@@ -1079,6 +1079,100 @@ class WorkflowService
     }
 
     // =========================================================================
+    // ESCALATION
+    // =========================================================================
+
+    /**
+     * Process overdue tasks: escalate to designated user or revert to originator.
+     * Call from cron: php symfony workflow:check-escalations
+     */
+    public function processEscalations(): array
+    {
+        $results = ['escalated' => 0, 'reverted' => 0, 'errors' => 0];
+
+        // Find tasks past their due date that haven't been escalated yet
+        $overdueTasks = DB::table('ahg_workflow_task as t')
+            ->join('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
+            ->join('ahg_workflow as w', 't.workflow_id', '=', 'w.id')
+            ->whereNotNull('t.due_date')
+            ->where('t.due_date', '<', date('Y-m-d'))
+            ->whereNotIn('t.status', ['approved', 'rejected', 'cancelled', 'escalated'])
+            ->whereNull('t.escalated_at')
+            ->select('t.*', 's.escalation_user_id', 's.name as step_name', 'w.name as workflow_name', 'w.notification_enabled')
+            ->get();
+
+        foreach ($overdueTasks as $task) {
+            try {
+                $escalateToUserId = $task->escalation_user_id ?: $task->submitted_by;
+                $isRevert = empty($task->escalation_user_id);
+
+                DB::table('ahg_workflow_task')->where('id', $task->id)->update([
+                    'status' => 'claimed',
+                    'assigned_to' => $escalateToUserId,
+                    'claimed_at' => date('Y-m-d H:i:s'),
+                    'escalated_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+
+                $comment = $isRevert
+                    ? "Task overdue — reverted to originator after {$task->due_date}"
+                    : "Task overdue — escalated after {$task->due_date}";
+
+                $this->addHistory(
+                    $task->id,
+                    $task->workflow_id,
+                    $task->workflow_step_id,
+                    $task->object_id,
+                    $task->object_type,
+                    'escalated',
+                    $task->status,
+                    'claimed',
+                    $escalateToUserId,
+                    $comment
+                );
+
+                // Send notification
+                if ($task->notification_enabled) {
+                    $objectTitle = $this->getObjectTitle($task->object_id, $task->object_type);
+                    $this->queueNotification(
+                        $escalateToUserId,
+                        'task_escalated',
+                        "Escalated: {$task->step_name} — {$objectTitle}",
+                        $isRevert
+                            ? "The task '{$task->step_name}' for '{$objectTitle}' in workflow '{$task->workflow_name}' was overdue and has been returned to you as the originator."
+                            : "The task '{$task->step_name}' for '{$objectTitle}' in workflow '{$task->workflow_name}' was overdue and has been escalated to you for action.",
+                        $task->id
+                    );
+                }
+
+                $isRevert ? $results['reverted']++ : $results['escalated']++;
+            } catch (\Exception $e) {
+                error_log("WorkflowService ESCALATION ERROR task {$task->id}: " . $e->getMessage());
+                $results['errors']++;
+            }
+        }
+
+        return $results;
+    }
+
+    /**
+     * Get object title for notifications.
+     */
+    protected function getObjectTitle(int $objectId, string $objectType): string
+    {
+        if ($objectType === 'information_object') {
+            $title = DB::table('information_object_i18n')
+                ->where('id', $objectId)
+                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
+                ->value('title');
+            if ($title) {
+                return $title;
+            }
+        }
+        return "Object #{$objectId}";
+    }
+
+    // =========================================================================
     // AUDIT LOGGING
     // =========================================================================
 

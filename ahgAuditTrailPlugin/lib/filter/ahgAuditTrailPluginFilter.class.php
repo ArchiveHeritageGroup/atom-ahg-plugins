@@ -71,7 +71,8 @@ class ahgAuditTrailPluginFilter extends sfFilter
         $filterChain->execute();
 
         // After action execution - log if applicable
-        if ($this->isFirstCall()) {
+        // Note: cannot use isFirstCall() here — it was already consumed above
+        if ($request->hasAttribute('_audit_pre_state')) {
             $this->logAuthenticationChange();
             $this->logAction();
         }

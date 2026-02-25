@@ -80,45 +80,9 @@ EOF;
     {
         $this->logSection('escalate', 'Checking for overdue tasks...');
 
-        $overdueTasks = \Illuminate\Database\Capsule\Manager::table('ahg_workflow_task as t')
-            ->join('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
-            ->whereNotNull('t.due_date')
-            ->where('t.due_date', '<', date('Y-m-d'))
-            ->whereNotIn('t.status', ['approved', 'rejected', 'cancelled', 'escalated'])
-            ->whereNotNull('s.escalation_user_id')
-            ->select('t.*', 's.escalation_user_id')
-            ->get();
+        $results = $service->processEscalations();
 
-        $escalated = 0;
-        foreach ($overdueTasks as $task) {
-            \Illuminate\Database\Capsule\Manager::table('ahg_workflow_task')
-                ->where('id', $task->id)
-                ->update([
-                    'status' => 'escalated',
-                    'assigned_to' => $task->escalation_user_id,
-                    'escalated_at' => date('Y-m-d H:i:s'),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
-
-            // Log history
-            \Illuminate\Database\Capsule\Manager::table('ahg_workflow_history')->insert([
-                'task_id' => $task->id,
-                'workflow_id' => $task->workflow_id,
-                'workflow_step_id' => $task->workflow_step_id,
-                'object_id' => $task->object_id,
-                'object_type' => $task->object_type,
-                'action' => 'escalated',
-                'from_status' => $task->status,
-                'to_status' => 'escalated',
-                'performed_by' => 1, // System user
-                'performed_at' => date('Y-m-d H:i:s'),
-                'comment' => 'Automatically escalated due to overdue deadline',
-            ]);
-
-            $escalated++;
-        }
-
-        $this->logSection('escalate', "Escalated {$escalated} overdue tasks");
+        $this->logSection('escalate', "Escalated: {$results['escalated']}, Reverted to originator: {$results['reverted']}, Errors: {$results['errors']}");
     }
 
     protected function cleanupOldTasks(WorkflowService $service, int $days): void

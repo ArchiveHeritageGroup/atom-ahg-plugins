@@ -4,6 +4,15 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0"><i class="fas fa-cog me-2"></i>Workflow Administration</h1>
         <div>
+            <?php if (!empty($showInactive)): ?>
+                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="btn btn-outline-secondary">
+                    <i class="fas fa-eye-slash me-1"></i>Hide Deleted
+                </a>
+            <?php else: ?>
+                <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>?show_inactive=1" class="btn btn-outline-secondary">
+                    <i class="fas fa-eye me-1"></i>Show Deleted
+                </a>
+            <?php endif ?>
             <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'createWorkflow']) ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>Create Workflow
             </a>

@@ -114,25 +114,54 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
             $module = $context->getModuleName();
             $action = $context->getActionName();
 
-            // Only log write operations and specific actions
+            // Auditable actions and modules
             $auditableActions = ['create', 'edit', 'update', 'delete', 'copy', 'import', 'export', 'publish', 'unpublish'];
             $isWriteOperation = $request->isMethod('POST') || $request->isMethod('PUT') || $request->isMethod('DELETE');
 
-            if (!$isWriteOperation && !in_array($action, $auditableActions)) {
-                return;
-            }
-
-            // Skip non-auditable modules
+            // Broader module list — includes AHG manage plugin module names
             $auditableModules = [
                 'informationobject', 'actor', 'repository', 'term', 'taxonomy',
                 'accession', 'deaccession', 'donor', 'rightsholder', 'function',
                 'physicalobject', 'digitalobject', 'user', 'aclGroup', 'staticpage',
                 'museum', 'library', 'gallery',
                 'model3d', 'dam',
+                // AHG manage plugin modules
+                'ahgDisplay', 'ahgActorManage', 'ahgAccessionManage', 'ahgDonorManage',
+                'ahgRepositoryManage', 'ahgRightsHolderManage', 'ahgStorageManage',
+                'ahgTermTaxonomy', 'ahgUserManage', 'ahgJobsManage',
+                'ahgInformationObjectManage', 'ahgDacsManage', 'ahgDcManage',
+                'ahgModsManage', 'ahgRadManage',
             ];
 
-            if (!in_array($module, $auditableModules)) {
+            // Skip asset/debug/utility modules entirely
+            $skipModules = ['sfAsset', 'sfWebDebug', 'default', 'sfThumbnail', 'ahgVoice'];
+            if (in_array($module, $skipModules)) {
                 return;
+            }
+
+            // Skip AJAX autocomplete/polling/API-data requests (noise)
+            $skipActions = ['autocomplete', 'actorAutocomplete', 'repositoryAutocomplete',
+                'termAutocomplete', 'objectAutocomplete', 'autocompleteGlam',
+                'ajaxStatus', 'apiStatus', 'apiProgress', 'jobStatus',
+                'getAnnotation', 'apiRealtime', 'apiCheck', 'health'];
+            if ($request->isXmlHttpRequest() && in_array($action, $skipActions)) {
+                return;
+            }
+
+            // Determine if this is a view (any non-write GET request)
+            $isViewAction = !$isWriteOperation && !in_array($action, $auditableActions);
+
+            if ($isViewAction) {
+                // Log ALL views/page loads when audit_views is enabled
+                $db = class_exists('AhgCore\\Core\\AhgDb')
+                    ? \AhgCore\Core\AhgDb::class
+                    : \Illuminate\Database\Capsule\Manager::class;
+                $auditViews = $db::table('ahg_audit_settings')
+                    ->where('setting_key', 'audit_views')
+                    ->value('setting_value');
+                if ($auditViews !== '1') {
+                    return;
+                }
             }
 
             // Use AhgAuditService if available
@@ -144,10 +173,12 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
                     $username = $user->getAttribute('username') ?? $user->getUsername();
                 }
 
-                // Determine action type
+                // Determine action type — normalize to standard labels
                 $actionType = $action;
                 if ($request->isMethod('POST') && in_array($action, ['index', 'edit'])) {
                     $actionType = $request->getParameter('id') ? 'update' : 'create';
+                } elseif ($isViewAction) {
+                    $actionType = 'view';
                 }
 
                 \AhgAuditTrail\Services\AhgAuditService::logAction(
@@ -220,7 +251,85 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
             'gallery' => 'GalleryWork',
             'model3d' => 'Model3D',
             'dam' => 'DigitalAsset',
+            // AHG manage plugin modules
+            'display' => 'QubitInformationObject',
+            'ahgDisplay' => 'QubitInformationObject',
+            'ahgActorManage' => 'QubitActor',
+            'actorManage' => 'QubitActor',
+            'ahgAccessionManage' => 'QubitAccession',
+            'ahgDonorManage' => 'QubitDonor',
+            'ahgRepositoryManage' => 'QubitRepository',
+            'ahgRightsHolderManage' => 'QubitRightsHolder',
+            'ahgStorageManage' => 'QubitPhysicalObject',
+            'ahgTermTaxonomy' => 'QubitTerm',
+            'ahgUserManage' => 'QubitUser',
+            'ahgJobsManage' => 'QubitJob',
+            'ahgInformationObjectManage' => 'QubitInformationObject',
+            'repositoryManage' => 'QubitRepository',
+            'sfIsadPlugin' => 'QubitInformationObject',
+            'sfDcPlugin' => 'QubitInformationObject',
+            'sfRadPlugin' => 'QubitInformationObject',
+            'sfModsPlugin' => 'QubitInformationObject',
+            'sfIsdiahPlugin' => 'QubitRepository',
+            'sfIsaarPlugin' => 'QubitActor',
+            'ahgMuseumPlugin' => 'MuseumObject',
+            'ahgLibraryPlugin' => 'LibraryItem',
+            'ahgGalleryPlugin' => 'GalleryWork',
+            'ahgDAMPlugin' => 'DigitalAsset',
+            'auditTrail' => 'AuditLog',
+            'cco' => 'MuseumObject',
+            'condition' => 'ConditionAssessment',
+            'provenance' => 'ProvenanceRecord',
+            'preservation' => 'PreservationEvent',
+            'ai' => 'AIProcess',
+            'ner' => 'NERResult',
+            'heritage' => 'HeritageAsset',
+            'research' => 'ResearchRequest',
+            'loan' => 'Loan',
+            'exhibition' => 'Exhibition',
+            'ingest' => 'IngestSession',
+            'registry' => 'Registry',
         ];
+
+        // For registry module, resolve entity type from action name
+        if ($module === 'registry') {
+            $action = '';
+            if (sfContext::hasInstance()) {
+                $action = sfContext::getInstance()->getActionName();
+            }
+            $registryMap = [
+                'institutionBrowse' => 'Institution', 'institutionView' => 'Institution',
+                'institutionRegister' => 'Institution', 'institutionEdit' => 'Institution',
+                'myInstitutionDashboard' => 'Institution', 'myInstitutionInstances' => 'Instance',
+                'myInstitutionInstanceAdd' => 'Instance', 'myInstitutionInstanceEdit' => 'Instance',
+                'myInstitutionContacts' => 'Contact', 'myInstitutionContactAdd' => 'Contact',
+                'myInstitutionContactEdit' => 'Contact', 'myInstitutionSoftware' => 'Software',
+                'myInstitutionVendors' => 'Vendor', 'myInstitutionReview' => 'Review',
+                'vendorBrowse' => 'Vendor', 'vendorView' => 'Vendor',
+                'vendorRegister' => 'Vendor', 'vendorEdit' => 'Vendor',
+                'myVendorDashboard' => 'Vendor', 'myVendorClients' => 'Vendor',
+                'myVendorSoftware' => 'Software', 'myVendorSoftwareAdd' => 'Software',
+                'myVendorSoftwareEdit' => 'Software', 'myVendorContacts' => 'Contact',
+                'softwareBrowse' => 'Software', 'softwareView' => 'Software',
+                'softwareReleases' => 'SoftwareRelease',
+                'groupBrowse' => 'UserGroup', 'groupView' => 'UserGroup',
+                'groupCreate' => 'UserGroup', 'groupEdit' => 'UserGroup',
+                'groupMembers' => 'UserGroup', 'groupJoin' => 'UserGroup',
+                'groupLeave' => 'UserGroup', 'myGroups' => 'UserGroup',
+                'discussionList' => 'Discussion', 'discussionView' => 'Discussion',
+                'discussionNew' => 'Discussion',
+                'blogList' => 'BlogPost', 'blogView' => 'BlogPost',
+                'blogNew' => 'BlogPost', 'blogEdit' => 'BlogPost',
+                'community' => 'Community', 'search' => 'Search', 'map' => 'Map',
+                'adminDashboard' => 'Admin', 'adminInstitutions' => 'Institution',
+                'adminVendors' => 'Vendor', 'adminSoftware' => 'Software',
+                'adminGroups' => 'UserGroup', 'adminDiscussions' => 'Discussion',
+                'adminBlog' => 'BlogPost', 'adminReviews' => 'Review',
+                'adminSync' => 'Sync', 'adminSettings' => 'Settings',
+            ];
+            return $registryMap[$action] ?? 'Registry';
+        }
+
         return $map[$module] ?? $module;
     }
 

@@ -1,0 +1,833 @@
+/* ==========================================================================
+   ahgRegistryPlugin - Community Hub & Registry Styles
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Variables
+   -------------------------------------------------------------------------- */
+:root {
+    --reg-primary: #2c5282;
+    --reg-primary-light: #ebf4ff;
+    --reg-secondary: #38a169;
+    --reg-accent: #ed8936;
+    --reg-danger: #e53e3e;
+    --reg-muted: #718096;
+    --reg-border: #e2e8f0;
+    --reg-bg-light: #f7fafc;
+    --reg-card-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+    --reg-card-hover-shadow: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+    --reg-radius: 0.5rem;
+    --reg-radius-sm: 0.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Layout & Section Headers
+   -------------------------------------------------------------------------- */
+.registry-page {
+    padding-bottom: 2rem;
+}
+
+.registry-hero {
+    background: linear-gradient(135deg, var(--reg-primary) 0%, #1a365d 100%);
+    color: #fff;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.registry-hero h1 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.registry-hero .lead {
+    opacity: 0.9;
+}
+
+.registry-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--reg-border);
+}
+
+.registry-section-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Cards (Institution, Vendor, Software, Group, Blog)
+   -------------------------------------------------------------------------- */
+.registry-card {
+    background: #fff;
+    border: 1px solid var(--reg-border);
+    border-radius: var(--reg-radius);
+    box-shadow: var(--reg-card-shadow);
+    transition: box-shadow 0.2s, transform 0.2s;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.registry-card:hover {
+    box-shadow: var(--reg-card-hover-shadow);
+    transform: translateY(-2px);
+}
+
+.registry-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.registry-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.registry-card .card-title a {
+    color: var(--reg-primary);
+    text-decoration: none;
+}
+
+.registry-card .card-title a:hover {
+    text-decoration: underline;
+}
+
+.registry-card .card-text {
+    color: var(--reg-muted);
+    font-size: 0.9rem;
+    flex: 1;
+}
+
+.registry-card .card-footer {
+    background: var(--reg-bg-light);
+    border-top: 1px solid var(--reg-border);
+    font-size: 0.85rem;
+}
+
+/* Card logo */
+.registry-card-logo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: var(--reg-radius-sm);
+    flex-shrink: 0;
+}
+
+.registry-card-logo-placeholder {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--reg-primary-light);
+    color: var(--reg-primary);
+    font-size: 2rem;
+    font-weight: 700;
+    border-radius: var(--reg-radius-sm);
+    flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Badges & Tags
+   -------------------------------------------------------------------------- */
+.registry-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.registry-badge-verified {
+    background: #c6f6d5;
+    color: #22543d;
+}
+
+.registry-badge-featured {
+    background: #fefcbf;
+    color: #744210;
+}
+
+.registry-badge-unverified {
+    background: #fed7d7;
+    color: #9b2c2c;
+}
+
+.registry-badge-type {
+    background: var(--reg-primary-light);
+    color: var(--reg-primary);
+}
+
+.registry-tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    background: #edf2f7;
+    color: #4a5568;
+    margin: 0.1rem;
+    text-decoration: none;
+}
+
+.registry-tag:hover {
+    background: #e2e8f0;
+    color: #2d3748;
+    text-decoration: none;
+}
+
+/* --------------------------------------------------------------------------
+   Status Indicators
+   -------------------------------------------------------------------------- */
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.35rem;
+}
+
+.status-dot-online { background: #48bb78; }
+.status-dot-offline { background: #e53e3e; }
+.status-dot-maintenance { background: #ed8936; }
+.status-dot-decommissioned { background: #a0aec0; }
+
+.status-badge-online { background: #c6f6d5; color: #22543d; }
+.status-badge-offline { background: #fed7d7; color: #9b2c2c; }
+.status-badge-maintenance { background: #fefcbf; color: #744210; }
+
+/* --------------------------------------------------------------------------
+   Rating Stars
+   -------------------------------------------------------------------------- */
+.rating-stars {
+    display: inline-flex;
+    gap: 2px;
+    color: #d69e2e;
+}
+
+.rating-stars .star-empty {
+    color: #cbd5e0;
+}
+
+.rating-stars-input {
+    display: inline-flex;
+    flex-direction: row-reverse;
+    gap: 2px;
+}
+
+.rating-stars-input input {
+    display: none;
+}
+
+.rating-stars-input label {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #cbd5e0;
+    transition: color 0.15s;
+}
+
+.rating-stars-input label:hover,
+.rating-stars-input label:hover ~ label,
+.rating-stars-input input:checked ~ label {
+    color: #d69e2e;
+}
+
+/* --------------------------------------------------------------------------
+   Filter Sidebar
+   -------------------------------------------------------------------------- */
+.registry-filters {
+    background: #fff;
+    border: 1px solid var(--reg-border);
+    border-radius: var(--reg-radius);
+    padding: 1rem;
+}
+
+.registry-filters h5 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--reg-muted);
+    margin-bottom: 0.5rem;
+}
+
+.registry-filters .form-check {
+    margin-bottom: 0.25rem;
+}
+
+.registry-filters .form-check-label {
+    font-size: 0.9rem;
+}
+
+.registry-filter-count {
+    float: right;
+    font-size: 0.8rem;
+    color: var(--reg-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Profile Views
+   -------------------------------------------------------------------------- */
+.registry-profile-header {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.registry-profile-logo {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: var(--reg-radius);
+    border: 1px solid var(--reg-border);
+    flex-shrink: 0;
+}
+
+.registry-profile-logo-placeholder {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--reg-primary-light);
+    color: var(--reg-primary);
+    font-size: 3rem;
+    font-weight: 700;
+    border-radius: var(--reg-radius);
+    flex-shrink: 0;
+}
+
+.registry-profile-info h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.registry-profile-meta {
+    color: var(--reg-muted);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.registry-profile-section {
+    margin-bottom: 2rem;
+}
+
+.registry-profile-section h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--reg-border);
+}
+
+/* --------------------------------------------------------------------------
+   Discussions (Google Groups-style)
+   -------------------------------------------------------------------------- */
+.discussion-list {
+    border: 1px solid var(--reg-border);
+    border-radius: var(--reg-radius);
+    overflow: hidden;
+}
+
+.discussion-row {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--reg-border);
+    transition: background 0.15s;
+    gap: 1rem;
+}
+
+.discussion-row:last-child {
+    border-bottom: none;
+}
+
+.discussion-row:hover {
+    background: var(--reg-bg-light);
+}
+
+.discussion-row.pinned {
+    background: #fffff0;
+}
+
+.discussion-icon {
+    font-size: 1.25rem;
+    color: var(--reg-muted);
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+}
+
+.discussion-icon.resolved {
+    color: var(--reg-secondary);
+}
+
+.discussion-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.discussion-title {
+    font-weight: 600;
+    margin-bottom: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.discussion-title a {
+    color: #2d3748;
+    text-decoration: none;
+}
+
+.discussion-title a:hover {
+    color: var(--reg-primary);
+}
+
+.discussion-meta {
+    font-size: 0.8rem;
+    color: var(--reg-muted);
+}
+
+.discussion-stats {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    color: var(--reg-muted);
+}
+
+.discussion-last-activity {
+    font-size: 0.8rem;
+    color: var(--reg-muted);
+    text-align: right;
+    flex-shrink: 0;
+    min-width: 120px;
+}
+
+/* Thread view */
+.discussion-thread {
+    margin-bottom: 2rem;
+}
+
+.discussion-post {
+    background: #fff;
+    border: 1px solid var(--reg-border);
+    border-radius: var(--reg-radius);
+    margin-bottom: 1rem;
+    padding: 1.25rem;
+}
+
+.discussion-post.accepted-answer {
+    border-color: var(--reg-secondary);
+    border-width: 2px;
+}
+
+.discussion-post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.discussion-author {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.discussion-date {
+    font-size: 0.8rem;
+    color: var(--reg-muted);
+}
+
+.discussion-post-content {
+    line-height: 1.6;
+}
+
+.discussion-replies {
+    margin-left: 2rem;
+}
+
+/* Nested reply depth limit */
+.discussion-replies .discussion-replies {
+    margin-left: 1.5rem;
+}
+
+.discussion-replies .discussion-replies .discussion-replies {
+    margin-left: 1rem;
+}
+
+/* --------------------------------------------------------------------------
+   Blog Cards & Posts
+   -------------------------------------------------------------------------- */
+.blog-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: var(--reg-radius) var(--reg-radius) 0 0;
+}
+
+.blog-card-image-placeholder {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--reg-bg-light);
+    color: var(--reg-muted);
+    font-size: 2.5rem;
+    border-radius: var(--reg-radius) var(--reg-radius) 0 0;
+}
+
+.blog-author-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--reg-muted);
+}
+
+.blog-post-content {
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.blog-post-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--reg-radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Contact List
+   -------------------------------------------------------------------------- */
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--reg-border);
+    gap: 1rem;
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+}
+
+.contact-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--reg-primary-light);
+    color: var(--reg-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.contact-role-badge {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: var(--reg-radius-sm);
+    font-size: 0.7rem;
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.contact-role-badge.primary {
+    background: var(--reg-primary-light);
+    color: var(--reg-primary);
+}
+
+/* --------------------------------------------------------------------------
+   Instance List
+   -------------------------------------------------------------------------- */
+.instance-item {
+    background: #fff;
+    border: 1px solid var(--reg-border);
+    border-radius: var(--reg-radius);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.instance-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.instance-name {
+    font-weight: 600;
+}
+
+.instance-meta {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--reg-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Map
+   -------------------------------------------------------------------------- */
+#registry-map {
+    width: 100%;
+    height: 600px;
+    border-radius: var(--reg-radius);
+    border: 1px solid var(--reg-border);
+}
+
+.registry-map-popup h6 {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.registry-map-popup .badge {
+    font-size: 0.7rem;
+}
+
+/* --------------------------------------------------------------------------
+   Forms
+   -------------------------------------------------------------------------- */
+.registry-form {
+    max-width: 800px;
+}
+
+.registry-form .form-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--reg-border);
+}
+
+.registry-form .form-section:last-child {
+    border-bottom: none;
+}
+
+.registry-form .form-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--reg-primary);
+}
+
+/* Logo upload */
+.logo-upload-zone {
+    width: 150px;
+    height: 150px;
+    border: 2px dashed var(--reg-border);
+    border-radius: var(--reg-radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-upload-zone:hover {
+    border-color: var(--reg-primary);
+    background: var(--reg-primary-light);
+}
+
+.logo-upload-zone img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.logo-upload-zone .upload-icon {
+    font-size: 2rem;
+    color: var(--reg-muted);
+}
+
+.logo-upload-zone .upload-text {
+    font-size: 0.8rem;
+    color: var(--reg-muted);
+    margin-top: 0.25rem;
+}
+
+/* Attachment upload zone */
+.attachment-upload-zone {
+    border: 2px dashed var(--reg-border);
+    border-radius: var(--reg-radius);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.attachment-upload-zone:hover,
+.attachment-upload-zone.dragover {
+    border-color: var(--reg-primary);
+    background: var(--reg-primary-light);
+}
+
+.attachment-upload-zone .upload-icon {
+    font-size: 2.5rem;
+    color: var(--reg-muted);
+    margin-bottom: 0.5rem;
+}
+
+/* Feature checklist (instance form) */
+.feature-checklist {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.5rem;
+}
+
+.feature-checklist .form-check {
+    padding: 0.5rem 0.75rem;
+    background: var(--reg-bg-light);
+    border-radius: var(--reg-radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   Admin Dashboard Stats
+   -------------------------------------------------------------------------- */
+.registry-stat-card {
+    background: #fff;
+    border: 1px solid var(--reg-border);
+    border-radius: var(--reg-radius);
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.registry-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--reg-primary);
+    line-height: 1;
+}
+
+.registry-stat-label {
+    font-size: 0.85rem;
+    color: var(--reg-muted);
+    margin-top: 0.25rem;
+}
+
+.registry-stat-card.pending {
+    border-left: 4px solid var(--reg-accent);
+}
+
+/* --------------------------------------------------------------------------
+   Search Results
+   -------------------------------------------------------------------------- */
+.search-result-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--reg-border);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-type {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: var(--reg-radius-sm);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.search-result-type-institution { background: #bee3f8; color: #2a4365; }
+.search-result-type-vendor { background: #c6f6d5; color: #22543d; }
+.search-result-type-software { background: #e9d8fd; color: #44337a; }
+.search-result-type-group { background: #fefcbf; color: #744210; }
+.search-result-type-discussion { background: #fed7e2; color: #702459; }
+.search-result-type-blog { background: #feebc8; color: #7b341e; }
+
+.search-result-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.search-result-title a {
+    color: var(--reg-primary);
+    text-decoration: none;
+}
+
+.search-result-title a:hover {
+    text-decoration: underline;
+}
+
+.search-result-snippet {
+    font-size: 0.9rem;
+    color: var(--reg-muted);
+}
+
+/* --------------------------------------------------------------------------
+   Community Hub
+   -------------------------------------------------------------------------- */
+.community-section {
+    margin-bottom: 2.5rem;
+}
+
+.community-trending .discussion-row {
+    border: none;
+    border-bottom: 1px solid var(--reg-border);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .registry-profile-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .discussion-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .discussion-stats {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .discussion-last-activity {
+        text-align: left;
+        min-width: auto;
+    }
+
+    .discussion-replies {
+        margin-left: 1rem;
+    }
+
+    .feature-checklist {
+        grid-template-columns: 1fr;
+    }
+
+    #registry-map {
+        height: 400px;
+    }
+}
+
+@media (max-width: 576px) {
+    .registry-hero {
+        padding: 2rem 0;
+    }
+
+    .registry-hero h1 {
+        font-size: 1.5rem;
+    }
+}

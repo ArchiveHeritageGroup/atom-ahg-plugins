@@ -24,6 +24,66 @@
 
 </div>
 
+<?php if (!empty($userRecord['authorizedFormOfName']) || !empty($entityTypeName)) { ?>
+<div class="section border-bottom" id="profile">
+
+  <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Profile'); ?></h2>
+
+  <?php if (!empty($userRecord['authorizedFormOfName'])) { ?>
+    <?php echo render_show(__('Authorized form of name'), render_value_inline($userRecord['authorizedFormOfName'])); ?>
+  <?php } ?>
+  <?php if (!empty($entityTypeName)) { ?>
+    <?php echo render_show(__('Entity type'), render_value_inline($entityTypeName)); ?>
+  <?php } ?>
+
+</div>
+<?php } ?>
+
+<?php
+  $rawContact = $sf_data->getRaw('userRecord')['contact'] ?? null;
+?>
+<?php if ($rawContact) { ?>
+<div class="section border-bottom" id="contactInfo">
+
+  <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Contact information'); ?></h2>
+
+  <?php if (!empty($rawContact->contact_person)) { ?>
+    <?php echo render_show(__('Contact person'), render_value_inline($rawContact->contact_person)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->email)) { ?>
+    <?php echo render_show(__('Contact email'), render_value_inline($rawContact->email)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->telephone)) { ?>
+    <?php echo render_show(__('Telephone'), render_value_inline($rawContact->telephone)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->fax)) { ?>
+    <?php echo render_show(__('Fax'), render_value_inline($rawContact->fax)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->street_address)) { ?>
+    <?php echo render_show(__('Street address'), render_value_inline($rawContact->street_address)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->city)) { ?>
+    <?php echo render_show(__('City'), render_value_inline($rawContact->city)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->region)) { ?>
+    <?php echo render_show(__('Region/province'), render_value_inline($rawContact->region)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->postal_code)) { ?>
+    <?php echo render_show(__('Postal code'), render_value_inline($rawContact->postal_code)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->country_code)) { ?>
+    <?php echo render_show(__('Country'), render_value_inline($rawContact->country_code)); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->website)) { ?>
+    <?php echo render_show(__('Website'), '<a href="' . esc_specialchars($rawContact->website) . '" target="_blank">' . esc_specialchars($rawContact->website) . '</a>'); ?>
+  <?php } ?>
+  <?php if (!empty($rawContact->note)) { ?>
+    <?php echo render_show(__('Note'), render_value_inline($rawContact->note)); ?>
+  <?php } ?>
+
+</div>
+<?php } ?>
+
 <div class="section border-bottom" id="accessControl">
 
   <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Access control'); ?></h2>
@@ -67,17 +127,21 @@
 
 </div>
 
-<?php if ($clearance !== null) { ?>
+<?php if (class_exists('\\AhgSecurityClearance\\Services\\SecurityClearanceService')) { ?>
 <div class="section border-bottom" id="securityClearance">
 
   <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Security clearance'); ?></h2>
 
-  <?php echo render_show(__('Clearance level'), render_value_inline($clearance->level_name ?? __('None'))); ?>
-  <?php if (!empty($clearance->granted_at)) { ?>
-    <?php echo render_show(__('Granted'), render_value_inline($clearance->granted_at)); ?>
-  <?php } ?>
-  <?php if (!empty($clearance->expires_at)) { ?>
-    <?php echo render_show(__('Expires'), render_value_inline($clearance->expires_at)); ?>
+  <?php if ($clearance !== null) { ?>
+    <?php echo render_show(__('Clearance level'), render_value_inline($clearance->level_name ?? __('None')) . ' ' . link_to(__('Manage'), '@security_clearance_user?slug=' . $userRecord['slug'], ['class' => 'btn btn-sm atom-btn-outline-light ms-2'])); ?>
+    <?php if (!empty($clearance->granted_at)) { ?>
+      <?php echo render_show(__('Granted'), render_value_inline($clearance->granted_at)); ?>
+    <?php } ?>
+    <?php if (!empty($clearance->expires_at)) { ?>
+      <?php echo render_show(__('Expires'), render_value_inline($clearance->expires_at)); ?>
+    <?php } ?>
+  <?php } else { ?>
+    <?php echo render_show(__('Clearance level'), '<em>' . __('None') . '</em> ' . link_to(__('Grant clearance'), '@security_clearance_user?slug=' . $userRecord['slug'], ['class' => 'btn btn-sm atom-btn-outline-light ms-2'])); ?>
   <?php } ?>
 
 </div>

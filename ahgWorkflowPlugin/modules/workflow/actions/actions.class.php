@@ -228,7 +228,9 @@ class workflowActions extends AhgController
     public function executeAdmin($request)
     {
         $this->requireAdmin();
-        $this->workflows = $this->getService()->getWorkflows();
+        $this->showInactive = (bool) $request->getParameter('show_inactive', 0);
+        $filters = $this->showInactive ? [] : ['is_active' => 1];
+        $this->workflows = $this->getService()->getWorkflows($filters);
     }
 
     public function executeCreateWorkflow($request)
@@ -330,6 +332,8 @@ class workflowActions extends AhgController
                 'required_clearance_level' => $request->getParameter('required_clearance_level') ?: null,
                 'pool_enabled' => $request->getParameter('pool_enabled', 1),
                 'escalation_days' => $request->getParameter('escalation_days') ?: null,
+                'auto_assign_user_id' => $request->getParameter('auto_assign_user_id') ?: null,
+                'escalation_user_id' => $request->getParameter('escalation_user_id') ?: null,
                 'instructions' => $request->getParameter('instructions'),
                 'is_optional' => $request->getParameter('is_optional', 0),
             ];
@@ -341,6 +345,7 @@ class workflowActions extends AhgController
 
         $this->roles = $this->getRoles();
         $this->clearanceLevels = $this->getClearanceLevels();
+        $this->users = $this->getUsers();
     }
 
     public function executeEditStep($request)
@@ -363,6 +368,8 @@ class workflowActions extends AhgController
                 'required_clearance_level' => $request->getParameter('required_clearance_level') ?: null,
                 'pool_enabled' => $request->getParameter('pool_enabled', 0),
                 'escalation_days' => $request->getParameter('escalation_days') ?: null,
+                'auto_assign_user_id' => $request->getParameter('auto_assign_user_id') ?: null,
+                'escalation_user_id' => $request->getParameter('escalation_user_id') ?: null,
                 'instructions' => $request->getParameter('instructions'),
                 'is_optional' => $request->getParameter('is_optional', 0),
                 'is_active' => $request->getParameter('is_active', 1),
@@ -375,6 +382,7 @@ class workflowActions extends AhgController
 
         $this->roles = $this->getRoles();
         $this->clearanceLevels = $this->getClearanceLevels();
+        $this->users = $this->getUsers();
     }
 
     public function executeDeleteStep($request)
@@ -484,6 +492,19 @@ class workflowActions extends AhgController
     {
         return \Illuminate\Database\Capsule\Manager::table('security_classification')
             ->orderBy('level')
+            ->get()
+            ->toArray();
+    }
+
+    protected function getUsers(): array
+    {
+        return \Illuminate\Database\Capsule\Manager::table('user')
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('user.id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('user.active', 1)
+            ->selectRaw('user.id, user.username, COALESCE(ai.authorized_form_of_name, user.username) as name')
+            ->orderByRaw('COALESCE(ai.authorized_form_of_name, user.username)')
             ->get()
             ->toArray();
     }

@@ -41,20 +41,14 @@
                             <textarea class="form-control" id="description" name="description" rows="2"><?php echo esc_entities($step->description) ?></textarea>
                         </div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="action_required" class="form-label">Action Required</label>
-                                <select class="form-select" id="action_required" name="action_required">
-                                    <option value="approve_reject" <?php echo $step->action_required === 'approve_reject' ? 'selected' : '' ?>>Approve or Reject</option>
-                                    <option value="approve" <?php echo $step->action_required === 'approve' ? 'selected' : '' ?>>Approve Only</option>
-                                    <option value="complete" <?php echo $step->action_required === 'complete' ? 'selected' : '' ?>>Mark Complete</option>
-                                    <option value="submit" <?php echo $step->action_required === 'submit' ? 'selected' : '' ?>>Submit to Next Step</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="escalation_days" class="form-label">Escalation Days</label>
-                                <input type="number" class="form-control" id="escalation_days" name="escalation_days" min="1" value="<?php echo $step->escalation_days ?>">
-                            </div>
+                        <div class="mb-3">
+                            <label for="action_required" class="form-label">Action Required</label>
+                            <select class="form-select" id="action_required" name="action_required">
+                                <option value="approve_reject" <?php echo $step->action_required === 'approve_reject' ? 'selected' : '' ?>>Approve or Reject</option>
+                                <option value="approve" <?php echo $step->action_required === 'approve' ? 'selected' : '' ?>>Approve Only</option>
+                                <option value="complete" <?php echo $step->action_required === 'complete' ? 'selected' : '' ?>>Mark Complete</option>
+                                <option value="submit" <?php echo $step->action_required === 'submit' ? 'selected' : '' ?>>Submit to Next Step</option>
+                            </select>
                         </div>
 
                         <hr>
@@ -82,6 +76,43 @@
                                         </option>
                                     <?php endforeach ?>
                                 </select>
+                            </div>
+                        </div>
+
+                        <?php $rawUsers = sfOutputEscaper::unescape($users); ?>
+                        <div class="mb-3">
+                            <label for="auto_assign_user_id" class="form-label">Assign to Specific User</label>
+                            <select class="form-select" id="auto_assign_user_id" name="auto_assign_user_id">
+                                <option value="">Anyone with the required role</option>
+                                <?php foreach ($rawUsers as $u): ?>
+                                    <option value="<?php echo (int) $u->id ?>" <?php echo (int) ($step->auto_assign_user_id ?? 0) === (int) $u->id ? 'selected' : '' ?>>
+                                        <?php echo htmlspecialchars($u->name, ENT_QUOTES, 'UTF-8') ?> (<?php echo htmlspecialchars($u->username, ENT_QUOTES, 'UTF-8') ?>)
+                                    </option>
+                                <?php endforeach ?>
+                            </select>
+                            <small class="form-text text-muted">If set, this step will be auto-assigned to this user when a task reaches it</small>
+                        </div>
+
+                        <hr>
+                        <h6 class="mb-3">Escalation</h6>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="escalation_days" class="form-label">Escalation Days</label>
+                                <input type="number" class="form-control" id="escalation_days" name="escalation_days" min="1" value="<?php echo $step->escalation_days ?>">
+                                <small class="form-text text-muted">Leave empty for no deadline</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="escalation_user_id" class="form-label">Escalate To</label>
+                                <select class="form-select" id="escalation_user_id" name="escalation_user_id">
+                                    <option value="">Revert to originator</option>
+                                    <?php foreach ($rawUsers as $u): ?>
+                                        <option value="<?php echo (int) $u->id ?>" <?php echo (int) ($step->escalation_user_id ?? 0) === (int) $u->id ? 'selected' : '' ?>>
+                                            <?php echo htmlspecialchars($u->name, ENT_QUOTES, 'UTF-8') ?> (<?php echo htmlspecialchars($u->username, ENT_QUOTES, 'UTF-8') ?>)
+                                        </option>
+                                    <?php endforeach ?>
+                                </select>
+                                <small class="form-text text-muted">If no user selected, the task reverts to whoever submitted it</small>
                             </div>
                         </div>
 
