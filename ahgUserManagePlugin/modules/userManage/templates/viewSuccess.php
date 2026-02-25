@@ -24,16 +24,13 @@
 
 </div>
 
-<?php if (!empty($userRecord['authorizedFormOfName']) || !empty($entityTypeName)) { ?>
+<?php if (!empty($userRecord['authorizedFormOfName'])) { ?>
 <div class="section border-bottom" id="profile">
 
   <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Profile'); ?></h2>
 
   <?php if (!empty($userRecord['authorizedFormOfName'])) { ?>
     <?php echo render_show(__('Authorized form of name'), render_value_inline($userRecord['authorizedFormOfName'])); ?>
-  <?php } ?>
-  <?php if (!empty($entityTypeName)) { ?>
-    <?php echo render_show(__('Entity type'), render_value_inline($entityTypeName)); ?>
   <?php } ?>
 
 </div>
@@ -47,12 +44,6 @@
 
   <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Contact information'); ?></h2>
 
-  <?php if (!empty($rawContact->contact_person)) { ?>
-    <?php echo render_show(__('Contact person'), render_value_inline($rawContact->contact_person)); ?>
-  <?php } ?>
-  <?php if (!empty($rawContact->email)) { ?>
-    <?php echo render_show(__('Contact email'), render_value_inline($rawContact->email)); ?>
-  <?php } ?>
   <?php if (!empty($rawContact->telephone)) { ?>
     <?php echo render_show(__('Telephone'), render_value_inline($rawContact->telephone)); ?>
   <?php } ?>
