@@ -108,22 +108,6 @@
               <div class="form-text"><?php echo __('Display name for this user (from actor record).'); ?></div>
             </div>
 
-            <div class="mb-3">
-              <label for="entity_type_id" class="form-label"><?php echo __('Entity type'); ?></label>
-              <select class="form-select" id="entity_type_id" name="entity_type_id">
-                <option value=""><?php echo __('- Select -'); ?></option>
-                <?php
-                  $rawEntityTypes = $sf_data->getRaw('entityTypes');
-                  $rawRecord = $sf_data->getRaw('userRecord');
-                  $currentEntityTypeId = $rawRecord['entityTypeId'] ?? null;
-                ?>
-                <?php foreach ($rawEntityTypes as $et) { ?>
-                  <option value="<?php echo $et->id; ?>" <?php echo ((int) $et->id === (int) $currentEntityTypeId) ? 'selected' : ''; ?>>
-                    <?php echo esc_specialchars($et->name); ?>
-                  </option>
-                <?php } ?>
-              </select>
-            </div>
           </div>
         </div>
       </div>
@@ -140,19 +124,6 @@
               $rawRecord2 = $sf_data->getRaw('userRecord');
               $contact = $rawRecord2['contact'] ?? null;
             ?>
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="contact_person" class="form-label"><?php echo __('Contact person'); ?></label>
-                <input type="text" class="form-control" id="contact_person" name="contact_person"
-                       value="<?php echo esc_specialchars($contact->contact_person ?? ''); ?>">
-              </div>
-              <div class="col-md-6 mb-3">
-                <label for="contact_email" class="form-label"><?php echo __('Contact email'); ?></label>
-                <input type="email" class="form-control" id="contact_email" name="contact_email"
-                       value="<?php echo esc_specialchars($contact->email ?? ''); ?>">
-              </div>
-            </div>
-
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="contact_telephone" class="form-label"><?php echo __('Telephone'); ?></label>

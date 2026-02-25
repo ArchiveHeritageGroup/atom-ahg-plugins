@@ -90,19 +90,6 @@ class userManageActions extends AhgController
         // Check if viewing own profile
         $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
 
-        // Resolve entity type name for display
-        $this->entityTypeName = null;
-        if (!empty($this->userRecord['entityTypeId'])) {
-            $entityTypes = \AhgUserManage\Services\UserCrudService::getEntityTypes($culture);
-            foreach ($entityTypes as $et) {
-                if ((int) $et->id === (int) $this->userRecord['entityTypeId']) {
-                    $this->entityTypeName = $et->name;
-
-                    break;
-                }
-            }
-        }
-
         // Get API keys
         $this->restApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'RestApiKey');
         $this->oaiApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'OaiApiKey');
@@ -146,8 +133,6 @@ class userManageActions extends AhgController
         // Get available languages for translate permission
         $this->availableLanguages = \AhgUserManage\Services\UserCrudService::getAvailableLanguages();
 
-        // Get entity types for profile dropdown
-        $this->entityTypes = \AhgUserManage\Services\UserCrudService::getEntityTypes($culture);
 
         if (!$this->isNew) {
             $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
@@ -223,12 +208,9 @@ class userManageActions extends AhgController
             if (empty($this->errors)) {
                 // Profile fields
                 $authorizedFormOfName = trim($request->getParameter('authorized_form_of_name', ''));
-                $entityTypeId = $request->getParameter('entity_type_id', '');
 
                 // Contact fields
                 $contactFields = [
-                    'contact_person' => trim($request->getParameter('contact_person', '')),
-                    'email' => trim($request->getParameter('contact_email', '')),
                     'telephone' => trim($request->getParameter('contact_telephone', '')),
                     'fax' => trim($request->getParameter('contact_fax', '')),
                     'street_address' => trim($request->getParameter('contact_street_address', '')),
@@ -256,7 +238,7 @@ class userManageActions extends AhgController
                     'active' => (int) $active,
                     'groups' => is_array($groups) ? $groups : [],
                     'authorizedFormOfName' => $authorizedFormOfName,
-                    'entityTypeId' => '' !== $entityTypeId ? (int) $entityTypeId : null,
+                    'entityTypeId' => \QubitTerm::PERSON_ID,
                     'contact' => $hasContactData ? $contactFields : null,
                 ];
                 if (!empty($password)) {
