@@ -4,6 +4,8 @@ namespace AhgUserManage\Services;
 
 use Illuminate\Database\Capsule\Manager as DB;
 use AhgCore\Services\ObjectService;
+use AhgCore\Services\I18nService;
+use AhgCore\Services\ContactInformationService;
 
 class UserCrudService
 {
@@ -15,11 +17,13 @@ class UserCrudService
         $user = DB::table('user')
             ->join('object', 'user.id', '=', 'object.id')
             ->join('slug', 'user.id', '=', 'slug.object_id')
+            ->join('actor', 'user.id', '=', 'actor.id')
             ->where('user.id', $id)
             ->select([
                 'user.id as user_id', 'user.username', 'user.email',
                 'user.active', 'user.password_hash', 'user.salt',
                 'slug.slug', 'object.serial_number',
+                'actor.entity_type_id',
             ])
             ->first();
 
@@ -28,6 +32,13 @@ class UserCrudService
         }
 
         $groups = self::getUserGroups((int) $user->user_id);
+
+        // Get actor i18n (display name)
+        $culture = \sfContext::getInstance()->getUser()->getCulture();
+        $actorI18n = I18nService::getWithFallback('actor_i18n', (int) $user->user_id, $culture);
+
+        // Get contact information
+        $contacts = ContactInformationService::getByActorId((int) $user->user_id, $culture);
 
         return [
             'id' => (int) $user->user_id,
@@ -39,6 +50,9 @@ class UserCrudService
             'salt' => $user->salt,
             'groups' => $groups,
             'serialNumber' => $user->serial_number ?? 0,
+            'authorizedFormOfName' => $actorI18n->authorized_form_of_name ?? '',
+            'entityTypeId' => $user->entity_type_id ? (int) $user->entity_type_id : null,
+            'contact' => !empty($contacts) ? $contacts[0] : null,
         ];
     }
 
@@ -98,21 +112,51 @@ class UserCrudService
     }
 
     /**
+     * Get entity types (Person, Corporate body, Family).
+     * Taxonomy ID 32 = ACTOR_ENTITY_TYPE_ID.
+     */
+    public static function getEntityTypes(string $culture = 'en'): array
+    {
+        return DB::table('term')
+            ->join('term_i18n', function ($join) use ($culture) {
+                $join->on('term.id', '=', 'term_i18n.id')
+                     ->where('term_i18n.culture', '=', $culture);
+            })
+            ->where('term.taxonomy_id', 32)
+            ->select(['term.id', 'term_i18n.name'])
+            ->orderBy('term_i18n.name')
+            ->get()
+            ->all();
+    }
+
+    /**
      * Create a new user.
      */
     public static function create(array $data): int
     {
         return DB::transaction(function () use ($data) {
             $id = ObjectService::create('QubitUser');
+            $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
 
             ObjectService::generateSlug($id, $data['username'] ?? null);
 
             // User extends Actor in AtoM — actor row must exist first (FK constraint)
-            DB::table('actor')->insert([
+            $actorData = [
                 'id' => $id,
                 'parent_id' => \QubitActor::ROOT_ID,
-                'source_culture' => \AtomExtensions\Helpers\CultureHelper::getCulture(),
-            ]);
+                'source_culture' => $culture,
+            ];
+            if (!empty($data['entityTypeId'])) {
+                $actorData['entity_type_id'] = (int) $data['entityTypeId'];
+            }
+            DB::table('actor')->insert($actorData);
+
+            // Save actor i18n (display name)
+            if (!empty($data['authorizedFormOfName'])) {
+                I18nService::save('actor_i18n', $id, $culture, [
+                    'authorized_form_of_name' => $data['authorizedFormOfName'],
+                ]);
+            }
 
             // Hash password using AtoM's dual-layer approach
             $salt = md5(rand(100000, 999999) . ($data['email'] ?? ''));
@@ -149,6 +193,11 @@ class UserCrudService
                 }
             }
 
+            // Save contact information if provided
+            if (!empty($data['contact'])) {
+                ContactInformationService::save($id, $data['contact'], $culture);
+            }
+
             return $id;
         });
     }
@@ -158,6 +207,7 @@ class UserCrudService
      */
     public static function update(int $id, array $data): void
     {
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
         $updateFields = [];
 
         if (isset($data['username'])) {
@@ -182,6 +232,32 @@ class UserCrudService
 
         if (!empty($updateFields)) {
             DB::table('user')->where('id', $id)->update($updateFields);
+        }
+
+        // Update actor profile fields
+        if (array_key_exists('entityTypeId', $data)) {
+            DB::table('actor')->where('id', $id)->update([
+                'entity_type_id' => $data['entityTypeId'] ?: null,
+            ]);
+        }
+
+        if (array_key_exists('authorizedFormOfName', $data)) {
+            I18nService::save('actor_i18n', $id, $culture, [
+                'authorized_form_of_name' => $data['authorizedFormOfName'],
+            ]);
+        }
+
+        // Update contact information
+        if (array_key_exists('contact', $data)) {
+            $existingContacts = ContactInformationService::getByActorId($id, $culture);
+            $existingContactId = !empty($existingContacts) ? (int) $existingContacts[0]->id : null;
+
+            if (!empty($data['contact'])) {
+                ContactInformationService::save($id, $data['contact'], $culture, $existingContactId);
+            } elseif ($existingContactId) {
+                // All contact fields empty — delete existing contact
+                ContactInformationService::delete($existingContactId);
+            }
         }
 
         // Update groups if provided

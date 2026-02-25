@@ -94,6 +94,124 @@
       </div>
 
       <div class="accordion-item">
+        <h2 class="accordion-header" id="profile-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#profile-collapse" aria-expanded="false" aria-controls="profile-collapse">
+            <?php echo __('Profile'); ?>
+          </button>
+        </h2>
+        <div id="profile-collapse" class="accordion-collapse collapse" aria-labelledby="profile-heading">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label for="authorized_form_of_name" class="form-label"><?php echo __('Authorized form of name'); ?></label>
+              <input type="text" class="form-control" id="authorized_form_of_name" name="authorized_form_of_name"
+                     value="<?php echo esc_specialchars($userRecord['authorizedFormOfName'] ?? ''); ?>">
+              <div class="form-text"><?php echo __('Display name for this user (from actor record).'); ?></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="entity_type_id" class="form-label"><?php echo __('Entity type'); ?></label>
+              <select class="form-select" id="entity_type_id" name="entity_type_id">
+                <option value=""><?php echo __('- Select -'); ?></option>
+                <?php
+                  $rawEntityTypes = $sf_data->getRaw('entityTypes');
+                  $rawRecord = $sf_data->getRaw('userRecord');
+                  $currentEntityTypeId = $rawRecord['entityTypeId'] ?? null;
+                ?>
+                <?php foreach ($rawEntityTypes as $et) { ?>
+                  <option value="<?php echo $et->id; ?>" <?php echo ((int) $et->id === (int) $currentEntityTypeId) ? 'selected' : ''; ?>>
+                    <?php echo esc_specialchars($et->name); ?>
+                  </option>
+                <?php } ?>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="contactInfo-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#contactInfo-collapse" aria-expanded="false" aria-controls="contactInfo-collapse">
+            <?php echo __('Contact information'); ?>
+          </button>
+        </h2>
+        <div id="contactInfo-collapse" class="accordion-collapse collapse" aria-labelledby="contactInfo-heading">
+          <div class="accordion-body">
+            <?php
+              $rawRecord2 = $sf_data->getRaw('userRecord');
+              $contact = $rawRecord2['contact'] ?? null;
+            ?>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="contact_person" class="form-label"><?php echo __('Contact person'); ?></label>
+                <input type="text" class="form-control" id="contact_person" name="contact_person"
+                       value="<?php echo esc_specialchars($contact->contact_person ?? ''); ?>">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="contact_email" class="form-label"><?php echo __('Contact email'); ?></label>
+                <input type="email" class="form-control" id="contact_email" name="contact_email"
+                       value="<?php echo esc_specialchars($contact->email ?? ''); ?>">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="contact_telephone" class="form-label"><?php echo __('Telephone'); ?></label>
+                <input type="text" class="form-control" id="contact_telephone" name="contact_telephone"
+                       value="<?php echo esc_specialchars($contact->telephone ?? ''); ?>">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="contact_fax" class="form-label"><?php echo __('Fax'); ?></label>
+                <input type="text" class="form-control" id="contact_fax" name="contact_fax"
+                       value="<?php echo esc_specialchars($contact->fax ?? ''); ?>">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="contact_street_address" class="form-label"><?php echo __('Street address'); ?></label>
+              <input type="text" class="form-control" id="contact_street_address" name="contact_street_address"
+                     value="<?php echo esc_specialchars($contact->street_address ?? ''); ?>">
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label for="contact_city" class="form-label"><?php echo __('City'); ?></label>
+                <input type="text" class="form-control" id="contact_city" name="contact_city"
+                       value="<?php echo esc_specialchars($contact->city ?? ''); ?>">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="contact_region" class="form-label"><?php echo __('Region/province'); ?></label>
+                <input type="text" class="form-control" id="contact_region" name="contact_region"
+                       value="<?php echo esc_specialchars($contact->region ?? ''); ?>">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="contact_postal_code" class="form-label"><?php echo __('Postal code'); ?></label>
+                <input type="text" class="form-control" id="contact_postal_code" name="contact_postal_code"
+                       value="<?php echo esc_specialchars($contact->postal_code ?? ''); ?>">
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="contact_country_code" class="form-label"><?php echo __('Country'); ?></label>
+                <input type="text" class="form-control" id="contact_country_code" name="contact_country_code"
+                       value="<?php echo esc_specialchars($contact->country_code ?? ''); ?>">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="contact_website" class="form-label"><?php echo __('Website'); ?></label>
+                <input type="url" class="form-control" id="contact_website" name="contact_website"
+                       value="<?php echo esc_specialchars($contact->website ?? ''); ?>">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="contact_note" class="form-label"><?php echo __('Note'); ?></label>
+              <textarea class="form-control" id="contact_note" name="contact_note" rows="2"><?php echo esc_specialchars($contact->note ?? ''); ?></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
         <h2 class="accordion-header" id="accessControl-heading">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accessControl-collapse" aria-expanded="false" aria-controls="accessControl-collapse">
             <?php echo __('Access control'); ?>

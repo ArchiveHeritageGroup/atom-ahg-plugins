@@ -76,6 +76,7 @@ class userManageActions extends AhgController
             return;
         }
 
+        $culture = $this->culture();
         $slug = $request->getParameter('slug');
 
         $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
@@ -88,6 +89,19 @@ class userManageActions extends AhgController
 
         // Check if viewing own profile
         $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
+
+        // Resolve entity type name for display
+        $this->entityTypeName = null;
+        if (!empty($this->userRecord['entityTypeId'])) {
+            $entityTypes = \AhgUserManage\Services\UserCrudService::getEntityTypes($culture);
+            foreach ($entityTypes as $et) {
+                if ((int) $et->id === (int) $this->userRecord['entityTypeId']) {
+                    $this->entityTypeName = $et->name;
+
+                    break;
+                }
+            }
+        }
 
         // Get API keys
         $this->restApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'RestApiKey');
@@ -132,6 +146,9 @@ class userManageActions extends AhgController
         // Get available languages for translate permission
         $this->availableLanguages = \AhgUserManage\Services\UserCrudService::getAvailableLanguages();
 
+        // Get entity types for profile dropdown
+        $this->entityTypes = \AhgUserManage\Services\UserCrudService::getEntityTypes($culture);
+
         if (!$this->isNew) {
             $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
             if (!$this->userRecord) {
@@ -158,6 +175,9 @@ class userManageActions extends AhgController
                 'active' => true,
                 'groups' => [],
                 'serialNumber' => 0,
+                'authorizedFormOfName' => '',
+                'entityTypeId' => null,
+                'contact' => null,
             ];
 
             $this->isSelf = false;
@@ -201,11 +221,43 @@ class userManageActions extends AhgController
             }
 
             if (empty($this->errors)) {
+                // Profile fields
+                $authorizedFormOfName = trim($request->getParameter('authorized_form_of_name', ''));
+                $entityTypeId = $request->getParameter('entity_type_id', '');
+
+                // Contact fields
+                $contactFields = [
+                    'contact_person' => trim($request->getParameter('contact_person', '')),
+                    'email' => trim($request->getParameter('contact_email', '')),
+                    'telephone' => trim($request->getParameter('contact_telephone', '')),
+                    'fax' => trim($request->getParameter('contact_fax', '')),
+                    'street_address' => trim($request->getParameter('contact_street_address', '')),
+                    'city' => trim($request->getParameter('contact_city', '')),
+                    'region' => trim($request->getParameter('contact_region', '')),
+                    'postal_code' => trim($request->getParameter('contact_postal_code', '')),
+                    'country_code' => trim($request->getParameter('contact_country_code', '')),
+                    'website' => trim($request->getParameter('contact_website', '')),
+                    'note' => trim($request->getParameter('contact_note', '')),
+                ];
+
+                // Determine if any contact field has data
+                $hasContactData = false;
+                foreach ($contactFields as $v) {
+                    if ('' !== $v) {
+                        $hasContactData = true;
+
+                        break;
+                    }
+                }
+
                 $data = [
                     'username' => $username,
                     'email' => $email,
                     'active' => (int) $active,
                     'groups' => is_array($groups) ? $groups : [],
+                    'authorizedFormOfName' => $authorizedFormOfName,
+                    'entityTypeId' => '' !== $entityTypeId ? (int) $entityTypeId : null,
+                    'contact' => $hasContactData ? $contactFields : null,
                 ];
                 if (!empty($password)) {
                     $data['password'] = $password;
