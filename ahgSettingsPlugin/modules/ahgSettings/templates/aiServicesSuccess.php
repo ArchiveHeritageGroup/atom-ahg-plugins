@@ -595,6 +595,92 @@ $settings = $rawSettings;
     </div>
 </div>
 
+<!-- Qdrant Vector Search Settings -->
+<div class="card mb-4">
+  <div class="card-header bg-dark text-white">
+    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>Qdrant Vector Search (Discovery Plugin)</h5>
+  </div>
+  <div class="card-body">
+    <div class="mb-4">
+      <h6 class="fw-bold mb-3"><i class="fas fa-heartbeat me-1"></i>Service Status</h6>
+      <?php if ($qdrantStatus['service']): ?>
+        <div class="alert alert-success py-2">
+          <i class="fas fa-check-circle me-1"></i>
+          <strong>Qdrant is running</strong>
+          <?php if ($qdrantStatus['version']): ?>
+            — v<?php echo $qdrantStatus['version'] ?>
+          <?php endif; ?>
+        </div>
+        <?php if (!empty($qdrantStatus['collections'])): ?>
+          <table class="table table-sm table-bordered mb-0">
+            <thead class="table-light">
+              <tr><th>Collection</th><th>Vectors</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              <?php foreach ($qdrantStatus['collections'] as $col): ?>
+                <tr>
+                  <td><code><?php echo $col['name'] ?></code></td>
+                  <td><?php echo number_format($col['points']) ?></td>
+                  <td>
+                    <?php if ($col['status'] === 'green'): ?>
+                      <span class="badge bg-success"><?php echo $col['status'] ?></span>
+                    <?php else: ?>
+                      <span class="badge bg-warning"><?php echo $col['status'] ?></span>
+                    <?php endif; ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        <?php else: ?>
+          <div class="text-muted">No collections found.</div>
+        <?php endif; ?>
+      <?php else: ?>
+        <div class="alert alert-danger py-2">
+          <i class="fas fa-exclamation-triangle me-1"></i>
+          <strong>Qdrant is not running.</strong>
+          Start it with: <code>docker start qdrant</code>
+        </div>
+      <?php endif; ?>
+    </div>
+    <hr>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Qdrant URL</label>
+        <input type="text" class="form-control" name="qdrant_url" value="<?php echo $settings['qdrant_url'] ?? 'http://localhost:6333' ?>">
+        <div class="form-text">Qdrant REST endpoint</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Collection Name</label>
+        <input type="text" class="form-control" name="qdrant_collection" value="<?php echo $settings['qdrant_collection'] ?? '' ?>" placeholder="Auto-detected from database name">
+        <div class="form-text">Leave empty for auto-detection (dbname_records)</div>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Embedding Model</label>
+        <select class="form-select" name="qdrant_model">
+          <option value="all-MiniLM-L6-v2" <?php echo ($settings['qdrant_model'] ?? '') === 'all-MiniLM-L6-v2' ? 'selected' : '' ?>>all-MiniLM-L6-v2 (384d, fast)</option>
+          <option value="all-mpnet-base-v2" <?php echo ($settings['qdrant_model'] ?? '') === 'all-mpnet-base-v2' ? 'selected' : '' ?>>all-mpnet-base-v2 (768d, higher quality)</option>
+          <option value="multi-qa-MiniLM-L6-cos-v1" <?php echo ($settings['qdrant_model'] ?? '') === 'multi-qa-MiniLM-L6-cos-v1' ? 'selected' : '' ?>>multi-qa-MiniLM-L6-cos-v1 (384d, QA optimized)</option>
+        </select>
+        <div class="form-text">Sentence-transformers model for embeddings</div>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold">Minimum Similarity Score</label>
+        <input type="number" class="form-control" name="qdrant_min_score" value="<?php echo $settings['qdrant_min_score'] ?? '0.25' ?>" min="0" max="1" step="0.05">
+        <div class="form-text">Cosine similarity threshold (0-1). Lower = more results, higher = stricter match.</div>
+      </div>
+    </div>
+    <div class="alert alert-light border mt-3">
+      <i class="fas fa-info-circle me-1 text-primary"></i>
+      <strong>Indexing:</strong> Run the Qdrant indexer from the CLI or cron. See
+      <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'cronJobs']) ?>">Cron Jobs</a>
+      for the scheduled command.
+    </div>
+  </div>
+</div>
+
 <!-- Save Button -->
 <div class="d-flex justify-content-end gap-2 mb-4">
     <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'index']) ?>" class="btn btn-outline-secondary">

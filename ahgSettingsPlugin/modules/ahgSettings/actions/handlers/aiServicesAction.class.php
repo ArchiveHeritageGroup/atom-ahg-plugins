@@ -49,7 +49,12 @@ class AhgSettingsAiServicesAction extends AhgController
             'translation_overwrite' => '0',
             'translation_sector' => 'archives',
             'translation_save_culture' => '1',
-            'translation_field_mappings' => '{}'
+            'translation_field_mappings' => '{}',
+            'qdrant_enabled' => '1',
+            'qdrant_url' => 'http://localhost:6333',
+            'qdrant_collection' => '',
+            'qdrant_model' => 'all-MiniLM-L6-v2',
+            'qdrant_min_score' => '0.25',
         ];
 
         foreach ($defaults as $key => $value) {
@@ -213,10 +218,73 @@ class AhgSettingsAiServicesAction extends AhgController
             'revision_history' => 'Revision History'
         ];
 
+        // Qdrant status check
+        $this->qdrantStatus = $this->checkQdrantStatus(
+            $this->settings['qdrant_url'] ?? 'http://localhost:6333',
+            $this->settings['qdrant_collection'] ?? ''
+        );
+
         // Handle form submission
         if ($request->isMethod('post')) {
             $this->processForm($request);
         }
+    }
+
+    /**
+     * Check Qdrant service and collection health.
+     */
+    protected function checkQdrantStatus(string $url, string $collection): array
+    {
+        $status = ['service' => false, 'version' => '', 'collections' => [], 'collection_status' => ''];
+
+        // Check service health
+        $ch = curl_init(rtrim($url, '/') . '/healthz');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 2,
+            CURLOPT_CONNECTTIMEOUT => 1,
+        ]);
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        $status['service'] = ($code === 200);
+
+        if (!$status['service']) {
+            return $status;
+        }
+
+        // Get version
+        $ch = curl_init(rtrim($url, '/') . '/');
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 2]);
+        $resp = curl_exec($ch);
+        curl_close($ch);
+        $data = json_decode($resp, true);
+        $status['version'] = $data['version'] ?? '';
+
+        // List collections
+        $ch = curl_init(rtrim($url, '/') . '/collections');
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 2]);
+        $resp = curl_exec($ch);
+        curl_close($ch);
+        $data = json_decode($resp, true);
+        if (isset($data['result']['collections'])) {
+            foreach ($data['result']['collections'] as $col) {
+                $colName = $col['name'];
+                // Get point count for each collection
+                $ch2 = curl_init(rtrim($url, '/') . '/collections/' . $colName);
+                curl_setopt_array($ch2, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 2]);
+                $resp2 = curl_exec($ch2);
+                curl_close($ch2);
+                $colData = json_decode($resp2, true);
+                $status['collections'][] = [
+                    'name' => $colName,
+                    'points' => $colData['result']['points_count'] ?? 0,
+                    'status' => $colData['result']['status'] ?? 'unknown',
+                ];
+            }
+        }
+
+        return $status;
     }
 
     protected function processForm($request)
@@ -242,7 +310,11 @@ class AhgSettingsAiServicesAction extends AhgController
             'translation_mode',
             'translation_overwrite',
             'translation_sector',
-            'translation_save_culture'
+            'translation_save_culture',
+            'qdrant_url',
+            'qdrant_collection',
+            'qdrant_model',
+            'qdrant_min_score',
         ];
 
         try {
@@ -250,7 +322,7 @@ class AhgSettingsAiServicesAction extends AhgController
                 $value = $request->getParameter($field, '');
                 
                 // Handle checkboxes
-                if (in_array($field, ['ner_enabled', 'summarizer_enabled', 'spellcheck_enabled', 'translation_enabled', 'auto_extract_on_upload', 'translation_overwrite', 'translation_save_culture'])) {
+                if (in_array($field, ['ner_enabled', 'summarizer_enabled', 'spellcheck_enabled', 'translation_enabled', 'auto_extract_on_upload', 'translation_overwrite', 'translation_save_culture', 'qdrant_enabled'])) {
                     $value = $request->getParameter($field) ? '1' : '0';
                 }
 

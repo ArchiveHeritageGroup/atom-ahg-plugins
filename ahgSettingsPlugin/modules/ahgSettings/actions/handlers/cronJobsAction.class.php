@@ -1144,6 +1144,45 @@ class SettingsCronJobsAction extends AhgController
             ],
 
             // ============================================
+            // QDRANT VECTOR SEARCH (Discovery Plugin)
+            // ============================================
+            [
+                'name' => 'Qdrant Vector Index — Full Rebuild',
+                'command' => 'python3 {root}/atom-ahg-plugins/ahgDiscoveryPlugin/scripts/qdrant_index.py',
+                'description' => 'Rebuilds the Qdrant vector collection from scratch. Embeds all archival record titles, scope_and_content, and OCR transcript text using sentence-transformers (all-MiniLM-L6-v2, 384 dimensions) and indexes into Qdrant for semantic/vector search in the Discovery plugin.',
+                'options' => [
+                    '--db-name=NAME' => 'MySQL database name (archive or atom)',
+                    '--db-user=USER' => 'MySQL user (default: root)',
+                    '--db-password=PASS' => 'MySQL password',
+                    '--collection=NAME' => 'Qdrant collection name (e.g. archive_records, anc_records)',
+                    '--reset' => 'Drop and recreate the collection before indexing',
+                    '--offset=N' => 'Start from record offset N (for resuming)',
+                    '--limit=N' => 'Maximum records to index (0=all)',
+                ],
+                'schedule' => 'Weekly or after large imports — run at low priority (nice 19)',
+                'example' => '0 1 * * 0 cd {root} && nice -n 19 python3 atom-ahg-plugins/ahgDiscoveryPlugin/scripts/qdrant_index.py --db-name=archive --db-user=root --collection=archive_records >> /var/log/atom/qdrant-index.log 2>&1',
+                'duration' => 'Long (1-6 hours depending on record count)',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'AI Summarize — OCR Transcript to Scope',
+                'command' => 'php symfony ai:summarize --all-empty --field=scope_and_content',
+                'description' => 'Generates AI summaries from OCR transcript text (stored in the property table via digital objects) and writes them to the scope_and_content field of information objects. Processes records that have transcript text but no scope_and_content.',
+                'options' => [
+                    '--all-empty' => 'Process all records with empty target field',
+                    '--field=FIELD' => 'Target i18n field to write summary to (default: scope_and_content)',
+                    '--object=ID' => 'Process a single object by ID',
+                    '--repository=ID' => 'Limit to a specific repository',
+                    '--limit=N' => 'Maximum records to process',
+                    '--dry-run' => 'Preview without writing changes',
+                ],
+                'schedule' => 'Weekly or after large imports — run at low priority (nice 19)',
+                'example' => '0 2 * * 0 cd {root} && nice -n 19 php symfony ai:summarize --all-empty --field=scope_and_content >> /var/log/atom/ai-summarize.log 2>&1',
+                'duration' => 'Long (depends on record count and AI API speed)',
+                'category' => 'ahg',
+            ],
+
+            // ============================================
             // RIC TRIPLESTORE
             // ============================================
             [
