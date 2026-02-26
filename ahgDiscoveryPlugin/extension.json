@@ -1,0 +1,29 @@
+{
+    "name": "Discovery",
+    "machine_name": "ahgDiscoveryPlugin",
+    "version": "0.2.0",
+    "description": "Topic discovery and related content — natural language search across collections using NER entities, synonym expansion, and hierarchical context",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "search",
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "optional_dependencies": ["ahgAIPlugin", "ahgSemanticSearchPlugin", "ahgSecurityClearancePlugin"],
+    "tables": [
+        "ahg_discovery_cache",
+        "ahg_discovery_log"
+    ],
+    "features": [
+        "Natural language query expansion with synonym lookup",
+        "Three-strategy search: keyword, NER entity, hierarchical",
+        "Result grouping by collection/fonds",
+        "Related content sidebar for record views",
+        "Search analytics and caching"
+    ],
+    "is_core": false,
+    "is_locked": false
+}
