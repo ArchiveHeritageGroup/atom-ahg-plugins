@@ -22,6 +22,7 @@ class discoveryActions extends AhgController
         require_once $pluginDir . '/KeywordSearchStrategy.php';
         require_once $pluginDir . '/EntitySearchStrategy.php';
         require_once $pluginDir . '/HierarchicalStrategy.php';
+        require_once $pluginDir . '/VectorSearchStrategy.php';
         require_once $pluginDir . '/ResultMerger.php';
         require_once $pluginDir . '/ResultEnricher.php';
     }
@@ -72,7 +73,7 @@ class discoveryActions extends AhgController
         $expander = new \AhgDiscovery\Services\QueryExpander();
         $expanded = $expander->expand($query);
 
-        // Step 2: Three-strategy search (parallel in concept, sequential in PHP)
+        // Step 2: Four-strategy search (parallel in concept, sequential in PHP)
         $keywordSearch = new \AhgDiscovery\Services\KeywordSearchStrategy($culture);
         $entitySearch = new \AhgDiscovery\Services\EntitySearchStrategy();
         $hierarchicalSearch = new \AhgDiscovery\Services\HierarchicalStrategy();
@@ -80,20 +81,28 @@ class discoveryActions extends AhgController
         $keywordResults = $keywordSearch->search($expanded, 100);
         $entityResults = $entitySearch->search($expanded, 200);
 
-        // Hierarchical walk on top results from keyword + entity
+        // Vector (semantic) search via Qdrant — gracefully skipped if unavailable
+        $vectorResults = [];
+        if (\AhgDiscovery\Services\VectorSearchStrategy::isAvailable()) {
+            $vectorSearch = new \AhgDiscovery\Services\VectorSearchStrategy();
+            $vectorResults = $vectorSearch->search($expanded, 50);
+        }
+
+        // Hierarchical walk on top results from keyword + entity + vector
         $topResults = array_merge(
             array_slice($keywordResults, 0, 10),
             array_slice($entityResults, 0, 10)
         );
         $allFoundIds = array_unique(array_merge(
             array_column($keywordResults, 'object_id'),
-            array_column($entityResults, 'object_id')
+            array_column($entityResults, 'object_id'),
+            array_column($vectorResults, 'object_id')
         ));
         $hierarchicalResults = $hierarchicalSearch->search($topResults, $allFoundIds, 20);
 
-        // Step 3: Merge & Rank
+        // Step 3: Merge & Rank (4 strategies)
         $merger = new \AhgDiscovery\Services\ResultMerger();
-        $merged = $merger->merge($keywordResults, $entityResults, $hierarchicalResults);
+        $merged = $merger->merge($keywordResults, $entityResults, $hierarchicalResults, $vectorResults);
 
         // Step 4: Enrich with metadata (paginated slice)
         $enricher = new \AhgDiscovery\Services\ResultEnricher($culture);

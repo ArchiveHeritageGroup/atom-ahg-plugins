@@ -11,11 +11,18 @@ namespace AhgDiscovery\Services;
 class ResultMerger
 {
     /**
-     * Strategy weights for final scoring.
+     * Strategy weights for final scoring (4-strategy mode).
+     * When vector search is unavailable, weights auto-redistribute.
      */
-    private const WEIGHT_KEYWORD      = 0.35;
-    private const WEIGHT_ENTITY       = 0.40;
-    private const WEIGHT_HIERARCHICAL = 0.25;
+    private const WEIGHT_KEYWORD      = 0.30;
+    private const WEIGHT_ENTITY       = 0.30;
+    private const WEIGHT_VECTOR       = 0.25;
+    private const WEIGHT_HIERARCHICAL = 0.15;
+
+    /** Fallback weights when vector search is not available (3-strategy). */
+    private const WEIGHT_KEYWORD_3S      = 0.35;
+    private const WEIGHT_ENTITY_3S       = 0.40;
+    private const WEIGHT_HIERARCHICAL_3S = 0.25;
 
     /**
      * Fixed scores for hierarchical relationships.
@@ -29,12 +36,13 @@ class ResultMerger
      * @param array $keywordResults      From KeywordSearchStrategy
      * @param array $entityResults       From EntitySearchStrategy
      * @param array $hierarchicalResults From HierarchicalStrategy
+     * @param array $vectorResults       From VectorSearchStrategy (optional)
      * @return array GroupedResults structure
      */
-    public function merge(array $keywordResults, array $entityResults, array $hierarchicalResults): array
+    public function merge(array $keywordResults, array $entityResults, array $hierarchicalResults, array $vectorResults = []): array
     {
         // Step 1: Build unified map
-        $map = $this->buildResultMap($keywordResults, $entityResults, $hierarchicalResults);
+        $map = $this->buildResultMap($keywordResults, $entityResults, $hierarchicalResults, $vectorResults);
 
         if (empty($map)) {
             return [
@@ -45,7 +53,8 @@ class ResultMerger
         }
 
         // Step 2: Calculate final scores
-        $scored = $this->calculateScores($map, $keywordResults, $entityResults);
+        $hasVector = !empty($vectorResults);
+        $scored = $this->calculateScores($map, $keywordResults, $entityResults, $vectorResults, $hasVector);
 
         // Step 3: Sort by score
         usort($scored, fn($a, $b) => $b['score'] <=> $a['score']);
@@ -63,7 +72,7 @@ class ResultMerger
     /**
      * Build a map of object_id → {sources, reasons, data}.
      */
-    private function buildResultMap(array $keyword, array $entity, array $hierarchical): array
+    private function buildResultMap(array $keyword, array $entity, array $hierarchical, array $vector = []): array
     {
         $map = [];
 
@@ -106,6 +115,21 @@ class ResultMerger
             }
         }
 
+        // Vector (semantic) results
+        foreach ($vector as $r) {
+            $id = $r['object_id'];
+            if (!isset($map[$id])) {
+                $map[$id] = ['sources' => [], 'reasons' => [], 'data' => []];
+            }
+            $map[$id]['sources']['vector'] = $r;
+            if (!in_array('SEMANTIC', $map[$id]['reasons'])) {
+                $map[$id]['reasons'][] = 'SEMANTIC';
+            }
+            if (!empty($r['slug']) && empty($map[$id]['data']['slug'])) {
+                $map[$id]['data']['slug'] = $r['slug'];
+            }
+        }
+
         // Hierarchical results
         foreach ($hierarchical as $r) {
             $id = $r['object_id'];
@@ -124,8 +148,14 @@ class ResultMerger
     /**
      * Calculate weighted final scores for each result.
      */
-    private function calculateScores(array $map, array $keywordResults, array $entityResults): array
+    private function calculateScores(array $map, array $keywordResults, array $entityResults, array $vectorResults = [], bool $hasVector = false): array
     {
+        // Select weight set based on whether vector search contributed
+        $wKeyword = $hasVector ? self::WEIGHT_KEYWORD : self::WEIGHT_KEYWORD_3S;
+        $wEntity = $hasVector ? self::WEIGHT_ENTITY : self::WEIGHT_ENTITY_3S;
+        $wVector = $hasVector ? self::WEIGHT_VECTOR : 0;
+        $wHierarchy = $hasVector ? self::WEIGHT_HIERARCHICAL : self::WEIGHT_HIERARCHICAL_3S;
+
         // Find max values for normalization
         $maxEsScore = 0;
         foreach ($keywordResults as $r) {
@@ -138,6 +168,15 @@ class ResultMerger
         foreach ($entityResults as $r) {
             if ($r['match_count'] > $maxEntityCount) {
                 $maxEntityCount = $r['match_count'];
+            }
+        }
+
+        // Vector scores are already 0-1 (cosine similarity), no normalization needed
+        // but find max for relative ranking within vector results
+        $maxVectorScore = 0;
+        foreach ($vectorResults as $r) {
+            if ($r['vector_score'] > $maxVectorScore) {
+                $maxVectorScore = $r['vector_score'];
             }
         }
 
@@ -156,6 +195,12 @@ class ResultMerger
                 $entityNorm = $entry['sources']['entity']['match_count'] / $maxEntityCount;
             }
 
+            // Vector score (already 0-1 cosine, normalize relative to max)
+            $vectorNorm = 0;
+            if (isset($entry['sources']['vector']) && $maxVectorScore > 0) {
+                $vectorNorm = $entry['sources']['vector']['vector_score'] / $maxVectorScore;
+            }
+
             // Hierarchical score (fixed values)
             $hierarchyNorm = 0;
             if (isset($entry['sources']['hierarchical'])) {
@@ -164,9 +209,10 @@ class ResultMerger
             }
 
             // Weighted final score
-            $finalScore = ($keywordNorm * self::WEIGHT_KEYWORD)
-                        + ($entityNorm * self::WEIGHT_ENTITY)
-                        + ($hierarchyNorm * self::WEIGHT_HIERARCHICAL);
+            $finalScore = ($keywordNorm * $wKeyword)
+                        + ($entityNorm * $wEntity)
+                        + ($vectorNorm * $wVector)
+                        + ($hierarchyNorm * $wHierarchy);
 
             // Bonus: records found by multiple strategies get a boost
             $sourceCount = count($entry['sources']);
