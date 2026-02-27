@@ -1246,12 +1246,45 @@ class displayActions extends AhgController
             return [];
         }
 
-        // Store match metadata for template display
+        // Build auxiliary maps from raw strategy results for richer context
+        $entityMap = [];
+        foreach ($entityResults as $r) {
+            $entityMap[$r['object_id']] = [
+                'matched_values' => $r['matched_values'] ?? [],
+                'entity_types'   => $r['entity_types'] ?? '',
+            ];
+        }
+        $hierarchicalMap = [];
+        foreach ($hierarchicalResults as $r) {
+            $hierarchicalMap[$r['object_id']] = [
+                'relationship_type' => $r['relationship_type'] ?? '',
+                'via_object_id'     => $r['via_object_id'] ?? 0,
+            ];
+        }
+
+        // Store match metadata for template display.
+        // Normalize scores for display: raw scores are weighted sums (max ~0.25 for
+        // single-strategy matches) which look misleadingly low to users. Scale so the
+        // top result displays ~95% and others are relative to it.
+        $maxRawScore = 0;
+        foreach ($flatResults as $r) {
+            $s = $r['score'] ?? 0;
+            if ($s > $maxRawScore) {
+                $maxRawScore = $s;
+            }
+        }
+        $scoreScale = $maxRawScore > 0 ? (0.95 / $maxRawScore) : 1;
+
         $this->discoveryMeta = [];
         foreach ($flatResults as $r) {
-            $this->discoveryMeta[$r['object_id']] = [
-                'score'         => round($r['score'] ?? 0, 3),
-                'match_reasons' => $r['match_reasons'] ?? [],
+            $id = $r['object_id'];
+            $this->discoveryMeta[$id] = [
+                'score'           => round(min(1, ($r['score'] ?? 0) * $scoreScale), 3),
+                'match_reasons'   => $r['match_reasons'] ?? [],
+                'highlights'      => $r['highlights'] ?? [],
+                'matched_entities' => $entityMap[$id]['matched_values'] ?? [],
+                'entity_types'    => $entityMap[$id]['entity_types'] ?? '',
+                'relationship'    => $hierarchicalMap[$id] ?? null,
             ];
         }
 

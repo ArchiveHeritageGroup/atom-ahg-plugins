@@ -686,25 +686,108 @@ function getItemUrl($obj) {
                   <p class="card-text text-muted small mb-1"><?php echo esc_entities(mb_substr($obj->scope_and_content, 0, 150)) ?>...</p>
                 <?php endif ?>
                 <span class="badge bg-<?php echo $cfg['color'] ?>"><?php echo $cfg['label'] ?></span>
-                <?php if ($discoveryMode && isset($discoveryMeta[$obj->id])): ?>
-                  <?php $meta = $discoveryMeta[$obj->id]; $reasons = $meta['match_reasons'] ?? []; ?>
-                  <?php foreach (array_slice($reasons, 0, 3) as $reason):
-                    $reasonLower = strtolower($reason);
-                    if (strpos($reasonLower, 'keyword') !== false) { $rBg = 'success'; $rIcon = 'fa-search'; $rLabel = 'Keyword'; }
-                    elseif (strpos($reasonLower, 'entity') !== false) { $rBg = 'info'; $rIcon = 'fa-user-tag'; $rLabel = $reason; }
-                    elseif (strpos($reasonLower, 'semantic') !== false) { $rBg = 'primary'; $rIcon = 'fa-brain'; $rLabel = 'Semantic'; }
-                    elseif (strpos($reasonLower, 'sibling') !== false || strpos($reasonLower, 'child') !== false) { $rBg = 'secondary'; $rIcon = 'fa-sitemap'; $rLabel = ucfirst($reasonLower); }
-                    else { $rBg = 'dark'; $rIcon = 'fa-tag'; $rLabel = $reason; }
-                  ?>
-                    <span class="badge bg-<?php echo $rBg; ?> bg-opacity-75 small"><i class="fas <?php echo $rIcon; ?>"></i> <?php echo esc_entities($rLabel); ?></span>
-                  <?php endforeach; ?>
-                <?php endif; ?>
               </div>
             </div>
             <div class="col-md-1 d-flex flex-column align-items-center justify-content-center border-start gap-1">
               <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
             </div>
           </div>
+          <?php if ($discoveryMode && isset($discoveryMeta[$obj->id])): ?>
+            <?php
+              $meta = $discoveryMeta[$obj->id];
+              $reasons = $meta['match_reasons'] ?? [];
+              $score = $meta['score'] ?? 0;
+              $highlights = $meta['highlights'] ?? [];
+              $matchedEntities = $meta['matched_entities'] ?? [];
+              $entityTypes = $meta['entity_types'] ?? '';
+              $relationship = $meta['relationship'] ?? null;
+              $fieldLabels = [
+                'i18n.en.title' => 'Title', 'i18n.en.scopeAndContent' => 'Scope & Content',
+                'i18n.en.archivalHistory' => 'Archival History',
+                'subjects.i18n.en.name' => 'Subject', 'places.i18n.en.name' => 'Place',
+                'creators.i18n.en.authorizedFormOfName' => 'Creator',
+                'names.i18n.en.authorizedFormOfName' => 'Name',
+              ];
+            ?>
+            <div class="card-footer bg-light border-top py-2 px-3">
+              <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                <span class="text-muted small me-1"><i class="fas fa-chart-bar"></i> <?php echo __('Relevance'); ?>: <strong><?php echo round($score * 100); ?>%</strong></span>
+                <span class="text-muted small">|</span>
+                <?php foreach ($reasons as $reason):
+                  $reasonLower = strtolower($reason);
+                  if (strpos($reasonLower, 'keyword') !== false) { $rBg = 'success'; $rIcon = 'fa-search'; $rLabel = 'Keyword match'; }
+                  elseif (strpos($reasonLower, 'entity') !== false) { $rBg = 'info'; $rIcon = 'fa-user-tag'; $rLabel = str_replace('ENTITY:', 'Entity: ', $reason); }
+                  elseif (strpos($reasonLower, 'semantic') !== false) { $rBg = 'primary'; $rIcon = 'fa-brain'; $rLabel = 'Semantic match'; }
+                  elseif (strpos($reasonLower, 'sibling') !== false) { $rBg = 'secondary'; $rIcon = 'fa-sitemap'; $rLabel = 'Related (sibling)'; }
+                  elseif (strpos($reasonLower, 'child') !== false) { $rBg = 'secondary'; $rIcon = 'fa-level-down-alt'; $rLabel = 'Related (child)'; }
+                  else { $rBg = 'dark'; $rIcon = 'fa-tag'; $rLabel = $reason; }
+                ?>
+                  <span class="badge bg-<?php echo $rBg; ?> bg-opacity-75"><i class="fas <?php echo $rIcon; ?> me-1"></i><?php echo esc_entities($rLabel); ?></span>
+                <?php endforeach; ?>
+              </div>
+              <?php
+                // Gather explanation lines from all strategies
+                $explanations = [];
+
+                // ES keyword highlights (matched text fragments with <em> tags)
+                if (!empty($highlights)) {
+                    foreach ($highlights as $field => $fragments) {
+                        $label = $fieldLabels[$field] ?? ucfirst(preg_replace('/.*\./', '', $field));
+                        $explanations[] = '<i class="fas fa-search text-success me-1"></i><strong>' . esc_entities($label) . ':</strong> ' . implode(' &hellip; ', array_slice($fragments, 0, 2));
+                    }
+                }
+
+                // Entity matches (NER-detected entities)
+                if (!empty($matchedEntities)) {
+                    $typeMap = [];
+                    $types = array_filter(explode(',', $entityTypes));
+                    foreach ($matchedEntities as $i => $val) {
+                        $t = trim($types[$i] ?? 'entity');
+                        $typeMap[$t][] = $val;
+                    }
+                    foreach ($typeMap as $type => $vals) {
+                        $typeLabel = ucfirst(str_replace('_', ' ', $type));
+                        $explanations[] = '<i class="fas fa-user-tag text-info me-1"></i><strong>' . esc_entities($typeLabel) . ':</strong> ' . esc_entities(implode(', ', array_slice($vals, 0, 4)));
+                    }
+                }
+
+                // Semantic (vector) match — show similarity context terms
+                if (in_array('SEMANTIC', $reasons)) {
+                    $simTerms = [];
+                    if ($discoveryExpanded) {
+                        foreach (($discoveryExpanded['keywords'] ?? []) as $kw) { $simTerms[] = $kw; }
+                        foreach (($discoveryExpanded['synonyms'] ?? []) as $syn) { $simTerms[] = $syn; }
+                        foreach (($discoveryExpanded['phrases'] ?? []) as $ph) { $simTerms[] = $ph; }
+                    }
+                    $simTerms = array_unique(array_filter($simTerms));
+                    if (!empty($simTerms)) {
+                        $termBadges = array_map(fn($t) => '<span class="badge bg-primary bg-opacity-25 text-primary fw-normal">' . esc_entities($t) . '</span>', array_slice($simTerms, 0, 8));
+                        $explanations[] = '<i class="fas fa-brain text-primary me-1"></i>Semantic similarity: ' . implode(' ', $termBadges);
+                    } else {
+                        $explanations[] = '<i class="fas fa-brain text-primary me-1"></i>Matched by meaning — content is semantically similar to your query';
+                    }
+                }
+
+                // Hierarchical relationship
+                if ($relationship) {
+                    $relType = $relationship['relationship_type'] ?? '';
+                    $viaId = $relationship['via_object_id'] ?? 0;
+                    if ($relType === 'sibling') {
+                        $explanations[] = '<i class="fas fa-sitemap text-secondary me-1"></i>Related — sibling of a matching record';
+                    } elseif ($relType === 'child') {
+                        $explanations[] = '<i class="fas fa-level-down-alt text-secondary me-1"></i>Related — child of a matching record';
+                    }
+                }
+              ?>
+              <?php if (!empty($explanations)): ?>
+                <div class="small text-muted mt-1">
+                  <?php foreach ($explanations as $line): ?>
+                    <div class="mb-0"><?php echo $line; ?></div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          <?php endif; ?>
         </div>
       <?php endforeach ?>
     <?php endif ?>
