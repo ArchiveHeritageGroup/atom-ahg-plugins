@@ -24,6 +24,13 @@ class ResultMerger
     private const WEIGHT_ENTITY_3S       = 0.40;
     private const WEIGHT_HIERARCHICAL_3S = 0.25;
 
+    /** Weights when image similarity is included (5-strategy mode). */
+    private const WEIGHT_KEYWORD_5S      = 0.25;
+    private const WEIGHT_ENTITY_5S       = 0.25;
+    private const WEIGHT_VECTOR_5S       = 0.20;
+    private const WEIGHT_IMAGE_5S        = 0.15;
+    private const WEIGHT_HIERARCHICAL_5S = 0.15;
+
     /**
      * Fixed scores for hierarchical relationships.
      */
@@ -37,12 +44,13 @@ class ResultMerger
      * @param array $entityResults       From EntitySearchStrategy
      * @param array $hierarchicalResults From HierarchicalStrategy
      * @param array $vectorResults       From VectorSearchStrategy (optional)
+     * @param array $imageResults        From ImageSearchStrategy (optional)
      * @return array GroupedResults structure
      */
-    public function merge(array $keywordResults, array $entityResults, array $hierarchicalResults, array $vectorResults = []): array
+    public function merge(array $keywordResults, array $entityResults, array $hierarchicalResults, array $vectorResults = [], array $imageResults = []): array
     {
         // Step 1: Build unified map
-        $map = $this->buildResultMap($keywordResults, $entityResults, $hierarchicalResults, $vectorResults);
+        $map = $this->buildResultMap($keywordResults, $entityResults, $hierarchicalResults, $vectorResults, $imageResults);
 
         if (empty($map)) {
             return [
@@ -54,7 +62,8 @@ class ResultMerger
 
         // Step 2: Calculate final scores
         $hasVector = !empty($vectorResults);
-        $scored = $this->calculateScores($map, $keywordResults, $entityResults, $vectorResults, $hasVector);
+        $hasImage = !empty($imageResults);
+        $scored = $this->calculateScores($map, $keywordResults, $entityResults, $vectorResults, $hasVector, $imageResults, $hasImage);
 
         // Step 3: Sort by score
         usort($scored, fn($a, $b) => $b['score'] <=> $a['score']);
@@ -72,7 +81,7 @@ class ResultMerger
     /**
      * Build a map of object_id → {sources, reasons, data}.
      */
-    private function buildResultMap(array $keyword, array $entity, array $hierarchical, array $vector = []): array
+    private function buildResultMap(array $keyword, array $entity, array $hierarchical, array $vector = [], array $image = []): array
     {
         $map = [];
 
@@ -130,6 +139,21 @@ class ResultMerger
             }
         }
 
+        // Image similarity results
+        foreach ($image as $r) {
+            $id = $r['object_id'];
+            if (!isset($map[$id])) {
+                $map[$id] = ['sources' => [], 'reasons' => [], 'data' => []];
+            }
+            $map[$id]['sources']['image'] = $r;
+            if (!in_array('IMAGE_SIMILARITY', $map[$id]['reasons'])) {
+                $map[$id]['reasons'][] = 'IMAGE_SIMILARITY';
+            }
+            if (!empty($r['slug']) && empty($map[$id]['data']['slug'])) {
+                $map[$id]['data']['slug'] = $r['slug'];
+            }
+        }
+
         // Hierarchical results
         foreach ($hierarchical as $r) {
             $id = $r['object_id'];
@@ -148,13 +172,38 @@ class ResultMerger
     /**
      * Calculate weighted final scores for each result.
      */
-    private function calculateScores(array $map, array $keywordResults, array $entityResults, array $vectorResults = [], bool $hasVector = false): array
+    private function calculateScores(array $map, array $keywordResults, array $entityResults, array $vectorResults = [], bool $hasVector = false, array $imageResults = [], bool $hasImage = false): array
     {
-        // Select weight set based on whether vector search contributed
-        $wKeyword = $hasVector ? self::WEIGHT_KEYWORD : self::WEIGHT_KEYWORD_3S;
-        $wEntity = $hasVector ? self::WEIGHT_ENTITY : self::WEIGHT_ENTITY_3S;
-        $wVector = $hasVector ? self::WEIGHT_VECTOR : 0;
-        $wHierarchy = $hasVector ? self::WEIGHT_HIERARCHICAL : self::WEIGHT_HIERARCHICAL_3S;
+        // Select weight set based on active strategies
+        if ($hasImage && $hasVector) {
+            // 5-strategy mode
+            $wKeyword   = self::WEIGHT_KEYWORD_5S;
+            $wEntity    = self::WEIGHT_ENTITY_5S;
+            $wVector    = self::WEIGHT_VECTOR_5S;
+            $wImage     = self::WEIGHT_IMAGE_5S;
+            $wHierarchy = self::WEIGHT_HIERARCHICAL_5S;
+        } elseif ($hasImage && !$hasVector) {
+            // 4-strategy with image instead of vector
+            $wKeyword   = 0.30;
+            $wEntity    = 0.30;
+            $wVector    = 0;
+            $wImage     = 0.25;
+            $wHierarchy = 0.15;
+        } elseif ($hasVector) {
+            // 4-strategy (original)
+            $wKeyword   = self::WEIGHT_KEYWORD;
+            $wEntity    = self::WEIGHT_ENTITY;
+            $wVector    = self::WEIGHT_VECTOR;
+            $wImage     = 0;
+            $wHierarchy = self::WEIGHT_HIERARCHICAL;
+        } else {
+            // 3-strategy fallback
+            $wKeyword   = self::WEIGHT_KEYWORD_3S;
+            $wEntity    = self::WEIGHT_ENTITY_3S;
+            $wVector    = 0;
+            $wImage     = 0;
+            $wHierarchy = self::WEIGHT_HIERARCHICAL_3S;
+        }
 
         // Find max values for normalization
         $maxEsScore = 0;
@@ -171,12 +220,17 @@ class ResultMerger
             }
         }
 
-        // Vector scores are already 0-1 (cosine similarity), no normalization needed
-        // but find max for relative ranking within vector results
         $maxVectorScore = 0;
         foreach ($vectorResults as $r) {
             if ($r['vector_score'] > $maxVectorScore) {
                 $maxVectorScore = $r['vector_score'];
+            }
+        }
+
+        $maxImageScore = 0;
+        foreach ($imageResults as $r) {
+            if ($r['image_score'] > $maxImageScore) {
+                $maxImageScore = $r['image_score'];
             }
         }
 
@@ -195,10 +249,16 @@ class ResultMerger
                 $entityNorm = $entry['sources']['entity']['match_count'] / $maxEntityCount;
             }
 
-            // Vector score (already 0-1 cosine, normalize relative to max)
+            // Vector score (normalize relative to max)
             $vectorNorm = 0;
             if (isset($entry['sources']['vector']) && $maxVectorScore > 0) {
                 $vectorNorm = $entry['sources']['vector']['vector_score'] / $maxVectorScore;
+            }
+
+            // Image similarity score (normalize relative to max)
+            $imageNorm = 0;
+            if (isset($entry['sources']['image']) && $maxImageScore > 0) {
+                $imageNorm = $entry['sources']['image']['image_score'] / $maxImageScore;
             }
 
             // Hierarchical score (fixed values)
@@ -212,6 +272,7 @@ class ResultMerger
             $finalScore = ($keywordNorm * $wKeyword)
                         + ($entityNorm * $wEntity)
                         + ($vectorNorm * $wVector)
+                        + ($imageNorm * $wImage)
                         + ($hierarchyNorm * $wHierarchy);
 
             // Bonus: records found by multiple strategies get a boost

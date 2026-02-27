@@ -1,0 +1,26 @@
+{
+    "name": "GIS & Spatial Heritage",
+    "machine_name": "ahgGISPlugin",
+    "version": "0.1.0",
+    "description": "Geospatial search and GeoJSON export for heritage records with coordinates",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "search",
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "optional_dependencies": ["ahgContactPlugin", "ahgHeritagePlugin", "ahgNMMZPlugin"],
+    "install_sql": "database/install.sql",
+    "tables": [],
+    "features": [
+        "Bounding box spatial search",
+        "Haversine distance queries (radius search)",
+        "GeoJSON export for records with coordinates",
+        "Multi-source coordinate aggregation (contact_information, research_map_point, nmmz sites, IPTC metadata)"
+    ],
+    "is_core": false,
+    "is_locked": false
+}
