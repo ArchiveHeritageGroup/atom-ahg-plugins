@@ -42,10 +42,17 @@ $correctedQuery = $sf_data->getRaw('correctedQuery');
 $originalQuery = $sf_data->getRaw('originalQuery');
 $esAssistedSearch = $sf_data->getRaw('esAssistedSearch');
 
+// Discovery integration data
+$discoveryMode = $sf_data->getRaw('discoveryMode') ?: false;
+$discoveryExpanded = $sf_data->getRaw('discoveryExpanded') ?: null;
+$discoveryMeta = $sf_data->getRaw('discoveryMeta') ?: [];
+
 // Build filter params for URLs
 $fp = [
     'type' => $typeFilter,
     'parent' => $parentId,
+    'topLevel' => $sf_request->getParameter('topLevel'),
+    'query' => $sf_request->getParameter('query'),
     'creator' => $creatorFilter,
     'subject' => $subjectFilter,
     'place' => $placeFilter,
@@ -76,6 +83,9 @@ $sortLabels = [
   'startdate' => 'Start date',
   'enddate' => 'End date',
 ];
+if ($discoveryMode) {
+  $sortLabels = array_merge(['relevance' => 'Relevance'], $sortLabels);
+}
 
 function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
     $params = array_merge(['module' => 'display', 'action' => 'browse'], array_filter($fp), $add);
@@ -458,11 +468,35 @@ function getItemUrl($obj) {
     </div>
   <?php endif; ?>
 
-  <?php if ($esAssistedSearch): ?>
+  <?php if ($esAssistedSearch && !$discoveryMode): ?>
     <div class="alert alert-warning d-flex align-items-center mb-3" role="alert">
       <i class="fas fa-search me-2"></i>
       <div>
         <?php echo __('Showing fuzzy matches from search index. Results may be approximate.'); ?>
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($discoveryMode): ?>
+    <div class="alert alert-info d-flex align-items-start mb-3" role="alert">
+      <i class="fas fa-brain me-2 mt-1"></i>
+      <div>
+        <strong><?php echo __('AI-powered search'); ?></strong>
+        &mdash; <?php echo $total; ?> <?php echo __('results ranked by relevance'); ?>
+        <?php if ($discoveryExpanded): ?>
+          <div class="mt-1 small text-muted">
+            <?php if (!empty($discoveryExpanded['synonyms'])): ?>
+              <span class="me-2"><i class="fas fa-plus-circle"></i> <?php echo __('Synonyms'); ?>: <?php echo esc_entities(implode(', ', array_slice($discoveryExpanded['synonyms'], 0, 5))); ?></span>
+            <?php endif; ?>
+            <?php if (!empty($discoveryExpanded['entityTerms'])): ?>
+              <span class="me-2"><i class="fas fa-user-tag"></i> <?php echo __('Entities'); ?>: <?php echo esc_entities(implode(', ', array_slice($discoveryExpanded['entityTerms'], 0, 5))); ?></span>
+            <?php endif; ?>
+            <?php if ($discoveryExpanded['dateRange']): ?>
+              <span><i class="fas fa-calendar"></i> <?php echo esc_entities($discoveryExpanded['dateRange']['label'] ?? ''); ?></span>
+            <?php endif; ?>
+          </div>
+        <?php endif; ?>
+        <a href="<?php echo buildUrl($fp, ['discovery' => '0']); ?>" class="small text-muted"><?php echo __('Switch to classic search'); ?></a>
       </div>
     </div>
   <?php endif; ?>
@@ -652,6 +686,19 @@ function getItemUrl($obj) {
                   <p class="card-text text-muted small mb-1"><?php echo esc_entities(mb_substr($obj->scope_and_content, 0, 150)) ?>...</p>
                 <?php endif ?>
                 <span class="badge bg-<?php echo $cfg['color'] ?>"><?php echo $cfg['label'] ?></span>
+                <?php if ($discoveryMode && isset($discoveryMeta[$obj->id])): ?>
+                  <?php $meta = $discoveryMeta[$obj->id]; $reasons = $meta['match_reasons'] ?? []; ?>
+                  <?php foreach (array_slice($reasons, 0, 3) as $reason):
+                    $reasonLower = strtolower($reason);
+                    if (strpos($reasonLower, 'keyword') !== false) { $rBg = 'success'; $rIcon = 'fa-search'; $rLabel = 'Keyword'; }
+                    elseif (strpos($reasonLower, 'entity') !== false) { $rBg = 'info'; $rIcon = 'fa-user-tag'; $rLabel = $reason; }
+                    elseif (strpos($reasonLower, 'semantic') !== false) { $rBg = 'primary'; $rIcon = 'fa-brain'; $rLabel = 'Semantic'; }
+                    elseif (strpos($reasonLower, 'sibling') !== false || strpos($reasonLower, 'child') !== false) { $rBg = 'secondary'; $rIcon = 'fa-sitemap'; $rLabel = ucfirst($reasonLower); }
+                    else { $rBg = 'dark'; $rIcon = 'fa-tag'; $rLabel = $reason; }
+                  ?>
+                    <span class="badge bg-<?php echo $rBg; ?> bg-opacity-75 small"><i class="fas <?php echo $rIcon; ?>"></i> <?php echo esc_entities($rLabel); ?></span>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </div>
             </div>
             <div class="col-md-1 d-flex flex-column align-items-center justify-content-center border-start gap-1">

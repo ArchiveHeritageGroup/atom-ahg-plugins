@@ -185,28 +185,64 @@ class displayActions extends AhgController
             $this->mediaTypes = $this->getCachedFacet('media_type' . $sfx, 'media_type');
         }
 
-        // Build count query
-        $countQuery = DB::table('information_object as io')
-            ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
-            ->where('io.id', '>', 1);
-
-        // Apply all filters to count query
-        $this->applyFilters($countQuery);
-
-        $this->total = $countQuery->count();
-
-        // ES fuzzy fallback: when SQL search yields 0 results, try Elasticsearch
+        // ── Discovery integration ──────────────────────────────────────
+        // When a text query is present and ahgDiscoveryPlugin is enabled,
+        // route through the 4-strategy Discovery pipeline for relevance-
+        // ranked results instead of SQL FULLTEXT/LIKE.
+        $this->discoveryMode = false;
+        $this->discoveryExpanded = null;
+        $this->discoveryMeta = [];
         $this->esIds = null;
-        if ($this->total === 0 && $this->queryFilter) {
+
+        $useDiscovery = $this->queryFilter
+            && $request->getParameter('discovery', '1') !== '0'
+            && file_exists(\sfConfig::get('sf_plugins_dir') . '/ahgDiscoveryPlugin/lib/Services/QueryExpander.php');
+
+        if ($useDiscovery) {
             try {
-                $esIds = $this->tryElasticsearchFuzzy($this->queryFilter);
-                if (!empty($esIds)) {
-                    $this->esIds = $esIds;
-                    $this->esAssistedSearch = true;
-                    $this->total = count($esIds);
+                $discoveryIds = $this->runDiscoveryPipeline($this->queryFilter);
+                if (!empty($discoveryIds)) {
+                    $this->discoveryMode = true;
+
+                    // Apply facet filters to narrow the Discovery ID set
+                    $filteredIds = $this->applyFacetFiltersToIds($discoveryIds);
+
+                    $this->total = count($filteredIds);
+                    $this->totalPages = (int) ceil($this->total / $this->limit);
+
+                    // Paginate the ID list, then pass slice to main query via esIds path
+                    $pageIds = array_slice($filteredIds, ($this->page - 1) * $this->limit, $this->limit);
+                    $this->esIds = $pageIds;
+
+                    // Recompute facets scoped to full Discovery result set
+                    $this->recomputeDiscoveryFacets($discoveryIds);
                 }
             } catch (\Exception $e) {
-                error_log('FuzzySearch ES fallback: ' . $e->getMessage());
+                error_log('Discovery integration error: ' . $e->getMessage());
+                // Fall through to classic search
+            }
+        }
+
+        if (!$this->discoveryMode) {
+            // Classic path: SQL count + optional ES fuzzy fallback
+            $countQuery = DB::table('information_object as io')
+                ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+                ->where('io.id', '>', 1);
+
+            $this->applyFilters($countQuery);
+            $this->total = $countQuery->count();
+
+            if ($this->total === 0 && $this->queryFilter) {
+                try {
+                    $esIds = $this->tryElasticsearchFuzzy($this->queryFilter);
+                    if (!empty($esIds)) {
+                        $this->esIds = $esIds;
+                        $this->esAssistedSearch = true;
+                        $this->total = count($esIds);
+                    }
+                } catch (\Exception $e) {
+                    error_log('FuzzySearch ES fallback: ' . $e->getMessage());
+                }
             }
         }
 
@@ -262,37 +298,47 @@ class displayActions extends AhgController
             ->count();
 
         // Sort
-        // Handle sorting
         $sortDir = $this->sortDir === 'desc' ? 'desc' : 'asc';
-        switch ($this->sort) {
-            case 'identifier':
-            case 'refcode':
-                $query->orderBy('io.identifier', $sortDir);
-                break;
-            case 'date':
-                // Sort by object id as proxy for creation order
-                $query->orderBy('io.id', $sortDir);
-                break;
-            case 'startdate':
-                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
-                $query->orderByRaw("MIN(evt_sort.start_date) $sortDir");
-                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
-                break;
-            case 'enddate':
-                $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
-                $query->orderByRaw("MAX(evt_sort.end_date) $sortDir");
-                $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
-                break;
-            default:
-                $query->orderBy('i18n.title', $sortDir);
+        if ($this->discoveryMode && ($this->sort === 'relevance' || $this->sort === 'date')) {
+            // Discovery mode default: preserve relevance ranking via ORDER BY FIELD
+            if (!empty($this->esIds)) {
+                $idList = implode(',', array_map('intval', $this->esIds));
+                $query->orderByRaw("FIELD(io.id, $idList)");
+            }
+        } else {
+            switch ($this->sort) {
+                case 'identifier':
+                case 'refcode':
+                    $query->orderBy('io.identifier', $sortDir);
+                    break;
+                case 'date':
+                    $query->orderBy('io.id', $sortDir);
+                    break;
+                case 'startdate':
+                    $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                    $query->orderByRaw("MIN(evt_sort.start_date) $sortDir");
+                    $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                    break;
+                case 'enddate':
+                    $query->leftJoin('event as evt_sort', 'io.id', '=', 'evt_sort.object_id');
+                    $query->orderByRaw("MAX(evt_sort.end_date) $sortDir");
+                    $query->groupBy('io.id', 'io.identifier', 'io.parent_id', 'i18n.title', 'i18n.scope_and_content', 'level.name', 'doc.object_type', 'slug.slug');
+                    break;
+                default:
+                    $query->orderBy('i18n.title', $sortDir);
+            }
         }
 
-        // Paginate
-        $this->objects = $query
-            ->offset(($this->page - 1) * $this->limit)
-            ->limit($this->limit)
-            ->get()
-            ->toArray();
+        // Paginate — Discovery mode already sliced IDs, so fetch all matched
+        if ($this->discoveryMode && !empty($this->esIds)) {
+            $this->objects = $query->limit($this->limit)->get()->toArray();
+        } else {
+            $this->objects = $query
+                ->offset(($this->page - 1) * $this->limit)
+                ->limit($this->limit)
+                ->get()
+                ->toArray();
+        }
 
         // Enrich results
         foreach ($this->objects as &$obj) {
@@ -1056,10 +1102,14 @@ class displayActions extends AhgController
      */
     protected function tryElasticsearchFuzzy(string $query): array
     {
-        // Guard: ES must be available
-        if (!class_exists('SearchEngineFactory') || !SearchEngineFactory::isAvailable()) {
+        // Guard: verify ES is reachable with a quick check
+        $esHost = $this->config('app_opensearch_host', 'localhost');
+        $esPort = (int) $this->config('app_opensearch_port', 9200);
+        $fp = @fsockopen($esHost, $esPort, $errno, $errstr, 1);
+        if (!$fp) {
             return [];
         }
+        fclose($fp);
 
         // Determine index name from sfConfig or default pattern
         $indexName = $this->config('app_opensearch_index_name', '');
@@ -1127,6 +1177,327 @@ class displayActions extends AhgController
         }
 
         return $ids;
+    }
+
+    // ── Discovery pipeline ─────────────────────────────────────────
+
+    /**
+     * Run the 4-strategy Discovery pipeline and return relevance-ranked IDs.
+     *
+     * @return int[] Object IDs ordered by relevance score (highest first)
+     */
+    protected function runDiscoveryPipeline(string $query): array
+    {
+        $pluginDir = \sfConfig::get('sf_plugins_dir') . '/ahgDiscoveryPlugin/lib/Services';
+        require_once $pluginDir . '/QueryExpander.php';
+        require_once $pluginDir . '/KeywordSearchStrategy.php';
+        require_once $pluginDir . '/EntitySearchStrategy.php';
+        require_once $pluginDir . '/HierarchicalStrategy.php';
+        require_once $pluginDir . '/VectorSearchStrategy.php';
+        require_once $pluginDir . '/ResultMerger.php';
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        // Step 1: Query Expansion
+        $expander = new \AhgDiscovery\Services\QueryExpander();
+        $expanded = $expander->expand($query);
+
+        $this->discoveryExpanded = [
+            'keywords'    => $expanded['keywords'] ?? [],
+            'phrases'     => $expanded['phrases'] ?? [],
+            'synonyms'    => $expanded['synonyms'] ?? [],
+            'dateRange'   => $expanded['dateRange'] ?? null,
+            'entityTerms' => array_column($expanded['entityTerms'] ?? [], 'value'),
+        ];
+
+        // Step 2: Four-strategy search
+        $keywordSearch = new \AhgDiscovery\Services\KeywordSearchStrategy($culture);
+        $entitySearch  = new \AhgDiscovery\Services\EntitySearchStrategy();
+
+        $keywordResults = $keywordSearch->search($expanded, 100);
+        $entityResults  = $entitySearch->search($expanded, 200);
+
+        // Vector (semantic) search — gracefully skipped if Qdrant unavailable
+        $vectorResults = [];
+        if (\AhgDiscovery\Services\VectorSearchStrategy::isAvailable()) {
+            $vectorSearch = new \AhgDiscovery\Services\VectorSearchStrategy();
+            $vectorResults = $vectorSearch->search($expanded, 50);
+        }
+
+        // Hierarchical walk on top keyword + entity results
+        $hierarchicalSearch = new \AhgDiscovery\Services\HierarchicalStrategy();
+        $topResults = array_merge(
+            array_slice($keywordResults, 0, 10),
+            array_slice($entityResults, 0, 10)
+        );
+        $allFoundIds = array_unique(array_merge(
+            array_column($keywordResults, 'object_id'),
+            array_column($entityResults, 'object_id'),
+            array_column($vectorResults, 'object_id')
+        ));
+        $hierarchicalResults = $hierarchicalSearch->search($topResults, $allFoundIds, 20);
+
+        // Step 3: Merge & Rank
+        $merger = new \AhgDiscovery\Services\ResultMerger();
+        $merged = $merger->merge($keywordResults, $entityResults, $hierarchicalResults, $vectorResults);
+
+        $flatResults = $merged['flat_results'] ?? [];
+        if (empty($flatResults)) {
+            return [];
+        }
+
+        // Store match metadata for template display
+        $this->discoveryMeta = [];
+        foreach ($flatResults as $r) {
+            $this->discoveryMeta[$r['object_id']] = [
+                'score'         => round($r['score'] ?? 0, 3),
+                'match_reasons' => $r['match_reasons'] ?? [],
+            ];
+        }
+
+        return array_column($flatResults, 'object_id');
+    }
+
+    /**
+     * Apply active facet filters (type, creator, subject, etc.) to a set of Discovery IDs.
+     * Returns the filtered subset preserving original order.
+     *
+     * @param  int[] $ids Discovery-ranked object IDs
+     * @return int[] Filtered IDs in original order
+     */
+    protected function applyFacetFiltersToIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        // Check if any facet filters are active
+        $hasFilters = $this->typeFilter || $this->creatorFilter || $this->subjectFilter
+            || $this->placeFilter || $this->genreFilter || $this->levelFilter
+            || $this->mediaFilter || $this->repoFilter || $this->hasDigital
+            || $this->parentId;
+
+        if (!$hasFilters) {
+            // Publication status filter for guests
+            if (!$this->isAuthenticated) {
+                $published = DB::table('information_object as io')
+                    ->join('status as pub_st', function ($j) {
+                        $j->on('pub_st.object_id', '=', 'io.id')
+                          ->where('pub_st.type_id', '=', 158)
+                          ->where('pub_st.status_id', '=', 160);
+                    })
+                    ->whereIn('io.id', $ids)
+                    ->pluck('io.id')
+                    ->toArray();
+                // Preserve Discovery order
+                return array_values(array_intersect($ids, $published));
+            }
+            return $ids;
+        }
+
+        // Build a filter query on the Discovery ID set
+        $q = DB::table('information_object as io')
+            ->leftJoin('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+            ->whereIn('io.id', $ids)
+            ->where('io.id', '>', 1);
+
+        if (!$this->isAuthenticated) {
+            $q->join('status as pub_st', function ($j) {
+                $j->on('pub_st.object_id', '=', 'io.id')
+                  ->where('pub_st.type_id', '=', 158)
+                  ->where('pub_st.status_id', '=', 160);
+            });
+        }
+
+        if ($this->parentId) {
+            $q->where('io.parent_id', $this->parentId);
+        }
+        if ($this->typeFilter) {
+            $q->where('doc.object_type', $this->typeFilter);
+        }
+        if ($this->hasDigital) {
+            $q->whereExists(function ($sub) {
+                $sub->select(DB::raw(1))->from('digital_object')
+                    ->whereRaw('digital_object.object_id = io.id')
+                    ->whereNull('digital_object.parent_id');
+            });
+        }
+        if ($this->creatorFilter) {
+            $q->whereExists(function ($sub) {
+                $sub->select(DB::raw(1))->from('event')
+                    ->whereRaw('event.object_id = io.id')
+                    ->where('event.actor_id', $this->creatorFilter);
+            });
+        }
+        if ($this->subjectFilter) {
+            $q->whereExists(function ($sub) {
+                $sub->select(DB::raw(1))->from('object_term_relation')
+                    ->whereRaw('object_term_relation.object_id = io.id')
+                    ->where('object_term_relation.term_id', $this->subjectFilter);
+            });
+        }
+        if ($this->placeFilter) {
+            $q->whereExists(function ($sub) {
+                $sub->select(DB::raw(1))->from('object_term_relation')
+                    ->whereRaw('object_term_relation.object_id = io.id')
+                    ->where('object_term_relation.term_id', $this->placeFilter);
+            });
+        }
+        if ($this->genreFilter) {
+            $q->whereExists(function ($sub) {
+                $sub->select(DB::raw(1))->from('object_term_relation')
+                    ->whereRaw('object_term_relation.object_id = io.id')
+                    ->where('object_term_relation.term_id', $this->genreFilter);
+            });
+        }
+        if ($this->levelFilter) {
+            $q->where('io.level_of_description_id', $this->levelFilter);
+        }
+        if ($this->mediaFilter) {
+            $q->whereExists(function ($sub) {
+                $sub->select(DB::raw(1))->from('digital_object')
+                    ->whereRaw('digital_object.object_id = io.id')
+                    ->whereNull('digital_object.parent_id')
+                    ->whereRaw('digital_object.mime_type LIKE ?', [$this->mediaFilter . '/%']);
+            });
+        }
+        if ($this->repoFilter) {
+            $q->where('io.repository_id', $this->repoFilter);
+        }
+
+        $filteredIds = $q->pluck('io.id')->toArray();
+
+        // Preserve Discovery relevance order
+        return array_values(array_intersect($ids, $filteredIds));
+    }
+
+    /**
+     * Recompute facet counts scoped to the Discovery result set.
+     * Overrides the facet arrays already loaded by DynamicFacetService
+     * so the sidebar shows counts relevant to the search results.
+     *
+     * @param int[] $ids Full Discovery ID set (unfiltered by facets)
+     */
+    protected function recomputeDiscoveryFacets(array $ids): void
+    {
+        if (empty($ids)) {
+            return;
+        }
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        // GLAM type counts
+        $this->types = DB::table('information_object as io')
+            ->join('display_object_config as doc', 'io.id', '=', 'doc.object_id')
+            ->whereIn('io.id', $ids)
+            ->whereNotNull('doc.object_type')
+            ->select('doc.object_type', DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy('doc.object_type')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()
+            ->map(fn($r) => (object) ['id' => $r->object_type, 'name' => ucfirst($r->object_type), 'count' => (int) $r->count])
+            ->toArray();
+
+        // Level counts
+        $this->levels = DB::table('information_object as io')
+            ->join('term_i18n as ti', function ($j) use ($culture) {
+                $j->on('io.level_of_description_id', '=', 'ti.id')->where('ti.culture', '=', $culture);
+            })
+            ->whereIn('io.id', $ids)
+            ->select('io.level_of_description_id as id', 'ti.name', DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy('io.level_of_description_id', 'ti.name')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()->toArray();
+
+        // Creator counts
+        $this->creators = DB::table('information_object as io')
+            ->join('event as e', 'io.id', '=', 'e.object_id')
+            ->join('actor_i18n as ai', function ($j) use ($culture) {
+                $j->on('e.actor_id', '=', 'ai.id')->where('ai.culture', '=', $culture);
+            })
+            ->whereIn('io.id', $ids)
+            ->select('e.actor_id as id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy('e.actor_id', 'ai.authorized_form_of_name')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()->toArray();
+
+        // Subject counts (taxonomy_id = 35)
+        $this->subjects = DB::table('information_object as io')
+            ->join('object_term_relation as otr', 'io.id', '=', 'otr.object_id')
+            ->join('term as t', function ($j) {
+                $j->on('otr.term_id', '=', 't.id')->where('t.taxonomy_id', '=', 35);
+            })
+            ->join('term_i18n as ti', function ($j) use ($culture) {
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', $culture);
+            })
+            ->whereIn('io.id', $ids)
+            ->select('t.id', 'ti.name', DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy('t.id', 'ti.name')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()->toArray();
+
+        // Place counts (taxonomy_id = 42)
+        $this->places = DB::table('information_object as io')
+            ->join('object_term_relation as otr', 'io.id', '=', 'otr.object_id')
+            ->join('term as t', function ($j) {
+                $j->on('otr.term_id', '=', 't.id')->where('t.taxonomy_id', '=', 42);
+            })
+            ->join('term_i18n as ti', function ($j) use ($culture) {
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', $culture);
+            })
+            ->whereIn('io.id', $ids)
+            ->select('t.id', 'ti.name', DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy('t.id', 'ti.name')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()->toArray();
+
+        // Genre counts (taxonomy_id = 78)
+        $this->genres = DB::table('information_object as io')
+            ->join('object_term_relation as otr', 'io.id', '=', 'otr.object_id')
+            ->join('term as t', function ($j) {
+                $j->on('otr.term_id', '=', 't.id')->where('t.taxonomy_id', '=', 78);
+            })
+            ->join('term_i18n as ti', function ($j) use ($culture) {
+                $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', $culture);
+            })
+            ->whereIn('io.id', $ids)
+            ->select('t.id', 'ti.name', DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy('t.id', 'ti.name')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()->toArray();
+
+        // Repository counts
+        $this->repositories = DB::table('information_object as io')
+            ->join('actor_i18n as ai', function ($j) use ($culture) {
+                $j->on('io.repository_id', '=', 'ai.id')->where('ai.culture', '=', $culture);
+            })
+            ->whereIn('io.id', $ids)
+            ->whereNotNull('io.repository_id')
+            ->select('io.repository_id as id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy('io.repository_id', 'ai.authorized_form_of_name')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()->toArray();
+
+        // Media type counts
+        $this->mediaTypes = DB::table('information_object as io')
+            ->join('digital_object as dobj', function ($j) {
+                $j->on('io.id', '=', 'dobj.object_id')->whereNull('dobj.parent_id');
+            })
+            ->whereIn('io.id', $ids)
+            ->select(DB::raw("SUBSTRING_INDEX(dobj.mime_type, '/', 1) as media_type"), DB::raw('COUNT(DISTINCT io.id) as count'))
+            ->groupBy(DB::raw("SUBSTRING_INDEX(dobj.mime_type, '/', 1)"))
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get()
+            ->map(fn($r) => (object) ['id' => $r->media_type, 'name' => ucfirst($r->media_type), 'count' => (int) $r->count])
+            ->toArray();
     }
 
     /**
