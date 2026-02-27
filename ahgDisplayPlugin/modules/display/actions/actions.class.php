@@ -1246,6 +1246,29 @@ class displayActions extends AhgController
             return [];
         }
 
+        // Filter out junk records (barcodes, empty/placeholder titles)
+        $allIds = array_column($flatResults, 'object_id');
+        if (!empty($allIds)) {
+            $junkIds = DB::table('information_object_i18n')
+                ->whereIn('id', $allIds)
+                ->where(function ($q) {
+                    $q->where('title', 'LIKE', 'Barcode%')
+                      ->orWhere('scope_and_content', '=', 'barcode')
+                      ->orWhereRaw("LENGTH(TRIM(COALESCE(title, ''))) < 3");
+                })
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($junkIds)) {
+                $junkSet = array_flip($junkIds);
+                $flatResults = array_values(array_filter($flatResults, fn($r) => !isset($junkSet[$r['object_id']])));
+            }
+        }
+
+        if (empty($flatResults)) {
+            return [];
+        }
+
         // Build auxiliary maps from raw strategy results for richer context
         $entityMap = [];
         foreach ($entityResults as $r) {
