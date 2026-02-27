@@ -79,10 +79,24 @@ def build_text(title: str, scope: Optional[str], transcript: Optional[str] = Non
     return " ".join(parts)
 
 
+def _read_mycnf_password():
+    """Read password from ~/.my.cnf if it exists (matches mysql CLI behaviour)."""
+    cnf = os.path.expanduser("~/.my.cnf")
+    if not os.path.isfile(cnf):
+        return ""
+    try:
+        import configparser
+        cfg = configparser.ConfigParser()
+        cfg.read(cnf)
+        return cfg.get("client", "password", fallback="")
+    except Exception:
+        return ""
+
+
 def get_db_connection(args):
     """Create MySQL connection via PyMySQL."""
     import pymysql
-    password = os.environ.get("MYSQL_PASSWORD", args.db_password)
+    password = os.environ.get("MYSQL_PASSWORD", "") or args.db_password or _read_mycnf_password()
     return pymysql.connect(
         host=os.environ.get("MYSQL_HOST", "localhost"),
         user=args.db_user,
