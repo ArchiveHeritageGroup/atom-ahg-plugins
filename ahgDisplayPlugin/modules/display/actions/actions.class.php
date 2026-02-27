@@ -68,7 +68,18 @@ class displayActions extends AhgController
         $this->sortDir = $request->getParameter('dir', 'desc');
         $this->viewMode = $request->getParameter('view', 'card');
         $this->hasDigital = $request->getParameter('hasDigital');
-        
+
+        // Map standard AtoM parameters to display plugin native names
+        if (!$this->hasDigital && $request->getParameter('onlyMedia')) {
+            $this->hasDigital = '1';
+        }
+        if ($request->getParameter('topLod') !== null) {
+            $this->topLevelOnly = filter_var($request->getParameter('topLod'), FILTER_VALIDATE_BOOLEAN) ? '1' : '0';
+        }
+        if (!$this->parentId && $request->getParameter('ancestor')) {
+            $this->parentId = $request->getParameter('ancestor');
+        }
+
         // New facet filters
         $this->creatorFilter = $request->getParameter('creator');
         $this->subjectFilter = $request->getParameter('subject');

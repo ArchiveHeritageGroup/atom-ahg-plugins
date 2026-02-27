@@ -3,10 +3,15 @@ use AtomFramework\Http\Controllers\AhgController;
 use AtomFramework\Services\Write\WriteServiceFactory;
 use Illuminate\Database\Capsule\Manager as DB;
 
-// Load PHPMailer manually (since Composer is not used)
-require '/usr/share/nginx/phpmailer/src/PHPMailer.php';
-require '/usr/share/nginx/phpmailer/src/SMTP.php';
-require '/usr/share/nginx/phpmailer/src/Exception.php';
+// Load PHPMailer via composer autoloader, fallback to legacy path
+if (!class_exists('PHPMailer\PHPMailer\PHPMailer', true)) {
+    $legacyPath = '/usr/share/nginx/phpmailer/src/';
+    if (is_dir($legacyPath)) {
+        require $legacyPath . 'PHPMailer.php';
+        require $legacyPath . 'SMTP.php';
+        require $legacyPath . 'Exception.php';
+    }
+}
 
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;

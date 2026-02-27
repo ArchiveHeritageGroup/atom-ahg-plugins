@@ -8,42 +8,24 @@ class DigitalObjectShowComponent extends AhgComponents
 
     public function execute($request)
     {
-        // Try multiple ways to get the resource
-        $this->resource = null;
-        
-        // Method 1: Direct from request
-        if (isset($request->resource)) {
-            $this->resource = $request->resource;
-        }
-        
-        // Method 2: From sf_request attribute
-        if (!$this->resource) {
-            $sfRequest = $request->getAttribute('sf_request');
-            if ($sfRequest && method_exists($sfRequest, 'getAttribute')) {
-                $this->resource = $sfRequest->getAttribute('resource');
-            }
-        }
-        
-        // Method 3: From context
-        if (!$this->resource) {
-            $context = sfContext::getInstance();
-            if ($context && $context->has('request')) {
-                $mainRequest = $context->getRequest();
-                if ($mainRequest && method_exists($mainRequest, 'getAttribute')) {
-                    $this->resource = $mainRequest->getAttribute('resource');
-                }
-            }
-        }
-
+        // $this->resource is already set by get_component() via the var holder.
+        // Do NOT overwrite it — just check if it was provided.
         if (!$this->resource) {
             $this->showComponent = 'showDownload';
             $this->accessWarning = '';
             return;
         }
 
-        $this->usageType = $request->usageType;
-        $this->link = $request->link;
-        $this->iconOnly = $request->iconOnly;
+        // Default var holder values (set by get_component or fall back to defaults)
+        if (!isset($this->usageType)) {
+            $this->usageType = QubitTerm::THUMBNAIL_ID;
+        }
+        if (!isset($this->link)) {
+            $this->link = null;
+        }
+        if (!isset($this->iconOnly)) {
+            $this->iconOnly = false;
+        }
 
         // Check if it's a 3D model by extension
         $name = $this->resource->name ?? '';
@@ -95,7 +77,7 @@ class DigitalObjectShowComponent extends AhgComponents
         }
 
         $this->accessWarning = '';
-        if (isset($this->resource->object)) {
+        if (isset($this->resource->object) && $this->resource->object instanceof QubitInformationObject) {
             $this->accessWarning = QubitInformationObject::getAccessWarning($this->resource->object, $this->usageType);
         }
     }
