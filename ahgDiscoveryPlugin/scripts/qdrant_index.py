@@ -95,7 +95,7 @@ def get_db_connection(args):
 
 
 def count_records(conn) -> int:
-    """Count indexable records."""
+    """Count indexable records (excludes junk: barcodes, placeholders, very short titles)."""
     with conn.cursor(pymysql.cursors.Cursor) as cursor:
         cursor.execute("""
             SELECT COUNT(*)
@@ -104,6 +104,9 @@ def count_records(conn) -> int:
             WHERE io.id != 1
               AND i18n.title IS NOT NULL
               AND i18n.title != ''
+              AND i18n.title NOT LIKE 'Barcode%%'
+              AND COALESCE(i18n.scope_and_content, '') != 'barcode'
+              AND LENGTH(TRIM(i18n.title)) >= 3
         """, (CULTURE,))
         return cursor.fetchone()[0]
 
@@ -130,6 +133,9 @@ def fetch_records(conn, offset: int, limit: int):
             WHERE io.id != 1
               AND i18n.title IS NOT NULL
               AND i18n.title != ''
+              AND i18n.title NOT LIKE 'Barcode%%'
+              AND COALESCE(i18n.scope_and_content, '') != 'barcode'
+              AND LENGTH(TRIM(i18n.title)) >= 3
             GROUP BY io.id
             ORDER BY io.id
             LIMIT %s OFFSET %s
