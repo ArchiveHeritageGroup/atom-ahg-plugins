@@ -92,26 +92,46 @@
 
         <!-- STEP 1: Field Selection -->
         <div class="ahg-step-1">
-          <!-- Language Selection -->
+          <!-- Read from culture -->
           <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
+              <label class="form-label fw-bold"><?php echo __('Read from culture') ?></label>
+              <select class="form-select ahg-translate-read-culture">
+                <?php
+                  $cultures = isset($availableCultures) ? $availableCultures : [$userCulture];
+                  foreach ($cultures as $c):
+                    $cLabel = $c;
+                    foreach ($targetLanguages as $code => $langData) {
+                        if ($langData['culture'] === $c || $code === $c) { $cLabel = $langData['name'] . ' (' . $c . ')'; break; }
+                    }
+                ?>
+                  <option value="<?php echo htmlspecialchars($c, ENT_QUOTES, 'UTF-8') ?>"
+                      <?php echo $c === $userCulture ? 'selected' : '' ?>>
+                    <?php echo htmlspecialchars($cLabel, ENT_QUOTES, 'UTF-8') ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+              <small class="text-muted">AtoM culture where text is stored</small>
+            </div>
+            <div class="col-md-4">
               <label class="form-label fw-bold"><?php echo __('Source Language') ?></label>
               <select class="form-select ahg-translate-source">
                 <?php foreach ($targetLanguages as $code => $langData): ?>
                   <option value="<?php echo $code ?>" data-culture="<?php echo $langData['culture'] ?>"
                       <?php echo $code === $userCulture ? 'selected' : '' ?>>
-                    <?php echo htmlspecialchars($langData['name'], ENT_QUOTES, 'UTF-8') ?> (<?php echo $langData['culture'] ?>)
+                    <?php echo htmlspecialchars($langData['name'], ENT_QUOTES, 'UTF-8') ?>
                   </option>
                 <?php endforeach; ?>
               </select>
+              <small class="text-muted">Actual language of the text</small>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <label class="form-label fw-bold"><?php echo __('Target Language') ?></label>
               <select class="form-select ahg-translate-target">
                 <?php foreach ($targetLanguages as $code => $langData): ?>
                   <option value="<?php echo $code ?>" data-culture="<?php echo $langData['culture'] ?>"
                       <?php echo $code === $defaultTarget ? 'selected' : '' ?>>
-                    <?php echo htmlspecialchars($langData['name'], ENT_QUOTES, 'UTF-8') ?> (<?php echo $langData['culture'] ?>)
+                    <?php echo htmlspecialchars($langData['name'], ENT_QUOTES, 'UTF-8') ?>
                   </option>
                 <?php endforeach; ?>
               </select>
@@ -232,6 +252,7 @@
   const content = modalEl.querySelector(".modal-content");
   const objectId = content.getAttribute("data-object-id");
   const statusEl = content.querySelector(".ahg-translate-status");
+  const readCultureSel = content.querySelector(".ahg-translate-read-culture");
   const sourceSel = content.querySelector(".ahg-translate-source");
   const targetSel = content.querySelector(".ahg-translate-target");
   const saveCultureCb = content.querySelector(".ahg-save-culture");
@@ -293,9 +314,10 @@
     const body = new URLSearchParams({
       field: sourceField,
       targetField: sourceField,
+      readCulture: readCultureSel.value,
       source: source,
       target: target,
-      apply: "0", // Don't apply yet, just translate
+      apply: "0",
       saveCulture: "0",
       overwrite: "0"
     });

@@ -12,6 +12,7 @@
         "php": ">=8.1"
     },
     "dependencies": ["ahgCorePlugin"],
+    "install_sql": "database/install.sql",
     "optional_dependencies": ["ahgAIPlugin", "ahgSemanticSearchPlugin", "ahgSecurityClearancePlugin"],
     "tables": [
         "ahg_discovery_cache",

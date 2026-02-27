@@ -17,7 +17,7 @@ class AhgTranslationDb
     {
         $results = DB::select($sql, $params);
 
-        return $results[0] ?? null;
+        return isset($results[0]) ? (array) $results[0] : null;
     }
 
     public static function fetchAll(string $sql, array $params = [])

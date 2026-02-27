@@ -454,10 +454,22 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 
     html += '<div class="flex-grow-1 min-width-0">';
 
-    // Title
+    // Title + similarity score
+    html += '<div class="d-flex align-items-start justify-content-between">';
     html += '<a href="/' + encodeURI(slug) + '" class="discovery-result-title" data-object-id="' + (r.object_id || '') + '">';
     html += hlTitle || title;
     html += '</a>';
+    if (typeof r.score === 'number') {
+      var pct = Math.round(r.score * 100);
+      var barColor = pct >= 70 ? '#198754' : pct >= 40 ? '#fd7e14' : '#6c757d';
+      html += '<span class="ms-2 flex-shrink-0 text-nowrap" style="min-width:80px;" title="Similarity: ' + pct + '%">';
+      html += '<small class="fw-bold" style="color:' + barColor + '">' + pct + '%</small>';
+      html += '<div style="height:4px;width:60px;background:#e9ecef;border-radius:2px;margin-top:2px;">';
+      html += '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px;"></div>';
+      html += '</div>';
+      html += '</span>';
+    }
+    html += '</div>';
 
     // Metadata line
     var metaParts = [];
@@ -490,6 +502,7 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
       reasons.forEach(function(reason) {
         var badgeClass = 'bg-light text-muted';
         if (reason === 'KEYWORD') badgeClass = 'bg-info bg-opacity-10 text-info';
+        else if (reason === 'SEMANTIC') badgeClass = 'bg-primary bg-opacity-10 text-primary';
         else if (reason.startsWith('ENTITY:')) badgeClass = 'bg-success bg-opacity-10 text-success';
         else if (reason === 'SIBLING' || reason === 'CHILD') badgeClass = 'bg-warning bg-opacity-10 text-warning';
         var label = reason.startsWith('ENTITY:') ? reason.substring(7) : reason.toLowerCase();

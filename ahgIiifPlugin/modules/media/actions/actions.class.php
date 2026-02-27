@@ -116,8 +116,32 @@ class mediaActions extends AhgController
         // Normalize path
         $fullPath = realpath($fullPath);
 
-        // Security: ensure path is within web directory
-        if (!$fullPath || !str_starts_with($fullPath, realpath($webDir))) {
+        // Security: ensure path is within web directory or resolved upload targets
+        $allowed = [realpath($webDir)];
+        // Resolve the actual upload directory (may be a symlink to NAS/external storage)
+        $uploadsDir = $webDir . '/uploads';
+        if (is_dir($uploadsDir)) {
+            $resolved = realpath($uploadsDir);
+            if ($resolved) {
+                $allowed[] = $resolved;
+            }
+            // Also resolve each subdirectory (e.g. uploads/r -> /mnt/nas/...)
+            foreach (scandir($uploadsDir) as $entry) {
+                if ($entry === '.' || $entry === '..') continue;
+                $entryReal = realpath($uploadsDir . '/' . $entry);
+                if ($entryReal && !in_array($entryReal, $allowed)) {
+                    $allowed[] = $entryReal;
+                }
+            }
+        }
+        $pathAllowed = false;
+        foreach ($allowed as $prefix) {
+            if (str_starts_with($fullPath, $prefix)) {
+                $pathAllowed = true;
+                break;
+            }
+        }
+        if (!$fullPath || !$pathAllowed) {
             return null;
         }
 

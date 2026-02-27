@@ -79,9 +79,13 @@ class translationActions extends AhgController
         $targetFieldKey = (string)$request->getParameter('targetField', $fieldKey); // Default to same field
         $source = (string)$request->getParameter('source', $this->culture());
         $target = (string)$request->getParameter('target', $this->svc->getSetting('mt.target_culture', 'en'));
+        $readCulture = (string)$request->getParameter('readCulture', '');
         $apply = ((int)$request->getParameter('apply', 0) === 1);
         $overwrite = ((int)$request->getParameter('overwrite', 0) === 1);
         $saveCulture = ((int)$request->getParameter('saveCulture', 1) === 1);
+
+        // readCulture = which DB culture row to read from (may differ from source language)
+        $dbCulture = !empty($readCulture) ? $readCulture : $source;
 
         $allowed = AhgTranslationRepository::allowedFields();
         if (!isset($allowed[$fieldKey])) {
@@ -93,7 +97,7 @@ class translationActions extends AhgController
 
         $sourceColumn = $allowed[$fieldKey];
         $targetColumn = $allowed[$targetFieldKey];
-        $sourceText = $this->svc->repo()->getInformationObjectField($id, $source, $sourceColumn);
+        $sourceText = $this->svc->repo()->getInformationObjectField($id, $dbCulture, $sourceColumn);
 
         if ($sourceText === null || trim($sourceText) === '') {
             return $this->renderText(json_encode(array('ok' => false, 'error' => 'No source text for this field/language')));
