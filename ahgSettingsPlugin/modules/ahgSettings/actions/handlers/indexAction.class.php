@@ -289,6 +289,17 @@ class AhgSettingsIndexAction extends AhgController
             ];
         }
 
+        // Accession - show when ahgAccessionManagePlugin is enabled
+        $hasAccession = in_array('ahgAccessionManagePlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasAccession) {
+            $this->sections['accession'] = [
+                'label' => 'Accession Management',
+                'icon' => 'fa-inbox',
+                'description' => 'Intake workflow, numbering, appraisal, container and rights settings',
+                'url' => 'admin/ahg-settings/section?section=accession'
+            ];
+        }
+
         // Encryption - always available
         $this->sections['encryption'] = [
             'label' => 'Encryption',
