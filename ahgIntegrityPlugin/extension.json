@@ -1,0 +1,34 @@
+{
+    "name": "Integrity Assurance",
+    "machine_name": "ahgIntegrityPlugin",
+    "version": "1.0.0",
+    "description": "Enterprise-grade automated integrity assurance: scheduled fixity verification, scoped validation, concurrency controls, append-only ledger, dead-letter queue",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "preservation",
+    "keywords": ["integrity", "fixity", "verification", "checksum", "scheduling", "dead-letter", "ledger"],
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin", "ahgPreservationPlugin"],
+    "provides": {
+        "services": ["IntegrityService", "IntegrityScheduler"]
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "integrity_schedule",
+        "integrity_run",
+        "integrity_ledger",
+        "integrity_dead_letter"
+    ],
+    "settings": {
+        "default_algorithm": "sha256",
+        "default_batch_size": 200,
+        "default_max_runtime_minutes": 120,
+        "default_max_memory_mb": 512,
+        "dead_letter_max_retries": 3
+    }
+}
