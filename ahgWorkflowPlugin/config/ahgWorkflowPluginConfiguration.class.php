@@ -61,9 +61,27 @@ class ahgWorkflowPluginConfiguration extends sfPluginConfiguration
         // Start workflow (triggered when submitting item)
         $router->any('workflow_start', '/workflow/start/:object_id', 'startWorkflow', ['object_id' => '\d+']);
 
+        // V2.0: Timeline (#172)
+        $router->any('workflow_timeline', '/workflow/timeline/:object_id', 'timeline', ['object_id' => '\d+']);
+
+        // V2.0: Queues (#173)
+        $router->any('workflow_queues', '/workflow/queues', 'queues');
+
+        // V2.0: My Work / Team Work (#173)
+        $router->any('workflow_my_work', '/workflow/my-work', 'myWork');
+        $router->any('workflow_team_work', '/workflow/team-work', 'teamWork');
+
+        // V2.0: Overdue dashboard (#174)
+        $router->any('workflow_overdue', '/workflow/overdue', 'overdue');
+
+        // V2.0: Bulk operations (#175)
+        $router->any('workflow_bulk_preview', '/workflow/bulk/preview', 'bulkPreview');
+        $router->any('workflow_bulk_execute', '/workflow/bulk/execute', 'bulkExecute');
+
         // API endpoints for AJAX
         $router->any('workflow_api_stats', '/workflow/api/stats', 'apiStats');
         $router->any('workflow_api_tasks', '/workflow/api/tasks', 'apiTasks');
+        $router->any('workflow_api_sla', '/workflow/api/sla', 'apiSlaStatus');
 
         $router->register($event->getSubject());
     }

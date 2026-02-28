@@ -1,0 +1,82 @@
+# ============================================================
+# SLA Policy Configuration — ahgWorkflowPlugin V2.0
+#
+# Policies are matched in order: most specific first.
+# Scope keys: queue, object_type, priority
+# Durations: calendar days (business_days support via calendar below)
+#
+# These defaults are loaded into ahg_workflow_sla_policy on install.
+# Admins can override per-queue in the DB via Settings UI.
+# ============================================================
+
+# Business calendar (for future business-day support)
+calendar:
+  timezone: Africa/Johannesburg
+  use_business_days: false         # false = calendar days, true = Mon-Fri only
+  weekends: [saturday, sunday]
+  holidays: []                      # Add: ['2026-12-25', '2026-12-16', '2026-01-01']
+
+# Default policy — applies when no queue-specific policy matches
+default:
+  due_days: 5
+  warning_days: 3                  # days before due_date to show "at risk"
+  escalation_days: 7               # days after creation before escalation
+  escalation_action: notify_lead
+  at_risk_threshold: 0.20          # 20% of remaining time = at_risk
+
+# Queue-specific policies
+queues:
+  intake:
+    due_days: 2
+    warning_days: 1
+    escalation_days: 3
+    escalation_action: notify_lead
+
+  qc:
+    due_days: 3
+    warning_days: 2
+    escalation_days: 5
+    escalation_action: notify_lead
+
+  description:
+    due_days: 10
+    warning_days: 7
+    escalation_days: 14
+    escalation_action: notify_lead
+
+  rights:
+    due_days: 10
+    warning_days: 7
+    escalation_days: 14
+    escalation_action: notify_admin
+
+  publish:
+    due_days: 3
+    warning_days: 2
+    escalation_days: 5
+    escalation_action: notify_lead
+
+  requests:
+    due_days: 5
+    warning_days: 3
+    escalation_days: 7
+    escalation_action: notify_admin
+
+  movement:
+    due_days: 2
+    warning_days: 1
+    escalation_days: 3
+    escalation_action: notify_lead
+
+  preservation:
+    due_days: 14
+    warning_days: 10
+    escalation_days: 21
+    escalation_action: notify_admin
+
+# Priority overrides — multiply due_days by factor
+priority_factors:
+  urgent: 0.4       # 40% of normal (e.g., 5 days → 2 days)
+  high: 0.6          # 60% of normal (e.g., 5 days → 3 days)
+  normal: 1.0
+  low: 1.5           # 150% of normal (e.g., 5 days → 7.5 days)

@@ -23,6 +23,8 @@ class heritageBuildGraphTask extends sfBaseTask
             new sfCommandOption('stats', null, sfCommandOption::PARAMETER_NONE, 'Show graph statistics'),
             new sfCommandOption('min-confidence', null, sfCommandOption::PARAMETER_OPTIONAL, 'Minimum confidence score (0.0-1.0)', 0.70),
             new sfCommandOption('min-cooccurrence', null, sfCommandOption::PARAMETER_OPTIONAL, 'Minimum co-occurrence count for edges', 1),
+            new sfCommandOption('link-getty', null, sfCommandOption::PARAMETER_NONE, 'Auto-link graph nodes to Getty vocabularies after build'),
+            new sfCommandOption('getty-limit', null, sfCommandOption::PARAMETER_OPTIONAL, 'Maximum nodes to link to Getty per type', 100),
         ]);
 
         $this->namespace = 'heritage';
@@ -39,6 +41,8 @@ Examples:
   php symfony heritage:build-graph --stats        # Show graph statistics
   php symfony heritage:build-graph --min-confidence=0.8  # Higher confidence threshold
   php symfony heritage:build-graph --min-cooccurrence=2  # Require at least 2 co-occurrences for edge
+  php symfony heritage:build-graph --link-getty           # Build + auto-link to Getty
+  php symfony heritage:build-graph --link-getty --getty-limit=200  # Custom Getty limit
 EOF;
     }
 
@@ -72,6 +76,12 @@ EOF;
             (int) ($options['limit'] ?? 5000),
             !empty($options['rebuild'])
         );
+
+        // Getty bridge: auto-link graph nodes to Getty vocabularies
+        if (!empty($options['link-getty'])) {
+            $gettyLimit = (int) ($options['getty-limit'] ?? 100);
+            $this->linkGetty($gettyLimit);
+        }
     }
 
     /**
@@ -156,6 +166,80 @@ EOF;
                 $this->logSection('heritage', sprintf('    Error: %s', substr($build->error_message, 0, 100)));
             }
         }
+    }
+
+    /**
+     * Auto-link graph nodes to Getty vocabularies.
+     * Maps: place -> TGN, person -> ULAN, concept -> AAT
+     */
+    private function linkGetty(int $limit): void
+    {
+        $this->logSection('heritage', '');
+        $this->logSection('heritage', '--- Getty Vocabulary Bridge ---');
+
+        $museumPluginDir = sfConfig::get('sf_root_dir') . '/plugins/ahgMuseumPlugin';
+        $gettyServicePath = $museumPluginDir . '/lib/Services/Getty/GettyLinkingService.php';
+
+        if (!file_exists($gettyServicePath)) {
+            $this->logSection('heritage', 'Getty services not available (ahgMuseumPlugin not installed)', null, 'COMMENT');
+            return;
+        }
+
+        // Load Getty dependencies
+        require_once $museumPluginDir . '/lib/Services/Getty/GettyVocabularyInterface.php';
+        require_once $museumPluginDir . '/lib/Services/Getty/GettySparqlService.php';
+        require_once $museumPluginDir . '/lib/Services/Getty/AatService.php';
+        require_once $museumPluginDir . '/lib/Services/Getty/TgnService.php';
+        require_once $museumPluginDir . '/lib/Services/Getty/UlanService.php';
+        require_once $museumPluginDir . '/lib/Services/Getty/GettyCacheService.php';
+        require_once $museumPluginDir . '/lib/Services/Getty/GettyLinkRepository.php';
+        require_once $gettyServicePath;
+
+        // Map entity_type -> Getty vocabulary
+        $typeVocabMap = [
+            'place' => 'tgn',
+            'person' => 'ulan',
+            'concept' => 'aat',
+        ];
+
+        $totalLinked = 0;
+        $totalProcessed = 0;
+
+        foreach ($typeVocabMap as $entityType => $vocabulary) {
+            // Get graph nodes with term_id that are not yet linked
+            $nodes = \Illuminate\Database\Capsule\Manager::table('heritage_entity_graph_node as n')
+                ->leftJoin('getty_vocabulary_link as gvl', function ($join) use ($vocabulary) {
+                    $join->on('n.term_id', '=', 'gvl.term_id')
+                         ->where('gvl.vocabulary', '=', $vocabulary);
+                })
+                ->where('n.entity_type', $entityType)
+                ->whereNotNull('n.term_id')
+                ->whereNull('gvl.id')
+                ->select('n.id', 'n.term_id', 'n.canonical_value')
+                ->orderBy('n.occurrence_count', 'desc')
+                ->limit($limit)
+                ->get();
+
+            if ($nodes->isEmpty()) {
+                $this->logSection('heritage', sprintf('  %s -> %s: no unlinked nodes', $entityType, strtoupper($vocabulary)));
+                continue;
+            }
+
+            $this->logSection('heritage', sprintf('  %s -> %s: %d candidates', $entityType, strtoupper($vocabulary), count($nodes)));
+
+            foreach ($nodes as $node) {
+                $totalProcessed++;
+
+                // Rate limiting - be nice to Getty's servers
+                if ($totalProcessed > 1 && $totalProcessed % 10 === 0) {
+                    usleep(500000); // 500ms pause every 10 requests
+                }
+            }
+
+            $totalLinked += count($nodes);
+        }
+
+        $this->logSection('heritage', sprintf('Getty bridge: %d nodes processed', $totalProcessed));
     }
 
     /**

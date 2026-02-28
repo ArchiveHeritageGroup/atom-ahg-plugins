@@ -4,6 +4,21 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class WorkflowService
 {
+    /** @var WorkflowEventService|null */
+    protected ?WorkflowEventService $eventService = null;
+
+    /**
+     * Get or create the event service instance.
+     */
+    public function getEventService(): WorkflowEventService
+    {
+        if ($this->eventService === null) {
+            require_once __DIR__ . '/WorkflowEventService.php';
+            $this->eventService = new WorkflowEventService();
+        }
+        return $this->eventService;
+    }
+
     // =========================================================================
     // WORKFLOW DEFINITIONS
     // =========================================================================
@@ -723,20 +738,16 @@ class WorkflowService
         int $performedBy,
         ?string $comment = null
     ): int {
-        return DB::table('ahg_workflow_history')->insertGetId([
+        return $this->getEventService()->emit($action, [
             'task_id' => $taskId,
             'workflow_id' => $workflowId,
-            'workflow_step_id' => $stepId,
+            'step_id' => $stepId,
             'object_id' => $objectId,
             'object_type' => $objectType,
-            'action' => $action,
             'from_status' => $fromStatus,
             'to_status' => $toStatus,
             'performed_by' => $performedBy,
-            'performed_at' => date('Y-m-d H:i:s'),
             'comment' => $comment,
-            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-            'user_agent' => isset($_SERVER['HTTP_USER_AGENT']) ? substr($_SERVER['HTTP_USER_AGENT'], 0, 500) : null,
         ]);
     }
 
@@ -1170,6 +1181,376 @@ class WorkflowService
             }
         }
         return "Object #{$objectId}";
+    }
+
+    // =========================================================================
+    // AUDIT LOGGING
+    // =========================================================================
+
+    // =========================================================================
+    // V2.0: QUEUES (#173)
+    // =========================================================================
+
+    /**
+     * Get all queues with task counts.
+     */
+    public function getQueues(bool $includeInactive = false): array
+    {
+        $query = DB::table('ahg_workflow_queue');
+        if (!$includeInactive) {
+            $query->where('is_active', 1);
+        }
+        $queues = $query->orderBy('sort_order')->get()->toArray();
+
+        foreach ($queues as &$queue) {
+            $queue->task_count = DB::table('ahg_workflow_task')
+                ->where('queue_id', $queue->id)
+                ->whereNotIn('status', ['approved', 'rejected', 'cancelled'])
+                ->count();
+
+            $queue->overdue_count = DB::table('ahg_workflow_task')
+                ->where('queue_id', $queue->id)
+                ->whereNotIn('status', ['approved', 'rejected', 'cancelled'])
+                ->whereNotNull('due_date')
+                ->where('due_date', '<', date('Y-m-d'))
+                ->count();
+        }
+        unset($queue);
+
+        return $queues;
+    }
+
+    /**
+     * Get a single queue by ID.
+     */
+    public function getQueue(int $id): ?object
+    {
+        return DB::table('ahg_workflow_queue')->where('id', $id)->first();
+    }
+
+    /**
+     * Get queue stats (counts, overdue, average age).
+     */
+    public function getQueueStats(): array
+    {
+        $queues = $this->getQueues();
+        $stats = [];
+
+        foreach ($queues as $queue) {
+            $tasks = DB::table('ahg_workflow_task')
+                ->where('queue_id', $queue->id)
+                ->whereNotIn('status', ['approved', 'rejected', 'cancelled'])
+                ->get();
+
+            $totalAge = 0;
+            foreach ($tasks as $t) {
+                $totalAge += (time() - strtotime($t->created_at));
+            }
+
+            $stats[] = [
+                'queue' => $queue,
+                'count' => $queue->task_count,
+                'overdue' => $queue->overdue_count,
+                'unassigned' => DB::table('ahg_workflow_task')
+                    ->where('queue_id', $queue->id)
+                    ->whereNull('assigned_to')
+                    ->whereNotIn('status', ['approved', 'rejected', 'cancelled'])
+                    ->count(),
+                'avg_age_days' => count($tasks) > 0
+                    ? round($totalAge / count($tasks) / 86400, 1)
+                    : 0,
+            ];
+        }
+
+        return $stats;
+    }
+
+    /**
+     * Move a task to a queue.
+     */
+    public function moveToQueue(int $taskId, int $queueId, int $userId): void
+    {
+        $task = DB::table('ahg_workflow_task')->where('id', $taskId)->first();
+        if (!$task) {
+            throw new Exception("Task {$taskId} not found");
+        }
+
+        $oldQueueId = $task->queue_id;
+
+        DB::table('ahg_workflow_task')->where('id', $taskId)->update([
+            'queue_id' => $queueId,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->getEventService()->emit('queue_changed', [
+            'task_id' => $taskId,
+            'workflow_id' => $task->workflow_id,
+            'step_id' => $task->workflow_step_id,
+            'object_id' => $task->object_id,
+            'object_type' => $task->object_type,
+            'performed_by' => $userId,
+            'metadata' => ['old_queue_id' => $oldQueueId, 'new_queue_id' => $queueId],
+        ]);
+
+        // Apply SLA from new queue
+        try {
+            require_once __DIR__ . '/WorkflowSlaService.php';
+            $slaService = new WorkflowSlaService();
+            $slaService->applyPolicy($taskId, $userId);
+        } catch (\Exception $e) {
+            // SLA application is non-fatal
+        }
+    }
+
+    // =========================================================================
+    // V2.0: ASSIGNMENT MODEL (#173)
+    // =========================================================================
+
+    /**
+     * Assign task to self (claim).
+     */
+    public function assignToMe(int $taskId, int $userId): void
+    {
+        $this->claimTask($taskId, $userId);
+    }
+
+    /**
+     * Direct assignment to a specific user.
+     */
+    public function assignToUser(int $taskId, int $userId, int $performedBy): void
+    {
+        $task = DB::table('ahg_workflow_task')->where('id', $taskId)->first();
+        if (!$task) {
+            throw new Exception("Task {$taskId} not found");
+        }
+
+        $oldAssignee = $task->assigned_to;
+
+        DB::table('ahg_workflow_task')->where('id', $taskId)->update([
+            'assigned_to' => $userId,
+            'status' => 'claimed',
+            'claimed_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->getEventService()->emitReassignment(
+            $taskId, $task->object_id, $performedBy, $oldAssignee, $userId,
+            ['workflow_id' => $task->workflow_id, 'step_id' => $task->workflow_step_id, 'object_type' => $task->object_type]
+        );
+
+        // Notify assigned user
+        $objectTitle = $this->getObjectTitle($task->object_id, $task->object_type);
+        $this->queueNotification($userId, 'task_assigned', "Task assigned: {$objectTitle}", "You have been assigned a workflow task for '{$objectTitle}'.", $taskId);
+    }
+
+    /**
+     * Pool assignment to a group (all group members see it).
+     */
+    public function assignToTeam(int $taskId, int $groupId, int $performedBy): void
+    {
+        $task = DB::table('ahg_workflow_task')->where('id', $taskId)->first();
+        if (!$task) {
+            throw new Exception("Task {$taskId} not found");
+        }
+
+        // Unassign from specific user, set pool_enabled on step
+        DB::table('ahg_workflow_task')->where('id', $taskId)->update([
+            'assigned_to' => null,
+            'status' => 'pending',
+            'claimed_at' => null,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // Update step's allowed_group_ids to include this group
+        $step = DB::table('ahg_workflow_step')->where('id', $task->workflow_step_id)->first();
+        if ($step) {
+            $groupIds = json_decode($step->allowed_group_ids ?? '[]', true) ?: [];
+            if (!in_array($groupId, $groupIds)) {
+                $groupIds[] = $groupId;
+                DB::table('ahg_workflow_step')
+                    ->where('id', $step->id)
+                    ->update(['allowed_group_ids' => json_encode($groupIds)]);
+            }
+        }
+
+        $this->getEventService()->emit('reassigned', [
+            'task_id' => $taskId,
+            'workflow_id' => $task->workflow_id,
+            'step_id' => $task->workflow_step_id,
+            'object_id' => $task->object_id,
+            'object_type' => $task->object_type,
+            'performed_by' => $performedBy,
+            'metadata' => ['assignment_type' => 'team', 'group_id' => $groupId],
+            'comment' => "Assigned to team (group #{$groupId})",
+        ]);
+    }
+
+    /**
+     * Unassign a task (release back to pool).
+     */
+    public function unassign(int $taskId, int $performedBy): void
+    {
+        $this->releaseTask($taskId, $performedBy, 'Unassigned by administrator');
+    }
+
+    // =========================================================================
+    // V2.0: MY WORK / TEAM WORK (#173)
+    // =========================================================================
+
+    /**
+     * Get all tasks assigned to a user across all queues, with SLA data.
+     */
+    public function getMyWork(int $userId, array $filters = []): array
+    {
+        $query = DB::table('ahg_workflow_task as t')
+            ->leftJoin('ahg_workflow_queue as q', 't.queue_id', '=', 'q.id')
+            ->leftJoin('ahg_workflow as w', 't.workflow_id', '=', 'w.id')
+            ->leftJoin('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('t.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('t.assigned_to', $userId)
+            ->whereNotIn('t.status', ['approved', 'rejected', 'cancelled'])
+            ->select(
+                't.*',
+                'q.name as queue_name', 'q.slug as queue_slug', 'q.color as queue_color', 'q.icon as queue_icon',
+                'w.name as workflow_name',
+                's.name as step_name',
+                'ioi.title as object_title'
+            );
+
+        if (!empty($filters['queue_id'])) {
+            $query->where('t.queue_id', $filters['queue_id']);
+        }
+        if (!empty($filters['status'])) {
+            $query->where('t.status', $filters['status']);
+        }
+        if (!empty($filters['priority'])) {
+            $query->where('t.priority', $filters['priority']);
+        }
+
+        $tasks = $query->orderByRaw("FIELD(t.priority, 'urgent', 'high', 'normal', 'low')")
+            ->orderBy('t.due_date')
+            ->get()
+            ->toArray();
+
+        // Attach SLA data
+        require_once __DIR__ . '/WorkflowSlaService.php';
+        $slaService = new WorkflowSlaService();
+        foreach ($tasks as &$task) {
+            $task->sla = (object) $slaService->computeForTask($task);
+        }
+        unset($task);
+
+        return $tasks;
+    }
+
+    /**
+     * Get tasks for a team (by ACL group), with SLA data.
+     */
+    public function getTeamWork(int $groupId, array $filters = []): array
+    {
+        $userIds = DB::table('acl_user_group')
+            ->where('group_id', $groupId)
+            ->pluck('user_id')
+            ->toArray();
+
+        if (empty($userIds)) {
+            return [];
+        }
+
+        $query = DB::table('ahg_workflow_task as t')
+            ->leftJoin('ahg_workflow_queue as q', 't.queue_id', '=', 'q.id')
+            ->leftJoin('ahg_workflow as w', 't.workflow_id', '=', 'w.id')
+            ->leftJoin('ahg_workflow_step as s', 't.workflow_step_id', '=', 's.id')
+            ->leftJoin('user as u', 't.assigned_to', '=', 'u.id')
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('u.id', '=', 'ai.id')
+                     ->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('t.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->whereIn('t.assigned_to', $userIds)
+            ->whereNotIn('t.status', ['approved', 'rejected', 'cancelled'])
+            ->select(
+                't.*',
+                'q.name as queue_name', 'q.slug as queue_slug', 'q.color as queue_color',
+                'w.name as workflow_name',
+                's.name as step_name',
+                DB::raw('COALESCE(ai.authorized_form_of_name, u.username) as assignee_name'),
+                'ioi.title as object_title'
+            );
+
+        if (!empty($filters['queue_id'])) {
+            $query->where('t.queue_id', $filters['queue_id']);
+        }
+
+        $tasks = $query->orderByRaw("FIELD(t.priority, 'urgent', 'high', 'normal', 'low')")
+            ->orderBy('t.due_date')
+            ->get()
+            ->toArray();
+
+        require_once __DIR__ . '/WorkflowSlaService.php';
+        $slaService = new WorkflowSlaService();
+        foreach ($tasks as &$task) {
+            $task->sla = (object) $slaService->computeForTask($task);
+        }
+        unset($task);
+
+        return $tasks;
+    }
+
+    // =========================================================================
+    // V2.0: PRIORITY & DUE DATE CHANGES
+    // =========================================================================
+
+    /**
+     * Change task priority with audit event.
+     */
+    public function changePriority(int $taskId, string $newPriority, int $userId): void
+    {
+        $task = DB::table('ahg_workflow_task')->where('id', $taskId)->first();
+        if (!$task) {
+            throw new Exception("Task {$taskId} not found");
+        }
+
+        $oldPriority = $task->priority;
+
+        DB::table('ahg_workflow_task')->where('id', $taskId)->update([
+            'priority' => $newPriority,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->getEventService()->emitPriorityChange(
+            $taskId, $task->object_id, $userId, $oldPriority, $newPriority,
+            ['workflow_id' => $task->workflow_id, 'step_id' => $task->workflow_step_id, 'object_type' => $task->object_type]
+        );
+    }
+
+    /**
+     * Change task due date with audit event.
+     */
+    public function changeDueDate(int $taskId, string $newDueDate, int $userId, string $reason = ''): void
+    {
+        $task = DB::table('ahg_workflow_task')->where('id', $taskId)->first();
+        if (!$task) {
+            throw new Exception("Task {$taskId} not found");
+        }
+
+        $oldDate = $task->due_date;
+
+        DB::table('ahg_workflow_task')->where('id', $taskId)->update([
+            'due_date' => $newDueDate,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->getEventService()->emitDueDateChange(
+            $taskId, $task->object_id, $userId, $oldDate, $newDueDate,
+            ['workflow_id' => $task->workflow_id, 'step_id' => $task->workflow_step_id, 'object_type' => $task->object_type]
+        );
     }
 
     // =========================================================================

@@ -421,6 +421,243 @@ class workflowActions extends AhgController
     }
 
     // =========================================================================
+    // V2.0: TIMELINE (#172)
+    // =========================================================================
+
+    public function executeTimeline($request)
+    {
+        $this->requireAuth();
+        $objectId = (int) $request->getParameter('object_id');
+
+        if (!$objectId) {
+            $this->forward404('Object ID required');
+        }
+
+        $filters = [];
+        if ($request->getParameter('type')) {
+            $filters['type'] = $request->getParameter('type');
+        }
+        if ($request->getParameter('date_from')) {
+            $filters['date_from'] = $request->getParameter('date_from');
+        }
+        if ($request->getParameter('date_to')) {
+            $filters['date_to'] = $request->getParameter('date_to');
+        }
+        if ($request->getParameter('action')) {
+            $filters['action'] = $request->getParameter('action');
+        }
+
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowEventService.php';
+        $eventService = new WorkflowEventService();
+
+        // JSON response
+        $format = $request->getParameter('format', 'html');
+
+        if ($format === 'json') {
+            $this->getResponse()->setContentType('application/json');
+            $events = $eventService->getTimeline($objectId, $filters);
+            return $this->renderText(json_encode(['events' => $events, 'object_id' => $objectId]));
+        }
+
+        if ($format === 'csv') {
+            $this->getResponse()->setContentType('text/csv');
+            $this->getResponse()->setHttpHeader('Content-Disposition', "attachment; filename=timeline_{$objectId}.csv");
+            return $this->renderText($eventService->exportTimelineCsv($objectId, $filters));
+        }
+
+        // HTML view
+        $this->events = $eventService->getTimeline($objectId, $filters);
+        $this->objectId = $objectId;
+        $this->actions = $eventService->getAllActions();
+        $this->filters = $filters;
+
+        // Get object info
+        $this->object = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
+            ->first();
+    }
+
+    // =========================================================================
+    // V2.0: QUEUES (#173)
+    // =========================================================================
+
+    public function executeQueues($request)
+    {
+        $this->requireAuth();
+
+        $this->queues = $this->getService()->getQueueStats();
+        $this->isAdmin = $this->getUser()->hasCredential('administrator');
+
+        // SLA overview
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowSlaService.php';
+        $slaService = new WorkflowSlaService();
+        $this->slaOverview = $slaService->getOverview();
+    }
+
+    // =========================================================================
+    // V2.0: MY WORK / TEAM WORK (#173)
+    // =========================================================================
+
+    public function executeMyWork($request)
+    {
+        $this->requireAuth();
+        $userId = $this->getCurrentUserId();
+
+        $filters = [];
+        if ($request->getParameter('queue_id')) {
+            $filters['queue_id'] = (int) $request->getParameter('queue_id');
+        }
+        if ($request->getParameter('status')) {
+            $filters['status'] = $request->getParameter('status');
+        }
+        if ($request->getParameter('priority')) {
+            $filters['priority'] = $request->getParameter('priority');
+        }
+
+        $this->tasks = $this->getService()->getMyWork($userId, $filters);
+        $this->queues = $this->getService()->getQueues();
+        $this->filters = $filters;
+    }
+
+    public function executeTeamWork($request)
+    {
+        $this->requireAuth();
+
+        // Get user's primary group
+        $userId = $this->getCurrentUserId();
+        $groupId = (int) $request->getParameter('group_id');
+
+        if (!$groupId) {
+            $groupId = \Illuminate\Database\Capsule\Manager::table('acl_user_group')
+                ->where('user_id', $userId)
+                ->where('group_id', '>', 1)
+                ->value('group_id') ?: 0;
+        }
+
+        $filters = [];
+        if ($request->getParameter('queue_id')) {
+            $filters['queue_id'] = (int) $request->getParameter('queue_id');
+        }
+
+        $this->tasks = $groupId ? $this->getService()->getTeamWork($groupId, $filters) : [];
+        $this->queues = $this->getService()->getQueues();
+        $this->roles = $this->getRoles();
+        $this->currentGroupId = $groupId;
+        $this->filters = $filters;
+    }
+
+    // =========================================================================
+    // V2.0: OVERDUE DASHBOARD (#174)
+    // =========================================================================
+
+    public function executeOverdue($request)
+    {
+        $this->requireAuth();
+
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowSlaService.php';
+        $slaService = new WorkflowSlaService();
+
+        $filters = [];
+        if ($request->getParameter('user_id')) {
+            $filters['user_id'] = (int) $request->getParameter('user_id');
+        }
+        if ($request->getParameter('queue_id')) {
+            $filters['queue_id'] = (int) $request->getParameter('queue_id');
+        }
+        if ($request->getParameter('priority')) {
+            $filters['priority'] = $request->getParameter('priority');
+        }
+
+        // CSV export
+        if ($request->getParameter('format') === 'csv') {
+            $this->getResponse()->setContentType('text/csv');
+            $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename=overdue_report.csv');
+            return $this->renderText($slaService->exportOverdueCsv($filters));
+        }
+
+        $this->tasks = $slaService->getOverdueTasks($filters);
+        $this->slaOverview = $slaService->getOverview();
+        $this->statsByQueue = $slaService->getStatsByQueue();
+        $this->queues = $this->getService()->getQueues();
+        $this->users = $this->getUsers();
+        $this->filters = $filters;
+        $this->isAdmin = $this->getUser()->hasCredential('administrator');
+    }
+
+    // =========================================================================
+    // V2.0: BULK OPERATIONS (#175)
+    // =========================================================================
+
+    public function executeBulkPreview($request)
+    {
+        $this->requireAuth();
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['error' => 'POST required']));
+        }
+
+        $taskIds = $request->getParameter('task_ids', []);
+        $action = $request->getParameter('bulk_action', '');
+
+        if (empty($taskIds) || empty($action)) {
+            return $this->renderText(json_encode(['error' => 'task_ids and bulk_action required']));
+        }
+
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowEventService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowBulkService.php';
+
+        $eventService = new WorkflowEventService();
+        $bulkService = new WorkflowBulkService($this->getService(), $eventService);
+
+        if ($action === 'assign') {
+            $targetUserId = (int) $request->getParameter('target_user_id');
+            $preview = $bulkService->previewBulkAssign($taskIds, $targetUserId);
+        } else {
+            $preview = $bulkService->previewBulkTransition($taskIds, $action, $this->getCurrentUserId());
+        }
+
+        return $this->renderText(json_encode(['preview' => $preview, 'action' => $action]));
+    }
+
+    public function executeBulkExecute($request)
+    {
+        $this->requireAuth();
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['error' => 'POST required']));
+        }
+
+        $taskIds = $request->getParameter('task_ids', []);
+        $action = $request->getParameter('bulk_action', '');
+        $comment = $request->getParameter('comment');
+        $userId = $this->getCurrentUserId();
+
+        if (empty($taskIds) || empty($action)) {
+            return $this->renderText(json_encode(['error' => 'task_ids and bulk_action required']));
+        }
+
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowEventService.php';
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowBulkService.php';
+
+        $eventService = new WorkflowEventService();
+        $bulkService = new WorkflowBulkService($this->getService(), $eventService);
+
+        $result = match ($action) {
+            'assign' => $bulkService->bulkAssign($taskIds, (int) $request->getParameter('target_user_id'), $userId),
+            'approve', 'reject', 'return', 'cancel' => $bulkService->bulkTransition($taskIds, $action, $userId, $comment),
+            'note' => $bulkService->bulkAddNote($taskIds, $comment ?: '', $userId),
+            'priority' => $bulkService->bulkChangePriority($taskIds, $request->getParameter('new_priority', 'normal'), $userId),
+            'queue' => $bulkService->bulkMoveToQueue($taskIds, (int) $request->getParameter('queue_id'), $userId),
+            default => ['error' => "Unknown action: {$action}"],
+        };
+
+        return $this->renderText(json_encode($result));
+    }
+
+    // =========================================================================
     // API ENDPOINTS
     // =========================================================================
 
@@ -441,6 +678,27 @@ class workflowActions extends AhgController
             : $this->getService()->getMyTasks($this->getCurrentUserId());
 
         return $this->renderText(json_encode($tasks));
+    }
+
+    public function executeApiSlaStatus($request)
+    {
+        $this->requireAuth();
+        $this->getResponse()->setContentType('application/json');
+
+        $taskId = (int) $request->getParameter('task_id');
+        if ($taskId) {
+            $task = \Illuminate\Database\Capsule\Manager::table('ahg_workflow_task')->where('id', $taskId)->first();
+            if (!$task) {
+                return $this->renderText(json_encode(['error' => 'Task not found']));
+            }
+            require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowSlaService.php';
+            $sla = (new WorkflowSlaService())->computeForTask($task);
+            return $this->renderText(json_encode($sla));
+        }
+
+        // Overview
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/WorkflowSlaService.php';
+        return $this->renderText(json_encode((new WorkflowSlaService())->getOverview()));
     }
 
     // =========================================================================
