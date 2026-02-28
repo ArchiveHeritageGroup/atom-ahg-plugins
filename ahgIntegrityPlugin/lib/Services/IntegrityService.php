@@ -712,14 +712,16 @@ class IntegrityService
     {
         $path = $doRow->path ?? '';
         $name = $doRow->name ?? '';
+        $rootDir = \sfConfig::get('sf_root_dir', '/usr/share/nginx/archive');
 
         if ($path && $name) {
-            $fullPath = $this->uploadsPath . '/' . ltrim($path, '/') . '/' . $name;
+            // DB path is relative to sf_root_dir (e.g., /uploads/r/repo/hash/)
+            $fullPath = $rootDir . '/' . ltrim($path, '/') . $name;
 
             return $fullPath;
         }
 
-        return $this->uploadsPath . '/unknown_' . $doRow->id;
+        return $rootDir . '/uploads/unknown_' . $doRow->id;
     }
 
     protected function resolveRepositoryId(?int $informationObjectId): ?int
