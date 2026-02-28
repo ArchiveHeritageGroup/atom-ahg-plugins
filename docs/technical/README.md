@@ -1,90 +1,97 @@
-# Technical Documentation Index
+# Technical Manual
 
-Detailed technical reference for all AHG plugins including architecture diagrams, ERD schemas, and API documentation.
+Architecture, internals and implementation notes.
 
-**Version:** 2.8.2
-**Last Updated:** February 2026
 
----
+## Pages
 
-## Architecture & System Design
+- [ahg3DModelPlugin.md](./ahg3DModelPlugin.md)
+- [ahgAccessRequestPlugin.md](./ahgAccessRequestPlugin.md)
+- [ahgAIPlugin.md](./ahgAIPlugin.md)
+- [ahgAPIPlugin.md](./ahgAPIPlugin.md)
+- [ahgAuditTrailPlugin.md](./ahgAuditTrailPlugin.md)
+- [ahgBackupPlugin.md](./ahgBackupPlugin.md)
+- [ahgCartPlugin.md](./ahgCartPlugin.md)
+- [ahgConditionPlugin.md](./ahgConditionPlugin.md)
+- [ahgContactPlugin.md](./ahgContactPlugin.md)
+- [ahgCorePlugin.md](./ahgCorePlugin.md)
+- [ahgDAMPlugin.md](./ahgDAMPlugin.md)
+- [ahgDataMigrationPlugin.md](./ahgDataMigrationPlugin.md)
+- [ahgDedupePlugin.md](./ahgDedupePlugin.md)
+- [ahgDiscoveryPlugin.md](./ahgDiscoveryPlugin.md)
+- [ahgDisplayPlugin.md](./ahgDisplayPlugin.md)
+- [ahgDoiPlugin.md](./ahgDoiPlugin.md)
+- [ahgDonorAgreementPlugin.md](./ahgDonorAgreementPlugin.md)
+- [ahgEmbargoPlugin.md](./ahgEmbargoPlugin.md)
+- [ahgExhibitionPlugin.md](./ahgExhibitionPlugin.md)
+- [ahgExportPlugin.md](./ahgExportPlugin.md)
+- [ahgExtendedRightsPlugin.md](./ahgExtendedRightsPlugin.md)
+- [ahgFavoritesPlugin.md](./ahgFavoritesPlugin.md)
+- [ahgFederationPlugin.md](./ahgFederationPlugin.md)
+- [ahgFeedbackPlugin.md](./ahgFeedbackPlugin.md)
+- [ahgFormsPlugin.md](./ahgFormsPlugin.md)
+- [ahgGalleryPlugin.md](./ahgGalleryPlugin.md)
+- [ahgGraphQLPlugin.md](./ahgGraphQLPlugin.md)
+- [ahgGrapPlugin.md](./ahgGrapPlugin.md)
+- [ahgHeritagePlugin.md](./ahgHeritagePlugin.md)
+- [ahgICIPPlugin.md](./ahgICIPPlugin.md)
+- [ahgIiifPlugin.md](./ahgIiifPlugin.md)
+- [ahgIngestPlugin.md](./ahgIngestPlugin.md)
+- [ahgLabelPlugin.md](./ahgLabelPlugin.md)
+- [ahgLandingPagePlugin.md](./ahgLandingPagePlugin.md)
+- [ahgLibraryPlugin.md](./ahgLibraryPlugin.md)
+- [ahgLoanPlugin.md](./ahgLoanPlugin.md)
+- [ahgMarketplacePlugin.md](./ahgMarketplacePlugin.md)
+- [ahgMetadataExportPlugin.md](./ahgMetadataExportPlugin.md)
+- [ahgMetadataExtractionPlugin.md](./ahgMetadataExtractionPlugin.md)
+- [ahgMigrationPlugin.md](./ahgMigrationPlugin.md)
+- [ahgMultiTenantPlugin.md](./ahgMultiTenantPlugin.md)
+- [ahgMuseumPlugin.md](./ahgMuseumPlugin.md)
+- [ahgNerPlugin.md](./ahgNerPlugin.md)
+- [ahgPortableExportPlugin.md](./ahgPortableExportPlugin.md)
+- [ahgPreservationPlugin.md](./ahgPreservationPlugin.md)
+- [ahgPrivacyPlugin.md](./ahgPrivacyPlugin.md)
+- [ahgProvenancePlugin.md](./ahgProvenancePlugin.md)
+- [ahgRegistryPlugin.md](./ahgRegistryPlugin.md)
+- [ahgReportBuilderPlugin.md](./ahgReportBuilderPlugin.md)
+- [ahgReportsPlugin.md](./ahgReportsPlugin.md)
+- [ahgRepositoryBrowsePlugin.md](./ahgRepositoryBrowsePlugin.md)
+- [ahgRequestToPublishPlugin.md](./ahgRequestToPublishPlugin.md)
+- [ahgResearchPlugin.md](./ahgResearchPlugin.md)
+- [ahgRicExplorerPlugin.md](./ahgRicExplorerPlugin.md)
+- [ahgRightsPlugin.md](./ahgRightsPlugin.md)
+- [ahgSecurityClearancePlugin.md](./ahgSecurityClearancePlugin.md)
+- [ahgSemanticSearchPlugin.md](./ahgSemanticSearchPlugin.md)
+- [ahgSettingsPlugin.md](./ahgSettingsPlugin.md)
+- [ahgSpectrumPlugin.md](./ahgSpectrumPlugin.md)
+- [ahgStatisticsPlugin.md](./ahgStatisticsPlugin.md)
+- [ahgTermTaxonomyPlugin.md](./ahgTermTaxonomyPlugin.md)
+- [ahgThemeB5Plugin.md](./ahgThemeB5Plugin.md)
+- [ahgTiffPdfMergePlugin.md](./ahgTiffPdfMergePlugin.md)
+- [ahgTranslationPlugin.md](./ahgTranslationPlugin.md)
+- [ahgUiOverridesPlugin.md](./ahgUiOverridesPlugin.md)
+- [ahgVendorPlugin.md](./ahgVendorPlugin.md)
+- [ahgWorkflowPlugin.md](./ahgWorkflowPlugin.md)
+- [API_REPORTING_EXPORT.md](./API_REPORTING_EXPORT.md)
+- [api-technical-reference.md](./api-technical-reference.md)
+- [ARCHITECTURE.md](./ARCHITECTURE.md)
+- [AtoM_AHG_Framework_Library_Architecture_Diagrams.md](./AtoM_AHG_Framework_Library_Architecture_Diagrams.md)
+- [CSRF_POLICY.md](./CSRF_POLICY.md)
+- [DATABASE_ERD.md](./DATABASE_ERD.md)
+- [DATABASE_VIEWS.md](./DATABASE_VIEWS.md)
+- [Daya_Magration_TECHNICAL_DOCUMENTATION.md](./Daya_Magration_TECHNICAL_DOCUMENTATION.md)
+- [fuzzy-search-technical.md](./fuzzy-search-technical.md)
+- [GRAP_CONSOLIDATION_PLAN.md](./GRAP_CONSOLIDATION_PLAN.md)
+- [HERATIO_MIGRATION.md](./HERATIO_MIGRATION.md)
+- [M0_SECURITY_HARDENING.md](./M0_SECURITY_HARDENING.md)
+- [MODIFIED_FILES.md](./MODIFIED_FILES.md)
+- [ner-knowledge-graph-technical.md](./ner-knowledge-graph-technical.md)
+- [OUTBOUND_HTTP_POLICY.md](./OUTBOUND_HTTP_POLICY.md)
+- [PLUGIN_ARCHITECTURE.md](./PLUGIN_ARCHITECTURE.md)
+- [RIC_INTEGRATION_GUIDE.md](./RIC_INTEGRATION_GUIDE.md)
+- [SECURITY_MODEL.md](./SECURITY_MODEL.md)
+- [semantic-search-technical.md](./semantic-search-technical.md)
+- [SHELL_EXECUTION_POLICY.md](./SHELL_EXECUTION_POLICY.md)
+- [SYSTEM_FLOWS.md](./SYSTEM_FLOWS.md)
+- [TECHNICAL_DOCUMENTATION.md](./TECHNICAL_DOCUMENTATION.md)
 
-| Document | Description |
-|----------|-------------|
-| [PLUGIN_ARCHITECTURE.md](PLUGIN_ARCHITECTURE.md) | Plugin types, module ownership, extension surface API |
-| [DATABASE_ERD.md](DATABASE_ERD.md) | Entity-relationship diagrams for all plugin tables |
-| [SYSTEM_FLOWS.md](SYSTEM_FLOWS.md) | Request processing, installation, audit, IIIF, NER flows |
-| [TECHNICAL_DOCUMENTATION.md](TECHNICAL_DOCUMENTATION.md) | Comprehensive technical reference |
-| [HERATIO_MIGRATION.md](HERATIO_MIGRATION.md) | Heratio standalone migration roadmap, WriteServices, Propel decoupling |
-
----
-
-## Plugin Documentation
-
-### Core & Integration
-
-| Plugin | Category | Description |
-|--------|----------|-------------|
-| [ahgAPIPlugin](ahgAPIPlugin.md) | Integration | REST API v2 - Full CRUD, batch, webhooks |
-| [ahgAuditTrailPlugin](ahgAuditTrailPlugin.md) | Compliance | Comprehensive audit logging |
-| [ahgBackupPlugin](ahgBackupPlugin.md) | Administration | Backup and restore |
-| [ahgDataMigrationPlugin](ahgDataMigrationPlugin.md) | Data Management | GLAM/DAM sector-specific import/export, validation |
-| [ahgIngestPlugin](ahgIngestPlugin.md) | Ingestion | OAIS-aligned batch ingest, 6-step wizard, SIP/AIP/DIP |
-
-### Security & Compliance
-
-| Plugin | Category | Description |
-|--------|----------|-------------|
-| [ahgSecurityClearancePlugin](ahgSecurityClearancePlugin.md) | Security | Multi-level access control |
-| [ahgPrivacyPlugin](ahgPrivacyPlugin.md) | Compliance | POPIA/GDPR/PAIA compliance |
-| [ahgEmbargoPlugin](ahgEmbargoPlugin.md) | Access Control | Time-based restrictions |
-
-### Collections Management
-
-| Plugin | Category | Description |
-|--------|----------|-------------|
-| [ahgConditionPlugin](ahgConditionPlugin.md) | Conservation | Condition assessment |
-| [ahgSpectrumPlugin](ahgSpectrumPlugin.md) | Museum | Spectrum 5.0 procedures |
-| [ahgGrapPlugin](ahgGrapPlugin.md) | Financial | GRAP 103 heritage accounting |
-| [ahgDonorAgreementPlugin](ahgDonorAgreementPlugin.md) | Acquisitions & Contracts | Donor agreements, contracts, collaboration partnerships |
-| [ahgVendorPlugin](ahgVendorPlugin.md) | Administration | Vendor/supplier management |
-
-### Media & Viewing
-
-| Plugin | Category | Description |
-|--------|----------|-------------|
-| [ahgIiifPlugin](ahgIiifPlugin.md) | Media | IIIF manifests, viewers, auth, collections |
-
-### Research & AI
-
-| Plugin | Category | Description |
-|--------|----------|-------------|
-| [ahgResearchPlugin](ahgResearchPlugin.md) | Public Services | Researcher portal, bookings |
-| [ahgNerPlugin](ahgNerPlugin.md) | AI/NLP | Named Entity Recognition |
-
-### Preservation
-
-| Plugin | Category | Description |
-|--------|----------|-------------|
-| [ahgPreservationPlugin](ahgPreservationPlugin.md) | Preservation | OAIS/PREMIS, format migration, fixity |
-
----
-
-## ERD Legend
-
-```
-┌─────────────────────┐
-│     table_name      │
-├─────────────────────┤
-│ PK id INT          │  ← Primary Key
-│ FK foreign_id INT  │  ← Foreign Key
-│    column VARCHAR   │  ← Regular column
-└─────────────────────┘
-        │
-        │ 1:N           ← One-to-Many
-        ▼
-```
-
----
-
-*Part of the AtoM AHG Framework*
