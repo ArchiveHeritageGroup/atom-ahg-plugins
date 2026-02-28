@@ -2,15 +2,15 @@
 set -euo pipefail
 
 # Inventory exporter for psis.theahg.co.za (AtoM Symfony + Heratio nginx routing)
-# Writes to: atom-extensions-catalog/docs/_inventory/psis/<timestamp>/
+# Writes to: docs/_inventory/psis/<timestamp>/
 #
 # Usage:
 #   bin/inventory-sync-psis.sh --archive-root /usr/share/nginx/archive --apply
-# Optional DB plugin dump (NO secrets committed unless you choose):
+# Optional DB plugin dump (NO secrets unless you choose):
 #   bin/inventory-sync-psis.sh --archive-root /usr/share/nginx/archive --apply \
 #     --mysql-defaults /root/.my.cnf --db archive
 #
-# Default is DRY mode.
+# Default is DRY.
 
 ARCHIVE_ROOT=""
 APPLY=0
@@ -67,54 +67,47 @@ run_or_echo "php -v > '$OUT/runtime/php.txt' 2>&1 || true"
 run_or_echo "uname -a > '$OUT/runtime/uname.txt' 2>&1 || true"
 run_or_echo "lsb_release -a > '$OUT/runtime/os.txt' 2>&1 || true"
 
-# --- nginx truth (extract only psis vhost + heratio include) ---
+# --- nginx truth ---
 run_or_echo "sudo nginx -T > '$OUT/nginx/nginx-T.txt' 2>&1 || true"
 run_or_echo "grep -nE '^# configuration file ' '$OUT/nginx/nginx-T.txt' > '$OUT/nginx/config-files.txt' || true"
 
-# Extract the psis vhost file directly if present
 PSIS_VHOST="/etc/nginx/sites-enabled/psis.theahg.co.za.conf"
 if [[ -f "$PSIS_VHOST" ]]; then
-  run_or_echo "sudo sed -n '1,260p' '$PSIS_VHOST' > '$OUT/nginx/psis.vhost.conf' 2>&1 || true"
-else
-  # fallback: extract from nginx -T dump by matching server_name
-  run_or_echo "awk 'BEGIN{p=0} /server_name psis\\.theahg\\.co\\.za;/{p=1} p{print} /}\\s*$/&&p{exit}' '$OUT/nginx/nginx-T.txt' > '$OUT/nginx/psis.vhost.conf' 2>&1 || true"
+  run_or_echo "sudo sed -n '1,320p' '$PSIS_VHOST' > '$OUT/nginx/psis.vhost.conf' 2>&1 || true"
 fi
 
-HERATIO_CONF=\"$ARCHIVE_ROOT/atom-framework/config/nginx/heratio.conf\"
 if [[ -f "$ARCHIVE_ROOT/atom-framework/config/nginx/heratio.conf" ]]; then
-  run_or_echo "sed -n '1,260p' '$ARCHIVE_ROOT/atom-framework/config/nginx/heratio.conf' > '$OUT/heratio/heratio.nginx.conf' 2>&1 || true"
+  run_or_echo "sed -n '1,360p' '$ARCHIVE_ROOT/atom-framework/config/nginx/heratio.conf' > '$OUT/heratio/heratio.nginx.conf' 2>&1 || true"
 fi
 if [[ -f "$ARCHIVE_ROOT/atom-framework/config/nginx/extensions.conf" ]]; then
-  run_or_echo "sed -n '1,260p' '$ARCHIVE_ROOT/atom-framework/config/nginx/extensions.conf' > '$OUT/heratio/extensions.nginx.conf' 2>&1 || true"
+  run_or_echo "sed -n '1,360p' '$ARCHIVE_ROOT/atom-framework/config/nginx/extensions.conf' > '$OUT/heratio/extensions.nginx.conf' 2>&1 || true"
 fi
 
-# --- filesystem flags relevant to heratio/atom ---
+# --- filesystem flags ---
 run_or_echo "ls -la '$ARCHIVE_ROOT' > '$OUT/fs/archive-root.ls.txt' 2>&1 || true"
 run_or_echo "find '$ARCHIVE_ROOT' -maxdepth 2 -type f -name '.heratio_enabled' -print -exec ls -la {} \\; > '$OUT/fs/heratio-enabled.txt' 2>&1 || true"
-run_or_echo "find '$ARCHIVE_ROOT' -maxdepth 3 -type f -name 'settings.yml' -o -name 'databases.yml' -o -name 'app.yml' > '$OUT/fs/symfony-config-files.txt' 2>&1 || true"
+run_or_echo "find '$ARCHIVE_ROOT' -maxdepth 3 -type f \\( -name 'settings.yml' -o -name 'databases.yml' -o -name 'app.yml' \\) -print > '$OUT/fs/symfony-config-files.txt' 2>&1 || true"
 
-# --- symfony app inventory (tasks + routes-like output) ---
+# --- symfony inventory ---
 SYM="cd '$ARCHIVE_ROOT' && php symfony"
 run_or_echo "$SYM -V > '$OUT/symfony/symfony-version.txt' 2>&1 || true"
 run_or_echo "$SYM list > '$OUT/symfony/task-list.txt' 2>&1 || true"
-# Common tasks we care about (best-effort; some may not exist)
 run_or_echo "$SYM cache:clear > '$OUT/symfony/cache-clear.txt' 2>&1 || true"
 run_or_echo "$SYM search:status > '$OUT/symfony/search-status.txt' 2>&1 || true"
 run_or_echo "$SYM search:populate --help > '$OUT/symfony/search-populate-help.txt' 2>&1 || true"
 
-# --- Optional: DB plugin list (safe content, but requires mysql access) ---
+# --- DB plugin inventory (optional) ---
 if [[ -n "$MYSQL_DEFAULTS" && -n "$DB_NAME" ]]; then
   if [[ ! -f "$MYSQL_DEFAULTS" ]]; then
     echo "WARN: mysql defaults file not found: $MYSQL_DEFAULTS (skipping db dump)"
   else
     run_or_echo "mysql --defaults-extra-file='$MYSQL_DEFAULTS' '$DB_NAME' -e \
-      \"SELECT id, name, class_name, enabled, created_at, updated_at FROM atom_plugin ORDER BY enabled DESC, name ASC;\" \
-      > '$OUT/db/atom_plugin.txt' 2>&1 || true"
+\"SELECT id, name, class_name, enabled, created_at, updated_at FROM atom_plugin ORDER BY enabled DESC, name ASC;\" \
+> '$OUT/db/atom_plugin.txt' 2>&1 || true"
   fi
 else
   if [[ "$APPLY" -eq 1 ]]; then
-    echo "NOTE: DB plugin inventory skipped (provide --mysql-defaults and --db if desired)" \
-      > "$OUT/db/README.txt"
+    echo "DB plugin inventory skipped (provide --mysql-defaults and --db)." > "$OUT/db/README.txt"
   fi
 fi
 
