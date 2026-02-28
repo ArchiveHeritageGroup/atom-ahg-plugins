@@ -1,6 +1,6 @@
 # AtoM Heratio Research Portal — Training Manual
 
-**Plugin:** ahgResearchPlugin v3.0.0
+**Plugin:** ahgResearchPlugin v3.1.0
 **Platform:** AtoM Heratio (AtoM 2.10 + AHG Framework v2.8.2)
 **Author:** The Archive and Heritage Group (Pty) Ltd
 **Last Updated:** February 2026
@@ -31,16 +31,19 @@
 20. [Entity Resolution](#20-entity-resolution)
 21. [Visualization Tools](#21-visualization-tools)
 22. [Reproduction Requests](#22-reproduction-requests)
-23. [Rights & Access Policies (ODRL)](#23-rights--access-policies-odrl)
-24. [RO-Crate & DOI Minting](#24-ro-crate--doi-minting)
-25. [Notifications](#25-notifications)
-26. [REST API & API Keys](#26-rest-api--api-keys)
-27. [ORCID Integration](#27-orcid-integration)
-28. [Institutional Sharing](#28-institutional-sharing)
-29. [Audit Trail](#29-audit-trail)
-30. [Administration](#30-administration)
-31. [Database Reference](#31-database-reference)
-32. [Troubleshooting](#32-troubleshooting)
+23. [Request Lifecycle & SLA](#23-request-lifecycle--sla)
+24. [Material Retrieval & Custody](#24-material-retrieval--custody)
+25. [Accessibility](#25-accessibility)
+26. [Rights & Access Policies (ODRL)](#26-rights--access-policies-odrl)
+27. [RO-Crate & DOI Minting](#27-ro-crate--doi-minting)
+28. [Notifications](#28-notifications)
+29. [REST API & API Keys](#29-rest-api--api-keys)
+30. [ORCID Integration](#30-orcid-integration)
+31. [Institutional Sharing](#31-institutional-sharing)
+32. [Audit Trail](#32-audit-trail)
+33. [Administration](#33-administration)
+34. [Database Reference](#34-database-reference)
+35. [Troubleshooting](#35-troubleshooting)
 
 ---
 
@@ -301,11 +304,36 @@ Book equipment alongside your reading room booking.
 
 **URL:** `/research/retrieval-queue`
 
-Staff use this to manage the physical retrieval of materials:
-1. View all pending material requests
-2. Process requests in scheduled retrieval runs
-3. Update status: Requested → Retrieved → Delivered → Returned
-4. Print call slips for physical retrieval
+Staff use this to manage the physical retrieval of materials. The queue is divided into named sub-queues (New, Rush, Retrieval, Transit, Delivery, Curatorial, Return), each with a summary card showing the count of pending requests.
+
+**Queue Summary Cards** — click any card to filter the table below to that queue.
+
+**Per-Request Actions:**
+- **Print Call Slip** — open a printable call slip for an individual request
+- **Checkout** — available when status is `retrieved` or `delivered`; opens the custody checkout form
+- **Return** — available when status is `in_use`; opens the custody return/check-in form
+- **Custody Chain** — view the full chain-of-custody history for the linked archival object
+
+**Batch Actions (bottom toolbar):**
+1. Select one or more requests using the checkboxes
+2. **Update Status** — move selected requests to a new status (Requested, Retrieved, Delivered, In Use, Returned, Unavailable) with optional notes
+3. **Print Selected** — print call slips for all selected requests
+4. **Batch Checkout** — open the batch checkout form for selected requests
+5. **Batch Return** — open the batch return form for selected requests
+
+**Status Lifecycle:**
+
+```
+Requested → Retrieved → Delivered → In Use → Returned
+                                       ↓
+                                   Unavailable
+```
+
+**Location Tracking** — the `Current Location` column updates automatically as requests move through statuses:
+- Requested: original shelf location
+- Retrieved: "In transit"
+- Delivered / In Use: "Reading room"
+- Returned: "Return shelf (pending re-shelving)"
 
 ### Call Slips
 
@@ -1254,10 +1282,14 @@ Add items to the reproduction request:
 ### Request Lifecycle
 
 ```
-Draft → Submitted → Under Review → In Progress → Completed → Delivered
-                         ↓
-                      Rejected (with reason)
+Draft → Submitted → Pending Triage → Triage Approved → In Fulfilment → Delivered → Closed
+                                          ↓
+                                    Triage Denied
+                                          ↓
+                                    Needs Information (researcher contacted)
 ```
+
+**Triage** — every incoming request goes through a triage step where staff can approve, deny, or request more information from the researcher before work begins. See [Section 23: Request Lifecycle & SLA](#23-request-lifecycle--sla) for full details.
 
 ### Pricing
 
@@ -1277,7 +1309,259 @@ Once completed:
 
 ---
 
-## 23. Rights & Access Policies (ODRL)
+## 23. Request Lifecycle & SLA
+
+### Requests Dashboard
+
+**URL:** `/research/requests-dashboard`
+
+The combined requests dashboard shows all material and reproduction requests in a single view with SLA status indicators.
+
+**Summary Cards:**
+- Total material requests
+- Total reproduction requests
+- Overdue requests (past SLA due date)
+
+**Table Columns:**
+- ID, Type (Material/Reproduction), Title, Researcher, Status, Priority, SLA Due Date, Assigned To
+
+**SLA Badges:**
+- Green: on track (more than 3 days remaining)
+- Yellow/Warning: approaching deadline (3 days or fewer)
+- Red/Danger: overdue (past SLA due date)
+
+### Triage
+
+**URL:** `/research/request/:id/triage/:type`
+
+Every new request must go through triage before processing begins. Triage captures:
+
+**Triage Decisions:**
+- **Approve** — request is valid and can proceed to fulfilment; SLA timer starts
+- **Deny** — request is rejected with a reason (e.g., restricted material, insufficient justification)
+- **Needs Information** — researcher is contacted for clarification before a decision
+
+**Triage Form Fields:**
+- Decision (approve / deny / needs information)
+- Notes (required for deny and needs-information decisions)
+
+When a request is triaged as "approved", the system automatically computes the SLA due date based on the configured policy (default: 10 working days). A workflow event is emitted for the audit trail.
+
+### Assignment
+
+**URL:** `/research/request/:id/assign/:type`
+
+Staff can assign requests to specific team members for fulfilment. Assignment:
+- Records who is responsible for the request
+- Emits a workflow event for the audit trail
+- Visible on the requests dashboard
+
+### Correspondence
+
+**URL:** `/research/request/:id/correspond/:type`
+
+A built-in correspondence thread between staff and researchers, attached to each request.
+
+**Features:**
+- Threaded view with staff messages (blue) and researcher messages (green)
+- Internal notes visible only to staff (yellow highlight, lock icon)
+- Quick action buttons for triage and closure
+- Timeline sidebar showing combined status history, workflow events, and correspondence
+
+**Fields:**
+- Message body (required)
+- Internal note checkbox (staff-only visibility)
+
+### Closing Requests
+
+**URL:** `/research/request/:id/close/:type`
+
+Close a request when fulfilment is complete or the request is no longer needed.
+
+**Closure Reasons:**
+- Fulfilled
+- Cancelled by researcher
+- Duplicate
+- Unable to fulfil
+- Other
+
+### SLA Configuration
+
+SLA policies are managed centrally. The default research request SLA is:
+- **Warning:** 7 days (approaching deadline)
+- **Due:** 10 working days
+- **Escalation:** 14 days (breached — triggers escalation)
+
+SLA computation starts when a request is triaged as "approved". The SLA status is visible on the requests dashboard and in individual request views.
+
+### "Request This Item" Button
+
+On archival description (information object) pages, a "Request this item" button allows researchers to create a material request directly from the catalogue. The button:
+- Submits via AJAX to `/research/ajax/request-item`
+- Creates a new material request linked to the archival object
+- Shows success/error feedback inline
+- Only visible to logged-in, approved researchers
+
+---
+
+## 24. Material Retrieval & Custody
+
+### Overview
+
+The custody system tracks the physical chain of custody for archival materials as they move between storage, staff, and researchers. Every handoff is recorded with timestamps, handlers, condition assessments, and optional barcode scans.
+
+### Custody Checkout
+
+**URL:** `/research/custody/:id/checkout`
+
+When materials are handed to a researcher:
+
+**Checkout Form Fields:**
+- Condition at handoff (Excellent, Good, Fair, Poor, Critical)
+- Barcode scan (optional — for barcode-enabled collections)
+- Destination (defaults to "Reading Room")
+- Notes
+
+**What Happens:**
+1. A custody handoff record is created
+2. A Spectrum movement record is auto-generated (movement reason: `research_checkout`)
+3. The material request status changes to `in_use`
+4. The physical object's access status updates to `in_use`
+5. A workflow event is emitted for the audit trail
+6. The item's current location updates to the reading room
+
+### Custody Check-In / Return
+
+**URL:** `/research/custody/:id/checkin`
+
+When materials are returned by a researcher:
+
+**Return Form Fields:**
+- Condition before (state when material was checked out)
+- Condition after (state when returned)
+- Notes (e.g., damage observations)
+
+**What Happens:**
+1. A custody handoff record is created (type: `checkin`)
+2. A Spectrum movement record is auto-generated (movement reason: `research_return`)
+3. The material request status changes to `returned`
+4. The physical object's access status updates to `available`
+5. Current location updates to "Return shelf (pending re-shelving)"
+
+### Return Verification
+
+**URL:** `/research/custody/:id/return-verify`
+
+An optional verification step after return, where a second staff member confirms:
+- The material's condition matches what was reported
+- The material is ready to be re-shelved
+- Current location is updated to the original shelf location
+
+### Staff-to-Staff Transfer
+
+Custody can be transferred between staff members (e.g., shift handover). A transfer records:
+- From handler and to handler
+- Condition at transfer
+- Notes
+
+### Batch Checkout
+
+**URL:** `/research/custody/batch-checkout`
+
+Process multiple checkouts at once:
+1. Select requests from the retrieval queue
+2. Set a default condition and destination for all items
+3. Review the list and uncheck any items to exclude
+4. Submit — each item gets an individual custody record
+
+### Batch Return
+
+**URL:** `/research/custody/batch-return`
+
+Process multiple returns at once:
+1. Select requests from the retrieval queue
+2. For each item, set condition-before and condition-after individually
+3. Add per-item notes if needed
+4. Submit — each item gets an individual custody and movement record
+
+### Custody Chain
+
+**URL:** `/research/custody/chain/:object_id`
+
+View the full chain of custody for any archival object. The chain combines data from three sources:
+
+| Source | Icon | Description |
+|--------|------|-------------|
+| Custody Handoff | Hand icon (blue) | Research checkout/checkin/transfer events |
+| Spectrum Movement | Truck icon (cyan) | Physical movement records |
+| Provenance | Scroll icon (yellow) | Historical provenance events |
+
+**Table Columns:**
+- Date, Source, Event Type, From (handler + location), To (handler + location), Condition, Confirmed (signature), Notes
+
+### Spectrum Movement Integration
+
+Every custody handoff automatically creates a corresponding `spectrum_movement` record:
+- Movement reference: `RR-{request ID}`
+- Includes condition before/after
+- Links back to the custody handoff via foreign key
+- Compliant with Spectrum 5.1 Object Location and Movement Control procedures
+
+---
+
+## 25. Accessibility
+
+### WCAG 2.1 AA Compliance
+
+All research and workflow screens comply with WCAG 2.1 Level AA accessibility standards.
+
+### Skip Navigation
+
+Every page includes a "Skip to main content" link, visible when focused via keyboard (Tab key). This allows keyboard users and screen reader users to bypass the navigation and jump directly to the page content.
+
+### Screen Reader Support
+
+**ARIA Live Region** — an invisible region (`aria-live="polite"`) announces dynamic changes (AJAX updates, status changes) to screen readers without requiring a page reload.
+
+**Helper Functions (JavaScript):**
+- `ahgAnnounce(message, priority)` — announce a message to screen readers
+- `ahgFocusTo(selector)` — programmatically move focus to an element
+
+### Data Tables
+
+All data tables include:
+- `aria-label` on the `<table>` element describing the table's purpose
+- `<caption class="visually-hidden">` with a detailed description
+- `scope="col"` on all `<th>` header cells
+- Row-level `aria-label` on checkboxes identifying the associated item
+
+### Status Badges
+
+Status indicators never rely on colour alone:
+- Every badge includes an icon and text alongside the colour
+- Badges use `role="status"` and `aria-label` for screen reader context
+- Priority badges: bolt icon (rush/red), arrow-up icon (high/yellow), dash icon (normal/grey)
+
+### Form Accessibility
+
+- Required fields use `aria-required="true"`
+- Validation errors use `role="alert"` and `aria-invalid="true"`
+- Labels are programmatically associated with inputs via `for`/`id` or wrapping `<label>` elements
+
+### Keyboard Navigation
+
+- All interactive elements (buttons, links, checkboxes, dropdowns) are reachable via Tab
+- Escape key dismisses open modals
+- Focus indicators use a visible 3px blue outline (`:focus-visible`)
+- Batch select-all checkboxes toggle all items in the list
+
+### Decorative Icons
+
+All decorative Font Awesome icons include `aria-hidden="true"` to prevent screen readers from announcing them. Icons that convey meaning include appropriate `aria-label` or accompanying visible text.
+
+---
+
+## 26. Rights & Access Policies (ODRL)
 
 ### Overview
 
@@ -1306,7 +1590,7 @@ Evaluate whether a specific action is permitted:
 
 ---
 
-## 24. RO-Crate & DOI Minting
+## 27. RO-Crate & DOI Minting
 
 ### RO-Crate Packaging
 
@@ -1354,7 +1638,7 @@ Generate a complete reproducibility pack including:
 
 ---
 
-## 25. Notifications
+## 28. Notifications
 
 ### Viewing Notifications
 
@@ -1388,7 +1672,7 @@ JSON API for real-time notification polling:
 
 ---
 
-## 26. REST API & API Keys
+## 29. REST API & API Keys
 
 ### API Key Management
 
@@ -1432,7 +1716,7 @@ Default rate limit: 1000 requests per day per key. Configurable per key.
 
 ---
 
-## 27. ORCID Integration
+## 30. ORCID Integration
 
 ### Connecting ORCID
 
@@ -1458,7 +1742,7 @@ You can disconnect your ORCID iD at any time.
 
 ---
 
-## 28. Institutional Sharing
+## 31. Institutional Sharing
 
 ### Managing Institutions
 
@@ -1495,7 +1779,7 @@ Add external collaborators (non-researchers) to shares:
 
 ---
 
-## 29. Audit Trail
+## 32. Audit Trail
 
 ### Audit Module
 
@@ -1541,7 +1825,7 @@ Each audit entry contains:
 
 ---
 
-## 30. Administration
+## 33. Administration
 
 ### Researcher Approval
 
@@ -1595,7 +1879,7 @@ Track ethics approval milestones for projects:
 
 ---
 
-## 31. Database Reference
+## 34. Database Reference
 
 ### Core Tables (64 tables)
 
@@ -1700,10 +1984,12 @@ Track ethics approval milestones for projects:
 - `research_document_template` — Document templates
 - `research_snapshot` — Immutable snapshots
 - `research_snapshot_item` — Snapshot items
+- `research_request_correspondence` — Staff/researcher correspondence threads on requests
+- `research_custody_handoff` — Chain-of-custody handoff records (checkout, checkin, transfer, return, condition check)
 
 ---
 
-## 32. Troubleshooting
+## 35. Troubleshooting
 
 ### Common Issues
 
@@ -1740,4 +2026,4 @@ Contact your institution's archivist or system administrator for:
 
 ---
 
-*This manual covers ahgResearchPlugin v3.0.0. For the latest updates, check the plugin documentation in the AtoM Heratio repository.*
+*This manual covers ahgResearchPlugin v3.1.0. For the latest updates, check the plugin documentation in the AtoM Heratio repository.*
