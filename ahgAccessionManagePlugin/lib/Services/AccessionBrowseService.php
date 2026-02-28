@@ -135,6 +135,30 @@ class AccessionBrowseService
 
         $total = $response['hits']['total']['value'] ?? 0;
 
+        // Enrich with V2 data (status, priority, assigned) if available
+        try {
+            $ids = array_filter(array_map(fn($h) => $h['_id'] ?? null, $hits));
+            if (!empty($ids)) {
+                $v2Map = DB::table('accession_v2')
+                    ->whereIn('accession_id', $ids)
+                    ->get()
+                    ->keyBy('accession_id');
+
+                foreach ($hits as &$hit) {
+                    $hid = $hit['_id'] ?? null;
+                    if ($hid && isset($v2Map[$hid])) {
+                        $v2 = $v2Map[$hid];
+                        $hit['v2_status'] = $v2->status;
+                        $hit['v2_priority'] = $v2->priority;
+                        $hit['v2_assigned_to'] = $v2->assigned_to;
+                    }
+                }
+                unset($hit);
+            }
+        } catch (\Exception $e) {
+            // V2 tables may not exist yet
+        }
+
         return [
             'hits' => $hits,
             'total' => $total,

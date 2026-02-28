@@ -1,24 +1,50 @@
 {
     "name": "AHG Accession Manage",
     "machine_name": "ahgAccessionManagePlugin",
-    "version": "1.0.0",
-    "description": "High-performance accession browse and management using Laravel Query Builder and direct ES queries",
+    "version": "2.0.0",
+    "description": "First-class accession management with intake queue, appraisal workflow, container tracking, rights inheritance, and multi-tenant isolation",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "homepage": "https://theahg.co.za",
     "category": "browse",
-    "keywords": ["accession", "browse", "manage", "performance"],
+    "keywords": ["accession", "browse", "manage", "intake", "appraisal", "valuation", "container", "rights", "GRAP103", "IPSAS45"],
     "requires": {
-        "atom_framework": ">=1.0.0",
+        "atom_framework": ">=2.8.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
     "dependencies": ["ahgCorePlugin"],
-    "tables": [],
+    "tables": [
+        "accession_v2",
+        "accession_intake_checklist",
+        "accession_intake_template",
+        "accession_timeline",
+        "accession_attachment",
+        "accession_appraisal",
+        "accession_appraisal_criterion",
+        "accession_appraisal_template",
+        "accession_valuation_history",
+        "accession_container",
+        "accession_container_item",
+        "accession_rights",
+        "accession_rights_inherited",
+        "accession_numbering_sequence",
+        "accession_config"
+    ],
     "features": [
         "Accession browse via direct ES HTTP queries",
-        "Sort by accession number, title, acquisition date, last updated",
-        "Inline search with relevance ranking",
-        "Theme-compatible templates (SimplePager)"
+        "Intake queue with status workflow (draft/submitted/under_review/accepted/rejected/returned)",
+        "Configurable intake checklists with templates",
+        "Accession timeline (chain-of-custody audit trail)",
+        "File attachments (deed of gift, photos, correspondence)",
+        "Formal appraisal with weighted scoring criteria and templates",
+        "Heritage asset valuation history (GRAP 103/IPSAS 45)",
+        "Portfolio valuation reporting",
+        "Physical container tracking with barcode support",
+        "Container item management with IO linking",
+        "PREMIS-aligned rights management with inheritance to child IOs",
+        "Per-repository accession numbering sequences",
+        "Multi-tenant isolation (tenant_id on all tables)",
+        "CLI tasks: accession:intake, accession:report"
     ]
 }

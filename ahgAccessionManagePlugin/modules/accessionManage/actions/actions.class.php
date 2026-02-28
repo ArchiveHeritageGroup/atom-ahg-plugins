@@ -97,4 +97,30 @@ class accessionManageActions extends AhgController
         // Selected culture for template
         $this->selectedCulture = $culture;
     }
+
+    public function executeDashboard($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getUser()->setFlash('notice', $this->context->i18n->__('You must be logged in to view the accession dashboard.'));
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+        }
+
+        $this->stats = \AhgAccessionManage\Services\AccessionCrudService::getDashboardStats();
+
+        try {
+            $intakeService = new \AhgAccessionManage\Services\AccessionIntakeService();
+            $this->queueStats = $intakeService->getQueueStats();
+        } catch (\Exception $e) {
+            $this->queueStats = [];
+        }
+
+        try {
+            $appraisalService = new \AhgAccessionManage\Services\AccessionAppraisalService();
+            $this->valuationReport = $appraisalService->getValuationReport();
+        } catch (\Exception $e) {
+            $this->valuationReport = [];
+        }
+
+        return '_blade';
+    }
 }

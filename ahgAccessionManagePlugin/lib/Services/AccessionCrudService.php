@@ -35,7 +35,7 @@ class AccessionCrudService
         $i18n = I18nService::getWithFallback('accession_i18n', $id, $culture);
         $slug = ObjectService::getSlug($id);
 
-        return [
+        $result = [
             'id' => $id,
             'slug' => $slug,
             'identifier' => $row->identifier,
@@ -58,6 +58,28 @@ class AccessionCrudService
             'scopeAndContent' => $i18n->scope_and_content ?? '',
             'sourceOfAcquisition' => $i18n->source_of_acquisition ?? '',
         ];
+
+        // Join V2 extension data if available
+        try {
+            $v2 = DB::table('accession_v2')->where('accession_id', $id)->first();
+            if ($v2) {
+                $result['v2'] = [
+                    'status' => $v2->status,
+                    'priority' => $v2->priority,
+                    'assignedTo' => $v2->assigned_to,
+                    'submittedAt' => $v2->submitted_at,
+                    'acceptedAt' => $v2->accepted_at,
+                    'rejectedAt' => $v2->rejected_at,
+                    'rejectionReason' => $v2->rejection_reason,
+                    'intakeNotes' => $v2->intake_notes,
+                    'donorAgreementId' => $v2->donor_agreement_id,
+                ];
+            }
+        } catch (\Exception $e) {
+            // accession_v2 table may not exist yet
+        }
+
+        return $result;
     }
 
     /**
@@ -109,6 +131,34 @@ class AccessionCrudService
                 I18nService::save('accession_i18n', $id, $culture, $i18nData);
             }
 
+            // 5. Create accession_v2 record
+            try {
+                $intakeService = new AccessionIntakeService($data['tenantId'] ?? null);
+                $intakeService->ensureV2Record($id);
+
+                // Apply default checklist template
+                $containerService = new AccessionContainerService($data['tenantId'] ?? null);
+                $templateId = $containerService->getConfig('intake_checklist_template_id', '1');
+                if ($templateId) {
+                    $intakeService->applyChecklistTemplate($id, (int) $templateId);
+                }
+
+                // Add timeline event
+                $userId = $data['userId'] ?? null;
+                $intakeService->addTimelineEvent($id, AccessionIntakeService::EVENT_CREATED, $userId, 'Accession created');
+
+                // Auto-generate accession number if enabled
+                $autoNumber = $containerService->getConfig('auto_assign_enabled', '0');
+                if ($autoNumber === '1' && empty($data['identifier'])) {
+                    $repositoryId = $data['repositoryId'] ?? null;
+                    $number = $containerService->generateNextNumber($repositoryId);
+                    DB::table('accession')->where('id', $id)->update(['identifier' => $number]);
+                    ObjectService::generateSlug($id, $number);
+                }
+            } catch (\Exception $e) {
+                // V2 tables may not be installed yet — graceful degradation
+            }
+
             return $id;
         });
     }
@@ -155,6 +205,15 @@ class AccessionCrudService
             // 3. Touch the object record
             ObjectService::touch($id);
             ObjectService::incrementSerialNumber($id);
+
+            // 4. Log timeline event for V2
+            try {
+                $intakeService = new AccessionIntakeService($data['tenantId'] ?? null);
+                $userId = $data['userId'] ?? null;
+                $intakeService->addTimelineEvent($id, AccessionIntakeService::EVENT_NOTE, $userId, 'Accession updated');
+            } catch (\Exception $e) {
+                // V2 tables may not be installed yet
+            }
         });
     }
 
@@ -164,6 +223,20 @@ class AccessionCrudService
     public static function delete(int $id): void
     {
         DB::transaction(function () use ($id) {
+            // 0. Delete V2 data (intake, appraisal, containers, rights)
+            try {
+                $intakeService = new AccessionIntakeService();
+                $intakeService->deleteAllForAccession($id);
+
+                $appraisalService = new AccessionAppraisalService();
+                $appraisalService->deleteAllForAccession($id);
+
+                $containerService = new AccessionContainerService();
+                $containerService->deleteAllForAccession($id);
+            } catch (\Exception $e) {
+                // V2 tables may not be installed yet
+            }
+
             // 1. Delete accession events
             $eventIds = DB::table('accession_event')
                 ->where('accession_id', $id)
@@ -412,6 +485,95 @@ class AccessionCrudService
             'resourceTypes' => $termLookup(\QubitTaxonomy::ACCESSION_RESOURCE_TYPE_ID),
             'deaccessionScopes' => $termLookup(\QubitTaxonomy::DEACCESSION_SCOPE_ID),
         ];
+    }
+
+    /**
+     * Get full accession with V2 data, timeline, checklist, containers, appraisals, rights, attachments.
+     */
+    public static function getExtended(int $accessionId, string $culture = 'en'): ?array
+    {
+        $base = self::getById($accessionId, $culture);
+        if (!$base) {
+            return null;
+        }
+
+        try {
+            $tenantId = null;
+            $v2 = DB::table('accession_v2')->where('accession_id', $accessionId)->first();
+            if ($v2) {
+                $tenantId = $v2->tenant_id;
+            }
+
+            $intakeService = new AccessionIntakeService($tenantId);
+            $appraisalService = new AccessionAppraisalService($tenantId);
+            $containerService = new AccessionContainerService($tenantId);
+
+            $base['timeline'] = $intakeService->getTimeline($accessionId);
+            $base['checklist'] = $intakeService->getChecklist($accessionId);
+            $base['checklistProgress'] = $intakeService->getChecklistProgress($accessionId);
+            $base['attachments'] = $intakeService->getAttachments($accessionId);
+            $base['appraisals'] = $appraisalService->getAppraisalsForAccession($accessionId);
+            $base['valuations'] = $appraisalService->getValuationHistory($accessionId);
+            $base['currentValuation'] = $appraisalService->getCurrentValuation($accessionId);
+            $base['containers'] = $containerService->getContainers($accessionId);
+            $base['rights'] = $containerService->getRights($accessionId);
+        } catch (\Exception $e) {
+            // V2 tables may not be installed yet
+        }
+
+        return $base;
+    }
+
+    /**
+     * Get dashboard statistics.
+     */
+    public static function getDashboardStats(array $filters = []): array
+    {
+        $stats = [
+            'total' => 0,
+            'byStatus' => [],
+            'recentActivity' => [],
+            'topAssignees' => [],
+        ];
+
+        try {
+            $stats['total'] = DB::table('accession')->count();
+
+            $stats['byStatus'] = DB::table('accession_v2')
+                ->selectRaw('status, COUNT(*) as cnt')
+                ->groupBy('status')
+                ->pluck('cnt', 'status')
+                ->all();
+
+            $stats['recentActivity'] = DB::table('accession_timeline as t')
+                ->leftJoin('actor_i18n as ai', function ($j) {
+                    $j->on('t.actor_id', '=', 'ai.id')
+                        ->where('ai.culture', '=', 'en');
+                })
+                ->leftJoin('accession as a', 't.accession_id', '=', 'a.id')
+                ->select('t.event_type', 't.description', 't.created_at', 'ai.authorized_form_of_name as actor_name', 'a.identifier')
+                ->orderBy('t.created_at', 'desc')
+                ->limit(20)
+                ->get()
+                ->all();
+
+            $stats['topAssignees'] = DB::table('accession_v2 as v2')
+                ->join('actor_i18n as ai', function ($j) {
+                    $j->on('v2.assigned_to', '=', 'ai.id')
+                        ->where('ai.culture', '=', 'en');
+                })
+                ->whereNotNull('v2.assigned_to')
+                ->selectRaw('ai.authorized_form_of_name as name, COUNT(*) as cnt')
+                ->groupBy('v2.assigned_to', 'ai.authorized_form_of_name')
+                ->orderByDesc('cnt')
+                ->limit(10)
+                ->get()
+                ->all();
+        } catch (\Exception $e) {
+            // V2 tables may not be installed yet
+        }
+
+        return $stats;
     }
 
     /**

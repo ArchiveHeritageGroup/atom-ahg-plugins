@@ -23,6 +23,11 @@ class AhgSettingsSectionAction extends AhgController
         'encryption' => ['label' => 'Encryption', 'icon' => 'fa-lock', 'description' => 'XChaCha20-Poly1305 encryption for digital object files and sensitive database fields'],
         'voice_ai' => ['label' => 'Voice & AI', 'icon' => 'fa-microphone', 'description' => 'Voice commands, speech recognition, and AI image description settings'],
         'integrity' => ['label' => 'Integrity Assurance', 'icon' => 'fa-shield-alt', 'description' => 'Default settings for integrity verification, dead letter queue, and alerting'],
+        'accession' => [
+            'label' => 'Accession Management',
+            'icon' => 'fa-inbox',
+            'description' => 'Intake queue, appraisal, container and rights settings',
+        ],
     ];
 
     protected $checkboxFields = [
@@ -71,6 +76,13 @@ class AhgSettingsSectionAction extends AhgController
         'integrity' => [
             'integrity_enabled', 'integrity_auto_baseline', 'integrity_notify_on_failure', 'integrity_notify_on_mismatch',
         ],
+        'accession' => [
+            'accession_auto_assign_enabled',
+            'accession_require_donor_agreement',
+            'accession_require_appraisal',
+            'accession_allow_container_barcodes',
+            'accession_rights_inheritance_enabled',
+        ],
     ];
 
     
@@ -86,6 +98,7 @@ class AhgSettingsSectionAction extends AhgController
         'multi_tenant' => 'ahgMultiTenantPlugin',
         'portable_export' => 'ahgPortableExportPlugin',
         'integrity' => 'ahgIntegrityPlugin',
+        'accession' => 'ahgAccessionManagePlugin',
     ];
 
     // Check if a plugin is enabled
