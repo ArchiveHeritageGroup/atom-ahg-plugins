@@ -1,9 +1,0 @@
-Usage:
-  symfony [options] task_name [arguments]
-
-Options:
-  --help                   -H  Display this help message.
-  --quiet                  -q  Do not log messages to standard output.
-  --trace                  -t  Turn on invoke/execute tracing, enable full backtrace.
-  --version                -V  Display the program version.
-  --color                      Forces ANSI color output.

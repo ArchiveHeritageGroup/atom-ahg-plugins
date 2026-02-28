@@ -1,3 +1,0 @@
-/usr/share/nginx/archive/data/fixtures/settings.yml
-/usr/share/nginx/archive/config/databases.yml
-/usr/share/nginx/archive/config/app.yml
