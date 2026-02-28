@@ -72,88 +72,13 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($canManage && $hasReportBuilder): ?>
         <li><a href="/admin/report-builder"><i class="fas fa-tools me-2"></i><?php echo __('Report Builder'); ?></a></li>
         <?php endif; ?>
-        <?php if ($canManage): ?>
-        <li><a href="<?php echo url_for('export/index'); ?>"><i class="fas fa-download me-2"></i><?php echo __('Export Data'); ?></a></li>
-        <?php endif; ?>
-        <?php if ($hasPreservation && $canManage): ?>
-        <li><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>"><i class="fas fa-shield-alt me-2"></i><?php echo __('Preservation'); ?></a></li>
-        <?php endif; ?>
     </ul>
-
-    <?php if ($hasVendor && $canManage): ?>
-    <h4 class="mt-4"><?php echo __('Vendors'); ?></h4>
-    <ul class="list-unstyled">
-        <li><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'index']); ?>"><i class="fas fa-building me-2"></i><?php echo __('Vendor Dashboard'); ?></a></li>
-        <li><a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Transactions'); ?></a></li>
-    </ul>
-    <?php endif; ?>
-
-    <?php if ($hasMarketplace && $canManage): ?>
-    <h4 class="mt-4"><?php echo __('Marketplace'); ?></h4>
-    <ul class="list-unstyled">
-        <li><a href="/marketplace/admin"><i class="fas fa-store-alt me-2"></i><?php echo __('Admin Dashboard'); ?></a></li>
-        <li><a href="/marketplace/admin/listings"><i class="fas fa-list me-2"></i><?php echo __('Listings'); ?></a></li>
-        <li><a href="/marketplace/admin/sellers"><i class="fas fa-users me-2"></i><?php echo __('Sellers'); ?></a></li>
-        <li><a href="/marketplace/admin/transactions"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Transactions'); ?></a></li>
-        <li><a href="/marketplace/admin/payouts"><i class="fas fa-money-bill-wave me-2"></i><?php echo __('Payouts'); ?></a></li>
-    </ul>
-    <?php endif; ?>
-
-    <?php if (isPluginActive('ahgResearchPlugin') && $canManage): ?>
-    <h4 class="mt-4"><?php echo __('Research'); ?></h4>
-    <ul class="list-unstyled">
-        <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-graduation-cap me-2"></i><?php echo __('Research Dashboard'); ?></a></li>
-        <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'bookings']); ?>"><i class="fas fa-calendar-alt me-2"></i><?php echo __('Bookings'); ?></a></li>
-    </ul>
-    <?php endif; ?>
-
-    <?php if (isPluginActive('ahgAuditTrailPlugin') && $canManage): ?>
-    <h4 class="mt-4"><?php echo __('Audit'); ?></h4>
-    <ul class="list-unstyled">
-        <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line me-2"></i><?php echo __('Statistics'); ?></a></li>
-        <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list me-2"></i><?php echo __('Logs'); ?></a></li>
-    </ul>
-    <?php endif; ?>
 
     <?php if ($isAdmin): ?>
     <h4 class="mt-4"><?php echo __('Settings'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs me-2"></i><?php echo __('AHG Settings'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'levels']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Levels of Description'); ?></a></li>
-    </ul>
-
-    <h4 class="mt-4"><?php echo __('Compliance'); ?></h4>
-    <ul class="list-unstyled">
-        <?php if ($hasSecurity): ?>
-        <li><a href="/admin/security/compliance"><i class="fas fa-shield-alt me-2"></i><?php echo __('Security'); ?></a></li>
-        <?php endif; ?>
-        <?php if ($hasPrivacy): ?>
-        <li><a href="/privacyAdmin"><i class="fas fa-user-shield me-2"></i><?php echo __('Privacy &amp; Compliance'); ?></a></li>
-        <?php endif; ?>
-        <?php if ($hasCondition): ?>
-        <li><a href="/admin/condition"><i class="fas fa-heartbeat me-2"></i><?php echo __('Condition'); ?></a></li>
-        <?php endif; ?>
-        <?php if ($hasRights): ?>
-        <li><a href="<?php echo url_for(['module' => 'extendedRights', 'action' => 'dashboard']); ?>"><i class="fas fa-gavel me-2"></i><?php echo __('Rights'); ?></a></li>
-        <?php endif; ?>
-    </ul>
-    <?php endif; ?>
-
-    <?php if (($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ) && $isAdmin): ?>
-    <h4 class="mt-4"><?php echo __('Zimbabwe Compliance'); ?></h4>
-    <ul class="list-unstyled">
-        <?php if ($hasCDPA): ?>
-        <li><a href="<?php echo url_for(['module' => 'cdpa', 'action' => 'index']); ?>"><i class="fas fa-shield-alt me-2"></i><?php echo __('CDPA (Data Protection)'); ?></a></li>
-        <?php endif; ?>
-        <?php if ($hasNAZ): ?>
-        <li><a href="<?php echo url_for(['module' => 'naz', 'action' => 'index']); ?>"><i class="fas fa-landmark me-2"></i><?php echo __('NAZ (Archives)'); ?></a></li>
-        <?php endif; ?>
-        <?php if ($hasIPSAS): ?>
-        <li><a href="<?php echo url_for(['module' => 'ipsas', 'action' => 'index']); ?>"><i class="fas fa-coins me-2"></i><?php echo __('IPSAS (Assets)'); ?></a></li>
-        <?php endif; ?>
-        <?php if ($hasNMMZ): ?>
-        <li><a href="<?php echo url_for(['module' => 'nmmz', 'action' => 'index']); ?>"><i class="fas fa-monument me-2"></i><?php echo __('NMMZ (Monuments)'); ?></a></li>
-        <?php endif; ?>
     </ul>
     <?php endif; ?>
 </div>
@@ -251,47 +176,30 @@ $canManage = $isAdmin || $isEditor;
             </div>
         </div>
 
-        <!-- Dashboards Column -->
+        <!-- Sector Dashboards Column -->
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Dashboards'); ?></h5>
+                    <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i><?php echo __('Sector Dashboards'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <!-- Quality Dashboard removed - module does not exist -->
-                    <?php if ($hasSpectrum): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Spectrum Workflow'); ?></a></li>
-                    <?php endif; ?>
                     <?php if ($hasGrap): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grapCompliance', 'action' => 'dashboard']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('GRAP 103 Dashboard'); ?></a></li>
-                    <?php endif; ?>
-                    <?php if ($hasHeritage): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __('Heritage Asset Accounting'); ?></a></li>
-                    <?php endif; ?>
-                    <?php if ($hasCondition): ?>
-                    <li class="list-group-item"><a href="/admin/condition"><i class="fas fa-heartbeat me-2 text-muted"></i><?php echo __('Condition Management'); ?></a></li>
-                    <?php endif; ?>
-                    <?php if ($hasOais): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'oais', 'action' => 'dashboard']); ?>"><i class="fas fa-archive me-2 text-muted"></i><?php echo __('Digital Preservation (OAIS)'); ?></a></li>
-                    <?php endif; ?>
-                    <?php if ($hasResearch): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-graduation-cap me-2 text-muted"></i><?php echo __('Research Services'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grapCompliance', 'action' => 'dashboard']); ?>"><i class="fas fa-balance-scale me-2 text-muted"></i><?php echo __('GRAP 103 / Heritage Accounting'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasDonor): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'donor', 'action' => 'dashboard']); ?>"><i class="fas fa-handshake me-2 text-muted"></i><?php echo __('Donor Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasGallery): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'gallery', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery Management'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'gallery', 'action' => 'dashboard']); ?>"><i class="fas fa-palette me-2 text-muted"></i><?php echo __('Gallery'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasLibrary): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library Management'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>"><i class="fas fa-book me-2 text-muted"></i><?php echo __('Library'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasDam): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dam', 'action' => 'dashboard']); ?>"><i class="fas fa-images me-2 text-muted"></i><?php echo __('Digital Asset Management'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasMuseum): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'museum', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum Dashboard"); ?></a></li>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dashboard', 'action' => 'index']); ?>"><i class="fas fa-chart-line me-2 text-muted"></i><?php echo __("Data Quality Dashboard"); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'museum', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum"); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'dashboard']); ?>"><i class="fas fa-theater-masks me-2 text-muted"></i><?php echo __("Exhibitions"); ?></a></li>
                     <?php endif; ?>
                 </ul>
@@ -319,7 +227,9 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
+    <!-- ═══ WORKFLOW & PUBLISHING ═══ -->
     <?php if ($hasWorkflow && $canManage): ?>
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-project-diagram me-2"></i><?php echo __('Workflow & Publishing'); ?></h5>
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
@@ -332,6 +242,8 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="/workflow/pool"><i class="fas fa-inbox me-2 text-muted"></i><?php echo __('Task Pool'); ?></a></li>
                     <li class="list-group-item"><a href="/workflow/history"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Workflow History'); ?></a></li>
                     <li class="list-group-item"><a href="/workflow/admin"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Configure Workflows'); ?></a></li>
+                    <li class="list-group-item border-top mt-2 pt-2"><small class="text-muted fw-bold"><?php echo __("Publish Gates"); ?></small></li>
+                    <li class="list-group-item"><a href="/workflow/admin/gates"><i class="fas fa-check-double me-2 text-muted"></i><?php echo __('Gate Rules'); ?></a></li>
                 </ul>
             </div>
         </div>
@@ -351,6 +263,11 @@ $canManage = $isAdmin || $isEditor;
         </div>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
+
+    <!-- ═══ RESEARCH & ACCESS ═══ -->
+    <?php if ($hasResearch || $hasAccessRequest): ?>
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-graduation-cap me-2"></i><?php echo __('Research & Access'); ?></h5>
     <?php endif; ?>
 
     <?php if ($hasResearch): ?>
@@ -407,6 +324,34 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
+    <?php if ($hasAccessRequest && $canManage): ?>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Access Requests'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'pending']); ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('Pending Requests'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check me-2 text-muted"></i><?php echo __('Approvers'); ?></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'history']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Request History'); ?></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- ═══ SECURITY, COMPLIANCE & RIGHTS ═══ -->
+    <?php if ($isAdmin): ?>
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-shield-alt me-2"></i><?php echo __('Security, Compliance & Rights'); ?></h5>
+    <?php endif; ?>
+
     <!-- Compliance Row -->
     <?php if ($isAdmin): ?>
     <div class="row mb-4">
@@ -425,6 +370,7 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'report']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Clearance Report'); ?></a></li>
                     <?php endif; ?>
                     <?php if ($hasAudit): ?>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line me-2 text-muted"></i><?php echo __('Audit Statistics'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list me-2 text-muted"></i><?php echo __('Audit Log'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'export']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Export Audit Log'); ?></a></li>
                     <?php endif; ?>
@@ -587,10 +533,13 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasVendor && $canManage): ?>
-    <!-- Vendor Management Row -->
+    <!-- ═══ COMMERCE & VENDORS ═══ -->
+    <?php if (($hasMarketplace || $hasCart || $hasVendor || $hasDonor) && $canManage): ?>
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-store me-2"></i><?php echo __('Commerce & Vendors'); ?></h5>
+
+    <!-- Row 1: Vendor Management + Donor Management -->
     <div class="row mb-4">
-        <!-- Vendor Management -->
+        <?php if ($hasVendor): ?>
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #fd7e14 !important;">
@@ -610,19 +559,30 @@ $canManage = $isAdmin || $isEditor;
                         <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'transactions']); ?>"><i class="fas fa-exchange-alt me-2 text-muted"></i><?php echo __('Transactions'); ?></a>
                     </li>
                     <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'addTransaction']); ?>"><i class="fas fa-file-invoice me-2 text-muted"></i><?php echo __('New Transaction'); ?></a>
-                    </li>
-                    <li class="list-group-item">
                         <a href="<?php echo url_for(['module' => 'vendor', 'action' => 'serviceTypes']); ?>"><i class="fas fa-tools me-2 text-muted"></i><?php echo __('Service Types'); ?></a>
                     </li>
                 </ul>
             </div>
         </div>
-    </div>
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <?php if (($hasMarketplace || $hasCart) && $canManage): ?>
-    <!-- Buy / Sell / Store Row -->
+        <?php if ($hasDonor): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #198754 !important;">
+                    <h5 class="mb-0"><i class="fas fa-handshake me-2"></i><?php echo __('Donor Management'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'donor', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Donor Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'donorAgreement', 'action' => 'browse']); ?>"><i class="fas fa-file-contract me-2 text-muted"></i><?php echo __('Donor Agreements'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Row 2: Marketplace + Sales & Payouts -->
+    <?php if ($hasMarketplace || $hasCart): ?>
     <div class="row mb-4">
         <?php if ($hasMarketplace): ?>
         <div class="col-md-4">
@@ -634,23 +594,8 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="/marketplace/admin"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Admin Dashboard'); ?></a></li>
                     <li class="list-group-item"><a href="/marketplace/admin/listings"><i class="fas fa-list me-2 text-muted"></i><?php echo __('All Listings'); ?></a></li>
                     <li class="list-group-item"><a href="/marketplace"><i class="fas fa-search me-2 text-muted"></i><?php echo __('Browse Marketplace'); ?></a></li>
-                    <li class="list-group-item"><a href="/marketplace/auctions"><i class="fas fa-gavel me-2 text-muted"></i><?php echo __('Active Auctions'); ?></a></li>
-                    <li class="list-group-item"><a href="/marketplace/admin/reports"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Revenue Reports'); ?></a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #2563eb !important;">
-                    <h5 class="mb-0"><i class="fas fa-users me-2"></i><?php echo __('Sellers & Stores'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
                     <li class="list-group-item"><a href="/marketplace/admin/sellers"><i class="fas fa-id-badge me-2 text-muted"></i><?php echo __('Manage Sellers'); ?></a></li>
-                    <li class="list-group-item"><a href="/marketplace/admin/reviews"><i class="fas fa-star me-2 text-muted"></i><?php echo __('Moderate Reviews'); ?></a></li>
-                    <li class="list-group-item"><a href="/marketplace/admin/categories"><i class="fas fa-tags me-2 text-muted"></i><?php echo __('Categories'); ?></a></li>
-                    <li class="list-group-item"><a href="/marketplace/admin/currencies"><i class="fas fa-coins me-2 text-muted"></i><?php echo __('Currencies'); ?></a></li>
-                    <li class="list-group-item"><a href="/marketplace/admin/settings"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Marketplace Settings'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/auctions"><i class="fas fa-gavel me-2 text-muted"></i><?php echo __('Active Auctions'); ?></a></li>
                 </ul>
             </div>
         </div>
@@ -664,6 +609,7 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="/marketplace/admin/transactions"><i class="fas fa-exchange-alt me-2 text-muted"></i><?php echo __('All Transactions'); ?></a></li>
                     <li class="list-group-item"><a href="/marketplace/admin/payouts"><i class="fas fa-money-bill-wave me-2 text-muted"></i><?php echo __('Pending Payouts'); ?></a></li>
                     <li class="list-group-item"><a href="/marketplace/admin/payouts/batch"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Batch Payouts'); ?></a></li>
+                    <li class="list-group-item"><a href="/marketplace/admin/reports"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Revenue Reports'); ?></a></li>
                     <?php if ($hasCart): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cart', 'action' => 'adminOrders']); ?>"><i class="fas fa-shopping-bag me-2 text-muted"></i><?php echo __('Shop Orders'); ?></a></li>
                     <?php endif; ?>
@@ -685,157 +631,56 @@ $canManage = $isAdmin || $isEditor;
         <?php endif; ?>
     </div>
     <?php endif; ?>
-
-    <?php if (($hasAccessRequest || $hasRic || $hasBackup) && $canManage): ?>
-    <!-- Access, RiC & Maintenance Row -->
-    <div class="row mb-4">
-        <?php if ($hasAccessRequest): ?>
-        <!-- Access Requests -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
-                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Access Requests'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'pending']); ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('Pending Requests'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'approvers']); ?>"><i class="fas fa-user-check me-2 text-muted"></i><?php echo __('Approvers'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'accessRequest', 'action' => 'history']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Request History'); ?></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <?php endif; ?>
-
-        <?php if ($hasRic): ?>
-        <!-- RiC Explorer -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6f42c1 !important;">
-                    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Records in Contexts (RiC)'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('RiC Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'explorer']); ?>"><i class="fas fa-sitemap me-2 text-muted"></i><?php echo __('RiC Explorer'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'sync']); ?>"><i class="fas fa-sync me-2 text-muted"></i><?php echo __('Sync Status'); ?></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <?php endif; ?>
-
-        <?php if ($hasBackup && $isAdmin): ?>
-        <!-- Backup & Maintenance -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0"><i class="fas fa-database me-2"></i><?php echo __('Backup & Maintenance'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'backup', 'action' => 'index']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Backup Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'backup', 'action' => 'restore']); ?>"><i class="fas fa-undo-alt me-2 text-muted"></i><?php echo __('Restore'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'jobs', 'action' => 'browse']); ?>"><i class="fas fa-tasks me-2 text-muted"></i><?php echo __('Background Jobs'); ?></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <?php endif; ?>
-    </div>
     <?php endif; ?>
 
-    <?php if (($hasDedupe || $hasForms || $hasDoi) && $canManage): ?>
-    <!-- Data Quality, Forms & DOI Row -->
-    <div class="row mb-4">
-        <?php if ($hasDedupe): ?>
-        <!-- Duplicate Detection -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #dc3545 !important;">
-                    <h5 class="mb-0"><i class="fas fa-clone me-2"></i><?php echo __('Duplicate Detection'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Dedupe Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Duplicates'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'scan']); ?>"><i class="fas fa-search me-2 text-muted"></i><?php echo __('Run Scan'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'rules']); ?>"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Detection Rules'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'report']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Reports'); ?></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <?php endif; ?>
+    <?php /* Access Requests moved to Research & Access section above */ ?>
 
+    <!-- ═══ DATA QUALITY & CONFIGURATION ═══ -->
+    <?php if (($hasForms || $hasDoi || $hasRic) && $canManage): ?>
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-tools me-2"></i><?php echo __('Data Quality & Configuration'); ?></h5>
+    <div class="row mb-4">
         <?php if ($hasForms): ?>
-        <!-- Form Templates -->
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #198754 !important;">
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i><?php echo __('Form Templates'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Forms Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Templates'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'create']); ?>"><i class="fas fa-plus me-2 text-muted"></i><?php echo __('Create Template'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'forms', 'action' => 'assignments']); ?>"><i class="fas fa-link me-2 text-muted"></i><?php echo __('Assignments'); ?></a>
-                    </li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Forms Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Templates'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'create']); ?>"><i class="fas fa-plus me-2 text-muted"></i><?php echo __('Create Template'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'assignments']); ?>"><i class="fas fa-link me-2 text-muted"></i><?php echo __('Assignments'); ?></a></li>
                 </ul>
             </div>
         </div>
         <?php endif; ?>
 
         <?php if ($hasDoi): ?>
-        <!-- DOI Management -->
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #0dcaf0 !important;">
                     <h5 class="mb-0"><i class="fas fa-link me-2"></i><?php echo __('DOI Management'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('DOI Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse DOIs'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'queue']); ?>"><i class="fas fa-tasks me-2 text-muted"></i><?php echo __('Minting Queue'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'batchMint']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Batch Mint'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'doi', 'action' => 'config']); ?>"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('DataCite Config'); ?></a>
-                    </li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'doi', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('DOI Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'doi', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse DOIs'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'doi', 'action' => 'queue']); ?>"><i class="fas fa-tasks me-2 text-muted"></i><?php echo __('Minting Queue'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'doi', 'action' => 'batchMint']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Batch Mint'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasRic): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6f42c1 !important;">
+                    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Records in Contexts (RiC)'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('RiC Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'explorer']); ?>"><i class="fas fa-sitemap me-2 text-muted"></i><?php echo __('RiC Explorer'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ricDashboard', 'action' => 'sync']); ?>"><i class="fas fa-sync me-2 text-muted"></i><?php echo __('Sync Status'); ?></a></li>
                 </ul>
             </div>
         </div>
@@ -843,73 +688,134 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if (($hasDataMigration || $hasHeritage2 || $hasIngest) && $canManage): ?>
-    <!-- Data Migration, Ingest & Heritage Row -->
+    <!-- ═══ DATA OPERATIONS ═══ -->
+    <?php if (($hasDataMigration || $hasIngest || $hasBackup) && $canManage): ?>
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-database me-2"></i><?php echo __('Data Operations'); ?></h5>
     <div class="row mb-4">
         <?php if ($hasDataMigration): ?>
-        <!-- Data Migration -->
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #fd7e14 !important;">
                     <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Data Migration'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Migration Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'import']); ?>"><i class="fas fa-upload me-2 text-muted"></i><?php echo __('Import Data'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'export']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Export Data'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'history']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Migration History'); ?></a>
-                    </li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Migration Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'import']); ?>"><i class="fas fa-upload me-2 text-muted"></i><?php echo __('Import Data'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'export']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Export Data'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'history']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Migration History'); ?></a></li>
                 </ul>
             </div>
         </div>
         <?php endif; ?>
 
         <?php if ($hasIngest): ?>
-        <!-- Data Ingest -->
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #0dcaf0 !important;">
                     <h5 class="mb-0"><i class="fas fa-file-import me-2"></i><?php echo __('Data Ingest'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Ingest Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'configure']); ?>"><i class="fas fa-plus-circle me-2 text-muted"></i><?php echo __('New Ingest'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'downloadTemplate', 'sector' => 'archive']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('CSV Template'); ?></a>
-                    </li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Ingest Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ingest', 'action' => 'configure']); ?>"><i class="fas fa-plus-circle me-2 text-muted"></i><?php echo __('New Ingest'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ingest', 'action' => 'downloadTemplate', 'sector' => 'archive']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('CSV Template'); ?></a></li>
                 </ul>
             </div>
         </div>
         <?php endif; ?>
 
-        <?php if ($hasHeritage2): ?>
-        <!-- Heritage Management -->
+        <?php if ($hasBackup && $isAdmin): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0"><i class="fas fa-database me-2"></i><?php echo __('Backup & Maintenance'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'backup', 'action' => 'index']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('Backup Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'backup', 'action' => 'restore']); ?>"><i class="fas fa-undo-alt me-2 text-muted"></i><?php echo __('Restore'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'jobs', 'action' => 'browse']); ?>"><i class="fas fa-tasks me-2 text-muted"></i><?php echo __('Background Jobs'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <?php if ($hasHeritage2): ?>
+    <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #6c757d !important;">
                     <h5 class="mb-0"><i class="fas fa-landmark me-2"></i><?php echo __('Heritage Management'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminDashboard']); ?>"><i class="fas fa-cogs me-2 text-muted"></i><?php echo __('Admin Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsDashboard']); ?>"><i class="fas fa-chart-line me-2 text-muted"></i><?php echo __('Analytics Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Custodian Dashboard'); ?></a>
-                    </li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminDashboard']); ?>"><i class="fas fa-cogs me-2 text-muted"></i><?php echo __('Admin Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsDashboard']); ?>"><i class="fas fa-chart-line me-2 text-muted"></i><?php echo __('Analytics'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield me-2 text-muted"></i><?php echo __('Custodian'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+    <?php endif; ?>
+
+    <!-- ═══ DATA INTEGRITY & PRESERVATION ═══ -->
+    <?php if (($hasPreservation || $hasDedupe) && $canManage): ?>
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-fingerprint me-2"></i><?php echo __('Data Integrity & Preservation'); ?></h5>
+    <div class="row mb-4">
+        <?php if ($hasDedupe): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #dc3545 !important;">
+                    <h5 class="mb-0"><i class="fas fa-clone me-2"></i><?php echo __('Duplicate Detection'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Dedupe Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Duplicates'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'scan']); ?>"><i class="fas fa-search me-2 text-muted"></i><?php echo __('Run Scan'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'dedupe', 'action' => 'rules']); ?>"><i class="fas fa-cog me-2 text-muted"></i><?php echo __('Detection Rules'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($hasPreservation): ?>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #17a2b8 !important;">
+                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Digital Preservation'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Preservation Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']); ?>"><i class="fas fa-check-double me-2 text-muted"></i><?php echo __('Fixity Verification'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'events']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('PREMIS Events'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Preservation Reports'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i><?php echo __('Format Registry'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Formats'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']) . '?risk=high'; ?>"><i class="fas fa-exclamation-triangle me-2 text-muted"></i><?php echo __('At-Risk Formats'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'policies']); ?>"><i class="fas fa-cogs me-2 text-muted"></i><?php echo __('Preservation Policies'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #28a745 !important;">
+                    <h5 class="mb-0"><i class="fas fa-fingerprint me-2"></i><?php echo __('Checksums & Integrity'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']) . '?type=missing'; ?>"><i class="fas fa-exclamation-circle me-2 text-muted"></i><?php echo __('Missing Checksums'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']) . '?type=stale'; ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('Stale Verification'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']) . '?status=failed'; ?>"><i class="fas fa-times-circle me-2 text-muted"></i><?php echo __('Failed Checks'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'tiffpdfmerge', 'action' => 'browse']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('TIFF/PDF Merge Jobs'); ?></a></li>
                 </ul>
             </div>
         </div>
@@ -917,79 +823,9 @@ $canManage = $isAdmin || $isEditor;
     </div>
     <?php endif; ?>
 
-    <?php if ($hasPreservation && $canManage): ?>
-    <!-- Digital Preservation Row -->
-    <div class="row mb-4">
-        <!-- Digital Preservation -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #17a2b8 !important;">
-                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Digital Preservation'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Preservation Dashboard'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']); ?>"><i class="fas fa-check-double me-2 text-muted"></i><?php echo __('Fixity Verification'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'events']); ?>"><i class="fas fa-history me-2 text-muted"></i><?php echo __('PREMIS Events'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']); ?>"><i class="fas fa-chart-bar me-2 text-muted"></i><?php echo __('Preservation Reports'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'tiffpdfmerge', 'action' => 'browse']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('TIFF to PDF Merge Jobs'); ?></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Format Registry -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6610f2 !important;">
-                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i><?php echo __('Format Registry'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Formats'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']) . '?risk=high'; ?>"><i class="fas fa-exclamation-triangle me-2 text-muted"></i><?php echo __('At-Risk Formats'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'policies']); ?>"><i class="fas fa-cogs me-2 text-muted"></i><?php echo __('Preservation Policies'); ?></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Checksums & Fixity -->
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #28a745 !important;">
-                    <h5 class="mb-0"><i class="fas fa-fingerprint me-2"></i><?php echo __('Checksums & Integrity'); ?></h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']) . '?type=missing'; ?>"><i class="fas fa-exclamation-circle me-2 text-muted"></i><?php echo __('Missing Checksums'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'reports']) . '?type=stale'; ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('Stale Verification'); ?></a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']) . '?status=failed'; ?>"><i class="fas fa-times-circle me-2 text-muted"></i><?php echo __('Failed Checks'); ?></a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-    <?php endif; ?>
-
+    <!-- ═══ JURISDICTION COMPLIANCE ═══ -->
     <?php if (($hasCDPA || $hasNAZ || $hasIPSAS || $hasNMMZ) && $isAdmin): ?>
-    <!-- Zimbabwe Compliance Row -->
+    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-globe-africa me-2"></i><?php echo __('Jurisdiction Compliance'); ?></h5>
     <div class="row mb-4">
         <?php if ($hasCDPA): ?>
         <!-- CDPA - Data Protection -->
