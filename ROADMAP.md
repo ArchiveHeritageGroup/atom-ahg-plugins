@@ -81,28 +81,9 @@
 
 ---
 
-## Competitive Context
-
-| Platform | What We're Watching |
-|----------|-------------------|
-| **ArchivesSpace** | Five-year strategic roadmap (2026-2030), Wikidata plugin, Lyrasis interoperability |
-| **CollectiveAccess** | AI automated cataloguing (v2.2), ElasticSearch reimplementation, UI redesign (v3.0) |
-| **Arches Project** | Arches Lingo vocabulary management, SPARQL endpoints, GIS capabilities |
-| **Archivematica** | Extension architecture, UI simplification, AtoM contributor gatherings |
-| **Omeka S** | SaaS model, hierarchy module for archival collections |
-| **AtoM Foundation** | AtoM 3 design principles (still in planning — Heratio fills the gap now) |
-
----
-
-## Community Gaps Addressed
-
-Of [17 identified community gaps](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog/issues/170) in the AtoM ecosystem, Heratio addresses all 17 — 15 are complete or have working implementations, and 2 are in active development. Notable gaps that AtoM has never roadmapped include: IIIF integration, multi-tenancy, museum/Spectrum support, gallery/CCO, privacy compliance, heritage accounting, condition assessment, and donor management.
-
----
-
 ## Contributing
 
 We welcome feedback, feature requests, and contributions. Open an issue to start a discussion or submit a pull request.
 
 **Contact:** [The Archive and Heritage Group](https://theahg.co.za)
-**License:** GPL-3.0
+**License:** AGPL-3.0
