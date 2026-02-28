@@ -215,4 +215,4 @@ Of [17 identified community gaps](https://github.com/ArchiveHeritageGroup/atom-e
 We welcome feedback, feature requests, and contributions. Open an issue to start a discussion or submit a pull request.
 
 **Contact:** [The Archive and Heritage Group](https://theahg.co.za)
-**License:** GPL-3.0
+**License:** AGPL-3.0
