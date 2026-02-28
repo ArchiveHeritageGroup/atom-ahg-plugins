@@ -15,6 +15,8 @@ class integrityReportTask extends arBaseTask
             new sfCommandOption('dead-letter', null, sfCommandOption::PARAMETER_NONE, 'Show dead letter queue report'),
             new sfCommandOption('summary', null, sfCommandOption::PARAMETER_NONE, 'Show summary report'),
             new sfCommandOption('format', null, sfCommandOption::PARAMETER_OPTIONAL, 'Output format: text, json, csv', 'text'),
+            new sfCommandOption('export-csv', null, sfCommandOption::PARAMETER_OPTIONAL, 'Export ledger to CSV file (provide path or - for stdout)'),
+            new sfCommandOption('auditor-pack', null, sfCommandOption::PARAMETER_OPTIONAL, 'Generate auditor pack ZIP to specified path'),
         ]);
 
         $this->namespace = 'integrity';
@@ -22,7 +24,7 @@ class integrityReportTask extends arBaseTask
         $this->briefDescription = 'Generate integrity verification reports';
         $this->detailedDescription = <<<'EOF'
 Generate reports on integrity verification results, including run summaries,
-outcome breakdowns, and dead letter queue status.
+outcome breakdowns, dead letter queue status, CSV exports, and auditor packs.
 
 Examples:
   php symfony integrity:report --summary
@@ -31,6 +33,10 @@ Examples:
   php symfony integrity:report --dead-letter
   php symfony integrity:report --summary --format=json
   php symfony integrity:report --summary --format=csv
+  php symfony integrity:report --export-csv=/tmp/ledger.csv
+  php symfony integrity:report --export-csv=-
+  php symfony integrity:report --auditor-pack=/tmp/auditor.zip
+  php symfony integrity:report --auditor-pack=/tmp/auditor.zip --date-from=2026-01-01
 EOF;
     }
 
@@ -44,6 +50,20 @@ EOF;
         }
 
         $format = $options['format'] ?? 'text';
+
+        // Issue #188: CSV export
+        if (isset($options['export-csv']) && $options['export-csv'] !== false) {
+            $this->exportCsv($options);
+
+            return;
+        }
+
+        // Issue #188: Auditor pack
+        if (isset($options['auditor-pack']) && $options['auditor-pack'] !== false) {
+            $this->exportAuditorPack($options);
+
+            return;
+        }
 
         // Dead letter report
         if (!empty($options['dead-letter'])) {
@@ -62,6 +82,69 @@ EOF;
         // Filtered ledger report
         $this->ledgerReport($options, $format);
     }
+
+    // ------------------------------------------------------------------
+    // Issue #188: CSV Export
+    // ------------------------------------------------------------------
+
+    protected function exportCsv(array $options): void
+    {
+        require_once dirname(__DIR__) . '/Services/IntegrityService.php';
+        $service = new IntegrityService();
+
+        $filters = $this->buildFilters($options);
+        $csv = $service->exportLedgerCsv($filters);
+
+        $path = $options['export-csv'];
+        if ($path === '-' || $path === true) {
+            // Write to stdout
+            echo $csv;
+        } else {
+            file_put_contents($path, $csv);
+            $this->logSection('report', "CSV exported to: {$path}", null, 'INFO');
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Issue #188: Auditor Pack
+    // ------------------------------------------------------------------
+
+    protected function exportAuditorPack(array $options): void
+    {
+        require_once dirname(__DIR__) . '/Services/IntegrityService.php';
+        $service = new IntegrityService();
+
+        $filters = $this->buildFilters($options);
+        $tmpFile = $service->generateAuditorPack($filters);
+
+        $targetPath = $options['auditor-pack'];
+        if ($targetPath === true) {
+            $targetPath = '/tmp/integrity_auditor_pack_' . date('Ymd_His') . '.zip';
+        }
+
+        rename($tmpFile, $targetPath);
+        $this->logSection('report', "Auditor pack exported to: {$targetPath}", null, 'INFO');
+    }
+
+    protected function buildFilters(array $options): array
+    {
+        $filters = [];
+        if (!empty($options['date-from'])) {
+            $filters['date_from'] = $options['date-from'];
+        }
+        if (!empty($options['date-to'])) {
+            $filters['date_to'] = $options['date-to'];
+        }
+        if (!empty($options['repository-id'])) {
+            $filters['repository_id'] = (int) $options['repository-id'];
+        }
+
+        return $filters;
+    }
+
+    // ------------------------------------------------------------------
+    // Existing reports
+    // ------------------------------------------------------------------
 
     protected function summaryReport(string $format): void
     {

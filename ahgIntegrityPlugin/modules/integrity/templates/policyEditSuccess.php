@@ -1,0 +1,78 @@
+<?php
+$policy = $sf_data->getRaw('policy');
+$isNew = $sf_data->getRaw('isNew');
+$repositories = $sf_data->getRaw('repositories') ?: [];
+?>
+
+<main id="content" class="container-xxl py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-archive me-2"></i><?php echo $isNew ? __('New Retention Policy') : __('Edit Retention Policy'); ?></h1>
+    <a href="<?php echo url_for(['module' => 'integrity', 'action' => 'policies']); ?>" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
+    </a>
+  </div>
+
+  <form method="post" action="<?php echo url_for(['module' => 'integrity', 'action' => 'policyEdit', 'id' => $policy->id ?? '']); ?>">
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0"><?php echo __('Policy Details'); ?></h5></div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label"><?php echo __('Name'); ?> *</label>
+            <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($policy->name ?? ''); ?>" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label"><?php echo __('Retention Period (days)'); ?></label>
+            <input type="number" name="retention_period_days" class="form-control" value="<?php echo $policy->retention_period_days ?? 0; ?>" min="0">
+            <small class="text-muted"><?php echo __('0 = indefinite retention'); ?></small>
+          </div>
+          <div class="col-12">
+            <label class="form-label"><?php echo __('Description'); ?></label>
+            <textarea name="description" class="form-control" rows="2"><?php echo htmlspecialchars($policy->description ?? ''); ?></textarea>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label"><?php echo __('Trigger Type'); ?></label>
+            <select name="trigger_type" class="form-select">
+              <?php foreach (['ingest_date', 'last_modified', 'closure_date', 'last_access'] as $tt): ?>
+                <option value="<?php echo $tt; ?>" <?php echo ($policy->trigger_type ?? 'ingest_date') === $tt ? 'selected' : ''; ?>><?php echo $tt; ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label"><?php echo __('Scope Type'); ?></label>
+            <select name="scope_type" class="form-select" onchange="toggleScope(this.value)">
+              <?php foreach (['global', 'repository', 'hierarchy'] as $st): ?>
+                <option value="<?php echo $st; ?>" <?php echo ($policy->scope_type ?? 'global') === $st ? 'selected' : ''; ?>><?php echo $st; ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="col-md-4" id="repoField" style="display:<?php echo ($policy->scope_type ?? 'global') === 'repository' ? 'block' : 'none'; ?>">
+            <label class="form-label"><?php echo __('Repository'); ?></label>
+            <select name="repository_id" class="form-select">
+              <option value=""><?php echo __('Select...'); ?></option>
+              <?php foreach ($repositories as $repo): ?>
+                <option value="<?php echo $repo->id; ?>" <?php echo ($policy->repository_id ?? '') == $repo->id ? 'selected' : ''; ?>><?php echo htmlspecialchars($repo->name); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input type="checkbox" name="is_enabled" class="form-check-input" value="1" id="isEnabled"
+                <?php echo ($policy->is_enabled ?? 0) ? 'checked' : ''; ?>>
+              <label class="form-check-label" for="isEnabled"><?php echo __('Enabled'); ?></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">
+      <i class="fas fa-save me-1"></i><?php echo $isNew ? __('Create Policy') : __('Save Changes'); ?>
+    </button>
+  </form>
+</main>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+function toggleScope(val) {
+  document.getElementById('repoField').style.display = val === 'repository' ? 'block' : 'none';
+}
+</script>

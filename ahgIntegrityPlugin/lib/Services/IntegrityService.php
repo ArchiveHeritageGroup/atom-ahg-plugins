@@ -7,6 +7,7 @@ class IntegrityService
     private string $uploadsPath;
     private string $lockDir;
     private ?object $preservationService = null;
+    private string $currentActor = 'system';
 
     public function __construct()
     {
@@ -36,13 +37,40 @@ class IntegrityService
     }
 
     // ------------------------------------------------------------------
+    // Schema migration (Issue #188)
+    // ------------------------------------------------------------------
+
+    public function runMigration(): void
+    {
+        $dbName = DB::connection()->getDatabaseName();
+
+        // Add actor column if missing
+        $hasActor = DB::select(
+            "SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'integrity_ledger' AND COLUMN_NAME = 'actor'",
+            [$dbName]
+        );
+        if (($hasActor[0]->cnt ?? 0) == 0) {
+            DB::statement('ALTER TABLE `integrity_ledger` ADD COLUMN `actor` VARCHAR(255) NULL AFTER `duration_ms`');
+        }
+
+        // Add hostname column if missing
+        $hasHostname = DB::select(
+            "SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'integrity_ledger' AND COLUMN_NAME = 'hostname'",
+            [$dbName]
+        );
+        if (($hasHostname[0]->cnt ?? 0) == 0) {
+            DB::statement('ALTER TABLE `integrity_ledger` ADD COLUMN `hostname` VARCHAR(255) NULL AFTER `actor`');
+        }
+    }
+
+    // ------------------------------------------------------------------
     // Single object verification
     // ------------------------------------------------------------------
 
-    public function verifyObject(int $digitalObjectId, ?int $runId, string $algorithm = 'sha256'): array
+    public function verifyObject(int $digitalObjectId, ?int $runId, string $algorithm = 'sha256', string $actor = 'system'): array
     {
         $startTime = microtime(true);
-        $now = date('Y-m-d H:i:s');
+        $this->currentActor = $actor;
 
         // Resolve digital object
         $doRow = DB::table('digital_object')
@@ -221,6 +249,7 @@ class IntegrityService
         }
 
         $now = date('Y-m-d H:i:s');
+        $actor = $triggeredByUser ?: $triggeredBy;
 
         // Create run record
         $runId = DB::table('integrity_run')->insertGetId([
@@ -274,8 +303,8 @@ class IntegrityService
                     break;
                 }
 
-                // Verify
-                $result = $this->verifyObject($obj->id, $runId, $schedule->algorithm);
+                // Verify with actor tracking
+                $result = $this->verifyObject($obj->id, $runId, $schedule->algorithm, $actor);
                 $counters['objects_scanned']++;
 
                 switch ($result['outcome'] ?? 'error') {
@@ -326,13 +355,29 @@ class IntegrityService
         // Release lock
         $this->releaseLock($lockHandle, $scheduleId);
 
-        return [
+        $runResult = [
             'run_id' => $runId,
+            'schedule_id' => $scheduleId,
             'status' => $finalStatus,
             'counters' => $counters,
             'error' => $errorMessage,
             'duration_seconds' => round(microtime(true) - $startTime, 2),
         ];
+
+        // Issue #190: Alert checking (non-fatal)
+        try {
+            $alertServicePath = dirname(__FILE__) . '/IntegrityAlertService.php';
+            if (file_exists($alertServicePath)) {
+                require_once $alertServicePath;
+                $alertService = new \IntegrityAlertService();
+                $alertService->checkThresholds($runResult);
+                $alertService->sendScheduleNotification($schedule, $runResult);
+            }
+        } catch (\Exception $e) {
+            // Alert failures are non-fatal — never break verification
+        }
+
+        return $runResult;
     }
 
     // ------------------------------------------------------------------
@@ -391,7 +436,7 @@ class IntegrityService
             'created_at' => $now,
         ]);
 
-        $result = $this->verifyObject($digitalObjectId, $runId, $algorithm);
+        $result = $this->verifyObject($digitalObjectId, $runId, $algorithm, $triggeredBy);
         $passed = ($result['outcome'] ?? '') === 'pass' ? 1 : 0;
 
         DB::table('integrity_run')->where('id', $runId)->update([
@@ -409,7 +454,7 @@ class IntegrityService
     }
 
     // ------------------------------------------------------------------
-    // Append-only ledger
+    // Append-only ledger (Issue #188: actor + hostname)
     // ------------------------------------------------------------------
 
     protected function appendLedger(?int $runId, int $digitalObjectId, array $data): array
@@ -430,6 +475,8 @@ class IntegrityService
             'outcome' => 'error',
             'error_detail' => null,
             'duration_ms' => null,
+            'actor' => $this->currentActor,
+            'hostname' => gethostname() ?: null,
             'verified_at' => date('Y-m-d H:i:s'),
         ], $data);
 
@@ -702,6 +749,351 @@ class IntegrityService
             ->get()
             ->values()
             ->all();
+    }
+
+    // ------------------------------------------------------------------
+    // Issue #188: CSV Export
+    // ------------------------------------------------------------------
+
+    public function exportLedgerCsv(array $filters = []): string
+    {
+        $query = DB::table('integrity_ledger');
+
+        if (!empty($filters['date_from'])) {
+            $query->where('verified_at', '>=', $filters['date_from'] . ' 00:00:00');
+        }
+        if (!empty($filters['date_to'])) {
+            $query->where('verified_at', '<=', $filters['date_to'] . ' 23:59:59');
+        }
+        if (!empty($filters['repository_id'])) {
+            $query->where('repository_id', (int) $filters['repository_id']);
+        }
+        if (!empty($filters['outcome'])) {
+            $query->where('outcome', $filters['outcome']);
+        }
+        if (!empty($filters['information_object_id'])) {
+            // Hierarchy scope via nested set
+            $parent = DB::table('information_object')
+                ->where('id', (int) $filters['information_object_id'])
+                ->first();
+            if ($parent) {
+                $query->join('information_object as io', 'integrity_ledger.information_object_id', '=', 'io.id')
+                    ->where('io.lft', '>=', $parent->lft)
+                    ->where('io.rgt', '<=', $parent->rgt);
+            }
+        }
+
+        $entries = $query->orderByDesc('verified_at')->limit(50000)->get();
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, [
+            'id', 'run_id', 'digital_object_id', 'information_object_id', 'repository_id',
+            'file_path', 'file_size', 'file_exists', 'file_readable', 'algorithm',
+            'expected_hash', 'computed_hash', 'hash_match', 'outcome', 'error_detail',
+            'duration_ms', 'actor', 'hostname', 'verified_at',
+        ]);
+
+        foreach ($entries as $e) {
+            fputcsv($handle, [
+                $e->id, $e->run_id, $e->digital_object_id, $e->information_object_id,
+                $e->repository_id, $e->file_path, $e->file_size, $e->file_exists,
+                $e->file_readable, $e->algorithm, $e->expected_hash, $e->computed_hash,
+                $e->hash_match, $e->outcome, $e->error_detail ?? '',
+                $e->duration_ms, $e->actor ?? '', $e->hostname ?? '', $e->verified_at,
+            ]);
+        }
+
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return $csv;
+    }
+
+    // ------------------------------------------------------------------
+    // Issue #188: Auditor Pack (ZIP)
+    // ------------------------------------------------------------------
+
+    public function generateAuditorPack(array $filters = []): string
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), 'integrity_auditor_');
+        $zip = new \ZipArchive();
+        $zip->open($tmpFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        // 1. CSV of exceptions (non-pass entries)
+        $exFilters = array_merge($filters, ['outcome' => null]);
+        $exQuery = DB::table('integrity_ledger')->where('outcome', '!=', 'pass');
+        if (!empty($filters['date_from'])) {
+            $exQuery->where('verified_at', '>=', $filters['date_from'] . ' 00:00:00');
+        }
+        if (!empty($filters['date_to'])) {
+            $exQuery->where('verified_at', '<=', $filters['date_to'] . ' 23:59:59');
+        }
+        if (!empty($filters['repository_id'])) {
+            $exQuery->where('repository_id', (int) $filters['repository_id']);
+        }
+        $exceptions = $exQuery->orderByDesc('verified_at')->limit(50000)->get();
+
+        $csvHandle = fopen('php://temp', 'r+');
+        fputcsv($csvHandle, ['id', 'digital_object_id', 'outcome', 'file_path', 'error_detail', 'actor', 'hostname', 'verified_at']);
+        foreach ($exceptions as $e) {
+            fputcsv($csvHandle, [
+                $e->id, $e->digital_object_id, $e->outcome, $e->file_path,
+                $e->error_detail ?? '', $e->actor ?? '', $e->hostname ?? '', $e->verified_at,
+            ]);
+        }
+        rewind($csvHandle);
+        $zip->addFromString('exceptions.csv', stream_get_contents($csvHandle));
+        fclose($csvHandle);
+
+        // 2. Config snapshot
+        $schedules = DB::table('integrity_schedule')->get()->values()->all();
+        $deadLetterCounts = DB::table('integrity_dead_letter')
+            ->select('status', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('status')
+            ->pluck('cnt', 'status')
+            ->all();
+        $stats = $this->getDashboardStats();
+
+        $configSnapshot = [
+            'generated_at' => date('Y-m-d H:i:s'),
+            'hostname' => gethostname(),
+            'filters' => $filters,
+            'schedules' => $schedules,
+            'dead_letter_summary' => $deadLetterCounts,
+            'stats' => $stats,
+        ];
+        $zip->addFromString('config-snapshot.json', json_encode($configSnapshot, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        // 3. Summary HTML
+        $summaryHtml = $this->renderAuditorSummaryHtml($stats, $exceptions->count(), $schedules, $filters);
+        $zip->addFromString('summary.html', $summaryHtml);
+
+        $zip->close();
+
+        return $tmpFile;
+    }
+
+    public function renderAuditorSummaryHtml(array $stats, int $exceptionCount, array $schedules, array $filters): string
+    {
+        $date = date('Y-m-d H:i:s');
+        $host = htmlspecialchars(gethostname() ?: 'unknown');
+        $filterDesc = !empty($filters) ? htmlspecialchars(json_encode($filters)) : 'None';
+        $passRate = $stats['pass_rate'] ?? 'N/A';
+        $totalVerifications = number_format($stats['total_verifications'] ?? 0);
+        $totalPassed = number_format($stats['total_passed'] ?? 0);
+        $totalObjects = number_format($stats['total_master_objects'] ?? 0);
+        $openDL = $stats['open_dead_letters'] ?? 0;
+        $scheduleCount = count($schedules);
+
+        $scheduleRows = '';
+        foreach ($schedules as $s) {
+            $name = htmlspecialchars($s->name ?? '');
+            $enabled = $s->is_enabled ? 'Yes' : 'No';
+            $scheduleRows .= "<tr><td>{$s->id}</td><td>{$name}</td><td>{$s->scope_type}</td><td>{$s->frequency}</td><td>{$enabled}</td><td>{$s->total_runs}</td></tr>";
+        }
+
+        return <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Integrity Auditor Pack - Summary</title>
+<style>
+body { font-family: Arial, sans-serif; max-width: 900px; margin: 2em auto; color: #333; }
+h1 { color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 0.3em; }
+h2 { color: #2c3e50; margin-top: 1.5em; }
+table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background: #f4f6f7; }
+.stat { display: inline-block; margin: 0.5em 1em 0.5em 0; padding: 0.8em 1.2em; background: #eaf2f8; border-radius: 6px; }
+.stat .label { font-size: 0.85em; color: #666; }
+.stat .value { font-size: 1.4em; font-weight: bold; }
+.warn { color: #e74c3c; }
+.ok { color: #27ae60; }
+.meta { color: #888; font-size: 0.9em; }
+</style>
+</head>
+<body>
+<h1>Integrity Assurance - Auditor Pack</h1>
+<p class="meta">Generated: {$date} | Host: {$host} | Filters: {$filterDesc}</p>
+
+<h2>Summary</h2>
+<div>
+  <div class="stat"><div class="label">Master Objects</div><div class="value">{$totalObjects}</div></div>
+  <div class="stat"><div class="label">Total Verifications</div><div class="value">{$totalVerifications}</div></div>
+  <div class="stat"><div class="label">Total Passed</div><div class="value">{$totalPassed}</div></div>
+  <div class="stat"><div class="label">Pass Rate</div><div class="value {$this->passRateClass($stats['pass_rate'] ?? null)}">{$passRate}%</div></div>
+  <div class="stat"><div class="label">Open Dead Letters</div><div class="value {$this->deadLetterClass($openDL)}">{$openDL}</div></div>
+  <div class="stat"><div class="label">Exceptions in Export</div><div class="value">{$exceptionCount}</div></div>
+</div>
+
+<h2>Schedules ({$scheduleCount})</h2>
+<table>
+<thead><tr><th>ID</th><th>Name</th><th>Scope</th><th>Frequency</th><th>Enabled</th><th>Total Runs</th></tr></thead>
+<tbody>{$scheduleRows}</tbody>
+</table>
+
+<h2>Included Files</h2>
+<ul>
+<li><strong>summary.html</strong> - This document</li>
+<li><strong>exceptions.csv</strong> - All non-pass verification ledger entries</li>
+<li><strong>config-snapshot.json</strong> - Schedule configuration, dead letter summary, and current statistics</li>
+</ul>
+
+<p class="meta">AtoM Heratio - Integrity Assurance Plugin v1.1.0 | The Archive and Heritage Group (Pty) Ltd</p>
+</body>
+</html>
+HTML;
+    }
+
+    private function passRateClass(?float $rate): string
+    {
+        if ($rate === null) {
+            return '';
+        }
+
+        return $rate < 95 ? 'warn' : 'ok';
+    }
+
+    private function deadLetterClass(int $count): string
+    {
+        return $count > 0 ? 'warn' : 'ok';
+    }
+
+    // ------------------------------------------------------------------
+    // Issue #190: Enhanced statistics
+    // ------------------------------------------------------------------
+
+    public function calculateBacklog(): int
+    {
+        // Master DOs not in ledger (never verified)
+        $verified = DB::table('integrity_ledger')
+            ->select('digital_object_id')
+            ->distinct();
+
+        return DB::table('digital_object')
+            ->where('usage_id', 140)
+            ->whereNotIn('id', $verified)
+            ->count();
+    }
+
+    public function calculateThroughput(int $days = 7): array
+    {
+        $since = date('Y-m-d H:i:s', strtotime("-{$days} days"));
+
+        $runs = DB::table('integrity_run')
+            ->where('status', 'completed')
+            ->where('completed_at', '>=', $since)
+            ->whereNotNull('completed_at')
+            ->get();
+
+        $totalObjects = 0;
+        $totalBytes = 0;
+        $totalSeconds = 0;
+
+        foreach ($runs as $run) {
+            $totalObjects += $run->objects_scanned;
+            $totalBytes += $run->bytes_scanned;
+
+            $started = strtotime($run->started_at);
+            $completed = strtotime($run->completed_at);
+            if ($started && $completed && $completed > $started) {
+                $totalSeconds += ($completed - $started);
+            }
+        }
+
+        $totalHours = $totalSeconds > 0 ? $totalSeconds / 3600 : 0;
+
+        return [
+            'objects_per_hour' => $totalHours > 0 ? round($totalObjects / $totalHours, 1) : 0,
+            'bytes_per_hour' => $totalHours > 0 ? round($totalBytes / $totalHours) : 0,
+            'gb_per_hour' => $totalHours > 0 ? round($totalBytes / $totalHours / 1073741824, 2) : 0,
+            'total_objects' => $totalObjects,
+            'total_bytes' => $totalBytes,
+            'total_hours' => round($totalHours, 2),
+            'runs_completed' => count($runs),
+        ];
+    }
+
+    public function getDailyTrend(int $days = 30): array
+    {
+        return DB::table('integrity_ledger')
+            ->select(
+                DB::raw('DATE(verified_at) as day'),
+                DB::raw('COUNT(*) as total'),
+                DB::raw("SUM(CASE WHEN outcome = 'pass' THEN 1 ELSE 0 END) as passed"),
+                DB::raw("SUM(CASE WHEN outcome != 'pass' THEN 1 ELSE 0 END) as failed")
+            )
+            ->where('verified_at', '>=', date('Y-m-d', strtotime("-{$days} days")))
+            ->groupBy(DB::raw('DATE(verified_at)'))
+            ->orderBy('day')
+            ->get()
+            ->values()
+            ->all();
+    }
+
+    public function getFailureTypeBreakdown(int $days = 30): array
+    {
+        return DB::table('integrity_ledger')
+            ->select('outcome', DB::raw('COUNT(*) as cnt'))
+            ->where('outcome', '!=', 'pass')
+            ->where('verified_at', '>=', date('Y-m-d', strtotime("-{$days} days")))
+            ->groupBy('outcome')
+            ->orderByDesc('cnt')
+            ->get()
+            ->values()
+            ->all();
+    }
+
+    public function getRepositoryBreakdown(): array
+    {
+        return DB::table('integrity_ledger as il')
+            ->leftJoin('actor_i18n as ai', function ($j) {
+                $j->on('ai.id', '=', 'il.repository_id')
+                  ->where('ai.culture', '=', 'en');
+            })
+            ->select(
+                'il.repository_id',
+                DB::raw("COALESCE(ai.authorized_form_of_name, CONCAT('Repository #', il.repository_id), 'Unknown') as repo_name"),
+                DB::raw('COUNT(*) as total'),
+                DB::raw("SUM(CASE WHEN il.outcome = 'pass' THEN 1 ELSE 0 END) as passed"),
+                DB::raw("SUM(CASE WHEN il.outcome != 'pass' THEN 1 ELSE 0 END) as failed")
+            )
+            ->whereNotNull('il.repository_id')
+            ->groupBy('il.repository_id', 'ai.authorized_form_of_name')
+            ->orderByDesc('total')
+            ->get()
+            ->map(function ($row) {
+                $row->pass_rate = $row->total > 0 ? round(($row->passed / $row->total) * 100, 1) : 0;
+
+                return $row;
+            })
+            ->values()
+            ->all();
+    }
+
+    public function getFormatBreakdown(): array
+    {
+        try {
+            return DB::table('integrity_ledger as il')
+                ->join('preservation_object_format as pof', 'il.digital_object_id', '=', 'pof.digital_object_id')
+                ->select(
+                    'pof.format_name',
+                    DB::raw('COUNT(*) as total'),
+                    DB::raw("SUM(CASE WHEN il.outcome = 'pass' THEN 1 ELSE 0 END) as passed"),
+                    DB::raw("SUM(CASE WHEN il.outcome != 'pass' THEN 1 ELSE 0 END) as failed")
+                )
+                ->groupBy('pof.format_name')
+                ->orderByDesc('total')
+                ->limit(20)
+                ->get()
+                ->values()
+                ->all();
+        } catch (\Exception $e) {
+            // preservation_object_format table may not exist
+            return [];
+        }
     }
 
     // ------------------------------------------------------------------

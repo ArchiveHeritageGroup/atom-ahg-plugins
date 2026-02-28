@@ -22,6 +22,20 @@ class integrityActions extends AhgController
         return new IntegrityService();
     }
 
+    protected function getRetentionService(): IntegrityRetentionService
+    {
+        require_once dirname(__DIR__, 2) . '/lib/Services/IntegrityRetentionService.php';
+
+        return new IntegrityRetentionService();
+    }
+
+    protected function getAlertService(): IntegrityAlertService
+    {
+        require_once dirname(__DIR__, 2) . '/lib/Services/IntegrityAlertService.php';
+
+        return new IntegrityAlertService();
+    }
+
     // ------------------------------------------------------------------
     // Page actions
     // ------------------------------------------------------------------
@@ -34,6 +48,14 @@ class integrityActions extends AhgController
         $this->stats = $service->getDashboardStats();
         $this->recentRuns = $service->getRecentRuns(10);
         $this->recentFailures = $service->getRecentFailures(10);
+
+        // Issue #190: Enhanced stats
+        $this->backlog = $service->calculateBacklog();
+        $this->throughput = $service->calculateThroughput(7);
+        $this->dailyTrend = $service->getDailyTrend(30);
+        $this->repoBreakdown = $service->getRepositoryBreakdown();
+        $this->failureBreakdown = $service->getFailureTypeBreakdown(30);
+
         $this->pageTitle = 'Integrity Dashboard';
     }
 
@@ -269,7 +291,195 @@ class integrityActions extends AhgController
     }
 
     // ------------------------------------------------------------------
-    // API endpoints
+    // Issue #188: Export actions
+    // ------------------------------------------------------------------
+
+    public function executeExport($request)
+    {
+        $this->requireAdmin();
+
+        // Load repositories for filter dropdown
+        $this->repositories = DB::table('repository')
+            ->join('actor_i18n', function ($j) {
+                $j->on('actor_i18n.id', '=', 'repository.id')
+                  ->where('actor_i18n.culture', '=', 'en');
+            })
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->get()
+            ->values()
+            ->all();
+
+        $this->pageTitle = 'Export Ledger';
+    }
+
+    public function executeExportCsv($request)
+    {
+        $this->requireAdmin();
+        $service = $this->getService();
+
+        $filters = $this->getExportFilters($request);
+        $csv = $service->exportLedgerCsv($filters);
+
+        $filename = 'integrity_ledger_' . date('Ymd_His') . '.csv';
+
+        $response = $this->getResponse();
+        $response->setContentType('text/csv');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->setContent($csv);
+
+        return sfView::NONE;
+    }
+
+    public function executeExportAuditor($request)
+    {
+        $this->requireAdmin();
+        $service = $this->getService();
+
+        $filters = $this->getExportFilters($request);
+        $tmpFile = $service->generateAuditorPack($filters);
+
+        $filename = 'integrity_auditor_pack_' . date('Ymd_His') . '.zip';
+
+        $response = $this->getResponse();
+        $response->setContentType('application/zip');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->setContent(file_get_contents($tmpFile));
+        @unlink($tmpFile);
+
+        return sfView::NONE;
+    }
+
+    protected function getExportFilters($request): array
+    {
+        $filters = [];
+        if ($request->getParameter('date_from')) {
+            $filters['date_from'] = $request->getParameter('date_from');
+        }
+        if ($request->getParameter('date_to')) {
+            $filters['date_to'] = $request->getParameter('date_to');
+        }
+        if ($request->getParameter('repository_id')) {
+            $filters['repository_id'] = $request->getParameter('repository_id');
+        }
+        if ($request->getParameter('outcome')) {
+            $filters['outcome'] = $request->getParameter('outcome');
+        }
+
+        return $filters;
+    }
+
+    // ------------------------------------------------------------------
+    // Issue #189: Retention policy actions
+    // ------------------------------------------------------------------
+
+    public function executePolicies($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $this->policies = $retentionService->listPolicies();
+        $this->pageTitle = 'Retention Policies';
+    }
+
+    public function executePolicyEdit($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $id = $request->getParameter('id');
+        $this->policy = $id ? $retentionService->getPolicy((int) $id) : null;
+        $this->isNew = !$this->policy;
+
+        $this->repositories = DB::table('repository')
+            ->join('actor_i18n', function ($j) {
+                $j->on('actor_i18n.id', '=', 'repository.id')
+                  ->where('actor_i18n.culture', '=', 'en');
+            })
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->get()
+            ->values()
+            ->all();
+
+        if ($request->isMethod('post')) {
+            $data = [
+                'name' => $request->getParameter('name', 'New Policy'),
+                'description' => $request->getParameter('description'),
+                'retention_period_days' => (int) $request->getParameter('retention_period_days', 0),
+                'trigger_type' => $request->getParameter('trigger_type', 'ingest_date'),
+                'scope_type' => $request->getParameter('scope_type', 'global'),
+                'repository_id' => $request->getParameter('repository_id') ?: null,
+                'information_object_id' => $request->getParameter('information_object_id') ?: null,
+                'is_enabled' => $request->getParameter('is_enabled') ? 1 : 0,
+            ];
+
+            if ($this->isNew) {
+                $retentionService->createPolicy($data);
+            } else {
+                $retentionService->updatePolicy((int) $id, $data);
+            }
+
+            $this->redirect(['module' => 'integrity', 'action' => 'policies']);
+        }
+
+        $this->pageTitle = $this->isNew ? 'New Retention Policy' : 'Edit Retention Policy';
+    }
+
+    public function executeHolds($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $filters = [];
+        $status = $request->getParameter('status');
+        if ($status) {
+            $filters['status'] = $status;
+            $this->filterStatus = $status;
+        }
+
+        $this->holds = $retentionService->listHolds($filters);
+        $this->pageTitle = 'Legal Holds';
+    }
+
+    public function executeDisposition($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $filters = [];
+        $status = $request->getParameter('status');
+        if ($status) {
+            $filters['status'] = $status;
+            $this->filterStatus = $status;
+        }
+        $policyId = $request->getParameter('policy_id');
+        if ($policyId) {
+            $filters['policy_id'] = (int) $policyId;
+            $this->filterPolicyId = (int) $policyId;
+        }
+
+        $this->queue = $retentionService->listDispositionQueue($filters);
+        $this->stats = $retentionService->getDispositionStats();
+        $this->policies = $retentionService->listPolicies();
+        $this->pageTitle = 'Disposition Queue';
+    }
+
+    // ------------------------------------------------------------------
+    // Issue #190: Alert configuration
+    // ------------------------------------------------------------------
+
+    public function executeAlerts($request)
+    {
+        $this->requireAdmin();
+        $alertService = $this->getAlertService();
+
+        $this->alertConfigs = $alertService->listAlertConfigs();
+        $this->pageTitle = 'Alert Configuration';
+    }
+
+    // ------------------------------------------------------------------
+    // API endpoints (existing)
     // ------------------------------------------------------------------
 
     public function executeApiVerify($request)
@@ -387,6 +597,169 @@ class integrityActions extends AhgController
         $service = $this->getService();
 
         return $this->renderJson(['success' => true, 'stats' => $service->getDashboardStats()]);
+    }
+
+    // ------------------------------------------------------------------
+    // API endpoints (Issue #189: Retention)
+    // ------------------------------------------------------------------
+
+    public function executeApiPolicyToggle($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $id = (int) $request->getParameter('id');
+
+        try {
+            $retentionService->togglePolicy($id);
+            $policy = $retentionService->getPolicy($id);
+
+            return $this->renderJson(['success' => true, 'is_enabled' => (bool) ($policy->is_enabled ?? false)]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function executeApiPolicyDelete($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $id = (int) $request->getParameter('id');
+
+        try {
+            $retentionService->deletePolicy($id);
+
+            return $this->renderJson(['success' => true]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function executeApiHoldPlace($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $ioId = (int) $request->getParameter('information_object_id');
+        $reason = $request->getParameter('reason');
+
+        if (!$ioId || !$reason) {
+            return $this->renderJson(['success' => false, 'error' => 'information_object_id and reason required']);
+        }
+
+        try {
+            $holdId = $retentionService->placeHold($ioId, $reason, $this->getUser()->getUserName());
+
+            return $this->renderJson(['success' => true, 'hold_id' => $holdId]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function executeApiHoldRelease($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $id = (int) $request->getParameter('id');
+
+        try {
+            $result = $retentionService->releaseHold($id, $this->getUser()->getUserName());
+
+            return $this->renderJson(['success' => $result]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function executeApiDispositionAction($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $id = (int) $request->getParameter('id');
+        $action = $request->getParameter('disposition_action');
+        $notes = $request->getParameter('notes');
+
+        if (!in_array($action, ['approved', 'rejected', 'pending_review'])) {
+            return $this->renderJson(['success' => false, 'error' => 'Invalid action. Must be approved, rejected, or pending_review']);
+        }
+
+        try {
+            $result = $retentionService->reviewDisposition($id, $action, $this->getUser()->getUserName(), $notes);
+
+            return $this->renderJson(['success' => $result]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function executeApiRetentionScan($request)
+    {
+        $this->requireAdmin();
+        $retentionService = $this->getRetentionService();
+
+        $policyId = $request->getParameter('policy_id') ? (int) $request->getParameter('policy_id') : null;
+
+        try {
+            $count = $retentionService->scanEligible($policyId);
+
+            return $this->renderJson(['success' => true, 'queued' => $count]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // API endpoints (Issue #190: Alerts)
+    // ------------------------------------------------------------------
+
+    public function executeApiAlertSave($request)
+    {
+        $this->requireAdmin();
+        $alertService = $this->getAlertService();
+
+        $id = $request->getParameter('id');
+        $data = [
+            'alert_type' => $request->getParameter('alert_type'),
+            'threshold_value' => $request->getParameter('threshold_value'),
+            'comparison' => $request->getParameter('comparison', 'gt'),
+            'is_enabled' => $request->getParameter('is_enabled') ? 1 : 0,
+            'email' => $request->getParameter('email') ?: null,
+            'webhook_url' => $request->getParameter('webhook_url') ?: null,
+            'webhook_secret' => $request->getParameter('webhook_secret') ?: null,
+        ];
+
+        try {
+            if ($id) {
+                $alertService->updateAlertConfig((int) $id, $data);
+
+                return $this->renderJson(['success' => true, 'id' => (int) $id]);
+            }
+
+            $newId = $alertService->createAlertConfig($data);
+
+            return $this->renderJson(['success' => true, 'id' => $newId]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
+    }
+
+    public function executeApiAlertDelete($request)
+    {
+        $this->requireAdmin();
+        $alertService = $this->getAlertService();
+
+        $id = (int) $request->getParameter('id');
+
+        try {
+            $alertService->deleteAlertConfig($id);
+
+            return $this->renderJson(['success' => true]);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
+        }
     }
 
     // ------------------------------------------------------------------

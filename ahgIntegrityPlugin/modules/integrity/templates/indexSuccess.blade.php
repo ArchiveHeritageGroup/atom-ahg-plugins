@@ -4,12 +4,29 @@ $recentRuns = $recentRuns ?? [];
 $recentFailures = $recentFailures ?? [];
 $passRate = $stats->pass_rate ?? null;
 $outcomes = $stats->recent_outcomes ?? [];
+$backlog = $backlog ?? 0;
+$throughput = $throughput ?? [];
+$dailyTrend = $dailyTrend ?? [];
+$repoBreakdown = $repoBreakdown ?? [];
+$failureBreakdown = $failureBreakdown ?? [];
 @endphp
 
 <main id="content" class="container-xxl py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-shield-alt me-2"></i>{{ __('Integrity Dashboard') }}</h1>
     <div>
+      <a href="{{ url_for(['module' => 'integrity', 'action' => 'export']) }}" class="btn btn-outline-success btn-sm me-1">
+        <i class="fas fa-download me-1"></i>{{ __('Export') }}
+      </a>
+      <a href="{{ url_for(['module' => 'integrity', 'action' => 'policies']) }}" class="btn btn-outline-warning btn-sm me-1">
+        <i class="fas fa-archive me-1"></i>{{ __('Policies') }}
+      </a>
+      <a href="{{ url_for(['module' => 'integrity', 'action' => 'holds']) }}" class="btn btn-outline-danger btn-sm me-1">
+        <i class="fas fa-lock me-1"></i>{{ __('Holds') }}
+      </a>
+      <a href="{{ url_for(['module' => 'integrity', 'action' => 'alerts']) }}" class="btn btn-outline-dark btn-sm me-1">
+        <i class="fas fa-bell me-1"></i>{{ __('Alerts') }}
+      </a>
       <a href="{{ url_for(['module' => 'integrity', 'action' => 'schedules']) }}" class="btn btn-outline-primary btn-sm me-1">
         <i class="fas fa-clock me-1"></i>{{ __('Schedules') }}
       </a>
@@ -24,7 +41,7 @@ $outcomes = $stats->recent_outcomes ?? [];
 
   {{-- Stats cards --}}
   <div class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-md-2">
       <div class="card text-center h-100">
         <div class="card-body">
           <h6 class="text-muted">{{ __('Master Objects') }}</h6>
@@ -32,7 +49,7 @@ $outcomes = $stats->recent_outcomes ?? [];
         </div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
       <div class="card text-center h-100">
         <div class="card-body">
           <h6 class="text-muted">{{ __('Total Verifications') }}</h6>
@@ -40,7 +57,7 @@ $outcomes = $stats->recent_outcomes ?? [];
         </div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
       <div class="card text-center h-100 {{ $passRate !== null && $passRate < 95 ? 'border-warning' : '' }}">
         <div class="card-body">
           <h6 class="text-muted">{{ __('Pass Rate') }}</h6>
@@ -50,7 +67,7 @@ $outcomes = $stats->recent_outcomes ?? [];
         </div>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
       <div class="card text-center h-100 {{ ($stats->open_dead_letters ?? 0) > 0 ? 'border-danger' : '' }}">
         <div class="card-body">
           <h6 class="text-muted">{{ __('Open Dead Letters') }}</h6>
@@ -60,6 +77,128 @@ $outcomes = $stats->recent_outcomes ?? [];
           @if (($stats->open_dead_letters ?? 0) > 0)
             <a href="{{ url_for(['module' => 'integrity', 'action' => 'deadLetter']) }}" class="small">{{ __('View') }}</a>
           @endif
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card text-center h-100 {{ $backlog > 0 ? 'border-info' : '' }}">
+        <div class="card-body">
+          <h6 class="text-muted">{{ __('Never Verified') }}</h6>
+          <h2 class="mb-0 {{ $backlog > 0 ? 'text-info' : 'text-success' }}">{{ number_format($backlog) }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card text-center h-100">
+        <div class="card-body">
+          <h6 class="text-muted">{{ __('Throughput (7d)') }}</h6>
+          <h3 class="mb-0">{{ number_format($throughput['objects_per_hour'] ?? 0) }} <small class="text-muted">obj/hr</small></h3>
+          <small class="text-muted">{{ $throughput['gb_per_hour'] ?? 0 }} GB/hr</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- Daily Trend (30 days) --}}
+  @if (!empty($dailyTrend))
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0">{{ __('Daily Verification Trend (30 days)') }}</h5>
+    </div>
+    <div class="card-body">
+      @php
+        $maxTotal = max(array_map(fn($d) => $d->total ?? 0, $dailyTrend)) ?: 1;
+      @endphp
+      @foreach ($dailyTrend as $day)
+        @php
+          $pct = ($day->total / $maxTotal) * 100;
+          $passPct = $day->total > 0 ? ($day->passed / $day->total) * $pct : 0;
+          $failPct = $pct - $passPct;
+          $label = substr($day->day, 5); // MM-DD
+        @endphp
+        <div class="d-flex align-items-center mb-1">
+          <small class="text-muted me-2" style="min-width:45px">{{ $label }}</small>
+          <div class="progress flex-grow-1" style="height:16px">
+            @if ($passPct > 0)
+              <div class="progress-bar bg-success" style="width:{{ $passPct }}%" title="{{ $day->passed }} passed"></div>
+            @endif
+            @if ($failPct > 0)
+              <div class="progress-bar bg-danger" style="width:{{ $failPct }}%" title="{{ $day->failed }} failed"></div>
+            @endif
+          </div>
+          <small class="text-muted ms-2" style="min-width:50px">{{ number_format($day->total) }}</small>
+        </div>
+      @endforeach
+    </div>
+  </div>
+  @endif
+
+  <div class="row g-3 mb-4">
+    {{-- Repository Breakdown --}}
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><h5 class="mb-0">{{ __('Repository Breakdown') }}</h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>{{ __('Repository') }}</th>
+                  <th class="text-end">{{ __('Total') }}</th>
+                  <th class="text-end">{{ __('Passed') }}</th>
+                  <th class="text-end">{{ __('Failed') }}</th>
+                  <th class="text-end">{{ __('Pass Rate') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @forelse ($repoBreakdown as $repo)
+                  <tr>
+                    <td>{{ $repo->repo_name }}</td>
+                    <td class="text-end">{{ number_format($repo->total) }}</td>
+                    <td class="text-end">{{ number_format($repo->passed) }}</td>
+                    <td class="text-end {{ $repo->failed > 0 ? 'text-danger fw-bold' : '' }}">{{ number_format($repo->failed) }}</td>
+                    <td class="text-end {{ $repo->pass_rate < 95 ? 'text-warning fw-bold' : 'text-success' }}">{{ $repo->pass_rate }}%</td>
+                  </tr>
+                @empty
+                  <tr><td colspan="5" class="text-muted text-center py-3">{{ __('No repository data yet.') }}</td></tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{-- Failure Type Breakdown --}}
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><h5 class="mb-0">{{ __('Failure Type Breakdown (30 days)') }}</h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>{{ __('Outcome') }}</th>
+                  <th class="text-end">{{ __('Count') }}</th>
+                  <th class="text-end">{{ __('Percentage') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @php
+                  $failTotal = array_sum(array_map(fn($f) => $f->cnt ?? 0, $failureBreakdown));
+                @endphp
+                @forelse ($failureBreakdown as $fb)
+                  <tr>
+                    <td><span class="badge bg-danger">{{ $fb->outcome }}</span></td>
+                    <td class="text-end">{{ number_format($fb->cnt) }}</td>
+                    <td class="text-end">{{ $failTotal > 0 ? round(($fb->cnt / $failTotal) * 100, 1) : 0 }}%</td>
+                  </tr>
+                @empty
+                  <tr><td colspan="3" class="text-muted text-center py-3">{{ __('No failures in the last 30 days.') }}</td></tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -141,7 +280,7 @@ $outcomes = $stats->recent_outcomes ?? [];
             @forelse ($recentRuns as $run)
               <tr>
                 <td><a href="{{ url_for(['module' => 'integrity', 'action' => 'runDetail', 'id' => $run->id]) }}">{{ $run->id }}</a></td>
-                <td>{{ $run->schedule_name ?? '—' }}</td>
+                <td>{{ $run->schedule_name ?? "\xE2\x80\x94" }}</td>
                 <td><span class="badge {{ $run->status === 'completed' ? 'bg-success' : ($run->status === 'running' ? 'bg-info' : 'bg-warning') }}">{{ $run->status }}</span></td>
                 <td>{{ number_format($run->objects_scanned) }}</td>
                 <td>{{ number_format($run->objects_passed) }}</td>
@@ -180,7 +319,7 @@ $outcomes = $stats->recent_outcomes ?? [];
               <tr>
                 <td>{{ $f->digital_object_id }}</td>
                 <td><span class="badge bg-danger">{{ $f->outcome }}</span></td>
-                <td class="text-truncate" style="max-width:400px">{{ $f->file_path ?? '—' }}</td>
+                <td class="text-truncate" style="max-width:400px">{{ $f->file_path ?? "\xE2\x80\x94" }}</td>
                 <td>{{ $f->verified_at }}</td>
               </tr>
             @endforeach

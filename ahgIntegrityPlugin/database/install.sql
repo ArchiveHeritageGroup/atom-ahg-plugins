@@ -124,6 +124,95 @@ CREATE TABLE IF NOT EXISTS `integrity_dead_letter` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- Issue #188: Add actor/hostname tracking to ledger
+-- (Programmatic migration via runMigration() checks INFORMATION_SCHEMA before ALTER)
+-- ============================================================
+-- ALTER TABLE `integrity_ledger` ADD COLUMN `actor` VARCHAR(255) NULL AFTER `duration_ms`;
+-- ALTER TABLE `integrity_ledger` ADD COLUMN `hostname` VARCHAR(255) NULL AFTER `actor`;
+-- NOTE: The above ALTERs are applied programmatically by IntegrityService::runMigration()
+--       to avoid errors on re-run. They are commented here for documentation only.
+
+-- ============================================================
+-- Table: integrity_retention_policy (Issue #189)
+-- Retention period definitions and scope rules
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `integrity_retention_policy` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `description` TEXT NULL,
+    `retention_period_days` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 = indefinite retention',
+    `trigger_type` ENUM('ingest_date','last_modified','closure_date','last_access') NOT NULL DEFAULT 'ingest_date',
+    `scope_type` ENUM('global','repository','hierarchy') NOT NULL DEFAULT 'global',
+    `repository_id` INT NULL,
+    `information_object_id` INT NULL,
+    `is_enabled` TINYINT(1) NOT NULL DEFAULT 0,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_irp_enabled` (`is_enabled`),
+    INDEX `idx_irp_scope` (`scope_type`, `repository_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Table: integrity_legal_hold (Issue #189)
+-- Legal holds that block disposition of records
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `integrity_legal_hold` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `information_object_id` INT NOT NULL,
+    `reason` TEXT NOT NULL,
+    `placed_by` VARCHAR(255) NOT NULL,
+    `placed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `released_by` VARCHAR(255) NULL,
+    `released_at` DATETIME NULL,
+    `status` ENUM('active','released') NOT NULL DEFAULT 'active',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_ilh_io` (`information_object_id`),
+    INDEX `idx_ilh_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Table: integrity_disposition_queue (Issue #189)
+-- Disposition review queue for records past retention period
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `integrity_disposition_queue` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `policy_id` BIGINT UNSIGNED NOT NULL,
+    `information_object_id` INT NOT NULL,
+    `digital_object_id` INT NULL,
+    `status` ENUM('eligible','pending_review','approved','rejected','held','disposed') NOT NULL DEFAULT 'eligible',
+    `eligible_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `reviewed_by` VARCHAR(255) NULL,
+    `reviewed_at` DATETIME NULL,
+    `review_notes` TEXT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_idq_policy` (`policy_id`),
+    INDEX `idx_idq_io` (`information_object_id`),
+    INDEX `idx_idq_status` (`status`),
+    CONSTRAINT `fk_idq_policy` FOREIGN KEY (`policy_id`) REFERENCES `integrity_retention_policy`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Table: integrity_alert_config (Issue #190)
+-- Threshold-based alerting configuration
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `integrity_alert_config` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `alert_type` ENUM('pass_rate_below','failure_count_above','dead_letter_count_above','backlog_above','run_failure') NOT NULL,
+    `threshold_value` DECIMAL(12,2) NULL,
+    `comparison` ENUM('lt','lte','gt','gte','eq') NOT NULL DEFAULT 'gt',
+    `is_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+    `email` VARCHAR(255) NULL,
+    `webhook_url` VARCHAR(1024) NULL,
+    `webhook_secret` VARCHAR(255) NULL,
+    `last_triggered_at` DATETIME NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_iac_enabled` (`is_enabled`),
+    INDEX `idx_iac_type` (`alert_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 -- Seed data: 2 default schedules
 -- ============================================================
 INSERT IGNORE INTO `integrity_schedule` (`id`, `name`, `description`, `scope_type`, `algorithm`, `frequency`, `batch_size`, `io_throttle_ms`, `max_memory_mb`, `max_runtime_minutes`, `max_concurrent_runs`, `is_enabled`, `next_run_at`, `notify_on_failure`, `notify_on_mismatch`)

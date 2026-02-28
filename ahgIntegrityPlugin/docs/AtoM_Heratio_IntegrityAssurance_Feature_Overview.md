@@ -2,7 +2,7 @@
 
 ## Feature Overview
 
-**Plugin:** ahgIntegrityPlugin v1.0.0
+**Plugin:** ahgIntegrityPlugin v1.1.0
 **Category:** Digital Preservation
 **Author:** The Archive and Heritage Group (Pty) Ltd
 **License:** AGPL-3.0
@@ -13,7 +13,7 @@
 
 The Integrity Assurance plugin provides enterprise-grade automated integrity verification for digital objects managed by AtoM Heratio. It ensures that archival files remain unchanged over time by comparing stored cryptographic checksums against current file hashes, detecting corruption, unauthorized modifications, or storage failures before they become unrecoverable.
 
-The plugin builds on the existing Digital Preservation plugin's checksum infrastructure, adding sophisticated scheduling, concurrency controls, and failure management capabilities required by large-scale GLAM and DAM institutions.
+The plugin builds on the existing Digital Preservation plugin's checksum infrastructure, adding sophisticated scheduling, concurrency controls, failure management, retention policies, legal holds, and threshold-based alerting required by large-scale GLAM and DAM institutions.
 
 ## Key Features
 
@@ -33,6 +33,7 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 ### Append-Only Verification Ledger
 - Complete audit trail of every verification attempt
 - Entries are never updated or deleted — full forensic history
+- **Actor and hostname tracking** for multi-server environments
 - Denormalized repository and information object IDs for efficient scoped queries
 - Records file existence, readability, hash values, match status, and timing
 
@@ -42,24 +43,60 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 - Per-object, per-failure-type tracking with unique constraint
 - Retry management with configurable maximum retries
 
+### CSV Export & Auditor Pack (v1.1.0)
+- **CSV export**: Download the complete verification ledger with date, repository, and outcome filters
+- **Auditor Pack**: ZIP archive containing standalone summary.html (no external dependencies), exceptions.csv, and config-snapshot.json
+- **CLI export**: `--export-csv` and `--auditor-pack` flags for automated reporting pipelines
+
+### Retention Policy Engine (v1.1.0)
+- **Policy definitions**: Name, description, retention period (days), trigger type, scope
+- **Trigger types**: Ingest date, last modified, closure date, last access
+- **Scope types**: Global, per-repository, or per-hierarchy node
+- **Disposition review queue**: Eligible, Pending Review, Approved, Rejected, Held, Disposed
+- **Safe disposition**: Marks as "disposed" only — no actual deletion (preserving archival integrity)
+
+### Legal Holds (v1.1.0)
+- Place legal holds on information objects to block disposition
+- Automatic blocking of disposition queue entries when hold is placed
+- Release workflow with re-evaluation of queue entries
+- Full audit trail in the verification ledger
+
+### Threshold-Based Alerting (v1.1.0)
+- **Alert types**: Pass rate below threshold, failure count above, dead letter count above, backlog above, run failure
+- **Email notifications**: Via SwiftMailer (matches existing AtoM pattern)
+- **Webhook notifications**: HTTP POST with HMAC-SHA256 signature verification
+- **Schedule notifications**: Existing notify_email, notify_on_failure, notify_on_mismatch wired to alert system
+- **Non-fatal**: Alert failures never break verification runs
+
+### Enhanced Dashboard (v1.1.0)
+- **Backlog card**: Count of master digital objects never verified
+- **Throughput card**: Objects/hour and GB/hour over the last 7 days
+- **Daily Trend chart**: CSS-only horizontal bar chart (30 days), green=pass, red=fail
+- **Repository Breakdown table**: Per-repository totals, pass/fail counts, pass rate
+- **Failure Type Breakdown table**: Outcome distribution with percentages
+
 ### Admin Dashboard
 - Real-time statistics: master objects, total verifications, pass rate
 - Recent runs and failures at a glance
 - Schedule management with enable/disable toggle and on-demand execution
 - Dead letter queue management with acknowledgment workflow
+- Navigation to Export, Policies, Holds, Alerts pages
 
 ### CLI Commands
 | Command | Purpose |
 |---------|---------|
 | `php symfony integrity:verify` | Run fixity verification (single object, batch, or by schedule) |
 | `php symfony integrity:schedule` | Manage schedules, run due schedules (for cron) |
-| `php symfony integrity:report` | Generate reports in text, JSON, or CSV format |
+| `php symfony integrity:report` | Generate reports, CSV exports, auditor packs |
+| `php symfony integrity:retention` | Manage retention policies, legal holds, disposition queue |
 
 ### Reporting
 - Summary statistics with pass rates and trend analysis
 - Monthly trend breakdown (12-month view)
 - Dead letter queue status reports
 - Multi-format output: text (terminal), JSON (integration), CSV (spreadsheets)
+- Filtered CSV export with 50,000 row limit
+- Auditor Pack ZIP for compliance audits
 
 ## Compliance and Standards
 
@@ -70,6 +107,8 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 | **NDSA Levels of Preservation** | Level 2+ fixity checking with automated scheduling |
 | **NARSSA/NARS** | South African national archives compliance for digital records |
 | **ISO 16363** (TDR Audit) | Documented integrity checking for Trusted Digital Repository certification |
+| **Records Retention** | Configurable retention policies with disposition review queue |
+| **Legal Hold** | Litigation hold capability to prevent disposition of records under review |
 
 ## Technical Requirements
 
@@ -78,7 +117,7 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 | **AtoM Heratio** | v2.8+ with atom-framework v2.8.0+ |
 | **Dependencies** | ahgCorePlugin, ahgPreservationPlugin (for baseline checksums) |
 | **PHP** | 8.1 or higher |
-| **Database** | MySQL 8.0+ (4 new tables) |
+| **Database** | MySQL 8.0+ (8 tables) |
 | **Hash Algorithms** | SHA-256 (default), SHA-512 |
 | **Storage** | Read access to all digital object storage paths |
 
@@ -88,14 +127,21 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 |-------|---------|
 | `integrity_schedule` | Verification schedule definitions with concurrency controls |
 | `integrity_run` | Execution records with counters and status |
-| `integrity_ledger` | Append-only verification audit trail |
+| `integrity_ledger` | Append-only verification audit trail with actor/hostname tracking |
 | `integrity_dead_letter` | Persistent failure queue with workflow states |
+| `integrity_retention_policy` | Retention period definitions and scope rules |
+| `integrity_legal_hold` | Legal holds blocking disposition |
+| `integrity_disposition_queue` | Disposition review queue |
+| `integrity_alert_config` | Threshold-based alert configuration |
 
 ## Recommended Cron Configuration
 
 ```
 # Run due integrity schedules every 15 minutes
 */15 * * * * cd /usr/share/nginx/archive && php symfony integrity:schedule --run-due >> /var/log/atom/integrity-scheduler.log 2>&1
+
+# Scan for retention-eligible objects daily at 1am
+0 1 * * * cd /usr/share/nginx/archive && php symfony integrity:retention --scan-eligible >> /var/log/atom/integrity-retention.log 2>&1
 
 # Weekly integrity summary report (Monday 8am)
 0 8 * * 1 cd /usr/share/nginx/archive && php symfony integrity:report --summary >> /var/log/atom/integrity-report.log 2>&1
@@ -107,12 +153,17 @@ Accessible at **Admin > Integrity** (requires administrator permissions):
 
 | Page | URL | Description |
 |------|-----|-------------|
-| Dashboard | `/admin/integrity` | Statistics, health overview, recent activity |
+| Dashboard | `/admin/integrity` | Statistics, health overview, trend chart, breakdowns |
 | Schedules | `/admin/integrity/schedules` | Manage verification schedules |
 | Runs | `/admin/integrity/runs` | Run history with filtering |
 | Ledger | `/admin/integrity/ledger` | Browse append-only verification ledger |
 | Dead Letter | `/admin/integrity/dead-letter` | Manage persistent failures |
 | Report | `/admin/integrity/report` | Visual report with trends |
+| Export | `/admin/integrity/export` | CSV export and Auditor Pack download |
+| Policies | `/admin/integrity/policies` | Retention policy management |
+| Holds | `/admin/integrity/holds` | Legal hold management |
+| Disposition | `/admin/integrity/disposition` | Disposition review queue |
+| Alerts | `/admin/integrity/alerts` | Threshold-based alert configuration |
 
 ## Installation
 
@@ -126,8 +177,11 @@ php bin/atom extension:enable ahgIntegrityPlugin
 # 3. Clear cache
 php symfony cc
 
-# 4. Verify installation
+# 4. Run schema migration (adds actor/hostname columns if upgrading from v1.0.0)
 php symfony integrity:verify --status
+
+# 5. Verify installation
+php symfony integrity:retention --status
 ```
 
 ---

@@ -1,13 +1,13 @@
 {
     "name": "Integrity Assurance",
     "machine_name": "ahgIntegrityPlugin",
-    "version": "1.0.0",
-    "description": "Enterprise-grade automated integrity assurance: scheduled fixity verification, scoped validation, concurrency controls, append-only ledger, dead-letter queue",
+    "version": "1.1.0",
+    "description": "Enterprise-grade automated integrity assurance: scheduled fixity verification, scoped validation, concurrency controls, append-only ledger, dead-letter queue, retention policies, legal holds, disposition review, threshold alerting",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0",
     "homepage": "https://theahg.co.za",
     "category": "preservation",
-    "keywords": ["integrity", "fixity", "verification", "checksum", "scheduling", "dead-letter", "ledger"],
+    "keywords": ["integrity", "fixity", "verification", "checksum", "scheduling", "dead-letter", "ledger", "retention", "legal-hold", "disposition", "alerting"],
     "requires": {
         "atom_framework": ">=2.8.0",
         "atom": ">=2.8",
@@ -15,14 +15,18 @@
     },
     "dependencies": ["ahgCorePlugin", "ahgPreservationPlugin"],
     "provides": {
-        "services": ["IntegrityService", "IntegrityScheduler"]
+        "services": ["IntegrityService", "IntegrityScheduler", "IntegrityRetentionService", "IntegrityAlertService"]
     },
     "install_sql": "database/install.sql",
     "tables": [
         "integrity_schedule",
         "integrity_run",
         "integrity_ledger",
-        "integrity_dead_letter"
+        "integrity_dead_letter",
+        "integrity_retention_policy",
+        "integrity_legal_hold",
+        "integrity_disposition_queue",
+        "integrity_alert_config"
     ],
     "settings": {
         "default_algorithm": "sha256",

@@ -1,6 +1,6 @@
 # AtoM Heratio — Integrity Assurance Plugin User Manual
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Author:** The Archive and Heritage Group (Pty) Ltd
 
 ---
@@ -15,9 +15,14 @@
 6. [Verification Ledger](#verification-ledger)
 7. [Dead Letter Queue](#dead-letter-queue)
 8. [Reports](#reports)
-9. [CLI Commands](#cli-commands)
-10. [Cron Setup](#cron-setup)
-11. [Troubleshooting](#troubleshooting)
+9. [Export & Auditor Pack](#export--auditor-pack)
+10. [Retention Policies](#retention-policies)
+11. [Legal Holds](#legal-holds)
+12. [Disposition Queue](#disposition-queue)
+13. [Alerts](#alerts)
+14. [CLI Commands](#cli-commands)
+15. [Cron Setup](#cron-setup)
+16. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -29,9 +34,12 @@ The Integrity Assurance plugin automates the verification of digital object inte
 
 1. The Preservation plugin generates baseline checksums (SHA-256 or SHA-512) when digital objects are ingested
 2. The Integrity plugin runs scheduled or ad-hoc verification passes
-3. Each verification is recorded in an append-only ledger
+3. Each verification is recorded in an append-only ledger with actor and hostname tracking
 4. Persistent failures are escalated to a dead-letter queue for manual investigation
-5. Reports and dashboards provide visibility into overall collection health
+5. Retention policies determine when records become eligible for disposition review
+6. Legal holds block disposition of records under review
+7. Threshold-based alerts notify administrators of integrity issues via email or webhook
+8. Reports and dashboards provide visibility into overall collection health
 
 ## Installation
 
@@ -62,18 +70,45 @@ The installation creates two default schedules:
 - **Daily Sample Check** (enabled): Verifies 200 random master objects daily
 - **Weekly Full Scan** (disabled): Comprehensive scan of all master objects
 
+### Upgrading from v1.0.0
+
+If upgrading from v1.0.0, the plugin will automatically add the `actor` and `hostname` columns to the `integrity_ledger` table on first use. You can also run the migration manually:
+
+```bash
+# Re-run install.sql (safe — uses CREATE TABLE IF NOT EXISTS)
+mysql -u root archive < atom-ahg-plugins/ahgIntegrityPlugin/database/install.sql
+
+# The ALTER for actor/hostname is handled programmatically
+php symfony integrity:verify --status
+```
+
 ## Dashboard
 
 Access: **Admin > Integrity** or navigate to `/admin/integrity`
 
 The dashboard provides an at-a-glance view of your collection's integrity health:
 
+**Top Row (6 cards):**
 - **Master Objects**: Total number of master digital objects in the system
 - **Total Verifications**: Cumulative verification count across all runs
 - **Pass Rate**: Percentage of verifications that matched baseline checksums
 - **Open Dead Letters**: Number of unresolved persistent failures (requires attention)
-- **Recent Runs**: Table of the last 10 verification runs with status and counters
-- **Recent Failures**: Objects that failed verification (mismatch, missing, errors)
+- **Never Verified** (backlog): Master objects that have never been verified
+- **Throughput (7d)**: Verification speed in objects/hour and GB/hour
+
+**Daily Trend (30 days):**
+- Horizontal bar chart showing daily pass (green) and fail (red) counts
+- Helps identify trends and anomalies at a glance
+
+**Repository Breakdown:**
+- Per-repository table with total verifications, passed, failed, and pass rate
+- Quickly identify which repositories need attention
+
+**Failure Type Breakdown:**
+- Distribution of failure types (mismatch, missing, unreadable, etc.) over the last 30 days
+- Helps prioritize remediation efforts
+
+**Navigation buttons** in the header provide quick access to: Export, Policies, Holds, Alerts, Schedules, Ledger, Report.
 
 ## Schedules
 
@@ -130,6 +165,8 @@ Each entry records:
 - File path, size, existence, and readability status
 - Hash algorithm, expected hash, computed hash, and match result
 - Outcome: pass, mismatch, missing, unreadable, permission_error, path_drift, no_baseline, error
+- **Actor**: Who/what triggered the verification (user, system, scheduler, CLI)
+- **Hostname**: Server that performed the verification
 - Verification timestamp and duration
 
 ### Filtering
@@ -173,6 +210,164 @@ The report page shows:
 - Outcome breakdown with percentage bars
 - Monthly trend table (12 months) showing pass rates over time
 - CLI command reference for generating machine-readable reports
+
+## Export & Auditor Pack
+
+Access: **Admin > Integrity > Export**
+
+### CSV Export
+
+Download the verification ledger as a CSV file with filters:
+- Date range (from/to)
+- Repository
+- Outcome type
+
+The CSV includes all ledger columns: ID, run ID, digital object ID, file path, hashes, outcome, actor, hostname, and timestamp. Maximum 50,000 rows per export.
+
+### Auditor Pack (ZIP)
+
+Download a self-contained ZIP archive for compliance audits containing:
+- **summary.html**: Standalone HTML report with inline CSS (no external dependencies), showing statistics, schedule configuration, and overall health
+- **exceptions.csv**: All non-pass verification entries
+- **config-snapshot.json**: Complete schedule configuration, dead letter summary, and current statistics
+
+Both export types support the same filter parameters.
+
+### CLI Export
+
+```bash
+# Export to CSV file
+php symfony integrity:report --export-csv=/tmp/ledger.csv
+
+# Export to stdout (pipe to another tool)
+php symfony integrity:report --export-csv=-
+
+# Generate auditor pack
+php symfony integrity:report --auditor-pack=/tmp/auditor.zip
+
+# With filters
+php symfony integrity:report --export-csv=/tmp/q1.csv --date-from=2026-01-01 --date-to=2026-03-31
+```
+
+## Retention Policies
+
+Access: **Admin > Integrity > Policies**
+
+Retention policies define how long records should be kept before becoming eligible for disposition review. This does NOT automatically delete records — it only identifies candidates for human review.
+
+### Creating a Policy
+
+1. Click **New Policy**
+2. Configure:
+   - **Name**: Descriptive name (e.g., "7-Year Financial Records")
+   - **Retention Period**: Number of days (0 = indefinite, never eligible)
+   - **Trigger Type**: When the clock starts
+     - `ingest_date`: From when the record was created in AtoM
+     - `last_modified`: From last modification date
+     - `closure_date`: From closure/completion date
+     - `last_access`: From last access date
+   - **Scope**: Global, per-repository, or per-hierarchy node
+   - **Enabled**: Toggle to activate/deactivate
+
+### Managing Policies
+
+From the policy list:
+- **Toggle**: Enable/disable the policy
+- **Edit**: Modify policy settings
+- **Delete**: Remove the policy (also removes its disposition queue entries)
+
+### Scanning for Eligible Records
+
+Use the **Scan for Eligible** button on the Disposition page or CLI:
+```bash
+php symfony integrity:retention --scan-eligible
+php symfony integrity:retention --scan-eligible --policy-id=1
+```
+
+## Legal Holds
+
+Access: **Admin > Integrity > Holds**
+
+Legal holds prevent records from being disposed of, even if they are past their retention period. Use legal holds when records are subject to litigation, investigation, or regulatory review.
+
+### Placing a Hold
+
+1. Click **Place Hold**
+2. Enter the Information Object ID
+3. Provide a reason (required for audit trail)
+4. Click **Place Hold**
+
+When a hold is placed:
+- The hold is recorded with the placer's name and timestamp
+- Any matching disposition queue entries are moved to "held" status
+- A ledger entry is created for audit purposes
+
+### Releasing a Hold
+
+Click the unlock icon next to an active hold. When released:
+- The hold is marked as "released" with the releaser's name and timestamp
+- If no other active holds exist on the record, disposition queue entries revert to "eligible"
+- A ledger entry is created for audit purposes
+
+## Disposition Queue
+
+Access: **Admin > Integrity > Disposition**
+
+The disposition queue shows records that have passed their retention period and are candidates for review.
+
+### Status Flow
+
+```
+eligible → pending_review → approved → disposed
+                          → rejected
+                          → held (if legal hold placed)
+```
+
+### Reviewing Records
+
+- Click the checkmark to **approve** disposition
+- Click the X to **reject** disposition
+- Optionally add review notes
+
+**Important**: "Disposed" status only marks the record — it does NOT delete anything. Actual deletion (if required) is a separate manual process outside the plugin.
+
+### Status Summary
+
+The page header shows counts for each status, helping prioritize review work.
+
+## Alerts
+
+Access: **Admin > Integrity > Alerts**
+
+Configure threshold-based alerts to be notified when integrity metrics cross defined boundaries.
+
+### Alert Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **Pass rate below** | Triggers when pass rate drops | Alert if pass rate < 95% |
+| **Failure count above** | Triggers when failures exceed threshold | Alert if > 10 failures per run |
+| **Dead letter count above** | Triggers when open dead letters exceed threshold | Alert if > 5 open dead letters |
+| **Backlog above** | Triggers when unverified objects exceed threshold | Alert if > 1000 never-verified |
+| **Run failure** | Triggers on any failed/timeout/partial run | Alert on any run failure |
+
+### Notification Channels
+
+- **Email**: Sent via the configured SwiftMailer (same as AtoM's email system)
+- **Webhook**: HTTP POST to a URL with JSON payload
+  - Optional HMAC-SHA256 signature in `X-Signature` header for verification
+  - Useful for integration with Slack, Teams, PagerDuty, etc.
+
+### Creating an Alert
+
+1. Click **New Alert**
+2. Select the alert type and comparison operator
+3. Set the threshold value
+4. Provide email and/or webhook URL
+5. Optionally add a webhook secret for HMAC signing
+6. Enable/disable the alert
+
+Alerts are evaluated after each batch verification run. Alert failures are non-fatal — they never break the verification process.
 
 ## CLI Commands
 
@@ -238,6 +433,37 @@ php symfony integrity:report --summary --format=json
 
 # CSV output (for spreadsheets)
 php symfony integrity:report --dead-letter --format=csv
+
+# Export full ledger to CSV
+php symfony integrity:report --export-csv=/tmp/ledger.csv
+
+# Generate auditor pack
+php symfony integrity:report --auditor-pack=/tmp/auditor.zip
+```
+
+### integrity:retention
+
+```bash
+# List all retention policies
+php symfony integrity:retention --list
+
+# Show retention & disposition status
+php symfony integrity:retention --status
+
+# Scan for eligible disposition candidates
+php symfony integrity:retention --scan-eligible
+
+# Scan for specific policy
+php symfony integrity:retention --scan-eligible --policy-id=1
+
+# Process approved dispositions (mark as disposed)
+php symfony integrity:retention --process-queue
+
+# Place a legal hold
+php symfony integrity:retention --hold=12345 --reason="Legal investigation"
+
+# Release a legal hold
+php symfony integrity:retention --release=1
 ```
 
 ## Cron Setup
@@ -248,8 +474,17 @@ Add these entries to your system crontab:
 # Run due integrity schedules every 15 minutes
 */15 * * * * cd /usr/share/nginx/archive && php symfony integrity:schedule --run-due >> /var/log/atom/integrity-scheduler.log 2>&1
 
-# Weekly summary report (Monday 8am)
+# Scan for retention-eligible objects daily at 1am
+0 1 * * * cd /usr/share/nginx/archive && php symfony integrity:retention --scan-eligible >> /var/log/atom/integrity-retention.log 2>&1
+
+# Process approved dispositions daily at 2am
+0 2 * * * cd /usr/share/nginx/archive && php symfony integrity:retention --process-queue >> /var/log/atom/integrity-retention.log 2>&1
+
+# Weekly integrity summary report (Monday 8am)
 0 8 * * 1 cd /usr/share/nginx/archive && php symfony integrity:report --summary >> /var/log/atom/integrity-report.log 2>&1
+
+# Weekly auditor pack export (Monday 8:30am)
+30 8 * * 1 cd /usr/share/nginx/archive && php symfony integrity:report --auditor-pack=/tmp/integrity_weekly.zip >> /var/log/atom/integrity-report.log 2>&1
 ```
 
 These cron entries are also documented in **Admin > AHG Settings > Cron Jobs** under the "Integrity Assurance" category.
@@ -284,6 +519,17 @@ The symlink should point to the NAS mount (e.g., `/mnt/nas/heratio/archive`).
 1. Check dead letter queue for patterns (same repository, same failure type)
 2. Run a targeted verification: `php symfony integrity:verify --repository-id=X --limit=50`
 3. Check storage health (NAS connectivity, disk errors)
+
+### Alerts not sending
+1. Verify email configuration in AtoM's `apps/qubit/config/factories.yml` (mailer section)
+2. Check webhook URL is accessible from the server
+3. Verify alert is enabled in Admin > Integrity > Alerts
+4. Check PHP error logs for alert-related exceptions
+
+### Retention scan finding no eligible records
+1. Ensure retention_period_days > 0 (0 = indefinite, never eligible)
+2. Check that the trigger_type column matches your data (e.g., `ingest_date` requires `created_at`)
+3. Verify the policy scope matches your records (repository ID, hierarchy node)
 
 ---
 
