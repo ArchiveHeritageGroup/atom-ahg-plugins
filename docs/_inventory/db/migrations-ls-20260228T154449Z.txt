@@ -1,0 +1,12 @@
+total 96
+drwxr-xr-x 2 root root  4096 Feb  1 18:49 .
+drwxr-xr-x 4 root root  4096 Feb 14 07:24 ..
+-rw-r--r-- 1 root root  1246 Feb  1 18:50 004_fix_atom_plugin_class_name.php
+-rw-r--r-- 1 root root  1453 Feb  1 18:50 2025_01_08_add_record_check.sql
+-rw-r--r-- 1 root root  4878 Feb  1 18:50 2026_01_07_sector_level_defaults.sql
+-rw-r--r-- 1 root root  1825 Feb  1 18:50 2026_01_18_add_missing_indexes.sql
+-rw-r--r-- 1 root root 10710 Feb  1 18:50 2026_01_25_create_heritage_discovery_tables.sql
+-rw-r--r-- 1 root root  9889 Feb  1 18:50 2026_01_25_create_heritage_enhanced_landing.sql
+-rw-r--r-- 1 root root 11065 Feb  1 18:50 2026_01_25_create_heritage_tables.sql
+-rw-r--r-- 1 root root 10934 Feb  1 18:50 2026_01_26_create_heritage_contributions.sql
+-rw-r--r-- 1 root root 20054 Feb  1 18:50 2026_01_26_create_heritage_sessions_6_9.sql

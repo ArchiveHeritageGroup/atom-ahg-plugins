@@ -1,0 +1,20 @@
+*/5 * * * * /usr/share/nginx/archive/ric_sync.sh --cron
+0 3 * * * cd /usr/share/nginx/archive && php symfony search:cleanup
+0 6 * * * cd /usr/share/nginx/archive && php symfony search:notify-saved --frequency=daily
+0 7 * * 1 cd /usr/share/nginx/archive && php symfony search:notify-saved --frequency=weekly
+0 8 1 * * cd /usr/share/nginx/archive && php symfony search:notify-saved --frequency=monthly
+0 8 * * * cd /usr/share/nginx/archive && php symfony agreement:process-reminders
+0 3 * * * cd /usr/share/nginx/archive && php symfony search:cleanup
+0 2 * * * www-data /usr/share/nginx/archive/atom-framework/scripts/run-backup.sh --retention=30
+0 3 * * 0 www-data /usr/share/nginx/archive/atom-framework/scripts/run-backup.sh --retention=90
+0 4 * * * www-data /usr/share/nginx/archive/atom-framework/scripts/cleanup-backups.sh
+* * * * * cd /usr/share/nginx/archive && php symfony ric:queue-process --limit=50
+0 2 * * 0 cd /usr/share/nginx/archive && php symfony ric:integrity-check --fix
+0 3 1 * * cd /usr/share/nginx/archive && php symfony ric:cleanup
+0 8 * * * /usr/share/nginx/archive/tools/donor-reminder-cron.sh >> /var/log/atom-donor-reminders.log 2>&1
+*/1 * * * * php /usr/share/nginx/archive/atom-framework/bin/sync-library-display.php >> /var/log/atom-sync.log 2>&1
+0 * * * * /usr/share/nginx/archive/atom-framework/bin/cron-3d-thumbnails.sh
+0 * * * * php symfony ahg:refresh-facet-cache --env=prod > /dev/null 2>&1
+*/15 * * * * cd /usr/share/nginx/archive && php symfony workflow:process --notifications >> /var/log/atom-workflow.log 2>&1
+# Daily MySQL full dump to NAS (1am)
+0 1 * * * /usr/local/bin/mysql_full_dump.sh
