@@ -2133,6 +2133,105 @@ slot('title', $title);
                                 </div>
                             <?php break; ?>
 
+                        <?php case 'accession': ?>
+                                <!-- Intake Queue -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-inbox me-2"></i><?php echo __('Intake Queue') ?></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="accession_numbering_mask"><?php echo __('Numbering Mask') ?></label>
+                                                <input type="text" class="form-control" id="accession_numbering_mask"
+                                                       name="settings[accession_numbering_mask]"
+                                                       value="<?php echo htmlspecialchars($settings['accession_numbering_mask'] ?? 'ACC-{YYYY}-{####}') ?>"
+                                                       placeholder="ACC-{YYYY}-{####}">
+                                                <div class="form-text"><?php echo __('Pattern for auto-generated accession numbers. Use {YYYY} for year and {####} for sequence.') ?></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="accession_default_priority"><?php echo __('Default Priority') ?></label>
+                                                <select class="form-select" id="accession_default_priority" name="settings[accession_default_priority]">
+                                                    <option value="low" <?php echo ($settings['accession_default_priority'] ?? 'normal') === 'low' ? 'selected' : '' ?>><?php echo __('Low') ?></option>
+                                                    <option value="normal" <?php echo ($settings['accession_default_priority'] ?? 'normal') === 'normal' ? 'selected' : '' ?>><?php echo __('Normal') ?></option>
+                                                    <option value="high" <?php echo ($settings['accession_default_priority'] ?? 'normal') === 'high' ? 'selected' : '' ?>><?php echo __('High') ?></option>
+                                                    <option value="urgent" <?php echo ($settings['accession_default_priority'] ?? 'normal') === 'urgent' ? 'selected' : '' ?>><?php echo __('Urgent') ?></option>
+                                                </select>
+                                                <div class="form-text"><?php echo __('Default priority assigned to new accessions in the intake queue.') ?></div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-3 mt-2">
+                                            <div class="col-md-4">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="accession_auto_assign_enabled"
+                                                           name="settings[accession_auto_assign_enabled]" value="true"
+                                                           <?php echo ($settings['accession_auto_assign_enabled'] ?? 'false') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="accession_auto_assign_enabled">
+                                                        <strong><?php echo __('Auto-Assign to Archivist') ?></strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Automatically assign new accessions to the creating archivist.') ?></div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="accession_require_donor_agreement"
+                                                           name="settings[accession_require_donor_agreement]" value="true"
+                                                           <?php echo ($settings['accession_require_donor_agreement'] ?? 'false') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="accession_require_donor_agreement">
+                                                        <strong><?php echo __('Require Donor Agreement') ?></strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Donor agreement must be attached before an accession can be finalised.') ?></div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="accession_require_appraisal"
+                                                           name="settings[accession_require_appraisal]" value="true"
+                                                           <?php echo ($settings['accession_require_appraisal'] ?? 'false') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="accession_require_appraisal">
+                                                        <strong><?php echo __('Require Appraisal') ?></strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Appraisal must be completed before an accession can be finalised.') ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Containers & Rights -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-box me-2"></i><?php echo __('Containers & Rights') ?></h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="accession_allow_container_barcodes"
+                                                           name="settings[accession_allow_container_barcodes]" value="true"
+                                                           <?php echo ($settings['accession_allow_container_barcodes'] ?? 'false') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="accession_allow_container_barcodes">
+                                                        <strong><?php echo __('Allow Container Barcodes') ?></strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Enable barcode scanning for linking containers to accessions.') ?></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="accession_rights_inheritance_enabled"
+                                                           name="settings[accession_rights_inheritance_enabled]" value="true"
+                                                           <?php echo ($settings['accession_rights_inheritance_enabled'] ?? 'false') === 'true' ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="accession_rights_inheritance_enabled">
+                                                        <strong><?php echo __('Rights Inheritance') ?></strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text"><?php echo __('Automatically inherit rights from the donor agreement to created information objects.') ?></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php break; ?>
+
                         <?php endswitch; ?>
 
                         <!-- Submit Button -->
