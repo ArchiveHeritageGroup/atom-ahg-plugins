@@ -658,6 +658,204 @@ class workflowActions extends AhgController
     }
 
     // =========================================================================
+    // PUBLISH GATES (#176)
+    // =========================================================================
+
+    protected function getGateService(): PublishGateService
+    {
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/PublishGateService.php';
+        return new PublishGateService();
+    }
+
+    public function executePublishReadiness($request)
+    {
+        $this->requireAuth();
+        $objectId = (int) $request->getParameter('object_id');
+
+        $gateService = $this->getGateService();
+        $this->results = $gateService->evaluate($objectId, $this->getCurrentUserId());
+        $this->canPublish = !in_array(true, array_map(
+            fn($r) => $r['severity'] === 'blocker' && $r['status'] === 'failed',
+            $this->results
+        ));
+        $this->objectId = $objectId;
+        $this->isAdmin = $this->getUser()->hasCredential('administrator');
+
+        // Stats
+        $this->passedCount = count(array_filter($this->results, fn($r) => $r['status'] === 'passed'));
+        $this->failedCount = count(array_filter($this->results, fn($r) => $r['status'] === 'failed'));
+        $this->warningCount = count(array_filter($this->results, fn($r) => $r['status'] === 'warning'));
+        $this->skippedCount = count(array_filter($this->results, fn($r) => $r['status'] === 'skipped'));
+
+        // Object info
+        $this->object = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+            ->join('information_object as io', 'information_object_i18n.id', '=', 'io.id')
+            ->where('information_object_i18n.id', $objectId)
+            ->where('information_object_i18n.culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
+            ->select('information_object_i18n.title', 'io.identifier')
+            ->first();
+    }
+
+    public function executePublishSimulate($request)
+    {
+        $this->requireAuth();
+        $objectId = (int) $request->getParameter('object_id');
+
+        $this->objectId = $objectId;
+        $this->preview = $this->getGateService()->simulatePublish(
+            $objectId,
+            \AtomExtensions\Helpers\CultureHelper::getCulture()
+        );
+    }
+
+    public function executePublishExecute($request)
+    {
+        $this->requireAuth();
+        $objectId = (int) $request->getParameter('object_id');
+        $force = (bool) $request->getParameter('force', 0);
+
+        if ($force) {
+            $this->requireAdmin();
+        }
+
+        $result = $this->getGateService()->executePublish(
+            $objectId,
+            $this->getCurrentUserId(),
+            $force
+        );
+
+        if ($result['published']) {
+            $this->getUser()->setFlash('notice', 'Record published successfully');
+        } else {
+            $blockerMessages = array_map(fn($b) => $b['error_message'], $result['blockers']);
+            $this->getUser()->setFlash('error', 'Cannot publish: ' . implode('; ', $blockerMessages));
+        }
+
+        $this->redirect("workflow/publish-readiness/{$objectId}");
+    }
+
+    public function executeGateAdmin($request)
+    {
+        $this->requireAdmin();
+        $this->rules = $this->getGateService()->getRules();
+    }
+
+    public function executeGateRuleEdit($request)
+    {
+        $this->requireAdmin();
+        $ruleId = (int) $request->getParameter('id');
+
+        $gateService = $this->getGateService();
+
+        // Load existing rule (0 = new rule)
+        $this->rule = $ruleId > 0
+            ? \Illuminate\Database\Capsule\Manager::table('ahg_publish_gate_rule')->where('id', $ruleId)->first()
+            : null;
+
+        if ($request->isMethod('post')) {
+            $data = [
+                'name' => $request->getParameter('name'),
+                'rule_type' => $request->getParameter('rule_type'),
+                'entity_type' => $request->getParameter('entity_type', 'information_object'),
+                'level_of_description_id' => $request->getParameter('level_of_description_id') ?: null,
+                'material_type' => $request->getParameter('material_type') ?: null,
+                'repository_id' => $request->getParameter('repository_id') ?: null,
+                'field_name' => $request->getParameter('field_name') ?: null,
+                'rule_config' => $request->getParameter('rule_config') ?: null,
+                'error_message' => $request->getParameter('error_message'),
+                'severity' => $request->getParameter('severity', 'blocker'),
+                'is_active' => $request->getParameter('is_active') ? 1 : 0,
+                'sort_order' => (int) $request->getParameter('sort_order', 0),
+            ];
+
+            if ($this->rule) {
+                $gateService->updateRule($ruleId, $data);
+                $this->getUser()->setFlash('notice', 'Rule updated');
+            } else {
+                $gateService->createRule($data);
+                $this->getUser()->setFlash('notice', 'Rule created');
+            }
+
+            $this->redirect('workflow/admin/gates');
+        }
+
+        // Load dropdown data for form
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $this->ruleTypes = \Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
+            ->where('taxonomy', 'publish_gate_rule_type')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
+
+        $this->levels = \Illuminate\Database\Capsule\Manager::table('term_i18n')
+            ->join('term', 'term_i18n.id', '=', 'term.id')
+            ->where('term.taxonomy_id', 34) // Level of description taxonomy
+            ->where('term_i18n.culture', $culture)
+            ->select('term.id', 'term_i18n.name')
+            ->orderBy('term_i18n.name')
+            ->get()
+            ->toArray();
+
+        $this->repositories = $this->getRepositories();
+    }
+
+    public function executeGateRuleDelete($request)
+    {
+        $this->requireAdmin();
+        $ruleId = (int) $request->getParameter('id');
+
+        $this->getGateService()->deleteRule($ruleId);
+        $this->getUser()->setFlash('notice', 'Rule deleted');
+        $this->redirect('workflow/admin/gates');
+    }
+
+    // =========================================================================
+    // CHANGE SUMMARY (#177)
+    // =========================================================================
+
+    public function executeChangeSummary($request)
+    {
+        $this->requireAuth();
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['error' => 'POST required']));
+        }
+
+        $objectId = (int) $request->getParameter('object_id');
+        if (!$objectId) {
+            return $this->renderText(json_encode(['error' => 'object_id required']));
+        }
+
+        // Collect new values from POST
+        $newValues = [];
+        $fields = ['title', 'scope_and_content', 'extent_and_medium', 'archival_history',
+                    'acquisition', 'arrangement', 'access_conditions', 'reproduction_conditions',
+                    'physical_characteristics', 'finding_aids', 'location_of_originals',
+                    'location_of_copies', 'related_units_of_description', 'rules'];
+        foreach ($fields as $f) {
+            $val = $request->getParameter($f);
+            if ($val !== null) {
+                $newValues[$f] = $val;
+            }
+        }
+
+        require_once $this->config('sf_root_dir') . '/plugins/ahgWorkflowPlugin/lib/Services/ChangeSummaryService.php';
+        $summaryService = new ChangeSummaryService();
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $diffs = $summaryService->computeDiff($objectId, $newValues, $culture);
+        $summary = $summaryService->formatSummary($diffs);
+
+        return $this->renderText(json_encode([
+            'diffs' => $diffs,
+            'summary' => $summary,
+            'change_count' => count($diffs),
+        ]));
+    }
+
+    // =========================================================================
     // API ENDPOINTS
     // =========================================================================
 

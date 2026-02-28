@@ -106,6 +106,17 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         $apiv2->get('apiv2_webhookDeliveries', '/api/v2/webhooks/:id/deliveries', 'webhookDeliveries', ['id' => '\d+']);
         $apiv2->post('apiv2_webhookRegenerateSecret', '/api/v2/webhooks/:id/regenerate-secret', 'webhookRegenerateSecret', ['id' => '\d+']);
 
+        // Events & Audit API (#183)
+        $apiv2->get('apiv2_eventsBrowse', '/api/v2/events', 'eventsBrowse');
+        $apiv2->get('apiv2_eventsRead', '/api/v2/events/:id', 'eventsRead', ['id' => '\d+']);
+        $apiv2->get('apiv2_eventsCorrelation', '/api/v2/events/correlation/:correlation_id', 'eventsCorrelation');
+        $apiv2->get('apiv2_auditBrowse', '/api/v2/audit', 'auditBrowse');
+        $apiv2->get('apiv2_auditRead', '/api/v2/audit/:id', 'auditRead', ['id' => '\d+']);
+
+        // Publish API (#183)
+        $apiv2->get('apiv2_publishReadiness', '/api/v2/publish/readiness/:slug', 'publishReadiness', ['slug' => '[a-z0-9_-]+']);
+        $apiv2->post('apiv2_publishExecute', '/api/v2/publish/execute/:slug', 'publishExecute', ['slug' => '[a-z0-9_-]+']);
+
         $apiv2->register($routing);
 
         // ===================

@@ -761,4 +761,59 @@ class iiifActions extends AhgController
 
         return $this->renderText(json_encode(['success' => true]));
     }
+
+    // =========================================================================
+    // IIIF VALIDATION (#184)
+    // =========================================================================
+
+    public function executeValidationDashboard($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->redirect('user/login');
+        }
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgIiifPlugin/lib/Services/IiifValidationService.php';
+        $service = new \AhgIiif\Services\IiifValidationService();
+
+        $this->stats = $service->getDashboardStats();
+
+        // Get recent objects with digital objects for quick validation
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $this->recentObjects = \Illuminate\Database\Capsule\Manager::table('digital_object as do')
+            ->join('information_object_i18n as ioi', function ($join) use ($culture) {
+                $join->on('do.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 's.object_id', '=', 'do.object_id')
+            ->select('do.object_id', 'ioi.title', 's.slug',
+                \Illuminate\Database\Capsule\Manager::raw('COUNT(do.id) as do_count'))
+            ->groupBy('do.object_id', 'ioi.title', 's.slug')
+            ->orderByDesc('do.object_id')
+            ->limit(50)
+            ->get()
+            ->toArray();
+    }
+
+    public function executeValidationRun($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->redirect('user/login');
+        }
+
+        $objectId = (int) $request->getParameter('object_id');
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        require_once sfConfig::get('sf_root_dir') . '/plugins/ahgIiifPlugin/lib/Services/IiifValidationService.php';
+        $service = new \AhgIiif\Services\IiifValidationService();
+
+        $results = $service->validateManifest($objectId, $culture);
+
+        $this->getResponse()->setContentType('application/json');
+        return $this->renderText(json_encode([
+            'object_id' => $objectId,
+            'results' => $results,
+            'passed' => count(array_filter($results, fn($r) => $r['status'] === 'passed')),
+            'failed' => count(array_filter($results, fn($r) => $r['status'] === 'failed')),
+            'warnings' => count(array_filter($results, fn($r) => $r['status'] === 'warning')),
+        ]));
+    }
 }

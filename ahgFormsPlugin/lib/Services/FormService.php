@@ -444,7 +444,7 @@ class FormService
      *
      * @return object|null Template or null for default
      */
-    public function resolveTemplate(string $formType, ?int $repositoryId = null, ?int $levelId = null, ?int $parentId = null): ?object
+    public function resolveTemplate(string $formType, ?int $repositoryId = null, ?int $levelId = null, ?int $parentId = null, ?string $descriptiveStandard = null): ?object
     {
         // Build query to find matching assignment
         $query = DB::table('ahg_form_assignment as fa')
@@ -462,7 +462,7 @@ class FormService
         foreach ($assignments as $assignment) {
             $score = 0;
 
-            // Repository match
+            // Repository match (+100, hard requirement if set)
             if ($assignment->repository_id !== null) {
                 if ($assignment->repository_id == $repositoryId) {
                     $score += 100;
@@ -471,7 +471,16 @@ class FormService
                 }
             }
 
-            // Level match
+            // Descriptive standard match (+75, #177 editor bridge)
+            if (isset($assignment->descriptive_standard) && $assignment->descriptive_standard !== null) {
+                if ($descriptiveStandard && strtolower($assignment->descriptive_standard) === strtolower($descriptiveStandard)) {
+                    $score += 75;
+                } else {
+                    continue; // Standard mismatch, skip
+                }
+            }
+
+            // Level match (+50, hard requirement if set)
             if ($assignment->level_of_description_id !== null) {
                 if ($assignment->level_of_description_id == $levelId) {
                     $score += 50;
@@ -480,7 +489,7 @@ class FormService
                 }
             }
 
-            // Collection/parent match
+            // Collection/parent match (+25, soft bonus)
             if ($assignment->collection_id !== null && $parentId) {
                 if ($this->isDescendantOf($parentId, $assignment->collection_id)) {
                     $score += 25;

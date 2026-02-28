@@ -99,20 +99,62 @@ class IiifManifestV3Service
             ];
         }
 
+        // Rights (#184): Pull from rights table → map to URI
+        $rightsUri = $this->resolveRightsUri($object['id'] ?? 0);
+        if ($rightsUri) {
+            $manifest['rights'] = $rightsUri;
+        }
+
+        // Required statement (#184): Institution attribution
+        $attribution = $this->resolveRequiredStatement($object['id'] ?? 0, $culture);
+        if ($attribution) {
+            $manifest['requiredStatement'] = [
+                'label' => [$culture => ['Attribution']],
+                'value' => [$culture => [$attribution]],
+            ];
+        }
+
+        // Provider (#184): Institution details
+        $provider = $this->resolveProvider($object['id'] ?? 0, $culture);
+        if ($provider) {
+            $manifest['provider'] = [$provider];
+        }
+
+        // seeAlso (#184): Link back to the AtoM description page
+        if (!empty($object['slug'])) {
+            $manifest['seeAlso'] = [[
+                'id' => "{$this->baseUrl}/{$object['slug']}",
+                'type' => 'Dataset',
+                'label' => [$culture => ['Archival description']],
+                'format' => 'text/html',
+            ]];
+        }
+
+        // Thumbnail with dimensions (#184)
         if (!empty($items)) {
             $firstCanvas = $items[0];
             $firstAnno = $firstCanvas['items'][0]['items'][0] ?? null;
             if ($firstAnno) {
                 $thumbnailId = str_replace('/full/max/', '/full/200,/', $firstAnno['body']['id']);
+                $serviceId = $firstAnno['body']['service'][0]['id'] ?? '';
                 $manifest['thumbnail'] = [[
                     'id' => $thumbnailId,
                     'type' => 'Image',
                     'format' => 'image/jpeg',
-                    'service' => [[
-                        'id' => $firstAnno['body']['service'][0]['id'] ?? '',
-                        'type' => 'ImageService2',
-                        'profile' => 'level2',
-                    ]],
+                    'width' => 200,
+                    'height' => (int) round(200 * ($firstCanvas['height'] / max($firstCanvas['width'], 1))),
+                    'service' => [
+                        [
+                            'id' => $serviceId,
+                            'type' => 'ImageService2',
+                            'profile' => 'level2',
+                        ],
+                        [
+                            'id' => $serviceId,
+                            'type' => 'ImageService3',
+                            'profile' => 'level2',
+                        ],
+                    ],
                 ]];
             }
         }
@@ -153,6 +195,11 @@ class IiifManifestV3Service
                                     [
                                         'id' => $imageApiBase,
                                         'type' => 'ImageService2',
+                                        'profile' => 'level2',
+                                    ],
+                                    [
+                                        'id' => $imageApiBase,
+                                        'type' => 'ImageService3',
                                         'profile' => 'level2',
                                     ],
                                 ],
@@ -208,5 +255,139 @@ class IiifManifestV3Service
         }
 
         return ['width' => 1000, 'height' => 1000];
+    }
+
+    /**
+     * Resolve rights URI from the rights table for this object.
+     * Maps to Creative Commons or RightsStatements.org URIs.
+     */
+    private function resolveRightsUri(int $objectId): ?string
+    {
+        if (!$objectId) {
+            return null;
+        }
+
+        $right = DB::table('rights as r')
+            ->leftJoin('rights_i18n as ri', function ($join) {
+                $join->on('r.id', '=', 'ri.id')->where('ri.culture', '=', 'en');
+            })
+            ->where('r.object_id', $objectId)
+            ->select('r.basis_id', 'ri.license_note', 'ri.rights_note')
+            ->first();
+
+        if (!$right) {
+            return null;
+        }
+
+        // Check for Creative Commons URL in license_note
+        $licenseNote = $right->license_note ?? '';
+        if (preg_match('#https?://creativecommons\.org/\S+#', $licenseNote, $m)) {
+            return $m[0];
+        }
+
+        // Check for RightsStatements.org URL
+        if (preg_match('#https?://rightsstatements\.org/\S+#', $licenseNote, $m)) {
+            return $m[0];
+        }
+
+        // Check in rights_note as well
+        $rightsNote = $right->rights_note ?? '';
+        if (preg_match('#https?://creativecommons\.org/\S+#', $rightsNote, $m)) {
+            return $m[0];
+        }
+        if (preg_match('#https?://rightsstatements\.org/\S+#', $rightsNote, $m)) {
+            return $m[0];
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve requiredStatement (institution attribution) for the object.
+     */
+    private function resolveRequiredStatement(int $objectId, string $culture): ?string
+    {
+        if (!$objectId) {
+            return null;
+        }
+
+        // Try ahg_settings for IIIF-specific attribution
+        try {
+            $attribution = DB::table('ahg_settings')
+                ->where('setting_key', 'iiif_attribution')
+                ->value('setting_value');
+
+            if (!empty($attribution)) {
+                return $attribution;
+            }
+        } catch (\Exception $e) {
+            // ahg_settings table may not exist
+        }
+
+        // Fall back to repository name
+        $repoId = DB::table('information_object')
+            ->where('id', $objectId)
+            ->value('repository_id');
+
+        if ($repoId) {
+            $name = DB::table('actor_i18n')
+                ->where('id', $repoId)
+                ->where('culture', $culture)
+                ->value('authorized_form_of_name');
+
+            if (!empty($name)) {
+                return $name;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve provider (institution) for the manifest.
+     */
+    private function resolveProvider(int $objectId, string $culture): ?array
+    {
+        if (!$objectId) {
+            return null;
+        }
+
+        $repoId = DB::table('information_object')
+            ->where('id', $objectId)
+            ->value('repository_id');
+
+        if (!$repoId) {
+            return null;
+        }
+
+        $repo = DB::table('actor_i18n')
+            ->where('id', $repoId)
+            ->where('culture', $culture)
+            ->select('authorized_form_of_name')
+            ->first();
+
+        if (!$repo || empty($repo->authorized_form_of_name)) {
+            return null;
+        }
+
+        $slug = DB::table('slug')
+            ->where('object_id', $repoId)
+            ->value('slug');
+
+        $provider = [
+            'id' => $slug ? "{$this->baseUrl}/{$slug}" : "{$this->baseUrl}",
+            'type' => 'Agent',
+            'label' => [$culture => [$repo->authorized_form_of_name]],
+        ];
+
+        // Add homepage
+        $provider['homepage'] = [[
+            'id' => $this->baseUrl,
+            'type' => 'Text',
+            'label' => [$culture => [$repo->authorized_form_of_name]],
+            'format' => 'text/html',
+        ]];
+
+        return $provider;
     }
 }

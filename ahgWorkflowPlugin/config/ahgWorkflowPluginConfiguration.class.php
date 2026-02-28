@@ -78,6 +78,17 @@ class ahgWorkflowPluginConfiguration extends sfPluginConfiguration
         $router->any('workflow_bulk_preview', '/workflow/bulk/preview', 'bulkPreview');
         $router->any('workflow_bulk_execute', '/workflow/bulk/execute', 'bulkExecute');
 
+        // Publish Gates (#176)
+        $router->any('workflow_publish_readiness', '/workflow/publish-readiness/:object_id', 'publishReadiness', ['object_id' => '\d+']);
+        $router->any('workflow_publish_simulate', '/workflow/publish-simulate/:object_id', 'publishSimulate', ['object_id' => '\d+']);
+        $router->any('workflow_publish_execute', '/workflow/publish-execute/:object_id', 'publishExecute', ['object_id' => '\d+']);
+        $router->any('workflow_gate_admin', '/workflow/admin/gates', 'gateAdmin');
+        $router->any('workflow_gate_rule_edit', '/workflow/admin/gates/:id/edit', 'gateRuleEdit', ['id' => '\d+']);
+        $router->any('workflow_gate_rule_delete', '/workflow/admin/gates/:id/delete', 'gateRuleDelete', ['id' => '\d+']);
+
+        // Change Summary (#177)
+        $router->any('workflow_change_summary', '/workflow/change-summary', 'changeSummary');
+
         // API endpoints for AJAX
         $router->any('workflow_api_stats', '/workflow/api/stats', 'apiStats');
         $router->any('workflow_api_tasks', '/workflow/api/tasks', 'apiTasks');

@@ -99,6 +99,9 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $iiif->post('iiif_annotations_create', '/iiif/annotations', 'annotationsCreate');
         $iiif->any('iiif_annotations_update', '/iiif/annotations/:id', 'annotationsUpdate', ['id' => '\d+']);
         $iiif->any('iiif_annotations_delete', '/iiif/annotations/:id', 'annotationsDelete', ['id' => '\d+']);
+        // IIIF Validation (#184)
+        $iiif->any('iiif_validation', '/admin/iiif-validation', 'validationDashboard');
+        $iiif->any('iiif_validation_run', '/admin/iiif-validation/run/:object_id', 'validationRun', ['object_id' => '\d+']);
         $iiif->register($routing);
 
         // ===================

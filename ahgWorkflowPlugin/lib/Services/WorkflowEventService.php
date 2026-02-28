@@ -39,6 +39,12 @@ class WorkflowEventService
     public const ACTION_SLA_WARNING = 'sla_warning';
     public const ACTION_SLA_BREACHED = 'sla_breached';
 
+    // Publish gate action types (#176)
+    public const ACTION_GATE_EVALUATED = 'gate_evaluated';
+    public const ACTION_GATE_PASSED = 'gate_passed';
+    public const ACTION_GATE_FAILED = 'gate_failed';
+    public const ACTION_GATE_OVERRIDDEN = 'gate_overridden';
+
     /** Current correlation ID for bulk operations */
     private ?string $correlationId = null;
 
@@ -319,6 +325,10 @@ class WorkflowEventService
                 self::ACTION_SLA_WARNING, self::ACTION_SLA_BREACHED,
                 self::ACTION_PUBLISH, self::ACTION_UNPUBLISH,
             ],
+            'gates' => [
+                self::ACTION_GATE_EVALUATED, self::ACTION_GATE_PASSED,
+                self::ACTION_GATE_FAILED, self::ACTION_GATE_OVERRIDDEN,
+            ],
             'rights' => [
                 self::ACTION_RIGHTS_DECISION,
             ],
@@ -341,6 +351,9 @@ class WorkflowEventService
             self::ACTION_UNPUBLISH,
             self::ACTION_RIGHTS_DECISION,
             self::ACTION_SLA_BREACHED,
+            self::ACTION_GATE_PASSED,
+            self::ACTION_GATE_FAILED,
+            self::ACTION_GATE_OVERRIDDEN,
         ]);
     }
 
