@@ -1990,6 +1990,74 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Medium to Long',
                 'category' => 'metadata',
             ],
+
+            // ---------------------------------------------------------
+            // Integrity Assurance (ahgIntegrityPlugin)
+            // ---------------------------------------------------------
+            [
+                'name' => 'Integrity: Run Due Schedules',
+                'command' => 'php symfony integrity:schedule --run-due',
+                'description' => 'Checks for due integrity verification schedules and executes them. This is the primary cron entry for automated fixity checking. Delegates hash verification to PreservationService and records results in the append-only integrity ledger.',
+                'options' => [],
+                'schedule' => 'Every 15 minutes (scheduler checks, only runs when schedules are due)',
+                'example' => '*/15 * * * * cd {root} && php symfony integrity:schedule --run-due >> /var/log/atom/integrity-scheduler.log 2>&1',
+                'duration' => 'Variable (depends on schedule batch size and object count)',
+                'category' => 'integrity',
+            ],
+            [
+                'name' => 'Integrity: Verify Objects',
+                'command' => 'php symfony integrity:verify',
+                'description' => 'Run ad-hoc fixity verification on digital objects. Verifies stored checksums (from preservation_checksum) against current file hashes. Results recorded in integrity_ledger. Objects failing 3+ consecutive times are escalated to the dead-letter queue.',
+                'options' => [
+                    '--object-id=ID' => 'Verify a single digital object by ID',
+                    '--schedule-id=ID' => 'Run a specific schedule',
+                    '--repository-id=ID' => 'Verify objects in a specific repository',
+                    '--limit=N' => 'Maximum objects to verify (default: 200)',
+                    '--stale-days=N' => 'Only verify objects not checked in N days (default: 7)',
+                    '--all' => 'Verify all master digital objects (ignores --limit)',
+                    '--throttle=MS' => 'IO throttle in ms between objects (default: 10)',
+                    '--status' => 'Show current verification status and statistics',
+                    '--dry-run' => 'Show what would be verified without verifying',
+                ],
+                'schedule' => 'On demand or via schedules (use integrity:schedule --run-due for automated runs)',
+                'example' => '0 3 * * * cd {root} && php symfony integrity:verify --limit=500 --stale-days=14 --throttle=20 >> /var/log/atom/integrity-verify.log 2>&1',
+                'duration' => 'Medium to Long (depends on object count and IO speed)',
+                'category' => 'integrity',
+            ],
+            [
+                'name' => 'Integrity: Schedule Management',
+                'command' => 'php symfony integrity:schedule',
+                'description' => 'Manage integrity verification schedules. Schedules support scoping (global, per-repository, per-hierarchy), frequency (daily/weekly/monthly/cron), concurrency controls (batch size, IO throttle, memory/runtime limits), and notification settings.',
+                'options' => [
+                    '--list' => 'List all configured schedules with status',
+                    '--status' => 'Show schedule status summary (total, enabled, due, active)',
+                    '--run-due' => 'Run all due schedules (for cron)',
+                    '--run-id=ID' => 'Run a specific schedule immediately',
+                    '--enable=ID' => 'Enable a schedule by ID',
+                    '--disable=ID' => 'Disable a schedule by ID',
+                ],
+                'schedule' => 'On demand for management; --run-due every 15 min for automation',
+                'example' => 'cd {root} && php symfony integrity:schedule --list',
+                'duration' => 'Short (management) to Long (--run-due)',
+                'category' => 'integrity',
+            ],
+            [
+                'name' => 'Integrity: Generate Report',
+                'command' => 'php symfony integrity:report',
+                'description' => 'Generate integrity verification reports including summary statistics, ledger entries, and dead-letter queue status. Supports text, JSON, and CSV output formats for integration with external monitoring systems.',
+                'options' => [
+                    '--summary' => 'Show summary report (pass rate, schedules, recent runs)',
+                    '--dead-letter' => 'Show dead letter queue report',
+                    '--date-from=DATE' => 'Start date filter (YYYY-MM-DD)',
+                    '--date-to=DATE' => 'End date filter (YYYY-MM-DD)',
+                    '--repository-id=ID' => 'Filter by repository',
+                    '--format=FMT' => 'Output format: text, json, csv (default: text)',
+                ],
+                'schedule' => 'Weekly summary report recommended',
+                'example' => '0 8 * * 1 cd {root} && php symfony integrity:report --summary --format=json >> /var/log/atom/integrity-report.json 2>&1',
+                'duration' => 'Short',
+                'category' => 'integrity',
+            ],
         ];
     }
 
@@ -2004,6 +2072,7 @@ class SettingsCronJobsAction extends AhgController
             'import' => ['title' => 'Import & Export', 'icon' => 'bi-arrow-left-right', 'jobs' => []],
             'oai' => ['title' => 'OAI-PMH', 'icon' => 'bi-cloud-download', 'jobs' => []],
             'preservation' => ['title' => 'Digital Preservation', 'icon' => 'bi-shield-lock', 'jobs' => []],
+            'integrity' => ['title' => 'Integrity Assurance', 'icon' => 'bi-shield-check', 'jobs' => []],
             'metadata' => ['title' => 'Metadata Export', 'icon' => 'bi-file-earmark-code', 'jobs' => []],
             'doi' => ['title' => 'DOI Management', 'icon' => 'bi-link-45deg', 'jobs' => []],
             'maintenance' => ['title' => 'Maintenance', 'icon' => 'bi-wrench', 'jobs' => []],
