@@ -21,7 +21,7 @@ class accessionAppraisalActions extends sfActions
     protected function requireEditor(): int
     {
         $userId = $this->requireAuth();
-        if (!$this->context->user->hasCredential('editor')) {
+        if (!$this->context->user->hasCredential('editor') && !$this->context->user->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -54,7 +54,7 @@ class accessionAppraisalActions extends sfActions
             $this->currentAppraisal = $service->getAppraisal($appraisalId);
         }
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeAppraisalSave(sfWebRequest $request)
@@ -153,7 +153,7 @@ class accessionAppraisalActions extends sfActions
         $this->valuations = $service->getValuationHistory($accessionId);
         $this->currentValuation = $service->getCurrentValuation($accessionId);
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeValuationAdd(sfWebRequest $request)
@@ -234,7 +234,7 @@ class accessionAppraisalActions extends sfActions
 
         $this->templates = $service->listTemplates();
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     // =========================================================================
@@ -267,6 +267,6 @@ class accessionAppraisalActions extends sfActions
             ->get()
             ->all();
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 }

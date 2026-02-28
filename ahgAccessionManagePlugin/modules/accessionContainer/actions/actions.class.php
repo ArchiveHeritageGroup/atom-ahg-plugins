@@ -21,7 +21,7 @@ class accessionContainerActions extends sfActions
     protected function requireEditor(): int
     {
         $userId = $this->requireAuth();
-        if (!$this->context->user->hasCredential('editor')) {
+        if (!$this->context->user->hasCredential('editor') && !$this->context->user->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -54,7 +54,7 @@ class accessionContainerActions extends sfActions
             $this->containerItems[$c->id] = $service->getContainerItems($c->id);
         }
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeApiContainerSave(sfWebRequest $request)
@@ -213,7 +213,7 @@ class accessionContainerActions extends sfActions
         $this->grantActs = \AhgAccessionManage\Services\AccessionContainerService::GRANT_ACTS;
         $this->grantRestrictions = \AhgAccessionManage\Services\AccessionContainerService::GRANT_RESTRICTIONS;
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeApiRightsSave(sfWebRequest $request)

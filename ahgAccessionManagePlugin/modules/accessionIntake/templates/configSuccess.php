@@ -11,7 +11,7 @@
 ?>
 
 <?php slot('title'); ?>
-  <h1><i class="fas fa-cog me-2"></i><?php echo __('Accession V2 configuration'); ?></h1>
+  <h1><i class="fas fa-cog me-2"></i><?php echo __('Accession configuration'); ?></h1>
 <?php end_slot(); ?>
 
 <?php slot('before-content'); ?>

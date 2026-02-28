@@ -121,6 +121,6 @@ class accessionManageActions extends AhgController
             $this->valuationReport = [];
         }
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 }

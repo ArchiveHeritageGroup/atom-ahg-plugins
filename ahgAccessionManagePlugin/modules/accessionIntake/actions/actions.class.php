@@ -27,7 +27,7 @@ class accessionIntakeActions extends sfActions
     protected function requireEditor(): int
     {
         $userId = $this->requireAuth();
-        if (!$this->context->user->hasCredential('editor')) {
+        if (!$this->context->user->hasCredential('editor') && !$this->context->user->isAdministrator()) {
             $this->forward('admin', 'secure');
         }
 
@@ -72,7 +72,7 @@ class accessionIntakeActions extends sfActions
         $this->statuses = ['draft', 'submitted', 'under_review', 'accepted', 'rejected', 'returned'];
         $this->priorities = ['low', 'normal', 'high', 'urgent'];
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeQueueDetail(sfWebRequest $request)
@@ -96,7 +96,7 @@ class accessionIntakeActions extends sfActions
         $this->attachments = $service->getAttachments($accessionId);
         $this->checklistTemplates = $service->getChecklistTemplates();
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeSubmit(sfWebRequest $request)
@@ -240,7 +240,7 @@ class accessionIntakeActions extends sfActions
 
         $this->timeline = $service->getTimeline($accessionId);
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     // =========================================================================
@@ -263,7 +263,7 @@ class accessionIntakeActions extends sfActions
         $this->checklistProgress = $service->getChecklistProgress($accessionId);
         $this->checklistTemplates = $service->getChecklistTemplates();
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeApiChecklistToggle(sfWebRequest $request)
@@ -311,7 +311,7 @@ class accessionIntakeActions extends sfActions
 
         $this->attachments = $service->getAttachments($accessionId);
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeApiAttachmentUpload(sfWebRequest $request)
@@ -373,7 +373,7 @@ class accessionIntakeActions extends sfActions
         $appraisalService = new \AhgAccessionManage\Services\AccessionAppraisalService();
         $this->appraisalTemplates = $appraisalService->listTemplates();
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 
     public function executeNumbering(sfWebRequest $request)
@@ -393,6 +393,6 @@ class accessionIntakeActions extends sfActions
         $containerService = $this->getContainerService();
         $this->defaultMask = $containerService->getConfig('numbering_mask', '{YEAR}-{SEQ:5}');
 
-        return '_blade';
+        // Use Success.php template (Symfony default)
     }
 }
