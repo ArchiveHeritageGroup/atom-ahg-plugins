@@ -2115,6 +2115,120 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Short',
                 'category' => 'integrity',
             ],
+
+            // ---------------------------------------------------------
+            // Accession Management V2 (ahgAccessionManagePlugin)
+            // ---------------------------------------------------------
+            [
+                'name' => 'Accession: Intake Queue Stats',
+                'command' => 'php symfony accession:intake --stats',
+                'description' => 'Displays intake queue statistics including counts by status, queue depth (submitted + under review), average processing time, and overdue items (>7 days).',
+                'options' => [],
+                'schedule' => 'Daily for monitoring or on demand',
+                'example' => '0 8 * * * cd {root} && php symfony accession:intake --stats >> /var/log/atom/accession-intake.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: Intake Queue List',
+                'command' => 'php symfony accession:intake --queue',
+                'description' => 'Lists the current intake queue with accession identifiers, titles, status, priority, and assigned users. Supports filtering by status.',
+                'options' => [
+                    '--status=STATUS' => 'Filter by status (draft, submitted, under_review, accepted, rejected, returned)',
+                    '--priority=PRIORITY' => 'Filter by priority (low, normal, high, urgent)',
+                ],
+                'schedule' => 'On demand',
+                'example' => 'cd {root} && php symfony accession:intake --queue --status=submitted',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: Assign to User',
+                'command' => 'php symfony accession:intake --assign=ID --user=USER_ID',
+                'description' => 'Assigns an accession to a staff member for review. Records the assignment in the chain-of-custody timeline.',
+                'options' => [
+                    '--assign=ID' => 'Accession ID to assign',
+                    '--user=USER_ID' => 'User ID to assign to',
+                ],
+                'schedule' => 'On demand',
+                'example' => 'cd {root} && php symfony accession:intake --assign=123 --user=5',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: Accept/Reject',
+                'command' => 'php symfony accession:intake --accept=ID',
+                'description' => 'Accept or reject an accession via CLI. Acceptance sets status to accepted and records the timestamp. Rejection requires a reason.',
+                'options' => [
+                    '--accept=ID' => 'Accept accession by ID',
+                    '--reject=ID' => 'Reject accession by ID',
+                    '--reason="TEXT"' => 'Reason for rejection (required with --reject)',
+                ],
+                'schedule' => 'On demand',
+                'example' => 'cd {root} && php symfony accession:intake --reject=123 --reason="Incomplete documentation"',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: View Checklist',
+                'command' => 'php symfony accession:intake --checklist=ID',
+                'description' => 'Displays the intake checklist for a specific accession, showing item labels and completion status.',
+                'options' => [
+                    '--checklist=ID' => 'Accession ID to view checklist for',
+                ],
+                'schedule' => 'On demand',
+                'example' => 'cd {root} && php symfony accession:intake --checklist=123',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: View Timeline',
+                'command' => 'php symfony accession:intake --timeline=ID',
+                'description' => 'Displays the chain-of-custody timeline for a specific accession, showing all events with actor, timestamp, and description.',
+                'options' => [
+                    '--timeline=ID' => 'Accession ID to view timeline for',
+                ],
+                'schedule' => 'On demand',
+                'example' => 'cd {root} && php symfony accession:intake --timeline=123',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: Status Report',
+                'command' => 'php symfony accession:report --status',
+                'description' => 'Generates a summary report showing total accessions, counts by intake status, queue depth, average processing time, overdue items, and the 10 most recent accessions.',
+                'options' => [],
+                'schedule' => 'Daily or weekly for management reporting',
+                'example' => '0 7 * * 1 cd {root} && php symfony accession:report --status >> /var/log/atom/accession-report.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: Portfolio Valuation Report',
+                'command' => 'php symfony accession:report --valuation',
+                'description' => 'Generates a GRAP 103 / IPSAS 45 compliant portfolio valuation report showing total value by currency, valuation type breakdown, and valued accession count.',
+                'options' => [
+                    '--repository=ID' => 'Filter by repository ID',
+                ],
+                'schedule' => 'Monthly or quarterly for financial reporting',
+                'example' => '0 6 1 * * cd {root} && php symfony accession:report --valuation >> /var/log/atom/accession-valuation.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Accession: Export CSV',
+                'command' => 'php symfony accession:report --export-csv',
+                'description' => 'Exports all accessions with V2 fields (status, priority, submitted/accepted dates) to a CSV file in the downloads/ directory.',
+                'options' => [
+                    '--repository=ID' => 'Filter by repository ID',
+                    '--date-from=YYYY-MM-DD' => 'Filter from date',
+                    '--date-to=YYYY-MM-DD' => 'Filter to date',
+                ],
+                'schedule' => 'On demand or monthly for archives',
+                'example' => '0 5 1 * * cd {root} && php symfony accession:report --export-csv --date-from=$(date -d "last month" +%%Y-%%m-01) >> /var/log/atom/accession-export.log 2>&1',
+                'duration' => 'Medium',
+                'category' => 'ahg',
+            ],
         ];
     }
 
