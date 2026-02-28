@@ -1,0 +1,8 @@
+Elasticsearch server information:
+ - Version: 7.17.29
+ - Host: localhost
+ - Port: 9200
+ - Index name: archive
+
+Document indexing status:
+Uncaught exception: Call to undefined method IndexWrapper::count() in /usr/share/nginx/archive/lib/task/search/arSearchStatusTask.class.php:81

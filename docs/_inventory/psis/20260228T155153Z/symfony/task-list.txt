@@ -1,0 +1,281 @@
+Usage:
+  symfony [options] task_name [arguments]
+
+Options:
+  --help                   -H  Display this help message.
+  --quiet                  -q  Do not log messages to standard output.
+  --trace                  -t  Turn on invoke/execute tracing, enable full backtrace.
+  --version                -V  Display the program version.
+  --color                      Forces ANSI color output.
+  --xml                        To output help as XML
+
+Available tasks:
+  :fix-code                    FIXME
+  :help                        Displays help for a task
+  :list                        Lists tasks
+  :release                     
+actor
+  :move-description-relations  Move actor-description relations
+ahg
+  :add-fulltext-indexes        Add FULLTEXT indexes for fuzzy search
+  :refresh-facet-cache         Refresh display facet cache
+ai-condition
+  :bulk-scan                   Bulk scan digital objects for condition assessment
+  :install                     Install AI Condition Assessment tables
+  :status                      Check AI Condition Service health
+ai
+  :htr                         Extract handwritten text from digital objects using TrOCR
+  :install                     Install ahgAIPlugin database tables
+  :ner-extract                 Extract named entities from archival records
+  :ner-sync                    Sync NER corrections to training server
+  :process-pending             Process pending AI extraction queue
+  :spellcheck                  Check spelling in archival records
+  :suggest-description         Generate AI description suggestions for archival records
+  :summarize                   Generate summaries for archival records
+  :sync-entity-cache           Sync approved NER entities to heritage discovery cache
+  :translate                   Translate archival records between cultures
+  :uninstall                   Uninstall ahgAIPlugin
+api
+  :webhook-process-retries     Process pending webhook retries
+app
+  :routes                      Displays current routes for an application
+cache
+  :clear                       Clears the cache (cc)
+  :xml-representations         Render all descriptions as XML and cache the results as files
+cdpa
+  :license-check               Check POTRAZ license expiry
+  :report                      Generate CDPA compliance report
+  :requests                    List data subject requests
+  :status                      Show CDPA compliance dashboard
+configure
+  :author                      Configure project author
+  :database                    Configure database DSN
+csv
+  :accession-export            Export accession record data to a CSV file
+  :accession-import            Import csv acession data
+  :audit-import                Audit CSV import.
+  :authority-export            Export authority record data as CSV file(s)
+  :authority-import            Import csv authority record data
+  :authority-relation-import   Import authority record relations using CSV data.
+  :check-import                Check CSV data, providing diagnostic info.
+  :custom-import               Import csv data using custom criteria
+  :deaccession-import          Import CSV deaccession data
+  :digital-object-path-check   Check digital object paths in CSV data.
+  :event-import                Import csv event record data
+  :export                      Export descriptions as CSV file(s)
+  :export-term-usage           Export terms associated, with information objects, as CSV file(s)
+  :import                      Import csv information object data
+  :physicalobject-import       Import physical object CSV data.
+  :physicalstorage-holdings    Export physical storage holdings report as CSV data.
+  :repository-export           Export repository information to a CSV
+  :repository-import           Import csv repository data
+dedupe
+  :merge                       Merge duplicate records
+  :report                      Generate duplicate detection reports
+  :scan                        Scan for duplicate records
+digitalobject
+  :delete                      Delete digital objects given an archival description slug.
+  :extract-text                Extracts text from PDFs for search indexing
+  :load                        Load a CSV list of digital objects
+  :regen-derivatives           Regenerates digital object derivative from master copy
+display
+  :auto-detect                 Auto-detect GLAM types for all information objects
+  :reindex                     Reindex display data in Elasticsearch
+doi
+  :deactivate                  Deactivate DOIs (create tombstones)
+  :mint                        Mint DOIs for records via DataCite
+  :process-queue               Process the DOI minting queue
+  :sync                        Sync DOI metadata with DataCite
+  :verify                      Verify DOIs resolve correctly
+embargo
+  :process                     Process embargo expiry: auto-lift and send notifications
+  :report                      Generate embargo reports
+export
+  :auth-recs                   Bulk export multiple EAC XML files at once for authority records.
+  :bulk                        Bulk export multiple XML files at once
+  :bulk-csv                    Bulk export multiple CSV files at once
+finding-aid
+  :generate                    Generate a Finding Aid document
+forms
+  :export                      Export a form template to JSON
+  :import                      Import a form template from JSON
+  :list                        List form templates
+generate
+  :app                         Generates a new application
+  :module                      Generates a new module
+  :project                     Generates a new project
+  :task                        Creates a skeleton class for a new task
+help
+  :import                      Import markdown docs into the help system
+  :rebuild-index               Rebuild help article text index and sections from stored markdown
+heritage
+  :build-graph                 Build entity relationship graph from entity cache
+  :install                     Install heritage accounting database schema
+  :region                      Manage heritage accounting regions
+i18n
+  :consolidate                 Combine all application messages into a single output (XLIFF)
+  :custom-link-to-markdown     Convert custom link format to Markdown syntax in various i18n table fields
+  :diff                        Compares existing XLIFF strings to new i18n strings extracted from PHP files as per the i18n:extract task.
+  :extract                     Extracts i18n strings from php files
+  :extractPlugin               Extracts i18n strings for a plugin from php files
+  :find                        Finds non "i18n ready" strings in an application
+  :rectify                     Copy i18n target messages from application source to plugin source. This prevents losing translated string in the fragmentation of application message source into multiple plugin message sources.
+  :remove-duplicates           Delete duplicate source messages
+  :remove-html-tags            Remove HTML tags from inside various i18n fields, and convert HTML entities
+  :update-fixtures             Reads XLIFF files from {{path}} and merges translations to database fixture files
+import
+  :bulk                        Bulk import multiple XML/CSV files at once
+  :delete                      Delete data created by an import
+  :dip-objects                 Import digital objects from Archivematica DIP using CSV file
+ingest
+  :commit                      Process ingest commit job in background
+integrity
+  :report                      Generate integrity verification reports
+  :retention                   Manage retention policies, legal holds, and disposition queue
+  :schedule                    Manage integrity verification schedules
+  :verify                      Run fixity verification on digital objects
+ipsas
+  :report                      Generate IPSAS heritage asset reports
+jobs
+  :clear                       Clear AtoM jobs
+  :list                        List AtoM jobs
+  :worker                      Gearman worker daemon
+library
+  :process-covers              Process pending book cover downloads from Open Library
+linked-data
+  :sync                        Link entities to VIAF, Wikidata, and Getty authority sources
+log
+  :clear                       Clears log files
+  :rotate                      Rotates an application's log files
+metadata
+  :export                      Export archival descriptions to various metadata standards
+migration
+  :import                      Import data using saved field mappings
+museum
+  :exhibition                  Manage museum exhibitions
+  :getty-link                  Link taxonomy terms to Getty vocabularies (AAT, TGN, ULAN)
+  :migrate                     Run museum metadata database migrations
+naz
+  :closure-check               Check closure periods for expiry and releases
+  :permit-expiry               Check research permits for expiry
+  :report                      Generate NAZ compliance reports
+  :transfer-due                List pending and overdue records transfers
+nmmz
+  :report                      Generate NMMZ heritage reports
+physicalobject
+  :delete-unlinked             Delete physical objects that aren't linked to descriptions
+  :normalize                   Normalize physical object data
+plugin
+  :add-channel                 Add a new PEAR channel
+  :install                     Installs a plugin
+  :list                        Lists installed plugins
+  :publish-assets              Publishes web assets for all plugins
+  :uninstall                   Uninstalls a plugin
+  :upgrade                     Upgrades a plugin
+portable
+  :cleanup                     Delete expired portable exports and their files
+  :export                      Generate a portable standalone catalogue viewer
+preservation
+  :convert                     Convert digital objects to preservation-safe formats
+  :fixity                      Verify file integrity using checksums
+  :identify                    Identify file formats using Siegfried (PRONOM)
+  :migration                   Format migration planning and obsolescence reporting
+  :package                     Manage OAIS preservation packages
+  :pronom-sync                 Sync format registry from PRONOM (UK National Archives)
+  :replicate                   Replicate files to backup targets
+  :scheduler                   Run scheduled preservation workflows
+  :verify-backup               Verify backup integrity and replication status
+  :virus-scan                  Scan digital objects for viruses using ClamAV
+preservica
+  :export                      Export data to Preservica OPEX or PAX format
+  :import                      Import data from Preservica OPEX or PAX format
+  :info                        Show Preservica format information and field mappings
+privacy
+  :jurisdiction                Manage privacy compliance jurisdictions
+  :scan-pii                    Scan archival descriptions for PII (Personally Identifiable Information)
+project
+  :clear-controllers           Clears all non production environment controllers
+  :deploy                      Deploys a project to another server
+  :disable                     Disables an application in a given environment
+  :enable                      Enables an application in a given environment
+  :optimize                    Optimizes a project for better performance
+  :permissions                 Fixes symfony directory permissions
+  :send-emails                 Sends emails stored in a queue
+  :validate                    Finds deprecated usage in a project
+propel
+  :build                       Generate code based on your schema
+  :build-all                   Generates Propel model and form classes, SQL and initializes the database
+  :build-all-load              Generates Propel model and form classes, SQL, initializes the database, and loads data
+  :build-filters               Creates filter form classes for the current model
+  :build-forms                 Creates form classes for the current model
+  :build-model                 Creates classes for the current model
+  :build-nested-set            Build all nested set values.
+  :build-schema                Creates a schema from an existing database
+  :build-sql                   Creates SQL for the current model
+  :data-dump                   Dumps data to the fixtures directory
+  :data-load                   Loads YAML fixture data
+  :generate-admin              Generates a Propel admin module
+  :generate-module             Generates a Propel module
+  :generate-module-for-route   Generates a Propel module for a route definition
+  :generate-slugs              Generate slugs for all slug-less objects.
+  :graphviz                    Generates a graphviz chart of current object model
+  :insert-sql                  Inserts SQL for current model
+  :migrate                     Migrate the database schema and existing data for compatibility with a newer version of Qubit.
+  :schema-to-xml               Creates schema.xml from schema.yml
+  :schema-to-yml               Creates schema.yml from schema.xml
+ric
+  :queue-process               Sync AtoM records to Fuseki RiC triplestore
+search
+  :document                    Output search index document data corresponding to an AtoM resource
+  :populate                    Populates the search index
+  :status                      Display search index status
+sector
+  :archives-csv-import         Import archives CSV data with ISAD-G validation
+  :dam-csv-import              Import DAM CSV data with Dublin Core/IPTC validation
+  :gallery-csv-import          Import gallery CSV data with CCO validation
+  :library-csv-import          Import library CSV data with MARC/RDA validation
+  :museum-csv-import           Import museum CSV data with Spectrum validation
+security
+  :update-cache                Update security classification cache for Cantaloupe watermarks
+statistics
+  :aggregate                   Aggregate usage statistics for reporting
+  :report                      Generate statistics reports
+symfony
+  :test                        Launches the symfony test suite
+taxonomy
+  :normalize                   Normalize taxonomy terms
+test
+  :all                         Launches all tests
+  :coverage                    Outputs test code coverage
+  :functional                  Launches functional tests
+  :unit                        Launches unit tests
+theme
+  :diagnose                    Diagnose ahgThemeB5Plugin configuration issues
+tools
+  :add-superuser               Add new superuser.
+  :atom-plugins                Manage AtoM plugins.
+  :data-integrity-repair       Attempt data integrity repair
+  :delete-description          Delete description given its slug.
+  :delete-drafts               Delete all information objects with publication status: DRAFT
+  :delete-user                 Delete a user.
+  :expire-data                 Delete expired data
+  :find-repository-latlng      Search for the lat/lng values of your contacts in Google Maps
+  :get-version                 Show current version (including release and database version)
+  :install                     Install AtoM.
+  :promote-user-to-admin       Promote user to admin.
+  :purge                       Purge all data.
+  :rename-slug                 Update slug(s) to use a different name
+  :reset-password              Generate or set a new password for a given username or e-mail address
+  :run                         Run ad-hoc logic contained in a PHP file
+  :settings                    Get or set settings.
+  :sitemap                     Write a Sitemap XML file that lists the URLs of the site.
+  :unlink-creators             Unlink creators from descriptions so creator inheritance can be used.
+  :update-publication-status   Updates the publication status of description(s)
+  :upgrade-sql                 Migrate the database schema and existing data for compatibility with a newer version of Qubit.
+triposr
+  :generate                    Generate 3D model from 2D image using TripoSR
+watermark
+  :apply-derivatives           Apply watermarks to derivative images
+workflow
+  :process                     Process workflow operations (notifications, escalation, cleanup)
+  :status                      View workflow task status and statistics

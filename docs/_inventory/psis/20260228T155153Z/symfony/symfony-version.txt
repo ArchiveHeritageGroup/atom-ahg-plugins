@@ -1,0 +1,1 @@
+symfony version 1.4.20 (/usr/share/nginx/archive/vendor/symfony/lib)

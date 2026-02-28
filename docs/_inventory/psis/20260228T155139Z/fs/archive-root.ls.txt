@@ -1,0 +1,125 @@
+total 1868
+drwxr-xr-x  26 www-data www-data   4096 Feb 28 16:40 .
+drwxr-xr-x  19 www-data www-data   4096 Feb 26 12:05 ..
+lrwxrwxrwx   1 www-data www-data     33 Feb  1 18:55 ahg3DModelPlugin -> atom-ahg-plugins/ahg3DModelPlugin
+lrwxrwxrwx   1 www-data www-data     39 Feb  1 18:55 ahgAccessRequestPlugin -> atom-ahg-plugins/ahgAccessRequestPlugin
+lrwxrwxrwx   1 www-data www-data     28 Feb  1 18:55 ahgAIPlugin -> atom-ahg-plugins/ahgAIPlugin
+lrwxrwxrwx   1 www-data www-data     29 Feb  1 18:55 ahgAPIPlugin -> atom-ahg-plugins/ahgAPIPlugin
+lrwxrwxrwx   1 www-data www-data     36 Feb  1 18:55 ahgAuditTrailPlugin -> atom-ahg-plugins/ahgAuditTrailPlugin
+lrwxrwxrwx   1 www-data www-data     32 Feb  1 18:55 ahgBackupPlugin -> atom-ahg-plugins/ahgBackupPlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  1 18:55 ahgCartPlugin -> atom-ahg-plugins/ahgCartPlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  1 18:55 ahgCDPAPlugin -> atom-ahg-plugins/ahgCDPAPlugin
+lrwxrwxrwx   1 www-data www-data     35 Feb  1 18:55 ahgConditionPlugin -> atom-ahg-plugins/ahgConditionPlugin
+lrwxrwxrwx   1 www-data www-data     33 Feb  1 18:55 ahgContactPlugin -> atom-ahg-plugins/ahgContactPlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  1 18:55 ahgCorePlugin -> atom-ahg-plugins/ahgCorePlugin
+lrwxrwxrwx   1 www-data www-data     29 Feb  1 18:55 ahgDAMPlugin -> atom-ahg-plugins/ahgDAMPlugin
+lrwxrwxrwx   1 www-data www-data     39 Feb  1 18:55 ahgDataMigrationPlugin -> atom-ahg-plugins/ahgDataMigrationPlugin
+lrwxrwxrwx   1 www-data www-data     32 Feb  1 18:55 ahgDedupePlugin -> atom-ahg-plugins/ahgDedupePlugin
+lrwxrwxrwx   1 www-data www-data     33 Feb  1 18:55 ahgDisplayPlugin -> atom-ahg-plugins/ahgDisplayPlugin
+lrwxrwxrwx   1 www-data www-data     29 Feb  1 18:55 ahgDoiPlugin -> atom-ahg-plugins/ahgDoiPlugin
+lrwxrwxrwx   1 www-data www-data     40 Feb  1 18:55 ahgDonorAgreementPlugin -> atom-ahg-plugins/ahgDonorAgreementPlugin
+lrwxrwxrwx   1 www-data www-data     36 Feb  1 18:55 ahgExhibitionPlugin -> atom-ahg-plugins/ahgExhibitionPlugin
+lrwxrwxrwx   1 www-data www-data     32 Feb  1 18:55 ahgExportPlugin -> atom-ahg-plugins/ahgExportPlugin
+lrwxrwxrwx   1 www-data www-data     40 Feb  1 18:55 ahgExtendedRightsPlugin -> atom-ahg-plugins/ahgExtendedRightsPlugin
+lrwxrwxrwx   1 www-data www-data     35 Feb  1 18:55 ahgFavoritesPlugin -> atom-ahg-plugins/ahgFavoritesPlugin
+lrwxrwxrwx   1 www-data www-data     31 Feb  9 12:07 ahgFederationPlugin -> plugins/ahgFederationPlugin/web
+lrwxrwxrwx   1 www-data www-data     34 Feb  1 18:55 ahgFeedbackPlugin -> atom-ahg-plugins/ahgFeedbackPlugin
+lrwxrwxrwx   1 www-data www-data     31 Feb  1 18:55 ahgFormsPlugin -> atom-ahg-plugins/ahgFormsPlugin
+lrwxrwxrwx   1 www-data www-data     33 Feb  1 18:55 ahgGalleryPlugin -> atom-ahg-plugins/ahgGalleryPlugin
+lrwxrwxrwx   1 www-data www-data     44 Feb  1 18:55 ahgHeritageAccountingPlugin -> atom-ahg-plugins/ahgHeritageAccountingPlugin
+lrwxrwxrwx   1 www-data www-data     34 Feb  1 18:55 ahgHeritagePlugin -> atom-ahg-plugins/ahgHeritagePlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  1 18:55 ahgICIPPlugin -> atom-ahg-plugins/ahgICIPPlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  1 18:55 ahgIiifPlugin -> atom-ahg-plugins/ahgIiifPlugin
+lrwxrwxrwx   1 www-data www-data     31 Feb  1 18:55 ahgIPSASPlugin -> atom-ahg-plugins/ahgIPSASPlugin
+lrwxrwxrwx   1 www-data www-data     31 Feb  1 18:55 ahgLabelPlugin -> atom-ahg-plugins/ahgLabelPlugin
+lrwxrwxrwx   1 www-data www-data     37 Feb  1 18:55 ahgLandingPagePlugin -> atom-ahg-plugins/ahgLandingPagePlugin
+lrwxrwxrwx   1 www-data www-data     33 Feb  1 18:55 ahgLibraryPlugin -> atom-ahg-plugins/ahgLibraryPlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  1 18:55 ahgLoanPlugin -> atom-ahg-plugins/ahgLoanPlugin
+lrwxrwxrwx   1 www-data www-data     40 Feb  1 18:55 ahgMetadataExportPlugin -> atom-ahg-plugins/ahgMetadataExportPlugin
+lrwxrwxrwx   1 www-data www-data     44 Feb  1 18:55 ahgMetadataExtractionPlugin -> atom-ahg-plugins/ahgMetadataExtractionPlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  6 14:42 ahgMigrationPlugin -> plugins/ahgMigrationPlugin/web
+lrwxrwxrwx   1 www-data www-data     32 Feb  6 14:42 ahgMultiTenantPlugin -> plugins/ahgMultiTenantPlugin/web
+lrwxrwxrwx   1 www-data www-data     32 Feb  1 18:55 ahgMuseumPlugin -> atom-ahg-plugins/ahgMuseumPlugin
+lrwxrwxrwx   1 www-data www-data     29 Feb  1 18:55 ahgNAZPlugin -> atom-ahg-plugins/ahgNAZPlugin
+lrwxrwxrwx   1 www-data www-data     30 Feb  1 18:55 ahgNMMZPlugin -> atom-ahg-plugins/ahgNMMZPlugin
+lrwxrwxrwx   1 www-data www-data     33 Feb  1 18:55 ahgPrivacyPlugin -> atom-ahg-plugins/ahgPrivacyPlugin
+lrwxrwxrwx   1 www-data www-data     36 Feb  1 18:55 ahgProvenancePlugin -> atom-ahg-plugins/ahgProvenancePlugin
+lrwxrwxrwx   1 www-data www-data     39 Feb  1 18:55 ahgReportBuilderPlugin -> atom-ahg-plugins/ahgReportBuilderPlugin
+lrwxrwxrwx   1 www-data www-data     33 Feb  1 18:55 ahgReportsPlugin -> atom-ahg-plugins/ahgReportsPlugin
+lrwxrwxrwx   1 www-data www-data     42 Feb  1 18:55 ahgRequestToPublishPlugin -> atom-ahg-plugins/ahgRequestToPublishPlugin
+lrwxrwxrwx   1 www-data www-data     34 Feb  1 18:55 ahgResearchPlugin -> atom-ahg-plugins/ahgResearchPlugin
+lrwxrwxrwx   1 www-data www-data     37 Feb  1 18:55 ahgRicExplorerPlugin -> atom-ahg-plugins/ahgRicExplorerPlugin
+lrwxrwxrwx   1 www-data www-data     32 Feb  1 18:55 ahgRightsPlugin -> atom-ahg-plugins/ahgRightsPlugin
+lrwxrwxrwx   1 www-data www-data     43 Feb  1 18:55 ahgSecurityClearancePlugin -> atom-ahg-plugins/ahgSecurityClearancePlugin
+lrwxrwxrwx   1 www-data www-data     40 Feb  1 18:55 ahgSemanticSearchPlugin -> atom-ahg-plugins/ahgSemanticSearchPlugin
+lrwxrwxrwx   1 www-data www-data     34 Feb  1 18:55 ahgSettingsPlugin -> atom-ahg-plugins/ahgSettingsPlugin
+lrwxrwxrwx   1 www-data www-data     34 Feb  1 18:55 ahgSpectrumPlugin -> atom-ahg-plugins/ahgSpectrumPlugin
+lrwxrwxrwx   1 www-data www-data     36 Feb  1 18:55 ahgStatisticsPlugin -> atom-ahg-plugins/ahgStatisticsPlugin
+lrwxrwxrwx   1 www-data www-data     28 Feb  6 14:56 ahgThemeB5Plugin -> plugins/ahgThemeB5Plugin/web
+lrwxrwxrwx   1 www-data www-data     38 Feb  1 18:55 ahgTiffPdfMergePlugin -> atom-ahg-plugins/ahgTiffPdfMergePlugin
+lrwxrwxrwx   1 www-data www-data     37 Feb  1 18:55 ahgTranslationPlugin -> atom-ahg-plugins/ahgTranslationPlugin
+lrwxrwxrwx   1 www-data www-data     37 Feb  1 18:55 ahgUiOverridesPlugin -> atom-ahg-plugins/ahgUiOverridesPlugin
+lrwxrwxrwx   1 www-data www-data     32 Feb  1 18:55 ahgVendorPlugin -> atom-ahg-plugins/ahgVendorPlugin
+lrwxrwxrwx   1 www-data www-data     34 Feb  1 18:55 ahgWorkflowPlugin -> atom-ahg-plugins/ahgWorkflowPlugin
+drwxr-xr-x   3 www-data www-data   4096 Feb 17 08:42 apps
+drwxr-xr-x  94 root     root       4096 Feb 28 16:43 atom-ahg-plugins
+drwxr-xr-x   7 root     root       4096 Feb  1 18:50 atom-ahg-python
+drwxr-xr-x   7 root     root       4096 Feb  1 18:50 atom-client-js
+drwxr-xr-x   5 root     root       4096 Feb 28 17:39 atom-extensions-catalog
+drwxr-xr-x  24 root     root       4096 Feb 28 14:44 atom-framework
+drwxrwxrwx   4 www-data www-data   4096 Feb 28 16:41 cache
+drwxr-xr-x   2 root     root       4096 Feb 28 16:34 .claude
+-rw-r--r--   1 root     root      36978 Feb 28 16:40 CLAUDE.md
+-rw-rw-r--   1 www-data www-data   1343 Feb  1 19:26 composer.json
+-rw-r--r--   1 root     root       1324 Feb  1 19:26 composer.json.bak
+-rw-rw-r--   1 www-data www-data 212017 Feb  1 19:26 composer.lock
+drwxr-xr-x   3 www-data www-data   4096 Feb 24 17:07 config
+-rw-rw-r--   1 www-data www-data   6152 Sep 26 23:00 COPYRIGHT
+drwxr-xr-x   2 www-data www-data   4096 Feb  1 18:22 css
+drwxr-xr-x  10 www-data www-data   4096 Feb 28 16:41 data
+drwxr-xr-x   5 www-data www-data  16384 Feb  1 18:22 dist
+drwxr-xr-x   2 root     root       4096 Feb  1 19:27 docs
+drwxr-xr-x   5 www-data www-data   4096 Feb 16 06:40 downloads
+-rw-rw-r--   1 www-data www-data 182068 Sep 26 23:00 ead.dtd
+-rw-r--r--   1 root     root      24834 Feb 15 20:34 ENUM.md
+-rw-r--r--   1 root     root       6227 Feb 25 16:41 extract_contact_emails.py
+-rw-rw-r--   1 www-data www-data   1150 Sep 26 23:00 favicon.ico
+-rw-r--r--   1 root     root     116247 Feb 21 18:47 generate_fds_tds.py
+-rw-r--r--   1 root     root      93318 Feb 21 18:50 generate_tds.py
+-rw-r--r--   1 root     root      52262 Feb 12 18:15 Heratio_Competitive_Analysis_Report.docx
+-rw-r--r--   1 root     root       4824 Feb 12 19:57 HERATIO_GAP_REGISTER.csv
+-rw-r--r--   1 root     root      36777 Feb 12 19:57 HERATIO_LONGTAIL_ACTIONABLE.csv
+-rw-r--r--   1 root     root      31173 Feb 12 19:57 HERATIO_LONGTAIL_SAVE_NEWQUBIT.csv
+-rw-r--r--   1 root     root       2498 Feb 13 13:14 heratio.php
+-rw-r--r--   1 root     root       5058 Feb 12 19:57 HERATIO_WORKPLAN_10_COMMITS.md
+drwxr-xr-x   5 www-data www-data   4096 Feb  1 18:22 images
+-rw-rw-r--   1 www-data www-data    455 Feb  1 18:50 index.php
+-rw-r--r--   1 root     root       6613 Feb 11 21:39 isSecure.md
+-rw-r--r--   1 root     root      65284 Feb 21 18:47 IT-Asset-Tracking-FDS-TDS.docx
+-rw-r--r--   1 root     root     133863 Feb 21 18:22 IT_ASSET_TRACKING.md
+-rw-r--r--   1 root     root      57174 Feb 21 18:05 IT-Asset-Tracking-Reuse-Assessment.md
+drwxr-xr-x   2 www-data www-data   4096 Feb  1 18:22 js
+drwxr-xr-x  19 www-data www-data   4096 Feb 16 20:46 lib
+-rw-rw-r--   1 www-data www-data  34519 Sep 26 23:00 LICENSE
+drwxr-xr-x   2 www-data www-data   4096 Feb 11 12:50 log
+-rw-r--r--   1 root     root     126873 Feb 12 20:46 MIGRATION_0.md
+-rw-r--r--   1 root     root      49647 Feb 17 10:39 MIGRATION.md
+-rw-r--r--   1 root     root        209 Feb 16 20:05 nav
+drwxr-xr-x 346 root     root      12288 Feb  1 18:23 node_modules
+-rw-rw-r--   1 www-data www-data   1212 Sep 26 23:00 package.json
+-rw-rw-r--   1 www-data www-data 177683 Feb  1 19:07 package-lock.json
+-rw-r--r--   1 root     root     202354 Feb 17 08:22 Photo Archive_79fqdh.pdf
+drwxr-xr-x  29 www-data www-data   4096 Feb 28 15:48 plugins
+-rw-rw-r--   1 www-data www-data    978 Sep 26 23:00 qubit_dev.php
+-rw-rw-r--   1 www-data www-data     26 Sep 26 23:00 robots.txt
+lrwxrwxrwx   1 root     root         51 Feb  1 18:24 sf -> /usr/share/nginx/archive/vendor/symfony/data/web/sf
+lrwxrwxrwx   1 www-data www-data     47 Feb  6 14:42 sfDoctrinePlugin -> vendor/symfony/lib/plugins/sfDoctrinePlugin/web
+-rw-r--r--   1 root     root          0 Feb  6 12:03 Sleep
+-rwxrwxr-x   1 www-data www-data    445 Sep 26 23:00 symfony
+-rw-r--r--   1 root     root        322 Feb  8 19:38 table
+drwxr-xr-x  44 www-data www-data   4096 Feb 25 16:30 uploads
+drwxr-xr-x  19 www-data www-data   4096 Feb 17 10:02 vendor
+drwxr-xr-x   5 root     root       4096 Feb 25 16:41 venv
+-rw-r--r--   1 root     root      31812 Feb 15 07:26 VOICE.md
+drwxr-xr-x   3 root     root       4096 Feb 11 11:23 web
+-rw-rw-r--   1 www-data www-data   3393 Sep 26 23:00 webpack.config.js

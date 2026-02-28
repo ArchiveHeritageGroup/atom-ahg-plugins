@@ -1,0 +1,20 @@
+>> cache     Clearing cache type "all" for "qubit" app and "cli" env
+>> file+     /usr/share/nginx/archive/data/qubit_cli-cli.lck
+>> chmod 777 /usr/share/nginx/archive/data/qubit_cli-cli.lck
+>> file-     /usr/share/nginx/archive/cache/qubit/cli/config/config_factories.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/cli/config/config_settings.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/cli/config/config_autoload.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/cli/config/config_config_handlers.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/cli/config/config_app.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/cli/config/config_routing.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/cli/config/config_search.yml.php
+>> file-     /usr/share/nginx/archive/data/qubit_cli-cli.lck
+>> cache     Clearing cache type "all" for "qubit" app and "prod" env
+>> file+     /usr/share/nginx/archive/data/qubit_prod-cli.lck
+>> chmod 777 /usr/share/nginx/archive/data/qubit_prod-cli.lck
+>> file-     /usr/share/nginx/archive/cache/qubit/prod/config/config_settings.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/prod/config/config_config_handlers.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/prod/config/config_app.yml.php
+>> file-     /usr/share/nginx/archive/cache/qubit/prod/config/config_search.yml.php
+>> file-     /usr/share/nginx/archive/data/qubit_prod-cli.lck
+>> file-     /usr/share/nginx/archive/cache/project_autoload.cache

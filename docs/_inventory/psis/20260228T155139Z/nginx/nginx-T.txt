@@ -1,0 +1,2464 @@
+2026/02/28 17:51:39 [warn] 212727#212727: protocol options redefined for 0.0.0.0:443 in /etc/nginx/sites-enabled/provenance.theahg.co.za:20
+2026/02/28 17:51:39 [warn] 212727#212727: protocol options redefined for 0.0.0.0:443 in /etc/nginx/sites-enabled/psis.theahg.co.za.conf:14
+2026/02/28 17:51:39 [warn] 212727#212727: protocol options redefined for 0.0.0.0:443 in /etc/nginx/sites-enabled/registry.theahg.co.za.conf:15
+2026/02/28 17:51:39 [warn] 212727#212727: protocol options redefined for [::]:443 in /etc/nginx/sites-enabled/registry.theahg.co.za.conf:16
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+# configuration file /etc/nginx/nginx.conf:
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+include /etc/nginx/modules-enabled/*.conf;
+
+events {
+	worker_connections 768;
+	# multi_accept on;
+}
+
+http {
+
+    # Define the bot detector
+    #     # DISABLED - using bot-blocker.conf
+    # map $http_user_agent $bad_bot {
+    #         default 0;
+    #         ~*(crawler|bot|spider|ahrefs|semrush|mj12bot|wget|curl|python|scrapy) 1;
+    #     }
+	
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
+	limit_req_zone $binary_remote_addr zone=req_limit_per_ip:10m rate=5r/s;
+	limit_req_zone $binary_remote_addr zone=slow:10m rate=10r/s;
+	limit_req_zone $binary_remote_addr zone=crit:10m rate=1r/s;
+	
+	fastcgi_buffers 64 64k;
+    	fastcgi_buffer_size 128k;
+    	fastcgi_busy_buffers_size 256k;
+    	fastcgi_temp_file_write_size 256k;
+    	fastcgi_read_timeout 300;
+
+    	proxy_buffers 64 64k;
+    	proxy_buffer_size 128k;
+    	large_client_header_buffers 8 64k;
+	##
+	# Basic Settings
+	##
+
+	sendfile on;
+	tcp_nopush on;
+	types_hash_max_size 2048;
+	# server_tokens off;
+
+	# server_names_hash_bucket_size 64;
+	# server_name_in_redirect off;
+
+	include /etc/nginx/mime.types;
+	default_type application/octet-stream;
+
+	##
+	# SSL Settings
+	##
+
+	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+	ssl_prefer_server_ciphers on;
+
+	##
+	# Logging Settings
+	##
+
+	access_log /var/log/nginx/access.log;
+	error_log /var/log/nginx/error.log;
+
+	##
+	# Gzip Settings
+	##
+
+	gzip on;
+
+	# gzip_vary on;
+	# gzip_proxied any;
+	# gzip_comp_level 6;
+	# gzip_buffers 16 8k;
+	# gzip_http_version 1.1;
+	# gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+	##
+	# Virtual Host Configs
+	##
+
+	include /etc/nginx/conf.d/*.conf;
+	include /etc/nginx/sites-enabled/*;
+}
+
+
+#mail {
+#	# See sample authentication script at:
+#	# http://wiki.nginx.org/ImapAuthenticateWithApachePhpScript
+#
+#	# auth_http localhost/auth.php;
+#	# pop3_capabilities "TOP" "USER";
+#	# imap_capabilities "IMAP4rev1" "UIDPLUS";
+#
+#	server {
+#		listen     localhost:110;
+#		protocol   pop3;
+#		proxy      on;
+#	}
+#
+#	server {
+#		listen     localhost:143;
+#		protocol   imap;
+#		proxy      on;
+#	}
+#}
+
+# configuration file /etc/nginx/mime.types:
+
+types {
+    text/html                             html htm shtml;
+    text/css                              css;
+    text/xml                              xml;
+    image/gif                             gif;
+    image/jpeg                            jpeg jpg;
+    application/javascript                js;
+    application/atom+xml                  atom;
+    application/rss+xml                   rss;
+
+    text/mathml                           mml;
+    text/plain                            txt;
+    text/vnd.sun.j2me.app-descriptor      jad;
+    text/vnd.wap.wml                      wml;
+    text/x-component                      htc;
+
+    image/png                             png;
+    image/tiff                            tif tiff;
+    image/vnd.wap.wbmp                    wbmp;
+    image/x-icon                          ico;
+    image/x-jng                           jng;
+    image/x-ms-bmp                        bmp;
+    image/svg+xml                         svg svgz;
+    image/webp                            webp;
+
+    application/font-woff                 woff;
+    application/java-archive              jar war ear;
+    application/json                      json;
+    application/mac-binhex40              hqx;
+    application/msword                    doc;
+    application/pdf                       pdf;
+    application/postscript                ps eps ai;
+    application/rtf                       rtf;
+    application/vnd.apple.mpegurl         m3u8;
+    application/vnd.ms-excel              xls;
+    application/vnd.ms-fontobject         eot;
+    application/vnd.ms-powerpoint         ppt;
+    application/vnd.wap.wmlc              wmlc;
+    application/vnd.google-earth.kml+xml  kml;
+    application/vnd.google-earth.kmz      kmz;
+    application/x-7z-compressed           7z;
+    application/x-cocoa                   cco;
+    application/x-java-archive-diff       jardiff;
+    application/x-java-jnlp-file          jnlp;
+    application/x-makeself                run;
+    application/x-perl                    pl pm;
+    application/x-pilot                   prc pdb;
+    application/x-rar-compressed          rar;
+    application/x-redhat-package-manager  rpm;
+    application/x-sea                     sea;
+    application/x-shockwave-flash         swf;
+    application/x-stuffit                 sit;
+    application/x-tcl                     tcl tk;
+    application/x-x509-ca-cert            der pem crt;
+    application/x-xpinstall               xpi;
+    application/xhtml+xml                 xhtml;
+    application/xspf+xml                  xspf;
+    application/zip                       zip;
+
+    application/octet-stream              bin exe dll;
+    application/octet-stream              deb;
+    application/octet-stream              dmg;
+    application/octet-stream              iso img;
+    application/octet-stream              msi msp msm;
+
+    application/vnd.openxmlformats-officedocument.wordprocessingml.document    docx;
+    application/vnd.openxmlformats-officedocument.spreadsheetml.sheet          xlsx;
+    application/vnd.openxmlformats-officedocument.presentationml.presentation  pptx;
+
+    audio/midi                            mid midi kar;
+    audio/mpeg                            mp3;
+    audio/ogg                             ogg;
+    audio/x-m4a                           m4a;
+    audio/x-realaudio                     ra;
+
+    video/3gpp                            3gpp 3gp;
+    video/mp2t                            ts;
+    video/mp4                             mp4;
+    video/mpeg                            mpeg mpg;
+    video/quicktime                       mov;
+    video/webm                            webm;
+    video/x-flv                           flv;
+    video/x-m4v                           m4v;
+    video/x-mng                           mng;
+    video/x-ms-asf                        asx asf;
+    video/x-ms-wmv                        wmv;
+    video/x-msvideo                       avi;
+    model/gltf-binary                     glb;
+    model/gltf+json                       gltf;
+}
+
+# configuration file /etc/nginx/conf.d/blocklist.conf:
+# Bot/Spam IP Blocklist
+# Updated: 2025-01-08
+geo $blocked_ip {
+    default 0;
+    74.7.243.192 1;
+    66.249.70.192 1;
+    66.249.70.193 1;
+    66.249.70.194 1;
+    66.249.70.195 1;
+    66.249.70.196 1;
+	66.249.70.197 1;
+    66.249.70.198 1;
+    66.249.70.199 1;
+	66.249.70.200 1;
+	
+}
+
+# configuration file /etc/nginx/conf.d/bot-blocker.conf:
+# Enhanced Bot Blocker for AtoM
+
+# API endpoints that bypass bot blocking
+map $request_uri $api_bypass {
+    default 0;
+    ~^/sparql/ 1;
+    ~^/api/ric/ 1;
+    ~^/ricExplorer/ 1;
+    ~^/api/library/ 1;
+}
+
+# Block bad bots by user agent
+map $http_user_agent $bad_bot {
+    default 0;
+    
+    # Scripting/automation
+    ~*python-requests 1;
+    ~*python-urllib 1;
+    ~*python/3 1;
+    ~*aiohttp 1;
+    ~*httpx 1;
+    ~*scrapy 1;
+    # ~*curl 1;  # Allow curl for API testing
+    ~*wget 1;
+    ~*libwww-perl 1;
+    ~*Go-http-client 1;
+    ~*Java 1;
+    ~*HttpClient 1;
+    ~*Mechanize 1;
+    ~*node-fetch 1;
+    ~*axios 1;
+    
+    # SEO crawlers (aggressive)
+    ~*MJ12bot 1;
+    ~*AhrefsBot 1;
+    ~*SemrushBot 1;
+    ~*DotBot 1;
+    ~*BLEXBot 1;
+    ~*PetalBot 1;
+    ~*DataForSeoBot 1;
+    ~*Bytespider 1;
+    ~*GPTBot 1;
+    ~*ClaudeBot 1;
+    ~*anthropic-ai 1;
+    
+    # Scanners
+    ~*scan 1;
+    ~*masscan 1;
+    ~*sqlmap 1;
+    ~*nikto 1;
+    ~*nmap 1;
+    
+    # Empty user agent
+    "" 1;
+}
+
+# Rate limit zones for browse protection
+limit_req_zone $binary_remote_addr zone=browse_limit:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=search_limit:10m rate=10r/s;
+
+# Connection limit
+limit_conn_zone $binary_remote_addr zone=conn_limit:10m;
+
+# configuration file /etc/nginx/sites-enabled/asset-works.theahg.co.za.conf:
+# asset-works.theahg.co.za - Laravel 12 Application
+# Asset Works - The Archive and Heritage Group
+
+# HTTP → HTTPS redirect
+server {
+    listen 80;
+    listen [::]:80;
+    server_name asset-works.theahg.co.za;
+
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS server
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name asset-works.theahg.co.za;
+
+    # Document root
+    root /usr/share/nginx/asset-works/public;
+    index index.php index.html;
+
+    # SSL certificates
+    ssl_certificate /etc/letsencrypt/live/theahg.ddns.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/theahg.ddns.net/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/theahg.ddns.net/chain.pem;
+
+    # SSL settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # Upload size limit
+    client_max_body_size 100M;
+
+    # Logging
+    access_log /var/log/nginx/asset-works_access.log;
+    error_log /var/log/nginx/asset-works_error.log;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # Laravel routing
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # PHP-FPM handler
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+    }
+
+    # Static assets caching (30 days)
+    location ~* \.(css|js|ico|gif|jpeg|jpg|png|svg|webp|woff|woff2|ttf|eot|otf|mp4|webm|ogg|mp3)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+        try_files $uri =404;
+    }
+
+    # Block access to hidden files (.ht, .git, .env)
+    location ~ /\.ht {
+        deny all;
+    }
+
+    location ~ /\.git {
+        deny all;
+    }
+
+    location ~ /\.env {
+        deny all;
+    }
+
+    # Deny access to other sensitive files
+    location ~ /composer\.(json|lock)$ {
+        deny all;
+    }
+
+    location ~ /package(-lock)?\.json$ {
+        deny all;
+    }
+
+    # Disable favicon.ico logging
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+
+    # Disable robots.txt logging
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+    }
+}
+
+# configuration file /etc/nginx/fastcgi_params:
+
+fastcgi_param  QUERY_STRING       $query_string;
+fastcgi_param  REQUEST_METHOD     $request_method;
+fastcgi_param  CONTENT_TYPE       $content_type;
+fastcgi_param  CONTENT_LENGTH     $content_length;
+
+fastcgi_param  SCRIPT_NAME        $fastcgi_script_name;
+fastcgi_param  REQUEST_URI        $request_uri;
+fastcgi_param  DOCUMENT_URI       $document_uri;
+fastcgi_param  DOCUMENT_ROOT      $document_root;
+fastcgi_param  SERVER_PROTOCOL    $server_protocol;
+fastcgi_param  REQUEST_SCHEME     $scheme;
+fastcgi_param  HTTPS              $https if_not_empty;
+
+fastcgi_param  GATEWAY_INTERFACE  CGI/1.1;
+fastcgi_param  SERVER_SOFTWARE    nginx/$nginx_version;
+
+fastcgi_param  REMOTE_ADDR        $remote_addr;
+fastcgi_param  REMOTE_PORT        $remote_port;
+fastcgi_param  REMOTE_USER        $remote_user;
+fastcgi_param  SERVER_ADDR        $server_addr;
+fastcgi_param  SERVER_PORT        $server_port;
+fastcgi_param  SERVER_NAME        $server_name;
+
+# PHP only, required if PHP was built with --enable-force-cgi-redirect
+fastcgi_param  REDIRECT_STATUS    200;
+
+# configuration file /etc/nginx/sites-enabled/dam.theahg.co.za.conf:
+##
+# Access to Memory (AtoM) – dam.theahg.co.za WITH IIIF SUPPORT
+# Updated: 2025-01-08 - Added bot protection
+##
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name dam.theahg.co.za;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name dam.theahg.co.za;
+
+    client_max_body_size 2G;
+
+    root /usr/share/nginx/dam;
+    index index.php index.html;
+
+    ssl_certificate     /etc/letsencrypt/live/theahg.ddns.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/theahg.ddns.net/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/theahg.ddns.net/chain.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_prefer_server_ciphers on;
+
+    access_log /var/log/nginx/dam_access.log;
+    error_log  /var/log/nginx/dam_error.log;
+
+    # ======================================
+    # SECURITY HEADERS
+    # ======================================
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # ======================================
+    # BOT PROTECTION (uses maps from conf.d)
+    # ======================================
+
+    # Block bad bots by user agent (bypass API endpoints via $api_bypass map)
+    set $block_bot 0;
+    if ($bad_bot) {
+        set $block_bot 1;
+    }
+    if ($api_bypass) {
+        set $block_bot 0;
+    }
+    if ($block_bot) {
+        return 444;
+    }
+    
+    # Block listed IPs
+    if ($blocked_ip) {
+        return 403;
+    }
+
+    # ======================================
+    # CORS HEADERS FOR UPLOADS (for canvas/annotator)
+    # ======================================
+    location /uploads/ {
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin "*";
+            add_header Access-Control-Allow-Methods "GET, OPTIONS";
+            add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept";
+            add_header Content-Length 0;
+            add_header Content-Type text/plain;
+            return 204;
+        }
+    }
+
+    # ======================================
+    # BLOCK COMMON PHP EXPLOIT SCANNERS
+    # ======================================
+    location ~* (eval-stdin\.php|phpunit|pearcmd|thinkphp|invokefunction|\.env|\.git|shell|cmd) {
+        return 444;
+    }
+
+    # Block attempts to include remote files
+    if ($query_string ~* "allow_url_include" ) { return 444; }
+    if ($query_string ~* "auto_prepend_file" ) { return 444; }
+
+    # ======================================
+    # BLOCK PATH TRAVERSAL
+    # ======================================
+    if ($request_uri ~ "\.\./") { return 444; }
+    if ($request_uri ~ "\.%2e%2e/") { return 444; }
+
+    # ======================================
+    # RATE-LIMITED BROWSE ENDPOINTS (bot targets)
+    # ======================================
+    
+    # GLAM browse - heavy bot target
+    location ~ ^/index\.php/glam/browse {
+        limit_req zone=browse_limit burst=10 nodelay;
+        limit_conn conn_limit 5;
+        
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+    
+    # Information object browse
+    location ~ ^/index\.php/informationobject/browse {
+        limit_req zone=browse_limit burst=10 nodelay;
+        limit_conn conn_limit 5;
+        
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+    
+    # Search endpoint
+    location ~ ^/index\.php/.*/search {
+        limit_req zone=search_limit burst=15 nodelay;
+        limit_conn conn_limit 10;
+        
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+
+    # ======================================
+    # RiC EXPLORER & APIs
+    # ======================================
+    
+    # RiC Explorer - serve static files (must be before PHP handlers)
+    location ^~ /ric/ {
+        alias /usr/share/nginx/dam/web/ric/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+    
+    # RiC Semantic Search API proxy
+    location ^~ /api/ric/ {
+        proxy_pass http://127.0.0.1:5001/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_connect_timeout 30;
+        proxy_read_timeout 30;
+    }
+
+    # RiC Provenance API
+    location ^~ /api/provenance/ {
+        proxy_pass http://127.0.0.1:5003/api/provenance/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # RiC Editor API
+    location ^~ /api/editor/ {
+        proxy_pass http://127.0.0.1:5002/api/editor/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # SPARQL Proxy for RiC Explorer
+    location ^~ /sparql/ {
+        proxy_pass http://192.168.0.112:3030/ric/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_connect_timeout 30;
+        proxy_read_timeout 180;
+        proxy_send_timeout 180;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type" always;
+    }
+
+    # RiC Dashboard
+    location ^~ /ric-dashboard/ {
+        alias /usr/share/nginx/dam/web/ric-dashboard/;
+        index index.php index.html;
+        
+        location ~ \.php$ {
+            fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+            fastcgi_param SCRIPT_FILENAME $request_filename;
+            include fastcgi_params;
+        }
+    }
+
+    # RiC Provenance UI
+    location ^~ /ric-provenance/ {
+        alias /usr/share/nginx/dam/web/ric-provenance/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # RiC Editor UI
+    location ^~ /ric-editor/ {
+        alias /usr/share/nginx/dam/web/ric-editor/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # ======================================
+    # MEDIA & IIIF EXTENSION ROUTES
+    # ======================================
+    include /usr/share/nginx/dam/atom-framework/config/nginx/extensions.conf;
+
+    # ======================================
+    # PHP HANDLING
+    # ======================================
+    
+    # PHP handling with PATH_INFO support for AtoM
+    location ~ ^/(index|qubit_dev)\.php(/|$) {
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 3600;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+
+    # ======================================
+    # DIGITAL OBJECT VIEWERS
+    # ======================================
+    
+    # Fix black viewer – allow inline JS on all digitalobject pages
+    location ~* /index\.php/.*/digitalobject/ {
+        add_header Content-Security-Policy "default-src 'self' data: blob:; 
+                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; 
+                                            style-src 'self' 'unsafe-inline'; 
+                                            img-src 'self' data: blob: https:;" always;
+    }
+
+    # ZoomPan viewer — must be routed by Symfony (NO ^~ !!!)
+    location /zoompan/ {
+        add_header Content-Security-Policy "default-src 'self' data: blob:;
+                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+                                            style-src 'self' 'unsafe-inline';
+                                            img-src 'self' data: blob: https:;" always;
+        try_files $uri $uri/ /index.php$args;
+    }
+
+    # 3D Viewer – Allow inline JS
+    location = /3D-image.php {
+        root /usr/share/nginx/dam;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/3D-image.php;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        add_header Content-Security-Policy "default-src 'self' data: blob:; 
+                                            script-src 'self' 'unsafe-inline'; 
+                                            img-src 'self' data: blob:; 
+                                            style-src 'self' 'unsafe-inline';" always;
+    }
+
+    # 3D folder
+    location ^~ /dam/3d/ {
+        alias /usr/share/nginx/dam/3d/;
+        try_files $uri =404;
+    }
+
+    # ======================================
+    # STANDALONE REPORT EXTENSION
+    # ======================================
+    location ^~ /ext/reports/ {
+        alias /usr/share/nginx/dam/atom-extensions/extensions/reports/public/;
+        index index.php index.html;
+        
+        location ~ \.php$ {
+            try_files $uri =404;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $request_filename;
+            fastcgi_param DOCUMENT_ROOT /usr/share/nginx/dam/atom-extensions/extensions/reports/public;
+            fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        }
+    }
+
+    # ======================================
+    # IIIF (Cantaloupe)
+    # ======================================
+
+    # IIIF Manifest Routes - handled by Symfony (ahgIiifPlugin)
+    # Pass to PHP front controller with PATH_INFO
+    location ~ ^/iiif/manifest/(.+)$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+        add_header Access-Control-Allow-Origin "*" always;
+    }
+
+    # IIIF Collection manifest routes - handled by ahgIiifCollection module
+    location ~ ^/manifest-collection/(.+)$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+        add_header Access-Control-Allow-Origin "*" always;
+    }
+
+    # IIIF Annotations - handled by Symfony (ahgIiifPlugin)
+    location ~ ^/iiif/annotations {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization" always;
+
+        # Handle OPTIONS preflight
+        if ($request_method = 'OPTIONS') {
+            return 204;
+        }
+    }
+
+    # IIIF Cantaloupe proxy
+    location /iiif/ {
+        proxy_pass http://127.0.0.1:8182/iiif/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        add_header Access-Control-Allow-Origin "*" always;
+
+        # Rewrite internal Cantaloupe URLs to public URLs in responses
+        sub_filter_types application/json application/ld+json;
+        sub_filter_once off;
+        # Replace internal URL with public HTTPS URL in one step
+        # This preserves 'protocol: http://iiif.io/api/image' which OpenSeadragon requires
+        sub_filter 'http://127.0.0.1:8182' 'https://$host';
+    }
+
+    location ^~ /dam/iiif/ {
+        rewrite ^/dam/iiif/(.*)$ /iiif/$1 break;
+        proxy_pass http://127.0.0.1:8182/iiif/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept" always;
+    }
+
+    # IIIF Manifest endpoint
+    location = /iiif-manifest.php {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        add_header Access-Control-Allow-Origin * always;
+    }
+
+    # ======================================
+    # STATIC ASSETS
+    # ======================================
+    
+    # Dominion Plugin JS & CSS
+    location ^~ /plugins/arDominionB5Plugin/js/dist/ {
+        alias /usr/share/nginx/dam/dist/js/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ^~ /plugins/arDominionB5Plugin/css/dist/ {
+        alias /usr/share/nginx/dam/dist/css/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ^~ /dam/dist/js/ {
+        alias /usr/share/nginx/dam/dist/js/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ^~ /dam/dist/css/ {
+        alias /usr/share/nginx/dam/dist/css/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Static content
+    location ~* ^/(css|dist|js|images|plugins|vendor|arDominionB5Plugin|ahgThemeB5Plugin|web)/.*\.(css|js|map|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|pdf)$ {
+        root /usr/share/nginx/dam;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # ======================================
+    # SECURITY - BLOCK DIRECT PHP ACCESS
+    # ======================================
+    location ~ \.php$ {
+        deny all;
+        return 404;
+    }
+
+    location ~ /\.(ht|git|svn) {
+        deny all;
+    }
+
+    # ======================================
+    # MAIN ROUTER (catch-all with rate limiting)
+    # ======================================
+    location / {
+        limit_req zone=slow burst=40 nodelay;
+        try_files $uri /index.php?$args;
+    }
+}
+
+# configuration file /usr/share/nginx/dam/atom-framework/config/nginx/extensions.conf:
+#
+# AtoM Framework - Extension Nginx Configuration
+# ========================================================
+# Include this file in your nginx server block to enable
+# media streaming, IIIF viewer, and other extension routes.
+#
+# Usage in your nginx config:
+#   include /path/to/atom-framework/config/nginx/extensions.conf;
+#
+# Place this BEFORE the main PHP handler and catch-all location blocks.
+#
+
+# ======================================
+# STATIC HTML TEST PAGES
+# ======================================
+
+location = /mirador-test.html {
+    try_files $uri =404;
+}
+
+# ======================================
+# MEDIA STREAMING & SNIPPETS (Symfony routes)
+# Handled by the media module via Symfony routing
+# ======================================
+
+# Media streaming - pass through Symfony for transcoding support
+# Buffering disabled for real-time streaming
+location ~ ^/media/stream/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/stream/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/stream/$1;
+    fastcgi_read_timeout 600;
+    fastcgi_buffering off;
+    add_header X-Accel-Buffering no;
+}
+
+# Media download
+location ~ ^/media/download/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/download/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/download/$1;
+}
+
+# Media snippets - GET by digital_object_id query param
+location = /media/snippets {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/snippets;
+    fastcgi_param PATH_TRANSLATED $document_root/media/snippets;
+    add_header Access-Control-Allow-Origin * always;
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+}
+
+# Media snippets by ID (GET/DELETE)
+location ~ ^/media/snippets/([0-9]+)/delete$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/snippets/$1/delete;
+    fastcgi_param PATH_TRANSLATED $document_root/media/snippets/$1/delete;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Media snippets by ID (list)
+location ~ ^/media/snippets/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/snippets/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/snippets/$1;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# ======================================
+# MEDIA CONVERSION (on-demand format conversion)
+# PSD/CR2/office docs/archives -> viewable formats
+# ======================================
+
+# Media conversion (GET) - longer timeout for LibreOffice/ImageMagick
+location ~ ^/media/convert/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/convert/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/convert/$1;
+    fastcgi_read_timeout 120;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# ======================================
+# IIIF MEDIA API ROUTES
+# Metadata extraction, waveforms, transcription
+# All routed through Symfony (ahgIiifPlugin)
+# ======================================
+
+# Media metadata extraction (POST)
+location ~ ^/media/extract/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/extract/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/extract/$1;
+    fastcgi_read_timeout 120;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Media metadata (GET)
+location ~ ^/media/metadata/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/metadata/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/metadata/$1;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Transcription start (POST - longer timeout for processing)
+location ~ ^/media/transcribe/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/transcribe/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/transcribe/$1;
+    fastcgi_read_timeout 600;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Transcription data with format (GET - json/vtt/srt/txt)
+location ~ ^/media/transcription/([0-9]+)/([a-z]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/transcription/$1/$2;
+    fastcgi_param PATH_TRANSLATED $document_root/media/transcription/$1/$2;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Transcription data (GET - default json)
+location ~ ^/media/transcription/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/transcription/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/transcription/$1;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# ======================================
+# IIIF VIEWER ROUTES
+# Note: IIIF routes are handled by ahgIiifPlugin (Symfony)
+# and configured in the main nginx config file.
+# The routes below are disabled as they require router.php
+# which is not currently implemented.
+# ======================================
+
+# IIIF Manifest generation - HANDLED BY MAIN CONFIG (ahgIiifPlugin via Symfony)
+# location ~ ^/iiif/manifest/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+#     add_header Access-Control-Allow-Origin * always;
+# }
+
+# IIIF Collection - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/collection/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+#     add_header Access-Control-Allow-Origin * always;
+# }
+
+# IIIF Viewer - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/viewer/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Embed - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/embed/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Annotations - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/annotations {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+#     add_header Access-Control-Allow-Origin * always;
+# }
+
+# IIIF OCR - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/ocr {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Text - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/text {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Search - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/search {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Viewer static assets
+# Note: Using try_files instead of alias to avoid $document_root limitation
+location /atom-framework/src/Extensions/IiifViewer/public/ {
+    try_files $uri =404;
+    expires 7d;
+}
+
+# ZoomPan static assets (CSS, JS, icons)
+location /atom-framework/src/Extensions/ZoomPan/public/ {
+    try_files $uri =404;
+    expires 7d;
+}
+
+# ======================================
+# IIIF IMAGE SERVER (CANTALOUPE) PROXY
+# Requires Cantaloupe running on port 8182
+# ======================================
+
+# Uncomment if you have Cantaloupe installed:
+# location /iiif/ {
+#     proxy_pass http://127.0.0.1:8182/iiif/;
+#     proxy_set_header Host $host;
+#     proxy_set_header X-Real-IP $remote_addr;
+#     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#     proxy_set_header X-Forwarded-Proto $scheme;
+#     add_header Access-Control-Allow-Origin "*" always;
+# }
+
+# configuration file /etc/nginx/sites-enabled/provenance.theahg.co.za:
+# Provenance AI - NER API Service
+# https://provenance.theahg.co.za
+
+server {
+    if ($host = provenance.theahg.co.za) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name provenance.theahg.co.za;
+    
+    # Redirect HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+
+
+}
+
+server {
+    listen 443 ssl http2;
+    server_name provenance.theahg.co.za;
+    
+    # SSL - Use same certs as theahg.co.za or get new ones
+    # ssl_certificate     /etc/letsencrypt/live/provenance.theahg.co.za/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/provenance.theahg.co.za/privkey.pem;
+    
+    # For now, use wildcard or main domain cert if available
+    ssl_certificate /etc/letsencrypt/live/provenance.theahg.co.za/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/provenance.theahg.co.za/privkey.pem; # managed by Certbot
+    ssl_trusted_certificate /etc/letsencrypt/live/theahg.ddns.net/chain.pem;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    
+    # Root for static files (llms.txt, robots.txt, landing page)
+    root /var/www/provenance;
+    index index.html;
+    
+    # Static files
+    location = /llms.txt {
+        try_files $uri =404;
+    }
+    
+    location = /robots.txt {
+        try_files $uri =404;
+    }
+    
+    # Landing page
+    location = / {
+        try_files $uri $uri/ /index.html;
+    }
+    
+    # API - Proxy to Python NER service
+    location /ner/ {
+        proxy_pass http://127.0.0.1:5004/ner/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeouts for long NER processing
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 300s;
+        proxy_read_timeout 300s;
+        
+        # CORS headers
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Authorization, Content-Type, X-API-Key" always;
+        
+        if ($request_method = OPTIONS) {
+            return 204;
+        }
+    }
+    
+    # Health check endpoint
+    location = /health {
+        proxy_pass http://127.0.0.1:5004/ner/v1/health;
+        proxy_http_version 1.1;
+    }
+    
+    # Logging
+    access_log /var/log/nginx/provenance.access.log;
+    error_log /var/log/nginx/provenance.error.log;
+
+}
+
+# configuration file /etc/nginx/sites-enabled/psis.theahg.co.za.conf:
+##
+# Access to Memory (AtoM) – psis.theahg.co.za WITH IIIF SUPPORT
+# Updated: 2025-01-08 - Added bot protection
+##
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name psis.theahg.co.za;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name psis.theahg.co.za;
+
+    client_max_body_size 2G;
+
+    root /usr/share/nginx/archive;
+    index index.php index.html;
+
+    ssl_certificate     /etc/letsencrypt/live/theahg.ddns.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/theahg.ddns.net/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/theahg.ddns.net/chain.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH';
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_prefer_server_ciphers on;
+
+    access_log /var/log/nginx/psis_access.log;
+    error_log  /var/log/nginx/psis_error.log;
+
+    # ======================================
+    # SECURITY HEADERS
+    # ======================================
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # ======================================
+    # BOT PROTECTION (uses maps from conf.d)
+    # ======================================
+
+    # Block bad bots by user agent (bypass API endpoints via $api_bypass map)
+    set $block_bot 0;
+    if ($bad_bot) {
+        set $block_bot 1;
+    }
+    if ($api_bypass) {
+        set $block_bot 0;
+    }
+    if ($block_bot) {
+        return 444;
+    }
+    
+    # Block listed IPs
+    if ($blocked_ip) {
+        return 403;
+    }
+
+    # ======================================
+    # CORS HEADERS FOR UPLOADS (for canvas/annotator)
+    # ======================================
+    location /uploads/ {
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept" always;
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+
+        # Handle preflight requests
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin "*";
+            add_header Access-Control-Allow-Methods "GET, OPTIONS";
+            add_header Access-Control-Allow-Headers "Origin, Content-Type, Accept";
+            add_header Content-Length 0;
+            add_header Content-Type text/plain;
+            return 204;
+        }
+    }
+
+    # ======================================
+    # GENERIC ICONS (AtoM digital object placeholders)
+    # ======================================
+    location /generic-icons/ {
+        alias /usr/share/nginx/archive/images/generic-icons/;
+    }
+
+    # ======================================
+    # BLOCK COMMON PHP EXPLOIT SCANNERS
+    # ======================================
+    location ~* (eval-stdin\.php|phpunit|pearcmd|thinkphp|invokefunction|\.env|\.git|shell|cmd) {
+        return 444;
+    }
+
+    # Block attempts to include remote files
+    if ($query_string ~* "allow_url_include" ) { return 444; }
+    if ($query_string ~* "auto_prepend_file" ) { return 444; }
+
+    # ======================================
+    # BLOCK PATH TRAVERSAL
+    # ======================================
+    if ($request_uri ~ "\.\./") { return 444; }
+    if ($request_uri ~ "\.%2e%2e/") { return 444; }
+
+    # ======================================
+    # RATE-LIMITED BROWSE ENDPOINTS (bot targets)
+    # ======================================
+    
+    # GLAM browse - heavy bot target
+    location ~ ^/index\.php/glam/browse {
+        limit_req zone=browse_limit burst=10 nodelay;
+        limit_conn conn_limit 5;
+        
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+    
+    # Information object browse
+    location ~ ^/index\.php/informationobject/browse {
+        limit_req zone=browse_limit burst=10 nodelay;
+        limit_conn conn_limit 5;
+        
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+    
+    # Search endpoint
+    location ~ ^/index\.php/.*/search {
+        limit_req zone=search_limit burst=15 nodelay;
+        limit_conn conn_limit 10;
+        
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+
+    # ======================================
+    # RiC EXPLORER & APIs
+    # ======================================
+    
+    # RiC Explorer - serve static files (must be before PHP handlers)
+    location ^~ /ric/ {
+        alias /usr/share/nginx/archive/web/ric/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+    
+    # RiC Semantic Search API proxy
+    location ^~ /api/ric/ {
+        proxy_pass http://127.0.0.1:5001/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_connect_timeout 30;
+        proxy_read_timeout 30;
+    }
+
+    # RiC Provenance API
+    location ^~ /api/provenance/ {
+        proxy_pass http://127.0.0.1:5003/api/provenance/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # RiC Editor API
+    location ^~ /api/editor/ {
+        proxy_pass http://127.0.0.1:5002/api/editor/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # SPARQL Proxy for RiC Explorer
+    location ^~ /sparql/ {
+        proxy_pass http://192.168.0.112:3030/ric/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_connect_timeout 30;
+        proxy_read_timeout 180;
+        proxy_send_timeout 180;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type" always;
+    }
+
+    # RiC Dashboard
+    location ^~ /ric-dashboard/ {
+        alias /usr/share/nginx/archive/web/ric-dashboard/;
+        index index.php index.html;
+        
+        location ~ \.php$ {
+            fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+            fastcgi_param SCRIPT_FILENAME $request_filename;
+            include fastcgi_params;
+        }
+    }
+
+    # RiC Provenance UI
+    location ^~ /ric-provenance/ {
+        alias /usr/share/nginx/archive/web/ric-provenance/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # RiC Editor UI
+    location ^~ /ric-editor/ {
+        alias /usr/share/nginx/archive/web/ric-editor/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # ======================================
+    # MEDIA & IIIF EXTENSION ROUTES
+    # ======================================
+    include /usr/share/nginx/archive/atom-framework/config/nginx/extensions.conf;
+
+    # ======================================
+    # HERATIO (STANDALONE LARAVEL KERNEL)
+    # ======================================
+    include /usr/share/nginx/archive/atom-framework/config/nginx/heratio.conf;
+
+    # ======================================
+    # PHP HANDLING
+    # ======================================
+    
+    # PHP handling with PATH_INFO support for AtoM
+    location ~ ^/(index|qubit_dev)\.php(/|$) {
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 3600;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+
+    # ======================================
+    # DIGITAL OBJECT VIEWERS
+    # ======================================
+    
+    # Fix black viewer – allow inline JS on all digitalobject pages
+    location ~* /index\.php/.*/digitalobject/ {
+        add_header Content-Security-Policy "default-src 'self' data: blob:; 
+                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; 
+                                            style-src 'self' 'unsafe-inline'; 
+                                            img-src 'self' data: blob: https:;" always;
+    }
+
+    # ZoomPan viewer — must be routed by Symfony (NO ^~ !!!)
+    location /zoompan/ {
+        add_header Content-Security-Policy "default-src 'self' data: blob:;
+                                            script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+                                            style-src 'self' 'unsafe-inline';
+                                            img-src 'self' data: blob: https:;" always;
+        try_files $uri $uri/ /index.php$args;
+    }
+
+    # 3D Viewer – Allow inline JS
+    location = /3D-image.php {
+        root /usr/share/nginx/archive;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root/3D-image.php;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        add_header Content-Security-Policy "default-src 'self' data: blob:; 
+                                            script-src 'self' 'unsafe-inline'; 
+                                            img-src 'self' data: blob:; 
+                                            style-src 'self' 'unsafe-inline';" always;
+    }
+
+    # 3D folder
+    location ^~ /archive/3d/ {
+        alias /usr/share/nginx/archive/3d/;
+        try_files $uri =404;
+    }
+
+    # ======================================
+    # STANDALONE REPORT EXTENSION
+    # ======================================
+    location ^~ /ext/reports/ {
+        alias /usr/share/nginx/archive/atom-extensions/extensions/reports/public/;
+        index index.php index.html;
+        
+        location ~ \.php$ {
+            try_files $uri =404;
+            include fastcgi_params;
+            fastcgi_param SCRIPT_FILENAME $request_filename;
+            fastcgi_param DOCUMENT_ROOT /usr/share/nginx/archive/atom-extensions/extensions/reports/public;
+            fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        }
+    }
+
+    # ======================================
+    # IIIF (Cantaloupe)
+    # ======================================
+
+    # IIIF Manifest Routes - handled by Symfony (ahgIiifPlugin)
+    # Pass to PHP front controller with PATH_INFO
+    location ~ ^/iiif/manifest/(.+)$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+        add_header Access-Control-Allow-Origin "*" always;
+    }
+
+    # IIIF Collection manifest routes - handled by ahgIiifCollection module
+    location ~ ^/manifest-collection/(.+)$ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+        add_header Access-Control-Allow-Origin "*" always;
+    }
+
+    # IIIF Annotations - handled by Symfony (ahgIiifPlugin)
+    location ~ ^/iiif/annotations {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization" always;
+
+        # Handle OPTIONS preflight
+        if ($request_method = 'OPTIONS') {
+            return 204;
+        }
+    }
+
+    # IIIF Viewer - standalone viewer page (handled by Symfony/ahgIiifPlugin)
+    location ~ ^/iiif/viewer/ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+    }
+
+    # IIIF v3 Manifest Routes (handled by Symfony/ahgIiifPlugin)
+    location ~ ^/iiif/v3/manifest/ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+        add_header Access-Control-Allow-Origin "*" always;
+    }
+
+    # IIIF Auth Routes (handled by Symfony/ahgIiifPlugin)
+    location ~ ^/iiif/auth/ {
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+        fastcgi_param DOCUMENT_ROOT $document_root;
+        fastcgi_param SCRIPT_NAME /index.php;
+        fastcgi_param PATH_INFO $uri;
+        fastcgi_read_timeout 300;
+    }
+
+    # IIIF Cantaloupe proxy
+    location /iiif/ {
+        proxy_pass http://127.0.0.1:8182/iiif/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        add_header Access-Control-Allow-Origin "*" always;
+
+        # Rewrite internal Cantaloupe URLs to public URLs in responses
+        sub_filter_types application/json application/ld+json;
+        sub_filter_once off;
+        # Replace internal URL with public HTTPS URL in one step
+        # This preserves 'protocol: http://iiif.io/api/image' which OpenSeadragon requires
+        sub_filter 'http://127.0.0.1:8182' 'https://$host';
+    }
+
+    location ^~ /archive/iiif/ {
+        rewrite ^/archive/iiif/(.*)$ /iiif/$1 break;
+        proxy_pass http://127.0.0.1:8182/iiif/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept" always;
+    }
+
+    # IIIF Manifest endpoint
+    location = /iiif-manifest.php {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        include fastcgi_params;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        add_header Access-Control-Allow-Origin * always;
+    }
+
+    # ======================================
+    # STATIC ASSETS
+    # ======================================
+    
+    # Dominion Plugin JS & CSS
+    location ^~ /plugins/arDominionB5Plugin/js/dist/ {
+        alias /usr/share/nginx/archive/dist/js/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ^~ /plugins/arDominionB5Plugin/css/dist/ {
+        alias /usr/share/nginx/archive/dist/css/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ^~ /archive/dist/js/ {
+        alias /usr/share/nginx/archive/dist/js/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location ^~ /archive/dist/css/ {
+        alias /usr/share/nginx/archive/dist/css/;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Static content
+    location ~* ^/(css|dist|js|images|plugins|vendor|arDominionB5Plugin|ahgThemeB5Plugin|web)/.*\.(css|js|map|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|pdf)$ {
+        root /usr/share/nginx/archive;
+        try_files $uri $uri/ =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # ======================================
+    # SECURITY - BLOCK DIRECT PHP ACCESS
+    # ======================================
+    location ~ \.php$ {
+        deny all;
+        return 404;
+    }
+
+    location ~ /\.(ht|git|svn) {
+        deny all;
+    }
+
+    # ======================================
+    # MAIN ROUTER (catch-all with rate limiting)
+    # ======================================
+    location / {
+        limit_req zone=slow burst=40 nodelay;
+        try_files $uri /index.php?$args;
+    }
+}
+
+# configuration file /usr/share/nginx/archive/atom-framework/config/nginx/extensions.conf:
+#
+# AtoM Framework - Extension Nginx Configuration
+# ========================================================
+# Include this file in your nginx server block to enable
+# media streaming, IIIF viewer, and other extension routes.
+#
+# Usage in your nginx config:
+#   include /path/to/atom-framework/config/nginx/extensions.conf;
+#
+# Place this BEFORE the main PHP handler and catch-all location blocks.
+#
+
+# ======================================
+# STATIC HTML TEST PAGES
+# ======================================
+
+location = /mirador-test.html {
+    try_files $uri =404;
+}
+
+# ======================================
+# MEDIA STREAMING & SNIPPETS (Symfony routes)
+# Handled by the media module via Symfony routing
+# ======================================
+
+# Media streaming - pass through Symfony for transcoding support
+# Buffering disabled for real-time streaming
+location ~ ^/media/stream/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/stream/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/stream/$1;
+    fastcgi_read_timeout 600;
+    fastcgi_buffering off;
+    add_header X-Accel-Buffering no;
+}
+
+# Media download
+location ~ ^/media/download/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/download/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/download/$1;
+}
+
+# Media snippets - GET by digital_object_id query param
+location = /media/snippets {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/snippets;
+    fastcgi_param PATH_TRANSLATED $document_root/media/snippets;
+    add_header Access-Control-Allow-Origin * always;
+    add_header Access-Control-Allow-Methods "GET, POST, OPTIONS" always;
+}
+
+# Media snippets by ID (GET/DELETE)
+location ~ ^/media/snippets/([0-9]+)/delete$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/snippets/$1/delete;
+    fastcgi_param PATH_TRANSLATED $document_root/media/snippets/$1/delete;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Media snippets by ID (list)
+location ~ ^/media/snippets/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/snippets/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/snippets/$1;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# ======================================
+# MEDIA CONVERSION (on-demand format conversion)
+# PSD/CR2/office docs/archives -> viewable formats
+# ======================================
+
+# Media conversion (GET) - longer timeout for LibreOffice/ImageMagick
+location ~ ^/media/convert/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/convert/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/convert/$1;
+    fastcgi_read_timeout 120;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# ======================================
+# IIIF MEDIA API ROUTES
+# Metadata extraction, waveforms, transcription
+# All routed through Symfony (ahgIiifPlugin)
+# ======================================
+
+# Media metadata extraction (POST)
+location ~ ^/media/extract/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/extract/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/extract/$1;
+    fastcgi_read_timeout 120;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Media metadata (GET)
+location ~ ^/media/metadata/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/metadata/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/metadata/$1;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Transcription start (POST - longer timeout for processing)
+location ~ ^/media/transcribe/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/transcribe/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/transcribe/$1;
+    fastcgi_read_timeout 600;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Transcription data with format (GET - json/vtt/srt/txt)
+location ~ ^/media/transcription/([0-9]+)/([a-z]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/transcription/$1/$2;
+    fastcgi_param PATH_TRANSLATED $document_root/media/transcription/$1/$2;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# Transcription data (GET - default json)
+location ~ ^/media/transcription/([0-9]+)$ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
+    fastcgi_param SCRIPT_NAME /index.php;
+    fastcgi_param PATH_INFO /media/transcription/$1;
+    fastcgi_param PATH_TRANSLATED $document_root/media/transcription/$1;
+    add_header Access-Control-Allow-Origin * always;
+}
+
+# ======================================
+# IIIF VIEWER ROUTES
+# Note: IIIF routes are handled by ahgIiifPlugin (Symfony)
+# and configured in the main nginx config file.
+# The routes below are disabled as they require router.php
+# which is not currently implemented.
+# ======================================
+
+# IIIF Manifest generation - HANDLED BY MAIN CONFIG (ahgIiifPlugin via Symfony)
+# location ~ ^/iiif/manifest/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+#     add_header Access-Control-Allow-Origin * always;
+# }
+
+# IIIF Collection - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/collection/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+#     add_header Access-Control-Allow-Origin * always;
+# }
+
+# IIIF Viewer - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/viewer/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Embed - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/embed/(.+)$ {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Annotations - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/annotations {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+#     add_header Access-Control-Allow-Origin * always;
+# }
+
+# IIIF OCR - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/ocr {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Text - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/text {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Search - HANDLED BY MAIN CONFIG
+# location ~ ^/iiif/search {
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     include fastcgi_params;
+#     fastcgi_param SCRIPT_FILENAME $document_root/atom-framework/src/Extensions/IiifViewer/public/router.php;
+# }
+
+# IIIF Viewer static assets
+# Note: Using try_files instead of alias to avoid $document_root limitation
+location /atom-framework/src/Extensions/IiifViewer/public/ {
+    try_files $uri =404;
+    expires 7d;
+}
+
+# ZoomPan static assets (CSS, JS, icons)
+location /atom-framework/src/Extensions/ZoomPan/public/ {
+    try_files $uri =404;
+    expires 7d;
+}
+
+# ======================================
+# IIIF IMAGE SERVER (CANTALOUPE) PROXY
+# Requires Cantaloupe running on port 8182
+# ======================================
+
+# Uncomment if you have Cantaloupe installed:
+# location /iiif/ {
+#     proxy_pass http://127.0.0.1:8182/iiif/;
+#     proxy_set_header Host $host;
+#     proxy_set_header X-Real-IP $remote_addr;
+#     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#     proxy_set_header X-Forwarded-Proto $scheme;
+#     add_header Access-Control-Allow-Origin "*" always;
+# }
+
+# configuration file /usr/share/nginx/archive/atom-framework/config/nginx/heratio.conf:
+#
+# Heratio (AtoM AHG Framework) — Full Nginx Configuration
+# =========================================================
+# Include this file in your nginx server block to route AHG
+# plugin traffic through the Laravel-based Heratio entry point.
+#
+# Usage in your nginx config:
+#   include /path/to/atom-framework/config/nginx/heratio.conf;
+#
+# Place this BEFORE the main PHP handler (index.php) block.
+#
+# KILL-SWITCH: Heratio is gated by a flag file. When the flag
+# file is absent, ALL routes fall through to Symfony's index.php.
+# Toggle instantly — no nginx reload required.
+#
+#   Enable:   touch /usr/share/nginx/archive/.heratio_enabled
+#   Disable:  rm /usr/share/nginx/archive/.heratio_enabled
+#
+# The env var HERATIO_ENABLED (checked by heratio.php) provides
+# a second layer of protection at the application level.
+#
+# Updated: 2026-02-13
+#
+
+# ── Kill-Switch: flag file gate ──────────────────────────
+# When .heratio_enabled exists → route to heratio.php
+# When absent → route to index.php (Symfony handles everything)
+set $heratio_entry "index.php";
+if (-f $document_root/.heratio_enabled) {
+    set $heratio_entry "heratio.php";
+}
+
+# ======================================
+# ROOT URL — redirect to heritage (standalone mode only)
+# ======================================
+# Uncomment when running in standalone mode:
+# location = / {
+#     return 302 /heritage;
+# }
+
+# ======================================
+# API V3 ENDPOINTS (Laravel/Heratio)
+# ======================================
+
+location ~ ^/api/v3/ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ======================================
+# AUTH ENDPOINTS (Laravel/Heratio)
+# ======================================
+
+location ~ ^/auth/ {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ======================================
+# USER AUTH (login/logout/clipboard)
+# ======================================
+
+location ~ ^/user(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ======================================
+# AHG PLUGIN ROUTES (Laravel/Heratio)
+# ======================================
+
+# ── Settings, Audit, TTS ────────────────────────────────
+location ~ ^/(ahgSettings|admin/ahg-settings|settings|admin/audit|tts)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── GLAM Browse, Display Search ──────────────────────────
+location ~ ^/(glam|display)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Security, Access Requests ────────────────────────────
+location ~ ^/(security|accessRequest)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Heritage Platform ────────────────────────────────────
+location ~ ^/heritage(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── AI & NER ─────────────────────────────────────────────
+location ~ ^/(ai|ner)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Data Migration, ICIP, RiC ───────────────────────────
+location ~ ^/(dataMigration|admin/data-migration|icip|admin/ric|ricExplorer)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Provenance, Feedback, Cart ───────────────────────────
+location ~ ^/(provenance|feedback|cart)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Metadata Extraction, Semantic Search ─────────────────
+location ~ ^/(metadataExtraction|admin/semantic-search|semanticSearchAdmin)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Multi-Tenant ─────────────────────────────────────────
+location ~ ^/tenant(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Admin: report-builder, backup ────────────────────────
+# DISABLED — routes through Symfony until Heratio action resolution is complete
+# location ~ ^/admin/(report-builder|backup)(/|$) {
+#     include fastcgi_params;
+#     fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+#     fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+#     fastcgi_param SCRIPT_NAME /$heratio_entry;
+#     fastcgi_param REQUEST_URI $request_uri;
+#     fastcgi_read_timeout 300;
+# }
+
+# ── Research ─────────────────────────────────────────────
+location ~ ^/research(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ══════════════════════════════════════════════════════════
+# AHG MANAGE PLUGIN ROUTES
+# ══════════════════════════════════════════════════════════
+#
+# These are AHG plugin modules that use AhgController and
+# render via Blade templates + Laravel DB. They work fully
+# in standalone Heratio mode.
+#
+location ~ ^/(accessionManage|actorManage|donorManage|repositoryManage|rightsHolderManage|storageManage|termTaxonomy|userManage)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Spectrum, Preservation, Reports ──────────────────────
+location ~ ^/(spectrum|preservation|reports|condition)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Privacy, Extended Rights, Vendor, Contact ────────────
+location ~ ^/(privacy|extendedRights|vendor|contact|donorAgreement)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── DOI, Favorites, Feedback, Publish ────────────────────
+location ~ ^/(doi|favorites|requestToPublish)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Jobs, Static Pages, Menu Management ──────────────────
+location ~ ^/(jobsManage|staticPageManage|menuManage|digitalObjectManage)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ══════════════════════════════════════════════════════════
+# BASE AtoM MODULE ROUTES (aliased to AHG manage plugins)
+# ══════════════════════════════════════════════════════════
+#
+# These base AtoM module URLs are used in the menu database.
+# ActionBridge redirects them to AHG manage plugin equivalents
+# via ACTION_ALIASES (e.g., /actor/browse → actorManage/browse).
+#
+location ~ ^/(actor|repository|taxonomy|accession|donor|rightsholder|physicalobject|function|informationobject|term|aclGroup|staticpage|search|object|sfPluginAdminPlugin|sfSkosPlugin)(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ── Settings (base AtoM admin settings) ────────────────────
+location ~ ^/settings(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# ══════════════════════════════════════════════════════════
+# CATCH-ALL: Route ALL remaining requests through Heratio
+# ══════════════════════════════════════════════════════════
+#
+# When .heratio_enabled exists, ALL requests go through
+# heratio.php (standalone mode — Symfony not available).
+# When absent, $heratio_entry = "index.php" and requests
+# go through Symfony as normal.
+#
+# This MUST be the last location block before the main
+# server catch-all, so static files (.css, .js, images)
+# are still served directly by nginx.
+
+# Catch-all for /index.php paths (intercepts try_files fallback)
+#
+# Flow: Request "/admin/secure" → no specific location match →
+# main config's `location /` → `try_files $uri /index.php?$args` →
+# internal redirect to /index.php → THIS block catches it →
+# routes to $heratio_entry (heratio.php when standalone).
+#
+location ~ ^/index\.php(/|$) {
+    include fastcgi_params;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root/$heratio_entry;
+    fastcgi_param SCRIPT_NAME /$heratio_entry;
+    fastcgi_param REQUEST_URI $request_uri;
+    fastcgi_read_timeout 300;
+}
+
+# configuration file /etc/nginx/sites-enabled/registry.theahg.co.za.conf:
+##
+# Registry - registry.theahg.co.za
+# Points to AtoM installation, serves ahgRegistryPlugin routes
+# Homepage redirects to /registry/
+##
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name registry.theahg.co.za;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name registry.theahg.co.za;
+
+    # Point to the AtoM installation
+    root /usr/share/nginx/archive;
+    index index.php index.html;
+
+    client_max_body_size 100M;
+
+    ssl_certificate     /etc/letsencrypt/live/theahg.ddns.net-0001/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/theahg.ddns.net-0001/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    access_log /var/log/nginx/registry_access.log;
+    error_log  /var/log/nginx/registry_error.log;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
+    # ======================================
+    # HOMEPAGE -> redirect to /registry/
+    # ======================================
+    location = / {
+        return 302 /registry/;
+    }
+
+    # ======================================
+    # REGISTRY PLUGIN STATIC ASSETS
+    # ======================================
+
+    # CSS from the plugin
+    location ^~ /plugins/ahgRegistryPlugin/css/ {
+        alias /usr/share/nginx/archive/plugins/ahgRegistryPlugin/css/;
+        expires 7d;
+        add_header Cache-Control "public";
+    }
+
+    # JS from the plugin
+    location ^~ /plugins/ahgRegistryPlugin/js/ {
+        alias /usr/share/nginx/archive/plugins/ahgRegistryPlugin/js/;
+        expires 7d;
+        add_header Cache-Control "public";
+    }
+
+    # Registry file uploads (logos, attachments, software packages)
+    location ^~ /uploads/registry/ {
+        alias /usr/share/nginx/archive/uploads/registry/;
+        expires 7d;
+        add_header Cache-Control "public";
+    }
+
+    # ======================================
+    # THEME STATIC ASSETS (needed for layout)
+    # ======================================
+
+    # Dominion/AHG theme JS & CSS
+    location ^~ /plugins/arDominionB5Plugin/js/dist/ {
+        alias /usr/share/nginx/archive/dist/js/;
+        try_files $uri =404;
+        expires 30d;
+    }
+
+    location ^~ /plugins/arDominionB5Plugin/css/dist/ {
+        alias /usr/share/nginx/archive/dist/css/;
+        try_files $uri =404;
+        expires 30d;
+    }
+
+    # General static content (css, js, images, fonts)
+    location ~* ^/(css|dist|js|images|plugins|vendor|web)/.*\.(css|js|map|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|pdf)$ {
+        root /usr/share/nginx/archive;
+        try_files $uri =404;
+        expires 30d;
+        add_header Cache-Control "public";
+    }
+
+    # Uploads (digital objects, logos)
+    location /uploads/ {
+        root /usr/share/nginx/archive;
+        try_files $uri =404;
+        expires 7d;
+    }
+
+    # ======================================
+    # PHP HANDLING (AtoM Symfony front controller)
+    # ======================================
+    location ~ ^/(index|qubit_dev)\.php(/|$) {
+        include fastcgi_params;
+        fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_param PATH_TRANSLATED $document_root$fastcgi_path_info;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        fastcgi_index index.php;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 128k;
+        fastcgi_buffers 4 256k;
+        fastcgi_busy_buffers_size 256k;
+    }
+
+    # Block direct PHP access (except front controller)
+    location ~ \.php$ {
+        deny all;
+        return 404;
+    }
+
+    # Block dotfiles
+    location ~ /\.(ht|git|svn) {
+        deny all;
+    }
+
+    # ======================================
+    # MAIN ROUTER (all /registry/* routes go through Symfony)
+    # ======================================
+    location / {
+        try_files $uri /index.php?$args;
+    }
+}
+
