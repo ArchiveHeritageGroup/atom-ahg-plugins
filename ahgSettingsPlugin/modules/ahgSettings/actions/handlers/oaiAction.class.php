@@ -34,7 +34,7 @@ class SettingsOaiAction extends AhgController
     public function execute($request)
     {
         // Redirect to global settings form if the OAI plugin is not enabled
-        if (!in_array('arOaiPlugin', unserialize($this->config('app_plugins')))) {
+        if (!in_array('arOaiPlugin', unserialize($this->config('app_plugins'), ['allowed_classes' => false]) ?: [])) {
             $this->redirect('settings/global');
         }
 

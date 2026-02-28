@@ -142,7 +142,7 @@ class AhgSettingsPluginsAction extends AhgController
                 return;
             }
 
-            $plugins = @unserialize($row->value);
+            $plugins = @unserialize($row->value, ['allowed_classes' => false]);
             if (!is_array($plugins)) {
                 $plugins = [];
             }

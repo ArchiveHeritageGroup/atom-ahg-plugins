@@ -1097,7 +1097,7 @@ class InformationObjectCrudService
             return [];
         }
 
-        $arr = @unserialize($pi);
+        $arr = @unserialize($pi, ['allowed_classes' => false]);
 
         return is_array($arr) ? $arr : [];
     }

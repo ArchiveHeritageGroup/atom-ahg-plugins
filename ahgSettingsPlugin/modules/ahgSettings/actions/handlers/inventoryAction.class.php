@@ -62,7 +62,8 @@ class SettingsInventoryAction extends AhgEditController
         switch ($name) {
             case 'levels':
                 $value = unserialize(
-                    $this->settingLevels->getValue(['sourceCulture' => true])
+                    $this->settingLevels->getValue(['sourceCulture' => true]),
+                    ['allowed_classes' => false]
                 );
 
                 if (false !== $value) {

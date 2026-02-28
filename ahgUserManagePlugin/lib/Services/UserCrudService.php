@@ -424,7 +424,7 @@ class UserCrudService
             return [];
         }
 
-        $decoded = @unserialize($perm->constants);
+        $decoded = @unserialize($perm->constants, ['allowed_classes' => false]);
         if (is_array($decoded) && isset($decoded['languages'])) {
             return $decoded['languages'];
         }

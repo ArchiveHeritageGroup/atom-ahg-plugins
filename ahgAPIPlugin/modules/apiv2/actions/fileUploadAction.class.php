@@ -1,6 +1,8 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgApiController;
+use AtomExtensions\Services\FileValidationService;
+
 class apiv2FileUploadAction extends AhgApiController
 {
     public function POST($request)
@@ -9,7 +11,14 @@ class apiv2FileUploadAction extends AhgApiController
             return $this->error(403, 'Forbidden', 'Write scope required');
         }
 
-        $type = $request->getParameter('type', 'general');
+        // Sanitize type parameter to prevent path traversal
+        $type = basename($request->getParameter('type', 'general'));
+        // Extra safety: strip any remaining dangerous characters
+        $type = preg_replace('/[^a-zA-Z0-9_-]/', '', $type);
+        if (empty($type)) {
+            $type = 'general';
+        }
+
         $uploadDir = $this->config('sf_upload_dir') . '/' . $type . '/' . date('Y/m');
 
         if (!is_dir($uploadDir)) {
@@ -17,6 +26,7 @@ class apiv2FileUploadAction extends AhgApiController
         }
 
         $results = [];
+        $errors = [];
 
         // Handle multiple files
         foreach ($_FILES as $key => $file) {
@@ -24,20 +34,29 @@ class apiv2FileUploadAction extends AhgApiController
                 // Multiple files with same field name
                 for ($i = 0; $i < count($file['name']); $i++) {
                     if ($file['error'][$i] === UPLOAD_ERR_OK) {
-                        $result = $this->saveFile([
+                        $fileEntry = [
                             'name' => $file['name'][$i],
                             'tmp_name' => $file['tmp_name'][$i],
                             'type' => $file['type'][$i],
-                            'size' => $file['size'][$i]
-                        ], $uploadDir);
-                        $results[] = $result;
+                            'size' => $file['size'][$i],
+                        ];
+                        $result = $this->saveFile($fileEntry, $uploadDir);
+                        if (isset($result['error'])) {
+                            $errors[] = $result;
+                        } else {
+                            $results[] = $result;
+                        }
                     }
                 }
             } else {
                 // Single file
                 if ($file['error'] === UPLOAD_ERR_OK) {
                     $result = $this->saveFile($file, $uploadDir);
-                    $results[] = $result;
+                    if (isset($result['error'])) {
+                        $errors[] = $result;
+                    } else {
+                        $results[] = $result;
+                    }
                 }
             }
         }
@@ -48,63 +67,153 @@ class apiv2FileUploadAction extends AhgApiController
             foreach ($data['files'] as $fileData) {
                 if (!empty($fileData['base64'])) {
                     $result = $this->saveBase64($fileData, $uploadDir);
-                    $results[] = $result;
+                    if (isset($result['error'])) {
+                        $errors[] = $result;
+                    } else {
+                        $results[] = $result;
+                    }
                 }
             }
         }
 
-        if (empty($results)) {
+        if (empty($results) && empty($errors)) {
             return $this->error(400, 'Bad Request', 'No files uploaded');
         }
 
-        return $this->success([
+        if (empty($results) && !empty($errors)) {
+            return $this->error(400, 'Validation Failed', $errors);
+        }
+
+        $response = [
             'uploaded' => count($results),
-            'files' => $results
-        ], 201);
+            'files' => $results,
+        ];
+
+        if (!empty($errors)) {
+            $response['rejected'] = count($errors);
+            $response['errors'] = $errors;
+        }
+
+        return $this->success($response, 201);
     }
 
     protected function saveFile($file, $uploadDir)
     {
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        // Validate the upload via FileValidationService
+        $validation = FileValidationService::validateUpload($file);
+        if (!$validation['valid']) {
+            return [
+                'error' => true,
+                'original_name' => $file['name'] ?? 'unknown',
+                'reasons' => $validation['errors'],
+            ];
+        }
+
+        $sanitizedName = FileValidationService::sanitizeFilename($file['name']);
+        $ext = strtolower(pathinfo($sanitizedName, PATHINFO_EXTENSION));
         $filename = uniqid() . '.' . $ext;
         $filepath = $uploadDir . '/' . $filename;
 
         move_uploaded_file($file['tmp_name'], $filepath);
 
+        // Post-move MIME check (magic bytes on the actual saved file)
+        $mimeCheck = FileValidationService::validateMime($filepath);
+        if (!$mimeCheck['valid']) {
+            @unlink($filepath);
+
+            return [
+                'error' => true,
+                'original_name' => $file['name'],
+                'reasons' => $mimeCheck['errors'],
+            ];
+        }
+
         return [
             'filename' => $filename,
             'original_name' => $file['name'],
-            'mime_type' => $file['type'],
+            'mime_type' => $mimeCheck['detected_mime'],
             'size' => $file['size'],
-            'path' => str_replace($this->config('sf_upload_dir'), '/uploads', $filepath)
+            'path' => str_replace($this->config('sf_upload_dir'), '/uploads', $filepath),
         ];
     }
 
     protected function saveBase64($data, $uploadDir)
     {
         $base64 = $data['base64'];
-        $ext = $data['extension'] ?? 'bin';
+        $ext = strtolower($data['extension'] ?? 'bin');
         $originalName = $data['name'] ?? 'file.' . $ext;
 
         if (preg_match('/^data:([^;]+);base64,/', $base64, $matches)) {
-            $mimeType = $matches[1];
+            $claimedMime = $matches[1];
             $base64 = substr($base64, strpos($base64, ',') + 1);
         } else {
-            $mimeType = 'application/octet-stream';
+            $claimedMime = 'application/octet-stream';
         }
 
-        $content = base64_decode($base64);
+        // Validate base64 size before decoding
+        $sizeCheck = FileValidationService::validateBase64Size($base64);
+        if (!$sizeCheck['valid']) {
+            return [
+                'error' => true,
+                'original_name' => $originalName,
+                'reasons' => $sizeCheck['errors'],
+            ];
+        }
+
+        // Validate extension
+        $allowedExtensions = FileValidationService::getAllowedExtensions();
+        $ext = preg_replace('/[^a-zA-Z0-9]/', '', $ext);
+        if (!in_array($ext, $allowedExtensions, true)) {
+            return [
+                'error' => true,
+                'original_name' => $originalName,
+                'reasons' => ["File extension '{$ext}' is not allowed."],
+            ];
+        }
+
+        $content = base64_decode($base64, true);
+        if ($content === false) {
+            return [
+                'error' => true,
+                'original_name' => $originalName,
+                'reasons' => ['Invalid base64 encoding.'],
+            ];
+        }
+
+        // Check decoded size
+        $maxSize = FileValidationService::getMaxSize();
+        if (strlen($content) > $maxSize) {
+            return [
+                'error' => true,
+                'original_name' => $originalName,
+                'reasons' => ['File exceeds maximum allowed size.'],
+            ];
+        }
+
+        $sanitizedName = FileValidationService::sanitizeFilename($originalName);
         $filename = uniqid() . '.' . $ext;
         $filepath = $uploadDir . '/' . $filename;
 
         file_put_contents($filepath, $content);
 
+        // Validate MIME type of the written file
+        $mimeCheck = FileValidationService::validateMime($filepath, $claimedMime);
+        if (!$mimeCheck['valid']) {
+            @unlink($filepath);
+
+            return [
+                'error' => true,
+                'original_name' => $originalName,
+                'reasons' => $mimeCheck['errors'],
+            ];
+        }
+
         return [
             'filename' => $filename,
             'original_name' => $originalName,
-            'mime_type' => $mimeType,
+            'mime_type' => $mimeCheck['detected_mime'],
             'size' => strlen($content),
-            'path' => str_replace($this->config('sf_upload_dir'), '/uploads', $filepath)
+            'path' => str_replace($this->config('sf_upload_dir'), '/uploads', $filepath),
         ];
     }
 }

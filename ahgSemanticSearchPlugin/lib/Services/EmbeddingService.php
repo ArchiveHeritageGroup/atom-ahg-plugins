@@ -214,8 +214,8 @@ class EmbeddingService
      */
     private function storeEmbedding(int $termId, string $model, array $embedding): bool
     {
-        // Serialize the embedding
-        $serialized = serialize($embedding);
+        // Encode the embedding as JSON
+        $serialized = json_encode($embedding);
 
         // Delete existing
         DB::table('ahg_thesaurus_embedding')
@@ -252,7 +252,13 @@ class EmbeddingService
             return null;
         }
 
-        return unserialize($record->embedding);
+        // Try JSON first (new format), fall back to PHP serialization (legacy)
+        $result = json_decode($record->embedding, true);
+        if ($result === null) {
+            $result = @unserialize($record->embedding, ['allowed_classes' => false]);
+        }
+
+        return is_array($result) ? $result : null;
     }
 
     /**
@@ -355,7 +361,13 @@ class EmbeddingService
         $similarities = [];
 
         foreach ($embeddings as $record) {
-            $termEmbedding = unserialize($record->embedding);
+            $termEmbedding = json_decode($record->embedding, true);
+            if ($termEmbedding === null) {
+                $termEmbedding = @unserialize($record->embedding, ['allowed_classes' => false]);
+            }
+            if (!is_array($termEmbedding)) {
+                continue;
+            }
             $similarity = $this->cosineSimilarity($queryEmbedding, $termEmbedding);
 
             if ($similarity >= $minSimilarity) {
@@ -406,7 +418,13 @@ class EmbeddingService
         $similarities = [];
 
         foreach ($embeddings as $record) {
-            $otherEmbedding = unserialize($record->embedding);
+            $otherEmbedding = json_decode($record->embedding, true);
+            if ($otherEmbedding === null) {
+                $otherEmbedding = @unserialize($record->embedding, ['allowed_classes' => false]);
+            }
+            if (!is_array($otherEmbedding)) {
+                continue;
+            }
             $similarity = $this->cosineSimilarity($termEmbedding, $otherEmbedding);
 
             $similarities[] = [

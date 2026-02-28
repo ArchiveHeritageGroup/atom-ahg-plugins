@@ -59,7 +59,11 @@ class GettyCacheService
             return null;
         }
 
-        $data = unserialize($content);
+        // Try JSON first (new format), fall back to PHP serialization (legacy)
+        $data = json_decode($content, true);
+        if ($data === null) {
+            $data = @unserialize($content, ['allowed_classes' => false]);
+        }
 
         if (!is_array($data) || !isset($data['expires'], $data['value'])) {
             @unlink($file);
@@ -100,7 +104,7 @@ class GettyCacheService
             'key' => $key,
         ];
 
-        $result = file_put_contents($file, serialize($data), LOCK_EX);
+        $result = file_put_contents($file, json_encode($data, JSON_UNESCAPED_UNICODE), LOCK_EX);
 
         if (false === $result) {
             $this->logger->warning('Getty cache write failed', ['key' => $key, 'file' => $file]);
@@ -195,7 +199,10 @@ class GettyCacheService
 
             $content = file_get_contents($file);
             if ($content) {
-                $data = @unserialize($content);
+                $data = json_decode($content, true);
+                if ($data === null) {
+                    $data = @unserialize($content, ['allowed_classes' => false]);
+                }
                 if (is_array($data) && isset($data['expires'])) {
                     if ($data['expires'] < time()) {
                         ++$stats['expired'];
@@ -230,7 +237,10 @@ class GettyCacheService
         foreach ($files as $file) {
             $content = file_get_contents($file);
             if ($content) {
-                $data = @unserialize($content);
+                $data = json_decode($content, true);
+                if ($data === null) {
+                    $data = @unserialize($content, ['allowed_classes' => false]);
+                }
                 if (is_array($data) && isset($data['expires']) && $data['expires'] < time()) {
                     if (@unlink($file)) {
                         ++$count;

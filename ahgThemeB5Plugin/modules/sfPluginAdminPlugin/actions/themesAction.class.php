@@ -45,7 +45,7 @@ class sfPluginAdminPluginThemesAction extends AhgController
             $criteria->add(QubitSetting::NAME, 'plugins');
             if (1 == count($query = QubitSetting::get($criteria))) {
                 $setting = $query[0];
-                $this->form->setDefault('enabled', unserialize($setting->getValue(['sourceCulture' => true])) ?: []);
+                $this->form->setDefault('enabled', unserialize($setting->getValue(['sourceCulture' => true]), ['allowed_classes' => false]) ?: []);
             }
         } else {
             $row = \Illuminate\Database\Capsule\Manager::table('setting')
@@ -55,7 +55,7 @@ class sfPluginAdminPluginThemesAction extends AhgController
             if ($row) {
                 $setting = $row;
                 $query = [$row];
-                $this->form->setDefault('enabled', unserialize($row->value) ?: []);
+                $this->form->setDefault('enabled', unserialize($row->value, ['allowed_classes' => false]) ?: []);
             } else {
                 $query = [];
             }
@@ -107,7 +107,7 @@ class sfPluginAdminPluginThemesAction extends AhgController
             if ($this->form->isValid()) {
                 $settings = [];
                 if (1 == count($query)) {
-                    $settings = unserialize($setting->getValue(['sourceCulture' => true])) ?: [];
+                    $settings = unserialize($setting->getValue(['sourceCulture' => true]), ['allowed_classes' => false]) ?: [];
                 }
 
                 foreach (array_keys($this->plugins) as $item) {
