@@ -1962,6 +1962,170 @@
                                 </fieldset>
                             @break
 
+                            @case('integrity')
+                                <!-- Integrity Verification Defaults -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>{{ __('Integrity Verification Defaults') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="integrity_enabled"
+                                                           name="settings[integrity_enabled]" value="true"
+                                                           {{ ($settings['integrity_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="integrity_enabled">
+                                                        <strong>{{ __('Enable Integrity Assurance') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text mb-3">{{ __('Master switch for all integrity verification functionality.') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="integrity_auto_baseline"
+                                                           name="settings[integrity_auto_baseline]" value="true"
+                                                           {{ ($settings['integrity_auto_baseline'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="integrity_auto_baseline">
+                                                        <strong>{{ __('Auto-Generate Baselines') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text mb-3">{{ __('Automatically generate baseline checksums on first verification if none exist.') }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="integrity_default_algorithm">{{ __('Default Algorithm') }}</label>
+                                                <select class="form-select" id="integrity_default_algorithm" name="settings[integrity_default_algorithm]">
+                                                    <option value="sha256" {{ ($settings['integrity_default_algorithm'] ?? 'sha256') === 'sha256' ? 'selected' : '' }}>SHA-256 (faster)</option>
+                                                    <option value="sha512" {{ ($settings['integrity_default_algorithm'] ?? '') === 'sha512' ? 'selected' : '' }}>SHA-512 (more secure)</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="integrity_default_batch_size">{{ __('Default Batch Size') }}</label>
+                                                <input type="number" class="form-control" id="integrity_default_batch_size"
+                                                       name="settings[integrity_default_batch_size]"
+                                                       value="{{ e($settings['integrity_default_batch_size'] ?? '200') }}" min="0" max="50000">
+                                                <div class="form-text">{{ __('Objects per run (0 = unlimited).') }}</div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="integrity_io_throttle_ms">{{ __('IO Throttle (ms)') }}</label>
+                                                <input type="number" class="form-control" id="integrity_io_throttle_ms"
+                                                       name="settings[integrity_io_throttle_ms]"
+                                                       value="{{ e($settings['integrity_io_throttle_ms'] ?? '10') }}" min="0" max="1000">
+                                                <div class="form-text">{{ __('Millisecond pause between objects to reduce disk pressure.') }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-3 mt-2">
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="integrity_default_max_runtime">{{ __('Max Runtime (minutes)') }}</label>
+                                                <input type="number" class="form-control" id="integrity_default_max_runtime"
+                                                       name="settings[integrity_default_max_runtime]"
+                                                       value="{{ e($settings['integrity_default_max_runtime'] ?? '120') }}" min="1" max="1440">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="integrity_default_max_memory">{{ __('Max Memory (MB)') }}</label>
+                                                <input type="number" class="form-control" id="integrity_default_max_memory"
+                                                       name="settings[integrity_default_max_memory]"
+                                                       value="{{ e($settings['integrity_default_max_memory'] ?? '512') }}" min="64" max="4096">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label" for="integrity_dead_letter_threshold">{{ __('Dead Letter Threshold') }}</label>
+                                                <input type="number" class="form-control" id="integrity_dead_letter_threshold"
+                                                       name="settings[integrity_dead_letter_threshold]"
+                                                       value="{{ e($settings['integrity_dead_letter_threshold'] ?? '3') }}" min="1" max="100">
+                                                <div class="form-text">{{ __('Consecutive failures before escalation to dead letter queue.') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Notification Defaults -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fas fa-bell me-2"></i>{{ __('Notification Defaults') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="integrity_notify_on_failure"
+                                                           name="settings[integrity_notify_on_failure]" value="true"
+                                                           {{ ($settings['integrity_notify_on_failure'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="integrity_notify_on_failure">
+                                                        <strong>{{ __('Notify on Run Failure') }}</strong>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch mb-3">
+                                                    <input class="form-check-input" type="checkbox" id="integrity_notify_on_mismatch"
+                                                           name="settings[integrity_notify_on_mismatch]" value="true"
+                                                           {{ ($settings['integrity_notify_on_mismatch'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="integrity_notify_on_mismatch">
+                                                        <strong>{{ __('Notify on Hash Mismatch') }}</strong>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="integrity_alert_email">{{ __('Default Alert Email') }}</label>
+                                                <input type="email" class="form-control" id="integrity_alert_email"
+                                                       name="settings[integrity_alert_email]"
+                                                       value="{{ e($settings['integrity_alert_email'] ?? '') }}"
+                                                       placeholder="admin@example.com">
+                                                <div class="form-text">{{ __('Default email for integrity alerts (used by new schedules and alert rules).') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="integrity_webhook_url">{{ __('Default Webhook URL') }}</label>
+                                                <input type="url" class="form-control" id="integrity_webhook_url"
+                                                       name="settings[integrity_webhook_url]"
+                                                       value="{{ e($settings['integrity_webhook_url'] ?? '') }}"
+                                                       placeholder="https://hooks.slack.com/...">
+                                                <div class="form-text">{{ __('Default webhook URL for alert notifications (Slack, Teams, PagerDuty, etc).') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Links -->
+                                <div class="card mb-4 border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="fas fa-link me-2"></i>{{ __('Quick Links') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-2">
+                                            <div class="col-auto">
+                                                <a href="{{ url_for(['module' => 'integrity', 'action' => 'index']) }}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-tachometer-alt me-1"></i>{{ __('Dashboard') }}
+                                                </a>
+                                            </div>
+                                            <div class="col-auto">
+                                                <a href="{{ url_for(['module' => 'integrity', 'action' => 'schedules']) }}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-clock me-1"></i>{{ __('Schedules') }}
+                                                </a>
+                                            </div>
+                                            <div class="col-auto">
+                                                <a href="{{ url_for(['module' => 'integrity', 'action' => 'policies']) }}" class="btn btn-outline-warning">
+                                                    <i class="fas fa-archive me-1"></i>{{ __('Retention Policies') }}
+                                                </a>
+                                            </div>
+                                            <div class="col-auto">
+                                                <a href="{{ url_for(['module' => 'integrity', 'action' => 'alerts']) }}" class="btn btn-outline-dark">
+                                                    <i class="fas fa-bell me-1"></i>{{ __('Alert Rules') }}
+                                                </a>
+                                            </div>
+                                            <div class="col-auto">
+                                                <a href="{{ url_for(['module' => 'integrity', 'action' => 'export']) }}" class="btn btn-outline-success">
+                                                    <i class="fas fa-download me-1"></i>{{ __('Export') }}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->

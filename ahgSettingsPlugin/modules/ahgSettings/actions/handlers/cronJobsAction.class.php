@@ -2058,6 +2058,63 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Short',
                 'category' => 'integrity',
             ],
+            [
+                'name' => 'Integrity: Export CSV / Auditor Pack',
+                'command' => 'php symfony integrity:report',
+                'description' => 'Export the verification ledger to CSV or generate a self-contained Auditor Pack ZIP for compliance audits. The auditor pack contains summary.html (standalone, no dependencies), exceptions.csv, and config-snapshot.json.',
+                'options' => [
+                    '--export-csv=PATH' => 'Export ledger to CSV file (use - for stdout)',
+                    '--auditor-pack=PATH' => 'Generate auditor pack ZIP to specified path',
+                    '--date-from=DATE' => 'Start date filter (YYYY-MM-DD)',
+                    '--date-to=DATE' => 'End date filter (YYYY-MM-DD)',
+                    '--repository-id=ID' => 'Filter by repository',
+                ],
+                'schedule' => 'Weekly auditor pack export recommended (e.g. Monday 8:30am)',
+                'example' => '30 8 * * 1 cd {root} && php symfony integrity:report --auditor-pack=/tmp/integrity_weekly.zip >> /var/log/atom/integrity-report.log 2>&1',
+                'duration' => 'Short to Medium',
+                'category' => 'integrity',
+            ],
+            [
+                'name' => 'Integrity: Retention Scan',
+                'command' => 'php symfony integrity:retention',
+                'description' => 'Scan for records that have passed their retention period and add them to the disposition review queue. Evaluates all enabled retention policies based on their trigger type (ingest date, last modified, closure date, last access) and scope.',
+                'options' => [
+                    '--scan-eligible' => 'Scan for eligible disposition candidates',
+                    '--policy-id=ID' => 'Filter scan to a specific policy',
+                    '--list' => 'List all retention policies',
+                    '--status' => 'Show retention and disposition status',
+                ],
+                'schedule' => 'Daily at 1am recommended',
+                'example' => '0 1 * * * cd {root} && php symfony integrity:retention --scan-eligible >> /var/log/atom/integrity-retention.log 2>&1',
+                'duration' => 'Short to Medium',
+                'category' => 'integrity',
+            ],
+            [
+                'name' => 'Integrity: Process Dispositions',
+                'command' => 'php symfony integrity:retention',
+                'description' => 'Process approved disposition queue entries by marking them as disposed. IMPORTANT: This only marks the status — it does NOT delete any records or files. Actual deletion is a separate manual process outside the plugin.',
+                'options' => [
+                    '--process-queue' => 'Process all approved dispositions',
+                ],
+                'schedule' => 'Daily at 2am recommended (after retention scan)',
+                'example' => '0 2 * * * cd {root} && php symfony integrity:retention --process-queue >> /var/log/atom/integrity-retention.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'integrity',
+            ],
+            [
+                'name' => 'Integrity: Legal Hold Management',
+                'command' => 'php symfony integrity:retention',
+                'description' => 'Place or release legal holds on information objects. Legal holds prevent records from being disposed of, even if past their retention period. All hold actions are logged to the integrity ledger for audit trail.',
+                'options' => [
+                    '--hold=IO_ID' => 'Place a legal hold on the specified information object',
+                    '--release=HOLD_ID' => 'Release a legal hold by hold ID',
+                    '--reason="TEXT"' => 'Reason for placing the hold (required for audit trail)',
+                ],
+                'schedule' => 'On demand only',
+                'example' => 'cd {root} && php symfony integrity:retention --hold=12345 --reason="Legal investigation ref LH-2026-001"',
+                'duration' => 'Short',
+                'category' => 'integrity',
+            ],
         ];
     }
 

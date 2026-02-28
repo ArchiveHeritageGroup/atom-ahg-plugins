@@ -57,6 +57,20 @@ if ($hasHeritagePlugin) {
     ];
 }
 
+$hasIntegrityPlugin = in_array('ahgIntegrityPlugin', sfProjectConfiguration::getActive()->getPlugins());
+if ($hasIntegrityPlugin) {
+    $allCards['Integrity Assurance'] = [
+        'label' => 'Integrity Assurance',
+        'icon' => 'fa-shield-alt',
+        'icon_prefix' => 'fas',
+        'description' => 'Fixity verification, retention policies, legal holds, disposition review, and alerting',
+        'url' => url_for(['module' => 'integrity', 'action' => 'index']),
+        'color' => 'danger',
+        'btn_text' => 'Dashboard',
+        'btn_icon' => 'fa-tachometer-alt'
+    ];
+}
+
 $allCards['Preservation & Backup'] = [
     'label' => 'Preservation & Backup',
     'icon' => 'fa-cloud-upload-alt',

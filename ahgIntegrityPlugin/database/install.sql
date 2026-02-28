@@ -9,11 +9,11 @@ CREATE TABLE IF NOT EXISTS `integrity_schedule` (
     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(255) NOT NULL,
     `description` TEXT NULL,
-    `scope_type` ENUM('global','repository','hierarchy') NOT NULL DEFAULT 'global',
+    `scope_type` VARCHAR(20) NOT NULL DEFAULT 'global' COMMENT 'global, repository, hierarchy',
     `repository_id` INT NULL,
     `information_object_id` INT NULL,
-    `algorithm` ENUM('sha256','sha512') NOT NULL DEFAULT 'sha256',
-    `frequency` ENUM('daily','weekly','monthly','ad_hoc') NOT NULL DEFAULT 'weekly',
+    `algorithm` VARCHAR(10) NOT NULL DEFAULT 'sha256' COMMENT 'sha256, sha512',
+    `frequency` VARCHAR(20) NOT NULL DEFAULT 'weekly' COMMENT 'daily, weekly, monthly, ad_hoc',
     `cron_expression` VARCHAR(100) NULL COMMENT 'Optional cron expression override',
     `batch_size` INT UNSIGNED NOT NULL DEFAULT 200,
     `io_throttle_ms` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Microsleep between objects (ms)',
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS `integrity_schedule` (
 CREATE TABLE IF NOT EXISTS `integrity_run` (
     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `schedule_id` BIGINT UNSIGNED NULL,
-    `status` ENUM('running','completed','partial','failed','timeout','cancelled') NOT NULL DEFAULT 'running',
-    `algorithm` ENUM('sha256','sha512') NOT NULL DEFAULT 'sha256',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'running' COMMENT 'running, completed, partial, failed, timeout, cancelled',
+    `algorithm` VARCHAR(10) NOT NULL DEFAULT 'sha256' COMMENT 'sha256, sha512',
     `objects_scanned` INT UNSIGNED NOT NULL DEFAULT 0,
     `objects_passed` INT UNSIGNED NOT NULL DEFAULT 0,
     `objects_failed` INT UNSIGNED NOT NULL DEFAULT 0,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `integrity_run` (
     `objects_error` INT UNSIGNED NOT NULL DEFAULT 0,
     `objects_skipped` INT UNSIGNED NOT NULL DEFAULT 0,
     `bytes_scanned` BIGINT UNSIGNED NOT NULL DEFAULT 0,
-    `triggered_by` ENUM('scheduler','manual','cli','api') NOT NULL DEFAULT 'manual',
+    `triggered_by` VARCHAR(20) NOT NULL DEFAULT 'manual' COMMENT 'scheduler, manual, cli, api',
     `triggered_by_user` VARCHAR(255) NULL,
     `lock_token` VARCHAR(64) NULL,
     `error_message` TEXT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS `integrity_ledger` (
     `expected_hash` VARCHAR(128) NULL,
     `computed_hash` VARCHAR(128) NULL,
     `hash_match` TINYINT(1) NULL,
-    `outcome` ENUM('pass','mismatch','missing','unreadable','permission_error','path_drift','no_baseline','error') NOT NULL,
+    `outcome` VARCHAR(30) NOT NULL COMMENT 'pass, mismatch, missing, unreadable, permission_error, path_drift, no_baseline, error',
     `error_detail` TEXT NULL,
     `duration_ms` INT UNSIGNED NULL,
     `verified_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,8 +101,8 @@ CREATE TABLE IF NOT EXISTS `integrity_ledger` (
 CREATE TABLE IF NOT EXISTS `integrity_dead_letter` (
     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `digital_object_id` INT NOT NULL,
-    `failure_type` ENUM('mismatch','missing','unreadable','permission_error','path_drift','error') NOT NULL,
-    `status` ENUM('open','acknowledged','investigating','resolved','ignored') NOT NULL DEFAULT 'open',
+    `failure_type` VARCHAR(30) NOT NULL COMMENT 'mismatch, missing, unreadable, permission_error, path_drift, error',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'open' COMMENT 'open, acknowledged, investigating, resolved, ignored',
     `consecutive_failures` INT UNSIGNED NOT NULL DEFAULT 1,
     `first_failure_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `last_failure_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -141,8 +141,8 @@ CREATE TABLE IF NOT EXISTS `integrity_retention_policy` (
     `name` VARCHAR(255) NOT NULL,
     `description` TEXT NULL,
     `retention_period_days` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT '0 = indefinite retention',
-    `trigger_type` ENUM('ingest_date','last_modified','closure_date','last_access') NOT NULL DEFAULT 'ingest_date',
-    `scope_type` ENUM('global','repository','hierarchy') NOT NULL DEFAULT 'global',
+    `trigger_type` VARCHAR(20) NOT NULL DEFAULT 'ingest_date' COMMENT 'ingest_date, last_modified, closure_date, last_access',
+    `scope_type` VARCHAR(20) NOT NULL DEFAULT 'global' COMMENT 'global, repository, hierarchy',
     `repository_id` INT NULL,
     `information_object_id` INT NULL,
     `is_enabled` TINYINT(1) NOT NULL DEFAULT 0,
@@ -164,7 +164,7 @@ CREATE TABLE IF NOT EXISTS `integrity_legal_hold` (
     `placed_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `released_by` VARCHAR(255) NULL,
     `released_at` DATETIME NULL,
-    `status` ENUM('active','released') NOT NULL DEFAULT 'active',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'active, released',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX `idx_ilh_io` (`information_object_id`),
     INDEX `idx_ilh_status` (`status`)
@@ -179,7 +179,7 @@ CREATE TABLE IF NOT EXISTS `integrity_disposition_queue` (
     `policy_id` BIGINT UNSIGNED NOT NULL,
     `information_object_id` INT NOT NULL,
     `digital_object_id` INT NULL,
-    `status` ENUM('eligible','pending_review','approved','rejected','held','disposed') NOT NULL DEFAULT 'eligible',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'eligible' COMMENT 'eligible, pending_review, approved, rejected, held, disposed',
     `eligible_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `reviewed_by` VARCHAR(255) NULL,
     `reviewed_at` DATETIME NULL,
@@ -198,9 +198,9 @@ CREATE TABLE IF NOT EXISTS `integrity_disposition_queue` (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS `integrity_alert_config` (
     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `alert_type` ENUM('pass_rate_below','failure_count_above','dead_letter_count_above','backlog_above','run_failure') NOT NULL,
+    `alert_type` VARCHAR(30) NOT NULL COMMENT 'pass_rate_below, failure_count_above, dead_letter_count_above, backlog_above, run_failure',
     `threshold_value` DECIMAL(12,2) NULL,
-    `comparison` ENUM('lt','lte','gt','gte','eq') NOT NULL DEFAULT 'gt',
+    `comparison` VARCHAR(5) NOT NULL DEFAULT 'gt' COMMENT 'lt, lte, gt, gte, eq',
     `is_enabled` TINYINT(1) NOT NULL DEFAULT 1,
     `email` VARCHAR(255) NULL,
     `webhook_url` VARCHAR(1024) NULL,
@@ -219,3 +219,48 @@ INSERT IGNORE INTO `integrity_schedule` (`id`, `name`, `description`, `scope_typ
 VALUES
 (1, 'Daily Sample Check', 'Verifies a sample of 200 digital objects daily to detect early signs of data corruption', 'global', 'sha256', 'daily', 200, 10, 512, 30, 1, 1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 1, 1),
 (2, 'Weekly Full Scan', 'Comprehensive weekly verification of all master digital objects across all repositories', 'global', 'sha256', 'weekly', 0, 5, 1024, 480, 1, 0, NULL, 1, 1);
+
+-- =====================================================
+-- Admin menu entry: Admin > Integrity
+-- Inserts as last child of the Admin menu node (name='admin')
+-- Uses MPTT: shift rgt values to make room, then insert
+-- =====================================================
+SET @admin_rgt = (SELECT rgt FROM menu WHERE name = 'admin' LIMIT 1);
+
+-- Only insert if not already present
+SET @exists = (SELECT COUNT(*) FROM menu WHERE name = 'integrity');
+
+-- Make room in the nested set: shift nodes to the right
+UPDATE menu SET rgt = rgt + 2 WHERE rgt >= @admin_rgt AND @exists = 0;
+UPDATE menu SET lft = lft + 2 WHERE lft > @admin_rgt AND @exists = 0;
+
+-- Insert the menu node as last child of Admin
+INSERT INTO menu (parent_id, name, path, lft, rgt, created_at, updated_at, source_culture, serial_number)
+SELECT id, 'integrity', 'integrity/index', @admin_rgt, @admin_rgt + 1, NOW(), NOW(), 'en', 0
+FROM menu WHERE name = 'admin' AND @exists = 0
+LIMIT 1;
+
+-- Insert the i18n label
+INSERT INTO menu_i18n (id, culture, label, description)
+SELECT m.id, 'en', 'Integrity', 'Integrity assurance: fixity verification, retention policies, legal holds, alerting'
+FROM menu m WHERE m.name = 'integrity' AND NOT EXISTS (
+    SELECT 1 FROM menu_i18n mi WHERE mi.id = m.id AND mi.culture = 'en'
+);
+
+-- =====================================================
+-- Settings defaults for integrity assurance
+-- =====================================================
+INSERT IGNORE INTO ahg_settings (setting_key, setting_value, setting_group, created_at, updated_at)
+VALUES
+('integrity_enabled', 'true', 'integrity', NOW(), NOW()),
+('integrity_default_algorithm', 'sha256', 'integrity', NOW(), NOW()),
+('integrity_default_batch_size', '200', 'integrity', NOW(), NOW()),
+('integrity_default_max_runtime', '120', 'integrity', NOW(), NOW()),
+('integrity_default_max_memory', '512', 'integrity', NOW(), NOW()),
+('integrity_dead_letter_threshold', '3', 'integrity', NOW(), NOW()),
+('integrity_io_throttle_ms', '10', 'integrity', NOW(), NOW()),
+('integrity_auto_baseline', 'true', 'integrity', NOW(), NOW()),
+('integrity_notify_on_failure', 'true', 'integrity', NOW(), NOW()),
+('integrity_notify_on_mismatch', 'true', 'integrity', NOW(), NOW()),
+('integrity_alert_email', '', 'integrity', NOW(), NOW()),
+('integrity_webhook_url', '', 'integrity', NOW(), NOW());
