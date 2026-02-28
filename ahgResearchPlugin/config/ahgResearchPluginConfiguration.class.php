@@ -363,6 +363,28 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_view_room', '/research/room/:id', 'viewRoom', ['id' => '\\d+']);
         $research->any('research_iiif_rooms', '/research/project/:project_id/iiif-rooms', 'iiifRooms', ['project_id' => '\\d+']);
 
+        // =====================================================================
+        // ISSUE 178: REQUEST LIFECYCLE (SLA, Triage, Correspondence)
+        // =====================================================================
+        $research->any('research_request_correspond', '/research/request/:id/correspond/:type', 'requestCorrespond', ['id' => '\\d+']);
+        $research->any('research_request_close', '/research/request/:id/close/:type', 'requestClose', ['id' => '\\d+']);
+        $research->any('research_request_assign', '/research/request/:id/assign/:type', 'requestAssign', ['id' => '\\d+']);
+        $research->any('research_request_triage', '/research/request/:id/triage/:type', 'requestTriage', ['id' => '\\d+']);
+        $research->any('research_request_sla', '/research/request/:id/sla/:type', 'requestSla', ['id' => '\\d+']);
+        $research->any('research_request_item_ajax', '/research/ajax/request-item', 'requestItemAjax');
+        $research->any('research_requests_dashboard', '/research/requests-dashboard', 'requestsDashboard');
+
+        // =====================================================================
+        // ISSUE 179: CUSTODY HANDOFF (Chain of Custody)
+        // =====================================================================
+        $research->any('research_custody_confirm', '/research/custody/:id/confirm', 'custodyConfirm', ['id' => '\\d+']);
+        $research->any('research_custody_return_verify', '/research/custody/:id/return-verify', 'custodyReturnVerify', ['id' => '\\d+']);
+        $research->any('research_custody_chain', '/research/custody/chain/:object_id', 'custodyChain', ['object_id' => '\\d+']);
+        $research->any('research_custody_checkout', '/research/custody/:id/checkout', 'custodyCheckout', ['id' => '\\d+']);
+        $research->any('research_custody_checkin', '/research/custody/:id/checkin', 'custodyCheckin', ['id' => '\\d+']);
+        $research->any('research_batch_checkout', '/research/custody/batch-checkout', 'batchCheckout');
+        $research->any('research_batch_return', '/research/custody/batch-return', 'batchReturn');
+
         // Dashboard
         $research->any('research_dashboard', '/research', 'dashboard');
         $research->any('research_renewal', '/research/renewal', 'renewal');

@@ -1,6 +1,8 @@
 <?php use_helper('Date') ?>
 <?php $actionMeta = []; foreach (sfOutputEscaper::unescape($actions) as $a) { $actionMeta[$a->code] = $a; } ?>
 
+<?php include_partial('workflow/accessibilityHelpers') ?>
+
 <div class="container-fluid px-4 py-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>

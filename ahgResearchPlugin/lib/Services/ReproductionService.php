@@ -13,6 +13,18 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class ReproductionService
 {
+    private ?object $eventService = null;
+
+    private function getEventService(): WorkflowEventService
+    {
+        if ($this->eventService === null) {
+            $pluginsDir = \sfConfig::get('sf_plugins_dir');
+            require_once $pluginsDir . '/ahgWorkflowPlugin/lib/Services/WorkflowEventService.php';
+            $this->eventService = new WorkflowEventService();
+        }
+        return $this->eventService;
+    }
+
     // Default pricing (can be overridden via settings)
     private array $defaultPricing = [
         'photocopy' => ['base' => 2.00, 'per_page' => 0.50],
@@ -302,9 +314,27 @@ class ReproductionService
             $updateData['processed_by'] = $changedBy;
         }
 
-        return DB::table('research_reproduction_request')
+        $updated = DB::table('research_reproduction_request')
             ->where('id', $requestId)
             ->update($updateData) > 0;
+
+        // Emit workflow event
+        if ($updated) {
+            try {
+                $this->getEventService()->emit('queue_changed', [
+                    'object_id' => $requestId,
+                    'object_type' => 'research_reproduction_request',
+                    'performed_by' => $changedBy ?? 0,
+                    'from_status' => $oldStatus,
+                    'to_status' => $newStatus,
+                    'comment' => $notes ?? "Status: {$oldStatus} → {$newStatus}",
+                ]);
+            } catch (\Exception $e) {
+                // Workflow plugin may not be installed
+            }
+        }
+
+        return $updated;
     }
 
     /**

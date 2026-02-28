@@ -159,4 +159,5 @@ $isIiifRooms = isset($projectId) && $projectId > 0;
 </div>
 <?php endif; ?>
 
+<?php include_partial('research/accessibilityHelpers') ?>
 <?php echo get_partial('layout_end') ?>

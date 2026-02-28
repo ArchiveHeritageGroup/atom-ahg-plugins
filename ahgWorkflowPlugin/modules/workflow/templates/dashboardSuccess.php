@@ -1,25 +1,29 @@
 <?php use_helper('Date') ?>
 
-<div class="container-fluid px-4 py-3">
+<a href="#main-content" class="visually-hidden-focusable"><?php echo __('Skip to main content') ?></a>
+
+<?php include_partial('workflow/accessibilityHelpers') ?>
+
+<div class="container-fluid px-4 py-3" id="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0"><i class="fas fa-tasks me-2"></i>Workflow Dashboard</h1>
+        <h1 class="h3 mb-0"><i class="fas fa-tasks me-2" aria-hidden="true"></i>Workflow Dashboard</h1>
         <?php if ($isAdmin): ?>
             <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="btn btn-outline-primary">
-                <i class="fas fa-cog me-1"></i>Manage Workflows
+                <i class="fas fa-cog me-1" aria-hidden="true"></i>Manage Workflows
             </a>
         <?php endif ?>
     </div>
 
     <?php if ($sf_user->hasFlash('notice')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
             <?php echo $sf_user->getFlash('notice') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?php echo __('Close') ?>"></button>
         </div>
     <?php endif ?>
     <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <?php echo $sf_user->getFlash('error') ?>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="<?php echo __('Close') ?>"></button>
         </div>
     <?php endif ?>
 
@@ -33,12 +37,12 @@
                             <h6 class="card-subtitle mb-1 text-white-50">My Tasks</h6>
                             <h2 class="card-title mb-0"><?php echo $stats['my_tasks'] ?? 0 ?></h2>
                         </div>
-                        <i class="fas fa-clipboard-list fa-2x opacity-50"></i>
+                        <i class="fas fa-clipboard-list fa-2x opacity-50" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0">
                     <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks']) ?>" class="text-white text-decoration-none small">
-                        View all <i class="fas fa-arrow-right ms-1"></i>
+                        View all <i class="fas fa-arrow-right ms-1" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -51,12 +55,12 @@
                             <h6 class="card-subtitle mb-1 text-dark-50">Pool Tasks</h6>
                             <h2 class="card-title mb-0"><?php echo $stats['pending_tasks'] ?? 0 ?></h2>
                         </div>
-                        <i class="fas fa-inbox fa-2x opacity-50"></i>
+                        <i class="fas fa-inbox fa-2x opacity-50" aria-hidden="true"></i>
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0">
                     <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'pool']) ?>" class="text-dark text-decoration-none small">
-                        Browse pool <i class="fas fa-arrow-right ms-1"></i>
+                        Browse pool <i class="fas fa-arrow-right ms-1" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
@@ -69,7 +73,7 @@
                             <h6 class="card-subtitle mb-1 text-white-50">Completed Today</h6>
                             <h2 class="card-title mb-0"><?php echo $stats['completed_today'] ?? 0 ?></h2>
                         </div>
-                        <i class="fas fa-check-circle fa-2x opacity-50"></i>
+                        <i class="fas fa-check-circle fa-2x opacity-50" aria-hidden="true"></i>
                     </div>
                 </div>
             </div>
@@ -82,7 +86,7 @@
                             <h6 class="card-subtitle mb-1 text-white-50">Overdue</h6>
                             <h2 class="card-title mb-0"><?php echo $stats['overdue_tasks'] ?? 0 ?></h2>
                         </div>
-                        <i class="fas fa-exclamation-triangle fa-2x opacity-50"></i>
+                        <i class="fas fa-exclamation-triangle fa-2x opacity-50" aria-hidden="true"></i>
                     </div>
                 </div>
             </div>
@@ -94,13 +98,13 @@
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>My Tasks</h5>
+                    <h5 class="mb-0"><i class="fas fa-clipboard-check me-2" aria-hidden="true"></i>My Tasks</h5>
                     <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'myTasks']) ?>" class="btn btn-sm btn-outline-secondary">View All</a>
                 </div>
                 <div class="card-body p-0">
                     <?php if (empty($myTasks)): ?>
                         <div class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-3x mb-2 opacity-50"></i>
+                            <i class="fas fa-inbox fa-3x mb-2 opacity-50" aria-hidden="true"></i>
                             <p class="mb-0">No tasks assigned to you</p>
                         </div>
                     <?php else: ?>
@@ -114,7 +118,7 @@
                                                 <?php echo esc_entities($task->workflow_name) ?> &rarr; <?php echo esc_entities($task->step_name) ?>
                                             </small>
                                         </div>
-                                        <span class="badge bg-<?php echo $task->priority === 'urgent' ? 'danger' : ($task->priority === 'high' ? 'warning' : 'secondary') ?>">
+                                        <span class="badge bg-<?php echo $task->priority === 'urgent' ? 'danger' : ($task->priority === 'high' ? 'warning' : 'secondary') ?>" role="status" aria-label="<?php echo __('Priority: %1%', ['%1%' => ucfirst($task->priority)]) ?>">
                                             <?php echo ucfirst($task->priority) ?>
                                         </span>
                                     </div>
@@ -130,13 +134,13 @@
         <div class="col-lg-6 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Available Tasks</h5>
+                    <h5 class="mb-0"><i class="fas fa-layer-group me-2" aria-hidden="true"></i>Available Tasks</h5>
                     <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'pool']) ?>" class="btn btn-sm btn-outline-secondary">Browse Pool</a>
                 </div>
                 <div class="card-body p-0">
                     <?php if (empty($poolTasks)): ?>
                         <div class="text-center text-muted py-4">
-                            <i class="fas fa-check-double fa-3x mb-2 opacity-50"></i>
+                            <i class="fas fa-check-double fa-3x mb-2 opacity-50" aria-hidden="true"></i>
                             <p class="mb-0">No tasks available to claim</p>
                         </div>
                     <?php else: ?>
@@ -166,7 +170,7 @@
     <!-- Recent Activity -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
+            <h5 class="mb-0"><i class="fas fa-history me-2" aria-hidden="true"></i>Recent Activity</h5>
             <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'history']) ?>" class="btn btn-sm btn-outline-secondary">View All</a>
         </div>
         <div class="card-body p-0">
@@ -176,13 +180,14 @@
                 </div>
             <?php else: ?>
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0" aria-label="<?php echo __('Recent workflow activity') ?>">
+                        <caption class="visually-hidden"><?php echo __('Recent workflow activity log') ?></caption>
                         <thead class="table-light">
                             <tr>
-                                <th>Time</th>
-                                <th>Action</th>
-                                <th>Object</th>
-                                <th>User</th>
+                                <th scope="col">Time</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">Object</th>
+                                <th scope="col">User</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -201,7 +206,7 @@
                                                 'returned' => 'warning',
                                                 default => 'secondary'
                                             };
-                                        ?>"><?php echo ucfirst($activity->action) ?></span>
+                                        ?>" role="status" aria-label="<?php echo __('Action: %1%', ['%1%' => ucfirst($activity->action)]) ?>"><?php echo ucfirst($activity->action) ?></span>
                                     </td>
                                     <td><?php echo esc_entities($activity->object_title ?? "#{$activity->object_id}") ?></td>
                                     <td><small><?php echo esc_entities($activity->username ?? 'Unknown') ?></small></td>

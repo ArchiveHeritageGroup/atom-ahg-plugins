@@ -74,3 +74,4 @@
   </div>
 </div>
 <?php end_slot() ?>
+<?php include_partial('research/accessibilityHelpers') ?>

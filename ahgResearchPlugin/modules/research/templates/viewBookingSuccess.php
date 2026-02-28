@@ -217,3 +217,4 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
   </div>
 </div>
 <?php end_slot() ?>
+<?php include_partial('research/accessibilityHelpers') ?>

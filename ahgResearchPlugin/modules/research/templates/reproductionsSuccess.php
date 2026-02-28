@@ -2,17 +2,18 @@
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
+<?php include_partial('research/accessibilityHelpers') ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
-        <li class="breadcrumb-item active">Reproduction Requests</li>
+        <li class="breadcrumb-item active" aria-current="page">Reproduction Requests</li>
     </ol>
 </nav>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2"><i class="fas fa-copy text-primary me-2"></i>Reproduction Requests</h1>
+    <h1 class="h2"><i class="fas fa-copy text-primary me-2" aria-hidden="true"></i>Reproduction Requests</h1>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'newReproduction']); ?>" class="btn btn-primary">
-        <i class="fas fa-plus me-1"></i> New Request
+        <i class="fas fa-plus me-1" aria-hidden="true"></i> New Request
     </a>
 </div>
 <div class="row mb-3">
@@ -31,16 +32,17 @@
 <?php if (!empty($requests)): ?>
     <div class="card">
         <div class="card-body p-0">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0" aria-label="Reproduction requests">
+                <caption class="visually-hidden">List of reproduction requests with status and cost</caption>
                 <thead class="table-light">
                     <tr>
-                        <th>Reference</th>
-                        <th>Purpose</th>
-                        <th>Items</th>
-                        <th>Total Cost</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th></th>
+                        <th scope="col">Reference</th>
+                        <th scope="col">Purpose</th>
+                        <th scope="col">Items</th>
+                        <th scope="col">Total Cost</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Date</th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,14 +53,14 @@
                             <td><span class="badge bg-secondary"><?php echo $req->item_count ?? 0; ?></span></td>
                             <td><?php echo $req->total_cost ? 'R' . number_format($req->total_cost, 2) : '-'; ?></td>
                             <td>
-                                <span class="badge bg-<?php echo match($req->status) { 'completed' => 'success', 'processing', 'in_production' => 'info', 'cancelled' => 'danger', 'draft' => 'secondary', default => 'warning' }; ?>">
+                                <span class="badge bg-<?php echo match($req->status) { 'completed' => 'success', 'processing', 'in_production' => 'info', 'cancelled' => 'danger', 'draft' => 'secondary', default => 'warning' }; ?>" role="status" aria-label="Status: <?php echo ucfirst(str_replace('_', ' ', $req->status)); ?>">
                                     <?php echo ucfirst(str_replace('_', ' ', $req->status)); ?>
                                 </span>
                             </td>
                             <td><?php echo date('M j, Y', strtotime($req->created_at)); ?></td>
                             <td>
-                                <a href="<?php echo url_for(['module' => 'research', 'action' => 'viewReproduction', 'id' => $req->id]); ?>" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-eye"></i>
+                                <a href="<?php echo url_for(['module' => 'research', 'action' => 'viewReproduction', 'id' => $req->id]); ?>" class="btn btn-sm btn-outline-primary" aria-label="View request <?php echo $req->reference_number ?: 'DRAFT-' . $req->id; ?>">
+                                    <i class="fas fa-eye" aria-hidden="true"></i>
                                 </a>
                             </td>
                         </tr>
@@ -70,11 +72,11 @@
 <?php else: ?>
     <div class="card">
         <div class="card-body text-center py-5">
-            <i class="fas fa-copy fa-3x text-muted mb-3"></i>
+            <i class="fas fa-copy fa-3x text-muted mb-3" aria-hidden="true"></i>
             <h5>No Reproduction Requests</h5>
             <p class="text-muted">Request copies or scans of archival materials.</p>
             <a href="<?php echo url_for(['module' => 'research', 'action' => 'newReproduction']); ?>" class="btn btn-primary">
-                <i class="fas fa-plus me-1"></i> New Request
+                <i class="fas fa-plus me-1" aria-hidden="true"></i> New Request
             </a>
         </div>
     </div>

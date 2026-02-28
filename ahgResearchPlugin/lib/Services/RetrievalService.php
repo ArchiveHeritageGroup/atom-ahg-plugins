@@ -14,6 +14,18 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class RetrievalService
 {
+    private ?object $eventService = null;
+
+    private function getEventService(): WorkflowEventService
+    {
+        if ($this->eventService === null) {
+            $pluginsDir = \sfConfig::get('sf_plugins_dir');
+            require_once $pluginsDir . '/ahgWorkflowPlugin/lib/Services/WorkflowEventService.php';
+            $this->eventService = new WorkflowEventService();
+        }
+        return $this->eventService;
+    }
+
     // =========================================================================
     // QUEUE MANAGEMENT
     // =========================================================================
@@ -359,9 +371,17 @@ class RetrievalService
             $updateData['returned_at'] = date('Y-m-d H:i:s');
         }
 
-        $updated = DB::table('research_material_request')
-            ->where('id', $requestId)
-            ->update($updateData) > 0;
+        // Auto-update location_current based on status transition
+        $locationMap = [
+            'requested' => $request->shelf_location ?? $request->location_code ?? null,
+            'retrieved' => 'In transit',
+            'delivered' => 'Reading room',
+            'in_use' => 'Reading room',
+            'returned' => 'Return shelf (pending re-shelving)',
+        ];
+        if (isset($locationMap[$newStatus])) {
+            $updateData['location_current'] = $locationMap[$newStatus];
+        }
 
         // Log status change
         if ($updated) {
@@ -374,6 +394,20 @@ class RetrievalService
                 'notes' => $notes,
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
+
+            // Emit workflow event
+            try {
+                $this->getEventService()->emit('queue_changed', [
+                    'object_id' => $requestId,
+                    'object_type' => 'research_material_request',
+                    'performed_by' => $userId ?? 0,
+                    'from_status' => $oldStatus,
+                    'to_status' => $newStatus,
+                    'comment' => $notes ?? "Status: {$oldStatus} → {$newStatus}",
+                ]);
+            } catch (\Exception $e) {
+                // Workflow plugin may not be installed
+            }
         }
 
         return $updated;

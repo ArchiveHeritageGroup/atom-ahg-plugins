@@ -114,6 +114,21 @@ class researchActions extends AhgController
             'apiKeys'               => 'profile',
             'renewal'               => 'profile',
             'odrlPolicies'          => 'odrlPolicies',
+            // Issue 178: Request Lifecycle
+            'requestsDashboard'     => 'requestsDashboard',
+            'requestTriage'         => 'requestsDashboard',
+            'requestAssign'         => 'requestsDashboard',
+            'requestCorrespond'     => 'requestsDashboard',
+            'requestClose'          => 'requestsDashboard',
+            'requestSla'            => 'requestsDashboard',
+            // Issue 179: Custody
+            'custodyCheckout'       => 'retrievalQueue',
+            'custodyCheckin'        => 'retrievalQueue',
+            'custodyConfirm'        => 'retrievalQueue',
+            'custodyReturnVerify'   => 'retrievalQueue',
+            'custodyChain'          => 'retrievalQueue',
+            'batchCheckout'         => 'retrievalQueue',
+            'batchReturn'           => 'retrievalQueue',
         ];
 
         return $map[$action] ?? '';
@@ -7023,6 +7038,557 @@ class researchActions extends AhgController
         $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
 
         return $this->renderText(json_encode($annotations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    // =========================================================================
+    // ISSUE 178: REQUEST LIFECYCLE (SLA, Triage, Correspondence)
+    // =========================================================================
+
+    private function loadLifecycleService(): RequestLifecycleService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/RequestLifecycleService.php';
+        return new RequestLifecycleService();
+    }
+
+    private function loadCustodyService(): CustodyHandoffService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CustodyHandoffService.php';
+        return new CustodyHandoffService();
+    }
+
+    /**
+     * Combined requests dashboard with SLA badges.
+     * GET /research/requests-dashboard
+     */
+    public function executeRequestsDashboard($request)
+    {
+        $this->requireAuth();
+        $lifecycle = $this->loadLifecycleService();
+
+        $filters = [
+            'status' => $request->getParameter('status'),
+            'type' => $request->getParameter('type'),
+            'search' => $request->getParameter('search'),
+            'assigned_to' => $request->getParameter('assigned_to'),
+            'overdue_only' => $request->getParameter('overdue_only'),
+        ];
+        $filters = array_filter($filters);
+
+        $this->dashboard = $lifecycle->getRequestsDashboard($filters);
+        $this->filters = $filters;
+        $this->slaColors = \WorkflowSlaService::STATUS_COLORS;
+        $this->slaIcons = \WorkflowSlaService::STATUS_ICONS;
+
+        $this->setTemplate('requestsDashboard');
+    }
+
+    /**
+     * Triage form (approve/deny/needs-info).
+     * GET+POST /research/request/:id/triage/:type
+     */
+    public function executeRequestTriage($request)
+    {
+        $this->requireAuth();
+        $requestId = (int) $request->getParameter('id');
+        $requestType = $request->getParameter('type', 'material');
+        $lifecycle = $this->loadLifecycleService();
+
+        if ($request->isMethod('post')) {
+            $decision = $request->getParameter('decision');
+            $notes = $request->getParameter('triage_notes', '');
+            $userId = $this->getCurrentUserId();
+
+            $result = $lifecycle->triageRequest($requestId, $requestType, $decision, $userId, $notes);
+
+            if ($result['success']) {
+                $this->getUser()->setFlash('notice', 'Request triaged successfully.');
+            } else {
+                $this->getUser()->setFlash('error', $result['error'] ?? 'Triage failed.');
+            }
+
+            $this->redirect("research/requests-dashboard");
+        }
+
+        $this->requestData = $lifecycle->getRequestWithSla($requestId, $requestType);
+        $this->requestType = $requestType;
+        $this->timeline = $lifecycle->getRequestTimeline($requestId, $requestType);
+
+        $this->setTemplate('requestTriage');
+    }
+
+    /**
+     * Assign request to staff.
+     * POST /research/request/:id/assign/:type
+     */
+    public function executeRequestAssign($request)
+    {
+        $this->requireAuth();
+        $requestId = (int) $request->getParameter('id');
+        $requestType = $request->getParameter('type', 'material');
+        $staffId = (int) $request->getParameter('staff_id');
+        $lifecycle = $this->loadLifecycleService();
+
+        $result = $lifecycle->assignRequest($requestId, $requestType, $staffId, $this->getCurrentUserId());
+
+        if ($request->isXmlHttpRequest()) {
+            $this->getResponse()->setContentType('application/json');
+            return $this->renderText(json_encode($result));
+        }
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('notice', 'Request assigned successfully.');
+        } else {
+            $this->getUser()->setFlash('error', $result['error'] ?? 'Assignment failed.');
+        }
+
+        $this->redirect("research/requests-dashboard");
+    }
+
+    /**
+     * Correspondence thread + reply form.
+     * GET+POST /research/request/:id/correspond/:type
+     */
+    public function executeRequestCorrespond($request)
+    {
+        $this->requireAuth();
+        $requestId = (int) $request->getParameter('id');
+        $requestType = $request->getParameter('type', 'material');
+        $lifecycle = $this->loadLifecycleService();
+
+        if ($request->isMethod('post')) {
+            $body = trim($request->getParameter('body', ''));
+            $isInternal = (bool) $request->getParameter('is_internal', false);
+            $subject = $request->getParameter('subject');
+            $userId = $this->getCurrentUserId();
+
+            if ($body !== '') {
+                $lifecycle->addCorrespondence($requestId, $requestType, $userId, 'staff', $body, $isInternal, $subject);
+                $this->getUser()->setFlash('notice', 'Message sent.');
+            }
+
+            $this->redirect("research/request/{$requestId}/correspond/{$requestType}");
+        }
+
+        $this->requestData = $lifecycle->getRequestWithSla($requestId, $requestType);
+        $this->requestType = $requestType;
+        $this->correspondence = $lifecycle->getCorrespondence($requestId, $requestType, true);
+        $this->timeline = $lifecycle->getRequestTimeline($requestId, $requestType);
+
+        $this->setTemplate('requestCorrespond');
+    }
+
+    /**
+     * Close a request.
+     * POST /research/request/:id/close/:type
+     */
+    public function executeRequestClose($request)
+    {
+        $this->requireAuth();
+        $requestId = (int) $request->getParameter('id');
+        $requestType = $request->getParameter('type', 'material');
+        $reason = $request->getParameter('closure_reason', 'fulfilled');
+        $notes = $request->getParameter('notes', '');
+        $lifecycle = $this->loadLifecycleService();
+
+        $result = $lifecycle->closeRequest($requestId, $requestType, $this->getCurrentUserId(), $reason, $notes);
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('notice', 'Request closed.');
+        } else {
+            $this->getUser()->setFlash('error', $result['error'] ?? 'Close failed.');
+        }
+
+        $this->redirect("research/requests-dashboard");
+    }
+
+    /**
+     * View SLA details for a request (AJAX).
+     * GET /research/request/:id/sla/:type
+     */
+    public function executeRequestSla($request)
+    {
+        $requestId = (int) $request->getParameter('id');
+        $requestType = $request->getParameter('type', 'material');
+        $lifecycle = $this->loadLifecycleService();
+
+        $sla = $lifecycle->getRequestSla($requestId, $requestType);
+
+        $this->getResponse()->setContentType('application/json');
+        return $this->renderText(json_encode($sla));
+    }
+
+    /**
+     * AJAX: "Request this item" from information object view.
+     * POST /research/ajax/request-item
+     */
+    public function executeRequestItemAjax($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $objectId = (int) $request->getParameter('object_id');
+        $requestType = $request->getParameter('request_type', 'reading_room');
+        $notes = $request->getParameter('notes', '');
+
+        if (!$objectId) {
+            $this->getResponse()->setStatusCode(400);
+            return $this->renderText(json_encode(['error' => 'Missing object_id']));
+        }
+
+        $userId = $this->getCurrentUserId();
+        $researcher = $this->service->getResearcherByUserId($userId);
+
+        if (!$researcher) {
+            $this->getResponse()->setStatusCode(403);
+            return $this->renderText(json_encode(['error' => 'Not a registered researcher']));
+        }
+
+        // Find active booking or create an ad-hoc request
+        $booking = DB::table('research_booking')
+            ->where('researcher_id', $researcher->id)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('booking_date', '>=', date('Y-m-d'))
+            ->orderBy('booking_date')
+            ->first();
+
+        if (!$booking) {
+            return $this->renderText(json_encode([
+                'error' => 'No active booking found. Please book a reading room visit first.',
+                'redirect' => url_for(['module' => 'research', 'action' => 'book']),
+            ]));
+        }
+
+        // Create material request
+        $requestId = DB::table('research_material_request')->insertGetId([
+            'booking_id' => $booking->id,
+            'object_id' => $objectId,
+            'request_type' => $requestType,
+            'priority' => 'normal',
+            'status' => 'requested',
+            'notes' => $notes,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'request_id' => $requestId,
+            'message' => 'Item requested successfully. You will be notified when it is ready.',
+        ]));
+    }
+
+    // =========================================================================
+    // ISSUE 179: CUSTODY HANDOFF (Chain of Custody)
+    // =========================================================================
+
+    /**
+     * Checkout form: condition, barcode, confirmation.
+     * GET+POST /research/custody/:id/checkout
+     */
+    public function executeCustodyCheckout($request)
+    {
+        $this->requireAuth();
+        $requestId = (int) $request->getParameter('id');
+        $custody = $this->loadCustodyService();
+
+        if ($request->isMethod('post')) {
+            $condition = $request->getParameter('condition', 'good');
+            $barcode = $request->getParameter('barcode');
+            $notes = $request->getParameter('notes');
+            $toLocation = $request->getParameter('to_location');
+
+            // Determine researcher from material request → booking
+            $mr = DB::table('research_material_request as mr')
+                ->join('research_booking as b', 'mr.booking_id', '=', 'b.id')
+                ->where('mr.id', $requestId)
+                ->select('b.researcher_id')
+                ->first();
+
+            $researcherId = $mr ? $mr->researcher_id : 0;
+
+            $result = $custody->recordCheckout(
+                $requestId,
+                $this->getCurrentUserId(),
+                $researcherId,
+                $condition,
+                $barcode,
+                $notes,
+                $toLocation
+            );
+
+            if ($result['success']) {
+                $this->getUser()->setFlash('notice', 'Material checked out successfully.');
+            } else {
+                $this->getUser()->setFlash('error', $result['error'] ?? 'Checkout failed.');
+            }
+
+            $this->redirect('research/retrieval-queue');
+        }
+
+        // GET — show checkout form
+        $this->materialRequest = DB::table('research_material_request as mr')
+            ->join('research_booking as b', 'mr.booking_id', '=', 'b.id')
+            ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('mr.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('mr.id', $requestId)
+            ->select('mr.*', 'r.first_name', 'r.last_name', 'ioi.title as item_title')
+            ->first();
+
+        $this->conditionOptions = DB::table('ahg_dropdown')
+            ->where('taxonomy', 'custody_condition')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
+
+        $this->setTemplate('custodyCheckout');
+    }
+
+    /**
+     * Check-in (return) material.
+     * GET+POST /research/custody/:id/checkin
+     */
+    public function executeCustodyCheckin($request)
+    {
+        $this->requireAuth();
+        $requestId = (int) $request->getParameter('id');
+        $custody = $this->loadCustodyService();
+
+        if ($request->isMethod('post')) {
+            $conditionBefore = $request->getParameter('condition_before', 'good');
+            $conditionAfter = $request->getParameter('condition_after', 'good');
+            $notes = $request->getParameter('notes');
+
+            $result = $custody->recordReturn($requestId, $this->getCurrentUserId(), $conditionBefore, $conditionAfter, $notes);
+
+            if ($result['success']) {
+                $this->getUser()->setFlash('notice', 'Material returned successfully.');
+            } else {
+                $this->getUser()->setFlash('error', $result['error'] ?? 'Return failed.');
+            }
+
+            $this->redirect('research/retrieval-queue?queue=return');
+        }
+
+        $this->materialRequest = DB::table('research_material_request as mr')
+            ->join('research_booking as b', 'mr.booking_id', '=', 'b.id')
+            ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('mr.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('mr.id', $requestId)
+            ->select('mr.*', 'r.first_name', 'r.last_name', 'ioi.title as item_title')
+            ->first();
+
+        $this->conditionOptions = DB::table('ahg_dropdown')
+            ->where('taxonomy', 'custody_condition')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
+
+        $this->handoffHistory = $custody->getHandoffHistory($requestId);
+
+        $this->setTemplate('custodyReturnVerify');
+    }
+
+    /**
+     * Confirm receipt (signature).
+     * POST /research/custody/:id/confirm
+     */
+    public function executeCustodyConfirm($request)
+    {
+        $this->requireAuth();
+        $handoffId = (int) $request->getParameter('id');
+        $custody = $this->loadCustodyService();
+
+        $result = $custody->confirmReceipt($handoffId, $this->getCurrentUserId());
+
+        if ($request->isXmlHttpRequest()) {
+            $this->getResponse()->setContentType('application/json');
+            return $this->renderText(json_encode($result));
+        }
+
+        if ($result['success']) {
+            $this->getUser()->setFlash('notice', 'Receipt confirmed.');
+        }
+
+        $this->redirect($request->getReferer() ?? 'research/retrieval-queue');
+    }
+
+    /**
+     * Return verification: condition reassessment.
+     * POST /research/custody/:id/return-verify
+     */
+    public function executeCustodyReturnVerify($request)
+    {
+        $this->requireAuth();
+        $requestId = (int) $request->getParameter('id');
+        $custody = $this->loadCustodyService();
+
+        if ($request->isMethod('post')) {
+            $condition = $request->getParameter('condition', 'good');
+            $notes = $request->getParameter('notes');
+
+            $result = $custody->verifyReturn($requestId, $this->getCurrentUserId(), $condition, $notes);
+
+            if ($result['success']) {
+                $this->getUser()->setFlash('notice', 'Return verified. Material re-shelved.');
+            } else {
+                $this->getUser()->setFlash('error', $result['error'] ?? 'Verification failed.');
+            }
+
+            $this->redirect('research/retrieval-queue?queue=return');
+        }
+
+        // GET: re-use custodyReturnVerify template
+        $this->executeCustodyCheckin($request);
+    }
+
+    /**
+     * Full custody chain timeline for an object.
+     * GET /research/custody/chain/:object_id
+     */
+    public function executeCustodyChain($request)
+    {
+        $this->requireAuth();
+        $objectId = (int) $request->getParameter('object_id');
+        $custody = $this->loadCustodyService();
+
+        $this->chain = $custody->getCustodyChain($objectId);
+        $this->objectId = $objectId;
+
+        // Get object title
+        $this->objectTitle = DB::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
+            ->value('title') ?? 'Object #' . $objectId;
+
+        $this->setTemplate('custodyChain');
+    }
+
+    /**
+     * Batch checkout with default condition.
+     * POST /research/custody/batch-checkout
+     */
+    public function executeBatchCheckout($request)
+    {
+        $this->requireAuth();
+
+        if ($request->isMethod('post')) {
+            $requestIds = $request->getParameter('request_ids', []);
+            $condition = $request->getParameter('condition', 'good');
+            $toLocation = $request->getParameter('to_location');
+            $researcherId = (int) $request->getParameter('researcher_id', 0);
+
+            if (empty($requestIds)) {
+                $this->getUser()->setFlash('error', 'No requests selected.');
+                $this->redirect('research/retrieval-queue');
+            }
+
+            $custody = $this->loadCustodyService();
+            $result = $custody->batchCheckout(
+                $requestIds,
+                $this->getCurrentUserId(),
+                $researcherId,
+                $condition,
+                $toLocation
+            );
+
+            $this->getUser()->setFlash('notice', "Batch checkout: {$result['success']} successful, {$result['failed']} failed.");
+            $this->redirect('research/retrieval-queue');
+        }
+
+        // GET — show batch checkout form
+        $selectedIds = $request->getParameter('ids', '');
+        $ids = array_filter(array_map('intval', explode(',', $selectedIds)));
+
+        $this->requests = DB::table('research_material_request as mr')
+            ->join('research_booking as b', 'mr.booking_id', '=', 'b.id')
+            ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('mr.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->whereIn('mr.id', $ids ?: [0])
+            ->select('mr.*', 'r.first_name', 'r.last_name', 'r.id as researcher_id', 'ioi.title as item_title')
+            ->get()
+            ->toArray();
+
+        $this->conditionOptions = DB::table('ahg_dropdown')
+            ->where('taxonomy', 'custody_condition')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
+
+        $this->setTemplate('batchCheckout');
+    }
+
+    /**
+     * Batch return with per-item condition.
+     * POST /research/custody/batch-return
+     */
+    public function executeBatchReturn($request)
+    {
+        $this->requireAuth();
+
+        if ($request->isMethod('post')) {
+            $items = [];
+            $requestIds = $request->getParameter('request_ids', []);
+            foreach ($requestIds as $id) {
+                $items[] = [
+                    'request_id' => (int) $id,
+                    'condition_before' => $request->getParameter("condition_before_{$id}", 'good'),
+                    'condition_after' => $request->getParameter("condition_after_{$id}", 'good'),
+                    'notes' => $request->getParameter("notes_{$id}"),
+                ];
+            }
+
+            if (empty($items)) {
+                $this->getUser()->setFlash('error', 'No requests selected.');
+                $this->redirect('research/retrieval-queue?queue=return');
+            }
+
+            $custody = $this->loadCustodyService();
+            $result = $custody->batchReturn($items, $this->getCurrentUserId());
+
+            $this->getUser()->setFlash('notice', "Batch return: {$result['success']} successful, {$result['failed']} failed.");
+            $this->redirect('research/retrieval-queue?queue=return');
+        }
+
+        // GET — show batch return form
+        $selectedIds = $request->getParameter('ids', '');
+        $ids = array_filter(array_map('intval', explode(',', $selectedIds)));
+
+        $this->requests = DB::table('research_material_request as mr')
+            ->join('research_booking as b', 'mr.booking_id', '=', 'b.id')
+            ->join('research_researcher as r', 'b.researcher_id', '=', 'r.id')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('mr.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->whereIn('mr.id', $ids ?: [0])
+            ->select('mr.*', 'r.first_name', 'r.last_name', 'ioi.title as item_title')
+            ->get()
+            ->toArray();
+
+        $this->conditionOptions = DB::table('ahg_dropdown')
+            ->where('taxonomy', 'custody_condition')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get()
+            ->toArray();
+
+        $this->setTemplate('batchReturn');
     }
 
 }

@@ -2,11 +2,12 @@
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
+<?php include_partial('research/accessibilityHelpers') ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>">Reproductions</a></li>
-        <li class="breadcrumb-item active"><?php echo $reproductionRequest->reference_number ?: 'DRAFT-' . $reproductionRequest->id; ?></li>
+        <li class="breadcrumb-item active" aria-current="page"><?php echo $reproductionRequest->reference_number ?: 'DRAFT-' . $reproductionRequest->id; ?></li>
     </ol>
 </nav>
 
@@ -14,7 +15,7 @@
     <div>
         <h1 class="h2">Reproduction Request</h1>
         <code><?php echo $reproductionRequest->reference_number ?: 'DRAFT-' . $reproductionRequest->id; ?></code>
-        <span class="badge ms-2 bg-<?php echo match($reproductionRequest->status) { 'completed' => 'success', 'processing', 'in_production' => 'info', 'cancelled' => 'danger', 'draft' => 'secondary', default => 'warning' }; ?>">
+        <span class="badge ms-2 bg-<?php echo match($reproductionRequest->status) { 'completed' => 'success', 'processing', 'in_production' => 'info', 'cancelled' => 'danger', 'draft' => 'secondary', default => 'warning' }; ?>" role="status" aria-label="Status: <?php echo ucfirst(str_replace('_', ' ', $reproductionRequest->status)); ?>">
             <?php echo ucfirst(str_replace('_', ' ', $reproductionRequest->status)); ?>
         </span>
     </div>
@@ -22,7 +23,7 @@
         <form method="post" class="d-inline">
             <input type="hidden" name="form_action" value="submit">
             <button type="submit" class="btn btn-success" <?php echo empty($items) ? 'disabled' : ''; ?>>
-                <i class="fas fa-paper-plane me-1"></i> Submit Request
+                <i class="fas fa-paper-plane me-1" aria-hidden="true"></i> Submit Request
             </button>
         </form>
     <?php endif; ?>
@@ -72,22 +73,23 @@
                 <h5 class="mb-0">Items</h5>
                 <?php if ($reproductionRequest->status === 'draft'): ?>
                     <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
-                        <i class="fas fa-plus me-1"></i> Add Item
+                        <i class="fas fa-plus me-1" aria-hidden="true"></i> Add Item
                     </button>
                 <?php endif; ?>
             </div>
             <div class="card-body p-0">
                 <?php if (!empty($items)): ?>
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0" aria-label="Reproduction request items">
+                        <caption class="visually-hidden">List of items in this reproduction request</caption>
                         <thead class="table-light">
                             <tr>
-                                <th>Item</th>
-                                <th>Type</th>
-                                <th>Format</th>
-                                <th>Qty</th>
-                                <th>Cost</th>
+                                <th scope="col">Item</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Format</th>
+                                <th scope="col">Qty</th>
+                                <th scope="col">Cost</th>
                                 <?php if ($reproductionRequest->status === 'draft'): ?>
-                                    <th></th>
+                                    <th scope="col"></th>
                                 <?php endif; ?>
                             </tr>
                         </thead>
@@ -110,7 +112,7 @@
                                             <form method="post" class="d-inline">
                                                 <input type="hidden" name="form_action" value="remove_item">
                                                 <input type="hidden" name="item_id" value="<?php echo $item->id; ?>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" aria-label="Remove item"><i class="fas fa-times" aria-hidden="true"></i></button>
                                             </form>
                                         </td>
                                     <?php endif; ?>
@@ -120,7 +122,7 @@
                     </table>
                 <?php else: ?>
                     <div class="text-center text-muted py-4">
-                        <i class="fas fa-box-open fa-2x mb-2"></i>
+                        <i class="fas fa-box-open fa-2x mb-2" aria-hidden="true"></i>
                         <p>No items added yet</p>
                     </div>
                 <?php endif; ?>
@@ -131,9 +133,9 @@
     <div class="col-md-4">
         <!-- Cost Summary -->
         <div class="card mb-4">
-            <div class="card-header"><h6 class="mb-0"><i class="fas fa-calculator me-2"></i>Cost Summary</h6></div>
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-calculator me-2" aria-hidden="true"></i>Cost Summary</h6></div>
             <div class="card-body">
-                <table class="table table-sm mb-0">
+                <table class="table table-sm mb-0" aria-label="Cost summary">
                     <tr>
                         <td>Subtotal:</td>
                         <td class="text-end">R<?php echo number_format($reproductionRequest->subtotal ?? 0, 2); ?></td>
@@ -164,7 +166,7 @@
 
         <!-- Status Timeline -->
         <div class="card">
-            <div class="card-header"><h6 class="mb-0"><i class="fas fa-history me-2"></i>Timeline</h6></div>
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-history me-2" aria-hidden="true"></i>Timeline</h6></div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     <small class="text-muted"><?php echo date('M j, Y H:i', strtotime($reproductionRequest->created_at)); ?></small><br>
@@ -202,7 +204,7 @@
                 <input type="hidden" name="form_action" value="add_item">
                 <input type="hidden" name="object_id" id="selectedObjectId" value="">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i><?php echo __('Add Item'); ?></h5>
+                    <h5 class="modal-title"><i class="fas fa-plus me-2" aria-hidden="true"></i><?php echo __('Add Item'); ?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -272,7 +274,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i><?php echo __('Add Item'); ?></button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1" aria-hidden="true"></i><?php echo __('Add Item'); ?></button>
                 </div>
             </form>
         </div>

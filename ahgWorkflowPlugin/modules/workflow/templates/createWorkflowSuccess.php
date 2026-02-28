@@ -1,5 +1,7 @@
 <?php use_helper('Date') ?>
 
+<?php include_partial('workflow/accessibilityHelpers') ?>
+
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">

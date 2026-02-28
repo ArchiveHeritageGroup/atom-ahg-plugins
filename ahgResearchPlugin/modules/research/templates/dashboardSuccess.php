@@ -337,3 +337,4 @@
     </div>
     <?php endif; ?>
 <?php end_slot() ?>
+<?php include_partial('research/accessibilityHelpers') ?>

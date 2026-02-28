@@ -2,6 +2,7 @@
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
+<?php include_partial('research/accessibilityHelpers') ?>
 <?php use_helper('Date') ?>
 <?php
 $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();

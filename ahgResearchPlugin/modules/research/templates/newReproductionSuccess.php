@@ -2,15 +2,16 @@
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
+<?php include_partial('research/accessibilityHelpers') ?>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>">Research</a></li>
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>">Reproductions</a></li>
-        <li class="breadcrumb-item active">New Request</li>
+        <li class="breadcrumb-item active" aria-current="page">New Request</li>
     </ol>
 </nav>
 
-<h1 class="h2 mb-4"><i class="fas fa-copy text-primary me-2"></i>New Reproduction Request</h1>
+<h1 class="h2 mb-4"><i class="fas fa-copy text-primary me-2" aria-hidden="true"></i>New Reproduction Request</h1>
 
 <div class="row">
     <div class="col-md-8">
@@ -67,13 +68,13 @@
                         <textarea name="special_instructions" class="form-control" rows="2" placeholder="Any special requirements or notes..."></textarea>
                     </div>
 
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
+                    <div class="alert alert-info" role="status">
+                        <i class="fas fa-info-circle me-2" aria-hidden="true"></i>
                         After creating the request, you can add individual items from your collections or by searching the archive.
                     </div>
 
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1"></i> Create Request</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-1" aria-hidden="true"></i> Create Request</button>
                         <a href="<?php echo url_for(['module' => 'research', 'action' => 'reproductions']); ?>" class="btn btn-secondary">Cancel</a>
                     </div>
                 </form>
@@ -83,7 +84,7 @@
 
     <div class="col-md-4">
         <div class="card">
-            <div class="card-header"><h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Pricing Information</h6></div>
+            <div class="card-header"><h6 class="mb-0"><i class="fas fa-info-circle me-2" aria-hidden="true"></i>Pricing Information</h6></div>
             <div class="card-body">
                 <p class="small text-muted">Reproduction fees vary based on:</p>
                 <ul class="small">

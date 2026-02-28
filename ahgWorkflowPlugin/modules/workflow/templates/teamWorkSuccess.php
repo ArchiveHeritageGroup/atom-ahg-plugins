@@ -1,5 +1,7 @@
 <?php use_helper('Date') ?>
 
+<?php include_partial('workflow/accessibilityHelpers') ?>
+
 <div class="container-fluid px-4 py-3">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0"><i class="fas fa-users me-2"></i>Team Work</h1>

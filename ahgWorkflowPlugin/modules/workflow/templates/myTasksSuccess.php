@@ -1,10 +1,14 @@
 <?php use_helper('Date') ?>
 
-<div class="container-fluid px-4 py-3">
+<a href="#main-content" class="visually-hidden-focusable"><?php echo __('Skip to main content') ?></a>
+
+<?php include_partial('workflow/accessibilityHelpers') ?>
+
+<div class="container-fluid px-4 py-3" id="main-content">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0"><i class="fas fa-clipboard-list me-2"></i>My Tasks</h1>
+        <h1 class="h3 mb-0"><i class="fas fa-clipboard-list me-2" aria-hidden="true"></i>My Tasks</h1>
         <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i>Dashboard
+            <i class="fas fa-arrow-left me-1" aria-hidden="true"></i>Dashboard
         </a>
     </div>
 
@@ -29,22 +33,23 @@
 
     <?php if (empty($tasks)): ?>
         <div class="text-center text-muted py-5">
-            <i class="fas fa-inbox fa-4x mb-3 opacity-50"></i>
+            <i class="fas fa-inbox fa-4x mb-3 opacity-50" aria-hidden="true"></i>
             <h4>No tasks assigned to you</h4>
             <p>Browse the <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'pool']) ?>">task pool</a> to claim available tasks.</p>
         </div>
     <?php else: ?>
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover" aria-label="<?php echo __('My assigned tasks') ?>">
+                <caption class="visually-hidden"><?php echo __('List of tasks assigned to you') ?></caption>
                 <thead class="table-light">
                     <tr>
-                        <th>Object</th>
-                        <th>Workflow</th>
-                        <th>Step</th>
-                        <th>Priority</th>
-                        <th>Due Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th scope="col">Object</th>
+                        <th scope="col">Workflow</th>
+                        <th scope="col">Step</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Due Date</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,10 +62,10 @@
                             </td>
                             <td><?php echo esc_entities($task->workflow_name) ?></td>
                             <td>
-                                <span class="badge bg-info"><?php echo esc_entities($task->step_name) ?></span>
+                                <span class="badge bg-info" role="status"><?php echo esc_entities($task->step_name) ?></span>
                             </td>
                             <td>
-                                <span class="badge bg-<?php echo $task->priority === 'urgent' ? 'danger' : ($task->priority === 'high' ? 'warning' : 'secondary') ?>">
+                                <span class="badge bg-<?php echo $task->priority === 'urgent' ? 'danger' : ($task->priority === 'high' ? 'warning' : 'secondary') ?>" role="status" aria-label="<?php echo __('Priority: %1%', ['%1%' => ucfirst($task->priority)]) ?>">
                                     <?php echo ucfirst($task->priority) ?>
                                 </span>
                             </td>
@@ -80,11 +85,11 @@
                                         'in_progress' => 'info',
                                         default => 'secondary'
                                     };
-                                ?>"><?php echo ucfirst($task->status) ?></span>
+                                ?>" role="status" aria-label="<?php echo __('Status: %1%', ['%1%' => ucfirst($task->status)]) ?>"><?php echo ucfirst($task->status) ?></span>
                             </td>
                             <td>
                                 <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'viewTask', 'id' => $task->id]) ?>" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-eye"></i> View
+                                    <i class="fas fa-eye" aria-hidden="true"></i> View
                                 </a>
                             </td>
                         </tr>
