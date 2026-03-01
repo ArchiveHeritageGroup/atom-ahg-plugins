@@ -19,7 +19,7 @@ class portableExportTask extends arBaseTask
             new sfCommandOption('scope', null, sfCommandOption::PARAMETER_REQUIRED, 'Export scope: all, fonds, repository, custom', 'all'),
             new sfCommandOption('slug', null, sfCommandOption::PARAMETER_OPTIONAL, 'Fonds/description slug (for scope=fonds or custom)'),
             new sfCommandOption('repository-id', null, sfCommandOption::PARAMETER_OPTIONAL, 'Repository ID (for scope=repository or custom)'),
-            new sfCommandOption('mode', null, sfCommandOption::PARAMETER_OPTIONAL, 'Viewer mode: read_only or editable', 'read_only'),
+            new sfCommandOption('mode', null, sfCommandOption::PARAMETER_OPTIONAL, 'Export mode: read_only, editable, or archive', 'read_only'),
             new sfCommandOption('culture', null, sfCommandOption::PARAMETER_OPTIONAL, 'Culture/language code', 'en'),
             new sfCommandOption('title', null, sfCommandOption::PARAMETER_OPTIONAL, 'Export title', 'Portable Catalogue'),
             new sfCommandOption('output', null, sfCommandOption::PARAMETER_OPTIONAL, 'Output path (directory or .zip file)'),
@@ -42,6 +42,7 @@ viewer for offline access on CD, USB, or downloadable ZIP.
   [php symfony portable:export --scope=fonds --slug=my-fonds|INFO]
   [php symfony portable:export --scope=repository --repository-id=5|INFO]
   [php symfony portable:export --scope=all --mode=editable|INFO]
+  [php symfony portable:export --scope=all --mode=archive|INFO]
   [php symfony portable:export --scope=all --no-objects|INFO]
   [php symfony portable:export --export-id=42|INFO]
 
@@ -61,6 +62,9 @@ EOF;
         require_once $ahgDir . '/lib/Services/AssetCollector.php';
         require_once $ahgDir . '/lib/Services/SearchIndexBuilder.php';
         require_once $ahgDir . '/lib/Services/ViewerPackager.php';
+        require_once $ahgDir . '/lib/Services/ArchiveExtractor.php';
+        require_once $ahgDir . '/lib/Services/ManifestBuilder.php';
+        require_once $ahgDir . '/lib/Services/ExportEstimator.php';
 
         $DB = \Illuminate\Database\Capsule\Manager::class;
 

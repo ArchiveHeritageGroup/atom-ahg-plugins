@@ -16,6 +16,7 @@ $d = function($field, $fallback = '') use ($session, $defaults) {
 $sectorVal = $session->sector ?? ($defaults['ingest_default_sector'] ?? 'archive');
 $standardVal = $session->standard ?? ($defaults['ingest_default_standard'] ?? 'isadg');
 $placementVal = $session->parent_placement ?? 'top_level';
+$entityTypeVal = $session->entity_type ?? 'description';
 ?>
 
 <h1><?php echo $session ? __('Edit Ingest Configuration') : __('New Ingest') ?></h1>
@@ -60,7 +61,24 @@ $placementVal = $session->parent_placement ?? 'top_level';
                                placeholder="<?php echo __('e.g. Annual Report Collection 2024') ?>">
                     </div>
 
-                    <div class="row">
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo __('Record Type') ?> <span class="text-danger">*</span></label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="entity_type" id="entity_type_description"
+                                   value="description" <?php echo $entityTypeVal === 'description' ? 'checked' : '' ?>>
+                            <label class="btn btn-outline-primary" for="entity_type_description">
+                                <i class="fas fa-archive me-1"></i><?php echo __('Archival Descriptions') ?>
+                            </label>
+                            <input type="radio" class="btn-check" name="entity_type" id="entity_type_accession"
+                                   value="accession" <?php echo $entityTypeVal === 'accession' ? 'checked' : '' ?>>
+                            <label class="btn btn-outline-primary" for="entity_type_accession">
+                                <i class="fas fa-clipboard-list me-1"></i><?php echo __('Accessions') ?>
+                            </label>
+                        </div>
+                        <small class="text-muted"><?php echo __('Choose whether to import archival descriptions or accession records') ?></small>
+                    </div>
+
+                    <div class="row" id="sector-standard-row">
                         <div class="col-md-6 mb-3">
                             <label for="sector" class="form-label"><?php echo __('Sector') ?> <span class="text-danger">*</span></label>
                             <select class="form-select" id="sector" name="sector">
@@ -363,8 +381,30 @@ document.addEventListener('DOMContentLoaded', function() {
     radios.forEach(function(r) { r.addEventListener('change', togglePanels); });
     togglePanels();
 
-    // Filter standards by sector
+    // Entity type toggle (description vs accession)
+    var entityRadios = document.querySelectorAll('input[name="entity_type"]');
+    var sectorStandardRow = document.getElementById('sector-standard-row');
+    var hierarchyCard = document.querySelector('input[name="parent_placement"]').closest('.card');
     var sectorSel = document.getElementById('sector');
+
+    function toggleEntityType() {
+        var val = document.querySelector('input[name="entity_type"]:checked').value;
+        if (val === 'accession') {
+            // Hide sector/standard (accessions are always archive sector)
+            sectorStandardRow.style.display = 'none';
+            sectorSel.value = 'archive';
+            // Hide hierarchy placement (accessions are flat)
+            hierarchyCard.style.display = 'none';
+        } else {
+            sectorStandardRow.style.display = '';
+            hierarchyCard.style.display = '';
+        }
+    }
+
+    entityRadios.forEach(function(r) { r.addEventListener('change', toggleEntityType); });
+    toggleEntityType();
+
+    // Filter standards by sector
     var standardSel = document.getElementById('standard');
 
     function filterStandards() {

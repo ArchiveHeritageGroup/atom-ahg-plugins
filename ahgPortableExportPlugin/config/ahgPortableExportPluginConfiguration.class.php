@@ -55,6 +55,7 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
         $r->any('portable_export_api_list', '/portable-export/api/list', 'apiList');
         $r->any('portable_export_api_delete', '/portable-export/api/delete', 'apiDelete');
         $r->any('portable_export_api_token', '/portable-export/api/token', 'apiToken');
+        $r->any('portable_export_api_estimate', '/portable-export/api/estimate', 'apiEstimate');
 
         // Download
         $r->any('portable_export_download', '/portable-export/download', 'download');

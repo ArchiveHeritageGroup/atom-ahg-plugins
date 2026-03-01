@@ -86,6 +86,7 @@ class ingestActions extends sfActions
         if ($request->isMethod('post')) {
             $config = [
                 'title' => $request->getParameter('title', ''),
+                'entity_type' => $request->getParameter('entity_type', 'description'),
                 'sector' => $request->getParameter('sector', 'archive'),
                 'standard' => $request->getParameter('standard', 'isadg'),
                 'repository_id' => $request->getParameter('repository_id') ?: null,
@@ -253,9 +254,16 @@ class ingestActions extends sfActions
                 $this->redirect(['module' => 'ingest', 'action' => 'validate', 'id' => $id]);
             }
 
-            $this->fieldGroups = \AhgIngestPlugin\Services\IngestService::getMetadataFieldGroups($this->session->standard);
-            $this->vocabularies = \AhgIngestPlugin\Services\IngestService::getControlledVocabularies($this->session->standard);
-            $this->requiredFields = \AhgIngestPlugin\Services\IngestService::getRequiredFields($this->session->standard);
+            $isAccession = (($this->session->entity_type ?? 'description') === 'accession');
+            if ($isAccession) {
+                $this->fieldGroups = \AhgIngestPlugin\Services\IngestService::getMetadataFieldGroups('accession');
+                $this->vocabularies = \AhgIngestPlugin\Services\IngestService::getControlledVocabularies('accession');
+                $this->requiredFields = \AhgIngestPlugin\Services\IngestService::getAccessionRequiredFields();
+            } else {
+                $this->fieldGroups = \AhgIngestPlugin\Services\IngestService::getMetadataFieldGroups($this->session->standard);
+                $this->vocabularies = \AhgIngestPlugin\Services\IngestService::getControlledVocabularies($this->session->standard);
+                $this->requiredFields = \AhgIngestPlugin\Services\IngestService::getRequiredFields($this->session->standard);
+            }
             $this->sampleRows = \Illuminate\Database\Capsule\Manager::table('ingest_row')
                 ->where('session_id', $id)
                 ->orderBy('row_number')
@@ -318,7 +326,10 @@ class ingestActions extends sfActions
         }
 
         $this->mappings = $svc->getMappings($id);
-        $this->targetFields = \AhgIngestPlugin\Services\IngestService::getTargetFields($this->session->standard);
+        $isAccession = (($this->session->entity_type ?? 'description') === 'accession');
+        $this->targetFields = $isAccession
+            ? \AhgIngestPlugin\Services\IngestService::getAccessionTargetFields()
+            : \AhgIngestPlugin\Services\IngestService::getTargetFields($this->session->standard);
         $this->savedProfiles = $svc->getSavedMappingProfiles();
 
         // Get sample data for preview

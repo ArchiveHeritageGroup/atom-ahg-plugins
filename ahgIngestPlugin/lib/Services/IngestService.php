@@ -75,6 +75,55 @@ class IngestService
     }
 
     /**
+     * Target fields for accession CSV ingest (mirrors base AtoM csvAccessionImportTask).
+     */
+    public static function getAccessionTargetFields(): array
+    {
+        return [
+            // Core accession fields
+            'accessionNumber', 'title', 'acquisitionDate', 'sourceOfAcquisition',
+            'locationInformation', 'receivedExtentUnits', 'scopeAndContent',
+            'appraisal', 'archivalHistory', 'processingNotes',
+            'culture',
+
+            // Taxonomy-controlled fields
+            'acquisitionType', 'resourceType', 'processingStatus', 'processingPriority',
+
+            // Donor fields
+            'donorName', 'donorStreetAddress', 'donorCity', 'donorRegion',
+            'donorCountry', 'donorPostalCode', 'donorTelephone', 'donorFax',
+            'donorEmail', 'donorContactPerson', 'donorNote',
+
+            // Event fields (pipe-delimited multiples)
+            'accessionEventTypes', 'accessionEventDates', 'accessionEventAgents', 'accessionEventNotes',
+
+            // Physical objects
+            'physicalObjectName', 'physicalObjectLocation', 'physicalObjectType',
+
+            // Alternative identifiers (pipe-delimited multiples)
+            'alternativeIdentifiers', 'alternativeIdentifierTypes', 'alternativeIdentifierNotes',
+
+            // Extended fields (ahgAccessionManagePlugin)
+            'intakeNotes', 'intakePriority', 'containerType', 'containerLabel',
+            'containerBarcode', 'containerQuantity',
+
+            // Digital object
+            'digitalObjectPath', 'digitalObjectURI',
+
+            // Linkage
+            'qubitParentSlug',
+        ];
+    }
+
+    /**
+     * Required fields for accession ingest.
+     */
+    public static function getAccessionRequiredFields(): array
+    {
+        return ['title', 'accessionNumber'];
+    }
+
+    /**
      * Required fields per standard (ISAD(G) 2.1 numbering, Spectrum, CCO, DC, MODS).
      */
     public static function getRequiredFields(string $standard = 'isadg'): array
@@ -260,7 +309,57 @@ class IngestService
             ];
         }
 
+        // ── Accession ──
+        if ($standard === 'accession') {
+            $vocabularies['acquisitionType'] = [
+                'label' => 'Acquisition Type',
+                'values' => self::getTaxonomyTerms('Acquisition type'),
+            ];
+            $vocabularies['resourceType'] = [
+                'label' => 'Resource Type',
+                'values' => self::getTaxonomyTerms('Resource type'),
+            ];
+            $vocabularies['processingStatus'] = [
+                'label' => 'Processing Status',
+                'values' => self::getTaxonomyTerms('Processing status'),
+            ];
+            $vocabularies['processingPriority'] = [
+                'label' => 'Processing Priority',
+                'values' => self::getTaxonomyTerms('Processing priority'),
+            ];
+            $vocabularies['intakePriority'] = [
+                'label' => 'Intake Priority',
+                'values' => ['High', 'Medium', 'Low', 'Urgent'],
+            ];
+        }
+
         return $vocabularies;
+    }
+
+    /**
+     * Fetch term names from an AtoM taxonomy by taxonomy name.
+     */
+    protected static function getTaxonomyTerms(string $taxonomyName): array
+    {
+        try {
+            $taxonomy = DB::table('taxonomy')
+                ->join('taxonomy_i18n', 'taxonomy.id', '=', 'taxonomy_i18n.id')
+                ->where('taxonomy_i18n.name', $taxonomyName)
+                ->first();
+
+            if (!$taxonomy) {
+                return [];
+            }
+
+            return DB::table('term')
+                ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+                ->where('term.taxonomy_id', $taxonomy->id)
+                ->whereNotNull('term_i18n.name')
+                ->pluck('term_i18n.name')
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**
@@ -625,6 +724,79 @@ class IngestService
             ];
         }
 
+        // ── Accession ──
+        if ($standard === 'accession') {
+            return [
+                'core' => [
+                    'label' => 'Accession Core',
+                    'fields' => [
+                        'accessionNumber'     => ['label' => 'Accession Number', 'type' => 'text', 'required' => true,
+                            'help' => 'Unique accession identifier'],
+                        'title'               => ['label' => 'Title', 'type' => 'text', 'required' => true],
+                        'acquisitionDate'     => ['label' => 'Acquisition Date', 'type' => 'text', 'help' => 'YYYY-MM-DD'],
+                        'sourceOfAcquisition' => ['label' => 'Source of Acquisition', 'type' => 'textarea'],
+                        'locationInformation' => ['label' => 'Location Information', 'type' => 'textarea'],
+                        'receivedExtentUnits' => ['label' => 'Received Extent & Units', 'type' => 'text'],
+                    ],
+                ],
+                'description' => [
+                    'label' => 'Description',
+                    'fields' => [
+                        'scopeAndContent' => ['label' => 'Scope and Content', 'type' => 'textarea'],
+                        'appraisal'       => ['label' => 'Appraisal, Destruction, Scheduling', 'type' => 'textarea'],
+                        'archivalHistory' => ['label' => 'Archival History', 'type' => 'textarea'],
+                        'processingNotes' => ['label' => 'Processing Notes', 'type' => 'textarea'],
+                    ],
+                ],
+                'classification' => [
+                    'label' => 'Classification',
+                    'fields' => [
+                        'acquisitionType'    => ['label' => 'Acquisition Type', 'type' => 'select',
+                            'vocabulary' => 'acquisitionType', 'help' => 'e.g. Donation, Purchase, Transfer'],
+                        'resourceType'       => ['label' => 'Resource Type', 'type' => 'select',
+                            'vocabulary' => 'resourceType'],
+                        'processingStatus'   => ['label' => 'Processing Status', 'type' => 'select',
+                            'vocabulary' => 'processingStatus'],
+                        'processingPriority' => ['label' => 'Processing Priority', 'type' => 'select',
+                            'vocabulary' => 'processingPriority'],
+                    ],
+                ],
+                'donor' => [
+                    'label' => 'Donor Information',
+                    'fields' => [
+                        'donorName'          => ['label' => 'Donor Name', 'type' => 'text'],
+                        'donorStreetAddress' => ['label' => 'Donor Address', 'type' => 'text'],
+                        'donorCity'          => ['label' => 'Donor City', 'type' => 'text'],
+                        'donorRegion'        => ['label' => 'Donor Region / Province', 'type' => 'text'],
+                        'donorCountry'       => ['label' => 'Donor Country', 'type' => 'text'],
+                        'donorPostalCode'    => ['label' => 'Donor Postal Code', 'type' => 'text'],
+                        'donorTelephone'     => ['label' => 'Donor Telephone', 'type' => 'text'],
+                        'donorEmail'         => ['label' => 'Donor Email', 'type' => 'text'],
+                        'donorContactPerson' => ['label' => 'Donor Contact Person', 'type' => 'text'],
+                        'donorNote'          => ['label' => 'Donor Note', 'type' => 'textarea'],
+                    ],
+                ],
+                'extended' => [
+                    'label' => 'Extended Fields',
+                    'fields' => [
+                        'intakeNotes'       => ['label' => 'Intake Notes', 'type' => 'textarea'],
+                        'intakePriority'    => ['label' => 'Intake Priority', 'type' => 'select',
+                            'vocabulary' => 'intakePriority'],
+                        'containerType'     => ['label' => 'Container Type', 'type' => 'text'],
+                        'containerLabel'    => ['label' => 'Container Label', 'type' => 'text'],
+                        'containerBarcode'  => ['label' => 'Container Barcode', 'type' => 'text'],
+                        'containerQuantity' => ['label' => 'Container Quantity', 'type' => 'text'],
+                    ],
+                ],
+                'control' => [
+                    'label' => 'Control',
+                    'fields' => [
+                        'culture' => ['label' => 'Language (culture code)', 'type' => 'text', 'help' => 'e.g. en, fr, af'],
+                    ],
+                ],
+            ];
+        }
+
         // Fallback: same as ISAD(G)
         return self::getMetadataFieldGroups('isadg');
     }
@@ -636,6 +808,7 @@ class IngestService
         return DB::table('ingest_session')->insertGetId([
             'user_id' => $userId,
             'title' => $config['title'] ?? null,
+            'entity_type' => $config['entity_type'] ?? 'description',
             'sector' => $config['sector'] ?? 'archive',
             'standard' => $config['standard'] ?? 'isadg',
             'repository_id' => $config['repository_id'] ?? null,
@@ -1009,14 +1182,18 @@ class IngestService
             return [];
         }
 
+        // Check if this is an accession ingest
+        $session = DB::table('ingest_session')->where('id', $sessionId)->first();
+        $isAccession = ($session && ($session->entity_type ?? 'description') === 'accession');
+
         $sourceHeaders = json_decode($file->headers, true) ?: [];
-        $targetFields = self::getTargetFields($standard);
+        $targetFields = $isAccession ? self::getAccessionTargetFields() : self::getTargetFields($standard);
 
         // Clear existing mappings
         DB::table('ingest_mapping')->where('session_id', $sessionId)->delete();
 
         // Known aliases (source variant → AtoM field)
-        $aliases = [
+        $aliases = $isAccession ? self::getAccessionAliases() : [
             'legacy_id' => 'legacyId',
             'legacyid' => 'legacyId',
             'parent_id' => 'parentId',
@@ -1123,6 +1300,133 @@ class IngestService
         }
 
         return $mappings;
+    }
+
+    /**
+     * Accession CSV header aliases for auto-mapping.
+     */
+    protected static function getAccessionAliases(): array
+    {
+        return [
+            // Core accession
+            'accession_number' => 'accessionNumber',
+            'accession number' => 'accessionNumber',
+            'accession no' => 'accessionNumber',
+            'accession no.' => 'accessionNumber',
+            'acc_no' => 'accessionNumber',
+            'acc no' => 'accessionNumber',
+            'accno' => 'accessionNumber',
+            'acquisition_date' => 'acquisitionDate',
+            'acquisition date' => 'acquisitionDate',
+            'date_received' => 'acquisitionDate',
+            'date received' => 'acquisitionDate',
+            'date_of_acquisition' => 'acquisitionDate',
+            'received_date' => 'acquisitionDate',
+            'source_of_acquisition' => 'sourceOfAcquisition',
+            'source of acquisition' => 'sourceOfAcquisition',
+            'source' => 'sourceOfAcquisition',
+            'provenance' => 'sourceOfAcquisition',
+            'location_information' => 'locationInformation',
+            'location' => 'locationInformation',
+            'storage_location' => 'locationInformation',
+            'received_extent_units' => 'receivedExtentUnits',
+            'extent' => 'receivedExtentUnits',
+            'extent_and_medium' => 'receivedExtentUnits',
+            'scope_and_content' => 'scopeAndContent',
+            'scope' => 'scopeAndContent',
+            'description' => 'scopeAndContent',
+            'archival_history' => 'archivalHistory',
+            'custodial_history' => 'archivalHistory',
+            'processing_notes' => 'processingNotes',
+
+            // Taxonomy
+            'acquisition_type' => 'acquisitionType',
+            'acquisition type' => 'acquisitionType',
+            'type_of_acquisition' => 'acquisitionType',
+            'resource_type' => 'resourceType',
+            'resource type' => 'resourceType',
+            'material_type' => 'resourceType',
+            'processing_status' => 'processingStatus',
+            'processing status' => 'processingStatus',
+            'processing_priority' => 'processingPriority',
+            'processing priority' => 'processingPriority',
+            'priority' => 'processingPriority',
+
+            // Donor
+            'donor_name' => 'donorName',
+            'donor name' => 'donorName',
+            'donor' => 'donorName',
+            'donor_street_address' => 'donorStreetAddress',
+            'donor_address' => 'donorStreetAddress',
+            'donor address' => 'donorStreetAddress',
+            'donor_city' => 'donorCity',
+            'donor city' => 'donorCity',
+            'donor_region' => 'donorRegion',
+            'donor region' => 'donorRegion',
+            'donor_province' => 'donorRegion',
+            'donor_state' => 'donorRegion',
+            'donor_country' => 'donorCountry',
+            'donor country' => 'donorCountry',
+            'donor_postal_code' => 'donorPostalCode',
+            'donor postal code' => 'donorPostalCode',
+            'donor_zip' => 'donorPostalCode',
+            'donor_telephone' => 'donorTelephone',
+            'donor telephone' => 'donorTelephone',
+            'donor_phone' => 'donorTelephone',
+            'donor_fax' => 'donorFax',
+            'donor_email' => 'donorEmail',
+            'donor email' => 'donorEmail',
+            'donor_contact_person' => 'donorContactPerson',
+            'donor contact person' => 'donorContactPerson',
+            'donor_contact' => 'donorContactPerson',
+            'donor_note' => 'donorNote',
+            'donor note' => 'donorNote',
+
+            // Events
+            'accession_event_types' => 'accessionEventTypes',
+            'event_types' => 'accessionEventTypes',
+            'accession_event_dates' => 'accessionEventDates',
+            'event_dates' => 'accessionEventDates',
+            'accession_event_agents' => 'accessionEventAgents',
+            'event_agents' => 'accessionEventAgents',
+            'accession_event_notes' => 'accessionEventNotes',
+            'event_notes' => 'accessionEventNotes',
+
+            // Physical
+            'physical_object_name' => 'physicalObjectName',
+            'physical_object_location' => 'physicalObjectLocation',
+            'physical_object_type' => 'physicalObjectType',
+
+            // Alternative identifiers
+            'alternative_identifiers' => 'alternativeIdentifiers',
+            'alt_identifiers' => 'alternativeIdentifiers',
+            'alternative_identifier_types' => 'alternativeIdentifierTypes',
+            'alternative_identifier_notes' => 'alternativeIdentifierNotes',
+
+            // Extended (ahgAccessionManagePlugin)
+            'intake_notes' => 'intakeNotes',
+            'intake notes' => 'intakeNotes',
+            'intake_priority' => 'intakePriority',
+            'intake priority' => 'intakePriority',
+            'container_type' => 'containerType',
+            'container type' => 'containerType',
+            'container_label' => 'containerLabel',
+            'container label' => 'containerLabel',
+            'container_barcode' => 'containerBarcode',
+            'barcode' => 'containerBarcode',
+            'container_quantity' => 'containerQuantity',
+            'quantity' => 'containerQuantity',
+
+            // Digital object
+            'digital_object_path' => 'digitalObjectPath',
+            'digital_object_uri' => 'digitalObjectURI',
+            'digital_object' => 'digitalObjectPath',
+            'filename' => 'digitalObjectPath',
+            'file_path' => 'digitalObjectPath',
+
+            // Linkage
+            'parent_slug' => 'qubitParentSlug',
+        ];
     }
 
     public function saveMappings(int $sessionId, array $mappings): void
@@ -1469,8 +1773,9 @@ class IngestService
         // Clear previous validations
         DB::table('ingest_validation')->where('session_id', $sessionId)->delete();
 
+        $isAccession = (($session->entity_type ?? 'description') === 'accession');
         $standard = $session->standard;
-        $required = self::getRequiredFields($standard);
+        $required = $isAccession ? self::getAccessionRequiredFields() : self::getRequiredFields($standard);
 
         $rows = DB::table('ingest_row')
             ->where('session_id', $sessionId)
@@ -1479,8 +1784,9 @@ class IngestService
 
         $stats = ['total' => count($rows), 'valid' => 0, 'warnings' => 0, 'errors' => 0];
 
-        // Track legacyIds for duplicate detection
+        // Track legacyIds / accessionNumbers for duplicate detection
         $legacyIds = [];
+        $accessionNumbers = [];
         $checksums = [];
 
         foreach ($rows as $row) {
@@ -1500,49 +1806,125 @@ class IngestService
                 }
             }
 
-            // Level of description validation
-            if (!empty($enriched['levelOfDescription'])) {
-                $validLevels = [
-                    'Fonds', 'Subfonds', 'Collection', 'Series', 'Subseries',
-                    'File', 'Item', 'Part', 'Class', 'Sub-item',
-                ];
-                $lvl = $enriched['levelOfDescription'];
-                if (!in_array($lvl, $validLevels, true) && !in_array(ucfirst(strtolower($lvl)), $validLevels, true)) {
-                    $this->addValidation($sessionId, $row->row_number, 'warning', 'levelOfDescription',
-                        "Level of description '{$lvl}' may not be recognized");
-                    $rowWarnings++;
-                }
-            }
+            if ($isAccession) {
+                // ── Accession-specific validation ──
 
-            // Date format validation
-            foreach (['creationDatesStart', 'creationDatesEnd', 'eventStartDates', 'eventEndDates'] as $dateField) {
-                if (!empty($enriched[$dateField])) {
-                    $val = $enriched[$dateField];
+                // Duplicate accessionNumber within batch
+                if (!empty($enriched['accessionNumber'])) {
+                    $accNum = trim($enriched['accessionNumber']);
+                    if (isset($accessionNumbers[$accNum])) {
+                        $this->addValidation($sessionId, $row->row_number, 'error', 'accessionNumber',
+                            "Duplicate accession number '{$accNum}' (also on row {$accessionNumbers[$accNum]})");
+                        $rowErrors++;
+                    } else {
+                        $accessionNumbers[$accNum] = $row->row_number;
+                    }
+
+                    // Check if accession number already exists in AtoM
+                    $existsInDb = DB::table('accession')
+                        ->where('identifier', $accNum)
+                        ->exists();
+                    if ($existsInDb) {
+                        $this->addValidation($sessionId, $row->row_number, 'warning', 'accessionNumber',
+                            "Accession number '{$accNum}' already exists in the system");
+                        $rowWarnings++;
+                    }
+                }
+
+                // acquisitionDate format validation
+                if (!empty($enriched['acquisitionDate'])) {
+                    $val = $enriched['acquisitionDate'];
                     if (!preg_match('/^\d{4}(-\d{2}(-\d{2})?)?$/', $val) && !strtotime($val)) {
-                        $this->addValidation($sessionId, $row->row_number, 'warning', $dateField,
+                        $this->addValidation($sessionId, $row->row_number, 'warning', 'acquisitionDate',
                             "Date '{$val}' may not be in a recognized format (YYYY-MM-DD preferred)");
                         $rowWarnings++;
                     }
                 }
-            }
 
-            // Hierarchy: parentId references must exist as legacyId within the batch
-            if (!empty($row->parent_id_ref) && $session->parent_placement === 'csv_hierarchy') {
-                // We'll validate parent references in a second pass below
-            }
+                // Taxonomy term validation for controlled fields
+                foreach (['acquisitionType', 'resourceType', 'processingStatus', 'processingPriority'] as $taxField) {
+                    if (!empty($enriched[$taxField])) {
+                        $termVal = trim($enriched[$taxField]);
+                        $taxonomyMap = [
+                            'acquisitionType' => 'Acquisition type',
+                            'resourceType' => 'Resource type',
+                            'processingStatus' => 'Processing status',
+                            'processingPriority' => 'Processing priority',
+                        ];
+                        $taxName = $taxonomyMap[$taxField] ?? null;
+                        if ($taxName) {
+                            $termExists = DB::table('term')
+                                ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+                                ->join('taxonomy', 'term.taxonomy_id', '=', 'taxonomy.id')
+                                ->join('taxonomy_i18n', 'taxonomy.id', '=', 'taxonomy_i18n.id')
+                                ->where('taxonomy_i18n.name', $taxName)
+                                ->where('term_i18n.name', $termVal)
+                                ->exists();
+                            if (!$termExists) {
+                                $this->addValidation($sessionId, $row->row_number, 'warning', $taxField,
+                                    "Term '{$termVal}' not found in taxonomy '{$taxName}' — will be created");
+                                $rowWarnings++;
+                            }
+                        }
+                    }
+                }
 
-            // Duplicate legacyId detection
-            if (!empty($row->legacy_id)) {
-                if (isset($legacyIds[$row->legacy_id])) {
-                    $this->addValidation($sessionId, $row->row_number, 'error', 'legacyId',
-                        "Duplicate legacyId '{$row->legacy_id}' (also on row {$legacyIds[$row->legacy_id]})");
-                    $rowErrors++;
-                } else {
-                    $legacyIds[$row->legacy_id] = $row->row_number;
+                // Accession event validation (pipe-delimited, counts must match)
+                $eventTypes = !empty($enriched['accessionEventTypes']) ? explode('|', $enriched['accessionEventTypes']) : [];
+                $eventDates = !empty($enriched['accessionEventDates']) ? explode('|', $enriched['accessionEventDates']) : [];
+                if (!empty($eventTypes) && !empty($eventDates) && count($eventTypes) !== count($eventDates)) {
+                    $this->addValidation($sessionId, $row->row_number, 'warning', 'accessionEventTypes',
+                        'Event types and dates count mismatch (' . count($eventTypes) . ' types vs ' . count($eventDates) . ' dates)');
+                    $rowWarnings++;
+                }
+
+            } else {
+                // ── Description-specific validation ──
+
+                // Level of description validation
+                if (!empty($enriched['levelOfDescription'])) {
+                    $validLevels = [
+                        'Fonds', 'Subfonds', 'Collection', 'Series', 'Subseries',
+                        'File', 'Item', 'Part', 'Class', 'Sub-item',
+                    ];
+                    $lvl = $enriched['levelOfDescription'];
+                    if (!in_array($lvl, $validLevels, true) && !in_array(ucfirst(strtolower($lvl)), $validLevels, true)) {
+                        $this->addValidation($sessionId, $row->row_number, 'warning', 'levelOfDescription',
+                            "Level of description '{$lvl}' may not be recognized");
+                        $rowWarnings++;
+                    }
+                }
+
+                // Date format validation
+                foreach (['creationDatesStart', 'creationDatesEnd', 'eventStartDates', 'eventEndDates'] as $dateField) {
+                    if (!empty($enriched[$dateField])) {
+                        $val = $enriched[$dateField];
+                        if (!preg_match('/^\d{4}(-\d{2}(-\d{2})?)?$/', $val) && !strtotime($val)) {
+                            $this->addValidation($sessionId, $row->row_number, 'warning', $dateField,
+                                "Date '{$val}' may not be in a recognized format (YYYY-MM-DD preferred)");
+                            $rowWarnings++;
+                        }
+                    }
+                }
+
+                // Hierarchy: parentId references must exist as legacyId within the batch
+                if (!empty($row->parent_id_ref) && $session->parent_placement === 'csv_hierarchy') {
+                    // We'll validate parent references in a second pass below
+                }
+
+                // Duplicate legacyId detection
+                if (!empty($row->legacy_id)) {
+                    if (isset($legacyIds[$row->legacy_id])) {
+                        $this->addValidation($sessionId, $row->row_number, 'error', 'legacyId',
+                            "Duplicate legacyId '{$row->legacy_id}' (also on row {$legacyIds[$row->legacy_id]})");
+                        $rowErrors++;
+                    } else {
+                        $legacyIds[$row->legacy_id] = $row->row_number;
+                    }
                 }
             }
 
-            // Duplicate checksum detection
+            // Duplicate checksum detection (common to both types)
             if (!empty($row->checksum_sha256)) {
                 if (isset($checksums[$row->checksum_sha256])) {
                     $this->addValidation($sessionId, $row->row_number, 'warning', 'digitalObjectPath',
@@ -1553,7 +1935,7 @@ class IngestService
                 }
             }
 
-            // Digital object file existence
+            // Digital object file existence (common to both types)
             if (!empty($row->digital_object_path) && !$row->digital_object_matched) {
                 $this->addValidation($sessionId, $row->row_number, 'warning', 'digitalObjectPath',
                     "Digital object file not found: " . basename($row->digital_object_path));
@@ -1575,8 +1957,8 @@ class IngestService
             }
         }
 
-        // Second pass: validate parent references
-        if ($session->parent_placement === 'csv_hierarchy') {
+        // Second pass: validate parent references (description mode only)
+        if (!$isAccession && $session->parent_placement === 'csv_hierarchy') {
             foreach ($rows as $row) {
                 if (!empty($row->parent_id_ref) && !isset($legacyIds[$row->parent_id_ref])) {
                     // Check if it exists in AtoM already

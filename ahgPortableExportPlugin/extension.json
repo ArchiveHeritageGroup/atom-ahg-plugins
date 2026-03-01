@@ -1,8 +1,8 @@
 {
     "name": "Portable Export",
     "machine_name": "ahgPortableExportPlugin",
-    "version": "1.1.0",
-    "description": "Standalone portable HTML/JS viewer for offline catalogue access on CD, USB, or downloadable ZIP. Zero server required.",
+    "version": "2.0.0",
+    "description": "Portable export for offline catalogue access (viewer mode) or full system archive export (re-importable JSON with checksums). Supports CD, USB, ZIP distribution.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0",
     "requires": {
@@ -20,16 +20,23 @@
     "category": "export",
     "features": [
         "Self-contained HTML/JS viewer for offline catalogue access",
+        "Archive export mode: re-importable JSON format with SHA-256 checksums",
+        "Full entity coverage: descriptions, authorities, taxonomies, rights, accessions, physical objects, events, notes, relations, repositories",
+        "Manifest with checksums for all exported files",
+        "Dry-run estimate (record counts + estimated package size)",
+        "Export verification CLI: php symfony portable:verify",
         "Export full or partial catalogue (fonds, repository, custom scope)",
         "Client-side search with FlexSearch",
         "Hierarchical tree navigation (MPPT-ordered)",
         "Digital object inline viewing (images, PDFs)",
-        "Edit mode with researcher exchange format (v1.0)",
-        "CLI command: php symfony portable:export",
+        "Edit mode with researcher exchange format",
+        "CLI commands: portable:export, portable:verify",
         "Admin UI with background processing and progress tracking",
         "Secure download tokens for sharing"
     ],
     "changelog": {
+        "2.0.0": "Archive export mode with re-importable JSON, manifest checksums, dry-run estimates, verification CLI",
+        "1.1.0": "Queue integration, clipboard export, quick-start from description page",
         "1.0.0": "Initial release with full export pipeline and static viewer"
     }
 }

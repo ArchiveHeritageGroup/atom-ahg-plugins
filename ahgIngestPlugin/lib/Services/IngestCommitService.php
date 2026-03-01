@@ -273,6 +273,14 @@ class IngestCommitService
             return null;
         }
 
+        // Dispatch by entity type
+        $entityType = $session->entity_type ?? 'description';
+
+        if ($entityType === 'accession') {
+            return $this->processAccessionRow($row, $enriched, $session);
+        }
+
+        // Default: create information_object
         // Resolve parent ID
         $parentId = $this->resolveParentId($row, $session, $legacyToAtomId);
 
@@ -297,6 +305,39 @@ class IngestCommitService
         ]);
 
         return ['atom_id' => $atomId, 'do_id' => $doId];
+    }
+
+    /**
+     * Process an accession row using AccessionCommitHandler.
+     */
+    protected function processAccessionRow(object $row, array $enriched, object $session): array
+    {
+        $ahgDir = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgIngestPlugin';
+        require_once $ahgDir . '/lib/Services/AccessionCommitHandler.php';
+
+        $handler = new AccessionCommitHandler();
+        $result = $handler->createAccession($enriched, $session);
+
+        $accessionId = $result['accession_id'] ?? null;
+        $doId = $result['do_id'] ?? null;
+
+        if (!$accessionId) {
+            throw new \RuntimeException("Failed to create accession for row {$row->row_number}");
+        }
+
+        // Import digital object if present
+        if (!empty($row->digital_object_path) && $row->digital_object_matched && file_exists($row->digital_object_path)) {
+            $doId = $this->importDigitalObject($accessionId, $row->digital_object_path, $session);
+        }
+
+        // Update row with created IDs
+        DB::table('ingest_row')->where('id', $row->id)->update([
+            'created_atom_id' => $accessionId,
+            'created_accession_id' => $accessionId,
+            'created_do_id' => $doId,
+        ]);
+
+        return ['atom_id' => $accessionId, 'do_id' => $doId];
     }
 
     protected function resolveParentId(object $row, object $session, array $legacyToAtomId): int

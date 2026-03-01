@@ -1159,4 +1159,71 @@ if (!$this->getUser()->isAuthenticated()) {
 
         return sfView::NONE;
     }
+
+    // ─── Accession CSV Export ────────────────────────────────────────────
+
+    /**
+     * Accession CSV export page and download.
+     */
+    public function executeAccessionCsv($request)
+    {
+        $DB = \Illuminate\Database\Capsule\Manager::class;
+
+        $this->format = 'accession_csv';
+        $this->formatName = 'Accession CSV Export';
+
+        // Get repositories for filter
+        $this->repositories = $DB::table('repository')
+            ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
+            ->where('actor_i18n.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
+            ->get();
+
+        // Total accession count for display
+        $this->accessionCount = $DB::table('accession')->count();
+
+        // Handle export
+        if ($request->isMethod('post')) {
+            return $this->processAccessionCsvExport($request);
+        }
+    }
+
+    /**
+     * Process accession CSV export.
+     */
+    protected function processAccessionCsvExport($request)
+    {
+        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgExportPlugin';
+        require_once $pluginDir . '/lib/Services/AccessionExportService.php';
+
+        $svc = new \AhgExportPlugin\Services\AccessionExportService();
+
+        $filters = [];
+
+        $repoId = $request->getParameter('repository_id');
+        if ($repoId) {
+            $filters['repository_id'] = (int) $repoId;
+        }
+
+        $dateFrom = $request->getParameter('date_from');
+        if ($dateFrom) {
+            $filters['date_from'] = $dateFrom;
+        }
+
+        $dateTo = $request->getParameter('date_to');
+        if ($dateTo) {
+            $filters['date_to'] = $dateTo;
+        }
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $csv = $svc->exportCsv($filters, $culture);
+
+        $filename = 'atom_accession_export_' . date('Y-m-d_His') . '.csv';
+        $this->getResponse()->setContentType('text/csv');
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $this->getResponse()->setContent($csv);
+
+        return sfView::NONE;
+    }
 }

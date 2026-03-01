@@ -18,6 +18,9 @@ class portableExportActions extends sfActions
             require_once $ahgDir . '/lib/Services/AssetCollector.php';
             require_once $ahgDir . '/lib/Services/SearchIndexBuilder.php';
             require_once $ahgDir . '/lib/Services/ViewerPackager.php';
+            require_once $ahgDir . '/lib/Services/ArchiveExtractor.php';
+            require_once $ahgDir . '/lib/Services/ManifestBuilder.php';
+            require_once $ahgDir . '/lib/Services/ExportEstimator.php';
             $loaded = true;
         }
     }
@@ -85,7 +88,7 @@ class portableExportActions extends sfActions
         $includeReferences = $request->getParameter('include_references', '1');
         $includeMasters = $request->getParameter('include_masters', '0');
 
-        // Branding
+        // Branding + archive entity types
         $branding = [];
         if ($request->getParameter('branding_title')) {
             $branding['title'] = $request->getParameter('branding_title');
@@ -95,6 +98,12 @@ class portableExportActions extends sfActions
         }
         if ($request->getParameter('branding_footer')) {
             $branding['footer'] = $request->getParameter('branding_footer');
+        }
+        if ($mode === 'archive' && $request->getParameter('entity_types')) {
+            $entityTypes = json_decode($request->getParameter('entity_types'), true);
+            if (is_array($entityTypes)) {
+                $branding['entity_types'] = $entityTypes;
+            }
         }
 
         // Create export record with retention
@@ -496,6 +505,38 @@ class portableExportActions extends sfActions
             ->toArray();
 
         return $this->jsonResponse(['results' => $results]);
+    }
+
+    // ─── API: Dry-Run Estimate ────────────────────────────────────
+
+    public function executeApiEstimate(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+        $this->loadServices();
+
+        $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
+        require_once $ahgDir . '/lib/Services/ExportEstimator.php';
+
+        $scopeType = $request->getParameter('scope_type', 'all');
+        $scopeSlug = $request->getParameter('scope_slug');
+        $repositoryId = $request->getParameter('repository_id');
+        $mode = $request->getParameter('mode', 'archive');
+        $scopeItems = null;
+
+        if ($request->getParameter('scope_items')) {
+            $scopeItems = json_decode($request->getParameter('scope_items'), true);
+        }
+
+        $estimator = new \AhgPortableExportPlugin\Services\ExportEstimator();
+        $estimate = $estimator->estimate(
+            $scopeType,
+            $scopeSlug ?: null,
+            $repositoryId ? (int) $repositoryId : null,
+            $scopeItems,
+            $mode
+        );
+
+        return $this->jsonResponse($estimate);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────

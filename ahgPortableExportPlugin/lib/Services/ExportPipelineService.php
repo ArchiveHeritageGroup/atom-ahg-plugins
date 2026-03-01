@@ -36,6 +36,9 @@ class ExportPipelineService
             require_once $ahgDir . '/lib/Services/AssetCollector.php';
             require_once $ahgDir . '/lib/Services/SearchIndexBuilder.php';
             require_once $ahgDir . '/lib/Services/ViewerPackager.php';
+            require_once $ahgDir . '/lib/Services/ArchiveExtractor.php';
+            require_once $ahgDir . '/lib/Services/ManifestBuilder.php';
+            require_once $ahgDir . '/lib/Services/ExportEstimator.php';
             $loaded = true;
         }
     }
@@ -78,6 +81,13 @@ class ExportPipelineService
      */
     protected function executeSteps(int $exportId, object $export): void
     {
+        // Branch: archive mode runs a different pipeline
+        if ($export->mode === 'archive') {
+            $this->executeArchiveSteps($exportId, $export);
+
+            return;
+        }
+
         $outputDir = $this->resolveOutputDir($exportId);
         @mkdir($outputDir . '/data', 0755, true);
 
@@ -191,6 +201,95 @@ class ExportPipelineService
         ]);
 
         // Insert notification for the user who started the export
+        $this->notifyCompletion($export, $totalDescriptions, $totalObjects, $zipSize);
+    }
+
+    /**
+     * Execute archive export pipeline: ArchiveExtractor → AssetCollector → ManifestBuilder → ZIP.
+     */
+    protected function executeArchiveSteps(int $exportId, object $export): void
+    {
+        $outputDir = $this->resolveOutputDir($exportId);
+        @mkdir($outputDir . '/data', 0755, true);
+
+        $options = [
+            'scope_type' => $export->scope_type,
+            'scope_slug' => $export->scope_slug,
+            'scope_repository_id' => $export->scope_repository_id ? (int) $export->scope_repository_id : null,
+            'scope_items' => $export->scope_items ? json_decode($export->scope_items, true) : null,
+            'culture' => $export->culture,
+        ];
+
+        // Parse entity_types from export config if set, otherwise use all
+        $entityTypes = null;
+        if (!empty($export->branding)) {
+            $branding = json_decode($export->branding, true);
+            if (!empty($branding['entity_types'])) {
+                $entityTypes = $branding['entity_types'];
+                $options['entity_types'] = $entityTypes;
+            }
+        }
+
+        // Step 1: Extract entities (0-60%)
+        $this->updateProgress($exportId, 5);
+        $archiveExtractor = new ArchiveExtractor($export->culture, function ($current, $total) use ($exportId) {
+            $pct = 5 + (int) (($current / max($total, 1)) * 55);
+            $this->updateProgress($exportId, min($pct, 60));
+        });
+
+        $entityFiles = $archiveExtractor->extract($exportId, $options, $outputDir);
+        $this->updateProgress($exportId, 60);
+
+        // Calculate total descriptions from extracted data
+        $totalDescriptions = $entityFiles['descriptions']['count'] ?? 0;
+        $totalObjects = 0;
+
+        // Step 2: Collect digital assets (60-80%)
+        if ($export->include_objects) {
+            // Re-read descriptions to get digital object paths
+            $descriptionsFile = $outputDir . '/data/descriptions.json';
+            if (file_exists($descriptionsFile)) {
+                $descriptions = json_decode(file_get_contents($descriptionsFile), true) ?: [];
+
+                $collector = new AssetCollector(null, function ($current, $total) use ($exportId) {
+                    $pct = 60 + (int) (($current / max($total, 1)) * 20);
+                    $this->updateProgress($exportId, min($pct, 80));
+                });
+
+                $assetResult = $collector->collect($descriptions, $outputDir, [
+                    'include_thumbnails' => (bool) $export->include_thumbnails,
+                    'include_references' => (bool) $export->include_references,
+                    'include_masters' => (bool) $export->include_masters,
+                ]);
+
+                $totalObjects = count($assetResult['files']);
+            }
+        }
+        $this->updateProgress($exportId, 80);
+
+        // Step 3: Build manifest with checksums (80-90%)
+        $manifestBuilder = new ManifestBuilder();
+        $manifestBuilder->build($outputDir, $entityFiles, $options);
+        $this->updateProgress($exportId, 90);
+
+        // Step 4: Create ZIP (90-100%)
+        $zipPath = $outputDir . '.zip';
+        $this->loadServices();
+        $packager = new ViewerPackager();
+        $zipSize = $packager->createZip($outputDir, $zipPath);
+        $this->updateProgress($exportId, 98);
+
+        // Mark as completed
+        DB::table('portable_export')->where('id', $exportId)->update([
+            'status' => 'completed',
+            'progress' => 100,
+            'total_descriptions' => $totalDescriptions,
+            'total_objects' => $totalObjects,
+            'output_path' => $zipPath,
+            'output_size' => $zipSize,
+            'completed_at' => date('Y-m-d H:i:s'),
+        ]);
+
         $this->notifyCompletion($export, $totalDescriptions, $totalObjects, $zipSize);
     }
 

@@ -27,6 +27,9 @@ class ahgExportPluginConfiguration extends sfPluginConfiguration
         $router->any('export_grap', '/export/grap', 'archival');
         $router->any('export_authorities', '/export/authorities', 'authority');
 
+        // Accession CSV export
+        $router->any('export_accession_csv', '/export/accession-csv', 'accessionCsv');
+
         // Legacy route for object/export
         $router->any('object_export', '/object/export', 'index');
 

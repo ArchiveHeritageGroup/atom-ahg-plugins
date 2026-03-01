@@ -75,6 +75,24 @@ $exportFormats = sfOutputEscaper::unescape($exportFormats ?? []);
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i><?php echo __('Accessions'); ?></h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted"><?php echo __('Export accession records to CSV. Compatible with ingest wizard re-import.'); ?></p>
+                    <div class="d-grid gap-2">
+                        <a href="<?php echo url_for('@export_accession_csv'); ?>" class="btn btn-outline-warning">
+                            <i class="fas fa-file-csv me-1"></i>Accession CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
