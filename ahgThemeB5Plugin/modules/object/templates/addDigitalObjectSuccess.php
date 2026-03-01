@@ -85,7 +85,8 @@
         <?php
         // Show merge option if ahgPreservationPlugin is enabled and user has credentials
         $showMerge = false;
-        if ($sf_user->hasCredential(['contributor', 'editor', 'administrator'], false) && $resource instanceof QubitInformationObject) {
+        $rawResource = sfOutputEscaper::unescape($resource);
+        if ($sf_user->hasCredential(['contributor', 'editor', 'administrator'], false) && $rawResource instanceof QubitInformationObject) {
             try {
                 $showMerge = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
                     ->where('name', 'ahgPreservationPlugin')
@@ -199,7 +200,7 @@
     .tpm-file-item:hover { background-color: #f8f9fa; }
     .sortable-ghost { opacity: 0.4; background-color: #cfe2ff !important; }
     </style>
-    <script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js" <?php echo $nonceAttr; ?>></script>
+    <script src="/plugins/ahgCorePlugin/web/js/vendor/Sortable.min.js" <?php echo $nonceAttr; ?>></script>
     <script <?php echo $nonceAttr; ?>>
     (function() {
         'use strict';

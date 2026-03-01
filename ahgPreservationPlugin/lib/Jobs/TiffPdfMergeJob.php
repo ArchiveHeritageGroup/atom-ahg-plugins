@@ -228,13 +228,17 @@ class TiffPdfMergeJob
             return null;
         }
 
-        $slug = DB::table('slug')
-            ->where('object_id', $informationObjectId)
-            ->first();
+        // Resolve repository slug (inherit from ancestors if needed)
+        $repoSlug = $this->resolveRepositorySlug($informationObjectId);
 
-        $slugValue = $slug ? $slug->slug : sprintf('%010d', $informationObjectId);
+        // Compute checksum for AtoM hash-based directory path
+        $checksum = hash_file('sha256', $filePath);
+        $uploadBase = \sfConfig::get('sf_upload_dir');
 
-        $uploadDir = '' . sfConfig::get('sf_upload_dir') . '/r/' . $slugValue;
+        // AtoM path: /uploads/r/<repo-slug>/<c0>/<c1>/<c2>/<checksum>/
+        $hashPath = $checksum[0] . '/' . $checksum[1] . '/' . $checksum[2] . '/' . $checksum;
+        $relativePath = '/uploads/r/' . $repoSlug . '/' . $hashPath . '/';
+        $uploadDir = $uploadBase . '/r/' . $repoSlug . '/' . $hashPath;
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
@@ -247,35 +251,44 @@ class TiffPdfMergeJob
             return null;
         }
 
-        // Create digital object record
-        $digitalObjectId = DB::table('digital_object')->insertGetId([
-            'information_object_id' => $informationObjectId,
-            'usage_id' => 142, // QubitTerm::MASTER_ID
-            'mime_type' => 'application/pdf',
-            'byte_size' => filesize($destPath),
-            'checksum' => md5_file($destPath),
-            'checksum_type' => 'md5',
-            'name' => $filename,
-            'path' => 'r/' . $slugValue . '/' . $filename,
-            'sequence' => 0,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
+        // Create object record (AtoM entity inheritance: object -> digital_object)
+        $now = date('Y-m-d H:i:s');
+        $digitalObjectId = DB::table('object')->insertGetId([
+            'class_name' => 'QubitDigitalObject',
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
 
-        // Generate derivatives
-        $this->generateDerivatives($digitalObjectId, $destPath, $slugValue);
+        // Create digital_object record with same id
+        DB::table('digital_object')->insert([
+            'id' => $digitalObjectId,
+            'object_id' => $informationObjectId,
+            'usage_id' => 140, // QubitTerm::MASTER_ID
+            'mime_type' => 'application/pdf',
+            'byte_size' => filesize($destPath),
+            'checksum' => $checksum,
+            'checksum_type' => 'sha256',
+            'name' => $filename,
+            'path' => $relativePath,
+            'sequence' => 0,
+        ]);
+
+        // Generate derivatives in same hash directory
+        $this->generateDerivatives($digitalObjectId, $destPath, $relativePath);
 
         return $digitalObjectId;
     }
 
-    protected function generateDerivatives($digitalObjectId, $masterPath, $slugValue): void
+    protected function generateDerivatives($digitalObjectId, $masterPath, $masterRelativePath): void
     {
         $convert = $this->getSetting('imagemagick_path', '/usr/bin/convert');
         $uploadDir = dirname($masterPath);
         $baseName = pathinfo(basename($masterPath), PATHINFO_FILENAME);
+        // Derivative path = same directory as master (with trailing slash)
+        $relativeDir = rtrim($masterRelativePath, '/') . '/';
 
-        // Thumbnail
-        $thumbFilename = $baseName . '_thumb.jpg';
+        // Thumbnail (usage_id 142, AtoM naming: <base>_142.jpg)
+        $thumbFilename = $baseName . '_142.jpg';
         $thumbPath = $uploadDir . '/' . $thumbFilename;
 
         exec(sprintf('%s -density 72 %s[0] -thumbnail 100x100 -flatten -quality 75 %s 2>&1',
@@ -283,20 +296,25 @@ class TiffPdfMergeJob
             $thumbOutput, $thumbReturn);
 
         if ($thumbReturn === 0 && file_exists($thumbPath)) {
+            $now = date('Y-m-d H:i:s');
+            $thumbObjId = DB::table('object')->insertGetId([
+                'class_name' => 'QubitDigitalObject',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
             DB::table('digital_object')->insert([
+                'id' => $thumbObjId,
                 'parent_id' => $digitalObjectId,
-                'usage_id' => 137, // QubitTerm::THUMBNAIL_ID
+                'usage_id' => 142, // QubitTerm::THUMBNAIL_ID
                 'mime_type' => 'image/jpeg',
                 'byte_size' => filesize($thumbPath),
                 'name' => $thumbFilename,
-                'path' => 'r/' . $slugValue . '/' . $thumbFilename,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
+                'path' => $relativeDir,
             ]);
         }
 
-        // Reference
-        $refFilename = $baseName . '_ref.jpg';
+        // Reference (usage_id 141, AtoM naming: <base>_141.jpg)
+        $refFilename = $baseName . '_141.jpg';
         $refPath = $uploadDir . '/' . $refFilename;
 
         exec(sprintf('%s -density 150 %s[0] -resize 480x480 -flatten -quality 80 %s 2>&1',
@@ -304,17 +322,64 @@ class TiffPdfMergeJob
             $refOutput, $refReturn);
 
         if ($refReturn === 0 && file_exists($refPath)) {
+            $now = date('Y-m-d H:i:s');
+            $refObjId = DB::table('object')->insertGetId([
+                'class_name' => 'QubitDigitalObject',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
             DB::table('digital_object')->insert([
+                'id' => $refObjId,
                 'parent_id' => $digitalObjectId,
                 'usage_id' => 141, // QubitTerm::REFERENCE_ID
                 'mime_type' => 'image/jpeg',
                 'byte_size' => filesize($refPath),
                 'name' => $refFilename,
-                'path' => 'r/' . $slugValue . '/' . $refFilename,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s'),
+                'path' => $relativeDir,
             ]);
         }
+    }
+
+    protected function resolveRepositorySlug(int $informationObjectId): string
+    {
+        // Walk up the hierarchy to find the repository_id
+        $currentId = $informationObjectId;
+        $repositoryId = null;
+
+        // AtoM inherits repository from ancestors — walk up via parent_id
+        for ($i = 0; $i < 50; $i++) {
+            $io = DB::table('information_object')
+                ->where('id', $currentId)
+                ->select('repository_id', 'parent_id')
+                ->first();
+
+            if (!$io) {
+                break;
+            }
+
+            if ($io->repository_id) {
+                $repositoryId = $io->repository_id;
+                break;
+            }
+
+            // Root node (parent_id = 1 is QubitInformationObject::ROOT_ID)
+            if (!$io->parent_id || $io->parent_id == 1) {
+                break;
+            }
+
+            $currentId = $io->parent_id;
+        }
+
+        if (!$repositoryId) {
+            return 'null';
+        }
+
+        // Get repository slug from slug table
+        $slug = DB::table('slug')
+            ->where('object_id', $repositoryId)
+            ->value('slug');
+
+        return $slug ?: 'null';
     }
 
     protected function getSetting(string $key, $default = null)
