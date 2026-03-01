@@ -33,6 +33,11 @@ class AhgSettingsSectionAction extends AhgController
             'icon' => 'fa-id-card',
             'description' => 'External linking, completeness, NER pipeline, merge/dedup, occupations, functions',
         ],
+        'security' => [
+            'label' => 'Security & Access Control',
+            'icon' => 'fa-shield-alt',
+            'description' => 'Password policy, account lockout, session security, and access control settings',
+        ],
     ];
 
     protected $checkboxFields = [
@@ -100,6 +105,11 @@ class AhgSettingsSectionAction extends AhgController
             'authority_merge_require_approval',
             'authority_hide_stubs_from_public',
             'authority_function_linking_enabled',
+        ],
+        'security' => [
+            'security_password_expiry_notify',
+            'security_lockout_enabled',
+            'security_force_password_change',
         ],
     ];
 
