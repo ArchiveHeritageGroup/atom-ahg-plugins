@@ -253,17 +253,48 @@ class HarvestClient
     {
         $url = $baseUrl . '?' . http_build_query($params);
 
+        // SSRF protection: validate the OAI endpoint URL
+        $parsed = parse_url($baseUrl);
+        $host = $parsed['host'] ?? '';
+
+        $blockedHosts = ['169.254.169.254', 'metadata.google.internal', 'metadata.internal'];
+        if (in_array(strtolower($host), $blockedHosts, true)) {
+            throw new HarvestException('Blocked host (metadata endpoint): ' . $host);
+        }
+
+        $resolvedIps = @gethostbynamel($host);
+        if ($resolvedIps !== false) {
+            foreach ($resolvedIps as $ip) {
+                if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                    throw new HarvestException('OAI endpoint resolves to private/reserved IP: ' . $ip);
+                }
+            }
+        }
+
         $ch = curl_init();
-        curl_setopt_array($ch, [
+
+        $port = $parsed['port'] ?? (($parsed['scheme'] ?? 'https') === 'https' ? 443 : 80);
+
+        $curlOpts = [
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_FOLLOWLOCATION => false, // Disable auto-redirect; handle manually for SSRF safety
             CURLOPT_TIMEOUT => $this->timeout,
             CURLOPT_USERAGENT => $this->userAgent,
+            CURLOPT_MAXFILESIZE => 50 * 1024 * 1024, // 50 MB response limit
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_HTTPHEADER => [
                 'Accept: text/xml, application/xml',
             ],
-        ]);
+        ];
+
+        // Pin resolved IP to prevent DNS rebinding
+        if ($resolvedIps !== false && !empty($resolvedIps)) {
+            $curlOpts[CURLOPT_RESOLVE] = [$host . ':' . $port . ':' . $resolvedIps[0]];
+        }
+
+        curl_setopt_array($ch, $curlOpts);
 
         $retries = 0;
         $response = false;
@@ -306,7 +337,7 @@ class HarvestClient
     protected function parseResponse(string $response): \SimpleXMLElement
     {
         libxml_use_internal_errors(true);
-        $xml = simplexml_load_string($response);
+        $xml = simplexml_load_string($response, \SimpleXMLElement::class, LIBXML_NONET | LIBXML_NOCDATA);
 
         if ($xml === false) {
             $errors = libxml_get_errors();

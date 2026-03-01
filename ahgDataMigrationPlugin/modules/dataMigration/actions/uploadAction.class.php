@@ -368,7 +368,7 @@ class dataMigrationUploadAction extends AhgController
             $fileContent = preg_replace('/xmlns="[^"]+"/', '', $fileContent);
             
             try {
-                $xml = new \SimpleXMLElement($fileContent);
+                $xml = new \SimpleXMLElement($fileContent, LIBXML_NONET | LIBXML_NOCDATA);
                 $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
                 $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
                 
@@ -796,7 +796,7 @@ class dataMigrationUploadAction extends AhgController
         // Remove default namespace to make XPath easier
         $content = preg_replace('/xmlns="[^"]+"/', '', $content);
 
-        $xml = new \SimpleXMLElement($content);
+        $xml = new \SimpleXMLElement($content, LIBXML_NONET | LIBXML_NOCDATA);
         $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
         $headers = [];
         $records = [];
@@ -1390,7 +1390,7 @@ class dataMigrationUploadAction extends AhgController
         try {
             $content = preg_replace('/xmlns="[^"]+"/', '', $content);
 
-            $xml = new \SimpleXMLElement($content);
+            $xml = new \SimpleXMLElement($content, LIBXML_NONET | LIBXML_NOCDATA);
             $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
 
             $objects = $xml->xpath('//StructuralObject');
@@ -1447,7 +1447,7 @@ class dataMigrationUploadAction extends AhgController
         $records = [];
 
         try {
-            $xml = new \SimpleXMLElement($content);
+            $xml = new \SimpleXMLElement($content, LIBXML_NONET | LIBXML_NOCDATA);
             $xml->registerXPathNamespace('dc', 'http://purl.org/dc/elements/1.1/');
             $xml->registerXPathNamespace('dcterms', 'http://purl.org/dc/terms/');
 

@@ -931,12 +931,12 @@ class ahgUniversalMetadataExtractor
         
         // Suppress XML errors
         libxml_use_internal_errors(true);
-        $doc = simplexml_load_string($xml);
-        
+        $doc = simplexml_load_string($xml, \SimpleXMLElement::class, LIBXML_NONET | LIBXML_NOCDATA);
+
         if (!$doc) {
             return $metadata;
         }
-        
+
         // Register namespaces
         $namespaces = $doc->getNamespaces(true);
         
@@ -979,12 +979,12 @@ class ahgUniversalMetadataExtractor
         $metadata = [];
         
         libxml_use_internal_errors(true);
-        $doc = simplexml_load_string($xml);
-        
+        $doc = simplexml_load_string($xml, \SimpleXMLElement::class, LIBXML_NONET | LIBXML_NOCDATA);
+
         if (!$doc) {
             return $metadata;
         }
-        
+
         $props = [
             'Application' => 'application',
             'AppVersion' => 'app_version',
@@ -1022,8 +1022,8 @@ class ahgUniversalMetadataExtractor
         $custom = [];
         
         libxml_use_internal_errors(true);
-        $doc = simplexml_load_string($xml);
-        
+        $doc = simplexml_load_string($xml, \SimpleXMLElement::class, LIBXML_NONET | LIBXML_NOCDATA);
+
         if (!$doc) {
             return $custom;
         }

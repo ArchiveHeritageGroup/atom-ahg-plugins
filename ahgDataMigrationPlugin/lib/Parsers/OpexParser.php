@@ -56,7 +56,8 @@ class OpexParser
     protected function load(): void
     {
         $this->dom = new \DOMDocument();
-        $this->dom->load($this->filepath);
+        $this->dom->substituteEntities = false;
+        $this->dom->load($this->filepath, LIBXML_NONET | LIBXML_NOCDATA);
 
         $this->xpath = new \DOMXPath($this->dom);
         

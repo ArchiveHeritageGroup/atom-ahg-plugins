@@ -551,7 +551,31 @@ class WebhookService
      */
     protected static function sendRequest(string $url, string $payload, string $signature, int $webhookId): array
     {
+        // SSRF protection: validate target URL before sending
+        $parsed = parse_url($url);
+        $host = $parsed['host'] ?? '';
+
+        // Block cloud metadata endpoints
+        $blockedHosts = ['169.254.169.254', 'metadata.google.internal', 'metadata.internal'];
+        if (in_array(strtolower($host), $blockedHosts, true)) {
+            return ['success' => false, 'status_code' => null, 'body' => null, 'error' => 'Blocked host (metadata endpoint)'];
+        }
+
+        // DNS pre-resolution to prevent DNS rebinding attacks
+        $resolvedIps = @gethostbynamel($host);
+        if ($resolvedIps === false) {
+            return ['success' => false, 'status_code' => null, 'body' => null, 'error' => 'DNS resolution failed'];
+        }
+
+        foreach ($resolvedIps as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return ['success' => false, 'status_code' => null, 'body' => null, 'error' => 'Target resolves to private IP'];
+            }
+        }
+
         $ch = curl_init($url);
+
+        $port = $parsed['port'] ?? (($parsed['scheme'] ?? 'https') === 'https' ? 443 : 80);
 
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
@@ -567,6 +591,8 @@ class WebhookService
             ],
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_FOLLOWLOCATION => false, // Disable auto-redirect to prevent SSRF via redirect
+            CURLOPT_RESOLVE => [$host . ':' . $port . ':' . $resolvedIps[0]], // Pin resolved IP
         ]);
 
         $body = curl_exec($ch);

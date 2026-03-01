@@ -2405,6 +2405,43 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Short',
                 'category' => 'queue',
             ],
+
+            // ============================================
+            // SECURITY & COMPLIANCE
+            // ============================================
+            [
+                'name' => 'POPIA Breach Notification Check',
+                'command' => 'php symfony privacy:breach-check',
+                'description' => 'Checks for breaches approaching or exceeding the 72-hour notification deadline (POPIA Section 22). Reports overdue and at-risk breaches, optionally sends email alerts to the DPO.',
+                'options' => [
+                    '--email=ADDRESS' => 'Send alert email to the specified address (e.g., dpo@example.com)',
+                    '--json' => 'Output results in JSON format (for scripted monitoring)',
+                ],
+                'schedule' => 'Hourly',
+                'example' => '0 * * * * cd {root} && php symfony privacy:breach-check --email=dpo@example.com >> /var/log/atom/breach-check.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'security',
+            ],
+            [
+                'name' => 'Login Attempt Cleanup',
+                'command' => 'php bin/atom tools:cleanup-login-attempts',
+                'description' => 'Removes expired login attempt records from the login_attempt table. Records older than the configured retention period (default 24 hours) are deleted. Keeps the table from growing indefinitely.',
+                'options' => [],
+                'schedule' => 'Daily (off-hours)',
+                'example' => '0 3 * * * cd {root} && php bin/atom tools:cleanup-login-attempts >> /var/log/atom/login-cleanup.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'security',
+            ],
+            [
+                'name' => 'Audit Log Retention',
+                'command' => 'php bin/atom tools:audit-retention',
+                'description' => 'Purges audit trail entries older than the configured retention period (default 365 days). Keeps the ahg_audit_log table manageable while maintaining compliance with NARSSA and POPIA requirements.',
+                'options' => [],
+                'schedule' => 'Weekly',
+                'example' => '0 4 * * 0 cd {root} && php bin/atom tools:audit-retention >> /var/log/atom/audit-retention.log 2>&1',
+                'duration' => 'Short to Medium',
+                'category' => 'security',
+            ],
         ];
     }
 
@@ -2427,6 +2464,7 @@ class SettingsCronJobsAction extends AhgController
             'ahg' => ['title' => 'AHG Extensions', 'icon' => 'bi-puzzle', 'jobs' => []],
             'ric' => ['title' => 'RiC Triplestore', 'icon' => 'bi-diagram-3', 'jobs' => []],
             'queue' => ['title' => 'Queue Engine', 'icon' => 'bi-stack', 'jobs' => []],
+            'security' => ['title' => 'Security & Compliance', 'icon' => 'bi-shield-lock', 'jobs' => []],
         ];
 
         foreach ($jobs as $job) {

@@ -343,7 +343,7 @@ class MigrationImportCommand extends BaseCommand
     protected function parseGenericXml(string $filepath): array
     {
         $content = file_get_contents($filepath);
-        $xml = new \SimpleXMLElement($content);
+        $xml = new \SimpleXMLElement($content, LIBXML_NONET | LIBXML_NOCDATA);
 
         $records = [];
         foreach ($xml->children() as $child) {

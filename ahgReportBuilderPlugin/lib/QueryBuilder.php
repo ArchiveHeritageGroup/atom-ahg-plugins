@@ -19,6 +19,8 @@ class QueryBuilder
         'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER', 'CREATE',
         'TRUNCATE', 'GRANT', 'REVOKE', 'REPLACE', 'RENAME',
         'LOAD', 'INTO OUTFILE', 'INTO DUMPFILE',
+        'SET', 'CALL', 'HANDLER', 'DO', 'LOCK', 'UNLOCK',
+        'PREPARE', 'EXECUTE', 'DEALLOCATE',
     ];
 
     /**
@@ -242,15 +244,17 @@ class QueryBuilder
     public function executeRawSql(string $sql, array $params = [], ?int $userId = null): array
     {
         // Validate user is administrator (group_id 100 = administrator)
-        if ($userId !== null) {
-            $isAdmin = DB::table('acl_user_group')
-                ->where('user_id', $userId)
-                ->where('group_id', 100)
-                ->exists();
+        if ($userId === null) {
+            throw new \RuntimeException('Raw SQL execution requires a valid user ID');
+        }
 
-            if (!$isAdmin) {
-                throw new \RuntimeException('Raw SQL execution requires administrator privileges');
-            }
+        $isAdmin = DB::table('acl_user_group')
+            ->where('user_id', $userId)
+            ->where('group_id', 100)
+            ->exists();
+
+        if (!$isAdmin) {
+            throw new \RuntimeException('Raw SQL execution requires administrator privileges');
         }
 
         // Validate SQL is read-only

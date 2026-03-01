@@ -1609,15 +1609,16 @@ class IngestCommitService
                 if (empty(trim($text))) continue;
 
                 $escaped = escapeshellarg($text);
+                $escapedLang = escapeshellarg($targetLang);
                 $cmd = "python3 -c \"
 import sys
 try:
     from argostranslate import translate
-    t = translate.get_translation_from_codes('en', '{$targetLang}')
+    t = translate.get_translation_from_codes('en', sys.argv[2])
     if t: print(t.translate(sys.argv[1]))
     else: print('')
 except: print('')
-\" {$escaped} 2>/dev/null";
+\" {$escaped} {$escapedLang} 2>/dev/null";
 
                 $translated = trim(shell_exec($cmd) ?? '');
                 if (!empty($translated) && $translated !== $text) {

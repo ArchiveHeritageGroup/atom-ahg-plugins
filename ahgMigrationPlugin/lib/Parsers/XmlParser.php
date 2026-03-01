@@ -65,8 +65,9 @@ class XmlParser implements ParserInterface
         
         libxml_use_internal_errors(true);
         $dom = new \DOMDocument();
-        
-        if (!$dom->load($filePath)) {
+        $dom->substituteEntities = false;
+
+        if (!$dom->load($filePath, LIBXML_NONET | LIBXML_NOCDATA)) {
             foreach (libxml_get_errors() as $error) {
                 $errors[] = "XML Error (line {$error->line}): " . trim($error->message);
             }

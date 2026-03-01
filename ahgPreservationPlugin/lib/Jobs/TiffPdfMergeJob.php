@@ -273,10 +273,40 @@ class TiffPdfMergeJob
             'sequence' => 0,
         ]);
 
+        // Generate slug for the digital object (required for AtoM edit links)
+        $this->generateSlug($digitalObjectId);
+
         // Generate derivatives in same hash directory
         $this->generateDerivatives($digitalObjectId, $destPath, $relativePath);
 
         return $digitalObjectId;
+    }
+
+    /**
+     * Generate a slug for the digital object so AtoM edit links work.
+     */
+    protected function generateSlug(int $objectId): void
+    {
+        // Check if slug already exists
+        $existing = DB::table('slug')->where('object_id', $objectId)->first();
+        if ($existing) {
+            return;
+        }
+
+        // Generate unique slug based on object ID
+        $baseSlug = 'digital-object-' . $objectId;
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (DB::table('slug')->where('slug', $slug)->exists()) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        DB::table('slug')->insert([
+            'object_id' => $objectId,
+            'slug' => $slug,
+        ]);
     }
 
     protected function generateDerivatives($digitalObjectId, $masterPath, $masterRelativePath): void

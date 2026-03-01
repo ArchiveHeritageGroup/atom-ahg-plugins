@@ -205,6 +205,65 @@ class PrivacyBreachService
     }
 
     /**
+     * Get breaches approaching or past the notification deadline.
+     *
+     * POPIA Section 22(1) requires notification within 72 hours of detection.
+     * Each jurisdiction has its own deadline stored in privacy_jurisdiction.breach_hours.
+     *
+     * @return Collection Breaches with hours_elapsed and hours_remaining
+     */
+    public function getOverdueBreaches(): Collection
+    {
+        // Get breaches that require notification but haven't been notified
+        $breaches = DB::table('privacy_breach as b')
+            ->leftJoin('privacy_jurisdiction as j', 'b.jurisdiction', '=', 'j.code')
+            ->where('b.notification_required', 1)
+            ->where('b.regulator_notified', 0)
+            ->whereNotIn('b.status', ['closed'])
+            ->select([
+                'b.*',
+                'j.breach_hours',
+                'j.name as jurisdiction_name',
+                DB::raw('TIMESTAMPDIFF(HOUR, b.detected_date, NOW()) as hours_elapsed'),
+            ])
+            ->orderBy('b.detected_date')
+            ->get();
+
+        // Calculate hours remaining
+        return $breaches->map(function ($breach) {
+            $deadlineHours = $breach->breach_hours ?? 72;
+            $breach->hours_remaining = $deadlineHours - $breach->hours_elapsed;
+            $breach->is_overdue = $breach->hours_remaining <= 0;
+            $breach->is_critical = $breach->hours_remaining <= 12 && $breach->hours_remaining > 0;
+
+            return $breach;
+        });
+    }
+
+    /**
+     * Check for overdue breaches and return alert details.
+     *
+     * Used by the breach:check CLI task for automated monitoring.
+     *
+     * @return array Summary with overdue + critical counts and breach details
+     */
+    public function checkDeadlines(): array
+    {
+        $breaches = $this->getOverdueBreaches();
+
+        $overdue = $breaches->filter(fn ($b) => $b->is_overdue);
+        $critical = $breaches->filter(fn ($b) => $b->is_critical);
+
+        return [
+            'total_pending' => $breaches->count(),
+            'overdue_count' => $overdue->count(),
+            'critical_count' => $critical->count(),
+            'overdue' => $overdue->values()->toArray(),
+            'critical' => $critical->values()->toArray(),
+        ];
+    }
+
+    /**
      * Get breach statistics
      */
     public function getStatistics(?string $jurisdiction = null): array

@@ -72,7 +72,8 @@ class PaxParser
     protected function loadXip(string $xipPath): void
     {
         $this->xipDom = new \DOMDocument();
-        $this->xipDom->load($xipPath);
+        $this->xipDom->substituteEntities = false;
+        $this->xipDom->load($xipPath, LIBXML_NONET | LIBXML_NOCDATA);
 
         $this->xpath = new \DOMXPath($this->xipDom);
         
@@ -341,7 +342,8 @@ class PaxParser
         
         foreach ($metaFiles as $metaFile) {
             $dom = new \DOMDocument();
-            if (@$dom->load($metaFile)) {
+            $dom->substituteEntities = false;
+            if (@$dom->load($metaFile, LIBXML_NONET | LIBXML_NOCDATA)) {
                 $xpath = new \DOMXPath($dom);
                 $xpath->registerNamespace('dc', 'http://purl.org/dc/elements/1.1/');
                 

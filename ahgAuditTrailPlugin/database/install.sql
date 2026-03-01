@@ -183,6 +183,13 @@ CREATE TABLE IF NOT EXISTS `ahg_audit_settings` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+-- Seed: Default audit settings (enabled by default for security compliance)
+INSERT IGNORE INTO `ahg_audit_settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
+('audit_enabled', '1', 'boolean', 'Enable audit trail logging'),
+('audit_authentication', '1', 'boolean', 'Log authentication events (login, logout, failed login)'),
+('audit_views', '0', 'boolean', 'Log view-only actions (high volume — enable only when needed)'),
+('retention_days', '365', 'integer', 'Number of days to retain audit log entries');
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

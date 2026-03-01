@@ -127,22 +127,49 @@ class LinkService
             return $result;
         }
 
-        $context = stream_context_create([
-            'http' => [
+        // Use framework HttpClientService for SSRF-safe outbound HTTP
+        if (class_exists(\AtomFramework\Services\HttpClientService::class)) {
+            $response = \AtomFramework\Services\HttpClientService::get($url, [], [
                 'timeout' => 5,
-                'user_agent' => 'AtoM Report Builder/1.0',
-                'follow_location' => true,
-                'max_redirects' => 3,
-            ],
-            'ssl' => [
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-            ],
-        ]);
+                'maxSize' => 50000,
+            ]);
+            $html = $response['body'] ?? '';
+            if ($response['error'] || empty($html)) {
+                return $result;
+            }
+        } else {
+            // Fallback: validate URL host before fetching
+            $parsed = parse_url($url);
+            $host = $parsed['host'] ?? '';
+            if (in_array($host, ['169.254.169.254', 'metadata.google.internal', 'metadata.internal', 'localhost', '127.0.0.1'], true)) {
+                return $result;
+            }
+            $resolvedIps = @gethostbynamel($host);
+            if ($resolvedIps) {
+                foreach ($resolvedIps as $ip) {
+                    if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                        return $result;
+                    }
+                }
+            }
 
-        $html = @file_get_contents($url, false, $context);
-        if (!$html) {
-            return $result;
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 5,
+                    'user_agent' => 'AtoM Report Builder/1.0',
+                    'follow_location' => false,
+                    'max_redirects' => 0,
+                ],
+                'ssl' => [
+                    'verify_peer' => true,
+                    'verify_peer_name' => true,
+                ],
+            ]);
+
+            $html = @file_get_contents($url, false, $context);
+            if (!$html) {
+                return $result;
+            }
         }
 
         // Limit to first 50KB

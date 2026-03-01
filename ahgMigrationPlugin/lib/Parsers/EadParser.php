@@ -398,9 +398,10 @@ class EadParser implements ParserInterface
     protected function loadDocument(string $filePath): void
     {
         $this->dom = new \DOMDocument();
+        $this->dom->substituteEntities = false;
         libxml_use_internal_errors(true);
-        
-        if (!$this->dom->load($filePath)) {
+
+        if (!$this->dom->load($filePath, LIBXML_NONET | LIBXML_NOCDATA)) {
             $errors = libxml_get_errors();
             libxml_clear_errors();
             throw new \RuntimeException("Cannot parse EAD: " . ($errors[0]->message ?? 'Unknown error'));

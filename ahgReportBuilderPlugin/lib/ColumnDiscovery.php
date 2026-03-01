@@ -1024,7 +1024,8 @@ class ColumnDiscovery
         $table = $dataSource['table'];
 
         try {
-            $dbColumns = DB::select("SHOW COLUMNS FROM {$table}");
+            $safeTable = preg_replace('/[^a-zA-Z0-9_]/', '', $table);
+            $dbColumns = DB::select("SHOW COLUMNS FROM `{$safeTable}`");
             foreach ($dbColumns as $col) {
                 $columns[$col->Field] = [
                     'label' => ucwords(str_replace('_', ' ', $col->Field)),

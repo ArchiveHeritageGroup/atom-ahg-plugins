@@ -63,8 +63,9 @@ class AuthorityEacExportService
         $doc = new \DOMDocument();
         $doc->preserveWhiteSpace = false;
         $doc->formatOutput = true;
+        $doc->substituteEntities = false;
 
-        if (!@$doc->loadXML($xml)) {
+        if (!@$doc->loadXML($xml, LIBXML_NONET | LIBXML_NOCDATA)) {
             return $xml;
         }
 

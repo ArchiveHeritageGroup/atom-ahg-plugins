@@ -1042,16 +1042,23 @@ class PreservationService
         $escapedInput = escapeshellarg($input);
         $escapedOutput = escapeshellarg($output);
 
+        // Allowlists for shell-safe option values
+        $validCompress = ['lzw', 'zip', 'jpeg', 'none', 'rle', 'group4', 'fax'];
+        $validPresets = ['ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow'];
+        $validPdfSettings = ['/default', '/screen', '/ebook', '/printer', '/prepress'];
+
         switch ($tool) {
             case 'imagemagick':
-                $quality = $options['quality'] ?? 95;
+                $quality = (int) ($options['quality'] ?? 95);
                 $compress = $options['compress'] ?? 'lzw';
+                $compress = in_array($compress, $validCompress, true) ? $compress : 'lzw';
                 $cmd = "convert {$escapedInput} -quality {$quality} -compress {$compress} {$escapedOutput} 2>&1";
                 break;
 
             case 'ffmpeg':
                 $preset = $options['preset'] ?? 'medium';
-                $crf = $options['crf'] ?? 23;
+                $preset = in_array($preset, $validPresets, true) ? $preset : 'medium';
+                $crf = (int) ($options['crf'] ?? 23);
                 if (in_array($targetFormat, ['mp3', 'wav', 'flac'])) {
                     $cmd = "ffmpeg -i {$escapedInput} -y {$escapedOutput} 2>&1";
                 } else {
@@ -1061,12 +1068,14 @@ class PreservationService
 
             case 'ghostscript':
                 $pdfSettings = $options['pdf_settings'] ?? '/ebook';
+                $pdfSettings = in_array($pdfSettings, $validPdfSettings, true) ? $pdfSettings : '/ebook';
                 $cmd = "gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS={$pdfSettings} -dNOPAUSE -dQUIET -dBATCH -sOutputFile={$escapedOutput} {$escapedInput} 2>&1";
                 break;
 
             case 'libreoffice':
-                $outputDir = dirname($output);
-                $cmd = "libreoffice --headless --convert-to {$targetFormat} --outdir {$outputDir} {$escapedInput} 2>&1";
+                $outputDir = escapeshellarg(dirname($output));
+                $safeFormat = preg_replace('/[^a-zA-Z0-9]/', '', $targetFormat);
+                $cmd = "libreoffice --headless --convert-to {$safeFormat} --outdir {$outputDir} {$escapedInput} 2>&1";
                 break;
 
             default:
@@ -4349,7 +4358,8 @@ class PreservationService
     {
         try {
             $doc = new DOMDocument();
-            if (!$doc->loadXML($xml)) {
+            $doc->substituteEntities = false;
+            if (!$doc->loadXML($xml, LIBXML_NONET | LIBXML_NOCDATA)) {
                 return null;
             }
 
