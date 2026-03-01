@@ -1,0 +1,27 @@
+{
+    "name": "AHG User Registration",
+    "machine_name": "ahgUserRegistrationPlugin",
+    "version": "1.0.0",
+    "description": "Public user self-registration with email verification and admin approval workflow",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "homepage": "https://theahg.co.za",
+    "category": "user",
+    "keywords": ["registration", "signup", "approval", "email verification"],
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": ["ahg_registration_request"],
+    "features": [
+        "Public self-registration form",
+        "Email verification with token",
+        "Admin approval queue",
+        "Role assignment on approval",
+        "Email notifications (new registration, approval, rejection)",
+        "Rate limiting per IP",
+        "Configurable default group assignment"
+    ]
+}

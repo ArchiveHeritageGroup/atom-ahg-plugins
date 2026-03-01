@@ -39,14 +39,36 @@
 
   <hr class="my-4">
 
-  <!-- Researcher Registration -->
-  <div class="card border-primary">
+  <?php
+  $routing = sfContext::getInstance()->getRouting();
+  $hasRegistration = $routing->hasRouteName('user_register');
+  $hasResearch = $routing->hasRouteName('research_workspace');
+  ?>
+
+  <?php if ($hasRegistration): ?>
+  <!-- User Registration -->
+  <div class="card border-primary mb-3">
     <div class="card-body text-center">
-      <h5 class="card-title"><i class="fas fa-user-graduate text-primary me-2"></i><?php echo __('New Researcher?'); ?></h5>
+      <h5 class="card-title"><i class="fas fa-user-plus text-primary me-2"></i><?php echo __('New User?'); ?></h5>
+      <p class="card-text text-muted">
+        <?php echo __('Register for an account to access archival materials and services.'); ?>
+      </p>
+      <a href="<?php echo url_for('@user_register'); ?>" class="btn btn-primary">
+        <i class="fas fa-user-plus me-2"></i><?php echo __('Register'); ?>
+      </a>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php if ($hasResearch): ?>
+  <!-- Researcher Registration -->
+  <div class="card border-success mb-3">
+    <div class="card-body text-center">
+      <h5 class="card-title"><i class="fas fa-user-graduate text-success me-2"></i><?php echo __('New Researcher?'); ?></h5>
       <p class="card-text text-muted">
         <?php echo __('Register to access the reading room, request archival materials, and save your research.'); ?>
       </p>
-      <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']); ?>" class="btn btn-primary">
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']); ?>" class="btn btn-success">
         <i class="fas fa-user-plus me-2"></i><?php echo __('Register as Researcher'); ?>
       </a>
     </div>
@@ -58,4 +80,5 @@
       <i class="fas fa-book-reader me-1"></i><?php echo __('View Research Services'); ?>
     </a>
   </div>
+  <?php endif; ?>
 <?php end_slot(); ?>

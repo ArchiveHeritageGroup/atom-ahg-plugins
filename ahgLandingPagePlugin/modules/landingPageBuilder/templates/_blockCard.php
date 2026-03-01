@@ -57,7 +57,7 @@ $isColumnLayout = in_array($block->machine_name, ['row_1_col', 'row_2_col', 'row
                 </div>
               <?php else: ?>
                 <?php foreach ($colBlocks as $childBlock): ?>
-                  <div class="nested-block card mb-1" data-block-id="<?php echo $childBlock->id ?>" draggable="true">
+                  <div class="nested-block card mb-1" data-block-id="<?php echo $childBlock->id ?>">
                     <div class="card-body py-1 px-2 small d-flex align-items-center">
                       <span class="drag-handle me-1" style="cursor: grab;">☰</span>
                       <span class="flex-grow-1 text-truncate"><?php echo $childBlock->title ?: $childBlock->type_label ?></span>

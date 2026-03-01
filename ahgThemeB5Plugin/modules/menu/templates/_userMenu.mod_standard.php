@@ -12,6 +12,7 @@ $hasAccessRequest = $routing->hasRouteName('access_request_my');
 $hasResearch = $routing->hasRouteName('research_workspace');
 $hasSpectrum = $routing->hasRouteName('spectrum_my_tasks');
 $hasResearcher = $routing->hasRouteName('researcher_dashboard');
+$hasRegistration = $routing->hasRouteName('user_register');
 
 // Get pending counts only if plugins exist
 $pendingCount = 0;
@@ -85,16 +86,22 @@ if ($isAuthenticated && $hasSpectrum) {
       </a>
     </div>
 
-    <?php if ($hasResearch): ?>
+    <?php if ($hasRegistration || $hasResearch): ?>
     <hr class="my-3">
     <div class="text-center">
-      <small class="text-muted d-block mb-2"><i class="fas fa-user-graduate me-1"></i><?php echo __('New Researcher?'); ?></small>
-      <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']); ?>" class="btn btn-sm btn-success w-100">
-        <i class="fas fa-user-plus me-1"></i><?php echo __('Register as Researcher'); ?>
+      <?php if ($hasRegistration): ?>
+      <a href="<?php echo url_for('@user_register'); ?>" class="btn btn-sm btn-primary w-100 mb-2">
+        <i class="fas fa-user-plus me-1"></i><?php echo __('Register'); ?>
       </a>
-      <a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>" class="small text-muted d-block mt-2">
+      <?php endif; ?>
+      <?php if ($hasResearch): ?>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']); ?>" class="btn btn-sm btn-success w-100 mb-1">
+        <i class="fas fa-user-graduate me-1"></i><?php echo __('Register as Researcher'); ?>
+      </a>
+      <a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>" class="small text-muted d-block mt-1">
         <i class="fas fa-book-reader me-1"></i><?php echo __('View Research Services'); ?>
       </a>
+      <?php endif; ?>
     </div>
     <?php endif; ?>
   </div>

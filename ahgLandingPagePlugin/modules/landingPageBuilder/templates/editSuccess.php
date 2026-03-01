@@ -267,12 +267,14 @@ window.LandingPageBuilder = {
         saveDraft: '<?php echo url_for(['module' => 'landingPageBuilder', 'action' => 'saveDraft']) ?>',
         publish: '<?php echo url_for(['module' => 'landingPageBuilder', 'action' => 'publish']) ?>',
         restoreVersion: '<?php echo url_for(['module' => 'landingPageBuilder', 'action' => 'restoreVersion']) ?>',
+        moveToColumn: '<?php echo url_for(['module' => 'landingPageBuilder', 'action' => 'moveToColumn']) ?>',
+        reorderColumnBlocks: '<?php echo url_for(['module' => 'landingPageBuilder', 'action' => 'reorderColumnBlocks']) ?>',
         listPage: '<?php echo url_for(['module' => 'landingPageBuilder', 'action' => 'list']) ?>'
     }
 };
 </script>
 
 <!-- Load Sortable.js and Landing Page Builder JS -->
-<script src="/plugins/ahgCorePlugin/web/js/vendor/vendor/Sortable.min.js"></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/Sortable.min.js"></script>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/landing-page-builder.js"></script>
 <script src="/plugins/ahgCorePlugin/web/js/vendor/landing-page-builder-columns.js"></script>

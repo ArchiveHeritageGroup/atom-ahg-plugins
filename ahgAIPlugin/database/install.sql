@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS ahg_ner_entity (
     entity_value VARCHAR(500) NOT NULL,
     original_value VARCHAR(500) DEFAULT NULL,
     original_type VARCHAR(50) DEFAULT NULL,
-    correction_type ENUM('none', 'value_edit', 'type_change', 'both', 'rejected', 'approved') DEFAULT 'none',
+    correction_type VARCHAR(20) NOT NULL DEFAULT 'none' COMMENT 'none, value_edit, type_change, both, rejected, approved',
     training_exported TINYINT(1) DEFAULT 0,
     confidence DECIMAL(5,4) DEFAULT 1.0000,
     status VARCHAR(50) DEFAULT 'pending',

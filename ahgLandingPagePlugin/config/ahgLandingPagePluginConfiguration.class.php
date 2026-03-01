@@ -61,6 +61,13 @@ class ahgLandingPagePluginConfiguration extends sfPluginConfiguration
         $router->any('landing_page_ajax_publish', '/admin/landing-pages/ajax/publish', 'publish');
         $router->any('landing_page_ajax_restore_version', '/admin/landing-pages/ajax/restore-version', 'restoreVersion');
         $router->any('landing_page_ajax_move_to_column', '/admin/landing-pages/ajax/move-to-column', 'moveToColumn');
+        $router->any('landing_page_ajax_reorder_column', '/admin/landing-pages/ajax/reorder-column', 'reorderColumnBlocks');
+
+        // User dashboard routes
+        $router->any('landing_page_my_dashboard', '/my/dashboard', 'myDashboard');
+        $router->any('landing_page_my_dashboard_edit', '/my/dashboard/edit', 'myDashboardEdit');
+        $router->any('landing_page_my_dashboard_list', '/my/dashboards', 'myDashboardList');
+        $router->any('landing_page_my_dashboard_create', '/my/dashboard/create', 'myDashboardCreate');
 
         // Public routes
         $router->any('landing_page_view', '/landing/:slug', 'index', ['slug' => '[a-z0-9\-]+']);

@@ -9,8 +9,10 @@ $config = is_array($block->config) ? $block->config : [];
     <span class="drag-handle me-2" style="cursor: grab;">☰</span>
     <span class="small flex-grow-1"><?php echo $block->type_label ?></span>
     <div class="btn-group btn-group-sm">
-      <button type="button" class="btn btn-link btn-sm p-0 px-1 btn-edit text-primary" title="Edit">✏️</button>
-      <button type="button" class="btn btn-link btn-sm p-0 px-1 btn-delete text-danger" title="Delete">🗑</button>
+      <button type="button" class="btn btn-link btn-sm p-0 px-1 btn-edit-nested text-primary"
+              data-block-id="<?php echo $block->id ?>" title="Edit">✏️</button>
+      <button type="button" class="btn btn-link btn-sm p-0 btn-delete-nested text-danger"
+              data-block-id="<?php echo $block->id ?>" title="Delete">🗑</button>
     </div>
   </div>
   <div class="card-body py-2 px-2 bg-light small">

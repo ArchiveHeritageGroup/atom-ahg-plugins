@@ -106,6 +106,21 @@
           Config.showNotification('Error moving block: ' + (result.error || 'Unknown error'), 'error');
           // Revert by reloading
           window.location.reload();
+        } else {
+          // Save the block order in the target column after successful move
+          saveColumnBlockOrder(newColumn);
+
+          // Also update source column order if it still has blocks
+          var fromColumn = evt.from;
+          if (fromColumn && fromColumn !== newColumn) {
+            saveColumnBlockOrder(fromColumn);
+            // Show/hide empty placeholder in source column
+            var remaining = fromColumn.querySelectorAll('.nested-block').length;
+            var srcEmpty = fromColumn.querySelector('.empty-column');
+            if (srcEmpty) {
+              srcEmpty.style.display = remaining === 0 ? '' : 'none';
+            }
+          }
         }
       })
       .catch(function (error) {
@@ -174,6 +189,7 @@
    */
   function saveColumnBlockOrder(columnZone) {
     const parentBlockId = columnZone.dataset.parentBlock;
+    const columnSlot = columnZone.dataset.column;
     const blockIds = [];
 
     columnZone.querySelectorAll('.nested-block').forEach(function (block) {
@@ -182,8 +198,28 @@
       }
     });
 
-    // The order is maintained per-column via position field
-    // For simplicity, we rely on the moveToColumn handling position
+    if (blockIds.length === 0) return;
+
+    const formData = new FormData();
+    formData.append('parent_block_id', parentBlockId || '');
+    formData.append('column_slot', columnSlot || '');
+    formData.append('order', JSON.stringify(blockIds));
+
+    const url = Config.urls.reorderColumnBlocks || Config.urls.reorderBlocks;
+
+    fetch(url, {
+      method: 'POST',
+      body: formData
+    })
+      .then(function (response) { return response.json(); })
+      .then(function (result) {
+        if (!result.success) {
+          Config.showNotification('Error saving order: ' + (result.error || 'Unknown error'), 'error');
+        }
+      })
+      .catch(function (error) {
+        Config.showNotification('Network error: ' + error.message, 'error');
+      });
   }
 
   /**

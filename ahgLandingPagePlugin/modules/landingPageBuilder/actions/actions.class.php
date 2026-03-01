@@ -482,6 +482,34 @@ class landingPageBuilderActions extends AhgController
         return $this->renderText(json_encode(['success' => $result]));
     }
 
+    /**
+     * Admin - Reorder blocks within a column (AJAX)
+     */
+    public function executeReorderColumnBlocks($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Invalid method']));
+        }
+
+        $repository = new \AtomExtensions\Repositories\LandingPageRepository();
+
+        $parentBlockId = $request->getParameter('parent_block_id');
+        $columnSlot = $request->getParameter('column_slot');
+        $order = json_decode($request->getParameter('order', '[]'), true);
+
+        if (empty($order)) {
+            return $this->renderText(json_encode(['success' => true]));
+        }
+
+        $parentBlockId = $parentBlockId ? (int)$parentBlockId : null;
+
+        $result = $repository->reorderColumnBlocks($parentBlockId, $columnSlot, $order);
+
+        return $this->renderText(json_encode(['success' => $result]));
+    }
+
     // =========================================================================
     // USER DASHBOARD ACTIONS
     // =========================================================================
