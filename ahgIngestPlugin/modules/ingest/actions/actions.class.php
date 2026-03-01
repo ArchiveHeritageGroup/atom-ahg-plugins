@@ -445,21 +445,44 @@ class ingestActions extends sfActions
             // Start the commit job
             $jobId = $commitSvc->startJob($id);
 
-            // Launch background task (non-blocking)
-            $atomRoot = sfConfig::get('sf_root_dir');
-            $logFile = sfConfig::get('sf_upload_dir') . '/ingest/job_' . $jobId . '.log';
-            $logDir = dirname($logFile);
-            if (!is_dir($logDir)) {
-                @mkdir($logDir, 0755, true);
+            // Dispatch to queue engine (falls back to nohup if queue unavailable)
+            $dispatched = false;
+            try {
+                if (class_exists('\AtomFramework\Services\QueueService')) {
+                    $queueService = new \AtomFramework\Services\QueueService();
+                    $userId = $this->userId();
+                    $queueService->dispatch(
+                        'ingest:commit',
+                        ['task' => 'ingest:commit', 'args' => '--job-id=' . $jobId],
+                        'ingest',
+                        3,
+                        0,
+                        1,
+                        $userId
+                    );
+                    $dispatched = true;
+                }
+            } catch (\Throwable $e) {
+                // Queue unavailable, fall through to nohup
             }
 
-            $cmd = sprintf(
-                'nohup php %s/symfony ingest:commit --job-id=%d > %s 2>&1 &',
-                escapeshellarg($atomRoot),
-                $jobId,
-                escapeshellarg($logFile)
-            );
-            exec($cmd);
+            if (!$dispatched) {
+                // Fallback: legacy nohup launch
+                $atomRoot = sfConfig::get('sf_root_dir');
+                $logFile = sfConfig::get('sf_upload_dir') . '/ingest/job_' . $jobId . '.log';
+                $logDir = dirname($logFile);
+                if (!is_dir($logDir)) {
+                    @mkdir($logDir, 0755, true);
+                }
+
+                $cmd = sprintf(
+                    'nohup php %s/symfony ingest:commit --job-id=%d > %s 2>&1 &',
+                    escapeshellarg($atomRoot),
+                    $jobId,
+                    escapeshellarg($logFile)
+                );
+                exec($cmd);
+            }
 
             $this->job = $commitSvc->getJobStatus($jobId);
         }

@@ -67,6 +67,20 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
 
         // Auto-trigger NER on digital object upload (Issue #19)
         $this->dispatcher->connect('QubitDigitalObject::insert', [$this, 'onDigitalObjectInsert']);
+
+        // Register queue handlers for AI tasks (CLI task bridge)
+        if (class_exists('\AtomFramework\Services\QueueJobRegistry')) {
+            $aiTasks = [
+                'ai:ner-extract', 'ai:translate', 'ai:summarize',
+                'ai:spellcheck', 'ai:suggest-description', 'ai:process-pending',
+            ];
+            foreach ($aiTasks as $task) {
+                \AtomFramework\Services\QueueJobRegistry::register(
+                    $task,
+                    \AtomFramework\Services\QueueCliTaskHandler::class
+                );
+            }
+        }
     }
 
     public function filterContent(sfEvent $event, $content)

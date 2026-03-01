@@ -534,9 +534,33 @@ class portableExportActions extends sfActions
 
     /**
      * Launch background export process.
+     *
+     * Uses QueueService if available, falls back to nohup.
      */
     protected function launchBackground(int $exportId): void
     {
+        // Try queue dispatch first
+        try {
+            if (class_exists('\AtomFramework\Services\QueueService')) {
+                $queueService = new \AtomFramework\Services\QueueService();
+                $userId = $this->userId();
+                $queueService->dispatch(
+                    'portable:export',
+                    ['task' => 'portable:export', 'args' => '--export-id=' . $exportId],
+                    'export',
+                    5,
+                    0,
+                    1,
+                    $userId
+                );
+
+                return;
+            }
+        } catch (\Throwable $e) {
+            // Queue unavailable, fall through to nohup
+        }
+
+        // Fallback: legacy nohup launch
         $atomRoot = sfConfig::get('sf_root_dir');
         $cmd = sprintf(
             'nohup php %s/symfony portable:export --export-id=%d > %s/downloads/portable-exports/export-%d.log 2>&1 &',

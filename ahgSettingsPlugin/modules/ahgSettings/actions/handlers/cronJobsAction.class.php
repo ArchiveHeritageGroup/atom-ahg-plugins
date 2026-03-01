@@ -2290,6 +2290,77 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Short',
                 'category' => 'ahg',
             ],
+
+            // ============================================
+            // QUEUE ENGINE
+            // ============================================
+            [
+                'name' => 'Queue Worker',
+                'command' => 'php atom-framework/bin/atom queue:work',
+                'description' => 'Persistent queue worker that polls for and processes background jobs. Should run as a systemd service, not a cron job. Supports multiple queues, memory limits, and graceful shutdown.',
+                'options' => [
+                    '--queue=QUEUES' => 'Comma-separated queue names (default: default)',
+                    '--once' => 'Process one job then exit',
+                    '--sleep=N' => 'Seconds to sleep when idle (default: 3)',
+                    '--max-jobs=N' => 'Exit after N jobs (0 = unlimited)',
+                    '--max-memory=N' => 'Exit at memory limit in MB (default: 256)',
+                    '--timeout=N' => 'Per-job timeout in seconds (default: 300)',
+                ],
+                'schedule' => 'Run as systemd service (atom-queue-worker@default.service)',
+                'example' => "# sudo cp atom-framework/packaging/templates/systemd/atom-queue-worker@.service /etc/systemd/system/\n# sudo systemctl daemon-reload\n# sudo systemctl enable --now atom-queue-worker@default",
+                'duration' => 'Continuous',
+                'category' => 'queue',
+            ],
+            [
+                'name' => 'Queue Status',
+                'command' => 'php atom-framework/bin/atom queue:status',
+                'description' => 'Shows per-queue job counts by status (pending, running, completed, failed) and lists active workers.',
+                'options' => [
+                    '--queue=NAME' => 'Filter by queue name',
+                ],
+                'schedule' => 'Run on demand for monitoring',
+                'example' => 'cd {root} && php atom-framework/bin/atom queue:status',
+                'duration' => 'Short',
+                'category' => 'queue',
+            ],
+            [
+                'name' => 'Queue Cleanup',
+                'command' => 'php atom-framework/bin/atom queue:cleanup',
+                'description' => 'Purges completed, cancelled, and failed job records older than a specified number of days. Also cleans up associated log entries and batch records.',
+                'options' => [
+                    '--days=N' => 'Delete items older than N days (default: 30)',
+                ],
+                'schedule' => 'Daily at 3am',
+                'example' => '0 3 * * * cd {root} && php atom-framework/bin/atom queue:cleanup --days=30 >> /var/log/atom/queue-cleanup.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'queue',
+            ],
+            [
+                'name' => 'Queue Retry Failed',
+                'command' => 'php atom-framework/bin/atom queue:retry --all',
+                'description' => 'Moves all permanently failed jobs back to the queue for re-processing. Failed jobs are reset with fresh attempt counts.',
+                'options' => [
+                    '--all' => 'Retry all failed jobs',
+                    'id' => 'Retry a specific failed job by ID',
+                ],
+                'schedule' => 'Run on demand or weekly for recovery',
+                'example' => '0 6 * * 1 cd {root} && php atom-framework/bin/atom queue:retry --all >> /var/log/atom/queue-retry.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'queue',
+            ],
+            [
+                'name' => 'Queue Failed — List / Flush',
+                'command' => 'php atom-framework/bin/atom queue:failed',
+                'description' => 'Lists failed jobs from the archive table, or flushes (deletes) all failed records.',
+                'options' => [
+                    '--flush' => 'Delete all failed job records',
+                    '--limit=N' => 'Number of entries to display (default: 25)',
+                ],
+                'schedule' => 'Run on demand for housekeeping',
+                'example' => 'cd {root} && php atom-framework/bin/atom queue:failed --flush',
+                'duration' => 'Short',
+                'category' => 'queue',
+            ],
         ];
     }
 
@@ -2311,6 +2382,7 @@ class SettingsCronJobsAction extends AhgController
             'audit' => ['title' => 'Audit & Logging', 'icon' => 'bi-journal-text', 'jobs' => []],
             'ahg' => ['title' => 'AHG Extensions', 'icon' => 'bi-puzzle', 'jobs' => []],
             'ric' => ['title' => 'RiC Triplestore', 'icon' => 'bi-diagram-3', 'jobs' => []],
+            'queue' => ['title' => 'Queue Engine', 'icon' => 'bi-stack', 'jobs' => []],
         ];
 
         foreach ($jobs as $job) {

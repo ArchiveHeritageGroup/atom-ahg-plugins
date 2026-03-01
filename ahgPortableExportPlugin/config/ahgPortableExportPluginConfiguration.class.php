@@ -27,6 +27,14 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'portableExport';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
+
+        // Register queue handler for portable:export
+        if (class_exists('\AtomFramework\Services\QueueJobRegistry')) {
+            \AtomFramework\Services\QueueJobRegistry::register(
+                'portable:export',
+                \AtomFramework\Services\QueueCliTaskHandler::class
+            );
+        }
     }
 
     public function addRoutes(sfEvent $event)

@@ -46,6 +46,15 @@ class ahgJobsManagePluginConfiguration extends sfPluginConfiguration
         $router->any('jobs_report', '/jobs/report/:id', 'report', ['id' => '\d+']);
         $router->any('jobs_delete', '/jobs/delete', 'delete');
         $router->any('jobs_export', '/jobs/export', 'export');
+
+        // Queue management routes
+        $router->any('queue_browse', '/admin/queue', 'queueBrowse');
+        $router->any('queue_detail', '/admin/queue/detail/:id', 'queueDetail', ['id' => '\d+']);
+        $router->any('queue_batches', '/admin/queue/batches', 'queueBatches');
+        $router->any('queue_progress', '/admin/queue/progress', 'queueProgress');
+        $router->any('queue_retry', '/admin/queue/retry', 'queueRetry');
+        $router->any('queue_cancel', '/admin/queue/cancel', 'queueCancel');
+
         $router->register($routing);
     }
 }

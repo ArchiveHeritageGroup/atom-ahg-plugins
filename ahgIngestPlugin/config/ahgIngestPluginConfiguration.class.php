@@ -27,6 +27,14 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'ingest';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
+
+        // Register queue handler for ingest:commit
+        if (class_exists('\AtomFramework\Services\QueueJobRegistry')) {
+            \AtomFramework\Services\QueueJobRegistry::register(
+                'ingest:commit',
+                \AtomFramework\Services\QueueCliTaskHandler::class
+            );
+        }
     }
 
     public function addRoutes(sfEvent $event)
