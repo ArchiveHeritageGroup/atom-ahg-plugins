@@ -1937,7 +1937,7 @@ class SettingsCronJobsAction extends AhgController
             [
                 'name' => 'Portable Export',
                 'command' => 'php symfony portable:export',
-                'description' => 'Generates a portable catalogue package. Two modes: (1) Viewer — standalone HTML/JS viewer for offline browsing on CD/USB/ZIP; (2) Archive — re-importable JSON with SHA-256 checksums for full system portability. Covers 11 entity types in archive mode.',
+                'description' => 'Generates a portable catalogue package. Two modes: (1) Viewer — standalone HTML/JS viewer for offline browsing on CD/USB/ZIP; (2) Archive — re-importable JSON with SHA-256 checksums for full system portability. Covers 15 entity types in archive mode.',
                 'options' => [
                     '--scope=SCOPE' => 'Export scope: all, fonds, repository, custom',
                     '--slug=SLUG' => 'Fonds/description slug (for scope=fonds)',
@@ -1964,6 +1964,23 @@ class SettingsCronJobsAction extends AhgController
                 'schedule' => 'On demand after file transfers',
                 'example' => 'cd {root} && php symfony portable:verify --path=/media/usb/archive-export.zip',
                 'duration' => 'Short to Medium',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Portable Import',
+                'command' => 'php symfony portable:import',
+                'description' => 'Imports an AtoM Heratio archive package (ZIP or directory) into the current instance. Supports merge (skip existing), replace (clear + reimport), and dry_run (validate only) modes. Imports 15 entity types in FK-dependency order with full ID remapping.',
+                'options' => [
+                    '--zip=PATH' => 'Path to archive ZIP file',
+                    '--path=PATH' => 'Path to extracted archive directory',
+                    '--mode=MODE' => 'Import mode: merge, replace, dry_run (default: merge)',
+                    '--culture=CODE' => 'Culture/language code (default: en)',
+                    '--entity-types=LIST' => 'Comma-separated list of entity types to import',
+                    '--import-id=ID' => 'Process existing import job by ID',
+                ],
+                'schedule' => 'On demand (data migration)',
+                'example' => 'cd {root} && php symfony portable:import --zip=/tmp/archive-export.zip --mode=merge >> /var/log/atom/portable-import.log 2>&1',
+                'duration' => 'Long (depends on archive size)',
                 'category' => 'ahg',
             ],
             [

@@ -21,6 +21,7 @@ class portableExportActions extends sfActions
             require_once $ahgDir . '/lib/Services/ArchiveExtractor.php';
             require_once $ahgDir . '/lib/Services/ManifestBuilder.php';
             require_once $ahgDir . '/lib/Services/ExportEstimator.php';
+            require_once $ahgDir . '/lib/Services/ArchiveImporter.php';
             $loaded = true;
         }
     }
@@ -537,6 +538,297 @@ class portableExportActions extends sfActions
         );
 
         return $this->jsonResponse($estimate);
+    }
+
+    // ─── Import UI ─────────────────────────────────────────────────
+
+    public function executeImport(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+
+        // Get past imports
+        $this->imports = DB::table('portable_import')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get()
+            ->toArray();
+    }
+
+    // ─── API: Validate Archive ─────────────────────────────────────
+
+    public function executeApiImportValidate(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+        $this->loadServices();
+
+        if (!$request->isMethod('post')) {
+            return $this->jsonResponse(['error' => 'POST required'], 405);
+        }
+
+        $archiveDir = null;
+        $tempDir = null;
+
+        // Handle file upload or server path
+        $serverPath = $request->getParameter('server_path');
+        if ($serverPath) {
+            if (pathinfo($serverPath, PATHINFO_EXTENSION) === 'zip') {
+                // Extract ZIP to temp
+                $tempDir = sys_get_temp_dir() . '/portable-validate-' . uniqid();
+                @mkdir($tempDir, 0755, true);
+
+                $zip = new \ZipArchive();
+                if ($zip->open($serverPath) !== true) {
+                    return $this->jsonResponse(['error' => 'Failed to open ZIP file'], 400);
+                }
+                $zip->extractTo($tempDir);
+                $zip->close();
+
+                $archiveDir = $tempDir;
+
+                // Check for nested directory
+                $items = @scandir($tempDir);
+                $subdirs = array_filter($items ?: [], function ($item) use ($tempDir) {
+                    return $item !== '.' && $item !== '..' && is_dir($tempDir . '/' . $item);
+                });
+                if (count($subdirs) === 1 && !file_exists($tempDir . '/manifest.json')) {
+                    $archiveDir = $tempDir . '/' . reset($subdirs);
+                }
+            } elseif (is_dir($serverPath)) {
+                $archiveDir = $serverPath;
+            } else {
+                return $this->jsonResponse(['error' => 'Invalid path — provide a ZIP file or directory'], 400);
+            }
+        } else {
+            // Handle uploaded file
+            $uploadDir = sfConfig::get('sf_root_dir') . '/downloads/portable-imports';
+            @mkdir($uploadDir, 0755, true);
+
+            if (isset($_FILES['archive_file']) && $_FILES['archive_file']['error'] === UPLOAD_ERR_OK) {
+                $uploadedFile = $_FILES['archive_file']['tmp_name'];
+                $originalName = $_FILES['archive_file']['name'];
+
+                $destPath = $uploadDir . '/' . uniqid('import-') . '-' . basename($originalName);
+                move_uploaded_file($uploadedFile, $destPath);
+
+                $tempDir = sys_get_temp_dir() . '/portable-validate-' . uniqid();
+                @mkdir($tempDir, 0755, true);
+
+                $zip = new \ZipArchive();
+                if ($zip->open($destPath) !== true) {
+                    return $this->jsonResponse(['error' => 'Failed to open uploaded ZIP'], 400);
+                }
+                $zip->extractTo($tempDir);
+                $zip->close();
+
+                $archiveDir = $tempDir;
+
+                // Check for nested directory
+                $items = @scandir($tempDir);
+                $subdirs = array_filter($items ?: [], function ($item) use ($tempDir) {
+                    return $item !== '.' && $item !== '..' && is_dir($tempDir . '/' . $item);
+                });
+                if (count($subdirs) === 1 && !file_exists($tempDir . '/manifest.json')) {
+                    $archiveDir = $tempDir . '/' . reset($subdirs);
+                }
+
+                // Store the uploaded ZIP path for later import
+                $request->setAttribute('uploaded_zip', $destPath);
+            } else {
+                return $this->jsonResponse(['error' => 'No file uploaded or server path provided'], 400);
+            }
+        }
+
+        // Load importer
+        $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
+        require_once $ahgDir . '/lib/Services/ArchiveImporter.php';
+
+        $importer = new \AhgPortableExportPlugin\Services\ArchiveImporter();
+        $validation = $importer->validate($archiveDir);
+
+        $response = [
+            'valid' => $validation['valid'],
+            'errors' => $validation['errors'],
+            'entity_counts' => $validation['entity_counts'],
+            'archive_path' => $archiveDir,
+        ];
+
+        if ($validation['manifest']) {
+            $response['source'] = $validation['manifest']['source'] ?? [];
+            $response['culture'] = $validation['manifest']['culture'] ?? 'en';
+            $response['scope'] = $validation['manifest']['scope'] ?? [];
+            $response['version'] = $validation['manifest']['version'] ?? 'unknown';
+            $response['created_at'] = $validation['manifest']['created_at'] ?? null;
+            $response['total_files'] = count($validation['manifest']['files'] ?? []);
+        }
+
+        // Cleanup temp if just validating
+        // Note: we keep archiveDir for the actual import step
+
+        return $this->jsonResponse($response);
+    }
+
+    // ─── API: Start Import ─────────────────────────────────────────
+
+    public function executeApiStartImport(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+        $this->loadServices();
+
+        if (!$request->isMethod('post')) {
+            return $this->jsonResponse(['error' => 'POST required'], 405);
+        }
+
+        $archivePath = $request->getParameter('archive_path');
+        $mode = $request->getParameter('mode', 'merge');
+        $entityTypesParam = $request->getParameter('entity_types');
+        $title = $request->getParameter('title', 'Web Import');
+
+        if (!$archivePath || !is_dir($archivePath)) {
+            return $this->jsonResponse(['error' => 'Invalid archive path. Please validate first.'], 400);
+        }
+
+        // Parse entity types
+        $entityTypes = null;
+        if ($entityTypesParam) {
+            $entityTypes = json_decode($entityTypesParam, true);
+        }
+
+        // Read manifest for source info
+        $sourceUrl = null;
+        $sourceVersion = null;
+        $totalEntities = 0;
+        $manifestPath = $archivePath . '/manifest.json';
+        if (file_exists($manifestPath)) {
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            $sourceUrl = $manifest['source']['url'] ?? null;
+            $sourceVersion = $manifest['source']['framework'] ?? null;
+            $totalEntities = array_sum($manifest['counts'] ?? []);
+        }
+
+        $importId = DB::table('portable_import')->insertGetId([
+            'user_id' => (int) $this->getUser()->getAttribute('user_id'),
+            'title' => $title,
+            'source_url' => $sourceUrl,
+            'source_version' => $sourceVersion,
+            'archive_path' => $archivePath,
+            'mode' => $mode,
+            'entity_types' => $entityTypes ? json_encode($entityTypes) : null,
+            'status' => 'importing',
+            'total_entities' => $totalEntities,
+            'started_at' => date('Y-m-d H:i:s'),
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        // Launch background import
+        $this->launchImportBackground($importId);
+
+        return $this->jsonResponse([
+            'success' => true,
+            'import_id' => $importId,
+            'message' => 'Import started. Polling for progress...',
+        ]);
+    }
+
+    // ─── API: Import Progress ──────────────────────────────────────
+
+    public function executeApiImportProgress(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+
+        $importId = (int) $request->getParameter('id');
+        if (!$importId) {
+            return $this->jsonResponse(['error' => 'Missing id parameter'], 400);
+        }
+
+        $import = DB::table('portable_import')->where('id', $importId)->first();
+        if (!$import) {
+            return $this->jsonResponse(['error' => 'Import not found'], 404);
+        }
+
+        return $this->jsonResponse([
+            'id' => (int) $import->id,
+            'status' => $import->status,
+            'progress' => (int) $import->progress,
+            'total_entities' => (int) $import->total_entities,
+            'imported_entities' => (int) $import->imported_entities,
+            'skipped_entities' => (int) $import->skipped_entities,
+            'error_count' => (int) $import->error_count,
+            'error_log' => $import->error_log,
+            'started_at' => $import->started_at,
+            'completed_at' => $import->completed_at,
+        ]);
+    }
+
+    // ─── API: Import List ──────────────────────────────────────────
+
+    public function executeApiImportList(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+
+        $imports = DB::table('portable_import')
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get()
+            ->toArray();
+
+        $result = array_map(function ($i) {
+            return [
+                'id' => (int) $i->id,
+                'title' => $i->title,
+                'source_url' => $i->source_url,
+                'mode' => $i->mode,
+                'status' => $i->status,
+                'progress' => (int) $i->progress,
+                'imported_entities' => (int) $i->imported_entities,
+                'skipped_entities' => (int) $i->skipped_entities,
+                'error_count' => (int) $i->error_count,
+                'created_at' => $i->created_at,
+                'completed_at' => $i->completed_at,
+            ];
+        }, $imports);
+
+        return $this->jsonResponse(['imports' => $result]);
+    }
+
+    /**
+     * Launch background import process.
+     */
+    protected function launchImportBackground(int $importId): void
+    {
+        // Try queue dispatch first
+        try {
+            if (class_exists('\AtomFramework\Services\QueueService')) {
+                $queueService = new \AtomFramework\Services\QueueService();
+                $userId = $this->userId();
+                $queueService->dispatch(
+                    'portable:import',
+                    ['task' => 'portable:import', 'args' => '--import-id=' . $importId],
+                    'import',
+                    5,
+                    0,
+                    1,
+                    $userId
+                );
+
+                return;
+            }
+        } catch (\Throwable $e) {
+            // Queue unavailable, fall through to nohup
+        }
+
+        // Fallback: legacy nohup launch
+        $atomRoot = sfConfig::get('sf_root_dir');
+        $logDir = $atomRoot . '/downloads/portable-imports';
+        @mkdir($logDir, 0755, true);
+
+        $cmd = sprintf(
+            'nohup php %s/symfony portable:import --import-id=%d > %s/import-%d.log 2>&1 &',
+            escapeshellarg($atomRoot),
+            $importId,
+            $logDir,
+            $importId
+        );
+        exec($cmd);
     }
 
     // ─── Helpers ──────────────────────────────────────────────────

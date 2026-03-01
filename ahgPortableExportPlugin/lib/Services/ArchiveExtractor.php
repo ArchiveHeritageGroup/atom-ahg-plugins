@@ -41,6 +41,7 @@ class ArchiveExtractor
             'descriptions', 'authorities', 'taxonomies', 'rights',
             'accessions', 'physical_objects', 'events', 'notes',
             'relations', 'digital_objects', 'repositories',
+            'object_term_relations', 'settings', 'users', 'menus',
         ];
 
         $files = [];
@@ -86,6 +87,18 @@ class ArchiveExtractor
                     break;
                 case 'repositories':
                     $data = $this->extractRepositories($repositoryId);
+                    break;
+                case 'object_term_relations':
+                    $data = $this->extractObjectTermRelations($scopeIds);
+                    break;
+                case 'settings':
+                    $data = $this->extractSettings();
+                    break;
+                case 'users':
+                    $data = $this->extractUsers();
+                    break;
+                case 'menus':
+                    $data = $this->extractMenus();
                     break;
             }
 
@@ -607,6 +620,170 @@ class ArchiveExtractor
             }
 
             $result[] = $rec;
+        }
+
+        return $result;
+    }
+
+    // ─── Object Term Relations ──────────────────────────────────────
+
+    protected function extractObjectTermRelations(?array $scopeIds): array
+    {
+        $query = DB::table('object_term_relation as otr')
+            ->leftJoin('term_i18n as ti', function ($join) {
+                $join->on('otr.term_id', '=', 'ti.id')
+                    ->where('ti.culture', '=', $this->culture);
+            });
+
+        if ($scopeIds !== null) {
+            $this->applyIdFilter($query, 'otr.object_id', $scopeIds);
+        }
+
+        $rows = $query->select(
+            'otr.id', 'otr.object_id', 'otr.term_id',
+            'ti.name as term_name'
+        )->get();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[] = (array) $row;
+        }
+
+        return $result;
+    }
+
+    // ─── Settings ───────────────────────────────────────────────────
+
+    protected function extractSettings(): array
+    {
+        // Sensitive keys to exclude from export
+        $sensitiveKeys = [
+            'password', 'secret', 'token', 'api_key', 'private_key',
+            'smtp_password', 'mail_password',
+        ];
+
+        $result = [
+            'setting' => [],
+            'setting_i18n' => [],
+            'ahg_settings' => [],
+        ];
+
+        // Core settings
+        $settings = DB::table('setting')->get();
+        foreach ($settings as $row) {
+            $result['setting'][] = (array) $row;
+        }
+
+        // Setting i18n
+        if (!empty($result['setting'])) {
+            $ids = array_column($result['setting'], 'id');
+            $chunks = array_chunk($ids, 500);
+            foreach ($chunks as $chunk) {
+                $rows = DB::table('setting_i18n')->whereIn('id', $chunk)->get();
+                foreach ($rows as $row) {
+                    $result['setting_i18n'][] = (array) $row;
+                }
+            }
+        }
+
+        // AHG settings (exclude sensitive keys)
+        $ahgQuery = DB::table('ahg_settings');
+        foreach ($sensitiveKeys as $key) {
+            $ahgQuery->where('setting_key', 'NOT LIKE', '%' . $key . '%');
+        }
+        $ahgRows = $ahgQuery->get();
+        foreach ($ahgRows as $row) {
+            $result['ahg_settings'][] = (array) $row;
+        }
+
+        return $result;
+    }
+
+    // ─── Users ──────────────────────────────────────────────────────
+
+    protected function extractUsers(): array
+    {
+        $result = [
+            'users' => [],
+            'groups' => [],
+            'user_groups' => [],
+            'permissions' => [],
+        ];
+
+        // Users — join actor_i18n for names, exclude password_hash and salt
+        $users = DB::table('user as u')
+            ->leftJoin('actor_i18n as ai', function ($join) {
+                $join->on('u.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', $this->culture);
+            })
+            ->leftJoin('slug as s', 'u.id', '=', 's.object_id')
+            ->select(
+                'u.id', 'u.username', 'u.email', 'u.active',
+                'ai.authorized_form_of_name as display_name',
+                's.slug'
+            )
+            ->get();
+
+        foreach ($users as $row) {
+            $result['users'][] = (array) $row;
+        }
+
+        // ACL groups
+        $groups = DB::table('acl_group as g')
+            ->leftJoin('acl_group_i18n as gi', function ($join) {
+                $join->on('g.id', '=', 'gi.id')
+                    ->where('gi.culture', '=', $this->culture);
+            })
+            ->select('g.id', 'g.parent_id', 'g.created_at', 'g.updated_at', 'gi.name', 'gi.description')
+            ->get();
+
+        foreach ($groups as $row) {
+            $result['groups'][] = (array) $row;
+        }
+
+        // User-group memberships
+        $userGroups = DB::table('acl_user_group')->get();
+        foreach ($userGroups as $row) {
+            $result['user_groups'][] = (array) $row;
+        }
+
+        // ACL permissions
+        $permissions = DB::table('acl_permission')->get();
+        foreach ($permissions as $row) {
+            $result['permissions'][] = (array) $row;
+        }
+
+        return $result;
+    }
+
+    // ─── Menus ──────────────────────────────────────────────────────
+
+    protected function extractMenus(): array
+    {
+        $result = [
+            'menus' => [],
+            'menu_i18n' => [],
+        ];
+
+        // Menus ordered by lft (MPTT tree order)
+        $menus = DB::table('menu')
+            ->orderBy('lft')
+            ->get();
+
+        foreach ($menus as $row) {
+            $result['menus'][] = (array) $row;
+        }
+
+        // Menu i18n
+        if (!empty($result['menus'])) {
+            $ids = array_column($result['menus'], 'id');
+            $chunks = array_chunk($ids, 500);
+            foreach ($chunks as $chunk) {
+                $rows = DB::table('menu_i18n')->whereIn('id', $chunk)->get();
+                foreach ($rows as $row) {
+                    $result['menu_i18n'][] = (array) $row;
+                }
+            }
         }
 
         return $result;

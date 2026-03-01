@@ -1,8 +1,8 @@
 {
-    "name": "Portable Export",
+    "name": "Portable Export & Import",
     "machine_name": "ahgPortableExportPlugin",
-    "version": "2.0.0",
-    "description": "Portable export for offline catalogue access (viewer mode) or full system archive export (re-importable JSON with checksums). Supports CD, USB, ZIP distribution.",
+    "version": "3.0.0",
+    "description": "Full-system portable export and import for AtoM Heratio. Export complete instances with 15 entity types, SHA-256 checksummed manifests, and self-documenting packages. Import archives into fresh instances with ID remapping, merge/replace/dry-run modes. Also supports offline HTML viewer export for CD/USB/ZIP distribution.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "license": "AGPL-3.0",
     "requires": {
@@ -15,26 +15,31 @@
     ],
     "tables": [
         "portable_export",
-        "portable_export_token"
+        "portable_export_token",
+        "portable_import"
     ],
     "category": "export",
     "features": [
         "Self-contained HTML/JS viewer for offline catalogue access",
-        "Archive export mode: re-importable JSON format with SHA-256 checksums",
-        "Full entity coverage: descriptions, authorities, taxonomies, rights, accessions, physical objects, events, notes, relations, repositories",
-        "Manifest with checksums for all exported files",
+        "Archive export: 15 entity types (descriptions, authorities, taxonomies, rights, accessions, physical objects, events, notes, relations, digital objects, repositories, object term relations, settings, users, menus)",
+        "Archive import: merge, replace, or dry-run modes with full ID remapping",
+        "Self-documenting packages: README.md + schema documentation in manifest",
+        "SHA-256 checksummed manifest for all exported files",
+        "FK-dependency-ordered import pipeline (taxonomies → repositories → descriptions → etc.)",
         "Dry-run estimate (record counts + estimated package size)",
-        "Export verification CLI: php symfony portable:verify",
+        "Export and import verification CLI: portable:verify, portable:import --mode=dry_run",
         "Export full or partial catalogue (fonds, repository, custom scope)",
         "Client-side search with FlexSearch",
         "Hierarchical tree navigation (MPPT-ordered)",
         "Digital object inline viewing (images, PDFs)",
         "Edit mode with researcher exchange format",
-        "CLI commands: portable:export, portable:verify",
-        "Admin UI with background processing and progress tracking",
-        "Secure download tokens for sharing"
+        "CLI commands: portable:export, portable:import, portable:verify, portable:cleanup",
+        "Admin UI with background processing and progress tracking (export + import)",
+        "Secure download tokens for sharing",
+        "Queue integration with nohup fallback"
     ],
     "changelog": {
+        "3.0.0": "V2.3 Exit Export + Portability: full-system import capability, 4 new entity types (object_term_relations, settings, users, menus), self-documenting packages with README + schema, import web UI wizard, portable:import CLI",
         "2.0.0": "Archive export mode with re-importable JSON, manifest checksums, dry-run estimates, verification CLI",
         "1.1.0": "Queue integration, clipboard export, quick-start from description page",
         "1.0.0": "Initial release with full export pipeline and static viewer"

@@ -74,6 +74,33 @@ FROM menu m WHERE m.name = 'portableExport' AND NOT EXISTS (
 );
 
 -- =====================================================
+-- Import job tracking
+-- =====================================================
+CREATE TABLE IF NOT EXISTS portable_import (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    source_url VARCHAR(500) DEFAULT NULL,
+    source_version VARCHAR(50) DEFAULT NULL,
+    archive_path VARCHAR(1024) DEFAULT NULL,
+    mode VARCHAR(20) DEFAULT 'merge' COMMENT 'merge, replace, dry_run',
+    entity_types JSON DEFAULT NULL,
+    status VARCHAR(20) DEFAULT 'pending' COMMENT 'pending, validating, validated, importing, completed, failed',
+    progress INT DEFAULT 0,
+    total_entities INT DEFAULT 0,
+    imported_entities INT DEFAULT 0,
+    skipped_entities INT DEFAULT 0,
+    error_count INT DEFAULT 0,
+    id_mapping JSON DEFAULT NULL,
+    error_log TEXT DEFAULT NULL,
+    started_at DATETIME DEFAULT NULL,
+    completed_at DATETIME DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_portable_import_user (user_id),
+    INDEX idx_portable_import_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- Settings defaults for portable export
 -- =====================================================
 INSERT IGNORE INTO ahg_settings (setting_key, setting_value, setting_group, created_at, updated_at)

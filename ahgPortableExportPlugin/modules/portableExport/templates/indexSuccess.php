@@ -7,9 +7,14 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
 
 <div class="container-fluid py-4">
 
-  <a href="<?php echo url_for(['module' => 'admin', 'action' => 'dashboard']); ?>" class="btn btn-outline-secondary btn-sm mb-3">
-    <i class="bi bi-arrow-left"></i> <?php echo __('Back to Dashboard'); ?>
-  </a>
+  <div class="d-flex mb-3">
+    <a href="<?php echo url_for(['module' => 'admin', 'action' => 'dashboard']); ?>" class="btn btn-outline-secondary btn-sm me-2">
+      <i class="bi bi-arrow-left"></i> <?php echo __('Back to Dashboard'); ?>
+    </a>
+    <a href="/portable-export/import" class="btn btn-outline-success btn-sm">
+      <i class="bi bi-box-arrow-in-down me-1"></i><?php echo __('Import Archive'); ?>
+    </a>
+  </div>
 
   <div class="card mb-4">
     <div class="card-header bg-primary text-white d-flex align-items-center">
@@ -142,6 +147,10 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
               <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="relations" id="ent-rel" checked><label class="form-check-label" for="ent-rel"><?php echo __('Relations'); ?></label></div></div>
               <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="digital_objects" id="ent-do" checked><label class="form-check-label" for="ent-do"><?php echo __('Digital Object Metadata'); ?></label></div></div>
               <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="repositories" id="ent-repo" checked><label class="form-check-label" for="ent-repo"><?php echo __('Repositories'); ?></label></div></div>
+              <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="object_term_relations" id="ent-otr" checked><label class="form-check-label" for="ent-otr"><?php echo __('Access Points (Term Relations)'); ?></label></div></div>
+              <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="settings" id="ent-settings" checked><label class="form-check-label" for="ent-settings"><?php echo __('Settings'); ?></label></div></div>
+              <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="users" id="ent-users" checked><label class="form-check-label" for="ent-users"><?php echo __('Users & Groups'); ?></label></div></div>
+              <div class="col-md-4"><div class="form-check"><input class="form-check-input archive-entity" type="checkbox" value="menus" id="ent-menus" checked><label class="form-check-label" for="ent-menus"><?php echo __('Menu Structure'); ?></label></div></div>
             </div>
           </div>
 

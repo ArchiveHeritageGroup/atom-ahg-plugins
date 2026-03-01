@@ -9,7 +9,7 @@
 class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Standalone portable catalogue viewer for CD/USB/ZIP distribution';
-    public static $version = '1.0.0';
+    public static $version = '3.0.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
@@ -28,10 +28,14 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'portableExport';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
 
-        // Register queue handler for portable:export
+        // Register queue handlers
         if (class_exists('\AtomFramework\Services\QueueJobRegistry')) {
             \AtomFramework\Services\QueueJobRegistry::register(
                 'portable:export',
+                \AtomFramework\Services\QueueCliTaskHandler::class
+            );
+            \AtomFramework\Services\QueueJobRegistry::register(
+                'portable:import',
                 \AtomFramework\Services\QueueCliTaskHandler::class
             );
         }
@@ -59,6 +63,13 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
 
         // Download
         $r->any('portable_export_download', '/portable-export/download', 'download');
+
+        // Import
+        $r->any('portable_export_import', '/portable-export/import', 'import');
+        $r->any('portable_export_api_start_import', '/portable-export/api/start-import', 'apiStartImport');
+        $r->any('portable_export_api_import_progress', '/portable-export/api/import-progress', 'apiImportProgress');
+        $r->any('portable_export_api_import_validate', '/portable-export/api/import-validate', 'apiImportValidate');
+        $r->any('portable_export_api_import_list', '/portable-export/api/import-list', 'apiImportList');
 
         $r->register($routing);
     }

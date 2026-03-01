@@ -39,6 +39,7 @@ class ExportPipelineService
             require_once $ahgDir . '/lib/Services/ArchiveExtractor.php';
             require_once $ahgDir . '/lib/Services/ManifestBuilder.php';
             require_once $ahgDir . '/lib/Services/ExportEstimator.php';
+            require_once $ahgDir . '/lib/Services/ArchiveImporter.php';
             $loaded = true;
         }
     }
