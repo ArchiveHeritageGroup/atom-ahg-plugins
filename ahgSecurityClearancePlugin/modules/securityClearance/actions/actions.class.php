@@ -435,6 +435,187 @@ class securityClearanceActions extends AhgController
             ->toArray();
     }
 
+    // =========================================================================
+    // Two-Factor Authentication (TOTP)
+    // =========================================================================
+
+    /**
+     * 2FA verification page — shown when classified access requires 2FA.
+     */
+    public function executeTwoFactor($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('/user/login');
+        }
+
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Core/Security/TotpService.php';
+
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $this->returnUrl = $request->getParameter('return', '/');
+        $this->clearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance($userId);
+        $this->isEnrolled = \AtomFramework\Core\Security\TotpService::isEnrolled($userId);
+
+        // If not enrolled, redirect to setup
+        if (!$this->isEnrolled) {
+            $this->redirect('/security/2fa/setup?return=' . urlencode($this->returnUrl));
+        }
+    }
+
+    /**
+     * 2FA verification — POST handler.
+     */
+    public function executeVerifyTwoFactor($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('/user/login');
+        }
+
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Core/Security/TotpService.php';
+
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $code = trim($request->getParameter('code', ''));
+        $returnUrl = $request->getParameter('return', '/');
+
+        $verified = false;
+
+        // Try TOTP code first, then email fallback
+        if (\AtomFramework\Core\Security\TotpService::verifyCode($userId, $code)) {
+            $verified = true;
+        } elseif (\AtomFramework\Core\Security\TotpService::verifyEmailCode($userId, $code)) {
+            $verified = true;
+        }
+
+        if ($verified) {
+            // Create 2FA session (valid for 8 hours)
+            \AtomExtensions\Services\SecurityClearanceService::create2FASession(
+                $userId,
+                session_id()
+            );
+
+            $this->getUser()->setFlash('success', 'Two-factor authentication verified.');
+            $this->redirect($returnUrl);
+        }
+
+        $this->getUser()->setFlash('error', 'Invalid verification code. Please try again.');
+        $this->redirect('/security/2fa?return=' . urlencode($returnUrl));
+    }
+
+    /**
+     * 2FA setup page — QR code enrollment.
+     */
+    public function executeSetupTwoFactor($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('/user/login');
+        }
+
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Core/Security/TotpService.php';
+
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $this->returnUrl = $request->getParameter('return', '/');
+
+        // Generate a new secret
+        $this->secret = \AtomFramework\Core\Security\TotpService::generateSecret($userId);
+
+        // Get user email for the provisioning URI
+        $email = \Illuminate\Database\Capsule\Manager::table('user')
+            ->where('id', $userId)
+            ->value('email') ?? 'user';
+
+        $this->provisioningUri = \AtomFramework\Core\Security\TotpService::getProvisioningUri(
+            $this->secret,
+            $email
+        );
+        $this->qrCodeUrl = \AtomFramework\Core\Security\TotpService::getQrCodeUrl($this->provisioningUri);
+    }
+
+    /**
+     * Confirm 2FA setup — verify the first code to activate enrollment.
+     */
+    public function executeConfirmTwoFactor($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('/user/login');
+        }
+
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Core/Security/TotpService.php';
+
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $code = trim($request->getParameter('code', ''));
+        $returnUrl = $request->getParameter('return', '/');
+
+        if (\AtomFramework\Core\Security\TotpService::verifyCode($userId, $code)) {
+            \AtomFramework\Core\Security\TotpService::confirmEnrollment($userId);
+
+            // Create 2FA session immediately
+            \AtomExtensions\Services\SecurityClearanceService::create2FASession(
+                $userId,
+                session_id()
+            );
+
+            $this->getUser()->setFlash('success', 'Two-factor authentication has been set up successfully.');
+            $this->redirect($returnUrl);
+        }
+
+        $this->getUser()->setFlash('error', 'Invalid code. Please scan the QR code again and enter the current code.');
+        $this->redirect('/security/2fa/setup?return=' . urlencode($returnUrl));
+    }
+
+    /**
+     * Send 2FA code via email (fallback).
+     */
+    public function executeSendEmailCode($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['error' => 'Not authenticated'], 401);
+        }
+
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Core/Security/TotpService.php';
+
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $email = \Illuminate\Database\Capsule\Manager::table('user')
+            ->where('id', $userId)
+            ->value('email');
+
+        if (!$email) {
+            return $this->renderJson(['error' => 'No email address on file'], 400);
+        }
+
+        $code = \AtomFramework\Core\Security\TotpService::generateEmailCode($userId);
+
+        // Send email via PHP mail()
+        $subject = 'AtoM Heratio — Your verification code';
+        $body = "Your two-factor verification code is: {$code}\n\nThis code expires in 10 minutes.\n\nIf you did not request this code, please ignore this email.";
+        $headers = "From: noreply@" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . "\r\n"
+                 . "Content-Type: text/plain; charset=UTF-8\r\n";
+
+        $sent = @mail($email, $subject, $body, $headers);
+
+        return $this->renderJson([
+            'success' => $sent,
+            'message' => $sent ? 'Verification code sent to your email.' : 'Failed to send email. Please use your authenticator app.',
+        ]);
+    }
+
+    /**
+     * Admin: Remove 2FA enrollment for a user.
+     */
+    public function executeRemoveTwoFactor($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->redirect('@homepage');
+        }
+
+        require_once $this->config('sf_root_dir').'/atom-framework/src/Core/Security/TotpService.php';
+
+        $userId = (int) $request->getParameter('id');
+        \AtomFramework\Core\Security\TotpService::removeEnrollment($userId);
+        \AtomExtensions\Services\SecurityClearanceService::invalidate2FASession(session_id());
+
+        $this->getUser()->setFlash('success', 'Two-factor authentication removed for user.');
+        $this->redirect('@security_clearance_view?id=' . $userId);
+    }
+
     /**
      * Security Compliance Dashboard
      */

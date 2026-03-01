@@ -32,6 +32,14 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         // User clearance management (slug-based)
         $router->any('security_clearance_user', '/security/clearance/user/:slug', 'user', ['slug' => '[a-zA-Z0-9_-]+']);
 
+        // Two-Factor Authentication (TOTP)
+        $router->any('security_2fa', '/security/2fa', 'twoFactor');
+        $router->post('security_2fa_verify', '/security/2fa/verify', 'verifyTwoFactor');
+        $router->any('security_2fa_setup', '/security/2fa/setup', 'setupTwoFactor');
+        $router->post('security_2fa_confirm', '/security/2fa/confirm', 'confirmTwoFactor');
+        $router->post('security_2fa_email', '/security/2fa/send-email', 'sendEmailCode');
+        $router->any('security_2fa_remove', '/security/2fa/remove/:id', 'removeTwoFactor', ['id' => '\d+']);
+
         $router->register($event->getSubject());
     }
 }
