@@ -777,7 +777,7 @@ $canManage = $isAdmin || $isEditor;
     </div>
     @endif
 
-    @if ($hasDataMigration || $hasHeritage2)
+    @if ($hasDataMigration || $hasHeritage2 || $hasPreservation)
     <div class="row mb-4">
         @if ($hasDataMigration)
         <div class="col-md-4">
@@ -790,6 +790,21 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'dataMigration', 'action' => 'import']) }}"><i class="fas fa-upload me-2 text-muted"></i>{{ __('Import Data') }}</a></li>
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'dataMigration', 'action' => 'export']) }}"><i class="fas fa-download me-2 text-muted"></i>{{ __('Export Data') }}</a></li>
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'dataMigration', 'action' => 'history']) }}"><i class="fas fa-history me-2 text-muted"></i>{{ __('Migration History') }}</a></li>
+                </ul>
+            </div>
+        </div>
+        @endif
+
+        @if ($hasPreservation)
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #28a745 !important;">
+                    <h5 class="mb-0"><i class="fas fa-fingerprint me-2"></i>{{ __('Checksums & Integrity') }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'reports']) }}?type=missing"><i class="fas fa-exclamation-circle me-2 text-muted"></i>{{ __('Missing Checksums') }}</a></li>
+                    <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'reports']) }}?type=stale"><i class="fas fa-clock me-2 text-muted"></i>{{ __('Stale Verification') }}</a></li>
+                    <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'fixityLog']) }}?status=failed"><i class="fas fa-times-circle me-2 text-muted"></i>{{ __('Failed Checks') }}</a></li>
                 </ul>
             </div>
         </div>
@@ -838,19 +853,6 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'formats']) }}"><i class="fas fa-list me-2 text-muted"></i>{{ __('Browse Formats') }}</a></li>
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'formats']) }}?risk=high"><i class="fas fa-exclamation-triangle me-2 text-muted"></i>{{ __('At-Risk Formats') }}</a></li>
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'policies']) }}"><i class="fas fa-cogs me-2 text-muted"></i>{{ __('Preservation Policies') }}</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #28a745 !important;">
-                    <h5 class="mb-0"><i class="fas fa-fingerprint me-2"></i>{{ __('Checksums & Integrity') }}</h5>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'reports']) }}?type=missing"><i class="fas fa-exclamation-circle me-2 text-muted"></i>{{ __('Missing Checksums') }}</a></li>
-                    <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'reports']) }}?type=stale"><i class="fas fa-clock me-2 text-muted"></i>{{ __('Stale Verification') }}</a></li>
-                    <li class="list-group-item"><a href="{{ url_for(['module' => 'preservation', 'action' => 'fixityLog']) }}?status=failed"><i class="fas fa-times-circle me-2 text-muted"></i>{{ __('Failed Checks') }}</a></li>
                 </ul>
             </div>
         </div>

@@ -465,16 +465,4 @@ class tiffpdfmergeActions extends AhgController
             }
         }
     }
-
-    protected function renderJson($data)
-    {
-        // Clean any existing output
-        while (ob_get_level() > 0) {
-            ob_end_clean();
-        }
-        
-        $this->getResponse()->setHttpHeader('Content-Type', 'application/json');
-        
-        return $this->renderText(json_encode($data));
-    }
 }
