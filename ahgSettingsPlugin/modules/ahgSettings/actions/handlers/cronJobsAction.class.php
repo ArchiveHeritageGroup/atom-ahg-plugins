@@ -2229,6 +2229,67 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Medium',
                 'category' => 'ahg',
             ],
+
+            // === Authority Records (ahgAuthorityPlugin) ===
+            [
+                'name' => 'Authority: Completeness Scan',
+                'command' => 'php symfony authority:completeness-scan',
+                'description' => 'Scans all authority records and calculates completeness scores based on ISAAR(CPF) field population, external identifiers, relations, and linked resources.',
+                'options' => [
+                    '--limit=N' => 'Limit the number of actors to process (default: all)',
+                ],
+                'schedule' => 'Daily or weekly',
+                'example' => '0 3 * * * cd {root} && php symfony authority:completeness-scan >> /var/log/atom/authority-completeness.log 2>&1',
+                'duration' => 'Medium',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Authority: NER Pipeline',
+                'command' => 'php symfony authority:ner-pipeline',
+                'description' => 'Processes unlinked NER entities and creates stub authority records for persons and organizations above the confidence threshold.',
+                'options' => [
+                    '--dry-run' => 'Show what would be created without making changes',
+                    '--threshold=N' => 'Minimum confidence score (0.0-1.0, default: from settings)',
+                ],
+                'schedule' => 'After NER extraction or daily',
+                'example' => '0 4 * * * cd {root} && php symfony authority:ner-pipeline >> /var/log/atom/authority-ner.log 2>&1',
+                'duration' => 'Medium',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Authority: Dedup Scan',
+                'command' => 'php symfony authority:dedup-scan',
+                'description' => 'Scans authority records for potential duplicates using name similarity (Jaro-Winkler), date overlap, and shared identifier matching.',
+                'options' => [
+                    '--limit=N' => 'Limit the number of actors to compare (default: all)',
+                ],
+                'schedule' => 'Weekly',
+                'example' => '0 2 * * 0 cd {root} && php symfony authority:dedup-scan >> /var/log/atom/authority-dedup.log 2>&1',
+                'duration' => 'Long',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Authority: Merge Report',
+                'command' => 'php symfony authority:merge-report',
+                'description' => 'Generates a summary report of all merge/split operations with transferred relations, resources, and contacts.',
+                'options' => [],
+                'schedule' => 'Monthly or on demand',
+                'example' => '0 6 1 * * cd {root} && php symfony authority:merge-report >> /var/log/atom/authority-merge.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
+            [
+                'name' => 'Authority: Function Sync',
+                'command' => 'php symfony authority:function-sync',
+                'description' => 'Validates actor-function links, reports orphaned references where actors or functions have been deleted, and optionally cleans up invalid links.',
+                'options' => [
+                    '--clean' => 'Remove orphaned links (default: report only)',
+                ],
+                'schedule' => 'After function edits or daily',
+                'example' => '0 5 * * * cd {root} && php symfony authority:function-sync >> /var/log/atom/authority-function-sync.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'ahg',
+            ],
         ];
     }
 

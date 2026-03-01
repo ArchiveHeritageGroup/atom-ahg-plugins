@@ -1,0 +1,29 @@
+/* ahgAuthorityPlugin styles */
+
+.authority-identifier-panel .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+}
+
+.authority-completeness-panel .progress {
+  border-radius: 0.25rem;
+}
+
+.authority-graph-panel #authority-graph {
+  border-top: 1px solid #dee2e6;
+}
+
+/* Dedup comparison */
+.dedup-field-match {
+  background-color: rgba(25, 135, 84, 0.05);
+}
+.dedup-field-mismatch {
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+/* NER pipeline entity badges */
+.ner-entity-badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

@@ -1,0 +1,66 @@
+{
+    "name": "AHG Authority Records Enhancement",
+    "machine_name": "ahgAuthorityPlugin",
+    "version": "1.0.0",
+    "description": "Comprehensive authority record enhancements: external linking (Wikidata, VIAF, ULAN, LCNAF), completeness dashboard, NER-to-authority pipeline, relationship graph, merge/split workflow, bulk deduplication, structured occupations, ISDF functions, EAC-CPF export enrichment, and contact panel surfacing.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "authority",
+    "keywords": [
+        "authority",
+        "actor",
+        "wikidata",
+        "viaf",
+        "ulan",
+        "lcnaf",
+        "completeness",
+        "dedup",
+        "merge",
+        "ner",
+        "eac-cpf",
+        "isdf",
+        "occupations",
+        "graph"
+    ],
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgActorManagePlugin"
+    ],
+    "optional": {
+        "extensions": [
+            "ahgDedupePlugin",
+            "ahgAIPlugin",
+            "ahgRicExplorerPlugin",
+            "ahgWorkflowPlugin",
+            "ahgContactPlugin",
+            "ahgExportPlugin",
+            "ahgFunctionManagePlugin"
+        ]
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "ahg_actor_identifier",
+        "ahg_actor_completeness",
+        "ahg_actor_occupation",
+        "ahg_actor_merge",
+        "ahg_ner_authority_stub",
+        "ahg_actor_function_link",
+        "ahg_authority_config"
+    ],
+    "provides": {
+        "admin_section": {
+            "id": "authority",
+            "section": "admin",
+            "title": "Authority Records",
+            "description": "Authority record enhancements, completeness dashboard, and quality management",
+            "icon": "fa-id-card",
+            "route": "authority/dashboard",
+            "permission": "administrator"
+        }
+    }
+}

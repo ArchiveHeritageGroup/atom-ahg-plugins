@@ -300,6 +300,17 @@ class AhgSettingsIndexAction extends AhgController
             ];
         }
 
+        // Authority Records - show when ahgAuthorityPlugin is enabled
+        $hasAuthority = in_array('ahgAuthorityPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasAuthority) {
+            $this->sections['authority'] = [
+                'label' => 'Authority Records',
+                'icon' => 'fa-id-card',
+                'description' => 'External linking, completeness, NER pipeline, merge/dedup, occupations, functions',
+                'url' => 'admin/ahg-settings/section?section=authority'
+            ];
+        }
+
         // Encryption - always available
         $this->sections['encryption'] = [
             'label' => 'Encryption',

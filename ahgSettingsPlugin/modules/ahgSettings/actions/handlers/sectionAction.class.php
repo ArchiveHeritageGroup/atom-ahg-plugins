@@ -28,6 +28,11 @@ class AhgSettingsSectionAction extends AhgController
             'icon' => 'fa-inbox',
             'description' => 'Intake queue, appraisal, container and rights settings',
         ],
+        'authority' => [
+            'label' => 'Authority Records',
+            'icon' => 'fa-id-card',
+            'description' => 'External linking, completeness, NER pipeline, merge/dedup, occupations, functions',
+        ],
     ];
 
     protected $checkboxFields = [
@@ -83,6 +88,19 @@ class AhgSettingsSectionAction extends AhgController
             'accession_allow_container_barcodes',
             'accession_rights_inheritance_enabled',
         ],
+        'authority' => [
+            'authority_wikidata_enabled',
+            'authority_viaf_enabled',
+            'authority_ulan_enabled',
+            'authority_lcnaf_enabled',
+            'authority_isni_enabled',
+            'authority_auto_verify_wikidata',
+            'authority_completeness_auto_recalc',
+            'authority_ner_auto_stub_enabled',
+            'authority_merge_require_approval',
+            'authority_hide_stubs_from_public',
+            'authority_function_linking_enabled',
+        ],
     ];
 
     
@@ -99,6 +117,7 @@ class AhgSettingsSectionAction extends AhgController
         'portable_export' => 'ahgPortableExportPlugin',
         'integrity' => 'ahgIntegrityPlugin',
         'accession' => 'ahgAccessionManagePlugin',
+        'authority' => 'ahgAuthorityPlugin',
     ];
 
     // Check if a plugin is enabled

@@ -2225,6 +2225,194 @@
                                 </div>
                             @break
 
+                        @case('authority')
+                            {{-- Authority Records Settings --}}
+                            <div class="card mb-4">
+                                <div class="card-header"><i class="fas fa-globe me-2"></i>{{ __('External Authority Sources') }}</div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">{{ __('Enable external authority file linking for reconciliation and enrichment.') }}</p>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_wikidata_enabled"
+                                                       name="settings[authority_wikidata_enabled]" value="true"
+                                                       {{ ($settings['authority_wikidata_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_wikidata_enabled">
+                                                    <strong>{{ __('Wikidata') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Enable Wikidata entity linking and reconciliation.') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_viaf_enabled"
+                                                       name="settings[authority_viaf_enabled]" value="true"
+                                                       {{ ($settings['authority_viaf_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_viaf_enabled">
+                                                    <strong>{{ __('VIAF') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Virtual International Authority File linking.') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_ulan_enabled"
+                                                       name="settings[authority_ulan_enabled]" value="true"
+                                                       {{ ($settings['authority_ulan_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_ulan_enabled">
+                                                    <strong>{{ __('Getty ULAN') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Union List of Artist Names linking.') }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_lcnaf_enabled"
+                                                       name="settings[authority_lcnaf_enabled]" value="true"
+                                                       {{ ($settings['authority_lcnaf_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_lcnaf_enabled">
+                                                    <strong>{{ __('LCNAF') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Library of Congress Name Authority File.') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_isni_enabled"
+                                                       name="settings[authority_isni_enabled]" value="true"
+                                                       {{ ($settings['authority_isni_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_isni_enabled">
+                                                    <strong>{{ __('ISNI') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('International Standard Name Identifier linking.') }}</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_auto_verify_wikidata"
+                                                       name="settings[authority_auto_verify_wikidata]" value="true"
+                                                       {{ ($settings['authority_auto_verify_wikidata'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_auto_verify_wikidata">
+                                                    <strong>{{ __('Auto-Verify Wikidata') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Automatically mark Wikidata identifiers as verified when added via reconciliation.') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header"><i class="fas fa-chart-bar me-2"></i>{{ __('Completeness & Quality') }}</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_completeness_auto_recalc"
+                                                       name="settings[authority_completeness_auto_recalc]" value="true"
+                                                       {{ ($settings['authority_completeness_auto_recalc'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_completeness_auto_recalc">
+                                                    <strong>{{ __('Auto-Recalculate Completeness') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Automatically recalculate completeness scores when the CLI scan runs.') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_hide_stubs_from_public"
+                                                       name="settings[authority_hide_stubs_from_public]" value="true"
+                                                       {{ ($settings['authority_hide_stubs_from_public'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_hide_stubs_from_public">
+                                                    <strong>{{ __('Hide Stubs from Public') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Hide stub-level authority records from public browse and search results.') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header"><i class="fas fa-robot me-2"></i>{{ __('NER Pipeline') }}</div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">{{ __('Configure how Named Entity Recognition creates authority record stubs.') }}</p>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_ner_auto_stub_enabled"
+                                                       name="settings[authority_ner_auto_stub_enabled]" value="true"
+                                                       {{ ($settings['authority_ner_auto_stub_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_ner_auto_stub_enabled">
+                                                    <strong>{{ __('Auto-Create Stubs') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Automatically create authority record stubs from NER entities above the confidence threshold.') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="authority_ner_auto_stub_threshold" class="form-label">
+                                                <strong>{{ __('Confidence Threshold') }}</strong>
+                                            </label>
+                                            <input type="number" class="form-control" id="authority_ner_auto_stub_threshold"
+                                                   name="settings[authority_ner_auto_stub_threshold]"
+                                                   value="{{ $settings['authority_ner_auto_stub_threshold'] ?? '0.85' }}"
+                                                   min="0" max="1" step="0.05">
+                                            <div class="form-text">{{ __('Minimum confidence score (0.0-1.0) for auto-creating stubs. Default: 0.85') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header"><i class="fas fa-code-branch me-2"></i>{{ __('Merge & Deduplication') }}</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_merge_require_approval"
+                                                       name="settings[authority_merge_require_approval]" value="true"
+                                                       {{ ($settings['authority_merge_require_approval'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_merge_require_approval">
+                                                    <strong>{{ __('Require Approval for Merge') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Require workflow approval before merging authority records. Requires ahgWorkflowPlugin.') }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="authority_dedup_threshold" class="form-label">
+                                                <strong>{{ __('Dedup Similarity Threshold') }}</strong>
+                                            </label>
+                                            <input type="number" class="form-control" id="authority_dedup_threshold"
+                                                   name="settings[authority_dedup_threshold]"
+                                                   value="{{ $settings['authority_dedup_threshold'] ?? '0.80' }}"
+                                                   min="0" max="1" step="0.05">
+                                            <div class="form-text">{{ __('Minimum similarity score (0.0-1.0) for flagging potential duplicates. Default: 0.80') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header"><i class="fas fa-project-diagram me-2"></i>{{ __('ISDF Functions') }}</div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input" type="checkbox" id="authority_function_linking_enabled"
+                                                       name="settings[authority_function_linking_enabled]" value="true"
+                                                       {{ ($settings['authority_function_linking_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="authority_function_linking_enabled">
+                                                    <strong>{{ __('Function Linking') }}</strong>
+                                                </label>
+                                            </div>
+                                            <div class="form-text">{{ __('Enable structured actor-to-function linking (ISDF). Requires ahgFunctionManagePlugin.') }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->
