@@ -124,11 +124,12 @@ CREATE TABLE IF NOT EXISTS `integrity_dead_letter` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
--- Issue #188: Add actor/hostname tracking to ledger
+-- Issue #188: Add actor/hostname/previous_hash tracking to ledger
 -- (Programmatic migration via runMigration() checks INFORMATION_SCHEMA before ALTER)
 -- ============================================================
 -- ALTER TABLE `integrity_ledger` ADD COLUMN `actor` VARCHAR(255) NULL AFTER `duration_ms`;
 -- ALTER TABLE `integrity_ledger` ADD COLUMN `hostname` VARCHAR(255) NULL AFTER `actor`;
+-- ALTER TABLE `integrity_ledger` ADD COLUMN `previous_hash` VARCHAR(128) NULL AFTER `hostname`;
 -- NOTE: The above ALTERs are applied programmatically by IntegrityService::runMigration()
 --       to avoid errors on re-run. They are commented here for documentation only.
 
@@ -145,12 +146,16 @@ CREATE TABLE IF NOT EXISTS `integrity_retention_policy` (
     `scope_type` VARCHAR(20) NOT NULL DEFAULT 'global' COMMENT 'global, repository, hierarchy',
     `repository_id` INT NULL,
     `information_object_id` INT NULL,
+    `object_format` VARCHAR(100) NULL COMMENT 'MIME type filter e.g. image/tiff, application/pdf',
     `is_enabled` TINYINT(1) NOT NULL DEFAULT 0,
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX `idx_irp_enabled` (`is_enabled`),
     INDEX `idx_irp_scope` (`scope_type`, `repository_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Issue #189: object_format column migration (programmatic via runMigration())
+-- ALTER TABLE `integrity_retention_policy` ADD COLUMN `object_format` VARCHAR(100) NULL AFTER `information_object_id`;
 
 -- ============================================================
 -- Table: integrity_legal_hold (Issue #189)

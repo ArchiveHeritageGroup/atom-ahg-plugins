@@ -61,6 +61,24 @@ class IntegrityService
         if (($hasHostname[0]->cnt ?? 0) == 0) {
             DB::statement('ALTER TABLE `integrity_ledger` ADD COLUMN `hostname` VARCHAR(255) NULL AFTER `actor`');
         }
+
+        // Issue #188: Add previous_hash column for chain verification
+        $hasPreviousHash = DB::select(
+            "SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'integrity_ledger' AND COLUMN_NAME = 'previous_hash'",
+            [$dbName]
+        );
+        if (($hasPreviousHash[0]->cnt ?? 0) == 0) {
+            DB::statement('ALTER TABLE `integrity_ledger` ADD COLUMN `previous_hash` VARCHAR(128) NULL AFTER `hostname`');
+        }
+
+        // Issue #189: Add object_format column to retention policy
+        $hasObjectFormat = DB::select(
+            "SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'integrity_retention_policy' AND COLUMN_NAME = 'object_format'",
+            [$dbName]
+        );
+        if (($hasObjectFormat[0]->cnt ?? 0) == 0) {
+            DB::statement('ALTER TABLE `integrity_retention_policy` ADD COLUMN `object_format` VARCHAR(100) NULL AFTER `information_object_id`');
+        }
     }
 
     // ------------------------------------------------------------------
@@ -477,6 +495,7 @@ class IntegrityService
             'duration_ms' => null,
             'actor' => $this->currentActor,
             'hostname' => gethostname() ?: null,
+            'previous_hash' => $this->resolvePreviousHash($digitalObjectId),
             'verified_at' => date('Y-m-d H:i:s'),
         ], $data);
 
@@ -687,7 +706,7 @@ class IntegrityService
     // Dashboard statistics
     // ------------------------------------------------------------------
 
-    public function getDashboardStats(): array
+    public function getDashboardStats(array $scope = []): array
     {
         $totalObjects = DB::table('digital_object')->where('usage_id', 140)->count();
 
@@ -695,10 +714,13 @@ class IntegrityService
             ->orderByDesc('started_at')
             ->first();
 
-        $recentOutcomes = DB::table('integrity_ledger')
+        $recentQuery = DB::table('integrity_ledger')
             ->select('outcome', DB::raw('COUNT(*) as cnt'))
-            ->where('verified_at', '>=', date('Y-m-d H:i:s', strtotime('-30 days')))
-            ->groupBy('outcome')
+            ->where('verified_at', '>=', date('Y-m-d H:i:s', strtotime('-30 days')));
+        if (!empty($scope['repository_id'])) {
+            $recentQuery->where('repository_id', (int) $scope['repository_id']);
+        }
+        $recentOutcomes = $recentQuery->groupBy('outcome')
             ->pluck('cnt', 'outcome')
             ->all();
 
@@ -709,8 +731,14 @@ class IntegrityService
         $scheduleCount = DB::table('integrity_schedule')->count();
         $enabledSchedules = DB::table('integrity_schedule')->where('is_enabled', 1)->count();
 
-        $totalVerifications = DB::table('integrity_ledger')->count();
-        $totalPassed = DB::table('integrity_ledger')->where('outcome', 'pass')->count();
+        $vQuery = DB::table('integrity_ledger');
+        $pQuery = DB::table('integrity_ledger')->where('outcome', 'pass');
+        if (!empty($scope['repository_id'])) {
+            $vQuery->where('repository_id', (int) $scope['repository_id']);
+            $pQuery->where('repository_id', (int) $scope['repository_id']);
+        }
+        $totalVerifications = $vQuery->count();
+        $totalPassed = $pQuery->count();
 
         return [
             'total_master_objects' => $totalObjects,
@@ -790,7 +818,7 @@ class IntegrityService
             'id', 'run_id', 'digital_object_id', 'information_object_id', 'repository_id',
             'file_path', 'file_size', 'file_exists', 'file_readable', 'algorithm',
             'expected_hash', 'computed_hash', 'hash_match', 'outcome', 'error_detail',
-            'duration_ms', 'actor', 'hostname', 'verified_at',
+            'duration_ms', 'actor', 'hostname', 'previous_hash', 'verified_at',
         ]);
 
         foreach ($entries as $e) {
@@ -799,7 +827,7 @@ class IntegrityService
                 $e->repository_id, $e->file_path, $e->file_size, $e->file_exists,
                 $e->file_readable, $e->algorithm, $e->expected_hash, $e->computed_hash,
                 $e->hash_match, $e->outcome, $e->error_detail ?? '',
-                $e->duration_ms, $e->actor ?? '', $e->hostname ?? '', $e->verified_at,
+                $e->duration_ms, $e->actor ?? '', $e->hostname ?? '', $e->previous_hash ?? '', $e->verified_at,
             ]);
         }
 
@@ -1016,30 +1044,40 @@ HTML;
         ];
     }
 
-    public function getDailyTrend(int $days = 30): array
+    public function getDailyTrend(int $days = 30, array $scope = []): array
     {
-        return DB::table('integrity_ledger')
+        $query = DB::table('integrity_ledger')
             ->select(
                 DB::raw('DATE(verified_at) as day'),
                 DB::raw('COUNT(*) as total'),
                 DB::raw("SUM(CASE WHEN outcome = 'pass' THEN 1 ELSE 0 END) as passed"),
                 DB::raw("SUM(CASE WHEN outcome != 'pass' THEN 1 ELSE 0 END) as failed")
             )
-            ->where('verified_at', '>=', date('Y-m-d', strtotime("-{$days} days")))
-            ->groupBy(DB::raw('DATE(verified_at)'))
+            ->where('verified_at', '>=', date('Y-m-d', strtotime("-{$days} days")));
+
+        if (!empty($scope['repository_id'])) {
+            $query->where('repository_id', (int) $scope['repository_id']);
+        }
+
+        return $query->groupBy(DB::raw('DATE(verified_at)'))
             ->orderBy('day')
             ->get()
             ->values()
             ->all();
     }
 
-    public function getFailureTypeBreakdown(int $days = 30): array
+    public function getFailureTypeBreakdown(int $days = 30, array $scope = []): array
     {
-        return DB::table('integrity_ledger')
+        $query = DB::table('integrity_ledger')
             ->select('outcome', DB::raw('COUNT(*) as cnt'))
             ->where('outcome', '!=', 'pass')
-            ->where('verified_at', '>=', date('Y-m-d', strtotime("-{$days} days")))
-            ->groupBy('outcome')
+            ->where('verified_at', '>=', date('Y-m-d', strtotime("-{$days} days")));
+
+        if (!empty($scope['repository_id'])) {
+            $query->where('repository_id', (int) $scope['repository_id']);
+        }
+
+        return $query->groupBy('outcome')
             ->orderByDesc('cnt')
             ->get()
             ->values()
@@ -1097,8 +1135,60 @@ HTML;
     }
 
     // ------------------------------------------------------------------
+    // Issue #188: Storage growth KPI
+    // ------------------------------------------------------------------
+
+    public function getStorageGrowth(int $days = 30): array
+    {
+        $since = date('Y-m-d', strtotime("-{$days} days"));
+
+        $daily = DB::table('integrity_run')
+            ->select(
+                DB::raw('DATE(started_at) as day'),
+                DB::raw('SUM(bytes_scanned) as total_bytes'),
+                DB::raw('COUNT(*) as run_count')
+            )
+            ->where('status', 'completed')
+            ->where('started_at', '>=', $since)
+            ->groupBy(DB::raw('DATE(started_at)'))
+            ->orderBy('day')
+            ->get()
+            ->values()
+            ->all();
+
+        $totalBytes = array_sum(array_map(fn ($d) => $d->total_bytes ?? 0, $daily));
+        $dayCount = count($daily);
+        $avgBytesPerDay = $dayCount > 0 ? round($totalBytes / $dayCount) : 0;
+
+        return [
+            'daily' => $daily,
+            'total_bytes' => $totalBytes,
+            'avg_bytes_per_day' => $avgBytesPerDay,
+            'avg_gb_per_day' => round($avgBytesPerDay / 1073741824, 3),
+            'days_measured' => $dayCount,
+        ];
+    }
+
+    // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
+
+    /**
+     * Issue #188: Resolve the computed_hash of the most recent 'pass' ledger entry
+     * for a given digital object, enabling chain-of-custody verification.
+     */
+    protected function resolvePreviousHash(int $digitalObjectId): ?string
+    {
+        try {
+            return DB::table('integrity_ledger')
+                ->where('digital_object_id', $digitalObjectId)
+                ->where('outcome', 'pass')
+                ->orderByDesc('id')
+                ->value('computed_hash');
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 
     protected function resolveFilePath(object $doRow): string
     {

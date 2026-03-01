@@ -59,6 +59,11 @@ $repositories = $repositories ?? [];
             <label class="form-label">{{ __('Information Object ID') }}</label>
             <input type="number" name="information_object_id" class="form-control" value="{{ $policy->information_object_id ?? '' }}">
           </div>
+          <div class="col-md-4">
+            <label class="form-label">{{ __('Object Format (MIME type)') }}</label>
+            <input type="text" name="object_format" class="form-control" value="{{ $policy->object_format ?? '' }}" placeholder="e.g. image/tiff, application/pdf">
+            <small class="text-muted">{{ __('Leave empty for all formats. Uses prefix matching.') }}</small>
+          </div>
           <div class="col-12">
             <div class="form-check">
               <input type="checkbox" name="is_enabled" class="form-check-input" value="1" id="isEnabled"

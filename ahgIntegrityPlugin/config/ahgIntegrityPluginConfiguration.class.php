@@ -3,7 +3,7 @@
 class ahgIntegrityPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Enterprise-grade automated integrity assurance: scheduled fixity verification, append-only ledger, dead-letter queue, retention policies, alerting';
-    public static $version = '1.1.0';
+    public static $version = '1.2.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
@@ -80,6 +80,17 @@ class ahgIntegrityPluginConfiguration extends sfPluginConfiguration
         // API endpoints (Issue #190)
         $r->any('integrity_api_alert_save', '/api/integrity/alert/save', 'apiAlertSave');
         $r->any('integrity_api_alert_delete', '/api/integrity/alert/:id/delete', 'apiAlertDelete', ['id' => '\d+']);
+
+        // API endpoints (Issue #191: Paginated list endpoints)
+        $r->any('integrity_api_ledger', '/api/integrity/ledger', 'apiLedger');
+        $r->any('integrity_api_runs', '/api/integrity/runs', 'apiRuns');
+        $r->any('integrity_api_holds', '/api/integrity/holds', 'apiHolds');
+        $r->any('integrity_api_policies', '/api/integrity/policies', 'apiPolicies');
+        $r->any('integrity_api_daily_trend', '/api/integrity/daily-trend', 'apiDailyTrend');
+        $r->any('integrity_api_repo_breakdown', '/api/integrity/repo-breakdown', 'apiRepoBreakdown');
+        $r->any('integrity_api_format_breakdown', '/api/integrity/format-breakdown', 'apiFormatBreakdown');
+        $r->any('integrity_api_throughput', '/api/integrity/throughput', 'apiThroughput');
+        $r->any('integrity_api_storage_growth', '/api/integrity/storage-growth', 'apiStorageGrowth');
 
         $r->register($routing);
     }

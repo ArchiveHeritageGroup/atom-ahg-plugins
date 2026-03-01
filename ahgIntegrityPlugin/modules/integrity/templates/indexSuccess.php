@@ -9,6 +9,10 @@ $throughput = $sf_data->getRaw('throughput') ?: [];
 $dailyTrend = $sf_data->getRaw('dailyTrend') ?: [];
 $repoBreakdown = $sf_data->getRaw('repoBreakdown') ?: [];
 $failureBreakdown = $sf_data->getRaw('failureBreakdown') ?: [];
+$formatBreakdown = $sf_data->getRaw('formatBreakdown') ?: [];
+$storageGrowth = $sf_data->getRaw('storageGrowth') ?: [];
+$repositories = $sf_data->getRaw('repositories') ?: [];
+$filterRepositoryId = $sf_data->getRaw('filterRepositoryId');
 ?>
 
 <main id="content" class="container-xxl py-4">
@@ -38,6 +42,27 @@ $failureBreakdown = $sf_data->getRaw('failureBreakdown') ?: [];
       </a>
     </div>
   </div>
+
+  <?php if (!empty($repositories)): ?>
+  <form method="get" action="<?php echo url_for(['module' => 'integrity', 'action' => 'index']); ?>" class="mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-auto">
+        <label class="form-label small mb-0"><?php echo __('Filter by Repository'); ?></label>
+        <select name="repository_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value=""><?php echo __('All Repositories'); ?></option>
+          <?php foreach ($repositories as $repo): ?>
+            <option value="<?php echo $repo->id; ?>" <?php echo $filterRepositoryId == $repo->id ? 'selected' : ''; ?>><?php echo htmlspecialchars($repo->name); ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <?php if ($filterRepositoryId): ?>
+        <div class="col-auto">
+          <a href="<?php echo url_for(['module' => 'integrity', 'action' => 'index']); ?>" class="btn btn-sm btn-outline-secondary"><?php echo __('Clear Filter'); ?></a>
+        </div>
+      <?php endif; ?>
+    </div>
+  </form>
+  <?php endif; ?>
 
   <div class="row g-3 mb-4">
     <div class="col-md-2">
@@ -95,6 +120,135 @@ $failureBreakdown = $sf_data->getRaw('failureBreakdown') ?: [];
     </div>
   </div>
 
+  <?php if (!empty($storageGrowth['daily'])): ?>
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card text-center h-100">
+        <div class="card-body">
+          <h6 class="text-muted"><?php echo __('Storage Scanned (30d)'); ?></h6>
+          <h3 class="mb-0"><?php echo number_format(($storageGrowth['total_bytes'] ?? 0) / 1073741824, 1); ?> GB</h3>
+          <small class="text-muted"><?php echo __('Avg'); ?>: <?php echo $storageGrowth['avg_gb_per_day'] ?? 0; ?> GB/day</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php if (!empty($dailyTrend)): ?>
+  <div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0"><?php echo __('Daily Verification Trend (30 days)'); ?></h5></div>
+    <div class="card-body">
+      <canvas id="dailyTrendChart" height="80"></canvas>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><h5 class="mb-0"><?php echo __('Repository Breakdown'); ?></h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th><?php echo __('Repository'); ?></th>
+                  <th class="text-end"><?php echo __('Total'); ?></th>
+                  <th class="text-end"><?php echo __('Passed'); ?></th>
+                  <th class="text-end"><?php echo __('Failed'); ?></th>
+                  <th class="text-end"><?php echo __('Pass Rate'); ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (empty($repoBreakdown)): ?>
+                  <tr><td colspan="5" class="text-muted text-center py-3"><?php echo __('No repository data yet.'); ?></td></tr>
+                <?php else: ?>
+                  <?php foreach ($repoBreakdown as $repo): ?>
+                    <tr>
+                      <td><a href="<?php echo url_for(['module' => 'integrity', 'action' => 'index', 'repository_id' => $repo->repository_id]); ?>"><?php echo htmlspecialchars($repo->repo_name); ?></a></td>
+                      <td class="text-end"><?php echo number_format($repo->total); ?></td>
+                      <td class="text-end"><?php echo number_format($repo->passed); ?></td>
+                      <td class="text-end <?php echo $repo->failed > 0 ? 'text-danger fw-bold' : ''; ?>"><?php echo number_format($repo->failed); ?></td>
+                      <td class="text-end <?php echo $repo->pass_rate < 95 ? 'text-warning fw-bold' : 'text-success'; ?>"><?php echo $repo->pass_rate; ?>%</td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><h5 class="mb-0"><?php echo __('Failure Type Breakdown (30 days)'); ?></h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th><?php echo __('Outcome'); ?></th>
+                  <th class="text-end"><?php echo __('Count'); ?></th>
+                  <th class="text-end"><?php echo __('Percentage'); ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php
+                  $failTotal = array_sum(array_map(fn($f) => $f->cnt ?? 0, $failureBreakdown));
+                ?>
+                <?php if (empty($failureBreakdown)): ?>
+                  <tr><td colspan="3" class="text-muted text-center py-3"><?php echo __('No failures in the last 30 days.'); ?></td></tr>
+                <?php else: ?>
+                  <?php foreach ($failureBreakdown as $fb): ?>
+                    <tr>
+                      <td><span class="badge bg-danger"><?php echo $fb->outcome; ?></span></td>
+                      <td class="text-end"><?php echo number_format($fb->cnt); ?></td>
+                      <td class="text-end"><?php echo $failTotal > 0 ? round(($fb->cnt / $failTotal) * 100, 1) : 0; ?>%</td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <?php if (!empty($formatBreakdown)): ?>
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><h5 class="mb-0"><?php echo __('Format Breakdown'); ?></h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th><?php echo __('Format'); ?></th>
+                  <th class="text-end"><?php echo __('Total'); ?></th>
+                  <th class="text-end"><?php echo __('Passed'); ?></th>
+                  <th class="text-end"><?php echo __('Failed'); ?></th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($formatBreakdown as $fmt): ?>
+                  <tr>
+                    <td><?php echo htmlspecialchars($fmt->format_name); ?></td>
+                    <td class="text-end"><?php echo number_format($fmt->total); ?></td>
+                    <td class="text-end"><?php echo number_format($fmt->passed); ?></td>
+                    <td class="text-end <?php echo $fmt->failed > 0 ? 'text-danger fw-bold' : ''; ?>"><?php echo number_format($fmt->failed); ?></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
+
   <div class="card mb-4">
     <div class="card-header"><h5 class="mb-0"><?php echo __('Recent Runs'); ?></h5></div>
     <div class="card-body p-0">
@@ -131,3 +285,33 @@ $failureBreakdown = $sf_data->getRaw('failureBreakdown') ?: [];
     </div>
   </div>
 </main>
+
+<?php if (!empty($dailyTrend)): ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+(function() {
+  var trendData = <?php echo json_encode(array_map(function($d) {
+    return ['day' => substr($d->day, 5), 'passed' => (int)$d->passed, 'failed' => (int)$d->failed];
+  }, $dailyTrend)); ?>;
+
+  var ctx = document.getElementById('dailyTrendChart');
+  if (ctx && typeof Chart !== 'undefined') {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: trendData.map(function(d) { return d.day; }),
+        datasets: [
+          { label: 'Passed', data: trendData.map(function(d) { return d.passed; }), backgroundColor: '#198754', borderRadius: 2 },
+          { label: 'Failed', data: trendData.map(function(d) { return d.failed; }), backgroundColor: '#dc3545', borderRadius: 2 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+      }
+    });
+  }
+})();
+</script>
+<?php endif; ?>

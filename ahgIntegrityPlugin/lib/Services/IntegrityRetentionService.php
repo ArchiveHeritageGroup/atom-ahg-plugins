@@ -33,6 +33,7 @@ class IntegrityRetentionService
             'scope_type' => 'global',
             'repository_id' => null,
             'information_object_id' => null,
+            'object_format' => null,
             'is_enabled' => 0,
             'created_at' => $now,
             'updated_at' => $now,
@@ -216,6 +217,13 @@ class IntegrityRetentionService
                     }
                     break;
                 // 'global' — no extra filter
+            }
+
+            // Issue #189: Filter by object_format (MIME type) if set
+            if (!empty($policy->object_format)) {
+                $ioQuery->join('digital_object as dobj', 'dobj.object_id', '=', 'io.id', 'inner')
+                    ->where('dobj.usage_id', 140)
+                    ->where('dobj.mime_type', 'LIKE', $policy->object_format . '%');
             }
 
             // Exclude already-queued IOs for this policy

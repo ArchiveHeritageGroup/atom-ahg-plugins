@@ -1,0 +1,1296 @@
+openapi: 3.0.3
+
+info:
+  title: AtoM Heratio Integrity Assurance API
+  version: "1.2.0"
+  description: >
+    API for the AtoM Heratio Integrity Assurance plugin (ahgIntegrityPlugin).
+    Provides digital-object integrity verification, scheduling, retention
+    policies, legal holds, disposition actions, dead-letter management,
+    alerting, and analytics dashboards for GLAM / DAM institutions.
+  contact:
+    name: Johan Pieterse
+    email: johan@theahg.co.za
+  license:
+    name: Proprietary
+    url: https://www.theahg.co.za
+
+servers:
+  - url: https://psis.theahg.co.za
+    description: PSIS / Archive instance
+
+security:
+  - cookieAuth: []
+
+tags:
+  - name: Dashboard
+    description: Aggregate statistics and analytics
+  - name: Verification
+    description: Digital-object integrity verification
+  - name: Ledger
+    description: Immutable verification ledger
+  - name: Runs
+    description: Scheduled and ad-hoc verification runs
+  - name: Schedules
+    description: Verification schedule management
+  - name: Retention
+    description: Retention policies and disposition
+  - name: Holds
+    description: Legal / litigation holds
+  - name: Dead Letter
+    description: Failed-verification dead-letter queue
+  - name: Alerts
+    description: Alert configuration
+  - name: Analytics
+    description: Trend and breakdown analytics
+
+paths:
+  # ──────────────────────────────────────────────
+  # Dashboard
+  # ──────────────────────────────────────────────
+  /api/integrity/stats:
+    get:
+      operationId: getStats
+      summary: Dashboard statistics
+      description: >
+        Returns aggregate integrity statistics including total objects,
+        verified count, failure count, last-run timestamp, and summary
+        figures used by the dashboard widgets.
+      tags: [Dashboard]
+      responses:
+        "200":
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      total_objects:
+                        type: integer
+                        example: 48210
+                      verified:
+                        type: integer
+                        example: 47900
+                      failed:
+                        type: integer
+                        example: 12
+                      pending:
+                        type: integer
+                        example: 298
+                      last_run:
+                        type: string
+                        format: date-time
+                        nullable: true
+                        example: "2026-02-28T14:30:00Z"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ──────────────────────────────────────────────
+  # Verification
+  # ──────────────────────────────────────────────
+  /api/integrity/verify:
+    post:
+      operationId: verifyObject
+      summary: Verify a digital object
+      description: >
+        Triggers an immediate integrity check (checksum comparison) for a
+        single digital object identified by its ID.
+      tags: [Verification]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [object_id]
+              properties:
+                object_id:
+                  type: integer
+                  description: ID of the digital object to verify
+                  example: 12345
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      outcome:
+                        type: string
+                        enum: [pass, fail, error]
+                        example: pass
+                      message:
+                        type: string
+                        example: "Checksum verified successfully"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Ledger (paginated)
+  # ──────────────────────────────────────────────
+  /api/integrity/ledger:
+    get:
+      operationId: getLedger
+      summary: Paginated verification ledger
+      description: >
+        Returns the immutable verification ledger with pagination and
+        optional filters by repository, outcome, and date range.
+      tags: [Ledger]
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Skip"
+        - name: repository_id
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filter by repository ID
+        - name: outcome
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pass, fail, error]
+          description: Filter by verification outcome
+        - name: date_from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Start date (inclusive, YYYY-MM-DD)
+          example: "2026-01-01"
+        - name: date_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: End date (inclusive, YYYY-MM-DD)
+          example: "2026-02-28"
+      responses:
+        "200":
+          description: Ledger entries retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/LedgerEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ──────────────────────────────────────────────
+  # Runs
+  # ──────────────────────────────────────────────
+  /api/integrity/runs:
+    get:
+      operationId: getRuns
+      summary: Paginated verification runs
+      description: Returns a paginated list of verification runs with optional status filter.
+      tags: [Runs]
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Skip"
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pending, running, completed, failed]
+          description: Filter by run status
+      responses:
+        "200":
+          description: Runs retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Run"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/run/{id}:
+    get:
+      operationId: getRun
+      summary: Get a specific run
+      description: Returns full details for a single verification run.
+      tags: [Runs]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Run details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      run:
+                        $ref: "#/components/schemas/Run"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Schedules
+  # ──────────────────────────────────────────────
+  /api/integrity/schedule/{id}/toggle:
+    post:
+      operationId: toggleSchedule
+      summary: Toggle a schedule on/off
+      description: Enables or disables a verification schedule.
+      tags: [Schedules]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Schedule toggled
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        example: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/integrity/schedule/{id}/delete:
+    post:
+      operationId: deleteSchedule
+      summary: Delete a schedule
+      description: Permanently removes a verification schedule.
+      tags: [Schedules]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Schedule deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFlag"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/integrity/schedule/{id}/run:
+    post:
+      operationId: runScheduleNow
+      summary: Execute a schedule immediately
+      description: >
+        Triggers an immediate execution of the specified schedule,
+        regardless of its next-run timestamp.
+      tags: [Schedules]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Schedule execution started
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      run_id:
+                        type: integer
+                        description: ID of the newly created run
+                        example: 42
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Dead Letter
+  # ──────────────────────────────────────────────
+  /api/integrity/dead-letter/{id}/action:
+    post:
+      operationId: deadLetterAction
+      summary: Act on a dead-letter entry
+      description: >
+        Performs an action (retry, acknowledge, escalate) on a dead-letter
+        queue entry representing a failed verification.
+      tags: [Dead Letter]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [dead_letter_action]
+              properties:
+                dead_letter_action:
+                  type: string
+                  enum: [retry, acknowledge, escalate]
+                  description: Action to perform on the dead-letter entry
+                notes:
+                  type: string
+                  description: Optional notes for the action
+                  example: "Re-running after storage recovery"
+      responses:
+        "200":
+          description: Action performed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFlag"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Retention Policies
+  # ──────────────────────────────────────────────
+  /api/integrity/policies:
+    get:
+      operationId: getPolicies
+      summary: Paginated retention policies
+      description: Returns a paginated list of retention policies.
+      tags: [Retention]
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Skip"
+      responses:
+        "200":
+          description: Policies retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RetentionPolicy"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/policy/{id}/toggle:
+    post:
+      operationId: togglePolicy
+      summary: Toggle a retention policy on/off
+      description: Enables or disables a retention policy.
+      tags: [Retention]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Policy toggled
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        example: false
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/integrity/policy/{id}/delete:
+    post:
+      operationId: deletePolicy
+      summary: Delete a retention policy
+      description: Permanently removes a retention policy.
+      tags: [Retention]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Policy deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFlag"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/integrity/retention/scan:
+    post:
+      operationId: retentionScan
+      summary: Scan for retention-eligible records
+      description: >
+        Scans the repository for records that have met their retention
+        period and are eligible for disposition. Optionally scoped to a
+        single policy.
+      tags: [Retention]
+      requestBody:
+        required: false
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                policy_id:
+                  type: integer
+                  description: Limit scan to a specific retention policy
+                  example: 5
+      responses:
+        "200":
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      eligible_count:
+                        type: integer
+                        description: Number of records eligible for disposition
+                        example: 17
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/disposition/{id}/action:
+    post:
+      operationId: dispositionAction
+      summary: Execute a disposition action
+      description: >
+        Performs a disposition action (destroy, transfer, review, extend)
+        on a record that has been flagged as retention-eligible.
+      tags: [Retention]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [disposition_action]
+              properties:
+                disposition_action:
+                  type: string
+                  enum: [destroy, transfer, review, extend]
+                  description: Disposition action to apply
+                notes:
+                  type: string
+                  description: Justification or notes for the action
+                  example: "Approved by records manager 2026-02-28"
+      responses:
+        "200":
+          description: Disposition action executed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFlag"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Legal Holds
+  # ──────────────────────────────────────────────
+  /api/integrity/holds:
+    get:
+      operationId: getHolds
+      summary: Paginated legal holds
+      description: Returns a paginated list of legal holds with optional status filter.
+      tags: [Holds]
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Skip"
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [active, released]
+          description: Filter by hold status
+      responses:
+        "200":
+          description: Holds retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/PaginatedEnvelope"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/LegalHold"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/hold/place:
+    post:
+      operationId: placeHold
+      summary: Place a legal hold
+      description: >
+        Places a legal or litigation hold on an information object,
+        preventing any disposition or deletion until the hold is released.
+      tags: [Holds]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [information_object_id, reason]
+              properties:
+                information_object_id:
+                  type: integer
+                  description: ID of the information object to hold
+                  example: 9876
+                reason:
+                  type: string
+                  description: Legal justification for the hold
+                  example: "Litigation hold per case REF-2026-0042"
+      responses:
+        "200":
+          description: Hold placed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      hold_id:
+                        type: integer
+                        description: ID of the newly created hold
+                        example: 15
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/integrity/hold/{id}/release:
+    post:
+      operationId: releaseHold
+      summary: Release a legal hold
+      description: Releases an active legal hold, allowing normal disposition to resume.
+      tags: [Holds]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Hold released
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFlag"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Alerts
+  # ──────────────────────────────────────────────
+  /api/integrity/alert/save:
+    post:
+      operationId: saveAlert
+      summary: Save an alert configuration
+      description: >
+        Creates or updates an alert configuration. Alerts notify
+        administrators when verification failures or threshold breaches
+        occur.
+      tags: [Alerts]
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: >
+                    Alert ID to update. Omit or leave empty to create a new
+                    alert.
+                  example: 3
+                alert_type:
+                  type: string
+                  description: Type of alert trigger
+                  example: "failure_threshold"
+                threshold:
+                  type: integer
+                  description: Numeric threshold value
+                  example: 5
+                email:
+                  type: string
+                  format: email
+                  description: Notification email address
+                  example: "admin@theahg.co.za"
+                enabled:
+                  type: boolean
+                  description: Whether the alert is active
+                  example: true
+      responses:
+        "200":
+          description: Alert saved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      alert_id:
+                        type: integer
+                        description: ID of the saved alert
+                        example: 3
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/alert/{id}/delete:
+    post:
+      operationId: deleteAlert
+      summary: Delete an alert configuration
+      description: Permanently removes an alert configuration.
+      tags: [Alerts]
+      parameters:
+        - $ref: "#/components/parameters/ResourceId"
+      responses:
+        "200":
+          description: Alert deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessFlag"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ──────────────────────────────────────────────
+  # Analytics
+  # ──────────────────────────────────────────────
+  /api/integrity/daily-trend:
+    get:
+      operationId: getDailyTrend
+      summary: Daily verification trend
+      description: >
+        Returns per-day pass/fail/error counts for the specified number of
+        trailing days, used to render the dashboard trend chart.
+      tags: [Analytics]
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 365
+          description: Number of trailing days to include
+      responses:
+        "200":
+          description: Trend data retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DailyTrendEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/repo-breakdown:
+    get:
+      operationId: getRepoBreakdown
+      summary: Repository breakdown
+      description: >
+        Returns verification outcome counts grouped by repository,
+        used for the repository-breakdown chart.
+      tags: [Analytics]
+      responses:
+        "200":
+          description: Breakdown retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/RepoBreakdownEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/format-breakdown:
+    get:
+      operationId: getFormatBreakdown
+      summary: Format breakdown
+      description: >
+        Returns verification outcome counts grouped by file format
+        (MIME type / PRONOM ID), used for the format-breakdown chart.
+      tags: [Analytics]
+      responses:
+        "200":
+          description: Breakdown retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/FormatBreakdownEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/throughput:
+    get:
+      operationId: getThroughput
+      summary: Verification throughput
+      description: >
+        Returns daily throughput statistics (objects verified per day and
+        average duration) for the specified trailing period.
+      tags: [Analytics]
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 365
+          description: Number of trailing days to include
+      responses:
+        "200":
+          description: Throughput data retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/ThroughputEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/integrity/storage-growth:
+    get:
+      operationId: getStorageGrowth
+      summary: Storage growth
+      description: >
+        Returns daily cumulative storage figures (total bytes, object
+        count) for the specified trailing period, used for the storage
+        growth chart.
+      tags: [Analytics]
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 365
+          description: Number of trailing days to include
+      responses:
+        "200":
+          description: Storage growth data retrieved
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessFlag"
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/StorageGrowthEntry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+# ════════════════════════════════════════════════
+# Components
+# ════════════════════════════════════════════════
+components:
+
+  # ── Security ──────────────────────────────────
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: symfony
+      description: >
+        Symfony session cookie. All endpoints require an authenticated
+        admin session.
+
+  # ── Reusable Parameters ──────────────────────
+  parameters:
+    ResourceId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      description: Unique resource identifier
+
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 25
+        minimum: 1
+        maximum: 500
+      description: Maximum number of records to return
+
+    Skip:
+      name: skip
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Number of records to skip (offset)
+
+  # ── Reusable Responses ───────────────────────
+  responses:
+    BadRequest:
+      description: Invalid or missing request parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error: "Missing required parameter: object_id"
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error: "Authentication required"
+
+    Forbidden:
+      description: Insufficient permissions (admin role required)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error: "Admin access required"
+
+    NotFound:
+      description: Requested resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            error: "Resource not found"
+
+  # ── Schemas ──────────────────────────────────
+  schemas:
+    SuccessFlag:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "An error occurred"
+
+    PaginatedEnvelope:
+      type: object
+      required: [success, total, limit, skip]
+      properties:
+        success:
+          type: boolean
+          example: true
+        total:
+          type: integer
+          description: Total number of matching records
+          example: 142
+        limit:
+          type: integer
+          description: Page size used
+          example: 25
+        skip:
+          type: integer
+          description: Offset used
+          example: 0
+
+    LedgerEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1001
+        digital_object_id:
+          type: integer
+          example: 12345
+        filename:
+          type: string
+          example: "photograph_001.tiff"
+        repository_id:
+          type: integer
+          nullable: true
+          example: 3
+        repository_name:
+          type: string
+          nullable: true
+          example: "National Archives Repository"
+        algorithm:
+          type: string
+          example: "sha256"
+        expected_checksum:
+          type: string
+          example: "a1b2c3d4e5f6..."
+        actual_checksum:
+          type: string
+          example: "a1b2c3d4e5f6..."
+        outcome:
+          type: string
+          enum: [pass, fail, error]
+          example: pass
+        file_size:
+          type: integer
+          description: File size in bytes
+          example: 4821504
+        mime_type:
+          type: string
+          example: "image/tiff"
+        duration_ms:
+          type: integer
+          description: Verification duration in milliseconds
+          example: 245
+        verified_at:
+          type: string
+          format: date-time
+          example: "2026-02-28T14:30:12Z"
+        run_id:
+          type: integer
+          nullable: true
+          example: 42
+
+    Run:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 42
+        schedule_id:
+          type: integer
+          nullable: true
+          example: 7
+        status:
+          type: string
+          enum: [pending, running, completed, failed]
+          example: completed
+        total_objects:
+          type: integer
+          example: 1500
+        verified:
+          type: integer
+          example: 1500
+        passed:
+          type: integer
+          example: 1488
+        failed:
+          type: integer
+          example: 12
+        errors:
+          type: integer
+          example: 0
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-02-28T02:00:00Z"
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-02-28T02:45:32Z"
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-02-28T01:59:55Z"
+
+    RetentionPolicy:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        name:
+          type: string
+          example: "7-Year Financial Records"
+        description:
+          type: string
+          nullable: true
+          example: "Retain financial records for 7 years per regulations"
+        retention_period_days:
+          type: integer
+          description: Retention period in days
+          example: 2555
+        disposition_action:
+          type: string
+          enum: [destroy, transfer, review]
+          example: review
+        enabled:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-06-15T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-01-10T08:30:00Z"
+
+    LegalHold:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 15
+        information_object_id:
+          type: integer
+          example: 9876
+        title:
+          type: string
+          description: Title of the held information object
+          example: "Board Meeting Minutes 2024"
+        reason:
+          type: string
+          example: "Litigation hold per case REF-2026-0042"
+        status:
+          type: string
+          enum: [active, released]
+          example: active
+        placed_by:
+          type: integer
+          description: User ID who placed the hold
+          example: 1
+        placed_at:
+          type: string
+          format: date-time
+          example: "2026-02-01T09:15:00Z"
+        released_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: null
+
+    DailyTrendEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-02-28"
+        pass:
+          type: integer
+          example: 1488
+        fail:
+          type: integer
+          example: 12
+        error:
+          type: integer
+          example: 0
+
+    RepoBreakdownEntry:
+      type: object
+      properties:
+        repository_id:
+          type: integer
+          example: 3
+        repository_name:
+          type: string
+          example: "National Archives Repository"
+        pass:
+          type: integer
+          example: 15200
+        fail:
+          type: integer
+          example: 8
+        error:
+          type: integer
+          example: 2
+
+    FormatBreakdownEntry:
+      type: object
+      properties:
+        mime_type:
+          type: string
+          example: "image/tiff"
+        pass:
+          type: integer
+          example: 9800
+        fail:
+          type: integer
+          example: 3
+        error:
+          type: integer
+          example: 0
+
+    ThroughputEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-02-28"
+        objects_verified:
+          type: integer
+          example: 1500
+        avg_duration_ms:
+          type: number
+          format: float
+          description: Average verification duration in milliseconds
+          example: 187.4
+
+    StorageGrowthEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: "2026-02-28"
+        total_bytes:
+          type: integer
+          format: int64
+          description: Cumulative storage in bytes
+          example: 1073741824
+        total_objects:
+          type: integer
+          description: Cumulative object count
+          example: 48210

@@ -9,6 +9,10 @@ $throughput = $throughput ?? [];
 $dailyTrend = $dailyTrend ?? [];
 $repoBreakdown = $repoBreakdown ?? [];
 $failureBreakdown = $failureBreakdown ?? [];
+$formatBreakdown = $formatBreakdown ?? [];
+$storageGrowth = $storageGrowth ?? [];
+$repositories = $repositories ?? [];
+$filterRepositoryId = $filterRepositoryId ?? null;
 @endphp
 
 <main id="content" class="container-xxl py-4">
@@ -38,6 +42,28 @@ $failureBreakdown = $failureBreakdown ?? [];
       </a>
     </div>
   </div>
+
+  {{-- Repository filter --}}
+  @if (!empty($repositories))
+  <form method="get" action="{{ url_for(['module' => 'integrity', 'action' => 'index']) }}" class="mb-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-auto">
+        <label class="form-label small mb-0">{{ __('Filter by Repository') }}</label>
+        <select name="repository_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">{{ __('All Repositories') }}</option>
+          @foreach ($repositories as $repo)
+            <option value="{{ $repo->id }}" {{ $filterRepositoryId == $repo->id ? 'selected' : '' }}>{{ $repo->name }}</option>
+          @endforeach
+        </select>
+      </div>
+      @if ($filterRepositoryId)
+        <div class="col-auto">
+          <a href="{{ url_for(['module' => 'integrity', 'action' => 'index']) }}" class="btn btn-sm btn-outline-secondary">{{ __('Clear Filter') }}</a>
+        </div>
+      @endif
+    </div>
+  </form>
+  @endif
 
   {{-- Stats cards --}}
   <div class="row g-3 mb-4">
@@ -99,36 +125,29 @@ $failureBreakdown = $failureBreakdown ?? [];
     </div>
   </div>
 
-  {{-- Daily Trend (30 days) --}}
+  {{-- Storage Growth KPI --}}
+  @if (!empty($storageGrowth['daily']))
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card text-center h-100">
+        <div class="card-body">
+          <h6 class="text-muted">{{ __('Storage Scanned (30d)') }}</h6>
+          <h3 class="mb-0">{{ number_format(($storageGrowth['total_bytes'] ?? 0) / 1073741824, 1) }} GB</h3>
+          <small class="text-muted">{{ __('Avg') }}: {{ $storageGrowth['avg_gb_per_day'] ?? 0 }} GB/day</small>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endif
+
+  {{-- Daily Trend (30 days) — Chart.js --}}
   @if (!empty($dailyTrend))
   <div class="card mb-4">
     <div class="card-header">
       <h5 class="mb-0">{{ __('Daily Verification Trend (30 days)') }}</h5>
     </div>
     <div class="card-body">
-      @php
-        $maxTotal = max(array_map(fn($d) => $d->total ?? 0, $dailyTrend)) ?: 1;
-      @endphp
-      @foreach ($dailyTrend as $day)
-        @php
-          $pct = ($day->total / $maxTotal) * 100;
-          $passPct = $day->total > 0 ? ($day->passed / $day->total) * $pct : 0;
-          $failPct = $pct - $passPct;
-          $label = substr($day->day, 5); // MM-DD
-        @endphp
-        <div class="d-flex align-items-center mb-1">
-          <small class="text-muted me-2" style="min-width:45px">{{ $label }}</small>
-          <div class="progress flex-grow-1" style="height:16px">
-            @if ($passPct > 0)
-              <div class="progress-bar bg-success" style="width:{{ $passPct }}%" title="{{ $day->passed }} passed"></div>
-            @endif
-            @if ($failPct > 0)
-              <div class="progress-bar bg-danger" style="width:{{ $failPct }}%" title="{{ $day->failed }} failed"></div>
-            @endif
-          </div>
-          <small class="text-muted ms-2" style="min-width:50px">{{ number_format($day->total) }}</small>
-        </div>
-      @endforeach
+      <canvas id="dailyTrendChart" height="80"></canvas>
     </div>
   </div>
   @endif
@@ -153,7 +172,9 @@ $failureBreakdown = $failureBreakdown ?? [];
               <tbody>
                 @forelse ($repoBreakdown as $repo)
                   <tr>
-                    <td>{{ $repo->repo_name }}</td>
+                    <td>
+                      <a href="{{ url_for(['module' => 'integrity', 'action' => 'index', 'repository_id' => $repo->repository_id]) }}">{{ $repo->repo_name }}</a>
+                    </td>
                     <td class="text-end">{{ number_format($repo->total) }}</td>
                     <td class="text-end">{{ number_format($repo->passed) }}</td>
                     <td class="text-end {{ $repo->failed > 0 ? 'text-danger fw-bold' : '' }}">{{ number_format($repo->failed) }}</td>
@@ -203,6 +224,41 @@ $failureBreakdown = $failureBreakdown ?? [];
       </div>
     </div>
   </div>
+
+  {{-- Format Breakdown --}}
+  @if (!empty($formatBreakdown))
+  <div class="row g-3 mb-4">
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header"><h5 class="mb-0">{{ __('Format Breakdown') }}</h5></div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>{{ __('Format') }}</th>
+                  <th class="text-end">{{ __('Total') }}</th>
+                  <th class="text-end">{{ __('Passed') }}</th>
+                  <th class="text-end">{{ __('Failed') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($formatBreakdown as $fmt)
+                  <tr>
+                    <td>{{ $fmt->format_name }}</td>
+                    <td class="text-end">{{ number_format($fmt->total) }}</td>
+                    <td class="text-end">{{ number_format($fmt->passed) }}</td>
+                    <td class="text-end {{ $fmt->failed > 0 ? 'text-danger fw-bold' : '' }}">{{ number_format($fmt->failed) }}</td>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  @endif
 
   {{-- Schedule summary --}}
   <div class="row g-3 mb-4">
@@ -330,3 +386,34 @@ $failureBreakdown = $failureBreakdown ?? [];
   </div>
   @endif
 </main>
+
+{{-- Chart.js for daily trend --}}
+@if (!empty($dailyTrend))
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+(function() {
+  var trendData = @php echo json_encode(array_map(function($d) {
+    return ['day' => substr($d->day, 5), 'passed' => (int)$d->passed, 'failed' => (int)$d->failed];
+  }, $dailyTrend)); @endphp;
+
+  var ctx = document.getElementById('dailyTrendChart');
+  if (ctx && typeof Chart !== 'undefined') {
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: trendData.map(function(d) { return d.day; }),
+        datasets: [
+          { label: 'Passed', data: trendData.map(function(d) { return d.passed; }), backgroundColor: '#198754', borderRadius: 2 },
+          { label: 'Failed', data: trendData.map(function(d) { return d.failed; }), backgroundColor: '#dc3545', borderRadius: 2 }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+      }
+    });
+  }
+})();
+</script>
+@endif

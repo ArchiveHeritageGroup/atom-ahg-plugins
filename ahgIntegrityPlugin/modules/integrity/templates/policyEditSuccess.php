@@ -55,6 +55,11 @@ $repositories = $sf_data->getRaw('repositories') ?: [];
               <?php endforeach; ?>
             </select>
           </div>
+          <div class="col-md-4">
+            <label class="form-label"><?php echo __('Object Format (MIME type)'); ?></label>
+            <input type="text" name="object_format" class="form-control" value="<?php echo htmlspecialchars($policy->object_format ?? ''); ?>" placeholder="e.g. image/tiff, application/pdf">
+            <small class="text-muted"><?php echo __('Leave empty for all formats. Uses prefix matching.'); ?></small>
+          </div>
           <div class="col-12">
             <div class="form-check">
               <input type="checkbox" name="is_enabled" class="form-check-input" value="1" id="isEnabled"

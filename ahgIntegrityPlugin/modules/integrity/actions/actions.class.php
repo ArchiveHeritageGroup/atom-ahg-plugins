@@ -45,16 +45,36 @@ class integrityActions extends AhgController
         $this->requireAdmin();
         $service = $this->getService();
 
-        $this->stats = $service->getDashboardStats();
+        // Issue #190: Optional repository filter for drill-down
+        $repositoryId = $request->getParameter('repository_id') ? (int) $request->getParameter('repository_id') : null;
+        $this->filterRepositoryId = $repositoryId;
+
+        $scope = $repositoryId ? ['repository_id' => $repositoryId] : [];
+
+        $this->stats = $service->getDashboardStats($scope);
         $this->recentRuns = $service->getRecentRuns(10);
         $this->recentFailures = $service->getRecentFailures(10);
 
         // Issue #190: Enhanced stats
         $this->backlog = $service->calculateBacklog();
         $this->throughput = $service->calculateThroughput(7);
-        $this->dailyTrend = $service->getDailyTrend(30);
+        $this->dailyTrend = $service->getDailyTrend(30, $scope);
         $this->repoBreakdown = $service->getRepositoryBreakdown();
-        $this->failureBreakdown = $service->getFailureTypeBreakdown(30);
+        $this->failureBreakdown = $service->getFailureTypeBreakdown(30, $scope);
+        $this->formatBreakdown = $service->getFormatBreakdown();
+        $this->storageGrowth = $service->getStorageGrowth(30);
+
+        // Repositories for filter dropdown
+        $this->repositories = DB::table('repository')
+            ->join('actor_i18n', function ($j) {
+                $j->on('actor_i18n.id', '=', 'repository.id')
+                  ->where('actor_i18n.culture', '=', 'en');
+            })
+            ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->get()
+            ->values()
+            ->all();
 
         $this->pageTitle = 'Integrity Dashboard';
     }
@@ -411,6 +431,7 @@ class integrityActions extends AhgController
                 'scope_type' => $request->getParameter('scope_type', 'global'),
                 'repository_id' => $request->getParameter('repository_id') ?: null,
                 'information_object_id' => $request->getParameter('information_object_id') ?: null,
+                'object_format' => $request->getParameter('object_format') ?: null,
                 'is_enabled' => $request->getParameter('is_enabled') ? 1 : 0,
             ];
 
@@ -760,6 +781,174 @@ class integrityActions extends AhgController
         } catch (\Exception $e) {
             return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Issue #191: Paginated list API endpoints
+    // ------------------------------------------------------------------
+
+    public function executeApiLedger($request)
+    {
+        $this->requireAdmin();
+
+        $limit = min((int) ($request->getParameter('limit') ?: 50), 500);
+        $skip = max((int) ($request->getParameter('skip') ?: 0), 0);
+
+        $query = DB::table('integrity_ledger');
+
+        if ($request->getParameter('repository_id')) {
+            $query->where('repository_id', (int) $request->getParameter('repository_id'));
+        }
+        if ($request->getParameter('outcome')) {
+            $query->where('outcome', $request->getParameter('outcome'));
+        }
+        if ($request->getParameter('date_from')) {
+            $query->where('verified_at', '>=', $request->getParameter('date_from') . ' 00:00:00');
+        }
+        if ($request->getParameter('date_to')) {
+            $query->where('verified_at', '<=', $request->getParameter('date_to') . ' 23:59:59');
+        }
+
+        $total = (clone $query)->count();
+        $rows = $query->orderByDesc('id')->skip($skip)->limit($limit)->get()->values()->all();
+
+        return $this->renderJson([
+            'success' => true,
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'data' => $rows,
+        ]);
+    }
+
+    public function executeApiRuns($request)
+    {
+        $this->requireAdmin();
+
+        $limit = min((int) ($request->getParameter('limit') ?: 50), 200);
+        $skip = max((int) ($request->getParameter('skip') ?: 0), 0);
+
+        $query = DB::table('integrity_run')
+            ->leftJoin('integrity_schedule', 'integrity_run.schedule_id', '=', 'integrity_schedule.id')
+            ->select('integrity_run.*', 'integrity_schedule.name as schedule_name');
+
+        if ($request->getParameter('status')) {
+            $query->where('integrity_run.status', $request->getParameter('status'));
+        }
+
+        $total = DB::table('integrity_run');
+        if ($request->getParameter('status')) {
+            $total->where('status', $request->getParameter('status'));
+        }
+        $totalCount = $total->count();
+
+        $rows = $query->orderByDesc('integrity_run.started_at')->skip($skip)->limit($limit)->get()->values()->all();
+
+        return $this->renderJson([
+            'success' => true,
+            'total' => $totalCount,
+            'limit' => $limit,
+            'skip' => $skip,
+            'data' => $rows,
+        ]);
+    }
+
+    public function executeApiHolds($request)
+    {
+        $this->requireAdmin();
+
+        $limit = min((int) ($request->getParameter('limit') ?: 50), 200);
+        $skip = max((int) ($request->getParameter('skip') ?: 0), 0);
+
+        $query = DB::table('integrity_legal_hold');
+        if ($request->getParameter('status')) {
+            $query->where('status', $request->getParameter('status'));
+        }
+
+        $total = (clone $query)->count();
+        $rows = $query->orderByDesc('placed_at')->skip($skip)->limit($limit)->get()->values()->all();
+
+        return $this->renderJson([
+            'success' => true,
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'data' => $rows,
+        ]);
+    }
+
+    public function executeApiPolicies($request)
+    {
+        $this->requireAdmin();
+
+        $limit = min((int) ($request->getParameter('limit') ?: 50), 200);
+        $skip = max((int) ($request->getParameter('skip') ?: 0), 0);
+
+        $total = DB::table('integrity_retention_policy')->count();
+        $rows = DB::table('integrity_retention_policy')
+            ->orderBy('id')
+            ->skip($skip)
+            ->limit($limit)
+            ->get()
+            ->values()
+            ->all();
+
+        return $this->renderJson([
+            'success' => true,
+            'total' => $total,
+            'limit' => $limit,
+            'skip' => $skip,
+            'data' => $rows,
+        ]);
+    }
+
+    public function executeApiDailyTrend($request)
+    {
+        $this->requireAdmin();
+        $service = $this->getService();
+
+        $days = min((int) ($request->getParameter('days') ?: 30), 365);
+        $data = $service->getDailyTrend($days);
+
+        return $this->renderJson(['success' => true, 'data' => $data]);
+    }
+
+    public function executeApiRepoBreakdown($request)
+    {
+        $this->requireAdmin();
+        $service = $this->getService();
+
+        return $this->renderJson(['success' => true, 'data' => $service->getRepositoryBreakdown()]);
+    }
+
+    public function executeApiFormatBreakdown($request)
+    {
+        $this->requireAdmin();
+        $service = $this->getService();
+
+        return $this->renderJson(['success' => true, 'data' => $service->getFormatBreakdown()]);
+    }
+
+    public function executeApiThroughput($request)
+    {
+        $this->requireAdmin();
+        $service = $this->getService();
+
+        $days = min((int) ($request->getParameter('days') ?: 7), 90);
+        $data = $service->calculateThroughput($days);
+
+        return $this->renderJson(['success' => true, 'data' => $data]);
+    }
+
+    public function executeApiStorageGrowth($request)
+    {
+        $this->requireAdmin();
+        $service = $this->getService();
+
+        $days = min((int) ($request->getParameter('days') ?: 30), 365);
+        $data = $service->getStorageGrowth($days);
+
+        return $this->renderJson(['success' => true, 'data' => $data]);
     }
 
     // ------------------------------------------------------------------

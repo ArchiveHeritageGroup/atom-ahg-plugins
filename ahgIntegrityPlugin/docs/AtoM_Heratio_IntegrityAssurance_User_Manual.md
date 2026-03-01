@@ -1,6 +1,6 @@
 # AtoM Heratio — Integrity Assurance Plugin User Manual
 
-**Version:** 1.1.0
+**Version:** 1.2.0
 **Author:** The Archive and Heritage Group (Pty) Ltd
 
 ---
@@ -21,8 +21,9 @@
 12. [Disposition Queue](#disposition-queue)
 13. [Alerts](#alerts)
 14. [CLI Commands](#cli-commands)
-15. [Cron Setup](#cron-setup)
-16. [Troubleshooting](#troubleshooting)
+15. [REST API](#rest-api)
+16. [Cron Setup](#cron-setup)
+17. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -34,7 +35,7 @@ The Integrity Assurance plugin automates the verification of digital object inte
 
 1. The Preservation plugin generates baseline checksums (SHA-256 or SHA-512) when digital objects are ingested
 2. The Integrity plugin runs scheduled or ad-hoc verification passes
-3. Each verification is recorded in an append-only ledger with actor and hostname tracking
+3. Each verification is recorded in an append-only ledger with actor, hostname, and previous hash chain tracking
 4. Persistent failures are escalated to a dead-letter queue for manual investigation
 5. Retention policies determine when records become eligible for disposition review
 6. Legal holds block disposition of records under review
@@ -70,9 +71,9 @@ The installation creates two default schedules:
 - **Daily Sample Check** (enabled): Verifies 200 random master objects daily
 - **Weekly Full Scan** (disabled): Comprehensive scan of all master objects
 
-### Upgrading from v1.0.0
+### Upgrading from v1.0.0 / v1.1.0
 
-If upgrading from v1.0.0, the plugin will automatically add the `actor` and `hostname` columns to the `integrity_ledger` table on first use. You can also run the migration manually:
+If upgrading from an earlier version, the plugin will automatically add new columns (`actor`, `hostname`, `previous_hash` on `integrity_ledger`; `object_format` on `integrity_retention_policy`) on first use. You can also run the migration manually:
 
 ```bash
 # Re-run install.sql (safe — uses CREATE TABLE IF NOT EXISTS)
@@ -96,17 +97,29 @@ The dashboard provides an at-a-glance view of your collection's integrity health
 - **Never Verified** (backlog): Master objects that have never been verified
 - **Throughput (7d)**: Verification speed in objects/hour and GB/hour
 
+**Storage Growth KPI (v1.2.0):**
+- Total storage scanned over the last 30 days (in GB)
+- Average GB/day scan rate
+
 **Daily Trend (30 days):**
-- Horizontal bar chart showing daily pass (green) and fail (red) counts
+- Interactive Chart.js stacked bar chart showing daily pass (green) and fail (red) counts
 - Helps identify trends and anomalies at a glance
 
 **Repository Breakdown:**
 - Per-repository table with total verifications, passed, failed, and pass rate
-- Quickly identify which repositories need attention
+- Click a repository name to filter all dashboard statistics to that repository (v1.2.0)
 
 **Failure Type Breakdown:**
 - Distribution of failure types (mismatch, missing, unreadable, etc.) over the last 30 days
 - Helps prioritize remediation efforts
+
+**Format Breakdown (v1.2.0):**
+- Verification results grouped by file format (from preservation_object_format table)
+- Shows total, passed, and failed counts per format
+
+**Repository Filter (v1.2.0):**
+- Dropdown at the top of the dashboard to scope all statistics to a specific repository
+- Click "Clear Filter" to return to global view
 
 **Navigation buttons** in the header provide quick access to: Export, Policies, Holds, Alerts, Schedules, Ledger, Report.
 
@@ -167,7 +180,22 @@ Each entry records:
 - Outcome: pass, mismatch, missing, unreadable, permission_error, path_drift, no_baseline, error
 - **Actor**: Who/what triggered the verification (user, system, scheduler, CLI)
 - **Hostname**: Server that performed the verification
+- **Previous Hash** (v1.2.0): The computed hash from the most recent successful verification of the same object, enabling chain-of-custody verification and tamper detection
 - Verification timestamp and duration
+
+### Database Immutability Advisory (v1.2.0)
+
+The `integrity_ledger` table is designed as an append-only audit trail. To enforce this at the database level, we recommend revoking UPDATE and DELETE privileges on this table for the web application user:
+
+```sql
+-- Create a dedicated web user with restricted privileges on the ledger
+GRANT SELECT, INSERT ON archive.integrity_ledger TO 'atom_web'@'localhost';
+
+-- Revoke any existing UPDATE/DELETE privileges
+REVOKE UPDATE, DELETE ON archive.integrity_ledger FROM 'atom_web'@'localhost';
+```
+
+This ensures that even in the event of a compromised application, the verification audit trail cannot be tampered with. The `previous_hash` column provides an additional layer of chain verification — any gap or inconsistency in the hash chain indicates potential ledger tampering.
 
 ### Filtering
 
@@ -266,6 +294,7 @@ Retention policies define how long records should be kept before becoming eligib
      - `last_modified`: From last modification date
      - `closure_date`: From closure/completion date
      - `last_access`: From last access date
+   - **Object Format** (v1.2.0): Optional MIME type filter (e.g., `image/tiff`, `application/pdf`). Leave empty for all formats. Uses prefix matching, so `image/` matches all image types.
    - **Scope**: Global, per-repository, or per-hierarchy node
    - **Enabled**: Toggle to activate/deactivate
 
@@ -465,6 +494,58 @@ php symfony integrity:retention --hold=12345 --reason="Legal investigation"
 # Release a legal hold
 php symfony integrity:retention --release=1
 ```
+
+## REST API
+
+The Integrity Assurance plugin provides a comprehensive REST API (v1.2.0) for integration with external monitoring tools, dashboards, and automation systems. All endpoints require administrator authentication via session cookie.
+
+### Paginated List Endpoints
+
+| Endpoint | Method | Parameters | Description |
+|----------|--------|-----------|-------------|
+| `/api/integrity/ledger` | GET | `limit`, `skip`, `repository_id`, `outcome`, `date_from`, `date_to` | Browse verification ledger |
+| `/api/integrity/runs` | GET | `limit`, `skip`, `status` | Browse run history |
+| `/api/integrity/holds` | GET | `limit`, `skip`, `status` | Browse legal holds |
+| `/api/integrity/policies` | GET | `limit`, `skip` | Browse retention policies |
+
+All paginated endpoints return: `{success: true, total: N, limit: N, skip: N, data: [...]}`
+
+### Analytics Endpoints
+
+| Endpoint | Method | Parameters | Description |
+|----------|--------|-----------|-------------|
+| `/api/integrity/stats` | GET | — | Dashboard statistics |
+| `/api/integrity/daily-trend` | GET | `days` (default: 30) | Daily pass/fail counts |
+| `/api/integrity/repo-breakdown` | GET | — | Per-repository verification stats |
+| `/api/integrity/format-breakdown` | GET | — | Per-format verification stats |
+| `/api/integrity/throughput` | GET | `days` (default: 7) | Verification throughput |
+| `/api/integrity/storage-growth` | GET | `days` (default: 30) | Storage scanned over time |
+
+### Action Endpoints
+
+| Endpoint | Method | Parameters | Description |
+|----------|--------|-----------|-------------|
+| `/api/integrity/verify` | POST | `object_id` | Verify a single digital object |
+| `/api/integrity/schedule/:id/run` | POST | — | Execute a schedule immediately |
+| `/api/integrity/schedule/:id/toggle` | POST | — | Enable/disable schedule |
+| `/api/integrity/retention/scan` | POST | `policy_id` (optional) | Scan for eligible dispositions |
+| `/api/integrity/hold/place` | POST | `information_object_id`, `reason` | Place a legal hold |
+| `/api/integrity/hold/:id/release` | POST | — | Release a legal hold |
+
+### Example Usage
+
+```bash
+# Get dashboard stats
+curl -s -b cookies.txt https://psis.theahg.co.za/api/integrity/stats | jq .
+
+# Browse ledger (first 10 entries)
+curl -s -b cookies.txt 'https://psis.theahg.co.za/api/integrity/ledger?limit=10' | jq .
+
+# Get daily trend for last 7 days
+curl -s -b cookies.txt 'https://psis.theahg.co.za/api/integrity/daily-trend?days=7' | jq .
+```
+
+Full OpenAPI 3.0.3 specification: `docs/openapi.yaml`
 
 ## Cron Setup
 

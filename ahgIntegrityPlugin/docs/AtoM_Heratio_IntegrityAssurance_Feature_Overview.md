@@ -2,7 +2,7 @@
 
 ## Feature Overview
 
-**Plugin:** ahgIntegrityPlugin v1.1.0
+**Plugin:** ahgIntegrityPlugin v1.2.0
 **Category:** Digital Preservation
 **Author:** The Archive and Heritage Group (Pty) Ltd
 **License:** AGPL-3.0
@@ -34,6 +34,7 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 - Complete audit trail of every verification attempt
 - Entries are never updated or deleted — full forensic history
 - **Actor and hostname tracking** for multi-server environments
+- **Previous hash chain** (v1.2.0): Each ledger entry records the computed hash of the prior successful verification, enabling tamper detection and chain-of-custody verification
 - Denormalized repository and information object IDs for efficient scoped queries
 - Records file existence, readability, hash values, match status, and timing
 
@@ -48,10 +49,11 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 - **Auditor Pack**: ZIP archive containing standalone summary.html (no external dependencies), exceptions.csv, and config-snapshot.json
 - **CLI export**: `--export-csv` and `--auditor-pack` flags for automated reporting pipelines
 
-### Retention Policy Engine (v1.1.0)
+### Retention Policy Engine (v1.1.0, enhanced v1.2.0)
 - **Policy definitions**: Name, description, retention period (days), trigger type, scope
 - **Trigger types**: Ingest date, last modified, closure date, last access
 - **Scope types**: Global, per-repository, or per-hierarchy node
+- **Object format filter** (v1.2.0): Restrict policies to specific MIME types (e.g., `image/tiff`, `application/pdf`) using prefix matching
 - **Disposition review queue**: Eligible, Pending Review, Approved, Rejected, Held, Disposed
 - **Safe disposition**: Marks as "disposed" only — no actual deletion (preserving archival integrity)
 
@@ -68,12 +70,15 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 - **Schedule notifications**: Existing notify_email, notify_on_failure, notify_on_mismatch wired to alert system
 - **Non-fatal**: Alert failures never break verification runs
 
-### Enhanced Dashboard (v1.1.0)
+### Enhanced Dashboard (v1.1.0, enhanced v1.2.0)
 - **Backlog card**: Count of master digital objects never verified
 - **Throughput card**: Objects/hour and GB/hour over the last 7 days
-- **Daily Trend chart**: CSS-only horizontal bar chart (30 days), green=pass, red=fail
-- **Repository Breakdown table**: Per-repository totals, pass/fail counts, pass rate
+- **Storage growth KPI** (v1.2.0): Total storage scanned and average GB/day over 30 days
+- **Daily Trend chart**: Interactive Chart.js stacked bar chart (v1.2.0, upgraded from CSS bars), green=pass, red=fail
+- **Repository Breakdown table**: Per-repository totals, pass/fail counts, pass rate — clickable for drill-down filtering (v1.2.0)
 - **Failure Type Breakdown table**: Outcome distribution with percentages
+- **Format Breakdown table** (v1.2.0): Verification results by file format (PRONOM)
+- **Repository filter** (v1.2.0): Dropdown filter to scope all dashboard statistics to a specific repository
 
 ### Admin Dashboard
 - Real-time statistics: master objects, total verifications, pass rate
@@ -89,6 +94,14 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 | `php symfony integrity:schedule` | Manage schedules, run due schedules (for cron) |
 | `php symfony integrity:report` | Generate reports, CSV exports, auditor packs |
 | `php symfony integrity:retention` | Manage retention policies, legal holds, disposition queue |
+
+### REST API (v1.2.0)
+- **25+ JSON API endpoints** for integration with external monitoring and automation systems
+- **Paginated list endpoints**: Ledger, runs, holds, policies with configurable `limit` and `skip` parameters
+- **Analytics endpoints**: Daily trend, repository breakdown, format breakdown, throughput, storage growth
+- **Action endpoints**: Verify objects, manage schedules, retention policies, legal holds, alerts
+- **OpenAPI specification**: Full OpenAPI 3.0.3 documentation included (see `docs/openapi.yaml`)
+- **Admin authentication required** on all endpoints
 
 ### Reporting
 - Summary statistics with pass rates and trend analysis
@@ -107,6 +120,7 @@ The plugin builds on the existing Digital Preservation plugin's checksum infrast
 | **NDSA Levels of Preservation** | Level 2+ fixity checking with automated scheduling |
 | **NARSSA/NARS** | South African national archives compliance for digital records |
 | **ISO 16363** (TDR Audit) | Documented integrity checking for Trusted Digital Repository certification |
+| **ISO 15489** (Records Management) | Supports authenticity, reliability, integrity, and usability requirements |
 | **Records Retention** | Configurable retention policies with disposition review queue |
 | **Legal Hold** | Litigation hold capability to prevent disposition of records under review |
 
