@@ -75,34 +75,8 @@
 
     <hr>
 
-    <!-- Related posts -->
-    <?php if (!empty($post['related'])): ?>
-    <div class="mb-4">
-      <h2 class="h5 mb-3"><?php echo __('Related Posts'); ?></h2>
-      <div class="row row-cols-1 row-cols-md-2 g-3">
-        <?php foreach ($post['related'] as $rel): ?>
-        <div class="col">
-          <div class="card h-100">
-            <?php if (!empty($rel->featured_image_path)): ?>
-            <img src="<?php echo htmlspecialchars($rel->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" style="height: 120px; object-fit: cover;">
-            <?php endif; ?>
-            <div class="card-body py-2">
-              <h6 class="card-title mb-1">
-                <a href="<?php echo url_for(['module' => 'registry', 'action' => 'blogView', 'slug' => $rel->slug]); ?>" class="text-decoration-none">
-                  <?php echo htmlspecialchars($rel->title, ENT_QUOTES, 'UTF-8'); ?>
-                </a>
-              </h6>
-              <small class="text-muted"><?php echo date('M j, Y', strtotime($rel->published_at ?? $rel->created_at)); ?></small>
-            </div>
-          </div>
-        </div>
-        <?php endforeach; ?>
-      </div>
-    </div>
-    <?php endif; ?>
-
     <!-- Back link -->
-    <div class="text-center">
+    <div class="text-center mt-4 mb-2">
       <a href="<?php echo url_for(['module' => 'registry', 'action' => 'blogList']); ?>" class="btn btn-outline-secondary">
         <i class="fas fa-arrow-left me-1"></i> <?php echo __('Back to Blog'); ?>
       </a>

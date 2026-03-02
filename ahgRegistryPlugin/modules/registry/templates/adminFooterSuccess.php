@@ -43,7 +43,7 @@
     <div class="card-body">
       <div class="mb-0">
         <label for="footer_description" class="form-label fw-semibold"><?php echo __('Description text (left column)'); ?></label>
-        <textarea class="form-control" id="footer_description" name="footer_description" rows="3"><?php echo htmlspecialchars($fs['footer_description'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+        <textarea class="form-control" id="footer_description" name="footer_description" rows="3"><?php echo htmlspecialchars(sfOutputEscaper::unescape($fs['footer_description'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></textarea>
         <div class="form-text"><?php echo __('Displayed in the left column of the footer.'); ?></div>
       </div>
     </div>
@@ -121,7 +121,7 @@
     <div class="card-body">
       <div class="mb-0">
         <label for="footer_copyright" class="form-label fw-semibold"><?php echo __('Copyright line'); ?></label>
-        <input type="text" class="form-control" id="footer_copyright" name="footer_copyright" value="<?php echo htmlspecialchars($fs['footer_copyright'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+        <input type="text" class="form-control" id="footer_copyright" name="footer_copyright" value="<?php echo htmlspecialchars(sfOutputEscaper::unescape($fs['footer_copyright'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
         <div class="form-text"><?php echo __('Use {year} as a placeholder for the current year. Basic HTML like &lt;a&gt; tags is allowed.'); ?></div>
       </div>
     </div>

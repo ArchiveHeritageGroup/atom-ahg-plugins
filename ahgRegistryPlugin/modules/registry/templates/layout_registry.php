@@ -300,7 +300,7 @@
     $_fCopyRow = \Illuminate\Database\Capsule\Manager::table('registry_settings')
       ->where('setting_key', 'footer_copyright')->first();
     if ($_fCopyRow && '' !== trim($_fCopyRow->setting_value)) {
-      $_footerCopyright = str_replace('{year}', date('Y'), $_fCopyRow->setting_value);
+      $_footerCopyright = str_replace('{year}', date('Y'), html_entity_decode($_fCopyRow->setting_value, ENT_QUOTES, 'UTF-8'));
     }
 
     $_fColsRow = \Illuminate\Database\Capsule\Manager::table('registry_settings')

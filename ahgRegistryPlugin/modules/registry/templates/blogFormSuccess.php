@@ -28,7 +28,7 @@
       </div>
     <?php endif; ?>
 
-    <?php $p = $post; ?>
+    <?php $p = sfOutputEscaper::unescape($post); ?>
 
     <?php
       $formAction = $p && !empty($p->id)
@@ -64,7 +64,7 @@
             <div class="col-12">
               <label for="bf-content" class="form-label"><?php echo __('Content'); ?> <span class="text-danger">*</span></label>
               <textarea class="form-control" id="bf-content" name="content" rows="15" required placeholder="<?php echo __('Write your blog post content here...'); ?>"><?php echo htmlspecialchars($p->content ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-              <div class="form-text"><?php echo __('Supports plain text. Paragraphs separated by blank lines. Rich text editor can be added later.'); ?></div>
+              <div class="form-text"><?php echo __('Supports HTML markup. Use &lt;p&gt;, &lt;h3&gt;, &lt;ul&gt;, &lt;a&gt; and other tags for formatting.'); ?></div>
             </div>
             <div class="col-12">
               <label for="bf-excerpt" class="form-label"><?php echo __('Excerpt'); ?></label>
