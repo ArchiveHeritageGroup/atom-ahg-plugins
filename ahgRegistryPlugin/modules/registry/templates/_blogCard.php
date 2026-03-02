@@ -48,11 +48,18 @@
           <?php echo date('M j, Y', strtotime($item->published_at ?? $item->created_at ?? 'now')); ?>
         </small>
       </div>
-      <?php if (!empty($item->view_count)): ?>
-      <small class="text-muted">
-        <i class="fas fa-eye me-1"></i><?php echo number_format((int) $item->view_count); ?>
-      </small>
-      <?php endif; ?>
+      <div class="d-flex gap-2">
+        <?php if (!empty($item->view_count)): ?>
+        <small class="text-muted">
+          <i class="fas fa-eye me-1"></i><?php echo number_format((int) $item->view_count); ?>
+        </small>
+        <?php endif; ?>
+        <?php if (isset($item->comment_count) && (int) $item->comment_count > 0): ?>
+        <small class="text-muted">
+          <i class="fas fa-comments me-1"></i><?php echo (int) $item->comment_count; ?>
+        </small>
+        <?php endif; ?>
+      </div>
     </div>
   </div>
 </div>

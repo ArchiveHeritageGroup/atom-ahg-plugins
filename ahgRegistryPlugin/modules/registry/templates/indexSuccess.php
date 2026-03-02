@@ -69,16 +69,34 @@
 </div>
 <?php endif; ?>
 
-<!-- Featured institutions -->
+<!-- Featured / Favorite institutions -->
+<?php
+  $_favMode = !empty($userFavoritesMode);
+  $_favIds = isset($userFavoriteIds) ? sfOutputEscaper::unescape($userFavoriteIds) : [];
+  if (!is_array($_favIds)) { $_favIds = []; }
+?>
 <?php if (!empty($featuredInstitutions)): ?>
 <div class="mb-5">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4 mb-0"><?php echo __('Featured Institutions'); ?></h2>
-    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionBrowse']); ?>" class="btn btn-sm btn-outline-primary"><?php echo __('View All'); ?></a>
+    <h2 class="h4 mb-0">
+      <?php if ($_favMode): ?>
+        <i class="fas fa-star text-warning me-1"></i><?php echo __('My Favorites'); ?>
+      <?php else: ?>
+        <?php echo __('Featured Institutions'); ?>
+      <?php endif; ?>
+    </h2>
+    <div>
+      <?php if ($sf_user->isAuthenticated()): ?>
+        <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myFavorites']); ?>" class="btn btn-sm btn-outline-warning me-1">
+          <i class="fas fa-star me-1"></i><?php echo __('All Favorites'); ?>
+        </a>
+      <?php endif; ?>
+      <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionBrowse']); ?>" class="btn btn-sm btn-outline-primary"><?php echo __('View All'); ?></a>
+    </div>
   </div>
   <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
     <?php foreach ($featuredInstitutions as $inst): ?>
-      <?php include_partial('registry/institutionCard', ['item' => $inst]); ?>
+      <?php include_partial('registry/institutionCard', ['item' => $inst, 'userFavoriteIds' => $_favIds, 'showFavoriteToggle' => $sf_user->isAuthenticated()]); ?>
     <?php endforeach; ?>
   </div>
 </div>

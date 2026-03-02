@@ -78,7 +78,7 @@ class InstitutionService
             ->leftJoin('registry_vendor as rv', 'rv.id', '=', 'rvi.vendor_id')
             ->where('rvi.institution_id', $id)
             ->where('rvi.is_active', 1)
-            ->select('rv.*', 'rvi.relationship_type', 'rvi.service_description', 'rvi.start_date', 'rvi.end_date')
+            ->select('rv.*', 'rv.name as vendor_name', 'rv.slug as vendor_slug', 'rvi.relationship_type', 'rvi.service_description', 'rvi.start_date', 'rvi.end_date')
             ->get()
             ->all();
 

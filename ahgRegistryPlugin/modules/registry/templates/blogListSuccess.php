@@ -92,6 +92,9 @@
           <small class="text-muted">
             <?php echo htmlspecialchars($post->author_name ?? '', ENT_QUOTES, 'UTF-8'); ?>
             &middot; <?php echo date('M j, Y', strtotime($post->published_at ?? $post->created_at)); ?>
+            <?php if (isset($post->comment_count) && (int) $post->comment_count > 0): ?>
+              &middot; <i class="fas fa-comments"></i> <?php echo (int) $post->comment_count; ?>
+            <?php endif; ?>
           </small>
         </div>
       </div>

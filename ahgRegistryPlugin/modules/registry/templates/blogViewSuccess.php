@@ -75,6 +75,55 @@
 
     <hr>
 
+    <!-- Comments section -->
+    <?php
+      $commentsEnabled = !isset($detail->comments_enabled) || $detail->comments_enabled;
+      $disc = isset($discussion) ? $discussion : null;
+      $commentCount = $disc ? (int) ($disc['reply_count'] ?? 0) : 0;
+      $blogReplyUrl = url_for(['module' => 'registry', 'action' => 'blogReply', 'slug' => $detail->slug]);
+    ?>
+    <?php if ($commentsEnabled): ?>
+    <div id="comments" class="mb-4">
+      <h3 class="h5 mb-3">
+        <i class="fas fa-comments me-1"></i>
+        <?php echo __('%1% Comments', ['%1%' => $commentCount]); ?>
+      </h3>
+
+      <?php if ($disc && !empty($disc['replies'])): ?>
+        <?php include_partial('registry/replyThread', [
+          'replies' => $disc['replies'],
+          'discussionId' => (int) $disc['discussion']->id,
+          'groupSlug' => '',
+          'replyUrl' => $blogReplyUrl,
+          'depth' => 0,
+        ]); ?>
+      <?php endif; ?>
+
+      <?php if ($sf_user->isAuthenticated()): ?>
+      <!-- Reply form -->
+      <div class="card mt-3" id="reply-form">
+        <div class="card-header fw-semibold"><?php echo __('Leave a Comment'); ?></div>
+        <div class="card-body">
+          <form method="post" action="<?php echo $blogReplyUrl; ?>">
+            <div class="mb-3">
+              <textarea class="form-control" name="content" rows="4" required placeholder="<?php echo __('Write your comment...'); ?>"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-comment me-1"></i> <?php echo __('Post Comment'); ?>
+            </button>
+          </form>
+        </div>
+      </div>
+      <?php else: ?>
+      <div class="alert alert-info mt-3">
+        <i class="fas fa-sign-in-alt me-1"></i>
+        <a href="<?php echo url_for(['module' => 'registry', 'action' => 'login']); ?>"><?php echo __('Log in'); ?></a>
+        <?php echo __('to leave a comment.'); ?>
+      </div>
+      <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Back link -->
     <div class="text-center mt-4 mb-2">
       <a href="<?php echo url_for(['module' => 'registry', 'action' => 'blogList']); ?>" class="btn btn-outline-secondary">

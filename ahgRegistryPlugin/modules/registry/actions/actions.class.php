@@ -92,6 +92,12 @@ class registryActions extends AhgController
         $inst = $db::table('registry_institution')
             ->where('created_by', $userId)->first();
 
+        // Admin fallback: use first institution if none matched by created_by
+        if (!$inst && $this->isAdmin()) {
+            $inst = $db::table('registry_institution')
+                ->orderBy('id', 'asc')->first();
+        }
+
         return $inst;
     }
 
@@ -103,8 +109,16 @@ class registryActions extends AhgController
         $userId = $this->getCurrentUserId();
         $db = \Illuminate\Database\Capsule\Manager::class;
 
-        return $db::table('registry_vendor')
+        $vendor = $db::table('registry_vendor')
             ->where('created_by', $userId)->first();
+
+        // Admin fallback: use first vendor if none matched by created_by
+        if (!$vendor && $this->isAdmin()) {
+            $vendor = $db::table('registry_vendor')
+                ->orderBy('id', 'asc')->first();
+        }
+
+        return $vendor;
     }
 
     protected function getRegistrySetting(string $key, $default = null)
@@ -211,7 +225,41 @@ class registryActions extends AhgController
             'groups' => $db::table('registry_user_group')->where('is_active', 1)->count(),
         ];
 
-        $this->featuredInstitutions = $svc->browse(['featured' => true, 'limit' => 6])['items'];
+        // Per-user favorites or admin-featured fallback
+        $userId = $this->getCurrentUserId();
+        $this->userFavoritesMode = false;
+
+        if ($userId) {
+            $favInstitutions = $db::table('registry_favorite as f')
+                ->join('registry_institution as ri', 'ri.id', '=', 'f.entity_id')
+                ->where('f.user_id', $userId)
+                ->where('f.entity_type', 'institution')
+                ->where('ri.is_active', 1)
+                ->select('ri.*')
+                ->orderBy('ri.name')
+                ->limit(6)
+                ->get();
+
+            if ($favInstitutions->count() > 0) {
+                $this->featuredInstitutions = $favInstitutions;
+                $this->userFavoritesMode = true;
+            } else {
+                $this->featuredInstitutions = $svc->browse(['featured' => true, 'limit' => 6])['items'];
+            }
+        } else {
+            $this->featuredInstitutions = $svc->browse(['featured' => true, 'limit' => 6])['items'];
+        }
+
+        // Get user's favorite IDs for star toggle on cards
+        $this->userFavoriteIds = [];
+        if ($userId) {
+            $this->userFavoriteIds = $db::table('registry_favorite')
+                ->where('user_id', $userId)
+                ->where('entity_type', 'institution')
+                ->pluck('entity_id')
+                ->all();
+        }
+
         $this->featuredVendors = $vendorSvc->browse(['featured' => true, 'limit' => 6])['items'];
         $this->featuredSoftware = $softwareSvc->browse(['featured' => true, 'limit' => 6])['items'];
         $this->recentBlog = $blogSvc->getPublished(4);
@@ -756,6 +804,102 @@ class registryActions extends AhgController
 
             return;
         }
+
+        // Load or auto-create discussion thread for this blog post
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $postId = (int) $this->post->id;
+
+        $discussion = $db::table('registry_discussion')
+            ->where('blog_post_id', $postId)
+            ->first();
+
+        if (!$discussion) {
+            $discId = $db::table('registry_discussion')->insertGetId([
+                'group_id' => null,
+                'blog_post_id' => $postId,
+                'author_email' => $this->post->author_name ?? 'system',
+                'author_name' => $this->post->author_name ?? 'System',
+                'title' => $this->post->title,
+                'content' => 'Comments for: ' . $this->post->title,
+                'topic_type' => 'discussion',
+                'status' => 'active',
+                'reply_count' => 0,
+                'view_count' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+            $discussion = $db::table('registry_discussion')->where('id', $discId)->first();
+        }
+
+        $discSvc = $this->loadService('DiscussionService');
+        $this->discussion = $discSvc->view((int) $discussion->id);
+        $this->currentUserEmail = $this->getCurrentUserEmail();
+    }
+
+    public function executeBlogReply($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $slug = $request->getParameter('slug');
+
+        // Find blog post by slug
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $post = $db::table('registry_blog_post')
+            ->where('slug', $slug)
+            ->where('status', 'published')
+            ->first();
+
+        if (!$post) {
+            $this->forward404();
+
+            return;
+        }
+
+        // Check if comments are enabled
+        if (isset($post->comments_enabled) && !$post->comments_enabled) {
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'blogView', 'slug' => $slug]));
+
+            return;
+        }
+
+        // Find or create discussion for this blog post
+        $discussion = $db::table('registry_discussion')
+            ->where('blog_post_id', $post->id)
+            ->first();
+
+        if (!$discussion) {
+            $this->forward404();
+
+            return;
+        }
+
+        $data = [
+            'content' => trim($request->getParameter('content', '')),
+            'parent_reply_id' => $request->getParameter('parent_reply_id', null),
+            'author_email' => $this->getCurrentUserEmail(),
+            'author_name' => $user->getAttribute('user_name', ''),
+            'author_user_id' => $this->getCurrentUserId(),
+        ];
+
+        if ('' !== $data['content']) {
+            $discSvc = $this->loadService('DiscussionService');
+            $discSvc->reply((int) $discussion->id, $data);
+
+            // Update blog post comment_count
+            $commentCount = $db::table('registry_discussion_reply')
+                ->where('discussion_id', $discussion->id)
+                ->where('status', 'active')
+                ->count();
+
+            $db::table('registry_blog_post')
+                ->where('id', $post->id)
+                ->update(['comment_count' => $commentCount]);
+        }
+
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'blogView', 'slug' => $slug]) . '#comments');
     }
 
     // ================================================================
@@ -858,7 +1002,7 @@ class registryActions extends AhgController
         }
 
         if (!$this->institution) {
-            $this->forward404();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
             return;
         }
@@ -1117,6 +1261,8 @@ class registryActions extends AhgController
         $this->errors = [];
         $this->vendors = \Illuminate\Database\Capsule\Manager::table('registry_vendor')
             ->where('is_active', 1)->orderBy('name')->get();
+        $this->allSoftware = \Illuminate\Database\Capsule\Manager::table('registry_software')
+            ->where('is_active', 1)->orderBy('name')->select('id', 'name', 'slug', 'latest_version')->get()->all();
 
         if ($request->isMethod('post')) {
             $svc = $this->loadService('InstanceService');
@@ -1192,6 +1338,8 @@ class registryActions extends AhgController
         $this->errors = [];
         $this->vendors = \Illuminate\Database\Capsule\Manager::table('registry_vendor')
             ->where('is_active', 1)->orderBy('name')->get();
+        $this->allSoftware = \Illuminate\Database\Capsule\Manager::table('registry_software')
+            ->where('is_active', 1)->orderBy('name')->select('id', 'name', 'slug', 'latest_version')->get()->all();
 
         if ($request->isMethod('post')) {
             $features = $request->getParameter('features', []);
@@ -1274,8 +1422,47 @@ class registryActions extends AhgController
             return;
         }
 
+        $db = \Illuminate\Database\Capsule\Manager::class;
         $svc = $this->loadService('RelationshipService');
+
+        // Handle POST: add or remove software
+        if ($request->isMethod('post')) {
+            $formAction = $request->getParameter('form_action', '');
+
+            if ('add' === $formAction) {
+                $softwareId = (int) $request->getParameter('software_id', 0);
+                $versionInUse = trim($request->getParameter('version_in_use', ''));
+                $notes = trim($request->getParameter('notes', ''));
+
+                if ($softwareId > 0) {
+                    $svc->assignSoftware([
+                        'institution_id' => $this->institution->id,
+                        'software_id' => $softwareId,
+                        'version_in_use' => $versionInUse ?: null,
+                        'notes' => $notes ?: null,
+                    ]);
+                }
+            } elseif ('remove' === $formAction) {
+                $assignmentId = (int) $request->getParameter('assignment_id', 0);
+                if ($assignmentId > 0) {
+                    $svc->removeSoftwareAssignment($assignmentId);
+                }
+            }
+
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']));
+
+            return;
+        }
+
         $this->software = $svc->getInstitutionSoftware($this->institution->id);
+
+        // Get all available software for the dropdown
+        $this->allSoftware = $db::table('registry_software')
+            ->where('is_active', 1)
+            ->orderBy('name', 'asc')
+            ->select('id', 'name', 'latest_version')
+            ->get()
+            ->all();
     }
 
     public function executeMyInstitutionVendors($request)
@@ -2412,6 +2599,7 @@ class registryActions extends AhgController
                 'author_type' => $request->getParameter('author_type', 'admin'),
                 'author_name' => $user->getAttribute('user_name', $this->getCurrentUserEmail()),
                 'category' => $request->getParameter('category', 'news'),
+                'comments_enabled' => (int) $request->getParameter('comments_enabled', 1),
                 'status' => 'draft',
             ];
 
@@ -2471,6 +2659,7 @@ class registryActions extends AhgController
                 'content' => trim($request->getParameter('content', '')),
                 'excerpt' => trim($request->getParameter('excerpt', '')),
                 'category' => $request->getParameter('category', 'news'),
+                'comments_enabled' => (int) $request->getParameter('comments_enabled', 0),
             ];
 
             if ('' === $data['title']) {
@@ -3585,6 +3774,11 @@ class registryActions extends AhgController
 
     protected function getContactFormData($request, string $entityType, int $entityId): array
     {
+        $roles = $request->getParameter('roles', []);
+        if (is_string($roles)) {
+            $roles = array_filter(array_map('trim', explode(',', $roles)));
+        }
+
         return [
             'entity_type' => $entityType,
             'entity_id' => $entityId,
@@ -3595,6 +3789,7 @@ class registryActions extends AhgController
             'mobile' => trim($request->getParameter('mobile', '')),
             'job_title' => trim($request->getParameter('job_title', '')),
             'department' => trim($request->getParameter('department', '')),
+            'roles' => !empty($roles) ? json_encode(array_values($roles)) : null,
             'is_primary' => $request->getParameter('is_primary', 0) ? 1 : 0,
             'is_public' => $request->getParameter('is_public', 1) ? 1 : 0,
             'notes' => trim($request->getParameter('notes', '')),

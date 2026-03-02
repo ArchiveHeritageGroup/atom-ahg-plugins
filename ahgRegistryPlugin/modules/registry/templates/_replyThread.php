@@ -70,7 +70,12 @@
             <i class="fas fa-reply me-1"></i><?php echo __('Reply'); ?>
           </button>
           <div class="reply-form mt-2" id="reply-form-<?php echo (int) ($r->id ?? 0); ?>" style="display: none;">
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'discussionReply', 'slug' => $groupSlug ?? '', 'id' => (int) ($discussionId ?? 0)]); ?>">
+            <?php
+              $formAction = isset($replyUrl) && $replyUrl
+                ? $replyUrl
+                : url_for(['module' => 'registry', 'action' => 'discussionReply', 'slug' => $groupSlug ?? '', 'id' => (int) ($discussionId ?? 0)]);
+            ?>
+            <form method="post" action="<?php echo $formAction; ?>">
               <input type="hidden" name="parent_reply_id" value="<?php echo (int) ($r->id ?? 0); ?>">
               <textarea class="form-control form-control-sm mb-2" name="content" rows="2" placeholder="<?php echo __('Write a reply...'); ?>" required></textarea>
               <button type="submit" class="btn btn-sm btn-primary"><?php echo __('Submit'); ?></button>
@@ -83,13 +88,19 @@
   </div>
 </div>
 <?php if (!empty($r->children) && $currentLevel < $maxDepth): ?>
-  <?php include_partial('registry/replyThread', [
-    'replies' => $r->children,
-    'groupSlug' => $groupSlug ?? '',
-    'discussionId' => $discussionId ?? 0,
-    'level' => $currentLevel + 1,
-    'depth' => $currentLevel + 1,
-  ]); ?>
+  <?php
+    $childParams = [
+      'replies' => $r->children,
+      'groupSlug' => $groupSlug ?? '',
+      'discussionId' => $discussionId ?? 0,
+      'level' => $currentLevel + 1,
+      'depth' => $currentLevel + 1,
+    ];
+    if (isset($replyUrl) && $replyUrl) {
+      $childParams['replyUrl'] = $replyUrl;
+    }
+  ?>
+  <?php include_partial('registry/replyThread', $childParams); ?>
 <?php endif; ?>
 <?php endforeach; ?>
 <?php endif; ?>

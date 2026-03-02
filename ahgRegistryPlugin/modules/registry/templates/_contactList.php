@@ -53,8 +53,8 @@
           <td>
             <?php
               $roles = [];
-              if (!empty($c->contact_roles)) {
-                $rawContactRoles = sfOutputEscaper::unescape($c->contact_roles);
+              if (!empty($c->roles)) {
+                $rawContactRoles = sfOutputEscaper::unescape($c->roles);
                 $roles = is_string($rawContactRoles) ? json_decode($rawContactRoles, true) : (array) $rawContactRoles;
               } elseif (!empty($c->role)) {
                 $roles = [$c->role];

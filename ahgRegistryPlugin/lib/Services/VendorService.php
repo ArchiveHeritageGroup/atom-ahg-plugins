@@ -124,7 +124,7 @@ class VendorService
             ->where('rvi.vendor_id', $id)
             ->where('rvi.is_active', 1)
             ->where('rvi.is_public', 1)
-            ->select('ri.*', 'rvi.relationship_type', 'rvi.service_description', 'rvi.start_date', 'rvi.end_date')
+            ->select('ri.*', 'ri.name as institution_name', 'ri.slug as institution_slug', 'rvi.relationship_type', 'rvi.service_description', 'rvi.start_date', 'rvi.end_date')
             ->get()
             ->all();
 
@@ -337,7 +337,7 @@ class VendorService
             ->leftJoin('registry_institution as ri', 'ri.id', '=', 'rvi.institution_id')
             ->where('rvi.vendor_id', $vendorId)
             ->where('rvi.is_active', 1)
-            ->select('ri.*', 'rvi.relationship_type', 'rvi.service_description', 'rvi.start_date', 'rvi.end_date')
+            ->select('ri.*', 'ri.name as institution_name', 'ri.slug as institution_slug', 'rvi.relationship_type', 'rvi.service_description', 'rvi.start_date', 'rvi.end_date')
             ->orderBy('ri.name', 'asc')
             ->get()
             ->all();

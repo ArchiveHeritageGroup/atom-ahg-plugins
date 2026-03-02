@@ -119,6 +119,13 @@
               <input type="text" class="form-control" id="bf-tags" name="tags" value="<?php echo htmlspecialchars($tagsVal, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Comma-separated: AtoM, archives, GLAM, preservation...'); ?>">
             </div>
             <div class="col-md-4">
+              <div class="form-check mt-2">
+                <input type="hidden" name="comments_enabled" value="0">
+                <input class="form-check-input" type="checkbox" id="bf-comments" name="comments_enabled" value="1"<?php echo (!isset($p->comments_enabled) || $p->comments_enabled) ? ' checked' : ''; ?>>
+                <label class="form-check-label" for="bf-comments"><?php echo __('Enable comments'); ?></label>
+              </div>
+            </div>
+            <div class="col-md-4">
               <?php if ($p && !empty($p->status)): ?>
               <label class="form-label"><?php echo __('Status'); ?></label>
               <div class="mt-1">

@@ -58,7 +58,8 @@ class InstitutionRepository
         $page = $params['page'] ?? 1;
         $offset = ($page - 1) * $limit;
 
-        $items = $query->orderBy($sort, $direction)
+        $items = $query->orderBy('is_featured', 'desc')
+                       ->orderBy($sort, $direction)
                        ->limit($limit)
                        ->offset($offset)
                        ->get();
@@ -94,7 +95,8 @@ class InstitutionRepository
             $page = $params['page'] ?? 1;
             $offset = ($page - 1) * $limit;
 
-            $items = $query->orderBy('name', 'asc')
+            $items = $query->orderBy('is_featured', 'desc')
+                           ->orderBy('name', 'asc')
                            ->limit($limit)
                            ->offset($offset)
                            ->get();
@@ -106,7 +108,8 @@ class InstitutionRepository
         $page = $params['page'] ?? 1;
         $offset = ($page - 1) * $limit;
 
-        $items = $query->orderByRaw("MATCH(name, description, collection_summary) AGAINST(? IN BOOLEAN MODE) DESC", [$term])
+        $items = $query->orderBy('is_featured', 'desc')
+                       ->orderByRaw("MATCH(name, description, collection_summary) AGAINST(? IN BOOLEAN MODE) DESC", [$term])
                        ->limit($limit)
                        ->offset($offset)
                        ->get();

@@ -59,7 +59,24 @@
             </div>
             <div class="col-md-4">
               <label for="if-software" class="form-label"><?php echo __('Software'); ?></label>
-              <input type="text" class="form-control" id="if-software" name="software" value="<?php echo htmlspecialchars($f->software ?? 'heratio', ENT_QUOTES, 'UTF-8'); ?>" placeholder="heratio">
+              <?php $currentSw = $f->software ?? 'heratio'; ?>
+              <select class="form-select" id="if-software" name="software">
+                <?php if (isset($allSoftware) && count($allSoftware) > 0):
+                  foreach ($allSoftware as $_sw): ?>
+                    <option value="<?php echo htmlspecialchars($_sw->name, ENT_QUOTES, 'UTF-8'); ?>"<?php echo (strcasecmp($currentSw, $_sw->name) === 0 || strcasecmp($currentSw, $_sw->slug) === 0) ? ' selected' : ''; ?>><?php echo htmlspecialchars($_sw->name, ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php endforeach; endif; ?>
+                <?php
+                  // If current value doesn't match any software in directory, show it as custom option
+                  $matched = false;
+                  if (isset($allSoftware)) {
+                    foreach ($allSoftware as $_sw) {
+                      if (strcasecmp($currentSw, $_sw->name) === 0 || strcasecmp($currentSw, $_sw->slug) === 0) { $matched = true; break; }
+                    }
+                  }
+                  if (!$matched && !empty($currentSw)): ?>
+                    <option value="<?php echo htmlspecialchars($currentSw, ENT_QUOTES, 'UTF-8'); ?>" selected><?php echo htmlspecialchars($currentSw, ENT_QUOTES, 'UTF-8'); ?> (<?php echo __('custom'); ?>)</option>
+                <?php endif; ?>
+              </select>
             </div>
             <div class="col-md-4">
               <label for="if-version" class="form-label"><?php echo __('Software Version'); ?></label>
