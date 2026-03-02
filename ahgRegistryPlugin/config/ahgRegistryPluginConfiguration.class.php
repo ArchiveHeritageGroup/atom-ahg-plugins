@@ -70,6 +70,9 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_admin_email', '/registry/admin/email', 'adminEmail');
         $loader->any('registry_admin_import', '/registry/admin/import', 'adminImport');
         $loader->any('registry_admin_users', '/registry/admin/users', 'adminUsers');
+        $loader->any('registry_admin_user_manage', '/registry/admin/users/manage', 'adminUserManage');
+        $loader->any('registry_admin_user_edit', '/registry/admin/users/:id/edit', 'adminUserEdit', ['id' => '\d+']);
+        $loader->post('registry_admin_user_reset_password', '/registry/admin/users/:id/reset-password', 'adminUserResetPassword', ['id' => '\d+']);
 
         // Admin CRUD: edit any entity by ID
         $loader->any('registry_admin_institution_edit', '/registry/admin/institutions/:id/edit', 'institutionEdit', ['id' => '\d+']);

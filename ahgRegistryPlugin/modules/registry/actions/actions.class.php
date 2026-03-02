@@ -1144,7 +1144,16 @@ class registryActions extends AhgController
 
         $this->setTemplate('contactForm');
 
-        $institution = $this->getMyInstitution();
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        // Admin can target a specific institution via ?inst= parameter
+        $targetId = (int) $request->getParameter('inst', 0);
+        if ($targetId && $this->isAdmin()) {
+            $institution = $db::table('registry_institution')->where('id', $targetId)->first();
+        } else {
+            $institution = $this->getMyInstitution();
+        }
+
         if (!$institution) {
             $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
@@ -1755,7 +1764,16 @@ class registryActions extends AhgController
 
         $this->setTemplate('contactForm');
 
-        $vendor = $this->getMyVendor();
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        // Admin can target a specific vendor via ?vendor= parameter
+        $targetId = (int) $request->getParameter('vendor', 0);
+        if ($targetId && $this->isAdmin()) {
+            $vendor = $db::table('registry_vendor')->where('id', $targetId)->first();
+        } else {
+            $vendor = $this->getMyVendor();
+        }
+
         if (!$vendor) {
             $this->forward404();
 
@@ -2704,6 +2722,7 @@ class registryActions extends AhgController
             'blog_pending' => $db::table('registry_blog_post')->where('status', 'pending_review')->count(),
             'reviews' => $db::table('registry_review')->count(),
             'users_pending' => $db::table('user')->where('active', 0)->count(),
+            'users_total' => $db::table('user')->count(),
         ];
     }
 
@@ -3685,6 +3704,271 @@ class registryActions extends AhgController
     }
 
     // ================================================================
+    // USER MANAGEMENT
+    // ================================================================
+
+    public function executeAdminUserManage($request)
+    {
+        $admin = $this->requireAdminUser();
+        if (!$admin) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        // Handle bulk actions
+        if ($request->isMethod('post')) {
+            $formAction = $request->getParameter('form_action', '');
+            $userId = (int) $request->getParameter('user_id');
+
+            if ($userId > 0 && 'toggle_active' === $formAction) {
+                $user = $db::table('user')->where('id', $userId)->first();
+                if ($user) {
+                    $db::table('user')->where('id', $userId)->update(['active' => $user->active ? 0 : 1]);
+                }
+            } elseif ($userId > 0 && 'delete' === $formAction) {
+                // Delete user + actor + object chain
+                $db::table('acl_user_group')->where('user_id', $userId)->delete();
+                $db::table('registry_user_group_member')->where('user_id', $userId)->delete();
+                $db::table('user')->where('id', $userId)->delete();
+                $db::table('actor_i18n')->where('id', $userId)->delete();
+                $db::table('actor')->where('id', $userId)->delete();
+                $db::table('object')->where('id', $userId)->delete();
+            }
+        }
+
+        // Search / filter
+        $search = trim($request->getParameter('q', ''));
+        $filter = $request->getParameter('filter', 'all'); // all, active, inactive, admin
+
+        $query = $db::table('user')
+            ->leftJoin('actor_i18n', function ($j) {
+                $j->on('actor_i18n.id', '=', 'user.id')
+                  ->where('actor_i18n.culture', '=', $this->culture());
+            })
+            ->leftJoin('object', 'object.id', '=', 'user.id')
+            ->select(
+                'user.id', 'user.username', 'user.email', 'user.active',
+                'actor_i18n.authorized_form_of_name as name',
+                'object.created_at'
+            );
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('user.username', 'like', "%{$search}%")
+                  ->orWhere('user.email', 'like', "%{$search}%")
+                  ->orWhere('actor_i18n.authorized_form_of_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ('active' === $filter) {
+            $query->where('user.active', 1);
+        } elseif ('inactive' === $filter) {
+            $query->where('user.active', 0);
+        } elseif ('admin' === $filter) {
+            $adminGroupId = \AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID;
+            $query->whereExists(function ($q) use ($adminGroupId) {
+                $q->select($q->raw(1))
+                  ->from('acl_user_group')
+                  ->whereColumn('acl_user_group.user_id', 'user.id')
+                  ->where('acl_user_group.group_id', $adminGroupId);
+            });
+        }
+
+        $query->orderBy('user.id', 'desc');
+
+        // Pagination
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $perPage = 25;
+        $total = (clone $query)->count();
+        $totalPages = max(1, (int) ceil($total / $perPage));
+        $page = min($page, $totalPages);
+
+        $this->users = $query->offset(($page - 1) * $perPage)->limit($perPage)->get()->all();
+
+        // Fetch group memberships for displayed users
+        $userIds = array_map(function ($u) { return $u->id; }, $this->users);
+        $this->userGroups = [];
+        if (!empty($userIds)) {
+            $memberships = $db::table('acl_user_group')
+                ->join('acl_group_i18n', function ($j) {
+                    $j->on('acl_group_i18n.id', '=', 'acl_user_group.group_id')
+                      ->where('acl_group_i18n.culture', '=', 'en');
+                })
+                ->whereIn('acl_user_group.user_id', $userIds)
+                ->select('acl_user_group.user_id', 'acl_user_group.group_id', 'acl_group_i18n.name as group_name')
+                ->get();
+            foreach ($memberships as $m) {
+                $this->userGroups[$m->user_id][] = $m;
+            }
+        }
+
+        $this->search = $search;
+        $this->filter = $filter;
+        $this->page = $page;
+        $this->totalPages = $totalPages;
+        $this->total = $total;
+    }
+
+    public function executeAdminUserEdit($request)
+    {
+        $admin = $this->requireAdminUser();
+        if (!$admin) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $userId = (int) $request->getParameter('id');
+
+        $this->editUser = $db::table('user')
+            ->leftJoin('actor_i18n', function ($j) {
+                $j->on('actor_i18n.id', '=', 'user.id')
+                  ->where('actor_i18n.culture', '=', $this->culture());
+            })
+            ->leftJoin('object', 'object.id', '=', 'user.id')
+            ->where('user.id', $userId)
+            ->select('user.id', 'user.username', 'user.email', 'user.active',
+                'actor_i18n.authorized_form_of_name as name', 'object.created_at')
+            ->first();
+
+        if (!$this->editUser) {
+            $this->forward404();
+            return;
+        }
+
+        // Fetch current group memberships
+        $this->currentGroups = $db::table('acl_user_group')
+            ->where('user_id', $userId)
+            ->pluck('group_id')
+            ->all();
+
+        // All assignable groups (excluding anonymous=98 and root=1)
+        $this->allGroups = $db::table('acl_group')
+            ->leftJoin('acl_group_i18n', function ($j) {
+                $j->on('acl_group_i18n.id', '=', 'acl_group.id')
+                  ->where('acl_group_i18n.culture', '=', 'en');
+            })
+            ->whereNotIn('acl_group.id', [1, 98])
+            ->select('acl_group.id', 'acl_group_i18n.name')
+            ->orderBy('acl_group.id')
+            ->get()
+            ->all();
+
+        // Registry group memberships
+        $this->registryGroups = $db::table('registry_user_group_member as m')
+            ->join('registry_user_group as g', 'g.id', '=', 'm.group_id')
+            ->where('m.user_id', $userId)
+            ->select('g.id', 'g.name', 'm.role')
+            ->get()
+            ->all();
+
+        $this->saved = false;
+
+        if ($request->isMethod('post')) {
+            $formAction = $request->getParameter('form_action', '');
+
+            if ('save' === $formAction) {
+                $newName = trim($request->getParameter('name', ''));
+                $newEmail = trim($request->getParameter('email', ''));
+                $newUsername = trim($request->getParameter('username', ''));
+                $active = (int) $request->getParameter('active', 0);
+
+                // Update user table
+                $db::table('user')->where('id', $userId)->update([
+                    'email' => $newEmail,
+                    'username' => $newUsername,
+                    'active' => $active,
+                ]);
+
+                // Update actor_i18n name
+                $db::table('actor_i18n')
+                    ->where('id', $userId)
+                    ->where('culture', $this->culture())
+                    ->update(['authorized_form_of_name' => $newName]);
+
+                // Update group memberships
+                $selectedGroups = $request->getParameter('groups', []);
+                if (!is_array($selectedGroups)) {
+                    $selectedGroups = [];
+                }
+                $selectedGroups = array_map('intval', $selectedGroups);
+
+                // Remove existing (except root=1 and anonymous=98)
+                $db::table('acl_user_group')
+                    ->where('user_id', $userId)
+                    ->whereNotIn('group_id', [1, 98])
+                    ->delete();
+
+                // Insert selected
+                foreach ($selectedGroups as $gid) {
+                    if ($gid > 0 && !in_array($gid, [1, 98])) {
+                        $db::table('acl_user_group')->insert([
+                            'user_id' => $userId,
+                            'group_id' => $gid,
+                        ]);
+                    }
+                }
+
+                $this->saved = true;
+
+                // Refresh data
+                $this->editUser = $db::table('user')
+                    ->leftJoin('actor_i18n', function ($j) {
+                        $j->on('actor_i18n.id', '=', 'user.id')
+                          ->where('actor_i18n.culture', '=', $this->culture());
+                    })
+                    ->leftJoin('object', 'object.id', '=', 'user.id')
+                    ->where('user.id', $userId)
+                    ->select('user.id', 'user.username', 'user.email', 'user.active',
+                        'actor_i18n.authorized_form_of_name as name', 'object.created_at')
+                    ->first();
+
+                $this->currentGroups = $db::table('acl_user_group')
+                    ->where('user_id', $userId)
+                    ->pluck('group_id')
+                    ->all();
+            }
+        }
+    }
+
+    public function executeAdminUserResetPassword($request)
+    {
+        $admin = $this->requireAdminUser();
+        if (!$admin) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $userId = (int) $request->getParameter('id');
+
+        $user = $db::table('user')->where('id', $userId)->first();
+        if (!$user) {
+            $this->forward404();
+            return;
+        }
+
+        $newPassword = $request->getParameter('new_password', '');
+        if (strlen($newPassword) < 6) {
+            $this->getUser()->setFlash('error', 'Password must be at least 6 characters.');
+            $this->redirect('/registry/admin/users/' . $userId . '/edit');
+            return;
+        }
+
+        // AtoM two-layer password: sha1(salt + plaintext) → argon2i
+        $salt = bin2hex(random_bytes(16));
+        $sha1 = sha1($salt . $newPassword);
+        $hash = password_hash($sha1, PASSWORD_ARGON2I);
+
+        $db::table('user')->where('id', $userId)->update([
+            'salt' => $salt,
+            'password_hash' => $hash,
+        ]);
+
+        $this->getUser()->setFlash('notice', 'Password reset successfully.');
+        $this->redirect('/registry/admin/users/' . $userId . '/edit');
+    }
+
+    // ================================================================
     // SYNC API
     // ================================================================
 
@@ -4259,11 +4543,15 @@ class registryActions extends AhgController
                 ]);
 
                 // 4. Insert into user table (active=0 — requires admin approval)
-                $passwordHash = password_hash($password, PASSWORD_ARGON2I);
+                // AtoM password: sha1(salt + plaintext) → argon2i
+                $salt = bin2hex(random_bytes(16));
+                $sha1 = sha1($salt . $password);
+                $passwordHash = password_hash($sha1, PASSWORD_ARGON2I);
                 $db::table('user')->insert([
                     'id' => $objectId,
                     'username' => $email,
                     'email' => $email,
+                    'salt' => $salt,
                     'password_hash' => $passwordHash,
                     'active' => 0,
                 ]);

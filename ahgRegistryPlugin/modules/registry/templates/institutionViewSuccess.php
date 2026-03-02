@@ -191,7 +191,7 @@
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
         <?php echo __('Contacts'); ?>
         <?php if ($canEdit): ?>
-          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContactAdd']); ?>" class="btn btn-sm btn-outline-primary">
+          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContactAdd']); ?>?inst=<?php echo (int) $detail->id; ?>" class="btn btn-sm btn-outline-primary">
             <i class="fas fa-plus me-1"></i><?php echo __('Add'); ?>
           </a>
         <?php endif; ?>

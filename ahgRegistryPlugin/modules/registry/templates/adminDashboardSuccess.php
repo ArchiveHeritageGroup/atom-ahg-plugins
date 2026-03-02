@@ -218,6 +218,15 @@
   </div>
 
   <div class="col">
+    <a href="/registry/admin/users/manage" class="card text-decoration-none h-100">
+      <div class="card-body text-center">
+        <i class="fas fa-users-cog fa-2x text-secondary mb-2"></i>
+        <h6 class="card-title"><?php echo __('Manage Users'); ?></h6>
+      </div>
+    </a>
+  </div>
+
+  <div class="col">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminSoftware']); ?>" class="card text-decoration-none h-100">
       <div class="card-body text-center">
         <i class="fas fa-code fa-2x text-info mb-2"></i>
