@@ -421,7 +421,8 @@ CREATE TABLE IF NOT EXISTS `registry_user_group_member` (
 -- ---------------------------------------------------
 CREATE TABLE IF NOT EXISTS `registry_discussion` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `group_id` bigint unsigned NOT NULL,
+  `group_id` bigint unsigned NULL,
+  `blog_post_id` bigint unsigned NULL,
   `author_email` varchar(255) NOT NULL,
   `author_name` varchar(255) DEFAULT NULL,
   `author_user_id` int DEFAULT NULL,
@@ -441,6 +442,7 @@ CREATE TABLE IF NOT EXISTS `registry_discussion` (
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `idx_discussion_group` (`group_id`),
+  KEY `idx_discussion_blog_post` (`blog_post_id`),
   KEY `idx_discussion_status` (`status`),
   KEY `idx_discussion_pinned` (`is_pinned` DESC),
   KEY `idx_discussion_last_reply` (`last_reply_at` DESC),
@@ -510,6 +512,8 @@ CREATE TABLE IF NOT EXISTS `registry_blog_post` (
   `is_featured` tinyint(1) DEFAULT 0,
   `is_pinned` tinyint(1) DEFAULT 0,
   `view_count` int DEFAULT 0,
+  `comment_count` int DEFAULT 0,
+  `comments_enabled` tinyint(1) DEFAULT 1,
   `published_at` datetime DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

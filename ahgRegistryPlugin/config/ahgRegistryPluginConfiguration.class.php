@@ -144,6 +144,7 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_group_view', '/registry/groups/:slug', 'groupView', ['slug' => '[a-z0-9-]+']);
 
         $loader->any('registry_blog', '/registry/blog', 'blogList');
+        $loader->post('registry_blog_reply', '/registry/blog/:slug/reply', 'blogReply', ['slug' => '[a-z0-9-]+']);
         $loader->any('registry_blog_view', '/registry/blog/:slug', 'blogView', ['slug' => '[a-z0-9-]+']);
 
         // ============================================================
