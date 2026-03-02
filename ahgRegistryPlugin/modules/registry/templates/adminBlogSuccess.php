@@ -102,6 +102,9 @@
         </td>
         <td class="text-end">
           <div class="btn-group btn-group-sm">
+            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'blogEdit', 'id' => (int) $item->id]); ?>" class="btn btn-sm btn-outline-dark" title="<?php echo __('Edit'); ?>">
+              <i class="fas fa-pen"></i>
+            </a>
             <?php if (($item->status ?? 'draft') !== 'published'): ?>
             <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminBlog']); ?>" class="d-inline">
               <input type="hidden" name="form_action" value="publish">
