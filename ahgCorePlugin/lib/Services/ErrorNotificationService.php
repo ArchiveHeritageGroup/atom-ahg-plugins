@@ -60,10 +60,8 @@ class ErrorNotificationService
             return false;
         }
 
-        // Only log warnings and errors (skip notices, deprecations, strict)
+        // Only log errors (skip warnings, notices, deprecations, strict)
         $logTypes = [
-            E_WARNING => 'warning',
-            E_USER_WARNING => 'warning',
             E_USER_ERROR => 'error',
             E_RECOVERABLE_ERROR => 'error',
         ];
@@ -273,13 +271,11 @@ class ErrorNotificationService
                 return;
             }
 
-            // Map HTTP status codes to log levels
+            // Only log server errors (5xx), skip client errors (4xx) as noise
             if ($statusCode >= 500) {
                 $level = 'error';
-            } elseif ($statusCode === 404) {
-                $level = 'warning';
             } else {
-                $level = 'warning';
+                return; // Skip 4xx (404, 400, etc.) — not actionable
             }
 
             $statusMessages = [
