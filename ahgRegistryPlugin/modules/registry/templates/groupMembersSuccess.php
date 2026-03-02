@@ -1,6 +1,7 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
 
-<?php $groupDetail = $group['group']; ?>
+<?php $groupDetail = sfOutputEscaper::unescape($group['group']); ?>
+<?php $members = sfOutputEscaper::unescape($members ?? []); ?>
 
 <?php slot('title'); ?><?php echo __('Members'); ?> - <?php echo htmlspecialchars($groupDetail->name, ENT_QUOTES, 'UTF-8'); ?><?php end_slot(); ?>
 

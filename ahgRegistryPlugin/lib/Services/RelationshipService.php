@@ -31,6 +31,8 @@ class RelationshipService
             ->select(
                 'rvi.id as relationship_id',
                 'ri.id as institution_id',
+                'ri.name as institution_name',
+                'ri.slug as institution_slug',
                 'ri.name',
                 'ri.slug',
                 'ri.institution_type',
@@ -42,6 +44,7 @@ class RelationshipService
                 'rvi.service_description',
                 'rvi.start_date',
                 'rvi.end_date',
+                'rvi.is_active',
                 'rvi.is_public'
             )
             ->orderBy('ri.name', 'asc')
@@ -61,6 +64,8 @@ class RelationshipService
             ->select(
                 'rvi.id as relationship_id',
                 'rv.id as vendor_id',
+                'rv.name as vendor_name',
+                'rv.slug as vendor_slug',
                 'rv.name',
                 'rv.slug',
                 'rv.vendor_type',
@@ -72,6 +77,7 @@ class RelationshipService
                 'rvi.service_description',
                 'rvi.start_date',
                 'rvi.end_date',
+                'rvi.is_active',
                 'rvi.is_public'
             )
             ->orderBy('rv.name', 'asc')

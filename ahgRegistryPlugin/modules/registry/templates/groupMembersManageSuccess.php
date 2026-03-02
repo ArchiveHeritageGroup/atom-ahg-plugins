@@ -1,5 +1,7 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
 
+<?php $group = sfOutputEscaper::unescape($group); ?>
+<?php $members = sfOutputEscaper::unescape($members ?? []); ?>
 <?php slot('title'); ?><?php echo __('Manage Members'); ?> - <?php echo htmlspecialchars($group->name ?? '', ENT_QUOTES, 'UTF-8'); ?><?php end_slot(); ?>
 
 <?php slot('content'); ?>

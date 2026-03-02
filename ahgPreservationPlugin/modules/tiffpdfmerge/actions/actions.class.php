@@ -221,6 +221,11 @@ class tiffpdfmergeActions extends AhgController
         $mergeJobId = (int) $request->getParameter('job_id');
         $fileOrder = $request->getParameter('file_order', []);
 
+        // Symfony may return a comma-separated string instead of an array
+        if (is_string($fileOrder)) {
+            $fileOrder = array_filter(array_map('intval', explode(',', $fileOrder)));
+        }
+
         if (!$mergeJobId || empty($fileOrder)) {
             return $this->renderJson(['success' => false, 'error' => 'Invalid parameters']);
         }

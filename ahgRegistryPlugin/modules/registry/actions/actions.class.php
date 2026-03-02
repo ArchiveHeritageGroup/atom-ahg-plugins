@@ -979,7 +979,7 @@ class registryActions extends AhgController
 
         $this->institution = $this->getMyInstitution();
         if (!$this->institution) {
-            $this->forward404();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
             return;
         }
@@ -1002,7 +1002,7 @@ class registryActions extends AhgController
 
         $institution = $this->getMyInstitution();
         if (!$institution) {
-            $this->forward404();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
             return;
         }
@@ -1087,7 +1087,7 @@ class registryActions extends AhgController
 
         $this->institution = $this->getMyInstitution();
         if (!$this->institution) {
-            $this->forward404();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
             return;
         }
@@ -1107,7 +1107,7 @@ class registryActions extends AhgController
 
         $institution = $this->getMyInstitution();
         if (!$institution) {
-            $this->forward404();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
             return;
         }
@@ -1269,7 +1269,7 @@ class registryActions extends AhgController
 
         $this->institution = $this->getMyInstitution();
         if (!$this->institution) {
-            $this->forward404();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
             return;
         }
@@ -1289,7 +1289,7 @@ class registryActions extends AhgController
 
         $this->institution = $this->getMyInstitution();
         if (!$this->institution) {
-            $this->forward404();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
             return;
         }
@@ -3453,14 +3453,16 @@ class registryActions extends AhgController
         }
 
         // Fetch all pending (inactive) users
+        // Note: user table has no created_at — it lives on the object table (AtoM inheritance)
         $this->pendingUsers = $db::table('user')
             ->leftJoin('actor_i18n', function ($j) {
                 $j->on('actor_i18n.id', '=', 'user.id')
                   ->where('actor_i18n.culture', '=', $this->culture());
             })
+            ->leftJoin('object', 'object.id', '=', 'user.id')
             ->where('user.active', 0)
-            ->select('user.id', 'user.email', 'user.username', 'actor_i18n.authorized_form_of_name as name', 'user.created_at')
-            ->orderBy('user.created_at', 'desc')
+            ->select('user.id', 'user.email', 'user.username', 'actor_i18n.authorized_form_of_name as name', 'object.created_at')
+            ->orderBy('object.created_at', 'desc')
             ->get()
             ->all();
 
