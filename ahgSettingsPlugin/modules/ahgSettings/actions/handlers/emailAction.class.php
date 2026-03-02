@@ -28,6 +28,20 @@ class AhgSettingsEmailAction extends AhgController
                     ]);
             }
 
+            // Save error alert settings
+            $errorAlertSettings = $request->getParameter('error_alert', []);
+            $errorAlertKeys = ['error_alert_enabled', 'error_alert_throttle_ttl', 'error_alert_daily_cap', 'error_alert_env_gate'];
+            foreach ($errorAlertKeys as $eak) {
+                if (array_key_exists($eak, $errorAlertSettings)) {
+                    DB::table('email_setting')
+                        ->where('setting_key', $eak)
+                        ->update([
+                            'setting_value' => $errorAlertSettings[$eak],
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                }
+            }
+
             // Save notification toggles to ahg_settings
             $notifKeys = [
                 'research_email_notifications',
@@ -69,6 +83,20 @@ class AhgSettingsEmailAction extends AhgController
             ->orderBy('id')
             ->get()
             ->toArray();
+
+        // Load error alert settings
+        $errorAlertSettings = [];
+        try {
+            $eaRows = DB::table('email_setting')
+                ->whereIn('setting_key', ['error_alert_enabled', 'error_alert_throttle_ttl', 'error_alert_daily_cap', 'error_alert_env_gate'])
+                ->get(['setting_key', 'setting_value']);
+            foreach ($eaRows as $row) {
+                $errorAlertSettings[$row->setting_key] = $row->setting_value;
+            }
+        } catch (\Exception $e) {
+            // table may not have these rows yet
+        }
+        $this->errorAlertSettings = $errorAlertSettings;
 
         // Load notification toggle settings from ahg_settings
         $notifToggles = [];

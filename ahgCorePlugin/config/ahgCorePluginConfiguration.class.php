@@ -18,6 +18,14 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
 
         // Register global error notification handler
         \AhgCore\Services\ErrorNotificationService::register();
+
+        // Register queue handler for async error alert emails
+        if (class_exists('AtomFramework\Services\QueueJobRegistry', false)) {
+            \AtomFramework\Services\QueueJobRegistry::register(
+                'error:send-alert',
+                'AhgCore\Services\ErrorAlertQueueHandler'
+            );
+        }
     }
 
     /**

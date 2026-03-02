@@ -80,6 +80,45 @@
           @endforeach
         </div>
       </div>
+
+      <!-- Error Alert Configuration -->
+      <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+          <i class="fas fa-exclamation-triangle me-2"></i>{{ __('Error Alert Configuration') }}
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">{{ __('Enable Error Alerts') }}</label>
+            <select name="error_alert[error_alert_enabled]" class="form-select">
+              <option value="0" {{ (isset($errorAlertSettings['error_alert_enabled']) && $errorAlertSettings['error_alert_enabled'] === '0') ? 'selected' : '' }}>{{ __('Disabled') }}</option>
+              <option value="1" {{ (!isset($errorAlertSettings['error_alert_enabled']) || $errorAlertSettings['error_alert_enabled'] === '1') ? 'selected' : '' }}>{{ __('Enabled') }}</option>
+            </select>
+            <small class="text-muted">{{ __('Send email alerts when unhandled exceptions occur.') }}</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{{ __('Throttle TTL (seconds)') }}</label>
+            <input type="number" name="error_alert[error_alert_throttle_ttl]"
+                   class="form-control" min="30" max="86400"
+                   value="{{ e($errorAlertSettings['error_alert_throttle_ttl'] ?? '300') }}">
+            <small class="text-muted">{{ __('Minimum seconds between duplicate error alerts. Default: 300 (5 min).') }}</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{{ __('Daily Cap') }}</label>
+            <input type="number" name="error_alert[error_alert_daily_cap]"
+                   class="form-control" min="0" max="1000"
+                   value="{{ e($errorAlertSettings['error_alert_daily_cap'] ?? '50') }}">
+            <small class="text-muted">{{ __('Maximum alert emails per day. 0 = unlimited. Default: 50.') }}</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">{{ __('Production Only') }}</label>
+            <select name="error_alert[error_alert_env_gate]" class="form-select">
+              <option value="0" {{ (isset($errorAlertSettings['error_alert_env_gate']) && $errorAlertSettings['error_alert_env_gate'] === '0') ? 'selected' : '' }}>{{ __('Send in all environments') }}</option>
+              <option value="1" {{ (!isset($errorAlertSettings['error_alert_env_gate']) || $errorAlertSettings['error_alert_env_gate'] === '1') ? 'selected' : '' }}>{{ __('Production only (skip when sf_debug=true)') }}</option>
+            </select>
+            <small class="text-muted">{{ __('When enabled, suppresses alerts in debug/development mode.') }}</small>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="col-md-6">
@@ -101,6 +140,7 @@
             <code>{reason}</code> - {{ __('Rejection reason') }}<br>
             <code>{message}</code>, <code>{file}</code>, <code>{line}</code>, <code>{trace}</code> - {{ __('Error alert details') }}<br>
             <code>{hostname}</code>, <code>{url}</code>, <code>{timestamp}</code> - {{ __('Error context') }}<br>
+            <code>{request_id}</code>, <code>{http_method}</code>, <code>{client_ip}</code>, <code>{user_agent}</code>, <code>{user_info}</code>, <code>{exception_class}</code> - {{ __('Extended error context') }}<br>
             <code>{researcher_name}</code>, <code>{reference_number}</code>, <code>{purpose}</code>, <code>{delivery_method}</code> - {{ __('Reproduction details') }}
           </div>
 
