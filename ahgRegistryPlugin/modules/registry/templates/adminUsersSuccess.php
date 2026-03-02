@@ -37,10 +37,14 @@
           <td><?php echo htmlspecialchars($u->email ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
           <td><small class="text-muted"><?php echo !empty($u->created_at) ? date('M j, Y H:i', strtotime($u->created_at)) : '—'; ?></small></td>
           <td class="text-end">
-            <form method="post" action="/registry/admin/users" class="d-inline">
+            <form method="post" action="/registry/admin/users" class="d-inline-flex align-items-center gap-2">
               <input type="hidden" name="user_id" value="<?php echo (int) $u->id; ?>">
               <input type="hidden" name="form_action" value="approve">
-              <button type="submit" class="btn btn-sm btn-success me-1" title="<?php echo __('Approve'); ?>">
+              <div class="form-check form-check-inline mb-0">
+                <input class="form-check-input" type="checkbox" name="make_admin" value="1" id="admin-<?php echo (int) $u->id; ?>">
+                <label class="form-check-label small" for="admin-<?php echo (int) $u->id; ?>"><?php echo __('Admin'); ?></label>
+              </div>
+              <button type="submit" class="btn btn-sm btn-success" title="<?php echo __('Approve'); ?>">
                 <i class="fas fa-check"></i> <?php echo __('Approve'); ?>
               </button>
             </form>

@@ -78,7 +78,7 @@
     <!-- Comments section -->
     <?php
       $commentsEnabled = !isset($detail->comments_enabled) || $detail->comments_enabled;
-      $disc = isset($discussion) ? $discussion : null;
+      $disc = isset($discussion) ? sfOutputEscaper::unescape($discussion) : null;
       $commentCount = $disc ? (int) ($disc['reply_count'] ?? 0) : 0;
       $blogReplyUrl = url_for(['module' => 'registry', 'action' => 'blogReply', 'slug' => $detail->slug]);
     ?>

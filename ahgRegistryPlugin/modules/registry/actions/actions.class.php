@@ -3630,6 +3630,21 @@ class registryActions extends AhgController
 
             if ($userId > 0 && 'approve' === $formAction) {
                 $db::table('user')->where('id', $userId)->update(['active' => 1]);
+
+                // Optionally assign administrator group
+                if ($request->getParameter('make_admin')) {
+                    $adminGroupId = \AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID;
+                    $exists = $db::table('acl_user_group')
+                        ->where('user_id', $userId)
+                        ->where('group_id', $adminGroupId)
+                        ->exists();
+                    if (!$exists) {
+                        $db::table('acl_user_group')->insert([
+                            'user_id' => $userId,
+                            'group_id' => $adminGroupId,
+                        ]);
+                    }
+                }
             } elseif ($userId > 0 && 'reject' === $formAction) {
                 // Delete user + actor + object chain
                 $db::table('acl_user_group')->where('user_id', $userId)->delete();
@@ -4217,74 +4232,94 @@ class registryActions extends AhgController
 
             // Create object → actor → user (AtoM entity inheritance)
             $now = date('Y-m-d H:i:s');
+            $culture = $this->culture();
 
-            // 1. Insert into object table
-            $objectId = $db::table('object')->insertGetId([
-                'class_name' => 'QubitUser',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ]);
+            try {
+                $db::connection()->beginTransaction();
 
-            // 2. Insert into actor table
-            $db::table('actor')->insert([
-                'id' => $objectId,
-                'entity_type_id' => \QubitTerm::PERSON_ID ?? 178,
-            ]);
+                // 1. Insert into object table
+                $objectId = $db::table('object')->insertGetId([
+                    'class_name' => 'QubitUser',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
 
-            // 3. Insert into actor_i18n
-            $db::table('actor_i18n')->insert([
-                'id' => $objectId,
-                'culture' => $this->culture(),
-                'authorized_form_of_name' => $name,
-            ]);
+                // 2. Insert into actor table
+                $db::table('actor')->insert([
+                    'id' => $objectId,
+                    'entity_type_id' => \QubitTerm::PERSON_ID ?? 178,
+                    'source_culture' => $culture,
+                ]);
 
-            // 4. Insert into user table (active=0 — requires admin approval)
-            $passwordHash = password_hash($password, PASSWORD_ARGON2I);
-            $db::table('user')->insert([
-                'id' => $objectId,
-                'username' => $email,
-                'email' => $email,
-                'password_hash' => $passwordHash,
-                'active' => 0,
-            ]);
+                // 3. Insert into actor_i18n
+                $db::table('actor_i18n')->insert([
+                    'id' => $objectId,
+                    'culture' => $culture,
+                    'authorized_form_of_name' => $name,
+                ]);
 
-            // 5. Assign to authenticated group (group 4)
-            $db::table('acl_user_group')->insert([
-                'user_id' => $objectId,
-                'group_id' => 4, // authenticated group
-            ]);
+                // 4. Insert into user table (active=0 — requires admin approval)
+                $passwordHash = password_hash($password, PASSWORD_ARGON2I);
+                $db::table('user')->insert([
+                    'id' => $objectId,
+                    'username' => $email,
+                    'email' => $email,
+                    'password_hash' => $passwordHash,
+                    'active' => 0,
+                ]);
 
-            // 6. Join selected user groups
+                // 5. Assign to authenticated group
+                $db::table('acl_user_group')->insert([
+                    'user_id' => $objectId,
+                    'group_id' => \AtomExtensions\Constants\AclConstants::AUTHENTICATED_ID,
+                ]);
+
+                $db::connection()->commit();
+            } catch (\Throwable $e) {
+                $db::connection()->rollBack();
+                $this->error = 'Registration failed. Please try again.';
+
+                return;
+            }
+
+            // 6. Join selected user groups (non-critical — outside transaction)
             if (is_array($selectedGroups)) {
                 foreach ($selectedGroups as $groupId) {
                     $groupId = (int) $groupId;
                     if ($groupId > 0) {
-                        $db::table('registry_user_group_member')->insert([
-                            'group_id' => $groupId,
-                            'user_id' => $objectId,
-                            'email' => $email,
-                            'name' => $name,
-                            'role' => 'member',
-                            'is_active' => 1,
-                            'joined_at' => $now,
-                        ]);
-                        // Update member count
-                        $db::table('registry_user_group')
-                            ->where('id', $groupId)
-                            ->increment('member_count');
+                        try {
+                            $db::table('registry_user_group_member')->insert([
+                                'group_id' => $groupId,
+                                'user_id' => $objectId,
+                                'email' => $email,
+                                'name' => $name,
+                                'role' => 'member',
+                                'is_active' => 1,
+                                'joined_at' => $now,
+                            ]);
+                            $db::table('registry_user_group')
+                                ->where('id', $groupId)
+                                ->increment('member_count');
+                        } catch (\Throwable $e) {
+                            // Non-critical — user account still created
+                        }
                     }
                 }
             }
 
             // 7. Newsletter subscription (if opted in)
             if ($request->getParameter('newsletter_subscribe')) {
-                $nlSvc = $this->loadService('NewsletterService');
-                $nlSvc->subscribe([
-                    'email' => $email,
-                    'name' => $name,
-                    'user_id' => $objectId,
-                    'auto_confirm' => true,
-                ]);
+                try {
+                    $nlSvc = $this->loadService('NewsletterService');
+                    $nlSvc->subscribe([
+                        'email' => $email,
+                        'name' => $name,
+                        'user_id' => $objectId,
+                        'auto_confirm' => true,
+                    ]);
+                } catch (\Throwable $e) {
+                    // Non-critical
+                }
             }
 
             $this->success = 'Account created! An administrator will review and activate your account.';
