@@ -242,7 +242,7 @@ if ($informationObject) {
                 const result = await res.json();
                 if (result.success && result.results) {
                     result.results.forEach(r => {
-                        if (r.success) uploadedFiles.push({ id: r.file_id, name: r.filename, size: r.size || file.size, width: r.width, height: r.height });
+                        if (r.success) uploadedFiles.push({ id: r.file_id, name: r.filename, size: r.size || file.size, width: r.width, height: r.height, pages: r.pages || 1 });
                     });
                 }
             } catch (e) { console.error(e); }
@@ -256,8 +256,9 @@ if ($informationObject) {
 
     function updateFileList() {
         const c = document.getElementById('tpmFileList');
-        document.getElementById('tpmFileCount').textContent = uploadedFiles.length;
-        if (!uploadedFiles.length) { c.innerHTML = '<div class="text-muted text-center py-5"><i class="fas fa-images fa-2x mb-2 d-block"></i>No files uploaded yet</div>'; return; }
+        const totalPages = uploadedFiles.reduce((sum, f) => sum + (f.pages || 1), 0);
+        document.getElementById('tpmFileCount').textContent = uploadedFiles.length + ' files, ' + totalPages + ' pages';
+        if (!uploadedFiles.length) { document.getElementById('tpmFileCount').textContent = '0'; c.innerHTML = '<div class="text-muted text-center py-5"><i class="fas fa-images fa-2x mb-2 d-block"></i>No files uploaded yet</div>'; return; }
         c.innerHTML = uploadedFiles.map((f, i) => `
             <div class="tpm-file-item d-flex align-items-center p-3 border-bottom" data-file-id="${f.id}">
                 <div class="drag-handle me-3 text-muted"><i class="fas fa-grip-vertical fa-lg"></i></div>
@@ -265,7 +266,7 @@ if ($informationObject) {
                 <i class="fas fa-file-image fa-2x text-secondary me-3"></i>
                 <div class="flex-grow-1">
                     <div class="fw-semibold">${escapeHtml(f.name)}</div>
-                    <small class="text-muted">${formatSize(f.size)}${f.width ? ` \u2022 ${f.width}\u00d7${f.height}px` : ''}</small>
+                    <small class="text-muted">${formatSize(f.size)}${f.width ? ` \u2022 ${f.width}\u00d7${f.height}px` : ''}${f.pages > 1 ? ' \u2022 <span class="badge bg-info">' + f.pages + ' pages</span>' : ''}</small>
                 </div>
                 <button class="btn btn-sm btn-outline-danger" onclick="window.removeFile(${f.id})"><i class="fas fa-times"></i></button>
             </div>
@@ -276,10 +277,13 @@ if ($informationObject) {
         const m = uploadedFiles.splice(evt.oldIndex, 1)[0];
         uploadedFiles.splice(evt.newIndex, 0, m);
         try {
+            const params = new URLSearchParams();
+            params.append('job_id', currentJob);
+            uploadedFiles.forEach(f => params.append('file_order[]', f.id));
             await fetch('{{ url_for(['module' => 'tiffpdfmerge', 'action' => 'reorder']) }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ job_id: currentJob, 'file_order[]': uploadedFiles.map(f => f.id) })
+                body: params
             });
         } catch (e) {}
         updateFileList();

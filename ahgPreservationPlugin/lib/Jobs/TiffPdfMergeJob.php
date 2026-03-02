@@ -69,14 +69,17 @@ class TiffPdfMergeJob
                 ->where('merge_job_id', $this->mergeJobId)
                 ->update(['status' => 'processed']);
 
+            // Count actual pages in the output PDF (not just file count)
+            $actualPages = $this->countPdfPages($outputPath);
+
             DB::table($this->jobTable)->where('id', $this->mergeJobId)->update([
                 'output_filename' => $outputFilename,
                 'output_path' => $outputPath,
-                'processed_files' => $files->count(),
+                'processed_files' => $actualPages,
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            $this->log('PDF created: ' . $outputFilename);
+            $this->log('PDF created: ' . $outputFilename . ' (' . $actualPages . ' pages)');
 
             $digitalObjectId = null;
 
@@ -103,8 +106,8 @@ class TiffPdfMergeJob
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
-            $this->log(sprintf('Merge complete! Created %d-page PDF%s',
-                $files->count(), $digitalObjectId ? ' and attached to record' : ''));
+            $this->log(sprintf('Merge complete! Created %d-page PDF from %d files%s',
+                $actualPages, $files->count(), $digitalObjectId ? ' and attached to record' : ''));
 
             return true;
 
@@ -410,6 +413,23 @@ class TiffPdfMergeJob
             ->value('slug');
 
         return $slug ?: 'null';
+    }
+
+    protected function countPdfPages(string $pdfPath): int
+    {
+        // Try pdfinfo first (fastest)
+        exec(sprintf('pdfinfo %s 2>/dev/null | grep "Pages:"', escapeshellarg($pdfPath)), $output);
+        if (!empty($output[0]) && preg_match('/Pages:\s+(\d+)/', $output[0], $m)) {
+            return (int) $m[1];
+        }
+
+        // Fallback: ImageMagick identify
+        exec(sprintf('identify %s 2>/dev/null | wc -l', escapeshellarg($pdfPath)), $output2);
+        if (!empty($output2[0])) {
+            return max(1, (int) trim($output2[0]));
+        }
+
+        return 1;
     }
 
     protected function getSetting(string $key, $default = null)

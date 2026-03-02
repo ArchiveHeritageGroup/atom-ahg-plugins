@@ -170,6 +170,14 @@ class tiffpdfmergeActions extends AhgController
             $imageInfo = @getimagesize($filePath);
             $maxOrder++;
 
+            // Detect page count for multipage TIFFs
+            $pageCount = 1;
+            if (in_array($extension, ['tif', 'tiff'])) {
+                $identifyCmd = sprintf('/usr/bin/identify -format "%%n\n" %s 2>/dev/null | head -1',
+                    escapeshellarg($filePath));
+                $pageCount = max(1, (int) trim(shell_exec($identifyCmd)));
+            }
+
             try {
                 $fileId = $this->getRepository()->addFile($mergeJobId, [
                     'original_filename' => $originalName,
@@ -181,6 +189,7 @@ class tiffpdfmergeActions extends AhgController
                     'height' => $imageInfo[1] ?? null,
                     'page_order' => $maxOrder,
                     'checksum_md5' => md5_file($filePath),
+                    'metadata' => ['page_count' => $pageCount],
                 ]);
 
                 $results[] = [
@@ -190,6 +199,7 @@ class tiffpdfmergeActions extends AhgController
                     'width' => $imageInfo[0] ?? null,
                     'height' => $imageInfo[1] ?? null,
                     'size' => filesize($filePath),
+                    'pages' => $pageCount,
                 ];
             } catch (Exception $e) {
                 $results[] = ['success' => false, 'filename' => $originalName, 'error' => $e->getMessage()];
