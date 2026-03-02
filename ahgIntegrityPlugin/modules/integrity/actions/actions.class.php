@@ -17,21 +17,21 @@ class integrityActions extends AhgController
 
     protected function getService(): IntegrityService
     {
-        require_once dirname(__DIR__, 2) . '/lib/Services/IntegrityService.php';
+        require_once dirname(__DIR__, 3) . '/lib/Services/IntegrityService.php';
 
         return new IntegrityService();
     }
 
     protected function getRetentionService(): IntegrityRetentionService
     {
-        require_once dirname(__DIR__, 2) . '/lib/Services/IntegrityRetentionService.php';
+        require_once dirname(__DIR__, 3) . '/lib/Services/IntegrityRetentionService.php';
 
         return new IntegrityRetentionService();
     }
 
     protected function getAlertService(): IntegrityAlertService
     {
-        require_once dirname(__DIR__, 2) . '/lib/Services/IntegrityAlertService.php';
+        require_once dirname(__DIR__, 3) . '/lib/Services/IntegrityAlertService.php';
 
         return new IntegrityAlertService();
     }
@@ -955,7 +955,7 @@ class integrityActions extends AhgController
     // Helpers
     // ------------------------------------------------------------------
 
-    protected function renderJson(array $data)
+    protected function renderJson(array $data, int $status = 200)
     {
         $this->getResponse()->setContentType('application/json');
         $this->getResponse()->setContent(json_encode($data));

@@ -27,6 +27,10 @@ $router->match(['GET', 'POST'], '/admin/ahg-settings/ai-services', $bridge)
     ->setDefaults(['_module' => 'ahgSettings', '_action' => 'aiServices'])
     ->name('admin_ahg_settings_ai_services');
 
+$router->match(['GET', 'POST'], '/admin/ahg-settings/error-log', $bridge)
+    ->setDefaults(['_module' => 'ahgSettings', '_action' => 'errorLog'])
+    ->name('admin_ahg_settings_error_log');
+
 $router->match(['GET', 'POST'], '/admin/ahg-settings/email', $bridge)
     ->setDefaults(['_module' => 'ahgSettings', '_action' => 'email'])
     ->name('admin_ahg_settings_email');
@@ -245,3 +249,7 @@ $router->match(['GET', 'POST'], '/ahgSettings/icipSettings', $bridge)
 $router->match(['GET', 'POST'], '/ahgSettings/ahgIntegration', $bridge)
     ->setDefaults(['_module' => 'ahgSettings', '_action' => 'ahgIntegration'])
     ->name('ahg_settings_ahg_integration');
+
+$router->match(['GET', 'POST'], '/ahgSettings/errorLog', $bridge)
+    ->setDefaults(['_module' => 'ahgSettings', '_action' => 'errorLog'])
+    ->name('ahg_settings_error_log');

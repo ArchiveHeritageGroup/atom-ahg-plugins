@@ -27,7 +27,8 @@ class ErrorNotificationService
     /**
      * Register error/exception/shutdown handlers.
      *
-     * Only activates when SMTP is enabled and notify_errors is set.
+     * Captures: uncaught exceptions, fatal errors, PHP warnings/notices,
+     * and HTTP error responses (404, 500, etc.).
      */
     public static function register(): void
     {
@@ -36,9 +37,76 @@ class ErrorNotificationService
         }
         self::$registered = true;
 
+        // Catch uncaught exceptions
         set_exception_handler([self::class, 'handleException']);
 
+        // Catch PHP warnings, notices, deprecations (log to DB, don't halt)
+        set_error_handler([self::class, 'handleError']);
+
+        // Catch fatal errors + HTTP error responses at shutdown
         register_shutdown_function([self::class, 'handleShutdown']);
+    }
+
+    /**
+     * Handle PHP errors (warnings, notices, deprecations, strict).
+     *
+     * Logs warnings and errors to database. Does NOT halt execution.
+     * Returns false to let PHP's default error handler also run.
+     */
+    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): bool
+    {
+        // Don't log if error reporting is suppressed with @
+        if (!(error_reporting() & $errno)) {
+            return false;
+        }
+
+        // Only log warnings and errors (skip notices, deprecations, strict)
+        $logTypes = [
+            E_WARNING => 'warning',
+            E_USER_WARNING => 'warning',
+            E_USER_ERROR => 'error',
+            E_RECOVERABLE_ERROR => 'error',
+        ];
+
+        if (!isset($logTypes[$errno])) {
+            return false;
+        }
+
+        $level = $logTypes[$errno];
+
+        // Filter out file read/require/include errors (noise from optional files)
+        $skipPatterns = [
+            'Failed opening required',
+            'Failed opening',
+            'failed to open stream',
+            'No such file or directory',
+            'require_once(',
+            'include_once(',
+            'require(',
+            'include(',
+            'fread():',
+            'fopen():',
+            'file_get_contents():',
+            'is_readable():',
+        ];
+        foreach ($skipPatterns as $pattern) {
+            if (stripos($errstr, $pattern) !== false) {
+                return false;
+            }
+        }
+
+        // Log to database (with rate limiting per unique error)
+        static $logged = [];
+        $key = md5($errfile . ':' . $errline . ':' . substr($errstr, 0, 100));
+        if (isset($logged[$key])) {
+            return false; // Already logged this exact error in this request
+        }
+        $logged[$key] = true;
+
+        self::logToDatabase($level, $errstr, $errfile, $errline, null, null);
+
+        // Return false to let PHP's default error handler run too
+        return false;
     }
 
     /**
@@ -122,6 +190,9 @@ class ErrorNotificationService
         // Log it first (always)
         error_log('Uncaught exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
 
+        // Log to database
+        self::logToDatabase('error', $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTraceAsString(), $e);
+
         self::sendErrorEmail(
             $e->getMessage(),
             $e->getFile(),
@@ -145,28 +216,155 @@ class ErrorNotificationService
     }
 
     /**
-     * Handle fatal errors on shutdown.
+     * Handle fatal errors and HTTP error responses on shutdown.
      */
     public static function handleShutdown(): void
     {
+        // 1. Check for fatal PHP errors
         $error = error_get_last();
-        if ($error === null) {
-            return;
+        if ($error !== null) {
+            $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
+            if (in_array($error['type'], $fatalTypes)) {
+                $typeNames = [
+                    E_ERROR => 'E_ERROR',
+                    E_PARSE => 'E_PARSE',
+                    E_CORE_ERROR => 'E_CORE_ERROR',
+                    E_COMPILE_ERROR => 'E_COMPILE_ERROR',
+                ];
+                $typeName = $typeNames[$error['type']] ?? 'UNKNOWN';
+                $trace = "Fatal {$typeName} in {$error['file']}:{$error['line']}\n\n"
+                    . "Error: {$error['message']}\n\n"
+                    . "PHP fatal errors do not produce stack traces.\n"
+                    . "Check the file and line above for the root cause.";
+
+                self::logToDatabase('fatal', $error['message'], $error['file'], $error['line'], $trace, null);
+
+                self::sendErrorEmail(
+                    $error['message'],
+                    $error['file'],
+                    $error['line'],
+                    $trace,
+                    null
+                );
+
+                return; // Fatal already logged, skip HTTP check
+            }
         }
 
-        // Only handle fatal errors
-        $fatalTypes = [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR];
-        if (!in_array($error['type'], $fatalTypes)) {
-            return;
+        // 2. Check for HTTP error responses (404, 500, etc.)
+        if (php_sapi_name() !== 'cli') {
+            self::logHttpErrorResponse();
         }
+    }
 
-        self::sendErrorEmail(
-            $error['message'],
-            $error['file'],
-            $error['line'],
-            'Fatal error (no stack trace available)',
-            null
-        );
+    /**
+     * Log HTTP error responses (404, 500, etc.) to the error log.
+     *
+     * Called at shutdown to capture Symfony-handled errors that never
+     * reach the exception handler (e.g. sfError404Exception).
+     */
+    private static function logHttpErrorResponse(): void
+    {
+        try {
+            $statusCode = http_response_code();
+
+            // Only log error responses (4xx and 5xx), skip 401/403 (normal auth)
+            if ($statusCode === false || $statusCode < 400 || $statusCode === 401 || $statusCode === 403) {
+                return;
+            }
+
+            // Map HTTP status codes to log levels
+            if ($statusCode >= 500) {
+                $level = 'error';
+            } elseif ($statusCode === 404) {
+                $level = 'warning';
+            } else {
+                $level = 'warning';
+            }
+
+            $statusMessages = [
+                400 => 'Bad Request',
+                401 => 'Unauthorized',
+                403 => 'Forbidden',
+                404 => 'Not Found',
+                405 => 'Method Not Allowed',
+                408 => 'Request Timeout',
+                410 => 'Gone',
+                429 => 'Too Many Requests',
+                500 => 'Internal Server Error',
+                502 => 'Bad Gateway',
+                503 => 'Service Unavailable',
+            ];
+
+            $statusText = $statusMessages[$statusCode] ?? 'HTTP Error';
+            $message = "HTTP {$statusCode} {$statusText}";
+
+            // For 404s, include the requested URL prominently
+            $url = $_SERVER['REQUEST_URI'] ?? '/';
+            if ($statusCode === 404) {
+                $message = "HTTP 404 Not Found: {$url}";
+            }
+
+            self::logToDatabase($level, $message, null, null, null, null, $statusCode);
+        } catch (\Throwable $e) {
+            // Never let logging cause errors
+            error_log('ErrorNotificationService: HTTP error log failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Log error to ahg_error_log table (public — also used by filters).
+     */
+    public static function logToDatabase(string $level, string $message, ?string $file, ?int $line, ?string $trace, ?\Throwable $exception, ?int $statusCode = null): void
+    {
+        try {
+            $capsuleClass = '\Illuminate\Database\Capsule\Manager';
+            if (!class_exists($capsuleClass, false) && !class_exists($capsuleClass)) {
+                return;
+            }
+
+            // Check table exists (cached after first check)
+            static $tableExists = null;
+            if ($tableExists === null) {
+                try {
+                    $tableExists = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_error_log');
+                } catch (\Throwable $e) {
+                    $tableExists = false;
+                }
+            }
+            if (!$tableExists) {
+                return;
+            }
+
+            $contextData = self::buildContextData($exception);
+
+            $userId = null;
+            if ($contextData['user_info'] !== 'anonymous' && strpos($contextData['user_info'], 'user_id:') === 0) {
+                $userId = (int) str_replace('user_id:', '', $contextData['user_info']);
+            }
+
+            \Illuminate\Database\Capsule\Manager::table('ahg_error_log')->insert([
+                'level' => $level,
+                'status_code' => $statusCode,
+                'message' => mb_substr($message, 0, 65000),
+                'file' => $file ? mb_substr($file, 0, 500) : null,
+                'line' => $line,
+                'exception_class' => $exception ? mb_substr(get_class($exception), 0, 255) : null,
+                'request_id' => $contextData['request_id'] !== 'N/A' ? $contextData['request_id'] : null,
+                'url' => mb_substr(self::getCurrentUrl(), 0, 2000),
+                'http_method' => $contextData['http_method'] !== 'N/A' ? $contextData['http_method'] : null,
+                'client_ip' => $contextData['client_ip'] !== 'N/A' ? $contextData['client_ip'] : null,
+                'user_agent' => isset($contextData['user_agent']) && $contextData['user_agent'] !== 'N/A' ? mb_substr($contextData['user_agent'], 0, 500) : null,
+                'user_id' => $userId,
+                'hostname' => gethostname() ?: null,
+                'trace' => $trace ? mb_substr($trace, 0, 65000) : null,
+                'is_read' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            // Never let logging cause an error
+            error_log('ErrorNotificationService: DB log failed: ' . $e->getMessage());
+        }
     }
 
     /**

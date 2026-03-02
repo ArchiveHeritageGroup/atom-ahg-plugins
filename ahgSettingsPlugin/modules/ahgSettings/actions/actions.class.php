@@ -126,6 +126,11 @@ class ahgSettingsActions extends AhgController
         return $this->executeSettingsAction('emailAction', $request);
     }
 
+    public function executeErrorLog($request)
+    {
+        return $this->executeSettingsAction('errorLogAction', $request);
+    }
+
     public function executeEmailTest($request)
     {
         return $this->executeSettingsAction('emailTestAction', $request);
