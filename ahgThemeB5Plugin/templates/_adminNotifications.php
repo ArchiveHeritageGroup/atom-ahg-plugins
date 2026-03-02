@@ -101,6 +101,25 @@ try {
             ];
         }
     }
+    // Check for unread error log entries (admin only)
+    if ($isAdmin) {
+        try {
+            $unreadErrors = (int) \Illuminate\Database\Capsule\Manager::table('ahg_error_log')
+                ->where('is_read', 0)
+                ->count();
+            if ($unreadErrors > 0) {
+                $notifications[] = [
+                    'type' => 'danger',
+                    'icon' => 'fa-exclamation-triangle',
+                    'text' => sprintf(__('%d unread system error(s) logged'), $unreadErrors),
+                    'url' => url_for(['module' => 'ahgSettings', 'action' => 'errorLog']),
+                    'action' => __('View Errors')
+                ];
+            }
+        } catch (Exception $e) {
+            // Table may not exist
+        }
+    }
 } catch (Exception $e) {
     // Tables may not exist - silently fail
 }
