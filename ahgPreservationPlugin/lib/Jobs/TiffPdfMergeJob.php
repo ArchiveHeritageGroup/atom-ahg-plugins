@@ -97,6 +97,17 @@ class TiffPdfMergeJob
                         'updated_at' => date('Y-m-d H:i:s'),
                     ]);
                     $this->log('Attached as digital object ID: ' . $digitalObjectId);
+
+                    // Reindex the information object in Elasticsearch
+                    try {
+                        $io = \QubitInformationObject::getById($mergeJob->information_object_id);
+                        if ($io) {
+                            \QubitSearch::getInstance()->update($io);
+                            $this->log('Elasticsearch index updated for record');
+                        }
+                    } catch (\Exception $e) {
+                        $this->log('Warning: Search index update failed: ' . $e->getMessage());
+                    }
                 }
             }
 

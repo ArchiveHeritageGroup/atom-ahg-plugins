@@ -37,15 +37,25 @@ class discoveryActions extends AhgController
     }
 
     /**
-     * AJAX search endpoint — runs the full 4-step pipeline.
+     * AJAX search endpoint — runs the search pipeline.
      *
-     * GET /discovery/search?q=...&page=1&limit=20
+     * GET /discovery/search?q=...&page=1&limit=20&mode=standard|semantic|vector
+     *
+     * Modes:
+     *   standard  — Keyword + hierarchical only (default)
+     *   semantic  — Keyword + entity/NER + hierarchical
+     *   vector    — Keyword + entity + vector + hierarchical (full pipeline)
      */
     public function executeSearch($request)
     {
         $query = trim($request->getParameter('q', ''));
         $page = max(1, (int) $request->getParameter('page', 1));
         $limit = min(50, max(5, (int) $request->getParameter('limit', 20)));
+        $mode = $request->getParameter('mode', 'standard');
+
+        if (!in_array($mode, ['standard', 'semantic', 'vector'])) {
+            $mode = 'standard';
+        }
 
         if (empty($query)) {
             return $this->renderJson([
@@ -54,14 +64,15 @@ class discoveryActions extends AhgController
                 'collections' => [],
                 'results' => [],
                 'expanded' => null,
+                'mode' => $mode,
             ]);
         }
 
         $culture = $this->culture();
         $startTime = microtime(true);
 
-        // Check cache first
-        $cacheKey = md5($query . '|' . $culture . '|' . $page . '|' . $limit);
+        // Check cache first (mode is part of the key)
+        $cacheKey = md5($query . '|' . $culture . '|' . $page . '|' . $limit . '|' . $mode);
         $cached = $this->getFromCache($cacheKey);
         if ($cached !== null) {
             $this->logSearch($query, $cached['expanded'] ?? null, $cached['total'] ?? 0, $startTime);
@@ -73,22 +84,28 @@ class discoveryActions extends AhgController
         $expander = new \AhgDiscovery\Services\QueryExpander();
         $expanded = $expander->expand($query);
 
-        // Step 2: Four-strategy search (parallel in concept, sequential in PHP)
+        // Step 2: Run strategies based on selected mode
         $keywordSearch = new \AhgDiscovery\Services\KeywordSearchStrategy($culture);
-        $entitySearch = new \AhgDiscovery\Services\EntitySearchStrategy();
         $hierarchicalSearch = new \AhgDiscovery\Services\HierarchicalStrategy();
 
+        // Standard: always run keyword search
         $keywordResults = $keywordSearch->search($expanded, 100);
-        $entityResults = $entitySearch->search($expanded, 200);
 
-        // Vector (semantic) search via Qdrant — gracefully skipped if unavailable
+        // Semantic: add entity/NER search
+        $entityResults = [];
+        if (in_array($mode, ['semantic', 'vector'])) {
+            $entitySearch = new \AhgDiscovery\Services\EntitySearchStrategy();
+            $entityResults = $entitySearch->search($expanded, 200);
+        }
+
+        // Vector: add Qdrant vector search
         $vectorResults = [];
-        if (\AhgDiscovery\Services\VectorSearchStrategy::isAvailable()) {
+        if ($mode === 'vector' && \AhgDiscovery\Services\VectorSearchStrategy::isAvailable()) {
             $vectorSearch = new \AhgDiscovery\Services\VectorSearchStrategy();
             $vectorResults = $vectorSearch->search($expanded, 50);
         }
 
-        // Hierarchical walk on top results from keyword + entity + vector
+        // Hierarchical walk on top results from active strategies
         $topResults = array_merge(
             array_slice($keywordResults, 0, 10),
             array_slice($entityResults, 0, 10)
@@ -100,7 +117,7 @@ class discoveryActions extends AhgController
         ));
         $hierarchicalResults = $hierarchicalSearch->search($topResults, $allFoundIds, 20);
 
-        // Step 3: Merge & Rank (4 strategies)
+        // Step 3: Merge & Rank
         $merger = new \AhgDiscovery\Services\ResultMerger();
         $merged = $merger->merge($keywordResults, $entityResults, $hierarchicalResults, $vectorResults);
 
@@ -123,6 +140,8 @@ class discoveryActions extends AhgController
             'page' => $page,
             'limit' => $limit,
             'pages' => max(1, (int) ceil($totalResults / $limit)),
+            'mode' => $mode,
+            'vector_available' => \AhgDiscovery\Services\VectorSearchStrategy::isAvailable(),
             'collections' => $collections,
             'results' => $enrichedResults,
             'expanded' => [

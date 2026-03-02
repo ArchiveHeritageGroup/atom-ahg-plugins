@@ -40,6 +40,25 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
         </button>
       </div>
 
+      <!-- Search Mode Selector -->
+      <div class="mt-3 d-flex align-items-center gap-2">
+        <small class="text-muted me-1"><i class="fas fa-sliders-h me-1"></i>Search mode:</small>
+        <div class="btn-group btn-group-sm" role="group" id="discovery-mode-group">
+          <button type="button" class="btn btn-outline-primary active" data-mode="standard"
+                  title="<?php echo __('Keyword search using Elasticsearch'); ?>">
+            <i class="fas fa-search me-1"></i><?php echo __('Standard'); ?>
+          </button>
+          <button type="button" class="btn btn-outline-primary" data-mode="semantic"
+                  title="<?php echo __('Standard + NER entity matching'); ?>">
+            <i class="fas fa-brain me-1"></i><?php echo __('Semantic'); ?>
+          </button>
+          <button type="button" class="btn btn-outline-primary" data-mode="vector"
+                  title="<?php echo __('Standard + Semantic + vector similarity (requires Qdrant)'); ?>">
+            <i class="fas fa-project-diagram me-1"></i><?php echo __('Vector'); ?>
+          </button>
+        </div>
+      </div>
+
       <!-- Query Expansion Info (hidden until search) -->
       <div id="discovery-expansion" class="mt-3 d-none">
         <small class="text-muted">
@@ -216,6 +235,9 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 
 /* View Toggle */
 #view-grouped.active, #view-flat.active { background: #0d6efd; color: white; border-color: #0d6efd; }
+
+/* Mode Toggle */
+#discovery-mode-group .btn.active { background: #0d6efd; color: white; border-color: #0d6efd; }
 </style>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>>
@@ -239,6 +261,7 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 
   var currentPage = 1;
   var currentQuery = '';
+  var currentMode = 'standard';
   var searchTimer = null;
   var sessionId = Math.random().toString(36).substr(2, 12);
 
@@ -263,6 +286,16 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
     btn.addEventListener('click', function() {
       searchInput.value = this.dataset.query;
       doSearch(1);
+    });
+  });
+
+  // Search mode toggle
+  document.querySelectorAll('#discovery-mode-group button').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('#discovery-mode-group button').forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+      currentMode = this.dataset.mode;
+      if (currentQuery) { doSearch(1); }
     });
   });
 
@@ -295,6 +328,8 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
     url.searchParams.set('q', q);
     if (page > 1) { url.searchParams.set('page', page); }
     else { url.searchParams.delete('page'); }
+    if (currentMode !== 'standard') { url.searchParams.set('mode', currentMode); }
+    else { url.searchParams.delete('mode'); }
     history.replaceState(null, '', url);
 
     // Show loading
@@ -308,7 +343,7 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 
     var startTime = performance.now();
 
-    fetch('/discovery/search?q=' + encodeURIComponent(q) + '&page=' + currentPage + '&limit=20')
+    fetch('/discovery/search?q=' + encodeURIComponent(q) + '&page=' + currentPage + '&limit=20&mode=' + currentMode)
       .then(function(r) { return r.json(); })
       .then(function(data) {
         loadingEl.classList.add('d-none');
@@ -321,8 +356,10 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 
         // Show summary
         summaryEl.classList.remove('d-none');
+        var modeLabels = { standard: 'Standard', semantic: 'Semantic', vector: 'Vector' };
+        var modeLabel = modeLabels[data.mode || currentMode] || 'Standard';
         document.getElementById('result-count').textContent = data.total + ' result' + (data.total !== 1 ? 's' : '');
-        document.getElementById('result-time').textContent = '(' + (elapsed / 1000).toFixed(1) + 's)';
+        document.getElementById('result-time').textContent = '(' + (elapsed / 1000).toFixed(1) + 's \u2022 ' + modeLabel + ')';
 
         // Show query expansion info
         showExpansion(data.expanded);
@@ -579,7 +616,14 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
 
   // ─── Auto-search if query in URL ────────────────────────────
 
+  // Restore mode and query from URL
   var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('mode') && ['standard', 'semantic', 'vector'].indexOf(urlParams.get('mode')) !== -1) {
+    currentMode = urlParams.get('mode');
+    document.querySelectorAll('#discovery-mode-group button').forEach(function(b) { b.classList.remove('active'); });
+    var modeBtn = document.querySelector('#discovery-mode-group button[data-mode="' + currentMode + '"]');
+    if (modeBtn) modeBtn.classList.add('active');
+  }
   if (urlParams.get('q')) {
     searchInput.value = urlParams.get('q');
     doSearch(parseInt(urlParams.get('page') || '1', 10));
