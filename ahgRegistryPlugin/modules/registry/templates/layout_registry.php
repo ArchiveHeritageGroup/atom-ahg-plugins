@@ -181,6 +181,27 @@
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#regNav">
       <span class="navbar-toggler-icon"></span>
     </button>
+    <?php
+      // Load nav visibility settings
+      $_navSettings = [];
+      try {
+          $_navRows = \Illuminate\Database\Capsule\Manager::table('registry_settings')
+              ->where('setting_key', 'like', 'nav_show_%')
+              ->get();
+          foreach ($_navRows as $_nr) {
+              $_navSettings[$_nr->setting_key] = !empty($_nr->setting_value) && '0' !== $_nr->setting_value;
+          }
+      } catch (\Exception $e) {
+          // Defaults: all visible
+      }
+      $_showCommunity   = $_navSettings['nav_show_community'] ?? true;
+      $_showUserGroups  = $_navSettings['nav_show_user_groups'] ?? true;
+      $_showBlog        = $_navSettings['nav_show_blog'] ?? true;
+      $_showNewsletters = $_navSettings['nav_show_newsletters'] ?? true;
+      $_showMap         = $_navSettings['nav_show_map'] ?? true;
+      $_showSearch      = $_navSettings['nav_show_search'] ?? true;
+      $_hasMoreItems    = $_showUserGroups || $_showBlog || $_showNewsletters || $_showMap || $_showSearch;
+    ?>
     <div class="collapse navbar-collapse" id="regNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
@@ -192,21 +213,35 @@
         <li class="nav-item">
           <a class="nav-link" href="/registry/software"><i class="fas fa-cube"></i> Software</a>
         </li>
+        <?php if ($_showCommunity): ?>
         <li class="nav-item">
           <a class="nav-link" href="/registry/community"><i class="fas fa-users"></i> Community</a>
         </li>
+        <?php endif; ?>
+        <?php if ($_hasMoreItems): ?>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
             <i class="fas fa-ellipsis-h"></i> More
           </a>
           <ul class="dropdown-menu">
+            <?php if ($_showUserGroups): ?>
             <li><a class="dropdown-item" href="/registry/groups"><i class="fas fa-user-friends me-2"></i>User Groups</a></li>
+            <?php endif; ?>
+            <?php if ($_showBlog): ?>
             <li><a class="dropdown-item" href="/registry/blog"><i class="fas fa-rss me-2"></i>Blog</a></li>
+            <?php endif; ?>
+            <?php if ($_showNewsletters): ?>
             <li><a class="dropdown-item" href="/registry/newsletters"><i class="fas fa-envelope me-2"></i>Newsletters</a></li>
+            <?php endif; ?>
+            <?php if ($_showMap): ?>
             <li><a class="dropdown-item" href="/registry/map"><i class="fas fa-map me-2"></i>Map</a></li>
+            <?php endif; ?>
+            <?php if ($_showSearch): ?>
             <li><a class="dropdown-item" href="/registry/search"><i class="fas fa-search me-2"></i>Search</a></li>
+            <?php endif; ?>
           </ul>
         </li>
+        <?php endif; ?>
       </ul>
 
       <!-- Right side: Search + Auth -->
