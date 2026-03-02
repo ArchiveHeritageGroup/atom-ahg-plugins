@@ -140,6 +140,7 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']); ?>"><i class="fas fa-chart-line fa-fw me-1"></i><?php echo __('Statistics'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'browse']); ?>"><i class="fas fa-clipboard-list fa-fw me-1"></i><?php echo __('Logs'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'settings']); ?>"><i class="fas fa-sliders-h fa-fw me-1"></i><?php echo __('Settings'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'errorLog']); ?>"><i class="fas fa-exclamation-triangle fa-fw me-1"></i><?php echo __('Error Log'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasRic): ?>

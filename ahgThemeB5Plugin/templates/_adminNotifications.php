@@ -101,17 +101,17 @@ try {
             ];
         }
     }
-    // Check for unread error log entries (admin only)
+    // Check for open (unresolved) error log entries (admin only)
     if ($isAdmin) {
         try {
-            $unreadErrors = (int) \Illuminate\Database\Capsule\Manager::table('ahg_error_log')
-                ->where('is_read', 0)
+            $openErrors = (int) \Illuminate\Database\Capsule\Manager::table('ahg_error_log')
+                ->whereNull('resolved_at')
                 ->count();
-            if ($unreadErrors > 0) {
+            if ($openErrors > 0) {
                 $notifications[] = [
                     'type' => 'danger',
                     'icon' => 'fa-exclamation-triangle',
-                    'text' => sprintf(__('%d unread system error(s) logged'), $unreadErrors),
+                    'text' => sprintf(__('%d open system error(s)'), $openErrors),
                     'url' => url_for(['module' => 'ahgSettings', 'action' => 'errorLog']),
                     'action' => __('View Errors')
                 ];

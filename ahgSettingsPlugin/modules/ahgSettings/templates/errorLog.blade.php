@@ -7,15 +7,23 @@
 
 <!-- Stats Row -->
 <div class="row mb-3">
-  <div class="col-md-3">
+  <div class="col-md-2">
     <div class="card border-danger">
       <div class="card-body text-center py-2">
-        <div class="h4 mb-0 text-danger">{{ $unreadCount }}</div>
-        <small class="text-muted">{{ __('Unread') }}</small>
+        <div class="h4 mb-0 text-danger">{{ $openCount }}</div>
+        <small class="text-muted">{{ __('Open') }}</small>
       </div>
     </div>
   </div>
-  <div class="col-md-3">
+  <div class="col-md-2">
+    <div class="card border-success">
+      <div class="card-body text-center py-2">
+        <div class="h4 mb-0 text-success">{{ $resolvedCount }}</div>
+        <small class="text-muted">{{ __('Resolved') }}</small>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2">
     <div class="card">
       <div class="card-body text-center py-2">
         <div class="h4 mb-0">{{ $todayCount }}</div>
@@ -23,19 +31,17 @@
       </div>
     </div>
   </div>
-  <div class="col-md-3">
-    <div class="card">
-      <div class="card-body text-center py-2">
-        <div class="h4 mb-0">{{ $total }}</div>
-        <small class="text-muted">{{ __('Total') }}</small>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-3 d-flex align-items-center justify-content-end gap-2">
+  <div class="col-md-6 d-flex align-items-center justify-content-end gap-2">
     <form method="post" class="d-inline">
       <input type="hidden" name="mark_read" value="all">
-      <button type="submit" class="btn btn-sm btn-outline-success" {{ $unreadCount === 0 ? 'disabled' : '' }}>
-        <i class="fas fa-check-double me-1"></i>{{ __('Mark All Read') }}
+      <button type="submit" class="btn btn-sm btn-outline-secondary" {{ $unreadCount === 0 ? 'disabled' : '' }}>
+        <i class="fas fa-eye me-1"></i>{{ __('Mark All Read') }}
+      </button>
+    </form>
+    <form method="post" class="d-inline">
+      <input type="hidden" name="resolve_all" value="1">
+      <button type="submit" class="btn btn-sm btn-outline-success" {{ $openCount === 0 ? 'disabled' : '' }} onclick="return confirm('Resolve all open errors?')">
+        <i class="fas fa-check-double me-1"></i>{{ __('Resolve All') }}
       </button>
     </form>
     <form method="post" class="d-inline">
@@ -54,10 +60,17 @@
       <input type="hidden" name="module" value="ahgSettings">
       <input type="hidden" name="action" value="errorLog">
       <div class="col-auto">
+        <select name="status" class="form-select form-select-sm">
+          <option value="open" {{ $status === 'open' ? 'selected' : '' }}>{{ __('Open') }}</option>
+          <option value="resolved" {{ $status === 'resolved' ? 'selected' : '' }}>{{ __('Resolved') }}</option>
+          <option value="all" {{ $status === 'all' ? 'selected' : '' }}>{{ __('All') }}</option>
+        </select>
+      </div>
+      <div class="col-auto">
         <select name="level" class="form-select form-select-sm">
           <option value="">{{ __('All levels') }}</option>
-          <option value="error" {{ $level === 'error' ? 'selected' : '' }}>Error</option>
           <option value="fatal" {{ $level === 'fatal' ? 'selected' : '' }}>Fatal</option>
+          <option value="error" {{ $level === 'error' ? 'selected' : '' }}>Error</option>
           <option value="warning" {{ $level === 'warning' ? 'selected' : '' }}>Warning</option>
         </select>
       </div>
@@ -78,17 +91,19 @@
     <table class="table table-sm table-hover mb-0">
       <thead class="table-dark">
         <tr>
+          <th style="width: 40px">#</th>
           <th style="width: 140px">{{ __('Time') }}</th>
           <th style="width: 70px">{{ __('Level') }}</th>
           <th>{{ __('Error') }}</th>
           <th style="width: 160px">{{ __('Location') }}</th>
           <th style="width: 120px">{{ __('Client') }}</th>
-          <th style="width: 60px"></th>
+          <th style="width: 100px">{{ __('Actions') }}</th>
         </tr>
       </thead>
       <tbody>
         @forelse ($errors as $err)
-        <tr class="{{ !$err->is_read ? 'table-warning' : '' }}">
+        <tr class="{{ $err->resolved_at ? 'table-light text-muted' : (!$err->is_read ? 'table-warning' : '') }}">
+          <td class="small text-muted">{{ $err->id }}</td>
           <td class="small text-nowrap">
             {{ $err->created_at }}
             @if ($err->request_id)
@@ -96,7 +111,9 @@
             @endif
           </td>
           <td>
-            @if ($err->level === 'fatal')
+            @if ($err->resolved_at)
+              <span class="badge bg-success">FIXED</span>
+            @elseif ($err->level === 'fatal')
               <span class="badge bg-danger">FATAL</span>
             @elseif ($err->level === 'error')
               <span class="badge bg-warning text-dark">ERROR</span>
@@ -109,12 +126,15 @@
           </td>
           <td>
             <div class="fw-bold small">{{ e($err->exception_class ?? '') }}</div>
-            <div class="small text-truncate" style="max-width: 400px" title="{{ e($err->message) }}">{{ e(substr($err->message, 0, 200)) }}</div>
+            <div class="small" style="word-break: break-word">{{ e($err->message) }}</div>
             @if ($err->url)
-              <div class="small text-muted text-truncate" style="max-width: 400px">
+              <div class="small text-muted" style="word-break: break-all">
                 <span class="badge bg-light text-dark">{{ $err->http_method ?? 'GET' }}</span>
-                {{ e(substr($err->url, 0, 120)) }}
+                {{ e($err->url) }}
               </div>
+            @endif
+            @if ($err->resolved_at)
+              <div class="small text-success"><i class="fas fa-check me-1"></i>Resolved {{ $err->resolved_at }}</div>
             @endif
           </td>
           <td class="small text-truncate" style="max-width: 160px" title="{{ e($err->file ?? '') }}">
@@ -126,13 +146,28 @@
               <br><span class="badge bg-info">user:{{ $err->user_id }}</span>
             @endif
           </td>
-          <td>
-            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#trace-{{ $err->id }}">
+          <td class="text-nowrap">
+            @if ($err->resolved_at)
+              <form method="post" class="d-inline">
+                <input type="hidden" name="reopen_id" value="{{ $err->id }}">
+                <button type="submit" class="btn btn-sm btn-outline-warning" title="{{ __('Reopen') }}">
+                  <i class="fas fa-undo"></i>
+                </button>
+              </form>
+            @else
+              <form method="post" class="d-inline">
+                <input type="hidden" name="resolve_id" value="{{ $err->id }}">
+                <button type="submit" class="btn btn-sm btn-outline-success" title="{{ __('Resolve') }}">
+                  <i class="fas fa-check"></i>
+                </button>
+              </form>
+            @endif
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#trace-{{ $err->id }}" title="{{ __('Details') }}">
               <i class="fas fa-chevron-down"></i>
             </button>
             <form method="post" class="d-inline">
               <input type="hidden" name="delete_id" value="{{ $err->id }}">
-              <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('Delete') }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="{{ __('Delete') }}" onclick="return confirm('Delete this entry?')">
                 <i class="fas fa-times"></i>
               </button>
             </form>
@@ -140,7 +175,7 @@
         </tr>
         @if ($err->trace)
         <tr class="collapse" id="trace-{{ $err->id }}">
-          <td colspan="6">
+          <td colspan="7">
             <pre class="bg-dark text-light p-2 rounded small mb-0" style="max-height: 300px; overflow: auto">{{ e($err->trace) }}</pre>
             @if ($err->user_agent)
               <small class="text-muted">UA: {{ e(substr($err->user_agent, 0, 150)) }}</small>
@@ -150,7 +185,7 @@
         @endif
         @empty
         <tr>
-          <td colspan="6" class="text-center text-muted py-4">
+          <td colspan="7" class="text-center text-muted py-4">
             <i class="fas fa-check-circle fa-2x mb-2 d-block text-success"></i>
             {{ __('No errors logged.') }}
           </td>
@@ -166,13 +201,13 @@
     <nav>
       <ul class="pagination pagination-sm mb-0">
         @if ($page > 1)
-          <li class="page-item"><a class="page-link" href="{{ url_for(['module' => 'ahgSettings', 'action' => 'errorLog', 'page' => $page - 1, 'level' => $level, 'q' => $search]) }}">&laquo;</a></li>
+          <li class="page-item"><a class="page-link" href="{{ url_for(['module' => 'ahgSettings', 'action' => 'errorLog', 'page' => $page - 1, 'level' => $level, 'q' => $search, 'status' => $status]) }}">&laquo;</a></li>
         @endif
         @for ($p = max(1, $page - 2); $p <= min($totalPages, $page + 2); $p++)
-          <li class="page-item {{ $p === $page ? 'active' : '' }}"><a class="page-link" href="{{ url_for(['module' => 'ahgSettings', 'action' => 'errorLog', 'page' => $p, 'level' => $level, 'q' => $search]) }}">{{ $p }}</a></li>
+          <li class="page-item {{ $p === $page ? 'active' : '' }}"><a class="page-link" href="{{ url_for(['module' => 'ahgSettings', 'action' => 'errorLog', 'page' => $p, 'level' => $level, 'q' => $search, 'status' => $status]) }}">{{ $p }}</a></li>
         @endfor
         @if ($page < $totalPages)
-          <li class="page-item"><a class="page-link" href="{{ url_for(['module' => 'ahgSettings', 'action' => 'errorLog', 'page' => $page + 1, 'level' => $level, 'q' => $search]) }}">&raquo;</a></li>
+          <li class="page-item"><a class="page-link" href="{{ url_for(['module' => 'ahgSettings', 'action' => 'errorLog', 'page' => $page + 1, 'level' => $level, 'q' => $search, 'status' => $status]) }}">&raquo;</a></li>
         @endif
       </ul>
     </nav>

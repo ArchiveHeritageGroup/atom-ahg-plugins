@@ -15,6 +15,28 @@ class AhgSettingsErrorLogAction extends AhgController
 
         \AhgCore\Core\AhgDb::init();
 
+        $userId = $this->getUser()->getUserID();
+
+        // Handle resolve single
+        if ($request->isMethod('post') && $request->getParameter('resolve_id')) {
+            DB::table('ahg_error_log')
+                ->where('id', (int) $request->getParameter('resolve_id'))
+                ->update(['resolved_at' => date('Y-m-d H:i:s'), 'resolved_by' => $userId, 'is_read' => 1]);
+
+            $this->getUser()->setFlash('success', 'Error marked as resolved');
+            $this->redirect(['module' => 'ahgSettings', 'action' => 'errorLog']);
+        }
+
+        // Handle reopen single
+        if ($request->isMethod('post') && $request->getParameter('reopen_id')) {
+            DB::table('ahg_error_log')
+                ->where('id', (int) $request->getParameter('reopen_id'))
+                ->update(['resolved_at' => null, 'resolved_by' => null]);
+
+            $this->getUser()->setFlash('success', 'Error reopened');
+            $this->redirect(['module' => 'ahgSettings', 'action' => 'errorLog']);
+        }
+
         // Handle mark-all-read
         if ($request->isMethod('post') && $request->getParameter('mark_read') === 'all') {
             DB::table('ahg_error_log')
@@ -22,6 +44,16 @@ class AhgSettingsErrorLogAction extends AhgController
                 ->update(['is_read' => 1]);
 
             $this->getUser()->setFlash('success', 'All errors marked as read');
+            $this->redirect(['module' => 'ahgSettings', 'action' => 'errorLog']);
+        }
+
+        // Handle resolve all open
+        if ($request->isMethod('post') && $request->getParameter('resolve_all') === '1') {
+            DB::table('ahg_error_log')
+                ->whereNull('resolved_at')
+                ->update(['resolved_at' => date('Y-m-d H:i:s'), 'resolved_by' => $userId, 'is_read' => 1]);
+
+            $this->getUser()->setFlash('success', 'All errors marked as resolved');
             $this->redirect(['module' => 'ahgSettings', 'action' => 'errorLog']);
         }
 
@@ -50,10 +82,18 @@ class AhgSettingsErrorLogAction extends AhgController
         // Filters
         $level = $request->getParameter('level', '');
         $search = $request->getParameter('q', '');
+        $status = $request->getParameter('status', 'open'); // open, resolved, all
         $page = max(1, (int) $request->getParameter('page', 1));
         $perPage = 25;
 
         $query = DB::table('ahg_error_log')->orderBy('created_at', 'desc');
+
+        // Status filter
+        if ($status === 'open') {
+            $query->whereNull('resolved_at');
+        } elseif ($status === 'resolved') {
+            $query->whereNotNull('resolved_at');
+        }
 
         if ($level) {
             $query->where('level', $level);
@@ -75,8 +115,11 @@ class AhgSettingsErrorLogAction extends AhgController
         $this->totalPages = max(1, (int) ceil($total / $perPage));
         $this->level = $level;
         $this->search = $search;
+        $this->status = $status;
 
         // Stats
+        $this->openCount = (int) DB::table('ahg_error_log')->whereNull('resolved_at')->count();
+        $this->resolvedCount = (int) DB::table('ahg_error_log')->whereNotNull('resolved_at')->count();
         $this->unreadCount = (int) DB::table('ahg_error_log')->where('is_read', 0)->count();
         $this->todayCount = (int) DB::table('ahg_error_log')
             ->where('created_at', '>=', date('Y-m-d 00:00:00'))

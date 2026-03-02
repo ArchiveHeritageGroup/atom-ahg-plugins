@@ -284,12 +284,8 @@ class ErrorNotificationService
 
             $statusMessages = [
                 400 => 'Bad Request',
-                401 => 'Unauthorized',
-                403 => 'Forbidden',
                 404 => 'Not Found',
                 405 => 'Method Not Allowed',
-                408 => 'Request Timeout',
-                410 => 'Gone',
                 429 => 'Too Many Requests',
                 500 => 'Internal Server Error',
                 502 => 'Bad Gateway',
@@ -297,13 +293,8 @@ class ErrorNotificationService
             ];
 
             $statusText = $statusMessages[$statusCode] ?? 'HTTP Error';
-            $message = "HTTP {$statusCode} {$statusText}";
-
-            // For 404s, include the requested URL prominently
             $url = $_SERVER['REQUEST_URI'] ?? '/';
-            if ($statusCode === 404) {
-                $message = "HTTP 404 Not Found: {$url}";
-            }
+            $message = "HTTP {$statusCode} {$statusText}: {$url}";
 
             self::logToDatabase($level, $message, null, null, null, null, $statusCode);
         } catch (\Throwable $e) {
