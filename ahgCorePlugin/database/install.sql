@@ -45,12 +45,14 @@ CREATE TABLE IF NOT EXISTS `ahg_dropdown` (
     `sort_order` INT DEFAULT 0,
     `is_default` TINYINT(1) DEFAULT 0,
     `is_active` TINYINT(1) DEFAULT 1,
+    `taxonomy_section` VARCHAR(50) NULL COMMENT 'UI section grouping',
     `metadata` JSON NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY `uk_taxonomy_code` (`taxonomy`, `code`),
     INDEX `idx_taxonomy` (`taxonomy`),
-    INDEX `idx_active` (`is_active`)
+    INDEX `idx_active` (`is_active`),
+    INDEX `idx_section` (`taxonomy_section`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
