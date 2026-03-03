@@ -59,9 +59,10 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
      */
     protected function setConfigDefaults()
     {
-        // Auto-detect base URL from request (default to https)
+        // Auto-detect base URL from request
         $host = $_SERVER['HTTP_HOST'] ?? 'psis.theahg.co.za';
-        $baseUrl = "https://{$host}";
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $baseUrl = "{$scheme}://{$host}";
 
         // Plugin sets its own config when enabled
         sfConfig::set('app_iiif_enabled', true);
