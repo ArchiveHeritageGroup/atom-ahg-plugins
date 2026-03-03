@@ -134,7 +134,21 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
         return render_iiif_viewer($resource, $options);
     }
 
-    // Fallback - simple rendering
+    // Fallback for images when ahgIiifPlugin is not available
+    if (is_object($digitalObject)) {
+        $imgUrl = ($digitalObject->path ?? '') . ($digitalObject->name ?? '');
+        if (!empty($imgUrl)) {
+            // Try reference image first, fall back to master
+            $refPath = '/uploads/r/' . $digitalObject->path . $digitalObject->name;
+            $html = '<div class="text-center">';
+            $html .= '<img src="' . htmlspecialchars($refPath) . '" alt="" class="img-fluid" style="max-height:600px;">';
+            $html .= '</div>';
+
+            return $html;
+        }
+    }
+
+    // Final fallback
     return '<div class="alert alert-warning">Viewer not available</div>';
 }
 endif;
