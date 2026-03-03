@@ -218,6 +218,8 @@ class helpActions extends AhgController
             ['pattern' => '/iiif', 'slug' => 'iiif-integration-user-guide', 'title' => 'IIIF Integration'],
             ['pattern' => '/audit', 'slug' => 'audit-trail-user-guide', 'title' => 'Audit Trail'],
             ['pattern' => '/privacy', 'slug' => 'privacy-user-guide', 'title' => 'Privacy & Compliance'],
+            ['pattern' => '/user/login', 'slug' => 'password-security-user-guide', 'anchor' => 'login-lockout-brute-force-protection', 'title' => 'Login Security'],
+            ['pattern' => '/user/passwordEdit', 'slug' => 'password-security-user-guide', 'anchor' => 'password-reuse-prevention', 'title' => 'Password Security'],
         ];
 
         $this->getResponse()->setContentType('application/json');

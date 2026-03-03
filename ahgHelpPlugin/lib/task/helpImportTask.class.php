@@ -21,7 +21,7 @@ class helpImportTask extends arBaseTask
         'Research' => ['researcher-', 'research-'],
         'GLAM Sectors' => ['glam-', 'dam-', 'gallery-', 'museum-', 'library-'],
         'AI & Automation' => ['ai-', 'ner-', 'semantic-', 'translation-', 'duplicate-', 'dedupe-', 'fuzzy-'],
-        'Compliance' => ['privacy-', 'security-', 'audit-', 'embargo-', 'cdpa-', 'naz-', 'nmmz-'],
+        'Compliance' => ['privacy-', 'security-', 'audit-', 'embargo-', 'cdpa-', 'naz-', 'nmmz-', 'password-'],
         'Viewers & Media' => ['iiif-', '3d-', 'openseadragon-', 'mirador-', 'audio-', 'pdf-merge-'],
         'Import/Export' => ['data-ingest-', 'export-', 'metadata-ex', 'migration-', 'portable-', 'data-migration-'],
         'Rights' => ['rights-', 'extended-rights-', 'icip-'],
