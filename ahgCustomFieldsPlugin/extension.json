@@ -1,0 +1,52 @@
+{
+    "name": "Custom Fields",
+    "machine_name": "ahgCustomFieldsPlugin",
+    "version": "1.0.0",
+    "description": "Admin-configurable custom metadata fields for any entity type. Define fields via UI — no code changes needed.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": ["ahgCorePlugin"],
+    "tables": ["custom_field_definition", "custom_field_value"],
+    "shared_tables": [],
+    "category": "metadata",
+    "load_order": 45,
+    "display_panels": [
+        {
+            "id": "custom_fields_io",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": ["informationobject"],
+            "position": "below-content",
+            "weight": 70
+        },
+        {
+            "id": "custom_fields_actor",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": ["actor"],
+            "position": "below-content",
+            "weight": 70
+        },
+        {
+            "id": "custom_fields_accession",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": ["accession"],
+            "position": "below-content",
+            "weight": 70
+        },
+        {
+            "id": "custom_fields_repository",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": ["repository"],
+            "position": "below-content",
+            "weight": 70
+        }
+    ]
+}

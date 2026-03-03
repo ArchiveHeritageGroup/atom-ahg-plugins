@@ -535,6 +535,22 @@ INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`
 ('federation_search_status', 'Federation Search Status', 'error', 'Error', '#f44336', 30, 0);
 
 -- ============================================================
+-- SEED DATA: Restriction Code (Access Restrictions)
+-- Base set of access restriction vocabularies for any institution.
+-- Institutions add their own codes via Admin > Dropdown Manager.
+-- ============================================================
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `color`, `sort_order`, `is_default`) VALUES
+('restriction_code', 'Access Restriction', 'open', 'Open / Unrestricted', '#4caf50', 10, 1),
+('restriction_code', 'Access Restriction', 'closed', 'Closed', '#f44336', 20, 0),
+('restriction_code', 'Access Restriction', 'restricted_time', 'Time-based Restriction', '#ff9800', 30, 0),
+('restriction_code', 'Access Restriction', 'restricted_permission', 'Permission Required', '#2196f3', 40, 0),
+('restriction_code', 'Access Restriction', 'restricted_privacy', 'Privacy Restriction', '#9c27b0', 50, 0),
+('restriction_code', 'Access Restriction', 'restricted_legal', 'Legal Hold', '#795548', 60, 0),
+('restriction_code', 'Access Restriction', 'restricted_cultural', 'Cultural Protocol', '#607d8b', 70, 0),
+('restriction_code', 'Access Restriction', 'restricted_security', 'Security Classification', '#e91e63', 80, 0),
+('restriction_code', 'Access Restriction', 'restricted_donor', 'Donor Restriction', '#ff5722', 90, 0);
+
+-- ============================================================
 -- ENUM TO DROPDOWN MIGRATION DATA
 -- These values replace hardcoded ENUM columns across all AHG plugins
 -- Additional migrations: enum_to_dropdown_migration_phase2*.sql

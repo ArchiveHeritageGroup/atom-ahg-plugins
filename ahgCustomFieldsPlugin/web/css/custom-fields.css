@@ -1,0 +1,105 @@
+/* ============================================================
+ * ahgCustomFieldsPlugin — Styles
+ * ============================================================ */
+
+/* View mode */
+.cf-view-group {
+    margin-bottom: 1rem;
+}
+
+.cf-group-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.cf-view-fields dt {
+    font-weight: 600;
+    color: #555;
+}
+
+.cf-view-fields dd {
+    margin-bottom: 0.5rem;
+}
+
+/* Edit mode */
+.cf-edit-group {
+    border: none;
+    padding: 0;
+    margin-bottom: 1rem;
+}
+
+.cf-group-legend {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cf-field {
+    position: relative;
+}
+
+/* Repeatable fields */
+.cf-repeatable-items {
+    margin-bottom: 0.25rem;
+}
+
+.cf-repeatable-row {
+    margin-bottom: 0.25rem !important;
+}
+
+.cf-repeatable-row .form-control {
+    border-right: 0;
+}
+
+.cf-repeatable-row .btn-outline-danger {
+    border-left: 0;
+}
+
+.cf-add-row {
+    font-size: 0.85rem;
+}
+
+/* Admin table */
+.cf-drag-handle {
+    color: #aaa;
+    padding: 0.25rem 0.5rem;
+}
+
+.cf-drag-handle:hover {
+    color: #333;
+}
+
+.cf-sortable tr.cf-dragging {
+    opacity: 0.5;
+    background: #e3f2fd !important;
+}
+
+.cf-sortable tr.cf-drag-over {
+    border-top: 2px solid #2196f3;
+}
+
+/* URL field open button */
+.cf-url-open {
+    pointer-events: auto;
+}
+
+input[type="url"]:placeholder-shown ~ .cf-url-open {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* Edit section */
+.cf-edit-section .card-header {
+    background: #f8f9fa;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .cf-view-fields dt,
+    .cf-view-fields dd {
+        width: 100%;
+        padding-left: 0;
+    }
+}
