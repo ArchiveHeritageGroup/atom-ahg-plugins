@@ -212,6 +212,7 @@ class helpActions extends AhgController
             ['pattern' => '/accession/browse', 'slug' => 'glam-browse-user-guide', 'anchor' => 'accession-browse', 'title' => 'Accession Browse'],
             ['pattern' => '/display/browse', 'slug' => 'glam-browse-user-guide', 'title' => 'GLAM Browse'],
             ['pattern' => '/admin/settings/ahg', 'slug' => 'ahg-settings-user-guide', 'title' => 'AHG Settings'],
+            ['pattern' => '/admin/customFields', 'slug' => 'custom-fields-user-guide', 'title' => 'Custom Fields'],
             ['pattern' => '/preservation', 'slug' => 'preservation-user-guide', 'title' => 'Digital Preservation'],
             ['pattern' => '/ingest', 'slug' => 'data-ingest-user-guide', 'title' => 'Data Ingest'],
             ['pattern' => '/iiif', 'slug' => 'iiif-integration-user-guide', 'title' => 'IIIF Integration'],
