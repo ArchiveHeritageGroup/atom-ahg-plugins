@@ -28,6 +28,15 @@ class HelpSearchIndexService
                 $query->whereNotIn('category', HelpArticleService::ADMIN_CATEGORIES);
             }
 
+            // Only include articles for enabled plugins
+            $enabled = HelpArticleService::getEnabledPlugins();
+            if (!empty($enabled)) {
+                $query->where(function ($q) use ($enabled) {
+                    $q->whereNull('related_plugin')
+                      ->orWhereIn('related_plugin', $enabled);
+                });
+            }
+
             $articles = $query->select('id', 'slug', 'title', 'category', 'subcategory', 'body_text')
                 ->orderBy('title')
                 ->get();

@@ -222,6 +222,18 @@ class helpActions extends AhgController
             ['pattern' => '/user/passwordEdit', 'slug' => 'password-security-user-guide', 'anchor' => 'password-reuse-prevention', 'title' => 'Password Security'],
         ];
 
+        // Filter context map to only include articles that exist and are visible
+        $slugs = array_unique(array_column($contextMap, 'slug'));
+        $visibleSlugs = [];
+        foreach ($slugs as $slug) {
+            if (\AhgHelp\Services\HelpArticleService::getBySlug($slug)) {
+                $visibleSlugs[] = $slug;
+            }
+        }
+        $contextMap = array_values(array_filter($contextMap, function ($m) use ($visibleSlugs) {
+            return in_array($m['slug'], $visibleSlugs);
+        }));
+
         $this->getResponse()->setContentType('application/json');
         $this->getResponse()->setHttpHeader('Cache-Control', 'public, max-age=600');
         $this->getResponse()->setContent(json_encode(['mappings' => $contextMap]));

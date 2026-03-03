@@ -14,6 +14,9 @@ class HelpArticleService
     /** Categories restricted to administrators only */
     public const ADMIN_CATEGORIES = ['Technical', 'Plugin Reference'];
 
+    /** Cached list of enabled plugin names */
+    protected static $enabledPlugins = null;
+
     /**
      * Check if the current user is an administrator.
      */
@@ -29,6 +32,28 @@ class HelpArticleService
     }
 
     /**
+     * Get the list of enabled plugin names (cached per request).
+     */
+    public static function getEnabledPlugins(): array
+    {
+        if (self::$enabledPlugins !== null) {
+            return self::$enabledPlugins;
+        }
+
+        try {
+            self::$enabledPlugins = DB::table('atom_plugin')
+                ->where('is_enabled', 1)
+                ->pluck('name')
+                ->all();
+        } catch (\Exception $e) {
+            // If atom_plugin table is unavailable, don't filter
+            self::$enabledPlugins = [];
+        }
+
+        return self::$enabledPlugins;
+    }
+
+    /**
      * Apply admin-only category filter to a query.
      */
     protected static function applyAdminFilter($query): void
@@ -36,6 +61,24 @@ class HelpArticleService
         if (!self::isAdmin()) {
             $query->whereNotIn('category', self::ADMIN_CATEGORIES);
         }
+    }
+
+    /**
+     * Apply enabled-plugin filter: hide articles whose related_plugin
+     * is set but not enabled on this deployment.
+     * Articles with no related_plugin (general docs) always show.
+     */
+    protected static function applyPluginFilter($query): void
+    {
+        $enabled = self::getEnabledPlugins();
+        if (empty($enabled)) {
+            return; // No plugin list available — show all
+        }
+
+        $query->where(function ($q) use ($enabled) {
+            $q->whereNull('related_plugin')
+              ->orWhereIn('related_plugin', $enabled);
+        });
     }
 
     /**
@@ -56,6 +99,7 @@ class HelpArticleService
             }
 
             self::applyAdminFilter($query);
+            self::applyPluginFilter($query);
 
             return $query->orderBy('sort_order')->orderBy('title')->get()->map(fn ($r) => (array) $r)->all();
         } catch (\Exception $e) {
@@ -76,6 +120,7 @@ class HelpArticleService
                 ->where('is_published', 1);
 
             self::applyAdminFilter($query);
+            self::applyPluginFilter($query);
 
             $row = $query->first();
 
@@ -97,6 +142,7 @@ class HelpArticleService
                 ->where('is_published', 1);
 
             self::applyAdminFilter($query);
+            self::applyPluginFilter($query);
 
             return $query->select('category', DB::raw('COUNT(*) as article_count'))
                 ->groupBy('category')
@@ -122,10 +168,13 @@ class HelpArticleService
                 return [];
             }
 
-            return DB::table('help_article')
+            $query = DB::table('help_article')
                 ->where('category', $category)
-                ->where('is_published', 1)
-                ->select('id', 'slug', 'title', 'subcategory', 'word_count', 'related_plugin', 'tags', 'updated_at')
+                ->where('is_published', 1);
+
+            self::applyPluginFilter($query);
+
+            return $query->select('id', 'slug', 'title', 'subcategory', 'word_count', 'related_plugin', 'tags', 'updated_at')
                 ->orderBy('subcategory')
                 ->orderBy('sort_order')
                 ->orderBy('title')
@@ -154,6 +203,7 @@ class HelpArticleService
                 ->whereRaw('MATCH(title, body_text) AGAINST(? IN BOOLEAN MODE)', [$query . '*']);
 
             self::applyAdminFilter($q);
+            self::applyPluginFilter($q);
 
             return $q->select(
                     'id',
@@ -192,6 +242,15 @@ class HelpArticleService
 
             if (!self::isAdmin()) {
                 $q->whereNotIn('ha.category', self::ADMIN_CATEGORIES);
+            }
+
+            // Plugin filter on joined table alias
+            $enabled = self::getEnabledPlugins();
+            if (!empty($enabled)) {
+                $q->where(function ($sub) use ($enabled) {
+                    $sub->whereNull('ha.related_plugin')
+                        ->orWhereIn('ha.related_plugin', $enabled);
+                });
             }
 
             return $q->select(
@@ -354,6 +413,7 @@ class HelpArticleService
                 ->where('is_published', 1);
 
             self::applyAdminFilter($query);
+            self::applyPluginFilter($query);
 
             return $query->select('slug', 'title', 'category', 'subcategory', 'updated_at')
                 ->orderByDesc('updated_at')
