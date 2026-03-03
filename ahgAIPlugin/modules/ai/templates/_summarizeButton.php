@@ -33,7 +33,7 @@ function generateSummary(objectId) {
             }
             
             // Show success notification
-            const savedMsg = data.saved ? 'Saved to Scope & Content' : 'Generated (not saved)';
+            const savedMsg = data.saved ? 'Saved to Scope & Content' : 'Generated (not saved — field has been moderated)';
             resultDiv.innerHTML = `
                 <div class="alert alert-success py-2">
                     <i class="bi bi-check-circle me-1"></i><strong>${savedMsg}</strong>

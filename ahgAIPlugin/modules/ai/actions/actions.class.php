@@ -1298,35 +1298,47 @@ class aiActions extends AhgController
     }
 
     /**
-     * Save summary to Scope & Content field
+     * Save summary to Scope & Content field.
+     *
+     * Prepends "[AI Summarized] " to the summary text.
+     * - If existing text starts with "[AI Summarized]", it is replaced (re-summarization).
+     * - If existing text does NOT start with "[AI Summarized]", it has been moderated — do not overwrite.
      */
     private function saveScopeAndContent($objectId, $summary)
     {
         try {
             $culture = $this->getUserCulture();
+            $taggedSummary = '[AI Summarized] ' . $summary;
 
             // Check if i18n record exists
-            $exists = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+            $existing = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                 ->where('id', $objectId)
                 ->where('culture', $culture)
-                ->exists();
+                ->first();
 
-            if ($exists) {
-                // Update existing
+            if ($existing) {
+                $currentText = $existing->scope_and_content ?? '';
+
+                // If field has content that does NOT start with [AI Summarized], it has been
+                // moderated by a human — do not overwrite.
+                if (!empty(trim($currentText)) && strpos($currentText, '[AI Summarized]') !== 0) {
+                    return false;
+                }
+
+                // Empty or starts with [AI Summarized] — safe to replace
                 Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                     ->where('id', $objectId)
                     ->where('culture', $culture)
-                    ->update(['scope_and_content' => $summary]);
+                    ->update(['scope_and_content' => $taggedSummary]);
             } else {
                 // Insert new
                 Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                     ->insert([
                         'id' => $objectId,
                         'culture' => $culture,
-                        'scope_and_content' => $summary
+                        'scope_and_content' => $taggedSummary
                     ]);
             }
-
 
             return true;
         } catch (Exception $e) {
