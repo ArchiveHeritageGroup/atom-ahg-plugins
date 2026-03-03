@@ -69,6 +69,25 @@ class registryActions extends AhgController
     }
 
     /**
+     * Log an error to the ahg_error_log table via ErrorNotificationService.
+     */
+    protected function logError(string $message, ?\Throwable $e = null): void
+    {
+        try {
+            \AhgCore\Services\ErrorNotificationService::logToDatabase(
+                'error',
+                '[Registry] ' . $message,
+                $e ? $e->getFile() : __FILE__,
+                $e ? $e->getLine() : __LINE__,
+                $e ? $e->getTraceAsString() : null,
+                $e
+            );
+        } catch (\Throwable $ignored) {
+            // Silently fail — never let logging break the app
+        }
+    }
+
+    /**
      * Get the current user's institution, with admin fallback.
      * Admin: tries created_by first, then falls back to first institution.
      * Regular user: only returns institution they created.
@@ -562,7 +581,15 @@ class registryActions extends AhgController
         $email = $this->getCurrentUserEmail();
         $userId = $this->getCurrentUserId();
 
-        $svc->join($slug, $email, $user->getAttribute('user_name', ''), $userId, null);
+        try {
+            $svc->join($slug, $email, $user->getAttribute('user_name', ''), $userId, null);
+        } catch (\Throwable $e) {
+            $this->logError('Group join failed (slug=' . $slug . '): ' . $e->getMessage(), $e);
+            $user->setFlash('error', 'An error occurred while joining the group.');
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'groupView', 'slug' => $slug]));
+
+            return;
+        }
 
         $user->setFlash('success', 'You have successfully joined this group.');
         $this->redirect(url_for(['module' => 'registry', 'action' => 'groupView', 'slug' => $slug]));
@@ -729,14 +756,19 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $result = $discSvc->create($group['group']->id, $data);
-                if (!empty($result['success'])) {
-                    $this->notifyGroupMembers($group['group'], $data['title'], $data['content'], $data['author_name'], $result['id'], $data['author_email']);
-                    $this->redirect(url_for(['module' => 'registry', 'action' => 'discussionView', 'slug' => $slug, 'id' => $result['id']]));
+                try {
+                    $result = $discSvc->create($group['group']->id, $data);
+                    if (!empty($result['success'])) {
+                        $this->notifyGroupMembers($group['group'], $data['title'], $data['content'], $data['author_name'], $result['id'], $data['author_email']);
+                        $this->redirect(url_for(['module' => 'registry', 'action' => 'discussionView', 'slug' => $slug, 'id' => $result['id']]));
 
-                    return;
+                        return;
+                    }
+                    $this->errors = [$result['error'] ?? 'Failed to create discussion'];
+                } catch (\Throwable $e) {
+                    $this->logError('Discussion create failed (group=' . $slug . '): ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while creating the discussion.';
                 }
-                $this->errors = [$result['error'] ?? 'Failed to create discussion'];
             }
 
             $this->formData = $data;
@@ -763,17 +795,21 @@ class registryActions extends AhgController
         ];
 
         if ('' !== $data['content']) {
-            $discSvc->reply($id, $data);
+            try {
+                $discSvc->reply($id, $data);
 
-            // Notify group members about the reply
-            $db = \Illuminate\Database\Capsule\Manager::class;
-            $discussion = $db::table('registry_discussion')->where('id', $id)->first();
-            if ($discussion) {
-                $group = $db::table('registry_user_group')->where('id', $discussion->group_id)->first();
-                if ($group) {
-                    $replyPreview = mb_substr(strip_tags($data['content']), 0, 200);
-                    $this->notifyGroupMembers($group, 'Re: ' . $discussion->title, $replyPreview, $data['author_name'], $id, $data['author_email']);
+                // Notify group members about the reply
+                $db = \Illuminate\Database\Capsule\Manager::class;
+                $discussion = $db::table('registry_discussion')->where('id', $id)->first();
+                if ($discussion) {
+                    $group = $db::table('registry_user_group')->where('id', $discussion->group_id)->first();
+                    if ($group) {
+                        $replyPreview = mb_substr(strip_tags($data['content']), 0, 200);
+                        $this->notifyGroupMembers($group, 'Re: ' . $discussion->title, $replyPreview, $data['author_name'], $id, $data['author_email']);
+                    }
                 }
+            } catch (\Throwable $e) {
+                $this->logError('Discussion reply failed (id=' . $id . '): ' . $e->getMessage(), $e);
             }
         }
 
@@ -885,18 +921,22 @@ class registryActions extends AhgController
         ];
 
         if ('' !== $data['content']) {
-            $discSvc = $this->loadService('DiscussionService');
-            $discSvc->reply((int) $discussion->id, $data);
+            try {
+                $discSvc = $this->loadService('DiscussionService');
+                $discSvc->reply((int) $discussion->id, $data);
 
-            // Update blog post comment_count
-            $commentCount = $db::table('registry_discussion_reply')
-                ->where('discussion_id', $discussion->id)
-                ->where('status', 'active')
-                ->count();
+                // Update blog post comment_count
+                $commentCount = $db::table('registry_discussion_reply')
+                    ->where('discussion_id', $discussion->id)
+                    ->where('status', 'active')
+                    ->count();
 
-            $db::table('registry_blog_post')
-                ->where('id', $post->id)
-                ->update(['comment_count' => $commentCount]);
+                $db::table('registry_blog_post')
+                    ->where('id', $post->id)
+                    ->update(['comment_count' => $commentCount]);
+            } catch (\Throwable $e) {
+                $this->logError('Blog reply failed (slug=' . $slug . '): ' . $e->getMessage(), $e);
+            }
         }
 
         $this->redirect(url_for(['module' => 'registry', 'action' => 'blogView', 'slug' => $slug]) . '#comments');
@@ -974,10 +1014,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $id = $svc->create($data);
-                $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
+                try {
+                    $id = $svc->create($data);
+                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Institution register failed: ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while registering the institution.';
+                }
             }
 
             $this->formData = (object) $data;
@@ -1087,27 +1132,32 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $result = $svc->update($this->institution->id, $data);
+                try {
+                    $result = $svc->update($this->institution->id, $data);
 
-                // Save tags
-                $tagsStr = trim($request->getParameter('tags', ''));
-                $this->saveTags('institution', $this->institution->id, $tagsStr);
+                    // Save tags
+                    $tagsStr = trim($request->getParameter('tags', ''));
+                    $this->saveTags('institution', $this->institution->id, $tagsStr);
 
-                $sfUser = \sfContext::getInstance()->getUser();
-                if (!empty($result['success'])) {
-                    $sfUser->setFlash('success', __('Institution updated successfully.'));
-                } else {
-                    $sfUser->setFlash('error', $result['error'] ?? __('Failed to save changes.'));
+                    $sfUser = \sfContext::getInstance()->getUser();
+                    if (!empty($result['success'])) {
+                        $sfUser->setFlash('success', __('Institution updated successfully.'));
+                    } else {
+                        $sfUser->setFlash('error', $result['error'] ?? __('Failed to save changes.'));
+                    }
+
+                    // Admin goes back to admin list; regular user goes to dashboard
+                    if ($editId && $this->isAdmin()) {
+                        $this->redirect(url_for(['module' => 'registry', 'action' => 'adminInstitutions']));
+                    } else {
+                        $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
+                    }
+
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Institution update failed (id=' . $this->institution->id . '): ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while saving the institution.';
                 }
-
-                // Admin goes back to admin list; regular user goes to dashboard
-                if ($editId && $this->isAdmin()) {
-                    $this->redirect(url_for(['module' => 'registry', 'action' => 'adminInstitutions']));
-                } else {
-                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
-                }
-
-                return;
             }
         }
     }
@@ -1175,10 +1225,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $svc->create($data);
-                $this->redirect($this->backUrl);
+                try {
+                    $svc->create($data);
+                    $this->redirect($this->backUrl);
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Institution contact add failed: ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while saving the contact.';
+                }
             }
 
             $this->contact = (object) $data;
@@ -1219,10 +1274,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $svc->update($id, $data);
-                $this->redirect($this->backUrl);
+                try {
+                    $svc->update($id, $data);
+                    $this->redirect($this->backUrl);
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Contact update failed (id=' . $id . '): ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while saving the contact.';
+                }
             }
 
             $this->contact = (object) $data;
@@ -1622,10 +1682,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $svc->create($data);
-                $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorDashboard']));
+                try {
+                    $svc->create($data);
+                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorDashboard']));
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Vendor register failed: ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while registering the vendor.';
+                }
             }
 
             $this->formData = (object) $data;
@@ -1715,19 +1780,24 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $svc->update($this->vendor->id, $data);
+                try {
+                    $svc->update($this->vendor->id, $data);
 
-                // Save tags
-                $tagsStr = trim($request->getParameter('tags', ''));
-                $this->saveTags('vendor', $this->vendor->id, $tagsStr);
+                    // Save tags
+                    $tagsStr = trim($request->getParameter('tags', ''));
+                    $this->saveTags('vendor', $this->vendor->id, $tagsStr);
 
-                if ($editId && $this->isAdmin()) {
-                    $this->redirect(url_for(['module' => 'registry', 'action' => 'adminVendors']));
-                } else {
-                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorDashboard']));
+                    if ($editId && $this->isAdmin()) {
+                        $this->redirect(url_for(['module' => 'registry', 'action' => 'adminVendors']));
+                    } else {
+                        $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorDashboard']));
+                    }
+
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Vendor update failed (id=' . $this->vendor->id . '): ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while saving the vendor.';
                 }
-
-                return;
             }
         }
     }
@@ -1795,10 +1865,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $svc->create($data);
-                $this->redirect($this->backUrl);
+                try {
+                    $svc->create($data);
+                    $this->redirect($this->backUrl);
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Vendor contact add failed: ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while saving the contact.';
+                }
             }
 
             $this->contact = (object) $data;
@@ -1989,10 +2064,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $id = $svc->create($data);
-                $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorSoftware']));
+                try {
+                    $id = $svc->create($data);
+                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorSoftware']));
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Software add failed: ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while adding the software.';
+                }
             }
 
             $this->software = (object) $data;
@@ -2474,18 +2554,23 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $id = $svc->create($data);
+                try {
+                    $id = $svc->create($data);
 
-                // Auto-join creator as organizer
-                $svc->join($data['name'], $this->getCurrentUserEmail(), $data['organizer_name'], $this->getCurrentUserId(), null);
-                \Illuminate\Database\Capsule\Manager::table('registry_user_group_member')
-                    ->where('group_id', $id)
-                    ->where('email', $this->getCurrentUserEmail())
-                    ->update(['role' => 'organizer']);
+                    // Auto-join creator as organizer
+                    $svc->join($data['name'], $this->getCurrentUserEmail(), $data['organizer_name'], $this->getCurrentUserId(), null);
+                    \Illuminate\Database\Capsule\Manager::table('registry_user_group_member')
+                        ->where('group_id', $id)
+                        ->where('email', $this->getCurrentUserEmail())
+                        ->update(['role' => 'organizer']);
 
-                $this->redirect(url_for(['module' => 'registry', 'action' => 'myGroups']));
+                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myGroups']));
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Group create failed: ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while creating the group.';
+                }
             }
 
             $this->group = (object) $data;
@@ -2641,10 +2726,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $id = $svc->create($data);
-                $this->redirect(url_for(['module' => 'registry', 'action' => 'myBlog']));
+                try {
+                    $id = $svc->create($data);
+                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myBlog']));
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Blog create failed: ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while creating the blog post.';
+                }
             }
 
             $this->post = (object) $data;
@@ -2685,10 +2775,15 @@ class registryActions extends AhgController
             }
 
             if (empty($this->errors)) {
-                $svc->update($id, $data);
-                $this->redirect(url_for(['module' => 'registry', 'action' => 'myBlog']));
+                try {
+                    $svc->update($id, $data);
+                    $this->redirect(url_for(['module' => 'registry', 'action' => 'myBlog']));
 
-                return;
+                    return;
+                } catch (\Throwable $e) {
+                    $this->logError('Blog update failed (id=' . $id . '): ' . $e->getMessage(), $e);
+                    $this->errors[] = 'An error occurred while saving the blog post.';
+                }
             }
 
             $this->post = (object) array_merge((array) $this->post, $data);
@@ -3647,31 +3742,35 @@ class registryActions extends AhgController
             $userId = (int) $request->getParameter('user_id');
             $formAction = $request->getParameter('form_action', '');
 
-            if ($userId > 0 && 'approve' === $formAction) {
-                $db::table('user')->where('id', $userId)->update(['active' => 1]);
+            try {
+                if ($userId > 0 && 'approve' === $formAction) {
+                    $db::table('user')->where('id', $userId)->update(['active' => 1]);
 
-                // Optionally assign administrator group
-                if ($request->getParameter('make_admin')) {
-                    $adminGroupId = \AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID;
-                    $exists = $db::table('acl_user_group')
-                        ->where('user_id', $userId)
-                        ->where('group_id', $adminGroupId)
-                        ->exists();
-                    if (!$exists) {
-                        $db::table('acl_user_group')->insert([
-                            'user_id' => $userId,
-                            'group_id' => $adminGroupId,
-                        ]);
+                    // Optionally assign administrator group
+                    if ($request->getParameter('make_admin')) {
+                        $adminGroupId = \AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID;
+                        $exists = $db::table('acl_user_group')
+                            ->where('user_id', $userId)
+                            ->where('group_id', $adminGroupId)
+                            ->exists();
+                        if (!$exists) {
+                            $db::table('acl_user_group')->insert([
+                                'user_id' => $userId,
+                                'group_id' => $adminGroupId,
+                            ]);
+                        }
                     }
+                } elseif ($userId > 0 && 'reject' === $formAction) {
+                    // Delete user + actor + object chain
+                    $db::table('acl_user_group')->where('user_id', $userId)->delete();
+                    $db::table('registry_user_group_member')->where('user_id', $userId)->delete();
+                    $db::table('user')->where('id', $userId)->delete();
+                    $db::table('actor_i18n')->where('id', $userId)->delete();
+                    $db::table('actor')->where('id', $userId)->delete();
+                    $db::table('object')->where('id', $userId)->delete();
                 }
-            } elseif ($userId > 0 && 'reject' === $formAction) {
-                // Delete user + actor + object chain
-                $db::table('acl_user_group')->where('user_id', $userId)->delete();
-                $db::table('registry_user_group_member')->where('user_id', $userId)->delete();
-                $db::table('user')->where('id', $userId)->delete();
-                $db::table('actor_i18n')->where('id', $userId)->delete();
-                $db::table('actor')->where('id', $userId)->delete();
-                $db::table('object')->where('id', $userId)->delete();
+            } catch (\Throwable $e) {
+                $this->logError('Admin user ' . $formAction . ' failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
             }
         }
 
@@ -3721,19 +3820,23 @@ class registryActions extends AhgController
             $formAction = $request->getParameter('form_action', '');
             $userId = (int) $request->getParameter('user_id');
 
-            if ($userId > 0 && 'toggle_active' === $formAction) {
-                $user = $db::table('user')->where('id', $userId)->first();
-                if ($user) {
-                    $db::table('user')->where('id', $userId)->update(['active' => $user->active ? 0 : 1]);
+            try {
+                if ($userId > 0 && 'toggle_active' === $formAction) {
+                    $user = $db::table('user')->where('id', $userId)->first();
+                    if ($user) {
+                        $db::table('user')->where('id', $userId)->update(['active' => $user->active ? 0 : 1]);
+                    }
+                } elseif ($userId > 0 && 'delete' === $formAction) {
+                    // Delete user + actor + object chain
+                    $db::table('acl_user_group')->where('user_id', $userId)->delete();
+                    $db::table('registry_user_group_member')->where('user_id', $userId)->delete();
+                    $db::table('user')->where('id', $userId)->delete();
+                    $db::table('actor_i18n')->where('id', $userId)->delete();
+                    $db::table('actor')->where('id', $userId)->delete();
+                    $db::table('object')->where('id', $userId)->delete();
                 }
-            } elseif ($userId > 0 && 'delete' === $formAction) {
-                // Delete user + actor + object chain
-                $db::table('acl_user_group')->where('user_id', $userId)->delete();
-                $db::table('registry_user_group_member')->where('user_id', $userId)->delete();
-                $db::table('user')->where('id', $userId)->delete();
-                $db::table('actor_i18n')->where('id', $userId)->delete();
-                $db::table('actor')->where('id', $userId)->delete();
-                $db::table('object')->where('id', $userId)->delete();
+            } catch (\Throwable $e) {
+                $this->logError('Admin user manage ' . $formAction . ' failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
             }
         }
 
@@ -3868,48 +3971,52 @@ class registryActions extends AhgController
             $formAction = $request->getParameter('form_action', '');
 
             if ('save' === $formAction) {
-                $newName = trim($request->getParameter('name', ''));
-                $newEmail = trim($request->getParameter('email', ''));
-                $newUsername = trim($request->getParameter('username', ''));
-                $active = (int) $request->getParameter('active', 0);
+                try {
+                    $newName = trim($request->getParameter('name', ''));
+                    $newEmail = trim($request->getParameter('email', ''));
+                    $newUsername = trim($request->getParameter('username', ''));
+                    $active = (int) $request->getParameter('active', 0);
 
-                // Update user table
-                $db::table('user')->where('id', $userId)->update([
-                    'email' => $newEmail,
-                    'username' => $newUsername,
-                    'active' => $active,
-                ]);
+                    // Update user table
+                    $db::table('user')->where('id', $userId)->update([
+                        'email' => $newEmail,
+                        'username' => $newUsername,
+                        'active' => $active,
+                    ]);
 
-                // Update actor_i18n name
-                $db::table('actor_i18n')
-                    ->where('id', $userId)
-                    ->where('culture', $this->culture())
-                    ->update(['authorized_form_of_name' => $newName]);
+                    // Update actor_i18n name
+                    $db::table('actor_i18n')
+                        ->where('id', $userId)
+                        ->where('culture', $this->culture())
+                        ->update(['authorized_form_of_name' => $newName]);
 
-                // Update group memberships
-                $selectedGroups = $request->getParameter('groups', []);
-                if (!is_array($selectedGroups)) {
-                    $selectedGroups = [];
-                }
-                $selectedGroups = array_map('intval', $selectedGroups);
-
-                // Remove existing (except root=1 and anonymous=98)
-                $db::table('acl_user_group')
-                    ->where('user_id', $userId)
-                    ->whereNotIn('group_id', [1, 98])
-                    ->delete();
-
-                // Insert selected
-                foreach ($selectedGroups as $gid) {
-                    if ($gid > 0 && !in_array($gid, [1, 98])) {
-                        $db::table('acl_user_group')->insert([
-                            'user_id' => $userId,
-                            'group_id' => $gid,
-                        ]);
+                    // Update group memberships
+                    $selectedGroups = $request->getParameter('groups', []);
+                    if (!is_array($selectedGroups)) {
+                        $selectedGroups = [];
                     }
-                }
+                    $selectedGroups = array_map('intval', $selectedGroups);
 
-                $this->saved = true;
+                    // Remove existing (except root=1 and anonymous=98)
+                    $db::table('acl_user_group')
+                        ->where('user_id', $userId)
+                        ->whereNotIn('group_id', [1, 98])
+                        ->delete();
+
+                    // Insert selected
+                    foreach ($selectedGroups as $gid) {
+                        if ($gid > 0 && !in_array($gid, [1, 98])) {
+                            $db::table('acl_user_group')->insert([
+                                'user_id' => $userId,
+                                'group_id' => $gid,
+                            ]);
+                        }
+                    }
+
+                    $this->saved = true;
+                } catch (\Throwable $e) {
+                    $this->logError('Admin user edit failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
+                }
 
                 // Refresh data
                 $this->editUser = $db::table('user')
@@ -3954,17 +4061,22 @@ class registryActions extends AhgController
             return;
         }
 
-        // AtoM two-layer password: sha1(salt + plaintext) → argon2i
-        $salt = bin2hex(random_bytes(16));
-        $sha1 = sha1($salt . $newPassword);
-        $hash = password_hash($sha1, PASSWORD_ARGON2I);
+        try {
+            // AtoM two-layer password: sha1(salt + plaintext) → argon2i
+            $salt = bin2hex(random_bytes(16));
+            $sha1 = sha1($salt . $newPassword);
+            $hash = password_hash($sha1, PASSWORD_ARGON2I);
 
-        $db::table('user')->where('id', $userId)->update([
-            'salt' => $salt,
-            'password_hash' => $hash,
-        ]);
+            $db::table('user')->where('id', $userId)->update([
+                'salt' => $salt,
+                'password_hash' => $hash,
+            ]);
 
-        $this->getUser()->setFlash('notice', 'Password reset successfully.');
+            $this->getUser()->setFlash('notice', 'Password reset successfully.');
+        } catch (\Throwable $e) {
+            $this->logError('Password reset failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
+            $this->getUser()->setFlash('error', 'Password reset failed. Please try again.');
+        }
         $this->redirect('/registry/admin/users/' . $userId . '/edit');
     }
 
@@ -4565,6 +4677,7 @@ class registryActions extends AhgController
                 $db::connection()->commit();
             } catch (\Throwable $e) {
                 $db::connection()->rollBack();
+                $this->logError('Registration failed for email=' . $email . ': ' . $e->getMessage(), $e);
                 $this->error = 'Registration failed. Please try again.';
 
                 return;
