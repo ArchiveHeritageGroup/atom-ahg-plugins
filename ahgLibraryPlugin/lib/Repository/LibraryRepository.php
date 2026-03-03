@@ -21,8 +21,8 @@ class LibraryRepository
     protected string $culture;
 
     protected const TABLE_ITEM = 'library_item';
-    protected const TABLE_CREATOR = 'library_creator';
-    protected const TABLE_SUBJECT = 'library_subject';
+    protected const TABLE_CREATOR = 'library_item_creator';
+    protected const TABLE_SUBJECT = 'library_item_subject';
     protected const TABLE_COPY = 'library_copy';
     protected const TABLE_SERIAL = 'library_serial_holding';
     protected const TABLE_CIRCULATION = 'library_circulation';
@@ -507,7 +507,19 @@ class LibraryRepository
                     ->orWhere('li.issn', 'LIKE', $term)
                     ->orWhere('li.call_number', 'LIKE', $term)
                     ->orWhere('li.publisher', 'LIKE', $term)
-                    ->orWhere('li.barcode', 'LIKE', $term);
+                    ->orWhere('li.barcode', 'LIKE', $term)
+                    ->orWhereExists(function ($sub) use ($term) {
+                        $sub->select(DB::raw(1))
+                            ->from(self::TABLE_CREATOR . ' as lic')
+                            ->whereColumn('lic.library_item_id', 'li.id')
+                            ->where('lic.name', 'LIKE', $term);
+                    })
+                    ->orWhereExists(function ($sub) use ($term) {
+                        $sub->select(DB::raw(1))
+                            ->from(self::TABLE_SUBJECT . ' as lis')
+                            ->whereColumn('lis.library_item_id', 'li.id')
+                            ->where('lis.heading', 'LIKE', $term);
+                    });
             });
         }
 
@@ -529,7 +541,7 @@ class LibraryRepository
         $map = [
             'title' => 'ioi.title',
             'call_number' => 'li.call_number',
-            'author' => 'ioi.title', // Would need join
+            'author' => 'ioi.title', // Sorts by title (author sort requires subquery)
             'date' => 'li.publication_date',
             'publisher' => 'li.publisher',
             'added' => 'li.created_at',

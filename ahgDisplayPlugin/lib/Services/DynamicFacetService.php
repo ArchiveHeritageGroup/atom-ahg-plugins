@@ -410,11 +410,13 @@ class DynamicFacetService
      */
     private function applyTextSearchFilter($query, $searchTerms): void
     {
+        $sectorTables = $this->getSectorSearchTables();
+
         if (is_array($searchTerms)) {
-            $query->where(function ($qb) use ($searchTerms) {
+            $query->where(function ($qb) use ($searchTerms, $sectorTables) {
                 foreach ($searchTerms as $term) {
                     $q = '%' . $term . '%';
-                    $qb->orWhere(function ($inner) use ($q) {
+                    $qb->orWhere(function ($inner) use ($q, $sectorTables) {
                         $inner->whereExists(function ($sub) use ($q) {
                             $sub->select(DB::raw(1))
                                 ->from('information_object_i18n as ioi')
@@ -424,12 +426,13 @@ class DynamicFacetService
                                       ->orWhere('ioi.scope_and_content', 'like', $q);
                                 });
                         })->orWhere('io.identifier', 'like', $q);
+                        $this->applySectorSearchClauses($inner, $q, $sectorTables);
                     });
                 }
             });
         } else {
             $q = '%' . $searchTerms . '%';
-            $query->where(function ($qb) use ($q) {
+            $query->where(function ($qb) use ($q, $sectorTables) {
                 $qb->whereExists(function ($sub) use ($q) {
                     $sub->select(DB::raw(1))
                         ->from('information_object_i18n as ioi')
@@ -439,8 +442,85 @@ class DynamicFacetService
                               ->orWhere('ioi.scope_and_content', 'like', $q);
                         });
                 })->orWhere('io.identifier', 'like', $q);
+                $this->applySectorSearchClauses($qb, $q, $sectorTables);
             });
         }
+    }
+
+    /**
+     * Add sector-specific search clauses (DAM, Museum, Gallery).
+     */
+    private function applySectorSearchClauses($qb, string $likePattern, array $sectorTables): void
+    {
+        if (in_array('dam_iptc_metadata', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('dam_iptc_metadata as dim')
+                    ->whereRaw('dim.object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('dim.creator', 'like', $likePattern)
+                          ->orWhere('dim.headline', 'like', $likePattern)
+                          ->orWhere('dim.caption', 'like', $likePattern)
+                          ->orWhere('dim.keywords', 'like', $likePattern);
+                    });
+            });
+        }
+
+        if (in_array('museum_metadata', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('museum_metadata as mm')
+                    ->whereRaw('mm.object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('mm.creator_identity', 'like', $likePattern)
+                          ->orWhere('mm.materials', 'like', $likePattern)
+                          ->orWhere('mm.techniques', 'like', $likePattern)
+                          ->orWhere('mm.classification', 'like', $likePattern)
+                          ->orWhere('mm.inscription', 'like', $likePattern);
+                    });
+            });
+        }
+
+        if (in_array('gallery_artist', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('event as ev_ga')
+                    ->join('gallery_artist as ga', 'ga.actor_id', '=', 'ev_ga.actor_id')
+                    ->whereRaw('ev_ga.object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('ga.display_name', 'like', $likePattern)
+                          ->orWhere('ga.medium_specialty', 'like', $likePattern)
+                          ->orWhere('ga.movement_style', 'like', $likePattern);
+                    });
+            });
+        }
+    }
+
+    /**
+     * Get list of sector-specific tables that exist in the database.
+     * Cached per request.
+     */
+    private static $sectorSearchTables = null;
+
+    private function getSectorSearchTables(): array
+    {
+        if (self::$sectorSearchTables !== null) {
+            return self::$sectorSearchTables;
+        }
+
+        self::$sectorSearchTables = [];
+        $candidates = ['dam_iptc_metadata', 'museum_metadata', 'gallery_artist'];
+
+        foreach ($candidates as $table) {
+            try {
+                DB::select("SELECT 1 FROM `{$table}` LIMIT 1");
+                self::$sectorSearchTables[] = $table;
+            } catch (\Exception $e) {
+                // Table doesn't exist — skip
+            }
+        }
+
+        return self::$sectorSearchTables;
     }
 
     // =========================================================================

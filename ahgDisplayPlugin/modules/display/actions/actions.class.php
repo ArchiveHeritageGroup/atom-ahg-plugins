@@ -1016,13 +1016,14 @@ class displayActions extends AhgController
     protected function applyTextSearchFilter($query, $searchTerms): void
     {
         $useFulltext = $this->isFulltextAvailable();
+        $sectorTables = $this->getSectorSearchTables();
 
         if (is_array($searchTerms)) {
             // Semantic search: OR between all terms
-            $query->where(function($qb) use ($searchTerms, $useFulltext) {
+            $query->where(function($qb) use ($searchTerms, $useFulltext, $sectorTables) {
                 foreach ($searchTerms as $term) {
                     $q = "%" . $term . "%";
-                    $qb->orWhere(function($inner) use ($q, $term, $useFulltext) {
+                    $qb->orWhere(function($inner) use ($q, $term, $useFulltext, $sectorTables) {
                         if ($useFulltext) {
                             $inner->whereExists(function($sub) use ($term, $q) {
                                 $sub->select(DB::raw(1))
@@ -1046,6 +1047,7 @@ class displayActions extends AhgController
                                     });
                             })->orWhere("io.identifier", "like", $q);
                         }
+                        $this->applySectorSearchClauses($inner, $q, $sectorTables);
                     });
                 }
             });
@@ -1053,7 +1055,7 @@ class displayActions extends AhgController
             // Normal search: single term
             $q = "%" . $searchTerms . "%";
             if ($useFulltext) {
-                $query->where(function($qb) use ($q, $searchTerms) {
+                $query->where(function($qb) use ($q, $searchTerms, $sectorTables) {
                     $qb->whereExists(function($sub) use ($searchTerms, $q) {
                         $sub->select(DB::raw(1))
                             ->from("information_object_i18n as ioi")
@@ -1065,9 +1067,10 @@ class displayActions extends AhgController
                                   ->orWhere("ioi.scope_and_content", "like", $q);
                             });
                     })->orWhere("io.identifier", "like", $q);
+                    $this->applySectorSearchClauses($qb, $q, $sectorTables);
                 });
             } else {
-                $query->where(function($qb) use ($q) {
+                $query->where(function($qb) use ($q, $sectorTables) {
                     $qb->whereExists(function($sub) use ($q) {
                         $sub->select(DB::raw(1))
                             ->from("information_object_i18n as ioi")
@@ -1077,9 +1080,90 @@ class displayActions extends AhgController
                                   ->orWhere("ioi.scope_and_content", "like", $q);
                             });
                     })->orWhere("io.identifier", "like", $q);
+                    $this->applySectorSearchClauses($qb, $q, $sectorTables);
                 });
             }
         }
+    }
+
+    /**
+     * Add sector-specific search clauses (DAM, Museum, Gallery).
+     * Only adds clauses for sector tables that exist in the database.
+     */
+    protected function applySectorSearchClauses($qb, string $likePattern, array $sectorTables): void
+    {
+        // DAM: search creator, headline, caption, keywords
+        if (in_array('dam_iptc_metadata', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('dam_iptc_metadata as dim')
+                    ->whereRaw('dim.object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('dim.creator', 'like', $likePattern)
+                          ->orWhere('dim.headline', 'like', $likePattern)
+                          ->orWhere('dim.caption', 'like', $likePattern)
+                          ->orWhere('dim.keywords', 'like', $likePattern);
+                    });
+            });
+        }
+
+        // Museum: search creator_identity, materials, techniques, classification, inscription
+        if (in_array('museum_metadata', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('museum_metadata as mm')
+                    ->whereRaw('mm.object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('mm.creator_identity', 'like', $likePattern)
+                          ->orWhere('mm.materials', 'like', $likePattern)
+                          ->orWhere('mm.techniques', 'like', $likePattern)
+                          ->orWhere('mm.classification', 'like', $likePattern)
+                          ->orWhere('mm.inscription', 'like', $likePattern);
+                    });
+            });
+        }
+
+        // Gallery: search artist display_name, medium_specialty, movement_style via event→actor
+        if (in_array('gallery_artist', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('event as ev_ga')
+                    ->join('gallery_artist as ga', 'ga.actor_id', '=', 'ev_ga.actor_id')
+                    ->whereRaw('ev_ga.object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('ga.display_name', 'like', $likePattern)
+                          ->orWhere('ga.medium_specialty', 'like', $likePattern)
+                          ->orWhere('ga.movement_style', 'like', $likePattern);
+                    });
+            });
+        }
+    }
+
+    /**
+     * Get list of sector-specific tables that exist in the database.
+     * Cached per request.
+     */
+    protected static $sectorSearchTables = null;
+
+    protected function getSectorSearchTables(): array
+    {
+        if (self::$sectorSearchTables !== null) {
+            return self::$sectorSearchTables;
+        }
+
+        self::$sectorSearchTables = [];
+        $candidates = ['dam_iptc_metadata', 'museum_metadata', 'gallery_artist'];
+
+        foreach ($candidates as $table) {
+            try {
+                DB::select("SELECT 1 FROM `{$table}` LIMIT 1");
+                self::$sectorSearchTables[] = $table;
+            } catch (\Exception $e) {
+                // Table doesn't exist — skip
+            }
+        }
+
+        return self::$sectorSearchTables;
     }
 
     /**
