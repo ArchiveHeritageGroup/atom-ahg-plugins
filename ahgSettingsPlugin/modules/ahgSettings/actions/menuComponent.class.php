@@ -69,6 +69,10 @@ class ahgSettingsMenuComponent extends AhgComponents
                 'action' => 'language',
             ],
             [
+                'label' => $i18n->__('Identifiers'),
+                'action' => 'identifier',
+            ],
+            [
                 'label' => $i18n->__('Inventory'),
                 'action' => 'inventory',
             ],
