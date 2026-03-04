@@ -125,7 +125,7 @@
   </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .creator-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -156,7 +156,7 @@
 }
 </style>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 (function() {
     var searchInput = document.getElementById('creatorSearchInput');
     var autocompleteDiv = document.getElementById('creatorAutocomplete');

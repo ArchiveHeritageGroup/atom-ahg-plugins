@@ -162,7 +162,7 @@ $pages = $userData['pages'] ?? 1;
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('trustModal').addEventListener('show.bs.modal', function(event) {
     var button = event.relatedTarget;
     document.getElementById('modal_user_id').value = button.getAttribute('data-user-id');

@@ -7,7 +7,7 @@ use_stylesheet('/plugins/ahgSpectrumPlugin/web/css/condition-photos.css?v=' . ti
 use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
 @endphp
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 /* Inline styles for photo grid - compact thumbnails */
 .photo-grid {
     display: grid !important;
@@ -426,7 +426,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Photo data for lightbox
 var photos = {!! json_encode($photos) !!};
 var currentPhotoIndex = 0;
@@ -681,7 +681,7 @@ function deletePhoto(photoId) {
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Annotation functionality
 var currentAnnotator = null;
 var currentPhotoId = null;
@@ -793,7 +793,7 @@ document.getElementById('annotation-modal').addEventListener('hidden.bs.modal', 
 });
 </script>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 /* Annotation badge on photos */
 .photo-item .annotation-badge {
     z-index: 10;

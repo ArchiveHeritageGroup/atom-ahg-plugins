@@ -166,7 +166,7 @@ $archivalCollections = (array) $archivalCollections;
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function toggleSourceOptions(type) {
     document.getElementById('archival_select_wrapper').style.display = type === 'archival' ? 'block' : 'none';
     document.getElementById('iiif_select_wrapper').style.display = type === 'iiif' ? 'block' : 'none';

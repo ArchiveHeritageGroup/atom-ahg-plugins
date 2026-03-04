@@ -179,7 +179,7 @@
   </section>
 @endslot
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
   // Attachment upload
   var uploadForm = document.getElementById('attachment-upload-form');

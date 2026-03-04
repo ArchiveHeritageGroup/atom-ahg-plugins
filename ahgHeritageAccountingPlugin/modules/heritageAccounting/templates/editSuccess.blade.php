@@ -233,7 +233,7 @@
     </form>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .autocomplete-dropdown {
     position: absolute;
     top: 100%;
@@ -261,7 +261,7 @@
 }
 </style>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('donorSearch');
     var resultsDiv = document.getElementById('donorResults');

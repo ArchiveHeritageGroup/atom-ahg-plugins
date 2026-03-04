@@ -81,7 +81,7 @@
       <label><input type="checkbox" onclick="toggleColumn(7)" checked> {{ __('Created') }}</label>
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function toggleColumn(colNum) {
       var table = document.getElementById('reportTable');
       var rows = table.getElementsByTagName('tr');

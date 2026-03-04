@@ -44,7 +44,7 @@
 
 @slot('content')
   @if (count($timeline ?? []) > 0)
-    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+    <style @cspNonce>
       .ahg-timeline {
         position: relative;
         padding-left: 40px;

@@ -225,7 +225,7 @@ $title = 'PDF Merge Jobs';
     @endif
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', async function() {
         if (!confirm('Delete this job and all its files?')) return;

@@ -78,7 +78,7 @@
       <label><input type="checkbox" onclick="toggleColumn(4)" checked> {{ __('Updated') }}</label>
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function toggleColumn(colNum) {
       var table = document.getElementById('reportTable');
       var rows = table.getElementsByTagName('tr');

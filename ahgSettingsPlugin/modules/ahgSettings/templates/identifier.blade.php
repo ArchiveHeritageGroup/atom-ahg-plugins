@@ -51,7 +51,7 @@
           {!! render_field($form->inherit_code_dc_xml->label(__('Inherit reference code (DC XML)'))) !!}
           {!! render_field($form->prevent_duplicate_actor_identifiers->label(__(
               '%1% identifiers: prevent entry/import of duplicates',
-              ['%1%' => sfConfig::get('app_ui_label_actor')]
+              ['%1%' => ahg_config('ui_label_actor')]
           ))) !!}
         </div>
       </div>

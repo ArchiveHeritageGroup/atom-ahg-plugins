@@ -251,7 +251,7 @@
     </form>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .autocomplete-dropdown {
     position: absolute;
     top: 100%;
@@ -279,9 +279,9 @@
 }
 </style>
 
-<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" {!! $csp_nonce !!}>
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" @cspNonce>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     var searchInput = document.getElementById('ioSearch');
     var resultsDiv = document.getElementById('ioResults');
@@ -334,8 +334,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" {!! $csp_nonce !!}></script>
-<script {!! $csp_nonce !!}>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" @cspNonce></script>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById('donorSelect');
     if (!el) return;

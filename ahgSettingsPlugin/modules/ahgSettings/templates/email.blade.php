@@ -266,7 +266,7 @@
   </div>
 </form>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('btnSendTest').addEventListener('click', function() {
     var email = document.getElementById('testEmailInput').value;
     if (email) {

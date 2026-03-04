@@ -375,7 +375,7 @@ if (!hash_equals($expected, $signature)) {
     </div>
     @endforeach
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function copySecret() {
       var input = document.getElementById('newWebhookSecret');
       input.select();

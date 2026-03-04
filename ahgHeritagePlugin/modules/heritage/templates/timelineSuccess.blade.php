@@ -140,7 +140,7 @@
   </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .timeline-container {
   padding-left: 50%;
 }

@@ -169,7 +169,7 @@
     </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .icip-notice-critical { background-color: #f8d7da; border-left: 4px solid #dc3545; }
 .icip-notice-warning { background-color: #fff3cd; border-left: 4px solid #ffc107; }
 .icip-notice-info { background-color: #cff4fc; border-left: 4px solid #0dcaf0; }

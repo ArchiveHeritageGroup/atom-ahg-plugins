@@ -1,6 +1,6 @@
 @php
 \AhgCore\Core\AhgDb::init();
-require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
+require_once ahg_config('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
 
 $repository = new \AtomFramework\Repositories\TiffPdfMergeRepository();
 $settings = $repository->getSettings();
@@ -204,7 +204,7 @@ $recentJobs = $repository->getJobs([], 10);
     @endif
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('tiffPdfSettingsForm')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData(this);

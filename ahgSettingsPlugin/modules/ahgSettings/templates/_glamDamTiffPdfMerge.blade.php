@@ -1,6 +1,6 @@
 @php
 \AhgCore\Core\AhgDb::init();
-require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
+require_once ahg_config('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
 
 $repository = new \AtomFramework\Repositories\TiffPdfMergeRepository();
 $stats = $repository->getStatistics();

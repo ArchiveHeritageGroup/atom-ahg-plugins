@@ -45,7 +45,7 @@ if ($damEnabled) {
     ];
 }
 
-$hasHeritagePlugin = in_array('ahgHeritagePlugin', \sfProjectConfiguration::getActive()->getPlugins());
+$hasHeritagePlugin = \AtomFramework\Services\MenuService::isPluginEnabled('ahgHeritagePlugin');
 if ($hasHeritagePlugin) {
     $allCards['Heritage Platform'] = [
         'label' => 'Heritage Platform',
@@ -59,7 +59,7 @@ if ($hasHeritagePlugin) {
     ];
 }
 
-$hasIntegrityPlugin = in_array('ahgIntegrityPlugin', \sfProjectConfiguration::getActive()->getPlugins());
+$hasIntegrityPlugin = \AtomFramework\Services\MenuService::isPluginEnabled('ahgIntegrityPlugin');
 if ($hasIntegrityPlugin) {
     $allCards['Integrity Assurance'] = [
         'label' => 'Integrity Assurance',
@@ -84,7 +84,7 @@ $allCards['Preservation & Backup'] = [
     'btn_icon' => 'fa-cog',
 ];
 
-$hasPortableExport = in_array('ahgPortableExportPlugin', \sfProjectConfiguration::getActive()->getPlugins());
+$hasPortableExport = \AtomFramework\Services\MenuService::isPluginEnabled('ahgPortableExportPlugin');
 if ($hasPortableExport) {
     $allCards['Portable Export'] = [
         'label' => 'Portable Export',

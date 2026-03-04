@@ -333,7 +333,7 @@ if (!function_exists('formatBytes')) {
 @endphp
 
 @if($package)
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 const packageId = {{ $package->id }};
 
 function addObject() {

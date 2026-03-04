@@ -229,7 +229,7 @@
     </form>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 (function() {
     'use strict';
     var forms = document.querySelectorAll('.needs-validation');

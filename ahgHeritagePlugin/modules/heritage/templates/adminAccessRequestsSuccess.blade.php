@@ -149,7 +149,7 @@ $pages = $requestData['pages'] ?? 1;
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('approveModal').addEventListener('show.bs.modal', function(event) {
     document.getElementById('approve_request_id').value = event.relatedTarget.getAttribute('data-request-id');
 });

@@ -127,7 +127,7 @@ $embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
   </div>
 </form>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('is_perpetual').addEventListener('change', function() {
   var endDateInput = document.getElementById('end_date');
   if (endDateInput) {

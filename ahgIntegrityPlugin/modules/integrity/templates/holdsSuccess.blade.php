@@ -99,7 +99,7 @@ $filterStatus = $filterStatus ?? '';
   </div>
 </div>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 document.getElementById('btnPlaceHold').addEventListener('click', function() {
   var ioId = document.getElementById('holdIoId').value;
   var reason = document.getElementById('holdReason').value;

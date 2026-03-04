@@ -152,7 +152,7 @@
 
     </form>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.use-default-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {

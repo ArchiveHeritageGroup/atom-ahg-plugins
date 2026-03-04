@@ -18,7 +18,7 @@
       $serviceHistory = $serviceHistory ?? [];
     @endphp
 
-    <style {!! $csp_nonce !!}>
+    <style @cspNonce>
       .service-card {
         transition: all 0.3s ease;
       }
@@ -305,7 +305,7 @@
       </div>
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     document.addEventListener('DOMContentLoaded', function() {
       const refreshBtn = document.getElementById('refresh-btn');
 

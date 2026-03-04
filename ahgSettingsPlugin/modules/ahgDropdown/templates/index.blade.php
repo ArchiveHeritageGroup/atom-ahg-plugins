@@ -193,7 +193,7 @@
       </div>
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function createTaxonomy() {
         var label = document.getElementById('newTaxonomyLabel').value.trim();
         var code = document.getElementById('newTaxonomyCode').value.trim();

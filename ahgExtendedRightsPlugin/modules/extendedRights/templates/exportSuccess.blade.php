@@ -1,5 +1,5 @@
 <!-- Tom Select CSS -->
-<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" {!! $csp_nonce !!}>
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" @cspNonce>
 
 <main id="content" class="container-xxl py-4">
   <h1 class="mb-4"><i class="fas fa-download me-2"></i>{{ __('Export Rights Data') }}</h1>
@@ -98,9 +98,9 @@
 </main>
 
 <!-- Tom Select JS -->
-<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" {!! $csp_nonce !!}></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" @cspNonce></script>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     // Single object select
     new TomSelect('#single_id', {

@@ -142,7 +142,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function closeBreach(id) {
     if (confirm('Close this breach incident?')) {
         fetch('/admin/privacy/breaches/update', {

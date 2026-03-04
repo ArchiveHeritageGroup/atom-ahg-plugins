@@ -171,7 +171,7 @@ $stats = $alertData['stats'] ?? [];
 </div>
 @endif
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function dismissAlert(alertId) {
     fetch('/heritage/api/analytics/alerts/' + alertId + '/dismiss', {
         method: 'POST',

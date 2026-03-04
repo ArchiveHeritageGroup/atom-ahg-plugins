@@ -131,7 +131,7 @@ $comparisons = ['lt' => '<', 'lte' => '<=', 'gt' => '>', 'gte' => '>=', 'eq' => 
   </div>
 </div>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 function resetAlertForm() {
   document.getElementById('alertId').value = '';
   document.getElementById('alertType').value = 'pass_rate_below';

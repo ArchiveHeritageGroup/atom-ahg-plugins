@@ -205,7 +205,7 @@ foreach ($statuses as $procId => $procStatus) {
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 (function() {
     'use strict';
 

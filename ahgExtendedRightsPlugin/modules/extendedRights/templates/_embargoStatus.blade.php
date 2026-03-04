@@ -17,7 +17,7 @@ if (!$embargo) {
     return;
 }
 
-$culture = sfContext::getInstance()->user->getCulture();
+$culture = $sf_user->getCulture();
 $i18n = \Illuminate\Database\Capsule\Manager::table('embargo_i18n')
     ->where('embargo_id', $embargo->id)
     ->where('culture', $culture)

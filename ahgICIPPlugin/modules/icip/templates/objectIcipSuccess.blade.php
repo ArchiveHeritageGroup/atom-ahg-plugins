@@ -314,7 +314,7 @@
     </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .icip-notice-critical {
     background-color: #f8d7da;
     border-left: 4px solid #dc3545;

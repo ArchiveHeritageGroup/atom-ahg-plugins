@@ -80,7 +80,7 @@
     </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .autocomplete-results {
     position: absolute;
     z-index: 1050;
@@ -114,7 +114,7 @@
 }
 </style>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 var autocompleteTimeout;
 
 document.getElementById('glamAutocomplete').addEventListener('input', function() {

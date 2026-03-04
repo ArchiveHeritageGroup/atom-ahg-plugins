@@ -1,16 +1,16 @@
 @extends('layouts.page')
 
 @php
-// Unescape arrays from Symfony output escaper
-$filters = sfOutputEscaper::unescape($filters ?? []);
-$outputFormats = sfOutputEscaper::unescape($outputFormats ?? []);
-$parameters = sfOutputEscaper::unescape($parameters ?? []);
-$results = sfOutputEscaper::unescape($results ?? []);
-$repositories = sfOutputEscaper::unescape($repositories ?? []);
-$levels = sfOutputEscaper::unescape($levels ?? []);
-$mediaTypes = sfOutputEscaper::unescape($mediaTypes ?? []);
-$users = sfOutputEscaper::unescape($users ?? []);
-$glamTypes = sfOutputEscaper::unescape($glamTypes ?? []);
+// Ensure arrays are raw (Blade variables are already unescaped, unlike Symfony templates)
+$filters = is_object($filters ?? []) ? (array) $filters : ($filters ?? []);
+$outputFormats = is_object($outputFormats ?? []) ? (array) $outputFormats : ($outputFormats ?? []);
+$parameters = is_object($parameters ?? []) ? (array) $parameters : ($parameters ?? []);
+$results = is_object($results ?? []) ? (array) $results : ($results ?? []);
+$repositories = is_object($repositories ?? []) ? (array) $repositories : ($repositories ?? []);
+$levels = is_object($levels ?? []) ? (array) $levels : ($levels ?? []);
+$mediaTypes = is_object($mediaTypes ?? []) ? (array) $mediaTypes : ($mediaTypes ?? []);
+$users = is_object($users ?? []) ? (array) $users : ($users ?? []);
+$glamTypes = is_object($glamTypes ?? []) ? (array) $glamTypes : ($glamTypes ?? []);
 @endphp
 
 @section('content')

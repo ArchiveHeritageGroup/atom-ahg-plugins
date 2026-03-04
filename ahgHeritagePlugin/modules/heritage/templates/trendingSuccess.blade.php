@@ -55,7 +55,7 @@
   </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .trending-card {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

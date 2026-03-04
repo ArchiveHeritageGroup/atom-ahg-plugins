@@ -91,7 +91,7 @@
                               [
                                   '%1%' => format_number(10),
                                   '%2%' => format_number(
-                                      sfConfig::get('app_treeview_items_per_page_max', 10000)
+                                      ahg_config('treeview_items_per_page_max', 10000)
                                   ),
                               ])),
                       null,

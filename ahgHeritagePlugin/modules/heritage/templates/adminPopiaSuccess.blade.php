@@ -145,7 +145,7 @@ $total = $flagData['total'] ?? 0;
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('resolveModal').addEventListener('show.bs.modal', function(event) {
     document.getElementById('resolve_flag_id').value = event.relatedTarget.getAttribute('data-flag-id');
 });

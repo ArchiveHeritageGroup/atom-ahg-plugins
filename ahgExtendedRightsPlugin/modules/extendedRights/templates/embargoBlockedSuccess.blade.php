@@ -46,7 +46,7 @@
           </a>
         </div>
 
-        @if (sfContext::getInstance()->getUser()->isAuthenticated())
+        @if ($sf_user->isAuthenticated())
           <hr class="my-4">
           <p class="text-muted small">
             <i class="fas fa-info-circle me-1"></i>

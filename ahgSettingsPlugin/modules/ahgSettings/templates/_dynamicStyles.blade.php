@@ -2,7 +2,7 @@
 $settings = [];
 try {
     if (!defined('ATOM_FRAMEWORK_DB_INITIALIZED')) {
-        $bootstrapPath = \sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $bootstrapPath = ahg_config('sf_root_dir') . '/atom-framework/bootstrap.php';
         if (file_exists($bootstrapPath)) {
             require_once $bootstrapPath;
         }
@@ -61,7 +61,7 @@ $hexToRgb = function($hex) {
     return implode(',', array_map('hexdec', str_split($hex, 2)));
 };
 @endphp
-<style id="ahg-theme-variables" {!! $csp_nonce !!}>
+<style id="ahg-theme-variables" @cspNonce>
 :root {
     /* Primary theme colors */
     --ahg-primary: {{ $primary }};

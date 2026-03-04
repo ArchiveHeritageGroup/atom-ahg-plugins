@@ -102,7 +102,7 @@ $filterStatus = $filterStatus ?? null;
   </div>
 </main>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.js-dl-action').forEach(function(btn) {
     btn.addEventListener('click', function() {

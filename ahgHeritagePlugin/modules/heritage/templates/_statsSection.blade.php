@@ -36,7 +36,7 @@ $statIcons = [
     </div>
 </section>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Animate counters when they come into view
 document.addEventListener('DOMContentLoaded', function() {
     const counters = document.querySelectorAll('.heritage-stat-number');

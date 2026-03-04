@@ -21,7 +21,7 @@ $exportFormats = $exportFormats ?? [];
 $doiStats = $doiStats ?? [];
 @endphp
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .software-card {
   border-left: 4px solid #0d6efd;
   transition: all 0.2s ease;

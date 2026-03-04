@@ -272,7 +272,7 @@
   </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('exception_type').addEventListener('change', function() {
   var isIpRange = this.value === 'ip_range';
   document.getElementById('exception_id_field').style.display = isIpRange ? 'none' : 'block';

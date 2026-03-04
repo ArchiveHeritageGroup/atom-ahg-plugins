@@ -75,7 +75,7 @@ $repositories = $repositories ?? [];
   </div>
 </main>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 function downloadExport(type) {
   var form = document.getElementById('exportForm');
   var params = new URLSearchParams(new FormData(form)).toString();

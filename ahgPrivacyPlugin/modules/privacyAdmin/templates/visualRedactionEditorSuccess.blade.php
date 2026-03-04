@@ -14,9 +14,9 @@ $docInfo = $docInfo;
 $regions = $regions ?? [];
 
 // IIIF Configuration
-$baseUrl = sfConfig::get('app_iiif_base_url', 'https://psis.theahg.co.za');
-$cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'https://psis.theahg.co.za/iiif/2');
-$frameworkPath = sfConfig::get('app_iiif_framework_path', '/atom-framework/src/Extensions/IiifViewer');
+$baseUrl = ahg_config('iiif_base_url', 'https://psis.theahg.co.za');
+$cantaloupeUrl = ahg_config('iiif_cantaloupe_url', 'https://psis.theahg.co.za/iiif/2');
+$frameworkPath = ahg_config('iiif_framework_path', '/atom-framework/src/Extensions/IiifViewer');
 $viewerId = 'redaction-viewer-' . $objectId;
 @endphp
 
@@ -242,23 +242,23 @@ $viewerId = 'redaction-viewer-' . $objectId;
 
 @if($docInfo)
 <!-- Load required libraries -->
-<link rel="stylesheet" href="{{ $frameworkPath }}/public/css/iiif-viewer.css" {!! $csp_nonce !!}>
-<link rel="stylesheet" href="{{ $frameworkPath }}/public/viewers/annotorious/annotorious.min.css" {!! $csp_nonce !!}>
-<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" {!! $csp_nonce !!}>
+<link rel="stylesheet" href="{{ $frameworkPath }}/public/css/iiif-viewer.css" @cspNonce>
+<link rel="stylesheet" href="{{ $frameworkPath }}/public/viewers/annotorious/annotorious.min.css" @cspNonce>
+<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" @cspNonce>
 
 @if($docInfo['is_pdf'])
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" {!! $csp_nonce !!}></script>
-<script {!! $csp_nonce !!}>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" @cspNonce></script>
+<script @cspNonce>
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
 @else
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js" {!! $csp_nonce !!}></script>
-<script src="{{ $frameworkPath }}/public/viewers/annotorious/openseadragon-annotorious.min.js" {!! $csp_nonce !!}></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js" @cspNonce></script>
+<script src="{{ $frameworkPath }}/public/viewers/annotorious/openseadragon-annotorious.min.js" @cspNonce></script>
 @endif
 
-<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js" {!! $csp_nonce !!}></script>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js" @cspNonce></script>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Visual Redaction Editor initializing...');
 
@@ -945,7 +945,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .redaction-annotation {
     stroke: #ff0000 !important;
     stroke-width: 3px !important;

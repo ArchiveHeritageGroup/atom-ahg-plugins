@@ -447,7 +447,7 @@ $metadataSources = [
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     // Update hidden JSON field when dropdowns change
     const fieldMappingSelects = document.querySelectorAll('.field-mapping');

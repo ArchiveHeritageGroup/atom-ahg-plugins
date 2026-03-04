@@ -326,7 +326,7 @@ php symfony preservation:verify-backup --status</code></pre>
       </div>
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function toggleFields() {
         var type = document.getElementById('targetType').value;
         var remoteFields = document.querySelectorAll('.remote-field');

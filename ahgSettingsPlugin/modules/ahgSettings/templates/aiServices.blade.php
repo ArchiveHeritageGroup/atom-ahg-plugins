@@ -709,7 +709,7 @@
     <!-- Test Connection Result -->
     <div id="connectionResult" class="alert d-none mb-4"></div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     // Initialize sector fields on page load
     document.addEventListener('DOMContentLoaded', function() {
         updateFieldsForSector();

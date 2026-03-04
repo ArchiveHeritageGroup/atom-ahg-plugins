@@ -183,7 +183,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('restrictionType').addEventListener('change', function() {
     document.getElementById('customTextGroup').style.display = this.value === 'custom' ? 'block' : 'none';
 });

@@ -5,7 +5,7 @@
 <head>
 </head>
 <h1>{{ __('Publish Preservation') }}</h1>
-<h1>{{ __('Publish Preservation %1%', ['%1%' => sfConfig::get('app_ui_label_presevationobject')]) }}</h1>
+<h1>{{ __('Publish Preservation %1%', ['%1%' => ahg_config('ui_label_presevationobject')]) }}</h1>
 
 {!! get_partial('default/pager', ['pager' => $pager]) !!}
 

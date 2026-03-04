@@ -1,8 +1,8 @@
 @php
 \AhgCore\Core\AhgDb::init();
-require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
+require_once ahg_config('sf_root_dir') . '/atom-framework/src/Repositories/TiffPdfMergeRepository.php';
 
-$userId = \sfContext::getInstance()->user->getAttribute('user_id');
+$userId = $sf_user->getAttribute('user_id');
 $repository = new \AtomFramework\Repositories\TiffPdfMergeRepository();
 $userStats = $repository->getStatistics($userId);
 $userJobs = $repository->getJobs(['user_id' => $userId], 3);

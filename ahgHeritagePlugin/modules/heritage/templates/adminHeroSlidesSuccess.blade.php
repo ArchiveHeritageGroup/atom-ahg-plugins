@@ -365,7 +365,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
 
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('overlay_opacity').addEventListener('input', function() {
     document.getElementById('opacity_value').textContent = Math.round(this.value * 100) + '%';
 });

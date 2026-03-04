@@ -314,7 +314,7 @@ php symfony preservation:identify --object-id=123
 php symfony preservation:identify --object-id=123 --reidentify</code></pre>
                 <h6 class="mt-3">Cron Schedule</h6>
                 <pre class="bg-dark text-light p-3 rounded"><code># Daily identification at 1am
-0 1 * * * cd {{ sfConfig::get('sf_root_dir') }} && \
+0 1 * * * cd {{ ahg_config('sf_root_dir') }} && \
   php symfony preservation:identify --limit=500</code></pre>
             </div>
         </div>

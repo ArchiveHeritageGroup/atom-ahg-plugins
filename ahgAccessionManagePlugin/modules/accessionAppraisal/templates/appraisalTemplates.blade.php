@@ -211,7 +211,7 @@
   </div>
 </div>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
   // ---- Add criterion row ----
   var container = document.getElementById('criteriaContainer');

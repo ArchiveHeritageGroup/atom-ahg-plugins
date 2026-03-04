@@ -81,7 +81,7 @@ $repositories = $repositories ?? [];
   </form>
 </main>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 function toggleScope(val) {
   document.getElementById('repoField').style.display = val === 'repository' ? 'block' : 'none';
   document.getElementById('hierarchyField').style.display = val === 'hierarchy' ? 'block' : 'none';

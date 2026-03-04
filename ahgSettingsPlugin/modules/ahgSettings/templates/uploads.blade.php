@@ -30,26 +30,26 @@
                   ->label(
                     __('%1% upload limits',
                     [
-                        '%1%' => sfConfig::get('app_ui_label_repository'),
+                        '%1%' => ahg_config('ui_label_repository'),
                     ]
                   ))
                   ->help(__(
                     'When enabled, an &quot;Upload limit&quot; meter is displayed for authenticated users on the %1% view page, and administrators can limit the disk space each %1% is allowed for %2% uploads',
                     [
-                        '%1%' => strtolower(sfConfig::get('app_ui_label_repository')),
-                        '%2%' => strtolower(sfConfig::get('app_ui_label_digitalobject')),
+                        '%1%' => strtolower(ahg_config('ui_label_repository')),
+                        '%2%' => strtolower(ahg_config('ui_label_digitalobject')),
                     ]))) !!}
 
               {!! render_field($form->repository_quota
                   ->label(__(
                       'Default %1% upload limit (GB)',
-                      ['%1%' => strtolower(sfConfig::get('app_ui_label_repository'))]
+                      ['%1%' => strtolower(ahg_config('ui_label_repository'))]
                   ))
                   ->help(__(
                       'Default %1% upload limit for a new %2%.  A value of &quot;0&quot; (zero) disables file upload.  A value of &quot;-1&quot; allows unlimited uploads',
                       [
-                          '%1%' => strtolower(sfConfig::get('app_ui_label_digitalobject')),
-                          '%2%' => strtolower(sfConfig::get('app_ui_label_repository')),
+                          '%1%' => strtolower(ahg_config('ui_label_digitalobject')),
+                          '%2%' => strtolower(ahg_config('ui_label_repository')),
                       ]))) !!}
 
               {!! render_field($form->explode_multipage_files

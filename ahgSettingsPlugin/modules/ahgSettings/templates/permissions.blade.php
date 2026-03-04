@@ -159,7 +159,7 @@
                   $permissionsCopyrightStatementForm
                       ->copyrightStatement
                       ->label(__('Copyright statement'))
-                      ->help(__('When enabled the following text will appear whenever a user tries to download a %1% master with an associated rights statement where the Basis = copyright and the Restriction = conditional. You can style and customize the text as in a static page.', ['%1%' => mb_strtolower(sfConfig::get('app_ui_label_digitalobject'))])),
+                      ->help(__('When enabled the following text will appear whenever a user tries to download a %1% master with an associated rights statement where the Basis = copyright and the Restriction = conditional. You can style and customize the text as in a static page.', ['%1%' => mb_strtolower(ahg_config('ui_label_digitalobject'))])),
                   $copyrightStatementSetting,
                   ['name' => 'value', 'class' => 'resizable']) !!}
 
@@ -168,8 +168,8 @@
               {!! render_field(
                   $permissionsCopyrightStatementForm
                       ->copyrightStatementApplyGlobally
-                      ->label(__('Apply to every %1%', ['%1%' => mb_strtolower(sfConfig::get('app_ui_label_digitalobject'))]))
-                      ->help(__('When enabled, the copyright pop-up will be applied to every %1%, regardless of whether there is an accompanying Rights statement.', ['%1%' => mb_strtolower(sfConfig::get('app_ui_label_digitalobject'))]))) !!}
+                      ->label(__('Apply to every %1%', ['%1%' => mb_strtolower(ahg_config('ui_label_digitalobject'))]))
+                      ->help(__('When enabled, the copyright pop-up will be applied to every %1%, regardless of whether there is an accompanying Rights statement.', ['%1%' => mb_strtolower(ahg_config('ui_label_digitalobject'))]))) !!}
             </div>
           </div>
         </div>
@@ -190,7 +190,7 @@
                   $permissionsPreservationSystemAccessStatementForm
                       ->preservationSystemAccessStatement
                       ->label(__('Access statement'))
-                      ->help(__('When enabled the text above will appear in the %1% metadata section to describe how a user may access the original and preservation copy of the file stored in a linked digital preservation system. The text appears in the "Permissions" field. When disabled, the "Permissions" field is not displayed.', ['%1%' => mb_strtolower(sfConfig::get('app_ui_label_digitalobject'))])),
+                      ->help(__('When enabled the text above will appear in the %1% metadata section to describe how a user may access the original and preservation copy of the file stored in a linked digital preservation system. The text appears in the "Permissions" field. When disabled, the "Permissions" field is not displayed.', ['%1%' => mb_strtolower(ahg_config('ui_label_digitalobject'))])),
                   $preservationSystemAccessStatementSetting,
                   ['name' => 'value', 'class' => 'resizable']) !!}
             </div>

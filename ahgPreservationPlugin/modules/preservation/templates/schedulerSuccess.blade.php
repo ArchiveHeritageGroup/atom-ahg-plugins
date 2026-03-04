@@ -281,7 +281,7 @@
             <div class="card-body">
                 <p class="small text-muted">Run the scheduler via cron to execute due workflows:</p>
                 <pre class="bg-dark text-light p-3 rounded small"><code># Run every minute (recommended)
-* * * * * cd {{ sfConfig::get('sf_root_dir') }} && \
+* * * * * cd {{ ahg_config('sf_root_dir') }} && \
   php symfony preservation:scheduler >> \
   /var/log/atom/scheduler.log 2>&1</code></pre>
                 <p class="small text-muted mb-0">Or run individual workflows:</p>
@@ -310,7 +310,7 @@ php symfony preservation:virus-scan --limit=200</code></pre>
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle schedule enabled/disabled
     document.querySelectorAll('.schedule-toggle').forEach(function(toggle) {

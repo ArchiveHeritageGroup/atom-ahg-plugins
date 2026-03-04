@@ -170,7 +170,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     // Edit button handler
     document.querySelectorAll('.edit-type-btn').forEach(function(btn) {

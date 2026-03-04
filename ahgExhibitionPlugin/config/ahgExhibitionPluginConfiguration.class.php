@@ -41,14 +41,15 @@ class ahgExhibitionPluginConfiguration extends sfPluginConfiguration
     {
         $router = new \AtomFramework\Routing\RouteLoader('exhibition');
 
+        // IMPORTANT: Routes are prepended — LAST registered = checked FIRST.
+        // Catch-all slug route MUST be registered FIRST (checked last).
+        // Specific routes MUST be registered LAST (checked first).
+
+        // View exhibition by slug (catch-all — registered first, checked last)
+        $router->any('exhibition_view', '/exhibition/:slug', 'show', ['slug' => '[a-z0-9-]+']);
+
         // Exhibition browse/index
         $router->any('exhibition_index', '/exhibitions', 'index');
-
-        // Exhibition dashboard
-        $router->any('exhibition_dashboard', '/exhibition/dashboard', 'dashboard');
-
-        // Create/Add exhibition
-        $router->any('exhibition_add', '/exhibition/add', 'add');
 
         // View exhibition by ID
         $router->any('exhibition_show', '/exhibition/:id', 'show', ['id' => '\d+']);
@@ -80,8 +81,11 @@ class ahgExhibitionPluginConfiguration extends sfPluginConfiguration
         // Venues management
         $router->any('exhibition_venues', '/exhibition/venues', 'venues');
 
-        // View exhibition by slug (must be last - catch-all)
-        $router->any('exhibition_view', '/exhibition/:slug', 'show', ['slug' => '[a-z0-9-]+']);
+        // Create/Add exhibition
+        $router->any('exhibition_add', '/exhibition/add', 'add');
+
+        // Exhibition dashboard (specific — registered last, checked first)
+        $router->any('exhibition_dashboard', '/exhibition/dashboard', 'dashboard');
 
         $router->register($event->getSubject());
     }

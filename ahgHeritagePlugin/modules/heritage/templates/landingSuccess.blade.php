@@ -50,7 +50,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 
 @section('pre')
 <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/heritage-landing.css">
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 :root {
     --heritage-primary: {{ $primaryColor }};
 }
@@ -243,7 +243,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 
         <div class="heritage-creators-track" id="creators-track">
             <?php
-            $bootstrap = sfConfig::get('sf_root_dir').'/atom-framework/bootstrap.php';
+            $bootstrap = ahg_config('sf_root_dir').'/atom-framework/bootstrap.php';
             if (file_exists($bootstrap)) { require_once $bootstrap; }
             $creators = \Illuminate\Database\Capsule\Manager::table('actor')
                 ->leftJoin('actor_i18n', function($join) {
@@ -385,7 +385,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                             $basePath = $item->image_path;
                             $basename = pathinfo($item->image_name, PATHINFO_FILENAME);
                             $candidate = $basePath . $basename . '_142.jpg';
-                            $rootDir = sfConfig::get('sf_root_dir', '/usr/share/nginx/archive');
+                            $rootDir = ahg_config('sf_root_dir', '/usr/share/nginx/archive');
                             if (file_exists($rootDir . $candidate)) {
                                 $thumbPath = $candidate;
                             }
@@ -486,7 +486,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                 <a href="{{ url_for(['module' => 'staticpage', 'slug' => 'terms']) }}">Terms</a>
             </div>
             <div class="heritage-footer-copyright">
-                &copy; {{ date('Y') }} {{ sfConfig::get('app_siteTitle', 'Heritage Archive') }}. All rights reserved.
+                &copy; {{ date('Y') }} {{ ahg_config('siteTitle', 'Heritage Archive') }}. All rights reserved.
             </div>
         </div>
     </footer>
@@ -495,7 +495,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 @endsection
 
 @section('after-content')
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Add body class for CSS targeting
 document.body.classList.add('heritage-landing-page');
 

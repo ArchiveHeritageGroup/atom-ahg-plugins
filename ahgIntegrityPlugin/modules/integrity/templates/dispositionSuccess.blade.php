@@ -103,7 +103,7 @@ $filterPolicyId = $filterPolicyId ?? '';
   </div>
 </main>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 document.getElementById('btnScanEligible').addEventListener('click', function() {
   this.disabled = true;
   this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Scanning...';

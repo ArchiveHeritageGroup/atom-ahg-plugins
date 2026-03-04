@@ -11,7 +11,7 @@
       {{ __('Cron Jobs') }}
     </h1>
 
-    <style {!! $csp_nonce !!}>
+    <style @cspNonce>
     .cron-card {
       transition: all 0.2s ease;
     }
@@ -155,7 +155,7 @@
       </div>
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text).then(function() {
         // Show brief feedback

@@ -175,7 +175,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="original-heading">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#original-collapse" aria-expanded="false" aria-controls="original-collapse">
-              {!! __('%1% metadata - original file', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]) !!}
+              {!! __('%1% metadata - original file', ['%1%' => ahg_config('ui_label_digitalobject')]) !!}
             </button>
           </h2>
           <div id="original-collapse" class="accordion-collapse collapse" aria-labelledby="original-heading">
@@ -197,7 +197,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="preservation-heading">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#preservation-collapse" aria-expanded="false" aria-controls="preservation-collapse">
-              {!! __('%1% metadata - preservation copy', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]) !!}
+              {!! __('%1% metadata - preservation copy', ['%1%' => ahg_config('ui_label_digitalobject')]) !!}
             </button>
           </h2>
           <div id="preservation-collapse" class="accordion-collapse collapse" aria-labelledby="preservation-heading">
@@ -215,7 +215,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="master-heading">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#master-collapse" aria-expanded="false" aria-controls="master-collapse">
-              {!! __('%1% metadata - master file', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]) !!}
+              {!! __('%1% metadata - master file', ['%1%' => ahg_config('ui_label_digitalobject')]) !!}
             </button>
           </h2>
           <div id="master-collapse" class="accordion-collapse collapse" aria-labelledby="master-heading">
@@ -237,7 +237,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="reference-heading">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#reference-collapse" aria-expanded="false" aria-controls="reference-collapse">
-              {!! __('%1% metadata - reference copy', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]) !!}
+              {!! __('%1% metadata - reference copy', ['%1%' => ahg_config('ui_label_digitalobject')]) !!}
             </button>
           </h2>
           <div id="reference-collapse" class="accordion-collapse collapse" aria-labelledby="reference-heading">
@@ -257,7 +257,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="thumbnail-heading">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#thumbnail-collapse" aria-expanded="false" aria-controls="thumbnail-collapse">
-              {!! __('%1% metadata - thumbnail copy', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]) !!}
+              {!! __('%1% metadata - thumbnail copy', ['%1%' => ahg_config('ui_label_digitalobject')]) !!}
             </button>
           </h2>
           <div id="thumbnail-collapse" class="accordion-collapse collapse" aria-labelledby="thumbnail-heading">

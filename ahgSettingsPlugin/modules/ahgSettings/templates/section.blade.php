@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('content')
-<style {!! $csp_nonce ?? '' !!}>
+<style @cspNonce>
 /* Page header bar — Primary colour */
 .ahg-settings-page .page-header {
     background-color: var(--ahg-primary, #005837) !important;
@@ -456,7 +456,7 @@
                                     <div class="form-group row">
                                         <label class="col-sm-3 col-form-label" for="photo_upload_path">{{ __('Upload Path') }}</label>
                                         <div class="col-sm-9">
-                                            <input type="text" class="form-control" id="photo_upload_path" name="settings[photo_upload_path]" value="{{ e($settings['photo_upload_path'] ?? sfConfig::get('sf_root_dir') . '/uploads/condition_photos') }}">
+                                            <input type="text" class="form-control" id="photo_upload_path" name="settings[photo_upload_path]" value="{{ e($settings['photo_upload_path'] ?? ahg_config('sf_root_dir') . '/uploads/condition_photos') }}">
                                             <small class="form-text text-muted">{{ __('Absolute path for condition photo storage') }}</small>
                                         </div>
                                     </div>
@@ -779,7 +779,7 @@
                                             <div class="col-md-8">
                                                 <label for="fuseki_endpoint" class="form-label">{{ __('Fuseki SPARQL Endpoint') }}</label>
                                                 <input type="url" class="form-control" id="fuseki_endpoint" name="settings[fuseki_endpoint]"
-                                                       value="{{ e($settings['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric')) }}"
+                                                       value="{{ e($settings['fuseki_endpoint'] ?? ahg_config('ric_fuseki_endpoint', 'http://localhost:3030/ric')) }}"
                                                        placeholder="http://localhost:3030/ric">
                                                 <div class="form-text">{{ __('Full URL to Fuseki SPARQL endpoint (e.g., http://localhost:3030/ric)') }}</div>
                                             </div>
@@ -929,7 +929,7 @@
                                                 <i class="fa fa-book me-1"></i>{{ __('RiC-O Reference') }}
                                             </a>
                                             @php
-                                                $fusekiAdmin = preg_replace('#/[^/]+$#', '/', $settings['fuseki_endpoint'] ?? sfConfig::get('app_ric_fuseki_endpoint', 'http://localhost:3030/ric'));
+                                                $fusekiAdmin = preg_replace('#/[^/]+$#', '/', $settings['fuseki_endpoint'] ?? ahg_config('ric_fuseki_endpoint', 'http://localhost:3030/ric'));
                                             @endphp
                                             <a href="{{ e($fusekiAdmin) }}" target="_blank" class="btn btn-outline-secondary">
                                                 <i class="fa fa-database me-1"></i>{{ __('Fuseki Admin') }}
@@ -939,7 +939,7 @@
                                 </div>
 
                                 <!-- Fuseki Test Connection Script -->
-                                <script {!! $csp_nonce !!}>
+                                <script @cspNonce>
                                 document.getElementById('test-fuseki-btn')?.addEventListener('click', function() {
                                     const btn = this;
                                     const resultDiv = document.getElementById('fuseki-test-result');
@@ -2585,7 +2585,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Color picker sync
 document.querySelectorAll('[id$="_color_picker"]').forEach(function(picker) {
     var textInput = document.getElementById(picker.id.replace('_picker', ''));
@@ -2614,7 +2614,7 @@ document.querySelectorAll('input[type="range"]').forEach(function(range) {
 });
 </script>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .ahg-settings-page .list-group-item.active {
     background-color: var(--primary, #007bff);
     border-color: var(--primary, #007bff);
@@ -2642,7 +2642,7 @@ document.querySelectorAll('input[type="range"]').forEach(function(range) {
 }
 </style>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Color picker sync for extended options
 document.addEventListener('DOMContentLoaded', function() {
     const colorFields = [
@@ -2695,7 +2695,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Color picker sync for PRIMARY and SECONDARY colors
 document.addEventListener('DOMContentLoaded', function() {
     // Sync primary color

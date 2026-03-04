@@ -129,7 +129,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function updateDsarStatus(id, status) {
     if (confirm('Update status to ' + status + '?')) {
         fetch('/admin/privacy/dsar/update', {

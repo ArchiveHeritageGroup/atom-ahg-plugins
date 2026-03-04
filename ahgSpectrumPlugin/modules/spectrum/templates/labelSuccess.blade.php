@@ -133,7 +133,7 @@ foreach ($preferredOrder as $key) {
     }
 }
 
-$qrUrl = sfContext::getInstance()->getRequest()->getUriPrefix() . '/' . $resource->slug;
+$qrUrl = $sf_request->getUriPrefix() . '/' . $resource->slug;
 
 $sectorLabels = [
     'library' => __('Library Item'),
@@ -144,7 +144,7 @@ $sectorLabels = [
 $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 @endphp
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 @media print {
     .no-print, #sidebar, #context-menu, nav, header, footer { display: none !important; }
     body { background: white !important; }
@@ -272,7 +272,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function updateBarcodeSource() {
     var value = document.getElementById('barcodeSource').value;
     document.getElementById('barcodeImg').src = 'https://barcodeapi.org/api/128/' + encodeURIComponent(value);

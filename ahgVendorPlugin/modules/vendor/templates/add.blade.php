@@ -223,7 +223,7 @@
     </form>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     var hasInsurance = document.getElementById('hasInsurance');
     var insuranceDetails = document.getElementById('insuranceDetails');

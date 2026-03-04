@@ -7,7 +7,7 @@
     </button>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .template-card .card-header { color: #ffffff !important; font-weight: 600; }
 .template-card .card-header h6 { color: #ffffff !important; }
 .template-card .card-header i { color: #ffffff !important; }
@@ -163,7 +163,7 @@ $categories = [
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function replaceTemplate(id, name) {
     document.getElementById('replace_id').value = id;
     document.getElementById('replace_name').textContent = name;

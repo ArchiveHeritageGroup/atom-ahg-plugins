@@ -6,7 +6,7 @@
     @include('_menu', ['nodes' => $menuNodes])
   </div>
   <div class="col-md-9">
-    <h1>{{ __('%1% derivatives', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]) }}</h1>
+    <h1>{{ __('%1% derivatives', ['%1%' => ahg_config('ui_label_digitalobject')]) }}</h1>
 
     {!! $form->renderGlobalErrors() !!}
 
@@ -18,7 +18,7 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="derivatives-heading">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#derivatives-collapse" aria-expanded="false" aria-controls="derivatives-collapse">
-              {{ __('%1% derivatives settings', ['%1%' => sfConfig::get('app_ui_label_digitalobject')]) }}
+              {{ __('%1% derivatives settings', ['%1%' => ahg_config('ui_label_digitalobject')]) }}
             </button>
           </h2>
           <div id="derivatives-collapse" class="accordion-collapse collapse" aria-labelledby="derivatives-heading">

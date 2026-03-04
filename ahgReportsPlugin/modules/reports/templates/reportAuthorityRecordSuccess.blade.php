@@ -126,7 +126,7 @@ $rawHasPrevious = isset($hasPrevious) ? $hasPrevious : false;
       <ul class="pagination justify-content-center">
         @if ($rawHasPrevious)
           <li class="page-item">
-            <a class="page-link" href="{{ url_for(['module' => 'reports', 'action' => 'reportAuthorityRecord', 'page' => $rawCurrentPage - 1] + sfOutputEscaper::unescape($sf_request->getGetParameters())) }}">
+            <a class="page-link" href="{{ url_for(['module' => 'reports', 'action' => 'reportAuthorityRecord', 'page' => $rawCurrentPage - 1] + ($sf_request->getGetParameters())) }}">
               {{ __('Previous') }}
             </a>
           </li>
@@ -134,7 +134,7 @@ $rawHasPrevious = isset($hasPrevious) ? $hasPrevious : false;
 
         @for ($p = max(1, $rawCurrentPage - 2); $p <= min($rawLastPage, $rawCurrentPage + 2); $p++)
           <li class="page-item {{ $p == $rawCurrentPage ? 'active' : '' }}">
-            <a class="page-link" href="{{ url_for(['module' => 'reports', 'action' => 'reportAuthorityRecord', 'page' => $p] + sfOutputEscaper::unescape($sf_request->getGetParameters())) }}">
+            <a class="page-link" href="{{ url_for(['module' => 'reports', 'action' => 'reportAuthorityRecord', 'page' => $p] + ($sf_request->getGetParameters())) }}">
               {{ $p }}
             </a>
           </li>
@@ -142,7 +142,7 @@ $rawHasPrevious = isset($hasPrevious) ? $hasPrevious : false;
 
         @if ($rawHasNext)
           <li class="page-item">
-            <a class="page-link" href="{{ url_for(['module' => 'reports', 'action' => 'reportAuthorityRecord', 'page' => $rawCurrentPage + 1] + sfOutputEscaper::unescape($sf_request->getGetParameters())) }}">
+            <a class="page-link" href="{{ url_for(['module' => 'reports', 'action' => 'reportAuthorityRecord', 'page' => $rawCurrentPage + 1] + ($sf_request->getGetParameters())) }}">
               {{ __('Next') }}
             </a>
           </li>

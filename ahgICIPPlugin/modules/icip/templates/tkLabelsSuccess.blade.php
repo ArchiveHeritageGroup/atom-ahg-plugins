@@ -189,7 +189,7 @@
     </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .icip-tk-label {
     background-color: #8B4513;
     color: white;

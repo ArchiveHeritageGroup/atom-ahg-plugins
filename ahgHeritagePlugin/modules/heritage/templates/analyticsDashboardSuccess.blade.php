@@ -156,8 +156,8 @@ $trends = [
         <div style="height: 250px;">
             <canvas id="trendsChart"></canvas>
         </div>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js" {!! $csp_nonce !!}></script>
-        <script {!! $csp_nonce !!}>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js" @cspNonce></script>
+        <script @cspNonce>
         new Chart(document.getElementById('trendsChart'), {
             type: 'line',
             data: {

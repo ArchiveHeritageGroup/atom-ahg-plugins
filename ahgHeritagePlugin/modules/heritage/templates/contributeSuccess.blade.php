@@ -340,7 +340,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     // Handle form submissions
     document.querySelectorAll('.contribution-form').forEach(form => {

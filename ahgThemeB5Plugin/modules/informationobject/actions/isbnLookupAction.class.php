@@ -80,14 +80,4 @@ class InformationobjectIsbnLookupAction extends AhgController
             ], 500);
         }
     }
-
-    /**
-     * Render JSON response.
-     */
-    protected function renderJson(array $data, int $status = 200): string
-    {
-        $this->getResponse()->setStatusCode($status);
-
-        return $this->renderText(json_encode($data, JSON_PRETTY_PRINT));
-    }
 }

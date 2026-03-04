@@ -42,7 +42,7 @@ try {
     @endif
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .condition-photos-section {
     margin-top: 10px;
     padding-top: 10px;

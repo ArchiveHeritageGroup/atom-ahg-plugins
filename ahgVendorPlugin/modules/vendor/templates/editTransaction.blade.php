@@ -237,7 +237,7 @@
     </form>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     var form = document.querySelector('.needs-validation');
     form.addEventListener('submit', function(event) {

@@ -389,7 +389,7 @@ $filters = $toArray($filters ?? []);
 
 <!-- Initialize click tracking -->
 @if ($searchId > 0)
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof HeritageApp !== 'undefined' && HeritageApp.setSearchContext) {
         HeritageApp.setSearchContext({{ (int) $searchId }});

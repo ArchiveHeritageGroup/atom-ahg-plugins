@@ -1,7 +1,7 @@
 @php
 // Load filter if not already loaded
 if (!class_exists('DigitalObjectEmbargoFilter')) {
-    require_once sfConfig::get('sf_root_dir') . '/plugins/ahgExtendedRightsPlugin/lib/DigitalObjectEmbargoFilter.php';
+    require_once ahg_config('sf_root_dir') . '/plugins/ahgExtendedRightsPlugin/lib/DigitalObjectEmbargoFilter.php';
 }
 
 // Get result if not provided
@@ -107,7 +107,7 @@ if (isset($embargoInfo['type'])) {
     </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .embargo-download-blocked {
     border-left: 4px solid;
 }

@@ -191,7 +191,7 @@
 
     </form>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     document.addEventListener('DOMContentLoaded', function() {
       var patternInput = document.getElementById('pattern-input');
       var preview = document.getElementById('pattern-preview');

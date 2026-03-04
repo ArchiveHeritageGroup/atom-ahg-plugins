@@ -142,7 +142,7 @@
       </div>
     </form>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function togglePasswordVisibility() {
       const input = document.getElementById('ahg_central_api_key');
       const icon = document.getElementById('toggleIcon');

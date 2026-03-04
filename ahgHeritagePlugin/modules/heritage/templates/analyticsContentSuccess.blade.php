@@ -234,8 +234,8 @@ $summary = [
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js" {!! $csp_nonce !!}></script>
-<script {!! $csp_nonce !!}>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" @cspNonce></script>
+<script @cspNonce>
 @php
 $levelData = $summary['by_level'];
 $repoData = $summary['by_repository'];

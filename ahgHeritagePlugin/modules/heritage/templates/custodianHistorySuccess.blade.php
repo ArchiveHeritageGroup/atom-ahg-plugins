@@ -163,7 +163,7 @@ $filters = $historyData['filters'] ?? [];
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('detailModal').addEventListener('show.bs.modal', function(event) {
     const logId = event.relatedTarget.dataset.logId;
     const content = document.getElementById('logDetailContent');

@@ -174,7 +174,7 @@
     </form>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 // Bootstrap form validation
 (function() {
     'use strict';

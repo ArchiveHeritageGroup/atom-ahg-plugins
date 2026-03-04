@@ -68,7 +68,7 @@
       {{ __('Found %1% results', ['%1%' => count($donors)]) }}
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function toggleColumn(colNum) {
       var table = document.getElementById('reportTable');
       var rows = table.getElementsByTagName('tr');

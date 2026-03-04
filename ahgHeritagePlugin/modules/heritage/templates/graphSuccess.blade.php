@@ -145,9 +145,9 @@
 </div>
 
 <!-- D3.js -->
-<script src="https://d3js.org/d3.v7.min.js" {!! $csp_nonce !!}></script>
+<script src="https://d3js.org/d3.v7.min.js" @cspNonce></script>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 (function() {
     'use strict';
 
@@ -327,7 +327,7 @@
 })();
 </script>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .heritage-graph-page .node:hover circle {
     stroke: #333;
     stroke-width: 3px;

@@ -36,7 +36,7 @@ input[type="date"] {
 			</div>
 
 			<div class="col-md-4">
-			@if (sfConfig::get('app_multi_repository'))
+			@if (ahg_config('multi_repository'))
 			<tr>
 				<td colspan="2">
 					{!! $form->repositories->label(__('Repository'))->renderRow() !!}

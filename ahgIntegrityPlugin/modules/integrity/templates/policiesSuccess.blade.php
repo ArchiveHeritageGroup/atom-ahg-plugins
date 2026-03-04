@@ -65,7 +65,7 @@ $policies = $policies ?? [];
   </div>
 </main>
 
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script @cspNonce>
 document.querySelectorAll('[data-policy-toggle]').forEach(function(btn) {
   btn.addEventListener('click', function() {
     var id = this.getAttribute('data-policy-toggle');

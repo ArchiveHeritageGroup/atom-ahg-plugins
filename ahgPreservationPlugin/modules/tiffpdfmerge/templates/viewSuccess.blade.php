@@ -211,7 +211,7 @@ $title = 'Job Details: ' . htmlspecialchars($job->job_name);
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('processBtn')?.addEventListener('click', async function() {
     this.disabled = true;
     this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Processing...';

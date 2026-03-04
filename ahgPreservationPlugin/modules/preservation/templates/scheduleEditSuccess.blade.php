@@ -223,7 +223,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     const cronInput = document.getElementById('cron_expression');
     const cronDesc = document.getElementById('cron_description');

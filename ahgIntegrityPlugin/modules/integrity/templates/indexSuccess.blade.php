@@ -389,8 +389,8 @@ $filterRepositoryId = $filterRepositoryId ?? null;
 
 {{-- Chart.js for daily trend --}}
 @if (!empty($dailyTrend))
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" @cspNonce></script>
+<script @cspNonce>
 (function() {
   var trendData = @php echo json_encode(array_map(function($d) {
     return ['day' => substr($d->day, 5), 'passed' => (int)$d->passed, 'failed' => (int)$d->failed];

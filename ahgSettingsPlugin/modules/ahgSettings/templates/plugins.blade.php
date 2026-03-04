@@ -122,7 +122,7 @@
     @endif
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.addEventListener('DOMContentLoaded', function() {
     var activeCategory = 'all';
     var activeStatus = 'all';

@@ -146,8 +146,8 @@
       </div>
     </div>
 
-    <script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js" {!! $csp_nonce !!}></script>
-    <script {!! $csp_nonce !!}>
+    <script src="/plugins/ahgCorePlugin/web/js/vendor/sortable.min.js" @cspNonce></script>
+    <script @cspNonce>
     var taxonomy = '{{ e($taxonomy) }}';
     var taxonomyLabel = '{{ e($taxonomyLabel) }}';
 
@@ -254,7 +254,7 @@
     });
     </script>
 
-    <style {!! $csp_nonce !!}>
+    <style @cspNonce>
     .drag-handle { cursor: grab; }
     .drag-handle:active { cursor: grabbing; }
     .sortable-ghost { opacity: 0.4; background: #f8f9fa; }

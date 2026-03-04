@@ -102,7 +102,7 @@
 </li>
 @endif
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .ahg-admin-menu .dropdown-header {
     font-weight: 600;
     color: #6c757d;

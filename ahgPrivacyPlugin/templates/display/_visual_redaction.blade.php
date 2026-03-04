@@ -10,7 +10,7 @@
 
 @php
 // Only show for users with editor credential and if there's a digital object
-$sf_user = sfContext::getInstance()->getUser();
+$sf_user = $sf_user ?? (isset($sf_context) ? $sf_context->getUser() : null);
 $canEdit = $sf_user->isAuthenticated() &&
            ($sf_user->isAdministrator() || $sf_user->hasCredential('editor'));
 @endphp

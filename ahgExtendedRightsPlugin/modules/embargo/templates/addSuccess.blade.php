@@ -134,7 +134,7 @@
 
 </form>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.getElementById('is_perpetual').addEventListener('change', function() {
   document.getElementById('end_date').disabled = this.checked;
   if (this.checked) {

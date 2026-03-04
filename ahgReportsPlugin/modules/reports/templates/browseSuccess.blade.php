@@ -27,7 +27,7 @@
 	</select>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function myFunction()
 {
 	var x=document.getElementById("dropd");

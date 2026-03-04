@@ -1,6 +1,6 @@
 @php
 \AhgCore\Core\AhgDb::init();
-require_once sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Repositories/TiffPdfMergeRepository.php';
+require_once ahg_config('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Repositories/TiffPdfMergeRepository.php';
 
 use Illuminate\Database\Capsule\Manager as DB;
 use AtomFramework\Repositories\TiffPdfMergeRepository;
@@ -172,7 +172,7 @@ $hasProcessing = DB::table('tiff_pdf_merge_job')->whereIn('status', ['queued', '
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 document.querySelectorAll('.tpm-process-btn').forEach(btn => {
     btn.addEventListener('click', async function() {
         const jobId = this.dataset.jobId;

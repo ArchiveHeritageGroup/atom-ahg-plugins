@@ -187,8 +187,8 @@ $patterns = [
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js" {!! $csp_nonce !!}></script>
-<script {!! $csp_nonce !!}>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" @cspNonce></script>
+<script @cspNonce>
 new Chart(document.getElementById('hourChart'), {
     type: 'bar',
     data: {

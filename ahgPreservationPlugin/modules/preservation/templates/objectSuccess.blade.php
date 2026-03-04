@@ -219,7 +219,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 function generateChecksums(id) {
     if (!confirm('Generate new checksums for this object?')) return;
 

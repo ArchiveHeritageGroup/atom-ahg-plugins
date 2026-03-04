@@ -185,7 +185,7 @@
     </form>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .autocomplete-dropdown {
     position: absolute;
     z-index: 1050;
@@ -218,7 +218,7 @@
 }
 </style>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 var selectedItems = [];
 var searchTimeout;
 

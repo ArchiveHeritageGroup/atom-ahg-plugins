@@ -168,7 +168,7 @@
     </div>
 </div>
 
-<style {!! $csp_nonce !!}>
+<style @cspNonce>
 .icip-tk-label { background-color: #8B4513; color: white; }
 .icip-bc-label { background-color: #228B22; color: white; }
 </style>

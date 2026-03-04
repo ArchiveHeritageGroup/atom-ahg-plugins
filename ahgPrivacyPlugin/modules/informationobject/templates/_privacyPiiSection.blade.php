@@ -14,12 +14,12 @@ if (!$sf_user->isAuthenticated()) {
 }
 
 // Check if Privacy plugin is enabled
-if (!in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+if (!\AtomFramework\Services\MenuService::isPluginEnabled('ahgPrivacyPlugin')) {
     return;
 }
 
 // Load PII helper
-require_once sfConfig::get('sf_plugins_dir').'/ahgPrivacyPlugin/lib/helper/PiiHelper.php';
+require_once ahg_config('sf_plugins_dir').'/ahgPrivacyPlugin/lib/helper/PiiHelper.php';
 
 $resourceId = $resource->id ?? null;
 if (!$resourceId) {

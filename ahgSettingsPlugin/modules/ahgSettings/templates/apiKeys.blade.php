@@ -248,7 +248,7 @@
       </div>
     </div>
 
-    <script {!! $csp_nonce !!}>
+    <script @cspNonce>
     function copyApiKey() {
       var input = document.getElementById('newApiKey');
       input.select();

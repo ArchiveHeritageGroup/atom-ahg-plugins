@@ -190,7 +190,7 @@
     </div>
 </div>
 
-<script {!! $csp_nonce !!}>
+<script @cspNonce>
 let deleteSlug = '';
 
 function deleteVendor(slug, name) {
