@@ -16,26 +16,36 @@ class DisplayTypeDetector
         'file' => 'archive',
         'item' => 'archive',
         'piece' => 'archive',
-        
+        'record group' => 'archive',
+        'document' => 'archive',
+        'part' => 'archive',
+        'travel and exploration' => 'archive',
+
         // Museum (Spectrum)
         'object' => 'museum',
         'specimen' => 'museum',
         'artefact' => 'museum',
         'artifact' => 'museum',
-        
+        '3d model' => 'museum',
+
         // Gallery
         'artwork' => 'gallery',
         'painting' => 'gallery',
         'sculpture' => 'gallery',
         'drawing' => 'gallery',
-        
+        'print' => 'gallery',
+        'installation' => 'gallery',
+
         // Library
         'book' => 'library',
         'periodical' => 'library',
         'volume' => 'library',
         'pamphlet' => 'library',
         'monograph' => 'library',
-        
+        'article' => 'library',
+        'manuscript' => 'library',
+        'journal' => 'library',
+
         // DAM
         'photograph' => 'dam',
         'photo' => 'dam',
@@ -43,7 +53,12 @@ class DisplayTypeDetector
         'negative' => 'dam',
         'album' => 'dam',
         'slide' => 'dam',
-        
+        'video' => 'dam',
+        'audio' => 'dam',
+        'film' => 'dam',
+        'map' => 'dam',
+        'poster' => 'dam',
+
         // Universal
         'collection' => 'universal',
     ];
@@ -96,10 +111,11 @@ class DisplayTypeDetector
             return 'archive';
         }
 
-        // Detect by level first, then parent, then events
+        // Detect by level first, then parent, then events, then media type
         $type = self::detectByLevel($object->level_name)
             ?? self::detectByParent($object->parent_id)
             ?? self::detectByEvents($objectId)
+            ?? self::detectByMediaType($objectId)
             ?? 'archive';
 
         // Save detected type
@@ -163,6 +179,30 @@ class DisplayTypeDetector
         if (in_array('production', $events) || in_array('manufacturer', $events)) return 'museum';
 
         return null;
+    }
+
+    protected static function detectByMediaType(int $objectId): ?string
+    {
+        $mediaType = DB::table('digital_object as do')
+            ->join('term_i18n as t', function ($j) {
+                $j->on('do.media_type_id', '=', 't.id')->where('t.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('do.object_id', $objectId)
+            ->value('t.name');
+
+        if (!$mediaType) {
+            return null;
+        }
+
+        $mediaType = strtolower($mediaType);
+
+        $mediaToDomain = [
+            'image' => 'dam',
+            'video' => 'dam',
+            'audio' => 'dam',
+        ];
+
+        return $mediaToDomain[$mediaType] ?? null;
     }
 
     protected static function saveType(int $objectId, string $type): void
