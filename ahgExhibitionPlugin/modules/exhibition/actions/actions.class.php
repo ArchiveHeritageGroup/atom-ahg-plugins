@@ -61,7 +61,9 @@ class exhibitionActions extends AhgController
         $service = $this->getExhibitionService();
 
         $id = $request->getParameter('id');
-        if (is_numeric($id)) {
+        if (empty($id)) {
+            $this->forward404('Exhibition not found');
+        } elseif (is_numeric($id)) {
             $this->exhibition = $service->get((int) $id, true);
         } else {
             $this->exhibition = $service->getBySlug($id);
