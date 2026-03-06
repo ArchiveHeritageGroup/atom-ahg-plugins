@@ -3456,7 +3456,7 @@ class researchActions extends AhgController
                 'entry_date' => $request->getParameter('entry_date') ?: $this->entry->entry_date,
             ]);
             $this->getUser()->setFlash('success', 'Entry updated');
-            $this->redirect('/research/journal/' . $id);
+            $this->redirect('/research/journal/entry/' . $id);
         }
     }
 
@@ -3488,7 +3488,7 @@ class researchActions extends AhgController
                     'entry_date' => $request->getParameter('entry_date') ?: date('Y-m-d'),
                 ]);
                 $this->getUser()->setFlash('success', 'Journal entry created');
-                $this->redirect('/research/journal/' . $entryId);
+                $this->redirect('/research/journal/entry/' . $entryId);
             }
         }
     }

@@ -216,7 +216,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
 
         // Issue 149 Phase 1: Journal
         $research->any('research_journal_new', '/research/journal/new', 'journalNew');
-        $research->any('research_journal_entry', '/research/journal/:id', 'journalEntry', ['id' => '\d+']);
+        $research->any('research_journal_entry', '/research/journal/entry/:id', 'journalEntry', ['id' => '\d+']);
         $research->any('research_journal', '/research/journal', 'journal');
 
         // =====================================================================
