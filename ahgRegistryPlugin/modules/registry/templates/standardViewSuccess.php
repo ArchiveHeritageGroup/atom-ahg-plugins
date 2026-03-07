@@ -142,6 +142,13 @@
       <?php endif; ?>
     </div>
 
+    <!-- Notes -->
+    <?php include_partial('registry/notes', [
+      'entityType' => 'standard',
+      'entityId' => $detail->id,
+      'returnUrl' => $sf_request->getUri(),
+    ]); ?>
+
     <!-- Software Conformance (only shown when data exists) -->
     <?php if (!empty($conformance)): ?>
     <div class="card mb-4">

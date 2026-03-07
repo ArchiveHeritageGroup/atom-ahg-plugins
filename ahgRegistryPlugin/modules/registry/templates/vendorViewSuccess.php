@@ -208,6 +208,13 @@
       <?php endif; ?>
     </div>
 
+    <!-- Notes -->
+    <?php include_partial('registry/notes', [
+      'entityType' => 'vendor',
+      'entityId' => $detail->id,
+      'returnUrl' => $sf_request->getUri(),
+    ]); ?>
+
   </div>
 
   <!-- Sidebar -->

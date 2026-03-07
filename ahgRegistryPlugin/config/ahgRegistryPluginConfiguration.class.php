@@ -189,6 +189,11 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_admin_erd_edit', '/registry/admin/erd/:id/edit', 'adminErdEdit', ['id' => '\d+']);
         $loader->any('registry_admin_erd_new', '/registry/admin/erd/new', 'adminErdEdit');
 
+        // Notes (universal)
+        $loader->post('registry_note_save', '/registry/notes/save', 'noteSave');
+        $loader->post('registry_note_delete', '/registry/notes/:id/delete', 'noteDelete', ['id' => '\d+']);
+        $loader->post('registry_note_pin', '/registry/notes/:id/pin', 'notePin', ['id' => '\d+']);
+
         // Favorites
         $loader->post('registry_favorite_toggle', '/registry/favorite/toggle', 'favoriteToggle');
         $loader->any('registry_my_favorites', '/registry/my/favorites', 'myFavorites');

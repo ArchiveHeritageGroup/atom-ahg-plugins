@@ -65,7 +65,7 @@
     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Entity Relationship Diagram'); ?></h5>
   </div>
   <div class="card-body p-0">
-    <pre class="p-4 mb-0" style="font-size: 0.78em; overflow-x: auto; background: #f8f9fa;"><?php echo htmlspecialchars($erd->diagram, ENT_QUOTES, 'UTF-8'); ?></pre>
+    <pre class="p-4 mb-0 text-white" style="font-size: 0.78em; overflow-x: auto; background: #1a1a2e;"><?php echo htmlspecialchars($erd->diagram, ENT_QUOTES, 'UTF-8'); ?></pre>
   </div>
 </div>
 <?php endif; ?>
@@ -182,6 +182,13 @@
   </div>
 </div>
 <?php endif; ?>
+
+<!-- Notes -->
+<?php include_partial('registry/notes', [
+  'entityType' => 'erd',
+  'entityId' => $erd->id,
+  'returnUrl' => $sf_request->getUri(),
+]); ?>
 
 <!-- Legend -->
 <div class="card bg-light border-0 mb-4">

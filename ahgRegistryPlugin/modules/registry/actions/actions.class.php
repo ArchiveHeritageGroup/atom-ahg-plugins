@@ -4242,6 +4242,92 @@ class registryActions extends AhgController
 
     // ================================================================
     // FAVORITES: Toggle favorite on any entity
+    // =========================================================================
+    // Notes (universal)
+    // =========================================================================
+
+    public function executeNoteSave($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) { return; }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        $entityType = trim($request->getParameter('entity_type', ''));
+        $entityId = (int) $request->getParameter('entity_id', 0);
+        $content = trim($request->getParameter('note_content', ''));
+        $returnUrl = $request->getParameter('return_url', '/registry');
+
+        if (empty($entityType) || $entityId < 1 || $content === '') {
+            $this->redirect($returnUrl);
+            return;
+        }
+
+        $regUser = $db::table('registry_user')
+            ->where('atom_user_id', (int) $user->getAttribute('user_id'))
+            ->first();
+
+        $userName = $regUser->display_name ?? ($regUser->username ?? 'Unknown');
+
+        $db::table('registry_note')->insert([
+            'entity_type' => $entityType,
+            'entity_id' => $entityId,
+            'user_id' => $regUser->id ?? null,
+            'user_name' => $userName,
+            'content' => $content,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->redirect($returnUrl);
+    }
+
+    public function executeNoteDelete($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) { return; }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $id = (int) $request->getParameter('id', 0);
+        $returnUrl = $request->getParameter('return_url', '/registry');
+
+        $note = $db::table('registry_note')->where('id', $id)->first();
+        if (!$note) {
+            $this->redirect($returnUrl);
+            return;
+        }
+
+        // Only author or admin can delete
+        $regUser = $db::table('registry_user')
+            ->where('atom_user_id', (int) $user->getAttribute('user_id'))
+            ->first();
+        $isAdmin = $this->isAdmin();
+
+        if ($isAdmin || ($regUser && (int) $regUser->id === (int) $note->user_id)) {
+            $db::table('registry_note')->where('id', $id)->delete();
+        }
+
+        $this->redirect($returnUrl);
+    }
+
+    public function executeNotePin($request)
+    {
+        if (!$this->requireAdminUser()) { return; }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $id = (int) $request->getParameter('id', 0);
+        $returnUrl = $request->getParameter('return_url', '/registry');
+
+        $note = $db::table('registry_note')->where('id', $id)->first();
+        if ($note) {
+            $db::table('registry_note')->where('id', $id)->update([
+                'is_pinned' => $note->is_pinned ? 0 : 1,
+            ]);
+        }
+
+        $this->redirect($returnUrl);
+    }
+
     // ================================================================
 
     public function executeFavoriteToggle($request)
@@ -5238,8 +5324,8 @@ class registryActions extends AhgController
                 'display_name' => $request->getParameter('display_name', ''),
                 'category' => $request->getParameter('form_category', 'general'),
                 'description' => $request->getParameter('description', ''),
-                'tables_json' => $request->getParameter('tables_json', '[]'),
-                'diagram' => $request->getParameter('diagram', ''),
+                'tables_json' => html_entity_decode($request->getParameter('tables_json', '[]'), ENT_QUOTES, 'UTF-8'),
+                'diagram' => html_entity_decode($request->getParameter('diagram', ''), ENT_QUOTES, 'UTF-8'),
                 'notes' => $request->getParameter('notes', ''),
                 'icon' => $request->getParameter('icon', 'fas fa-database'),
                 'color' => $request->getParameter('color', 'primary'),
