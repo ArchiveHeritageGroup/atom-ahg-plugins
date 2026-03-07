@@ -20,6 +20,7 @@
   $version = $item->current_version ?? '';
   $pubYear = $item->publication_year ?? '';
   $isFeatured = !empty($item->is_featured);
+  $extensionCount = (int) ($item->extension_count ?? 0);
 
   $rawSectors = sfOutputEscaper::unescape($item->sector_applicability ?? '');
   $sectors = is_string($rawSectors) ? json_decode($rawSectors, true) : (is_array($rawSectors) ? $rawSectors : []);
@@ -49,6 +50,9 @@
 
       <div class="mb-2">
         <span class="badge <?php echo $catClass; ?>"><?php echo htmlspecialchars(ucfirst($cat), ENT_QUOTES, 'UTF-8'); ?></span>
+        <?php if ($extensionCount > 0): ?>
+          <span class="badge bg-success"><i class="fas fa-puzzle-piece me-1"></i>Heratio +<?php echo $extensionCount; ?></span>
+        <?php endif; ?>
         <?php if ($isFeatured): ?>
           <span class="badge bg-warning text-dark"><i class="fas fa-award me-1"></i><?php echo __('Featured'); ?></span>
         <?php endif; ?>

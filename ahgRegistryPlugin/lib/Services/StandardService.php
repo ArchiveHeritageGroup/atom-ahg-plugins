@@ -51,7 +51,9 @@ class StandardService
         // If FULLTEXT returned 0, fall back to LIKE search
         if ($total === 0 && !empty($searchTerm)) {
             $likeTerm = '%' . $searchTerm . '%';
-            $query = DB::table($this->table)->where('is_active', 1);
+            $query = DB::table($this->table)
+                ->selectRaw('registry_standard.*, (SELECT COUNT(*) FROM registry_standard_extension WHERE registry_standard_extension.standard_id = registry_standard.id AND registry_standard_extension.is_active = 1) as extension_count')
+                ->where('is_active', 1);
 
             if (!empty($params['category'])) {
                 $query->where('category', $params['category']);
