@@ -6,6 +6,7 @@
 CREATE TABLE IF NOT EXISTS `registry_erd` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `plugin_name` varchar(255) NOT NULL COMMENT 'e.g. ahgPreservationPlugin',
+  `vendor_id` bigint unsigned DEFAULT NULL COMMENT 'FK to registry_vendor.id',
   `display_name` varchar(255) NOT NULL COMMENT 'e.g. Digital Preservation',
   `slug` varchar(255) NOT NULL,
   `category` varchar(100) NOT NULL DEFAULT 'general' COMMENT 'core, sector, compliance, browse, ai, ingest, rights, research, collection, exhibition, integration, reporting',

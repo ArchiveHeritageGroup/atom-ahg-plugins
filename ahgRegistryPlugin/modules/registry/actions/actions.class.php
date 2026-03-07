@@ -5128,6 +5128,9 @@ class registryActions extends AhgController
         if (!empty($request->getParameter('category'))) {
             $query->where('category', $request->getParameter('category'));
         }
+        if (!empty($request->getParameter('vendor'))) {
+            $query->where('vendor_id', (int) $request->getParameter('vendor'));
+        }
 
         $this->categories = $db::table('registry_erd')
             ->where('is_active', 1)
@@ -5137,8 +5140,19 @@ class registryActions extends AhgController
             ->pluck('category')
             ->all();
 
+        // Vendors that have ERD entries
+        $this->vendors = $db::table('registry_erd as e')
+            ->join('registry_vendor as v', 'v.id', '=', 'e.vendor_id')
+            ->where('e.is_active', 1)
+            ->select('v.id', 'v.name', $db::raw('COUNT(e.id) as erd_count'))
+            ->groupBy('v.id', 'v.name')
+            ->orderBy('v.name')
+            ->get()
+            ->all();
+
         $this->items = $query->orderBy('sort_order')->get()->all();
         $this->selectedCategory = $request->getParameter('category', '');
+        $this->selectedVendor = $request->getParameter('vendor', '');
         $this->isAdmin = $this->isAdmin();
     }
 
@@ -5217,8 +5231,10 @@ class registryActions extends AhgController
         $id = (int) $request->getParameter('id', 0);
 
         if ($request->isMethod('POST')) {
+            $vendorId = $request->getParameter('vendor_id', '');
             $data = [
                 'plugin_name' => $request->getParameter('plugin_name', ''),
+                'vendor_id' => $vendorId !== '' ? (int) $vendorId : null,
                 'display_name' => $request->getParameter('display_name', ''),
                 'category' => $request->getParameter('form_category', 'general'),
                 'description' => $request->getParameter('description', ''),

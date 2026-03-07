@@ -1,6 +1,6 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
 
-<?php slot('title'); ?><?php echo htmlspecialchars($erd->display_name, ENT_QUOTES, 'UTF-8'); ?> — <?php echo __('Schema & ERD'); ?><?php end_slot(); ?>
+<?php slot('title'); ?><?php echo sfOutputEscaper::unescape($erd->display_name); ?> — <?php echo __('Schema & ERD'); ?><?php end_slot(); ?>
 
 <?php slot('content'); ?>
 
@@ -8,7 +8,7 @@
   ['label' => __('Home'), 'url' => url_for('@homepage')],
   ['label' => __('Registry'), 'url' => url_for(['module' => 'registry', 'action' => 'index'])],
   ['label' => __('Schema & ERD'), 'url' => url_for(['module' => 'registry', 'action' => 'erdBrowse'])],
-  ['label' => htmlspecialchars($erd->display_name, ENT_QUOTES, 'UTF-8')],
+  ['label' => $erd->display_name],
 ]]); ?>
 
 <?php
@@ -25,10 +25,10 @@
 <div class="d-flex justify-content-between align-items-start mb-4">
   <div>
     <h1 class="h3 mb-1">
-      <i class="<?php echo htmlspecialchars($icon, ENT_QUOTES, 'UTF-8'); ?> text-<?php echo $color; ?> me-2"></i><?php echo htmlspecialchars($erd->display_name, ENT_QUOTES, 'UTF-8'); ?>
+      <i class="<?php echo htmlspecialchars($icon, ENT_QUOTES, 'UTF-8'); ?> text-<?php echo $color; ?> me-2"></i><?php echo $erd->display_name; ?>
     </h1>
-    <p class="text-muted mb-1"><?php echo htmlspecialchars($erd->description ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
-    <span class="badge bg-light text-dark border"><code><?php echo htmlspecialchars($erd->plugin_name, ENT_QUOTES, 'UTF-8'); ?></code></span>
+    <p class="text-muted mb-1"><?php echo $erd->description; ?></p>
+    <span class="badge bg-light text-dark border"><code><?php echo $erd->plugin_name; ?></code></span>
   </div>
   <div class="d-flex gap-2">
     <?php if (!empty($isAdmin)): ?>

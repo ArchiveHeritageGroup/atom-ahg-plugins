@@ -1,8 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
 
-<?php $detail = $standard['standard']; ?>
-<?php $extensions = $standard['extensions'] ?? []; ?>
-<?php $conformance = $standard['conformance'] ?? []; ?>
+<?php
+  $_raw = sfOutputEscaper::unescape($standard);
+  $detail = $_raw['standard'];
+  $extensions = $_raw['extensions'] ?? [];
+  $conformance = $_raw['conformance'] ?? [];
+  $tags = $_raw['tags'] ?? [];
+?>
 
 <?php slot('title'); ?><?php echo htmlspecialchars($detail->name, ENT_QUOTES, 'UTF-8'); ?> - <?php echo __('Standard'); ?><?php end_slot(); ?>
 
@@ -14,6 +18,8 @@
   ['label' => __('Standards'), 'url' => url_for(['module' => 'registry', 'action' => 'standardBrowse'])],
   ['label' => htmlspecialchars($detail->name, ENT_QUOTES, 'UTF-8')],
 ]]); ?>
+
+<?php $_isAdmin = sfContext::getInstance()->getUser() && sfContext::getInstance()->getUser()->isAuthenticated() && sfContext::getInstance()->getUser()->hasCredential('administrator'); ?>
 
 <?php
   $catBg = [
@@ -50,12 +56,19 @@
 
     <!-- Header -->
     <div class="mb-4">
-      <h1 class="h3 mb-1">
-        <?php echo htmlspecialchars($detail->name, ENT_QUOTES, 'UTF-8'); ?>
-        <?php if (!empty($detail->acronym)): ?>
-          <span class="badge bg-light text-dark border ms-2" style="font-size: 0.5em; vertical-align: middle;"><?php echo htmlspecialchars($detail->acronym, ENT_QUOTES, 'UTF-8'); ?></span>
+      <div class="d-flex justify-content-between align-items-start">
+        <h1 class="h3 mb-1">
+          <?php echo htmlspecialchars($detail->name, ENT_QUOTES, 'UTF-8'); ?>
+          <?php if (!empty($detail->acronym)): ?>
+            <span class="badge bg-light text-dark border ms-2" style="font-size: 0.5em; vertical-align: middle;"><?php echo htmlspecialchars($detail->acronym, ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php endif; ?>
+        </h1>
+        <?php if ($_isAdmin): ?>
+        <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminStandardEdit', 'id' => $detail->id]); ?>" class="btn btn-outline-secondary btn-sm flex-shrink-0">
+          <i class="fas fa-wrench me-1"></i><?php echo __('Maintenance'); ?>
+        </a>
         <?php endif; ?>
-      </h1>
+      </div>
       <div class="mb-2">
         <span class="badge <?php echo $catClass; ?>"><?php echo htmlspecialchars(ucfirst($cat), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php if (!empty($detail->is_featured)): ?>
@@ -129,15 +142,13 @@
       <?php endif; ?>
     </div>
 
-    <!-- Software Conformance -->
+    <!-- Software Conformance (only shown when data exists) -->
+    <?php if (!empty($conformance)): ?>
     <div class="card mb-4">
       <div class="card-header fw-semibold">
         <i class="fas fa-check-double me-2"></i><?php echo __('Software Conformance'); ?>
-        <?php if (!empty($conformance)): ?>
-          <span class="badge bg-secondary ms-1"><?php echo count($conformance); ?></span>
-        <?php endif; ?>
+        <span class="badge bg-secondary ms-1"><?php echo count($conformance); ?></span>
       </div>
-      <?php if (!empty($conformance)): ?>
       <div class="table-responsive">
         <table class="table table-hover mb-0">
           <thead class="table-light">
@@ -172,12 +183,8 @@
           </tbody>
         </table>
       </div>
-      <?php else: ?>
-      <div class="card-body">
-        <p class="text-muted mb-0"><?php echo __('No software conformance declarations yet.'); ?></p>
-      </div>
-      <?php endif; ?>
     </div>
+    <?php endif; ?>
 
   </div>
 
