@@ -195,6 +195,7 @@
           // Defaults: all visible
       }
       $_showCommunity   = $_navSettings['nav_show_community'] ?? true;
+      $_showStandards   = $_navSettings['nav_show_standards'] ?? true;
       $_showUserGroups  = $_navSettings['nav_show_user_groups'] ?? true;
       $_showBlog        = $_navSettings['nav_show_blog'] ?? true;
       $_showNewsletters = $_navSettings['nav_show_newsletters'] ?? true;
@@ -213,6 +214,11 @@
         <li class="nav-item">
           <a class="nav-link" href="/registry/software"><i class="fas fa-cube"></i> Software</a>
         </li>
+        <?php if ($_showStandards): ?>
+        <li class="nav-item">
+          <a class="nav-link" href="/registry/standards"><i class="fas fa-balance-scale"></i> Standards</a>
+        </li>
+        <?php endif; ?>
         <?php if ($_showCommunity): ?>
         <li class="nav-item">
           <a class="nav-link" href="/registry/community"><i class="fas fa-users"></i> Community</a>

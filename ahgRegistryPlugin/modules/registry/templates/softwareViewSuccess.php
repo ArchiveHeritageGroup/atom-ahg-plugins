@@ -307,6 +307,50 @@
     </div>
     <?php endif; ?>
 
+    <!-- Standards Conformance -->
+    <?php if (!empty($standardsConformance)): ?>
+    <div class="card mb-4">
+      <div class="card-header fw-semibold">
+        <i class="fas fa-balance-scale me-2"></i><?php echo __('Standards Conformance'); ?>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th><?php echo __('Standard'); ?></th>
+              <th><?php echo __('Level'); ?></th>
+              <th><?php echo __('Notes'); ?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($standardsConformance as $sc): ?>
+            <tr>
+              <td>
+                <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardView', 'slug' => $sc->slug]); ?>">
+                  <?php if (!empty($sc->acronym)): ?>
+                    <strong><?php echo htmlspecialchars($sc->acronym, ENT_QUOTES, 'UTF-8'); ?></strong>
+                    <small class="text-muted ms-1"><?php echo htmlspecialchars($sc->name, ENT_QUOTES, 'UTF-8'); ?></small>
+                  <?php else: ?>
+                    <strong><?php echo htmlspecialchars($sc->name, ENT_QUOTES, 'UTF-8'); ?></strong>
+                  <?php endif; ?>
+                </a>
+              </td>
+              <td>
+                <?php
+                  $lvlColors = ['full' => 'success', 'partial' => 'warning', 'extended' => 'primary', 'planned' => 'secondary'];
+                  $lvlColor = $lvlColors[$sc->conformance_level] ?? 'secondary';
+                ?>
+                <span class="badge bg-<?php echo $lvlColor; ?>"><?php echo htmlspecialchars(ucfirst($sc->conformance_level), ENT_QUOTES, 'UTF-8'); ?></span>
+              </td>
+              <td><small><?php echo htmlspecialchars($sc->notes ?? '', ENT_QUOTES, 'UTF-8'); ?></small></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Institutions using this -->
     <?php if (!empty($software['institutions'])): ?>
     <div class="card mb-4">
@@ -401,6 +445,18 @@
         <?php endif; ?>
       </ul>
     </div>
+
+    <!-- Setup Guides -->
+    <?php if (!empty($setupGuideCount) && $setupGuideCount > 0): ?>
+    <div class="card mb-4">
+      <div class="card-body text-center">
+        <a href="<?php echo url_for(['module' => 'registry', 'action' => 'setupGuideBrowse', 'slug' => $detail->slug]); ?>" class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-book-open me-1"></i> <?php echo __('Setup Guides'); ?>
+          <span class="badge bg-primary ms-1"><?php echo (int) $setupGuideCount; ?></span>
+        </a>
+      </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Pricing details -->
     <?php if (!empty($detail->pricing_details)): ?>

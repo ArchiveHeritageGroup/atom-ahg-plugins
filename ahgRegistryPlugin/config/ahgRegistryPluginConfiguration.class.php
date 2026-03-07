@@ -61,6 +61,15 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->post('registry_admin_software_verify', '/registry/admin/software/verify', 'adminSoftwareVerify');
         $loader->any('registry_admin_groups', '/registry/admin/groups', 'adminGroups');
         $loader->any('registry_admin_group_verify', '/registry/admin/groups/verify', 'adminGroupVerify');
+
+        // Admin: Standards
+        $loader->any('registry_admin_standards', '/registry/admin/standards', 'adminStandards');
+        $loader->any('registry_admin_standard_edit', '/registry/admin/standards/:id/edit', 'adminStandardEdit', ['id' => '\d+']);
+        $loader->any('registry_admin_standard_new', '/registry/admin/standards/new', 'adminStandardEdit');
+        $loader->any('registry_admin_extension_edit', '/registry/admin/standards/:standardId/extensions/:id/edit', 'adminExtensionEdit', ['standardId' => '\d+', 'id' => '\d+']);
+        $loader->any('registry_admin_extension_new', '/registry/admin/standards/:standardId/extensions/new', 'adminExtensionEdit', ['standardId' => '\d+']);
+        $loader->post('registry_admin_extension_delete', '/registry/admin/standards/extensions/:id/delete', 'adminExtensionDelete', ['id' => '\d+']);
+        $loader->any('registry_admin_setup_guides', '/registry/admin/setup-guides', 'adminSetupGuides');
         $loader->any('registry_admin_discussions', '/registry/admin/discussions', 'adminDiscussions');
         $loader->any('registry_admin_blog', '/registry/admin/blog', 'adminBlog');
         $loader->any('registry_admin_reviews', '/registry/admin/reviews', 'adminReviews');
@@ -157,6 +166,9 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_vendors', '/registry/vendors', 'vendorBrowse');
         $loader->any('registry_software', '/registry/software', 'softwareBrowse');
         $loader->any('registry_software_releases', '/registry/software/:slug/releases', 'softwareReleases', ['slug' => '[a-z0-9-]+']);
+        $loader->any('registry_software_guides', '/registry/software/:slug/setup', 'setupGuideBrowse', ['slug' => '[a-z0-9-]+']);
+        $loader->any('registry_software_guide_view', '/registry/software/:slug/setup/:guideSlug', 'setupGuideView', ['slug' => '[a-z0-9-]+', 'guideSlug' => '[a-z0-9-]+']);
+        $loader->any('registry_standards', '/registry/standards', 'standardBrowse');
         $loader->any('registry_instance_view', '/registry/instances/:id', 'instanceView', ['id' => '\d+']);
         $loader->any('registry_search', '/registry/search', 'search');
         $loader->any('registry_map', '/registry/map', 'map');
@@ -167,6 +179,7 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_institution_view', '/registry/institutions/:slug', 'institutionView', ['slug' => '[a-z0-9-]+']);
         $loader->any('registry_vendor_view', '/registry/vendors/:slug', 'vendorView', ['slug' => '[a-z0-9-]+']);
         $loader->any('registry_software_view', '/registry/software/:slug', 'softwareView', ['slug' => '[a-z0-9-]+']);
+        $loader->any('registry_standard_view', '/registry/standards/:slug', 'standardView', ['slug' => '[a-z0-9-]+']);
 
         // Favorites
         $loader->post('registry_favorite_toggle', '/registry/favorite/toggle', 'favoriteToggle');

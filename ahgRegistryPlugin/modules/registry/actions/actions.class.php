@@ -237,11 +237,19 @@ class registryActions extends AhgController
         $db = \Illuminate\Database\Capsule\Manager::class;
 
         // Build cross-entity stats for the homepage
+        $standardCount = 0;
+        try {
+            $standardCount = $db::table('registry_standard')->where('is_active', 1)->count();
+        } catch (\Exception $e) {
+            // Table may not exist yet
+        }
+
         $this->stats = [
             'institutions' => $db::table('registry_institution')->where('is_active', 1)->count(),
             'vendors' => $db::table('registry_vendor')->where('is_active', 1)->count(),
             'software' => $db::table('registry_software')->where('is_active', 1)->count(),
             'groups' => $db::table('registry_user_group')->where('is_active', 1)->count(),
+            'standards' => $standardCount,
         ];
 
         // Per-user favorites or admin-featured fallback
@@ -504,13 +512,38 @@ class registryActions extends AhgController
         $this->isFavorited = $this->isFavorited('software', (int) $this->software['software']->id);
 
         // Load components/plugins for this software
-        $this->components = \Illuminate\Database\Capsule\Manager::table('registry_software_component')
-            ->where('software_id', $this->software['software']->id)
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $swId = (int) $this->software['software']->id;
+
+        $this->components = $db::table('registry_software_component')
+            ->where('software_id', $swId)
             ->where('is_active', 1)
             ->orderBy('sort_order', 'asc')
             ->orderBy('name', 'asc')
             ->get()
             ->all();
+
+        // Standards conformance
+        try {
+            $this->standardsConformance = $db::table('registry_software_standard as ss')
+                ->join('registry_standard as st', 'ss.standard_id', '=', 'st.id')
+                ->where('ss.software_id', $swId)
+                ->select('st.name', 'st.acronym', 'st.slug', 'ss.conformance_level', 'ss.notes')
+                ->orderBy('st.sort_order')
+                ->get()->all();
+        } catch (\Exception $e) {
+            $this->standardsConformance = [];
+        }
+
+        // Setup guide count
+        try {
+            $this->setupGuideCount = $db::table('registry_setup_guide')
+                ->where('software_id', $swId)
+                ->where('is_active', 1)
+                ->count();
+        } catch (\Exception $e) {
+            $this->setupGuideCount = 0;
+        }
     }
 
     public function executeSoftwareReleases($request)
@@ -5029,5 +5062,309 @@ class registryActions extends AhgController
 
         $db::table('registry_software_component')->where('id', $compId)->delete();
         $this->redirect(url_for(['module' => 'registry', 'action' => 'softwareComponents', 'id' => $comp->software_id]));
+    }
+
+    // =========================================================================
+    // Standards: Public Browse & View
+    // =========================================================================
+
+    public function executeStandardBrowse($request)
+    {
+        $svc = $this->loadService('StandardService');
+
+        $this->result = $svc->browse([
+            'search' => $request->getParameter('q', ''),
+            'category' => $request->getParameter('category', ''),
+            'sector' => $request->getParameter('sector', ''),
+            'page' => (int) $request->getParameter('page', 1),
+            'limit' => 24,
+        ]);
+
+        $this->isAdmin = $this->isAdmin();
+    }
+
+    public function executeStandardView($request)
+    {
+        $svc = $this->loadService('StandardService');
+        $slug = $request->getParameter('slug', '');
+
+        $this->standard = $svc->getStandard($slug);
+        if (!$this->standard) {
+            $this->forward404();
+
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $currentCat = $this->standard['standard']->category ?? '';
+        $currentId = (int) $this->standard['standard']->id;
+        $this->relatedStandards = $db::table('registry_standard')
+            ->where('category', $currentCat)
+            ->where('id', '!=', $currentId)
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->limit(5)
+            ->get()
+            ->all();
+
+        $this->isAdmin = $this->isAdmin();
+    }
+
+    // =========================================================================
+    // Setup Guides: Public Browse & View
+    // =========================================================================
+
+    public function executeSetupGuideBrowse($request)
+    {
+        $svc = $this->loadService('StandardService');
+        $swSlug = $request->getParameter('slug', '');
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $this->software = $db::table('registry_software')->where('slug', $swSlug)->where('is_active', 1)->first();
+        if (!$this->software) {
+            $this->forward404();
+
+            return;
+        }
+
+        $this->result = $svc->browseGuides((int) $this->software->id, [
+            'category' => $request->getParameter('category', ''),
+            'page' => (int) $request->getParameter('page', 1),
+            'limit' => 20,
+        ]);
+
+        $this->isAdmin = $this->isAdmin();
+    }
+
+    public function executeSetupGuideView($request)
+    {
+        $svc = $this->loadService('StandardService');
+        $swSlug = $request->getParameter('slug', '');
+        $guideSlug = $request->getParameter('guideSlug', '');
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $this->software = $db::table('registry_software')->where('slug', $swSlug)->where('is_active', 1)->first();
+        if (!$this->software) {
+            $this->forward404();
+
+            return;
+        }
+
+        $this->guide = $svc->getGuide((int) $this->software->id, $guideSlug);
+        if (!$this->guide) {
+            $this->forward404();
+
+            return;
+        }
+
+        // Increment view count
+        $db::table('registry_setup_guide')->where('id', (int) $this->guide->id)->increment('view_count');
+
+        // Other guides for sidebar
+        $this->otherGuides = $db::table('registry_setup_guide')
+            ->where('software_id', (int) $this->software->id)
+            ->where('id', '!=', (int) $this->guide->id)
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->limit(10)
+            ->get()
+            ->all();
+    }
+
+    // =========================================================================
+    // Admin: Standards Management
+    // =========================================================================
+
+    public function executeAdminStandards($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        // Handle delete
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'delete') {
+            $id = (int) $request->getParameter('id');
+            $db::table('registry_standard_extension')->where('standard_id', $id)->delete();
+            $db::table('registry_software_standard')->where('standard_id', $id)->delete();
+            $db::table('registry_standard')->where('id', $id)->delete();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'adminStandards']));
+
+            return;
+        }
+
+        $query = $db::table('registry_standard')->orderBy('sort_order');
+        $category = $request->getParameter('category', '');
+        if ($category) {
+            $query->where('category', $category);
+        }
+
+        $this->standards = $query->get()->all();
+        $this->categories = $db::table('registry_standard')
+            ->selectRaw('category, COUNT(*) as cnt')
+            ->groupBy('category')
+            ->orderBy('category')
+            ->get()->all();
+        $this->currentCategory = $category;
+    }
+
+    public function executeAdminStandardEdit($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $id = (int) $request->getParameter('id', 0);
+
+        if ($id) {
+            $this->standard = $db::table('registry_standard')->where('id', $id)->first();
+            if (!$this->standard) {
+                $this->forward404();
+
+                return;
+            }
+            $this->extensions = $db::table('registry_standard_extension')
+                ->where('standard_id', $id)
+                ->orderBy('sort_order')
+                ->get()->all();
+        } else {
+            $this->standard = null;
+            $this->extensions = [];
+        }
+
+        if ($request->isMethod('post')) {
+            $svc = $this->loadService('StandardService');
+            $data = [
+                'name' => $request->getParameter('name', ''),
+                'acronym' => $request->getParameter('acronym', '') ?: null,
+                'category' => $request->getParameter('category', 'descriptive'),
+                'short_description' => $request->getParameter('short_description', '') ?: null,
+                'description' => $request->getParameter('description', '') ?: null,
+                'website_url' => $request->getParameter('website_url', '') ?: null,
+                'issuing_body' => $request->getParameter('issuing_body', '') ?: null,
+                'current_version' => $request->getParameter('current_version', '') ?: null,
+                'publication_year' => $request->getParameter('publication_year', '') ?: null,
+                'sector_applicability' => json_encode($request->getParameter('sectors', [])),
+                'is_featured' => $request->getParameter('is_featured') ? 1 : 0,
+                'is_active' => $request->getParameter('is_active', 1) ? 1 : 0,
+                'sort_order' => (int) $request->getParameter('sort_order', 100),
+            ];
+
+            if ($id) {
+                $data['id'] = $id;
+            }
+            $data['slug'] = $svc->generateSlug($data['acronym'] ?: $data['name'], 'registry_standard', $id ?: null);
+
+            $savedId = $svc->saveStandard($data);
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'adminStandards']));
+
+            return;
+        }
+    }
+
+    public function executeAdminExtensionEdit($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $standardId = (int) $request->getParameter('standardId');
+        $id = (int) $request->getParameter('id', 0);
+
+        $this->parentStandard = $db::table('registry_standard')->where('id', $standardId)->first();
+        if (!$this->parentStandard) {
+            $this->forward404();
+
+            return;
+        }
+
+        if ($id) {
+            $this->extension = $db::table('registry_standard_extension')->where('id', $id)->first();
+            if (!$this->extension) {
+                $this->forward404();
+
+                return;
+            }
+        } else {
+            $this->extension = null;
+        }
+
+        if ($request->isMethod('post')) {
+            $svc = $this->loadService('StandardService');
+            $data = [
+                'standard_id' => $standardId,
+                'extension_type' => $request->getParameter('extension_type', 'addition'),
+                'title' => $request->getParameter('title', ''),
+                'description' => $request->getParameter('description', ''),
+                'rationale' => $request->getParameter('rationale', '') ?: null,
+                'plugin_name' => $request->getParameter('plugin_name', '') ?: null,
+                'api_endpoint' => $request->getParameter('api_endpoint', '') ?: null,
+                'db_tables' => $request->getParameter('db_tables', '') ?: null,
+                'is_active' => $request->getParameter('is_active', 1) ? 1 : 0,
+                'sort_order' => (int) $request->getParameter('sort_order', 100),
+                'created_by' => $this->getCurrentUserId(),
+            ];
+
+            if ($id) {
+                $data['id'] = $id;
+            }
+
+            $svc->saveExtension($data);
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'adminStandardEdit', 'id' => $standardId]));
+
+            return;
+        }
+    }
+
+    public function executeAdminExtensionDelete($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $id = (int) $request->getParameter('id');
+        $ext = $db::table('registry_standard_extension')->where('id', $id)->first();
+        if (!$ext) {
+            $this->forward404();
+
+            return;
+        }
+
+        $db::table('registry_standard_extension')->where('id', $id)->delete();
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'adminStandardEdit', 'id' => $ext->standard_id]));
+    }
+
+    public function executeAdminSetupGuides($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        // Handle delete
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'delete') {
+            $id = (int) $request->getParameter('id');
+            $db::table('registry_setup_guide')->where('id', $id)->delete();
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'adminSetupGuides']));
+
+            return;
+        }
+
+        $this->guides = $db::table('registry_setup_guide as g')
+            ->join('registry_software as s', 'g.software_id', '=', 's.id')
+            ->select('g.*', 's.name as software_name', 's.slug as software_slug')
+            ->orderBy('s.name')
+            ->orderBy('g.sort_order')
+            ->get()->all();
     }
 }

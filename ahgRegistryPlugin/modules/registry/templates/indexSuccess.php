@@ -34,7 +34,7 @@
 <!-- Stats row -->
 <?php if (!empty($stats)): ?>
 <div class="row g-3 mb-5">
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-lg">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionBrowse']); ?>" class="card text-center h-100 text-decoration-none">
       <div class="card-body">
         <div class="display-6 fw-bold text-primary"><?php echo number_format($stats['institutions'] ?? 0); ?></div>
@@ -42,7 +42,7 @@
       </div>
     </a>
   </div>
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-lg">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'vendorBrowse']); ?>" class="card text-center h-100 text-decoration-none">
       <div class="card-body">
         <div class="display-6 fw-bold text-success"><?php echo number_format($stats['vendors'] ?? 0); ?></div>
@@ -50,7 +50,7 @@
       </div>
     </a>
   </div>
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-lg">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'softwareBrowse']); ?>" class="card text-center h-100 text-decoration-none">
       <div class="card-body">
         <div class="display-6 fw-bold text-info"><?php echo number_format($stats['software'] ?? 0); ?></div>
@@ -58,7 +58,15 @@
       </div>
     </a>
   </div>
-  <div class="col-6 col-md-3">
+  <div class="col-6 col-lg">
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardBrowse']); ?>" class="card text-center h-100 text-decoration-none">
+      <div class="card-body">
+        <div class="display-6 fw-bold text-danger"><?php echo number_format($stats['standards'] ?? 0); ?></div>
+        <div class="text-muted small"><?php echo __('Standards'); ?></div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-lg">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'groupBrowse']); ?>" class="card text-center h-100 text-decoration-none">
       <div class="card-body">
         <div class="display-6 fw-bold text-warning"><?php echo number_format($stats['groups'] ?? 0); ?></div>
