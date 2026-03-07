@@ -1,7 +1,7 @@
 # AtoM AHG Framework - Database ERD
 
-**Version:** 2.1.17
-**Last Updated:** January 2026
+**Version:** 2.8.2
+**Last Updated:** March 2026
 
 ---
 
@@ -427,7 +427,107 @@
 
 ---
 
-## 10. Table Relationships Summary
+## 10. Registry Standards & Conformance ERD
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                     REGISTRY STANDARDS & CONFORMANCE ERD                         │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  ┌─────────────────────────────────┐                                            │
+│  │        registry_standard        │                                            │
+│  ├─────────────────────────────────┤                                            │
+│  │ PK id                 BIGINT    │                                            │
+│  │    name               VARCHAR   │◄── Full standard name                     │
+│  │    acronym            VARCHAR   │◄── e.g. "ISAD(G)", "DACS"                │
+│  │    slug               VARCHAR   │◄── URL-safe unique identifier            │
+│  │    category           VARCHAR   │◄── descriptive|preservation|rights|       │
+│  │                                 │    accounting|compliance|metadata|        │
+│  │                                 │    interchange|sector                     │
+│  │    short_description  TEXT      │                                            │
+│  │    description        TEXT      │◄── Full markdown description             │
+│  │    issuing_body       VARCHAR   │◄── e.g. "ICA", "SAA", "OCLC"            │
+│  │    official_url       VARCHAR   │◄── Link to official standard             │
+│  │    current_version    VARCHAR   │◄── e.g. "2nd Edition", "3.0"            │
+│  │    publication_year   SMALLINT  │                                            │
+│  │    sector_applicability JSON    │◄── ["archives","libraries","museums"]     │
+│  │    is_featured        TINYINT   │                                            │
+│  │    is_active          TINYINT   │                                            │
+│  │    sort_order         INT       │                                            │
+│  │    created_at         DATETIME  │                                            │
+│  │    updated_at         DATETIME  │                                            │
+│  └────────────┬────────────────────┘                                            │
+│               │                                                                  │
+│               │ 1:N (CASCADE)                                                    │
+│               ▼                                                                  │
+│  ┌─────────────────────────────────┐                                            │
+│  │  registry_standard_extension    │◄── Heratio deviations/additions           │
+│  ├─────────────────────────────────┤                                            │
+│  │ PK id                 BIGINT    │                                            │
+│  │ FK standard_id        BIGINT    │────► registry_standard.id (CASCADE)       │
+│  │    title              VARCHAR   │◄── e.g. "Contact Management Extension"   │
+│  │    slug               VARCHAR   │                                            │
+│  │    extension_type     VARCHAR   │◄── addition|deviation|enhancement|wrapper │
+│  │    description        TEXT      │◄── Markdown — what Heratio adds/changes  │
+│  │    heratio_plugin     VARCHAR   │◄── Plugin that implements it             │
+│  │    heratio_version    VARCHAR   │◄── Minimum framework version             │
+│  │    documentation_url  VARCHAR   │                                            │
+│  │    is_active          TINYINT   │                                            │
+│  │    sort_order         INT       │                                            │
+│  │    created_at         DATETIME  │                                            │
+│  │    updated_at         DATETIME  │                                            │
+│  └─────────────────────────────────┘                                            │
+│                                                                                  │
+│               ┌────────────────────────────────────────────┐                    │
+│               │                                            │                    │
+│  ┌────────────┴────────────────────┐  ┌────────────────────┴───────────────┐    │
+│  │  registry_software_standard     │  │     registry_setup_guide           │    │
+│  │  (Conformance / Compliance)     │  │     (Implementation Guides)        │    │
+│  ├─────────────────────────────────┤  ├────────────────────────────────────┤    │
+│  │ PK id                 BIGINT    │  │ PK id                 BIGINT       │    │
+│  │ FK software_id        BIGINT    │──│ FK software_id        BIGINT       │──┐ │
+│  │ FK standard_id        BIGINT    │──│    title              VARCHAR      │  │ │
+│  │    conformance_level  VARCHAR   │  │    slug               VARCHAR      │  │ │
+│  │    notes              TEXT      │  │    category           VARCHAR      │  │ │
+│  │    created_at         DATETIME  │  │    content            LONGTEXT     │  │ │
+│  │    updated_at         DATETIME  │  │    difficulty         VARCHAR      │  │ │
+│  └──────────┬──────────────────────┘  │    estimated_minutes  INT          │  │ │
+│             │                         │    is_active          TINYINT      │  │ │
+│             │                         │    sort_order         INT          │  │ │
+│             │                         │    view_count         INT          │  │ │
+│             │                         │    created_at         DATETIME     │  │ │
+│             │                         │    updated_at         DATETIME     │  │ │
+│             │                         └────────────────────────────────────┘  │ │
+│             │                                                                │ │
+│             │         ┌──────────────────────────────────────────────────────┘ │
+│             │         │                                                        │
+│             ▼         ▼                                                        │
+│  ┌─────────────────────────────────┐                                          │
+│  │      registry_software          │◄── From existing registry tables         │
+│  ├─────────────────────────────────┤                                          │
+│  │ PK id                 BIGINT    │                                          │
+│  │    name               VARCHAR   │                                          │
+│  │    slug               VARCHAR   │                                          │
+│  │    ...                          │                                          │
+│  └─────────────────────────────────┘                                          │
+│                                                                                │
+│  Relationships:                                                                │
+│  • registry_standard_extension.standard_id → registry_standard.id (CASCADE)   │
+│  • registry_software_standard.software_id  → registry_software.id (CASCADE)   │
+│  • registry_software_standard.standard_id  → registry_standard.id (CASCADE)   │
+│  • registry_setup_guide.software_id        → registry_software.id (CASCADE)   │
+│  • UNIQUE(software_id, standard_id) on registry_software_standard             │
+│                                                                                │
+│  Heratio Extension Badge Logic:                                                │
+│  • Card shows "Heratio +N" badge when extension_count > 0                     │
+│  • extension_count = COUNT of active extensions per standard (subquery)        │
+│                                                                                │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 11. Table Relationships Summary
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
@@ -466,4 +566,4 @@
 
 ---
 
-*Part of the AtoM AHG Framework - v2.1.17*
+*Part of the AtoM AHG Framework - v2.8.2*

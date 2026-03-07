@@ -186,3 +186,20 @@ See: [SHELL_EXECUTION_POLICY.md](SHELL_EXECUTION_POLICY.md)
 - [ ] Elasticsearch not exposed to network (localhost only)
 - [ ] MySQL not exposed to network (localhost only)
 - [ ] File permissions: `www-data` owns `cache/`, `uploads/`
+- [ ] Nginx security headers hardened (HSTS, Permissions-Policy)
+- [ ] SPARQL/RiC API endpoints require authentication
+- [ ] Login endpoint rate-limited with fail2ban jail
+- [ ] `server_tokens off` in nginx.conf
+
+---
+
+## 13. Related Security Documents
+
+| Document | Location | Content |
+|----------|----------|---------|
+| [NGINX_SECURITY_HARDENING.md](NGINX_SECURITY_HARDENING.md) | `docs/technical/` | Nginx hardening guide for public-facing deployments |
+| [M0_SECURITY_HARDENING.md](M0_SECURITY_HARDENING.md) | `docs/technical/` | PHP deserialization and upload hardening |
+| [CSRF_POLICY.md](CSRF_POLICY.md) | `docs/technical/` | Cross-site request forgery protection |
+| [OUTBOUND_HTTP_POLICY.md](OUTBOUND_HTTP_POLICY.md) | `docs/technical/` | SSRF prevention policy |
+| [SHELL_EXECUTION_POLICY.md](SHELL_EXECUTION_POLICY.md) | `docs/technical/` | Shell command safety |
+| Security Assessment Reports | `docs/` | Periodic security assessment findings |
