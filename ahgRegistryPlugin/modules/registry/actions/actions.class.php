@@ -5110,6 +5110,46 @@ class registryActions extends AhgController
         $this->isAdmin = $this->isAdmin();
     }
 
+    public function executeStandardsSchema($request)
+    {
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        // Fetch table structures from information_schema
+        $tables = ['registry_standard', 'registry_standard_extension', 'registry_software_standard', 'registry_setup_guide'];
+        $this->schema = [];
+        foreach ($tables as $tbl) {
+            $this->schema[$tbl] = $db::select(
+                "SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA, COLUMN_COMMENT
+                 FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
+                 ORDER BY ORDINAL_POSITION",
+                [$tbl]
+            );
+        }
+
+        // Fetch foreign keys
+        $this->foreignKeys = $db::select(
+            "SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, CONSTRAINT_NAME
+             FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = DATABASE()
+               AND REFERENCED_TABLE_NAME IS NOT NULL
+               AND TABLE_NAME IN ('registry_standard_extension', 'registry_software_standard', 'registry_setup_guide')
+             ORDER BY TABLE_NAME, COLUMN_NAME"
+        );
+
+        // Counts
+        $this->counts = [];
+        foreach ($tables as $tbl) {
+            try {
+                $this->counts[$tbl] = $db::table($tbl)->count();
+            } catch (\Exception $e) {
+                $this->counts[$tbl] = 0;
+            }
+        }
+
+        $this->isAdmin = $this->isAdmin();
+    }
+
     // =========================================================================
     // Setup Guides: Public Browse & View
     // =========================================================================

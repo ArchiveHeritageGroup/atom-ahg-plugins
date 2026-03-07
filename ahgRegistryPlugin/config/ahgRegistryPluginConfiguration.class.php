@@ -180,6 +180,7 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_vendor_view', '/registry/vendors/:slug', 'vendorView', ['slug' => '[a-z0-9-]+']);
         $loader->any('registry_software_view', '/registry/software/:slug', 'softwareView', ['slug' => '[a-z0-9-]+']);
         $loader->any('registry_standard_view', '/registry/standards/:slug', 'standardView', ['slug' => '[a-z0-9-]+']);
+        $loader->any('registry_standards_schema', '/registry/standards/schema', 'standardsSchema');
 
         // Favorites
         $loader->post('registry_favorite_toggle', '/registry/favorite/toggle', 'favoriteToggle');

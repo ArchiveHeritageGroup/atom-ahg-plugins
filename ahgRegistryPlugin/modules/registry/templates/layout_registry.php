@@ -11,7 +11,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?php if (!include_slot('title')): ?>AtoM Registry<?php endif; ?></title>
-  <link rel="icon" href="/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/plugins/ahgRegistryPlugin/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/plugins/ahgRegistryPlugin/images/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/plugins/ahgRegistryPlugin/images/favicon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/plugins/ahgRegistryPlugin/images/apple-touch-icon.png">
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet" <?php echo $na; ?>>
