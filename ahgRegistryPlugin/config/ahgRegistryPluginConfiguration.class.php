@@ -182,6 +182,13 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_standard_view', '/registry/standards/:slug', 'standardView', ['slug' => '[a-z0-9-]+']);
         $loader->any('registry_standards_schema', '/registry/standards/schema', 'standardsSchema');
 
+        // ERD Documentation
+        $loader->any('registry_erd_view', '/registry/erd/:slug', 'erdView', ['slug' => '[a-z0-9-]+']);
+        $loader->any('registry_erd_browse', '/registry/erd', 'erdBrowse');
+        $loader->any('registry_admin_erd', '/registry/admin/erd', 'adminErd');
+        $loader->any('registry_admin_erd_edit', '/registry/admin/erd/:id/edit', 'adminErdEdit', ['id' => '\d+']);
+        $loader->any('registry_admin_erd_new', '/registry/admin/erd/new', 'adminErdEdit');
+
         // Favorites
         $loader->post('registry_favorite_toggle', '/registry/favorite/toggle', 'favoriteToggle');
         $loader->any('registry_my_favorites', '/registry/my/favorites', 'myFavorites');

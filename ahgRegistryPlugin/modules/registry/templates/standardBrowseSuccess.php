@@ -16,7 +16,7 @@
     <p class="text-muted mb-0"><?php echo __('%1% standards listed', ['%1%' => number_format($result['total'] ?? 0)]); ?></p>
   </div>
   <div class="col-auto">
-    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardsSchema']); ?>" class="btn btn-outline-secondary btn-sm">
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'erdBrowse']); ?>" class="btn btn-outline-secondary btn-sm">
       <i class="fas fa-project-diagram me-1"></i><?php echo __('Schema & ERD'); ?>
     </a>
   </div>

@@ -5112,34 +5112,66 @@ class registryActions extends AhgController
 
     public function executeStandardsSchema($request)
     {
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'erdView', 'slug' => 'standards-conformance']));
+    }
+
+    // =========================================================================
+    // ERD Documentation: Public Browse & View
+    // =========================================================================
+
+    public function executeErdBrowse($request)
+    {
         $db = \Illuminate\Database\Capsule\Manager::class;
 
-        // Fetch table structures from information_schema
-        $tables = ['registry_standard', 'registry_standard_extension', 'registry_software_standard', 'registry_setup_guide'];
+        $query = $db::table('registry_erd')->where('is_active', 1);
+
+        if (!empty($request->getParameter('category'))) {
+            $query->where('category', $request->getParameter('category'));
+        }
+
+        $this->categories = $db::table('registry_erd')
+            ->where('is_active', 1)
+            ->select('category')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category')
+            ->all();
+
+        $this->items = $query->orderBy('sort_order')->get()->all();
+        $this->selectedCategory = $request->getParameter('category', '');
+        $this->isAdmin = $this->isAdmin();
+    }
+
+    public function executeErdView($request)
+    {
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $slug = $request->getParameter('slug', '');
+
+        $this->erd = $db::table('registry_erd')->where('slug', $slug)->where('is_active', 1)->first();
+        if (!$this->erd) {
+            $this->forward404();
+            return;
+        }
+
+        // Parse tables_json and fetch live schema
+        $tables = json_decode($this->erd->tables_json, true);
+        if (!is_array($tables)) { $tables = []; }
+
         $this->schema = [];
+        $this->counts = [];
+        $tableList = [];
         foreach ($tables as $tbl) {
-            $this->schema[$tbl] = $db::select(
+            $cols = $db::select(
                 "SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_DEFAULT, EXTRA, COLUMN_COMMENT
                  FROM information_schema.COLUMNS
                  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
                  ORDER BY ORDINAL_POSITION",
                 [$tbl]
             );
-        }
-
-        // Fetch foreign keys
-        $this->foreignKeys = $db::select(
-            "SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, CONSTRAINT_NAME
-             FROM information_schema.KEY_COLUMN_USAGE
-             WHERE TABLE_SCHEMA = DATABASE()
-               AND REFERENCED_TABLE_NAME IS NOT NULL
-               AND TABLE_NAME IN ('registry_standard_extension', 'registry_software_standard', 'registry_setup_guide')
-             ORDER BY TABLE_NAME, COLUMN_NAME"
-        );
-
-        // Counts
-        $this->counts = [];
-        foreach ($tables as $tbl) {
+            if (!empty($cols)) {
+                $this->schema[$tbl] = $cols;
+                $tableList[] = $tbl;
+            }
             try {
                 $this->counts[$tbl] = $db::table($tbl)->count();
             } catch (\Exception $e) {
@@ -5147,7 +5179,75 @@ class registryActions extends AhgController
             }
         }
 
+        // Foreign keys for these tables
+        $this->foreignKeys = [];
+        if (!empty($tableList)) {
+            $placeholders = implode(',', array_fill(0, count($tableList), '?'));
+            $this->foreignKeys = $db::select(
+                "SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME, CONSTRAINT_NAME
+                 FROM information_schema.KEY_COLUMN_USAGE
+                 WHERE TABLE_SCHEMA = DATABASE()
+                   AND REFERENCED_TABLE_NAME IS NOT NULL
+                   AND TABLE_NAME IN ($placeholders)
+                 ORDER BY TABLE_NAME, COLUMN_NAME",
+                $tableList
+            );
+        }
+
         $this->isAdmin = $this->isAdmin();
+    }
+
+    // =========================================================================
+    // ERD Documentation: Admin
+    // =========================================================================
+
+    public function executeAdminErd($request)
+    {
+        if (!$this->requireAdminUser()) { return; }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $this->items = $db::table('registry_erd')->orderBy('sort_order')->get()->all();
+    }
+
+    public function executeAdminErdEdit($request)
+    {
+        if (!$this->requireAdminUser()) { return; }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $id = (int) $request->getParameter('id', 0);
+
+        if ($request->isMethod('POST')) {
+            $data = [
+                'plugin_name' => $request->getParameter('plugin_name', ''),
+                'display_name' => $request->getParameter('display_name', ''),
+                'category' => $request->getParameter('form_category', 'general'),
+                'description' => $request->getParameter('description', ''),
+                'tables_json' => $request->getParameter('tables_json', '[]'),
+                'diagram' => $request->getParameter('diagram', ''),
+                'notes' => $request->getParameter('notes', ''),
+                'icon' => $request->getParameter('icon', 'fas fa-database'),
+                'color' => $request->getParameter('color', 'primary'),
+                'sort_order' => (int) $request->getParameter('sort_order', 100),
+                'is_active' => $request->getParameter('is_active') ? 1 : 0,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+
+            if ($id > 0) {
+                $db::table('registry_erd')->where('id', $id)->update($data);
+            } else {
+                $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['display_name']), '-'));
+                $data['slug'] = $slug;
+                $data['created_at'] = date('Y-m-d H:i:s');
+                $id = $db::table('registry_erd')->insertGetId($data);
+            }
+
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'adminErd']));
+            return;
+        }
+
+        $this->erd = $id > 0
+            ? $db::table('registry_erd')->where('id', $id)->first()
+            : null;
     }
 
     // =========================================================================

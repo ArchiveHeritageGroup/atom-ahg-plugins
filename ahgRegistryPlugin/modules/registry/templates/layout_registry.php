@@ -222,6 +222,9 @@
           <a class="nav-link" href="/registry/standards"><i class="fas fa-balance-scale"></i> Standards</a>
         </li>
         <?php endif; ?>
+        <li class="nav-item">
+          <a class="nav-link" href="/registry/erd"><i class="fas fa-project-diagram"></i> Schema</a>
+        </li>
         <?php if ($_showCommunity): ?>
         <li class="nav-item">
           <a class="nav-link" href="/registry/community"><i class="fas fa-users"></i> Community</a>
