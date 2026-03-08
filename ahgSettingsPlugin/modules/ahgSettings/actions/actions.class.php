@@ -171,11 +171,6 @@ class ahgSettingsActions extends AhgController
         return $this->executeSettingsAction('aiServicesAction', $request);
     }
 
-    public function executeApiKeys($request)
-    {
-        return $this->executeSettingsAction('apiKeysAction', $request);
-    }
-
     public function executeWebhooks($request)
     {
         return $this->executeSettingsAction('webhooksAction', $request);

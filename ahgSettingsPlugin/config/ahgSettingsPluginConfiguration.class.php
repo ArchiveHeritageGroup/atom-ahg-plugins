@@ -51,9 +51,6 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_settings_save_tiff_pdf', '/ahgSettings/saveTiffPdfSettings', 'saveTiffPdfSettings');
         $router->any('ahg_settings_dam_tools', '/ahgSettings/damTools', 'damTools');
 
-        // API Keys
-        $router->any('ahg_settings_api_keys', '/admin/ahg-settings/api-keys', 'apiKeys');
-
         // Webhooks
         $router->any('admin_ahg_settings_webhooks', '/admin/ahg-settings/webhooks', 'webhooks');
 

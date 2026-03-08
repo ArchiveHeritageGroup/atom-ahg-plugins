@@ -35,10 +35,6 @@ $router->match(['GET', 'POST'], '/admin/ahg-settings/email', $bridge)
     ->setDefaults(['_module' => 'ahgSettings', '_action' => 'email'])
     ->name('admin_ahg_settings_email');
 
-$router->match(['GET', 'POST'], '/admin/ahg-settings/api-keys', $bridge)
-    ->setDefaults(['_module' => 'ahgSettings', '_action' => 'apiKeys'])
-    ->name('admin_ahg_settings_api_keys');
-
 $router->match(['GET', 'POST'], '/admin/ahg-settings/webhooks', $bridge)
     ->setDefaults(['_module' => 'ahgSettings', '_action' => 'webhooks'])
     ->name('admin_ahg_settings_webhooks');
@@ -127,10 +123,6 @@ $router->match(['GET', 'POST'], '/ahgSettings/levels', $bridge)
 $router->match(['GET', 'POST'], '/ahgSettings/aiServices', $bridge)
     ->setDefaults(['_module' => 'ahgSettings', '_action' => 'aiServices'])
     ->name('ahg_settings_ai_services');
-
-$router->match(['GET', 'POST'], '/ahgSettings/apiKeys', $bridge)
-    ->setDefaults(['_module' => 'ahgSettings', '_action' => 'apiKeys'])
-    ->name('ahg_settings_api_keys');
 
 $router->match(['GET', 'POST'], '/ahgSettings/webhooks', $bridge)
     ->setDefaults(['_module' => 'ahgSettings', '_action' => 'webhooks'])

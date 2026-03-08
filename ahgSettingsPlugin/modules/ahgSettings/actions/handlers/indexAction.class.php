@@ -145,16 +145,9 @@ class AhgSettingsIndexAction extends AhgController
             ];
         }
 
-        // API Keys - show when ahgAPIPlugin is enabled
+        // Webhooks - show when ahgAPIPlugin is enabled
         $hasApi = in_array('ahgAPIPlugin', sfProjectConfiguration::getActive()->getPlugins());
         if ($hasApi) {
-            $this->sections['api'] = [
-                'label' => 'API Keys',
-                'icon' => 'fa-key',
-                'description' => 'Manage REST API keys for external integrations',
-                'url' => 'admin/ahg-settings/api-keys'
-            ];
-
             $this->sections['webhooks'] = [
                 'label' => 'Webhooks',
                 'icon' => 'fa-broadcast-tower',
