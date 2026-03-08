@@ -4040,50 +4040,582 @@ Vendors, Instances, ERD Documentation, Discussions, Blog, Newsletter, User Group
 
 ---
 
-## 25. Library Cataloging (ahgLibraryPlugin)
+## 25. Library System — Full ILS (ahgLibraryPlugin)
 
-**3 tables** | `tables_json`: `["library_item","library_item_creator","library_item_subject"]`
+**18 tables** | `tables_json`: `["library_item","library_item_creator","library_item_subject","library_copy","library_patron","library_checkout","library_hold","library_fine","library_loan_rule","library_budget","library_order","library_order_line","library_subscription","library_serial_issue","library_ill_request","library_settings","library_subject_authority","library_entity_subject_map"]`
+
+### 25.1 Catalog Core
 
 ```
-┌──────────────────────────────────────────┐
-│            library_item                  │
-├──────────────────────────────────────────┤
-│ id               BIGINT UNSIGNED  PK     │
-│ information_object_id INT FK→info_object │
-│ isbn             VARCHAR(20)             │
-│ issn             VARCHAR(20)             │
-│ call_number      VARCHAR(100)            │
-│ edition          VARCHAR(100)            │
-│ publisher        VARCHAR(255)            │
-│ publication_date VARCHAR(50)             │
-│ pages            INT                     │
-│ ddc              VARCHAR(50) Dewey       │
-│ lcc              VARCHAR(50) LoC         │
-│ cover_image_path VARCHAR(500)            │
-│ barcode          VARCHAR(100)            │
-│ item_type        VARCHAR(50)             │
-│ status           VARCHAR(50)             │
-│ repository_id    INT    FK→repository    │
-└──────────┬──────────┬────────────────────┘
-           │          │
-           │ FK       │ FK
-           ▼          ▼
-┌──────────────────────────┐  ┌──────────────────────────────────────┐
-│  library_item_creator    │  │     library_item_subject              │
-├──────────────────────────┤  ├──────────────────────────────────────┤
-│ id         PK            │  │ id             BIGINT UNSIGNED PK    │
-│ library_item_id FK→item  │  │ library_item_id BIGINT FK→item       │
-│ actor_id   INT FK→actor  │  │ term_id        INT    FK→term        │
-│ role       VARCHAR(50)   │  │ subject_type   VARCHAR(50)           │
-│ display_order INT         │  └──────────────────────────────────────┘
-└──────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              library_item                                    │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ id                    BIGINT UNSIGNED  PK AUTO_INCREMENT                     │
+│ information_object_id INT UNSIGNED     FK→information_object.id              │
+│                                                                              │
+│ ── Bibliographic ──                                                          │
+│ material_type         VARCHAR(50)      NOT NULL DEFAULT 'monograph'          │
+│ subtitle              VARCHAR(500)                                           │
+│ responsibility_statement VARCHAR(500)                                        │
+│ edition               VARCHAR(255)                                           │
+│ edition_statement     VARCHAR(500)                                           │
+│ publisher             VARCHAR(255)                                           │
+│ publication_place     VARCHAR(255)                                           │
+│ publication_date      VARCHAR(100)                                           │
+│ copyright_date        VARCHAR(50)                                            │
+│ printing              VARCHAR(100)                                           │
+│ language              VARCHAR(100)                                           │
+│                                                                              │
+│ ── Classification ──                                                         │
+│ call_number           VARCHAR(100)                                           │
+│ classification_scheme VARCHAR(50)                                            │
+│ classification_number VARCHAR(100)                                           │
+│ dewey_decimal         VARCHAR(50)                                            │
+│ cutter_number         VARCHAR(50)                                            │
+│ shelf_location        VARCHAR(100)                                           │
+│                                                                              │
+│ ── Identifiers ──                                                            │
+│ isbn                  VARCHAR(17)                                            │
+│ issn                  VARCHAR(9)                                             │
+│ lccn                  VARCHAR(50)                                            │
+│ oclc_number           VARCHAR(50)                                            │
+│ doi                   VARCHAR(255)                                           │
+│ barcode               VARCHAR(50)                                            │
+│ openlibrary_id        VARCHAR(50)                                            │
+│ goodreads_id          VARCHAR(50)                                            │
+│ librarything_id       VARCHAR(50)                                            │
+│                                                                              │
+│ ── Physical ──                                                               │
+│ pagination            VARCHAR(100)                                           │
+│ dimensions            VARCHAR(100)                                           │
+│ physical_details      TEXT                                                   │
+│ accompanying_material TEXT                                                   │
+│ copy_number           VARCHAR(20)                                            │
+│ volume_designation    VARCHAR(100)                                           │
+│                                                                              │
+│ ── Series ──                                                                 │
+│ series_title          VARCHAR(500)                                           │
+│ series_number         VARCHAR(50)                                            │
+│ series_issn           VARCHAR(9)                                             │
+│ subseries_title       VARCHAR(500)                                           │
+│                                                                              │
+│ ── Notes ──                                                                  │
+│ general_note          TEXT                                                   │
+│ bibliography_note     TEXT                                                   │
+│ contents_note         TEXT                                                   │
+│ summary               TEXT                                                   │
+│ target_audience       TEXT                                                   │
+│ system_requirements   TEXT                                                   │
+│ binding_note          TEXT                                                   │
+│                                                                              │
+│ ── Serials-specific ──                                                       │
+│ frequency             VARCHAR(50)                                            │
+│ former_frequency      VARCHAR(100)                                           │
+│ numbering_peculiarities VARCHAR(255)                                         │
+│ publication_start_date DATE                                                  │
+│ publication_end_date  DATE                                                   │
+│ publication_status    VARCHAR(20)                                            │
+│                                                                              │
+│ ── Links ──                                                                  │
+│ cover_url             VARCHAR(500)                                           │
+│ cover_url_original    VARCHAR(500)                                           │
+│ openlibrary_url       VARCHAR(500)                                           │
+│ ebook_preview_url     VARCHAR(500)                                           │
+│                                                                              │
+│ ── Circulation ──                                                            │
+│ total_copies          SMALLINT UNSIGNED NOT NULL DEFAULT 1                   │
+│ available_copies      SMALLINT UNSIGNED NOT NULL DEFAULT 1                   │
+│ circulation_status    VARCHAR(30)      NOT NULL DEFAULT 'available'          │
+│                                                                              │
+│ ── Cataloging ──                                                             │
+│ cataloging_source     VARCHAR(100)                                           │
+│ cataloging_rules      VARCHAR(20)                                            │
+│ encoding_level        VARCHAR(20)                                            │
+│                                                                              │
+│ ── Heritage Accounting (GRAP 103 / IPSAS 45) ──                             │
+│ heritage_asset_id     INT UNSIGNED                                           │
+│ acquisition_method    VARCHAR(50)                                            │
+│ acquisition_date      DATE                                                   │
+│ acquisition_cost      DECIMAL(15,2)                                          │
+│ acquisition_currency  VARCHAR(3)       DEFAULT 'ZAR'                         │
+│ replacement_value     DECIMAL(15,2)                                          │
+│ insurance_value       DECIMAL(15,2)                                          │
+│ insurance_policy      VARCHAR(100)                                           │
+│ insurance_expiry      DATE                                                   │
+│ asset_class_code      VARCHAR(20)                                            │
+│ recognition_status    VARCHAR(30)      DEFAULT 'pending'                     │
+│ valuation_date        DATE                                                   │
+│ valuation_method      VARCHAR(50)                                            │
+│ valuation_notes       TEXT                                                   │
+│ donor_name            VARCHAR(255)                                           │
+│ donor_restrictions    TEXT                                                   │
+│ condition_grade       VARCHAR(30)                                            │
+│ conservation_priority VARCHAR(20)                                            │
+│                                                                              │
+│ created_at            TIMESTAMP                                              │
+│ updated_at            TIMESTAMP                                              │
+└──────────┬───────────────────┬───────────────────────────────────────────────┘
+           │                   │
+           │ FK                │ FK
+           ▼                   ▼
+┌─────────────────────────────────┐  ┌─────────────────────────────────────────┐
+│     library_item_creator        │  │       library_item_subject               │
+├─────────────────────────────────┤  ├─────────────────────────────────────────┤
+│ id              BIGINT PK       │  │ id              BIGINT PK               │
+│ library_item_id BIGINT FK→item  │  │ library_item_id BIGINT FK→item          │
+│ name            VARCHAR(500)    │  │ heading         VARCHAR(500)             │
+│ role            VARCHAR(50)     │  │ subject_type    VARCHAR(50) def 'topic'  │
+│ is_primary      TINYINT(1)      │  │ source          VARCHAR(100)             │
+│ sort_order      INT def 0       │  │ uri             VARCHAR(500)             │
+│ authority_uri   VARCHAR(500)    │  │ lcsh_id         VARCHAR(100)             │
+│ created_at      TIMESTAMP       │  │ authority_id    BIGINT FK→subj_auth      │
+└─────────────────────────────────┘  │ dewey_number    VARCHAR(50)              │
+                                     │ lcc_number      VARCHAR(50)              │
+                                     │ subdivisions    JSON                     │
+                                     │ created_at      TIMESTAMP                │
+                                     └─────────────────────────────────────────┘
+```
 
+### 25.2 Copy Management
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     library_copy                            │
+├─────────────────────────────────────────────────────────────┤
+│ id                BIGINT UNSIGNED  PK AUTO_INCREMENT        │
+│ library_item_id   BIGINT UNSIGNED  FK→library_item.id       │
+│ copy_number       SMALLINT UNSIGNED NOT NULL DEFAULT 1      │
+│ barcode           VARCHAR(50)      UNIQUE                   │
+│ accession_number  VARCHAR(50)      INDEX                    │
+│ call_number_suffix VARCHAR(20)                              │
+│ shelf_location    VARCHAR(100)                              │
+│ branch            VARCHAR(100)     INDEX                    │
+│ status            VARCHAR(30)      NOT NULL DEFAULT 'available' │
+│ condition_grade   VARCHAR(30)                               │
+│ condition_notes   TEXT                                      │
+│ acquisition_method VARCHAR(50)                              │
+│ acquisition_date  DATE                                      │
+│ acquisition_cost  DECIMAL(15,2)                             │
+│ acquisition_source VARCHAR(255)                             │
+│ withdrawal_date   DATE                                      │
+│ withdrawal_reason TEXT                                      │
+│ notes             TEXT                                      │
+│ created_at        TIMESTAMP                                 │
+│ updated_at        TIMESTAMP                                 │
+└─────────────────────────────────────────────────────────────┘
+  Status values: available, checked_out, on_hold, in_transit,
+                 in_repair, lost, missing, withdrawn
+```
+
+### 25.3 Patron Management
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    library_patron                           │
+├─────────────────────────────────────────────────────────────┤
+│ id                BIGINT UNSIGNED  PK AUTO_INCREMENT        │
+│ actor_id          INT UNSIGNED     FK→actor.id              │
+│ card_number       VARCHAR(50)      NOT NULL UNIQUE          │
+│ patron_type       VARCHAR(30)      NOT NULL DEFAULT 'public'│
+│ first_name        VARCHAR(100)     NOT NULL                 │
+│ last_name         VARCHAR(100)     NOT NULL INDEX           │
+│ email             VARCHAR(255)     INDEX                    │
+│ phone             VARCHAR(50)                               │
+│ address           TEXT                                      │
+│ institution       VARCHAR(255)                              │
+│ department        VARCHAR(100)                              │
+│ id_number         VARCHAR(50)                               │
+│ date_of_birth     DATE                                      │
+│ membership_start  DATE             NOT NULL                 │
+│ membership_expiry DATE             INDEX                    │
+│ max_checkouts     SMALLINT UNSIGNED NOT NULL DEFAULT 5      │
+│ max_renewals      SMALLINT UNSIGNED NOT NULL DEFAULT 2      │
+│ max_holds         SMALLINT UNSIGNED NOT NULL DEFAULT 3      │
+│ borrowing_status  VARCHAR(20)      NOT NULL DEFAULT 'active'│
+│ suspension_reason TEXT                                      │
+│ suspension_until  DATE                                      │
+│ total_fines_owed  DECIMAL(10,2)    NOT NULL DEFAULT 0.00    │
+│ total_fines_paid  DECIMAL(10,2)    NOT NULL DEFAULT 0.00    │
+│ total_checkouts   INT UNSIGNED     NOT NULL DEFAULT 0       │
+│ last_activity_date DATE                                     │
+│ photo_url         VARCHAR(500)                              │
+│ notes             TEXT                                      │
+│ created_by        INT UNSIGNED                              │
+│ created_at        TIMESTAMP                                 │
+│ updated_at        TIMESTAMP                                 │
+└─────────────────────────────────────────────────────────────┘
+  Patron types: public, student, faculty, staff, researcher, institutional
+  Borrowing status: active, suspended, expired, barred
+```
+
+### 25.4 Circulation
+
+```
+┌─────────────────────────────────────────────────────┐
+│                library_checkout                     │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ copy_id         BIGINT UNSIGNED  FK→library_copy.id │
+│ patron_id       BIGINT UNSIGNED  FK→library_patron  │
+│ checkout_date   DATETIME         NOT NULL INDEX     │
+│ due_date        DATE             NOT NULL INDEX     │
+│ return_date     DATETIME                            │
+│ renewed_count   SMALLINT UNSIGNED NOT NULL DEFAULT 0│
+│ status          VARCHAR(30)      NOT NULL INDEX     │
+│ checkout_notes  TEXT                                 │
+│ return_notes    TEXT                                 │
+│ return_condition VARCHAR(30)                        │
+│ checked_out_by  INT UNSIGNED                        │
+│ checked_in_by   INT UNSIGNED                        │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Status values: active, returned, lost, claimed_returned
+
+┌─────────────────────────────────────────────────────┐
+│                 library_hold                        │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ library_item_id BIGINT UNSIGNED  FK→library_item    │
+│ patron_id       BIGINT UNSIGNED  FK→library_patron  │
+│ hold_date       DATETIME         NOT NULL           │
+│ expiry_date     DATE                                │
+│ pickup_branch   VARCHAR(100)                        │
+│ queue_position  SMALLINT UNSIGNED NOT NULL DEFAULT 1│
+│ status          VARCHAR(30)      NOT NULL INDEX     │
+│ notification_sent TINYINT(1)     NOT NULL DEFAULT 0 │
+│ notification_date DATETIME                          │
+│ fulfilled_date  DATETIME                            │
+│ cancelled_date  DATETIME                            │
+│ cancel_reason   TEXT                                 │
+│ notes           TEXT                                 │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Hold status: pending, ready, fulfilled, cancelled, expired
+
+┌─────────────────────────────────────────────────────┐
+│                 library_fine                         │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ patron_id       BIGINT UNSIGNED  FK→library_patron  │
+│ checkout_id     BIGINT UNSIGNED  FK→library_checkout│
+│ fine_type       VARCHAR(30)      NOT NULL INDEX     │
+│ amount          DECIMAL(10,2)    NOT NULL           │
+│ paid_amount     DECIMAL(10,2)    NOT NULL DEFAULT 0 │
+│ currency        VARCHAR(3)       NOT NULL DEFAULT 'ZAR' │
+│ status          VARCHAR(20)      NOT NULL INDEX     │
+│ description     TEXT                                 │
+│ fine_date       DATE             NOT NULL INDEX     │
+│ payment_date    DATETIME                            │
+│ payment_method  VARCHAR(30)                         │
+│ payment_reference VARCHAR(100)                      │
+│ waived_by       INT UNSIGNED                        │
+│ waived_date     DATETIME                            │
+│ waive_reason    TEXT                                 │
+│ notes           TEXT                                 │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Fine types: overdue, lost, damaged, processing, replacement
+  Status: outstanding, paid, waived, partial
+
+┌─────────────────────────────────────────────────────┐
+│               library_loan_rule                     │
+├─────────────────────────────────────────────────────┤
+│ id               BIGINT UNSIGNED  PK AUTO_INCREMENT │
+│ material_type    VARCHAR(50)      NOT NULL INDEX    │
+│ patron_type      VARCHAR(30)      NOT NULL DEF '*'  │
+│ loan_period_days SMALLINT UNSIGNED NOT NULL DEF 14  │
+│ renewal_period_days SMALLINT UNSIGNED NOT NULL DEF 14│
+│ max_renewals     SMALLINT UNSIGNED NOT NULL DEF 2   │
+│ fine_per_day     DECIMAL(10,2)    NOT NULL DEF 1.00 │
+│ fine_cap         DECIMAL(10,2)                      │
+│ grace_period_days SMALLINT UNSIGNED NOT NULL DEF 0  │
+│ is_loanable      TINYINT(1)       NOT NULL DEF 1   │
+│ notes            TEXT                                │
+│ created_at       TIMESTAMP                          │
+└─────────────────────────────────────────────────────┘
+  Lookup fallback: exact match → material_type + '*' → global default
+```
+
+### 25.5 Acquisitions
+
+```
+┌─────────────────────────────────────────────────────┐
+│                 library_order                       │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ order_number    VARCHAR(50)      NOT NULL UNIQUE    │
+│ vendor_id       INT UNSIGNED     FK→actor.id INDEX  │
+│ vendor_name     VARCHAR(255)                        │
+│ order_date      DATE             NOT NULL INDEX     │
+│ expected_date   DATE                                │
+│ received_date   DATE                                │
+│ status          VARCHAR(30)      NOT NULL INDEX     │
+│ order_type      VARCHAR(30)      NOT NULL DEF 'purchase' │
+│ budget_code     VARCHAR(50)      INDEX              │
+│ subtotal        DECIMAL(15,2)    NOT NULL DEFAULT 0 │
+│ tax             DECIMAL(15,2)    NOT NULL DEFAULT 0 │
+│ shipping        DECIMAL(15,2)    NOT NULL DEFAULT 0 │
+│ total           DECIMAL(15,2)    NOT NULL DEFAULT 0 │
+│ currency        VARCHAR(3)       DEFAULT 'ZAR'      │
+│ invoice_number  VARCHAR(100)                        │
+│ invoice_date    DATE                                │
+│ payment_status  VARCHAR(30)      DEFAULT 'unpaid'   │
+│ shipping_address TEXT                                │
+│ notes           TEXT                                 │
+│ approved_by     INT UNSIGNED                        │
+│ approved_date   DATETIME                            │
+│ created_by      INT UNSIGNED                        │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Order status: draft, submitted, approved, ordered, partial, received, cancelled
+  Order type: purchase, standing_order, gift, exchange
+  Payment status: unpaid, partial, paid
+
+┌─────────────────────────────────────────────────────┐
+│              library_order_line                     │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ order_id        BIGINT UNSIGNED  FK→library_order   │
+│ library_item_id BIGINT UNSIGNED  FK→library_item    │
+│ title           VARCHAR(500)     NOT NULL           │
+│ isbn            VARCHAR(17)      INDEX              │
+│ issn            VARCHAR(9)                          │
+│ author          VARCHAR(255)                        │
+│ publisher       VARCHAR(255)                        │
+│ edition         VARCHAR(100)                        │
+│ material_type   VARCHAR(50)                         │
+│ quantity        SMALLINT UNSIGNED NOT NULL DEFAULT 1│
+│ unit_price      DECIMAL(15,2)    NOT NULL DEFAULT 0 │
+│ discount_percent DECIMAL(5,2)    NOT NULL DEFAULT 0 │
+│ line_total      DECIMAL(15,2)    NOT NULL DEFAULT 0 │
+│ quantity_received SMALLINT UNSIGNED NOT NULL DEF 0  │
+│ received_date   DATE                                │
+│ status          VARCHAR(30)      NOT NULL INDEX     │
+│ budget_code     VARCHAR(50)                         │
+│ fund_code       VARCHAR(50)                         │
+│ notes           TEXT                                 │
+│ created_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Line status: ordered, partial, received, cancelled, backordered
+
+┌─────────────────────────────────────────────────────┐
+│                library_budget                       │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ budget_code     VARCHAR(50)      NOT NULL INDEX     │
+│ fund_name       VARCHAR(255)     NOT NULL           │
+│ fiscal_year     VARCHAR(9)       NOT NULL INDEX     │
+│ allocated_amount DECIMAL(15,2)   NOT NULL DEFAULT 0 │
+│ committed_amount DECIMAL(15,2)   NOT NULL DEFAULT 0 │
+│ spent_amount    DECIMAL(15,2)    NOT NULL DEFAULT 0 │
+│ currency        VARCHAR(3)       DEFAULT 'ZAR'      │
+│ category        VARCHAR(50)      INDEX              │
+│ department      VARCHAR(100)                        │
+│ notes           TEXT                                 │
+│ status          VARCHAR(20)      NOT NULL INDEX     │
+│ created_by      INT UNSIGNED                        │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Budget status: active, frozen, closed
+```
+
+### 25.6 Serials
+
+```
+┌─────────────────────────────────────────────────────┐
+│              library_subscription                   │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ library_item_id BIGINT UNSIGNED  FK→library_item    │
+│ vendor_id       INT UNSIGNED                        │
+│ subscription_number VARCHAR(100)                    │
+│ status          VARCHAR(30)      NOT NULL INDEX     │
+│ start_date      DATE             NOT NULL           │
+│ end_date        DATE                                │
+│ renewal_date    DATE             INDEX              │
+│ frequency       VARCHAR(30)                         │
+│ issues_per_year SMALLINT UNSIGNED                   │
+│ cost_per_year   DECIMAL(10,2)                       │
+│ currency        VARCHAR(3)       DEFAULT 'ZAR'      │
+│ budget_code     VARCHAR(50)                         │
+│ routing_list    JSON                                │
+│ delivery_method VARCHAR(30)                         │
+│ notes           TEXT                                 │
+│ created_by      INT UNSIGNED                        │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Subscription status: active, suspended, cancelled, expired
+
+┌─────────────────────────────────────────────────────┐
+│              library_serial_issue                   │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ subscription_id BIGINT UNSIGNED  FK→subscription    │
+│ library_item_id BIGINT UNSIGNED  FK→library_item    │
+│ volume          VARCHAR(20)      INDEX              │
+│ issue_number    VARCHAR(20)                         │
+│ part            VARCHAR(20)                         │
+│ supplement      VARCHAR(50)                         │
+│ issue_date      DATE                                │
+│ expected_date   DATE             INDEX              │
+│ received_date   DATE                                │
+│ status          VARCHAR(30)      NOT NULL INDEX     │
+│ claim_date      DATE                                │
+│ claim_count     SMALLINT UNSIGNED NOT NULL DEFAULT 0│
+│ barcode         VARCHAR(50)      UNIQUE             │
+│ shelf_location  VARCHAR(100)                        │
+│ bound_volume_id BIGINT UNSIGNED                     │
+│ notes           TEXT                                 │
+│ checked_in_by   INT UNSIGNED                        │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Issue status: expected, received, claimed, missing, bound
+```
+
+### 25.7 Interlibrary Loan
+
+```
+┌─────────────────────────────────────────────────────┐
+│              library_ill_request                    │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ request_number  VARCHAR(50)      NOT NULL UNIQUE    │
+│ direction       VARCHAR(20)      NOT NULL INDEX     │
+│ patron_id       BIGINT UNSIGNED  FK→library_patron  │
+│ partner_library VARCHAR(255)     NOT NULL INDEX     │
+│ partner_contact VARCHAR(255)                        │
+│ partner_email   VARCHAR(255)                        │
+│ title           VARCHAR(500)     NOT NULL           │
+│ author          VARCHAR(255)                        │
+│ isbn            VARCHAR(17)                         │
+│ issn            VARCHAR(9)                          │
+│ publisher       VARCHAR(255)                        │
+│ publication_year VARCHAR(10)                        │
+│ volume_issue    VARCHAR(100)                        │
+│ pages           VARCHAR(50)                         │
+│ library_item_id BIGINT UNSIGNED  FK→library_item    │
+│ copy_id         BIGINT UNSIGNED                     │
+│ status          VARCHAR(30)      NOT NULL INDEX     │
+│ request_date    DATE             NOT NULL INDEX     │
+│ needed_by       DATE                                │
+│ shipped_date    DATE                                │
+│ received_date   DATE                                │
+│ due_date        DATE                                │
+│ return_date     DATE                                │
+│ shipping_method VARCHAR(50)                         │
+│ tracking_number VARCHAR(100)                        │
+│ cost            DECIMAL(10,2)                       │
+│ currency        VARCHAR(3)       DEFAULT 'ZAR'      │
+│ notes           TEXT                                 │
+│ created_by      INT UNSIGNED                        │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Direction: borrow, lend
+  Status: requested, approved, shipped, received, in_use, returned, cancelled
+```
+
+### 25.8 Subject Authority & Settings
+
+```
+┌─────────────────────────────────────────────────────┐
+│           library_subject_authority                 │
+├─────────────────────────────────────────────────────┤
+│ id              BIGINT UNSIGNED  PK AUTO_INCREMENT  │
+│ heading         VARCHAR(500)     NOT NULL INDEX     │
+│ heading_normalized VARCHAR(500)  NOT NULL INDEX     │
+│ heading_type    VARCHAR(61)      INDEX              │
+│ source          VARCHAR(50)      INDEX              │
+│ lcsh_id         VARCHAR(100)                        │
+│ lcsh_uri        VARCHAR(500)                        │
+│ suggested_dewey VARCHAR(50)                         │
+│ suggested_lcc   VARCHAR(50)                         │
+│ broader_terms   JSON                                │
+│ narrower_terms  JSON                                │
+│ related_terms   JSON                                │
+│ usage_count     INT UNSIGNED     INDEX DEFAULT 1    │
+│ first_used_at   TIMESTAMP                           │
+│ last_used_at    TIMESTAMP                           │
+│ created_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+  Heading types: topical, geographic, personal_name, corporate_name, genre_form
+  Sources: lcsh, mesh, fast, local
+
+┌─────────────────────────────────────────────────────┐
+│          library_entity_subject_map                 │
+├─────────────────────────────────────────────────────┤
+│ id                  BIGINT UNSIGNED PK AUTO_INC     │
+│ entity_type         VARCHAR(50)     NOT NULL INDEX  │
+│ entity_value        VARCHAR(500)    NOT NULL        │
+│ entity_normalized   VARCHAR(500)    NOT NULL        │
+│ subject_authority_id BIGINT UNSIGNED FK→subj_auth   │
+│ co_occurrence_count INT UNSIGNED    DEFAULT 1       │
+│ confidence          DECIMAL(5,4)    INDEX DEF 1.0   │
+│ created_at          TIMESTAMP                       │
+│ updated_at          TIMESTAMP                       │
+└─────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────┐
+│              library_settings                       │
+├─────────────────────────────────────────────────────┤
+│ id              INT UNSIGNED     PK AUTO_INCREMENT  │
+│ setting_key     VARCHAR(100)     NOT NULL UNIQUE    │
+│ setting_value   TEXT                                │
+│ setting_type    VARCHAR(37)      DEFAULT 'string'   │
+│ description     VARCHAR(255)                        │
+│ created_at      TIMESTAMP                           │
+│ updated_at      TIMESTAMP                           │
+└─────────────────────────────────────────────────────┘
+```
+
+### 25.9 Relationships
+
+```
   ════════════════════════════════════════════════════════════════════════════════════════
-  GLAM/DAM & INFORMATION OBJECT LINKS:
+  CORE LINKS:
    • library_item.information_object_id ──► information_object.id
-   • library_item.repository_id ──► repository.id
-   • library_item_creator.actor_id ──► actor.id
-   • library_item_subject.term_id ──► term.id
+   • library_item_creator.library_item_id ──► library_item.id
+   • library_item_subject.library_item_id ──► library_item.id
+   • library_item_subject.authority_id ──► library_subject_authority.id
+   • library_entity_subject_map.subject_authority_id ──► library_subject_authority.id
+
+  COPY & CIRCULATION:
+   • library_copy.library_item_id ──► library_item.id
+   • library_checkout.copy_id ──► library_copy.id
+   • library_checkout.patron_id ──► library_patron.id
+   • library_hold.library_item_id ──► library_item.id
+   • library_hold.patron_id ──► library_patron.id
+   • library_fine.patron_id ──► library_patron.id
+   • library_fine.checkout_id ──► library_checkout.id
+
+  PATRON:
+   • library_patron.actor_id ──► actor.id
+
+  ACQUISITIONS:
+   • library_order.vendor_id ──► actor.id (vendor as actor)
+   • library_order_line.order_id ──► library_order.id
+   • library_order_line.library_item_id ──► library_item.id
+
+  SERIALS:
+   • library_subscription.library_item_id ──► library_item.id
+   • library_serial_issue.subscription_id ──► library_subscription.id
+   • library_serial_issue.library_item_id ──► library_item.id
+
+  INTERLIBRARY LOAN:
+   • library_ill_request.patron_id ──► library_patron.id
+   • library_ill_request.library_item_id ──► library_item.id
+
+  PUBLICATION STATUS (via status table):
+   • status.object_id ──► information_object.id
+   • status.type_id = 158 (publication type)
+   • status.status_id: 160 = Published, 159 = Draft
   ════════════════════════════════════════════════════════════════════════════════════════
 ```
 
