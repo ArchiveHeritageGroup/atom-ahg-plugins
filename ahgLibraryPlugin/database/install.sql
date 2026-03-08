@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS library_subject_authority (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     heading VARCHAR(500) NOT NULL COMMENT 'The subject heading text',
     heading_normalized VARCHAR(500) NOT NULL COMMENT 'Normalized form for matching',
-    heading_type ENUM('topical','personal','corporate','geographic','genre','meeting') DEFAULT 'topical',
+    heading_type VARCHAR(68) COMMENT 'topical, personal, corporate, geographic, genre, meeting' DEFAULT 'topical',
     source VARCHAR(50) DEFAULT 'lcsh' COMMENT 'Source vocabulary (lcsh, mesh, local, etc.)',
     lcsh_id VARCHAR(100) COMMENT 'Authority record ID (e.g., sh85034652)',
     lcsh_uri VARCHAR(500) COMMENT 'Full URI to authority record',

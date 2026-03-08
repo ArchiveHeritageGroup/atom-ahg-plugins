@@ -10,12 +10,12 @@
 CREATE TABLE IF NOT EXISTS preservation_checksum (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     digital_object_id INT NOT NULL,
-    algorithm ENUM('md5', 'sha1', 'sha256', 'sha512') NOT NULL DEFAULT 'sha256',
+    algorithm VARCHAR(37) COMMENT 'md5, sha1, sha256, sha512' NOT NULL DEFAULT 'sha256',
     checksum_value VARCHAR(128) NOT NULL,
     file_size BIGINT UNSIGNED,
     generated_at DATETIME NOT NULL,
     verified_at DATETIME,
-    verification_status ENUM('pending', 'valid', 'invalid', 'error') DEFAULT 'pending',
+    verification_status VARCHAR(42) COMMENT 'pending, valid, invalid, error' DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
 
@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS preservation_fixity_check (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     digital_object_id INT NOT NULL,
     checksum_id BIGINT UNSIGNED,
-    algorithm ENUM('md5', 'sha1', 'sha256', 'sha512') NOT NULL,
+    algorithm VARCHAR(37) COMMENT 'md5, sha1, sha256, sha512' NOT NULL,
     expected_value VARCHAR(128) NOT NULL,
     actual_value VARCHAR(128),
-    status ENUM('pass', 'fail', 'error', 'missing') NOT NULL,
+    status VARCHAR(38) COMMENT 'pass, fail, error, missing' NOT NULL,
     error_message TEXT,
     checked_at DATETIME NOT NULL,
     checked_by VARCHAR(100) COMMENT 'user or system/cron',
@@ -63,18 +63,12 @@ CREATE TABLE IF NOT EXISTS preservation_event (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     digital_object_id INT,
     information_object_id INT,
-    event_type ENUM(
-        'creation', 'capture', 'ingestion', 'validation',
-        'fixity_check', 'virus_check', 'format_identification',
-        'normalization', 'migration', 'replication',
-        'deletion', 'deaccession', 'modification',
-        'metadata_modification', 'access', 'dissemination'
-    ) NOT NULL,
+    event_type VARCHAR(224) COMMENT 'creation, capture, ingestion, validation, fixity_check, virus_check, format_identification, normalization, migration, replication, deletion, deaccession, modification, metadata_modification, access, dissemination' NOT NULL,
     event_datetime DATETIME NOT NULL,
     event_detail TEXT,
-    event_outcome ENUM('success', 'failure', 'warning', 'unknown') DEFAULT 'unknown',
+    event_outcome VARCHAR(46) COMMENT 'success, failure, warning, unknown' DEFAULT 'unknown',
     event_outcome_detail TEXT,
-    linking_agent_type ENUM('user', 'system', 'software', 'organization') DEFAULT 'system',
+    linking_agent_type VARCHAR(48) COMMENT 'user, system, software, organization' DEFAULT 'system',
     linking_agent_value VARCHAR(255),
     linking_object_type VARCHAR(100),
     linking_object_value VARCHAR(255),
@@ -101,9 +95,9 @@ CREATE TABLE IF NOT EXISTS preservation_format (
     format_name VARCHAR(255) NOT NULL,
     format_version VARCHAR(50),
     extension VARCHAR(20),
-    risk_level ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    risk_level VARCHAR(39) COMMENT 'low, medium, high, critical' DEFAULT 'medium',
     risk_notes TEXT,
-    preservation_action ENUM('none', 'monitor', 'migrate', 'normalize') DEFAULT 'monitor',
+    preservation_action VARCHAR(45) COMMENT 'none, monitor, migrate, normalize' DEFAULT 'monitor',
     migration_target_id BIGINT UNSIGNED COMMENT 'Target format for migration',
     is_preservation_format TINYINT(1) DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -130,7 +124,7 @@ CREATE TABLE IF NOT EXISTS preservation_object_format (
     format_version VARCHAR(50),
     identification_tool VARCHAR(100) COMMENT 'e.g., siegfried, DROID, file, finfo',
     identification_date DATETIME NOT NULL,
-    confidence ENUM('low', 'medium', 'high', 'certain') DEFAULT 'medium',
+    confidence VARCHAR(38) COMMENT 'low, medium, high, certain' DEFAULT 'medium',
     basis VARCHAR(500) COMMENT 'How identified: extension, signature, container, byte match',
     warning TEXT COMMENT 'Identification warnings from tool',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -152,7 +146,7 @@ CREATE TABLE IF NOT EXISTS preservation_policy (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    policy_type ENUM('fixity', 'format', 'retention', 'replication') NOT NULL,
+    policy_type VARCHAR(50) COMMENT 'fixity, format, retention, replication' NOT NULL,
     is_active TINYINT(1) DEFAULT 1,
     schedule_cron VARCHAR(100) COMMENT 'Cron expression for scheduled runs',
     last_run_at DATETIME,
@@ -239,7 +233,7 @@ CREATE TABLE IF NOT EXISTS preservation_virus_scan (
     scan_engine VARCHAR(50) NOT NULL DEFAULT 'clamav',
     engine_version VARCHAR(50),
     signature_version VARCHAR(100),
-    status ENUM('clean', 'infected', 'error', 'skipped') NOT NULL,
+    status VARCHAR(43) COMMENT 'clean, infected, error, skipped' NOT NULL,
     threat_name VARCHAR(255) COMMENT 'Name of detected threat if infected',
     file_path VARCHAR(1024),
     file_size BIGINT UNSIGNED,
@@ -272,7 +266,7 @@ CREATE TABLE IF NOT EXISTS preservation_format_conversion (
     target_mime_type VARCHAR(100),
     conversion_tool VARCHAR(100) NOT NULL COMMENT 'imagemagick, ffmpeg, ghostscript, etc.',
     tool_version VARCHAR(50),
-    status ENUM('pending', 'processing', 'completed', 'failed') NOT NULL DEFAULT 'pending',
+    status VARCHAR(50) COMMENT 'pending, processing, completed, failed' NOT NULL DEFAULT 'pending',
     source_path VARCHAR(1024),
     source_size BIGINT UNSIGNED,
     source_checksum VARCHAR(128),
@@ -305,12 +299,12 @@ CREATE TABLE IF NOT EXISTS preservation_format_conversion (
 CREATE TABLE IF NOT EXISTS preservation_backup_verification (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     backup_id BIGINT UNSIGNED COMMENT 'Reference to atom_backup if exists',
-    backup_type ENUM('database', 'files', 'full', 'incremental') NOT NULL,
+    backup_type VARCHAR(46) COMMENT 'database, files, full, incremental' NOT NULL,
     backup_path VARCHAR(1024) NOT NULL,
     backup_size BIGINT UNSIGNED,
     original_checksum VARCHAR(128),
     verified_checksum VARCHAR(128),
-    status ENUM('valid', 'invalid', 'missing', 'error', 'corrupted') NOT NULL,
+    status VARCHAR(53) COMMENT 'valid, invalid, missing, error, corrupted' NOT NULL,
     verification_method VARCHAR(50) DEFAULT 'sha256',
     files_checked INT UNSIGNED DEFAULT 0,
     files_valid INT UNSIGNED DEFAULT 0,
@@ -337,12 +331,12 @@ CREATE TABLE IF NOT EXISTS preservation_replication_target (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    target_type ENUM('local', 'sftp', 's3', 'azure', 'gcs', 'rsync') NOT NULL,
+    target_type VARCHAR(46) COMMENT 'local, sftp, s3, azure, gcs, rsync' NOT NULL,
     connection_config JSON NOT NULL COMMENT 'Encrypted connection details',
     is_active TINYINT(1) DEFAULT 1,
     sync_schedule VARCHAR(100) COMMENT 'Cron expression',
     last_sync_at DATETIME,
-    last_sync_status ENUM('success', 'partial', 'failed') DEFAULT NULL,
+    last_sync_status VARCHAR(36) COMMENT 'success, partial, failed' DEFAULT NULL,
     last_sync_files INT UNSIGNED DEFAULT 0,
     last_sync_bytes BIGINT UNSIGNED DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -359,8 +353,8 @@ CREATE TABLE IF NOT EXISTS preservation_replication_target (
 CREATE TABLE IF NOT EXISTS preservation_replication_log (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     target_id BIGINT UNSIGNED NOT NULL,
-    operation ENUM('sync', 'verify', 'restore') NOT NULL,
-    status ENUM('started', 'completed', 'failed', 'partial') NOT NULL,
+    operation VARCHAR(33) COMMENT 'sync, verify, restore' NOT NULL,
+    status VARCHAR(47) COMMENT 'started, completed, failed, partial' NOT NULL,
     files_total INT UNSIGNED DEFAULT 0,
     files_synced INT UNSIGNED DEFAULT 0,
     files_failed INT UNSIGNED DEFAULT 0,
@@ -415,18 +409,11 @@ CREATE TABLE IF NOT EXISTS preservation_workflow_schedule (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    workflow_type ENUM(
-        'format_identification',
-        'fixity_check',
-        'virus_scan',
-        'format_conversion',
-        'backup_verification',
-        'replication'
-    ) NOT NULL,
+    workflow_type VARCHAR(112) COMMENT 'format_identification, fixity_check, virus_scan, format_conversion, backup_verification, replication' NOT NULL,
     is_enabled TINYINT(1) DEFAULT 1,
 
     -- Schedule configuration
-    schedule_type ENUM('cron', 'interval', 'manual') NOT NULL DEFAULT 'cron',
+    schedule_type VARCHAR(34) COMMENT 'cron, interval, manual' NOT NULL DEFAULT 'cron',
     cron_expression VARCHAR(100) COMMENT 'Cron expression (e.g., 0 2 * * *)',
     interval_hours INT UNSIGNED COMMENT 'Hours between runs for interval type',
 
@@ -439,7 +426,7 @@ CREATE TABLE IF NOT EXISTS preservation_workflow_schedule (
 
     -- Tracking
     last_run_at DATETIME,
-    last_run_status ENUM('success', 'partial', 'failed', 'timeout') DEFAULT NULL,
+    last_run_status VARCHAR(45) COMMENT 'success, partial, failed, timeout' DEFAULT NULL,
     last_run_processed INT UNSIGNED DEFAULT 0,
     last_run_duration_ms INT UNSIGNED,
     next_run_at DATETIME,
@@ -471,7 +458,7 @@ CREATE TABLE IF NOT EXISTS preservation_workflow_run (
     workflow_type VARCHAR(50) NOT NULL,
 
     -- Execution details
-    status ENUM('running', 'completed', 'failed', 'timeout', 'cancelled') NOT NULL DEFAULT 'running',
+    status VARCHAR(58) COMMENT 'running, completed, failed, timeout, cancelled' NOT NULL DEFAULT 'running',
     started_at DATETIME NOT NULL,
     completed_at DATETIME,
     duration_ms INT UNSIGNED,
@@ -487,7 +474,7 @@ CREATE TABLE IF NOT EXISTS preservation_workflow_run (
     summary JSON COMMENT 'Detailed run summary',
 
     -- Execution context
-    triggered_by ENUM('scheduler', 'manual', 'api') DEFAULT 'scheduler',
+    triggered_by VARCHAR(34) COMMENT 'scheduler, manual, api' DEFAULT 'scheduler',
     triggered_by_user VARCHAR(100),
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -523,13 +510,13 @@ CREATE TABLE IF NOT EXISTS preservation_package (
     description TEXT,
 
     -- Package type per OAIS model
-    package_type ENUM('sip', 'aip', 'dip') NOT NULL,
+    package_type VARCHAR(25) COMMENT 'sip, aip, dip' NOT NULL,
 
     -- Package status
-    status ENUM('draft', 'building', 'complete', 'validated', 'exported', 'error') NOT NULL DEFAULT 'draft',
+    status VARCHAR(65) COMMENT 'draft, building, complete, validated, exported, error' NOT NULL DEFAULT 'draft',
 
     -- Package format
-    package_format ENUM('bagit', 'zip', 'tar', 'directory') NOT NULL DEFAULT 'bagit',
+    package_format VARCHAR(38) COMMENT 'bagit, zip, tar, directory' NOT NULL DEFAULT 'bagit',
     bagit_version VARCHAR(10) DEFAULT '1.0',
 
     -- Content information
@@ -597,7 +584,7 @@ CREATE TABLE IF NOT EXISTS preservation_package_object (
     puid VARCHAR(50) COMMENT 'PRONOM identifier',
 
     -- Object role in package
-    object_role ENUM('payload', 'metadata', 'manifest', 'tagfile') DEFAULT 'payload',
+    object_role VARCHAR(48) COMMENT 'payload, metadata, manifest, tagfile' DEFAULT 'payload',
 
     -- Sequence for ordering
     sequence INT UNSIGNED DEFAULT 0,
@@ -621,18 +608,15 @@ CREATE TABLE IF NOT EXISTS preservation_package_event (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     package_id BIGINT UNSIGNED NOT NULL,
 
-    event_type ENUM(
-        'creation', 'modification', 'building', 'validation',
-        'export', 'import', 'transfer', 'deletion', 'error'
-    ) NOT NULL,
+    event_type VARCHAR(99) COMMENT 'creation, modification, building, validation, export, import, transfer, deletion, error' NOT NULL,
 
     event_datetime DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     event_detail TEXT,
-    event_outcome ENUM('success', 'failure', 'warning') DEFAULT 'success',
+    event_outcome VARCHAR(37) COMMENT 'success, failure, warning' DEFAULT 'success',
     event_outcome_detail TEXT,
 
     -- Agent information
-    agent_type ENUM('user', 'system', 'software') DEFAULT 'system',
+    agent_type VARCHAR(34) COMMENT 'user, system, software' DEFAULT 'system',
     agent_value VARCHAR(255),
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -654,7 +638,7 @@ CREATE TABLE IF NOT EXISTS preservation_migration_pathway (
     target_puid VARCHAR(50) NOT NULL COMMENT 'PRONOM identifier of target format',
     migration_tool VARCHAR(100) NOT NULL COMMENT 'Tool to perform migration (imagemagick, ffmpeg, etc.)',
     migration_command TEXT COMMENT 'Command template with placeholders {input} {output}',
-    quality_impact ENUM('lossless', 'minimal', 'moderate', 'significant') DEFAULT 'minimal',
+    quality_impact VARCHAR(52) COMMENT 'lossless, minimal, moderate, significant' DEFAULT 'minimal',
     fidelity_score DECIMAL(5,2) COMMENT 'Quality fidelity score 0-100',
     is_recommended TINYINT(1) DEFAULT 0 COMMENT 'Recommended pathway for this source format',
     is_automated TINYINT(1) DEFAULT 1 COMMENT 'Can be run automatically without review',
@@ -678,8 +662,8 @@ CREATE TABLE IF NOT EXISTS preservation_format_obsolescence (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     format_id BIGINT UNSIGNED NOT NULL COMMENT 'Reference to preservation_format',
     puid VARCHAR(50) NOT NULL COMMENT 'PRONOM identifier',
-    current_risk_level ENUM('low', 'medium', 'high', 'critical') NOT NULL,
-    migration_urgency ENUM('none', 'low', 'medium', 'high', 'critical') DEFAULT 'none',
+    current_risk_level VARCHAR(39) COMMENT 'low, medium, high, critical' NOT NULL,
+    migration_urgency VARCHAR(45) COMMENT 'none, low, medium, high, critical' DEFAULT 'none',
     affected_object_count INT UNSIGNED DEFAULT 0,
     storage_size_bytes BIGINT UNSIGNED DEFAULT 0 COMMENT 'Total storage for affected objects',
     recommended_action TEXT,
@@ -709,10 +693,10 @@ CREATE TABLE IF NOT EXISTS preservation_migration_plan (
     source_puid VARCHAR(50) NOT NULL,
     target_puid VARCHAR(50) NOT NULL,
     pathway_id BIGINT UNSIGNED COMMENT 'Selected migration pathway',
-    status ENUM('draft', 'approved', 'in_progress', 'completed', 'cancelled', 'failed') DEFAULT 'draft',
+    status VARCHAR(70) COMMENT 'draft, approved, in_progress, completed, cancelled, failed' DEFAULT 'draft',
 
     -- Scope
-    scope_type ENUM('all', 'repository', 'collection', 'custom') DEFAULT 'all',
+    scope_type VARCHAR(47) COMMENT 'all, repository, collection, custom' DEFAULT 'all',
     scope_criteria JSON COMMENT 'Criteria for object selection',
 
     -- Progress tracking
@@ -763,7 +747,7 @@ CREATE TABLE IF NOT EXISTS preservation_migration_plan_object (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     plan_id BIGINT UNSIGNED NOT NULL,
     digital_object_id INT NOT NULL,
-    status ENUM('pending', 'queued', 'processing', 'completed', 'failed', 'skipped') DEFAULT 'pending',
+    status VARCHAR(67) COMMENT 'pending, queued, processing, completed, failed, skipped' DEFAULT 'pending',
 
     -- Source info
     source_path VARCHAR(1024),

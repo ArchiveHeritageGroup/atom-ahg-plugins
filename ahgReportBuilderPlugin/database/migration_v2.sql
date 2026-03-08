@@ -10,7 +10,7 @@
 CREATE TABLE IF NOT EXISTS report_section (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     report_id BIGINT UNSIGNED NOT NULL,
-    section_type ENUM('narrative','table','chart','summary_card','image_gallery','links','sql_query') NOT NULL,
+    section_type VARCHAR(82) COMMENT 'narrative, table, chart, summary_card, image_gallery, links, sql_query' NOT NULL,
     title VARCHAR(255) DEFAULT NULL,
     content LONGTEXT DEFAULT NULL,
     position INT DEFAULT 0,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS report_template (
     name VARCHAR(255) NOT NULL,
     description TEXT DEFAULT NULL,
     category VARCHAR(100) DEFAULT 'custom',
-    scope ENUM('system','institution','user') DEFAULT 'user',
+    scope VARCHAR(37) COMMENT 'system, institution, user' DEFAULT 'user',
     structure JSON NOT NULL,
     created_by INT DEFAULT NULL,
     repository_id INT DEFAULT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS report_link (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     report_id BIGINT UNSIGNED NOT NULL,
     section_id BIGINT UNSIGNED DEFAULT NULL,
-    link_type ENUM('external','information_object','actor','repository','accession','digital_object') NOT NULL,
+    link_type VARCHAR(86) COMMENT 'external, information_object, actor, repository, accession, digital_object' NOT NULL,
     url VARCHAR(2048) DEFAULT NULL,
     title VARCHAR(500) DEFAULT NULL,
     description TEXT DEFAULT NULL,
@@ -129,7 +129,7 @@ CREATE TABLE IF NOT EXISTS report_query (
     section_id BIGINT UNSIGNED DEFAULT NULL,
     name VARCHAR(255) NOT NULL,
     query_text TEXT NOT NULL,
-    query_type ENUM('visual','raw_sql') DEFAULT 'visual',
+    query_type VARCHAR(27) COMMENT 'visual, raw_sql' DEFAULT 'visual',
     visual_config JSON DEFAULT NULL,
     parameters JSON DEFAULT NULL,
     row_limit INT DEFAULT 1000,
@@ -173,9 +173,9 @@ END//
 DELIMITER ;
 
 -- custom_report: Add workflow, template, and data binding fields
-CALL _rb_add_column('custom_report', 'status', "ENUM('draft','in_review','approved','published','archived') DEFAULT 'draft'");
+CALL _rb_add_column('custom_report', 'status', "VARCHAR(59) COMMENT 'draft, in_review, approved, published, archived' DEFAULT 'draft'");
 CALL _rb_add_column('custom_report', 'template_id', 'BIGINT UNSIGNED DEFAULT NULL');
-CALL _rb_add_column('custom_report', 'data_mode', "ENUM('live','snapshot') DEFAULT 'live'");
+CALL _rb_add_column('custom_report', 'data_mode', "VARCHAR(26) COMMENT 'live, snapshot' DEFAULT 'live'");
 CALL _rb_add_column('custom_report', 'snapshot_data', 'JSON DEFAULT NULL');
 CALL _rb_add_column('custom_report', 'snapshot_at', 'DATETIME DEFAULT NULL');
 CALL _rb_add_column('custom_report', 'cover_config', 'JSON DEFAULT NULL');
@@ -183,7 +183,7 @@ CALL _rb_add_column('custom_report', 'version', 'INT DEFAULT 1');
 CALL _rb_add_column('custom_report', 'workflow_id', 'BIGINT UNSIGNED DEFAULT NULL');
 
 -- report_schedule: Add trigger-based scheduling
-CALL _rb_add_column('report_schedule', 'schedule_type', "ENUM('recurring','trigger') DEFAULT 'recurring'");
+CALL _rb_add_column('report_schedule', 'schedule_type', "VARCHAR(30) COMMENT 'recurring, trigger' DEFAULT 'recurring'");
 CALL _rb_add_column('report_schedule', 'trigger_config', 'JSON DEFAULT NULL');
 
 -- report_archive: Add share token for download links

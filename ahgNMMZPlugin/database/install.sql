@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS nmmz_monument_category (
     code VARCHAR(20) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    protection_level ENUM('national', 'provincial', 'local') DEFAULT 'national',
+    protection_level VARCHAR(39) COMMENT 'national, provincial, local' DEFAULT 'national',
     is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -74,27 +74,27 @@ CREATE TABLE IF NOT EXISTS nmmz_monument (
     -- Legal status
     gazette_date DATE COMMENT 'Date gazetted as national monument',
     gazette_reference VARCHAR(100),
-    protection_level ENUM('national', 'provincial', 'local') DEFAULT 'national',
-    legal_status ENUM('gazetted', 'provisional', 'proposed', 'delisted') DEFAULT 'proposed',
+    protection_level VARCHAR(39) COMMENT 'national, provincial, local' DEFAULT 'national',
+    legal_status VARCHAR(53) COMMENT 'gazetted, provisional, proposed, delisted' DEFAULT 'proposed',
 
     -- Ownership/Management
-    ownership_type ENUM('state', 'private', 'communal', 'mixed') DEFAULT 'state',
+    ownership_type VARCHAR(43) COMMENT 'state, private, communal, mixed' DEFAULT 'state',
     owner_name VARCHAR(255),
     custodian VARCHAR(255),
     management_authority VARCHAR(255),
 
     -- Condition
-    condition_rating ENUM('excellent', 'good', 'fair', 'poor', 'critical', 'destroyed') DEFAULT 'good',
+    condition_rating VARCHAR(60) COMMENT 'excellent, good, fair, poor, critical, destroyed' DEFAULT 'good',
     last_inspection_date DATE,
-    conservation_priority ENUM('high', 'medium', 'low') DEFAULT 'medium',
+    conservation_priority VARCHAR(29) COMMENT 'high, medium, low' DEFAULT 'medium',
     threats TEXT,
 
     -- World Heritage
-    world_heritage_status ENUM('inscribed', 'tentative', 'none') DEFAULT 'none',
+    world_heritage_status VARCHAR(38) COMMENT 'inscribed, tentative, none' DEFAULT 'none',
     world_heritage_year INT,
     world_heritage_criteria VARCHAR(100),
 
-    status ENUM('active', 'at_risk', 'destroyed', 'delisted') DEFAULT 'active',
+    status VARCHAR(48) COMMENT 'active, at_risk, destroyed, delisted' DEFAULT 'active',
     notes TEXT,
 
     created_by INT NOT NULL,
@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS nmmz_antiquity (
     -- Physical
     dimensions VARCHAR(255),
     weight_kg DECIMAL(10, 4),
-    condition_rating ENUM('excellent', 'good', 'fair', 'poor', 'fragmentary') DEFAULT 'good',
+    condition_rating VARCHAR(52) COMMENT 'excellent, good, fair, poor, fragmentary' DEFAULT 'good',
 
     -- Current location
     current_location VARCHAR(255),
@@ -142,9 +142,9 @@ CREATE TABLE IF NOT EXISTS nmmz_antiquity (
     storage_reference VARCHAR(100),
 
     -- Legal status
-    ownership_type ENUM('state', 'museum', 'private', 'unknown') DEFAULT 'state',
+    ownership_type VARCHAR(43) COMMENT 'state, museum, private, unknown' DEFAULT 'state',
     owner_name VARCHAR(255),
-    acquisition_method ENUM('excavation', 'donation', 'purchase', 'confiscation', 'transfer', 'unknown') DEFAULT 'unknown',
+    acquisition_method VARCHAR(75) COMMENT 'excavation, donation, purchase, confiscation, transfer, unknown' DEFAULT 'unknown',
     acquisition_date DATE,
 
     -- Export status
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS nmmz_antiquity (
     estimated_value DECIMAL(15, 2),
     value_currency VARCHAR(3) DEFAULT 'USD',
 
-    status ENUM('in_collection', 'on_loan', 'missing', 'repatriated', 'destroyed') DEFAULT 'in_collection',
+    status VARCHAR(67) COMMENT 'in_collection, on_loan, missing, repatriated, destroyed' DEFAULT 'in_collection',
     notes TEXT,
 
     created_by INT NOT NULL,
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS nmmz_export_permit (
     applicant_address TEXT,
     applicant_email VARCHAR(255),
     applicant_phone VARCHAR(50),
-    applicant_type ENUM('individual', 'institution', 'dealer', 'researcher') NOT NULL,
+    applicant_type VARCHAR(55) COMMENT 'individual, institution, dealer, researcher' NOT NULL,
 
     -- Object details
     antiquity_id BIGINT UNSIGNED COMMENT 'Link to antiquity if registered',
@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS nmmz_export_permit (
     value_currency VARCHAR(3) DEFAULT 'USD',
 
     -- Purpose
-    export_purpose ENUM('exhibition', 'research', 'conservation', 'sale', 'personal', 'return') NOT NULL,
+    export_purpose VARCHAR(70) COMMENT 'exhibition, research, conservation, sale, personal, return' NOT NULL,
     purpose_details TEXT,
 
     -- Destination
@@ -212,7 +212,7 @@ CREATE TABLE IF NOT EXISTS nmmz_export_permit (
     fee_paid TINYINT(1) DEFAULT 0,
     fee_receipt VARCHAR(100),
 
-    status ENUM('pending', 'approved', 'rejected', 'issued', 'used', 'expired', 'cancelled') DEFAULT 'pending',
+    status VARCHAR(73) COMMENT 'pending, approved, rejected, issued, used, expired, cancelled' DEFAULT 'pending',
     rejection_reason TEXT,
 
     notes TEXT,
@@ -261,16 +261,16 @@ CREATE TABLE IF NOT EXISTS nmmz_archaeological_site (
     excavation_institution VARCHAR(255),
 
     -- Protection
-    protection_status ENUM('protected', 'unprotected', 'at_risk', 'destroyed') DEFAULT 'unprotected',
+    protection_status VARCHAR(54) COMMENT 'protected, unprotected, at_risk, destroyed' DEFAULT 'unprotected',
     threats TEXT,
     fencing TINYINT(1) DEFAULT 0,
     signage TINYINT(1) DEFAULT 0,
 
     -- Research
-    research_potential ENUM('high', 'medium', 'low', 'exhausted') DEFAULT 'medium',
+    research_potential VARCHAR(40) COMMENT 'high, medium, low, exhausted' DEFAULT 'medium',
     publications TEXT,
 
-    status ENUM('active', 'destroyed', 'submerged', 'built_over') DEFAULT 'active',
+    status VARCHAR(52) COMMENT 'active, destroyed, submerged, built_over' DEFAULT 'active',
     notes TEXT,
 
     created_by INT NOT NULL,
@@ -312,7 +312,7 @@ CREATE TABLE IF NOT EXISTS nmmz_heritage_impact_assessment (
     heritage_resources_found TEXT,
 
     -- Impact
-    impact_level ENUM('none', 'low', 'moderate', 'high', 'severe') DEFAULT 'moderate',
+    impact_level VARCHAR(45) COMMENT 'none, low, moderate, high, severe' DEFAULT 'moderate',
     impact_description TEXT,
 
     -- Mitigation
@@ -320,11 +320,11 @@ CREATE TABLE IF NOT EXISTS nmmz_heritage_impact_assessment (
     monitoring_plan TEXT,
 
     -- Recommendation
-    recommendation ENUM('approve', 'approve_with_conditions', 'reject', 'further_study') DEFAULT 'further_study',
+    recommendation VARCHAR(67) COMMENT 'approve, approve_with_conditions, reject, further_study' DEFAULT 'further_study',
     conditions TEXT,
 
     -- Status
-    status ENUM('submitted', 'under_review', 'approved', 'rejected', 'expired') DEFAULT 'submitted',
+    status VARCHAR(64) COMMENT 'submitted, under_review, approved, rejected, expired' DEFAULT 'submitted',
     decision_date DATE,
     decision_by INT,
 
@@ -347,8 +347,8 @@ CREATE TABLE IF NOT EXISTS nmmz_monument_inspection (
     inspection_date DATE NOT NULL,
     inspector_name VARCHAR(255) NOT NULL,
 
-    condition_rating ENUM('excellent', 'good', 'fair', 'poor', 'critical', 'destroyed') NOT NULL,
-    previous_rating ENUM('excellent', 'good', 'fair', 'poor', 'critical', 'destroyed'),
+    condition_rating VARCHAR(60) COMMENT 'excellent, good, fair, poor, critical, destroyed' NOT NULL,
+    previous_rating VARCHAR(60) COMMENT 'excellent, good, fair, poor, critical, destroyed',
 
     structural_condition TEXT,
     vegetation_encroachment TINYINT(1) DEFAULT 0,

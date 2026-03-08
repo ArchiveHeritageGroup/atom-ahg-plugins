@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS ahg_webhook_delivery (
     response_code INT DEFAULT NULL,
     response_body TEXT DEFAULT NULL,
     attempt_count INT DEFAULT 1,
-    status ENUM('pending', 'success', 'failed', 'retrying') DEFAULT 'pending',
+    status VARCHAR(46) COMMENT 'pending, success, failed, retrying' DEFAULT 'pending',
     next_retry_at DATETIME DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     delivered_at DATETIME DEFAULT NULL,

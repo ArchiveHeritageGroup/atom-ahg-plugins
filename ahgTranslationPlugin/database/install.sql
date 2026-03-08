@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `ahg_translation_draft` (
   `source_hash` CHAR(64) NOT NULL,
   `source_text` LONGTEXT NOT NULL,
   `translated_text` LONGTEXT NOT NULL,
-  `status` ENUM('draft','applied','rejected') NOT NULL DEFAULT 'draft',
+  `status` VARCHAR(36) COMMENT 'draft, applied, rejected' NOT NULL DEFAULT 'draft',
   `created_by_user_id` BIGINT UNSIGNED NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `applied_at` DATETIME NULL,

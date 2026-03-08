@@ -36,6 +36,6 @@ SELECT
     setting_key,
     setting_value
 FROM ahg_ner_settings
-WHERE setting_key NOT IN (
+WHERE setting_key COLLATE utf8mb4_unicode_ci NOT IN (
     SELECT setting_key FROM ahg_ai_settings WHERE feature = 'general'
 );

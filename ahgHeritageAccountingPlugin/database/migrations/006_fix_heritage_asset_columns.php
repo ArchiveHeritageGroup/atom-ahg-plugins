@@ -12,7 +12,7 @@ return new class {
                 DB::statement("ALTER TABLE `heritage_asset` ADD COLUMN `last_valuation_amount` DECIMAL(18,2) NULL AFTER `last_valuation_date`");
             }
             if (!DB::schema()->hasColumn('heritage_asset', 'valuation_method')) {
-                DB::statement("ALTER TABLE `heritage_asset` ADD COLUMN `valuation_method` ENUM('market','cost','income','expert','insurance','other') NULL AFTER `last_valuation_amount`");
+                DB::statement("ALTER TABLE `heritage_asset` ADD COLUMN `valuation_method` VARCHAR(58) COMMENT 'market, cost, income, expert, insurance, other' NULL AFTER `last_valuation_amount`");
             }
             if (!DB::schema()->hasColumn('heritage_asset', 'valuer_name')) {
                 DB::statement("ALTER TABLE `heritage_asset` ADD COLUMN `valuer_name` VARCHAR(255) NULL AFTER `valuation_method`");

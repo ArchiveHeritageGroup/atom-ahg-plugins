@@ -13,10 +13,10 @@ CREATE TABLE IF NOT EXISTS researcher_submission (
     repository_id INT DEFAULT NULL,              -- Target repository for publishing
     parent_object_id INT DEFAULT NULL,           -- Target parent IO for placement (NULL = root)
     project_id INT DEFAULT NULL,                 -- FK to research_project.id (link to research project)
-    source_type ENUM('online','offline') NOT NULL DEFAULT 'online',
+    source_type VARCHAR(27) COMMENT 'online, offline' NOT NULL DEFAULT 'online',
     source_file VARCHAR(255) DEFAULT NULL,       -- Original exchange JSON filename
     include_images TINYINT(1) DEFAULT 1,         -- Whether offline export included images
-    status ENUM('draft','submitted','under_review','approved','published','returned','rejected')
+    status VARCHAR(83) COMMENT 'draft, submitted, under_review, approved, published, returned, rejected'
         NOT NULL DEFAULT 'draft',
     workflow_task_id INT DEFAULT NULL,
     total_items INT DEFAULT 0,
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS researcher_submission_item (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     submission_id BIGINT UNSIGNED NOT NULL,
     parent_item_id BIGINT UNSIGNED DEFAULT NULL, -- Self-referencing for sub-levels
-    item_type ENUM('description','note','repository','creator') NOT NULL DEFAULT 'description',
+    item_type VARCHAR(50) COMMENT 'description, note, repository, creator' NOT NULL DEFAULT 'description',
     title VARCHAR(255) NOT NULL,
     identifier VARCHAR(255) DEFAULT NULL,
     level_of_description VARCHAR(50) DEFAULT 'item',
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS researcher_submission_review (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     submission_id BIGINT UNSIGNED NOT NULL,
     reviewer_id INT NOT NULL,
-    action ENUM('comment','return','approve','reject','publish') NOT NULL,
+    action VARCHAR(53) COMMENT 'comment, return, approve, reject, publish' NOT NULL,
     comment TEXT DEFAULT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (submission_id) REFERENCES researcher_submission(id) ON DELETE CASCADE,

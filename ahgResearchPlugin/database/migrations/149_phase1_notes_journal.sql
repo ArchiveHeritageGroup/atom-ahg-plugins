@@ -5,8 +5,8 @@
 
 -- Enhance annotations for rich text and visibility
 ALTER TABLE `research_annotation`
-  ADD COLUMN `visibility` ENUM('private','shared','public') DEFAULT 'private' AFTER `is_private`,
-  ADD COLUMN `content_format` ENUM('text','html') DEFAULT 'text' AFTER `content`;
+  ADD COLUMN `visibility` VARCHAR(35) COMMENT 'private, shared, public' DEFAULT 'private' AFTER `is_private`,
+  ADD COLUMN `content_format` VARCHAR(22) COMMENT 'text, html' DEFAULT 'text' AFTER `content`;
 
 ALTER TABLE `research_annotation`
   ADD FULLTEXT INDEX `idx_annotation_fulltext` (`title`, `content`);
@@ -19,9 +19,8 @@ CREATE TABLE IF NOT EXISTS `research_journal_entry` (
   `entry_date` DATE NOT NULL,
   `title` VARCHAR(500),
   `content` TEXT NOT NULL,
-  `content_format` ENUM('text','html') DEFAULT 'html',
-  `entry_type` ENUM('manual','auto_booking','auto_material','auto_annotation',
-                    'auto_search','auto_collection','reflection','milestone') DEFAULT 'manual',
+  `content_format` VARCHAR(22) COMMENT 'text, html' DEFAULT 'html',
+  `entry_type` VARCHAR(117) COMMENT 'manual, auto_booking, auto_material, auto_annotation, auto_search, auto_collection, reflection, milestone' DEFAULT 'manual',
   `time_spent_minutes` INT DEFAULT NULL,
   `tags` VARCHAR(500) DEFAULT NULL,
   `is_private` TINYINT(1) DEFAULT 1,

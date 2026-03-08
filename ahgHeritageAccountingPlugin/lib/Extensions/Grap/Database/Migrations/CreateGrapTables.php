@@ -41,7 +41,7 @@ class CreateGrapTables
                 
                 // Asset identification
                 $table->string('asset_number', 50)->nullable()->index();
-                $table->enum('recognition_status', ['recognized', 'not_recognized', 'pending', 'not_assessed'])->default('not_assessed');
+                $table->VARCHAR(81) COMMENT 'recognition_status, recognized, not_recognized, pending, not_assessed'->default('not_assessed');
                 $table->string('asset_class', 100)->nullable()->index();
                 $table->string('asset_subclass', 100)->nullable();
                 
@@ -58,7 +58,7 @@ class CreateGrapTables
                 $table->decimal('residual_value', 15, 2)->nullable();
                 
                 // Valuation
-                $table->enum('measurement_basis', ['cost', 'fair_value', 'deemed_cost', 'nominal'])->nullable();
+                $table->VARCHAR(69) COMMENT 'measurement_basis, cost, fair_value, deemed_cost, nominal'->nullable();
                 $table->date('valuation_date')->nullable();
                 $table->string('valuer', 255)->nullable();
                 $table->string('valuation_method', 100)->nullable();
@@ -106,10 +106,7 @@ class CreateGrapTables
             $schema->create('grap_transaction_log', function (Blueprint $table) {
                 $table->id();
                 $table->integer('asset_id')->unsigned();
-                $table->enum('transaction_type', [
-                    'acquisition', 'revaluation', 'impairment', 
-                    'disposal', 'transfer', 'depreciation', 'correction'
-                ]);
+                $table->VARCHAR(112) COMMENT 'transaction_type, acquisition, revaluation, impairment, disposal, transfer, depreciation, correction';
                 $table->decimal('amount', 15, 2)->nullable();
                 $table->decimal('previous_value', 15, 2)->nullable();
                 $table->decimal('new_value', 15, 2)->nullable();
@@ -165,7 +162,7 @@ class CreateGrapTables
                 $table->id();
                 $table->integer('asset_id')->unsigned();
                 $table->date('check_date');
-                $table->enum('check_type', ['full', 'quick', 'automated']);
+                $table->VARCHAR(46) COMMENT 'check_type, full, quick, automated';
                 $table->integer('score')->nullable();
                 $table->json('results')->nullable(); // Detailed results
                 $table->json('issues')->nullable(); // Issues found

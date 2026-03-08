@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS metadata_export_log (
     user_id INT DEFAULT NULL COMMENT 'User who initiated export',
     options JSON DEFAULT NULL COMMENT 'Export options used',
     duration_ms INT DEFAULT NULL COMMENT 'Export duration in milliseconds',
-    status ENUM('success', 'failed', 'partial') DEFAULT 'success',
+    status VARCHAR(36) COMMENT 'success, failed, partial' DEFAULT 'success',
     error_message TEXT DEFAULT NULL COMMENT 'Error message if failed',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_format (format_code),

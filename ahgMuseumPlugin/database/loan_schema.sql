@@ -17,12 +17,12 @@ CREATE TABLE IF NOT EXISTS loan (
 
     -- Loan identification
     loan_number VARCHAR(50) NOT NULL UNIQUE,
-    loan_type ENUM('out', 'in') NOT NULL,
+    loan_type VARCHAR(20) COMMENT 'out, in' NOT NULL,
 
     -- Basic information
     title VARCHAR(500),
     description TEXT,
-    purpose ENUM('exhibition', 'research', 'conservation', 'photography', 'education', 'filming', 'long_term', 'other') DEFAULT 'exhibition',
+    purpose VARCHAR(97) COMMENT 'exhibition, research, conservation, photography, education, filming, long_term, other' DEFAULT 'exhibition',
 
     -- Partner institution (borrower for loan_out, lender for loan_in)
     partner_institution VARCHAR(500) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS loan (
     return_date DATE,
 
     -- Insurance
-    insurance_type ENUM('borrower', 'lender', 'shared', 'government', 'self') DEFAULT 'borrower',
+    insurance_type VARCHAR(54) COMMENT 'borrower, lender, shared, government, self' DEFAULT 'borrower',
     insurance_value DECIMAL(15,2),
     insurance_currency VARCHAR(3) DEFAULT 'ZAR',
     insurance_policy_number VARCHAR(100),
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS loan_object (
     display_requirements TEXT,
 
     -- Status tracking
-    status ENUM('pending', 'approved', 'prepared', 'dispatched', 'received', 'on_display', 'packed', 'returned') DEFAULT 'pending',
+    status VARCHAR(91) COMMENT 'pending, approved, prepared, dispatched, received, on_display, packed, returned' DEFAULT 'pending',
 
     -- Dates
     dispatched_date DATE,
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS loan_document (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     loan_id BIGINT UNSIGNED NOT NULL,
 
-    document_type ENUM('agreement', 'condition_report', 'insurance', 'courier', 'correspondence', 'receipt', 'other') NOT NULL,
+    document_type VARCHAR(91) COMMENT 'agreement, condition_report, insurance, courier, correspondence, receipt, other' NOT NULL,
 
     file_path VARCHAR(500),
     file_name VARCHAR(255),

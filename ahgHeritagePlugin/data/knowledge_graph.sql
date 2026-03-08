@@ -16,7 +16,7 @@ SET SQL_MODE='NO_AUTO_VALUE_ON_ZERO';
 CREATE TABLE IF NOT EXISTS heritage_entity_graph_node (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    entity_type ENUM('person', 'organization', 'place', 'date', 'event', 'work', 'concept') NOT NULL,
+    entity_type VARCHAR(67) COMMENT 'person, organization, place, date, event, work, concept' NOT NULL,
     canonical_value VARCHAR(500) NOT NULL,
     normalized_value VARCHAR(500) NOT NULL,
 
@@ -60,19 +60,7 @@ CREATE TABLE IF NOT EXISTS heritage_entity_graph_edge (
     target_node_id BIGINT UNSIGNED NOT NULL,
 
     -- Relationship type
-    relationship_type ENUM(
-        'co_occurrence',      -- Appear in same document
-        'mentioned_with',     -- Mentioned together in text
-        'associated_with',    -- General association
-        'employed_by',        -- Person -> Organization
-        'located_in',         -- Entity -> Place
-        'occurred_at',        -- Event -> Date/Place
-        'related_to',         -- Generic relation
-        'same_as',            -- Duplicate/alias
-        'child_of',           -- Hierarchical relationship
-        'preceded_by',        -- Temporal relationship
-        'followed_by'         -- Temporal relationship
-    ) NOT NULL DEFAULT 'co_occurrence',
+    relationship_type VARCHAR(153) COMMENT 'co_occurrence, mentioned_with, associated_with, employed_by, located_in, occurred_at, related_to, same_as, child_of, preceded_by, followed_by' NOT NULL DEFAULT 'co_occurrence',
 
     -- Strength metrics
     weight DECIMAL(8,4) DEFAULT 1.0000,
@@ -117,7 +105,7 @@ CREATE TABLE IF NOT EXISTS heritage_entity_graph_object (
     mention_count INT DEFAULT 1,
     confidence DECIMAL(5,4) DEFAULT 1.0000,
     source_field VARCHAR(100) DEFAULT NULL,
-    extraction_method ENUM('taxonomy', 'ner', 'pattern', 'manual') DEFAULT 'ner',
+    extraction_method VARCHAR(42) COMMENT 'taxonomy, ner, pattern, manual' DEFAULT 'ner',
 
     -- Position info (for highlighting)
     positions JSON DEFAULT NULL,
@@ -139,8 +127,8 @@ CREATE TABLE IF NOT EXISTS heritage_entity_graph_object (
 CREATE TABLE IF NOT EXISTS heritage_graph_build_log (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    build_type ENUM('full', 'incremental', 'edges_only') NOT NULL DEFAULT 'incremental',
-    status ENUM('running', 'completed', 'failed') NOT NULL DEFAULT 'running',
+    build_type VARCHAR(41) COMMENT 'full, incremental, edges_only' NOT NULL DEFAULT 'incremental',
+    status VARCHAR(38) COMMENT 'running, completed, failed' NOT NULL DEFAULT 'running',
 
     nodes_created INT DEFAULT 0,
     nodes_updated INT DEFAULT 0,

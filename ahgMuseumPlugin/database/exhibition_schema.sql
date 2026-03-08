@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS exhibition (
     theme TEXT,
 
     -- Type and Status
-    exhibition_type ENUM('permanent', 'temporary', 'traveling', 'online', 'pop_up') DEFAULT 'temporary',
-    status ENUM('concept', 'planning', 'preparation', 'installation', 'open', 'closing', 'closed', 'archived', 'canceled') DEFAULT 'concept',
+    exhibition_type VARCHAR(59) COMMENT 'permanent, temporary, traveling, online, pop_up' DEFAULT 'temporary',
+    status VARCHAR(99) COMMENT 'concept, planning, preparation, installation, open, closing, closed, archived, canceled' DEFAULT 'concept',
 
     -- Dates
     planning_start_date DATE,
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS exhibition_section (
     description TEXT,
     narrative TEXT, -- Storyline/interpretive text
 
-    section_type ENUM('gallery', 'room', 'alcove', 'corridor', 'outdoor', 'virtual') DEFAULT 'gallery',
+    section_type VARCHAR(61) COMMENT 'gallery, room, alcove, corridor, outdoor, virtual' DEFAULT 'gallery',
     sequence_order INT DEFAULT 0,
 
     -- Physical space
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS exhibition_object (
     display_position VARCHAR(100), -- e.g., "Wall A", "Case 3", "Pedestal 2"
 
     -- Object status in exhibition
-    status ENUM('proposed', 'confirmed', 'on_loan_request', 'installed', 'removed', 'returned') DEFAULT 'proposed',
+    status VARCHAR(78) COMMENT 'proposed, confirmed, on_loan_request, installed, removed, returned' DEFAULT 'proposed',
 
     -- If external loan required
     requires_loan TINYINT(1) DEFAULT 0,
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS exhibition_object (
     mount_description TEXT,
     special_lighting TINYINT(1) DEFAULT 0,
     lighting_notes TEXT,
-    security_level ENUM('standard', 'enhanced', 'maximum') DEFAULT 'standard',
+    security_level VARCHAR(39) COMMENT 'standard, enhanced, maximum' DEFAULT 'standard',
 
     -- Environment requirements
     climate_controlled TINYINT(1) DEFAULT 0,
@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS exhibition_storyline (
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255),
     description TEXT,
-    narrative_type ENUM('thematic', 'chronological', 'biographical', 'geographical', 'technique', 'custom') DEFAULT 'thematic',
+    narrative_type VARCHAR(82) COMMENT 'thematic, chronological, biographical, geographical, technique, custom' DEFAULT 'thematic',
 
     -- Content
     introduction TEXT,
@@ -237,8 +237,8 @@ CREATE TABLE IF NOT EXISTS exhibition_storyline (
     is_primary TINYINT(1) DEFAULT 0, -- Main narrative path
 
     -- Target audience
-    target_audience ENUM('general', 'children', 'students', 'specialists', 'all') DEFAULT 'all',
-    reading_level ENUM('basic', 'intermediate', 'advanced') DEFAULT 'intermediate',
+    target_audience VARCHAR(57) COMMENT 'general, children, students, specialists, all' DEFAULT 'all',
+    reading_level VARCHAR(41) COMMENT 'basic, intermediate, advanced' DEFAULT 'intermediate',
 
     -- Duration for audio/tour
     estimated_duration_minutes INT,
@@ -302,7 +302,7 @@ CREATE TABLE IF NOT EXISTS exhibition_checklist_template (
 
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    checklist_type ENUM('planning', 'preparation', 'installation', 'opening', 'during', 'closing', 'deinstallation') NOT NULL,
+    checklist_type VARCHAR(89) COMMENT 'planning, preparation, installation, opening, during, closing, deinstallation' NOT NULL,
 
     -- Items as JSON array
     items JSON, -- [{name, description, required, category}]
@@ -320,11 +320,11 @@ CREATE TABLE IF NOT EXISTS exhibition_checklist (
     template_id BIGINT UNSIGNED,
 
     name VARCHAR(255) NOT NULL,
-    checklist_type ENUM('planning', 'preparation', 'installation', 'opening', 'during', 'closing', 'deinstallation') NOT NULL,
+    checklist_type VARCHAR(89) COMMENT 'planning, preparation, installation, opening, during, closing, deinstallation' NOT NULL,
 
     due_date DATE,
     completed_date DATE,
-    status ENUM('not_started', 'in_progress', 'completed', 'overdue') DEFAULT 'not_started',
+    status VARCHAR(56) COMMENT 'not_started, in_progress, completed, overdue' DEFAULT 'not_started',
 
     assigned_to INT,
 
@@ -366,7 +366,7 @@ CREATE TABLE IF NOT EXISTS exhibition_venue (
 
     name VARCHAR(255) NOT NULL,
     code VARCHAR(50),
-    venue_type ENUM('internal', 'partner', 'external', 'online') DEFAULT 'internal',
+    venue_type VARCHAR(47) COMMENT 'internal, partner, external, online' DEFAULT 'internal',
 
     -- Address
     address_line1 VARCHAR(255),
@@ -387,7 +387,7 @@ CREATE TABLE IF NOT EXISTS exhibition_venue (
     has_climate_control TINYINT(1) DEFAULT 0,
     has_security_system TINYINT(1) DEFAULT 0,
     has_loading_dock TINYINT(1) DEFAULT 0,
-    accessibility_rating ENUM('none', 'partial', 'full') DEFAULT 'partial',
+    accessibility_rating VARCHAR(31) COMMENT 'none, partial, full' DEFAULT 'partial',
 
     -- Insurance
     has_facility_insurance TINYINT(1) DEFAULT 0,
@@ -407,7 +407,7 @@ CREATE TABLE IF NOT EXISTS exhibition_gallery (
 
     name VARCHAR(255) NOT NULL,
     code VARCHAR(50),
-    gallery_type ENUM('gallery', 'hall', 'room', 'corridor', 'outdoor', 'foyer', 'stairwell') DEFAULT 'gallery',
+    gallery_type VARCHAR(68) COMMENT 'gallery, hall, room, corridor, outdoor, foyer, stairwell' DEFAULT 'gallery',
 
     floor_level VARCHAR(20),
     square_meters DECIMAL(8,2),
@@ -450,7 +450,7 @@ CREATE TABLE IF NOT EXISTS exhibition_event (
     exhibition_id BIGINT UNSIGNED NOT NULL,
 
     title VARCHAR(255) NOT NULL,
-    event_type ENUM('opening', 'closing', 'tour', 'lecture', 'workshop', 'performance', 'family', 'school', 'vip', 'press', 'other') NOT NULL,
+    event_type VARCHAR(101) COMMENT 'opening, closing, tour, lecture, workshop, performance, family, school, vip, press, other' NOT NULL,
     description TEXT,
 
     -- Schedule
@@ -485,7 +485,7 @@ CREATE TABLE IF NOT EXISTS exhibition_event (
     presenter_bio TEXT,
 
     -- Status
-    status ENUM('scheduled', 'confirmed', 'canceled', 'completed') DEFAULT 'scheduled',
+    status VARCHAR(53) COMMENT 'scheduled, confirmed, canceled, completed' DEFAULT 'scheduled',
 
     notes TEXT,
 
@@ -508,8 +508,8 @@ CREATE TABLE IF NOT EXISTS exhibition_media (
     exhibition_id BIGINT UNSIGNED NOT NULL,
     section_id BIGINT UNSIGNED,
 
-    media_type ENUM('image', 'video', 'audio', 'document', 'floorplan', 'poster', 'press') NOT NULL,
-    usage_type ENUM('promotional', 'installation', 'documentation', 'press', 'catalog', 'internal') DEFAULT 'documentation',
+    media_type VARCHAR(67) COMMENT 'image, video, audio, document, floorplan, poster, press' NOT NULL,
+    usage_type VARCHAR(78) COMMENT 'promotional, installation, documentation, press, catalog, internal' DEFAULT 'documentation',
 
     file_path VARCHAR(500),
     file_name VARCHAR(255),

@@ -124,12 +124,12 @@ DROP TABLE IF EXISTS `embargo`;
 CREATE TABLE IF NOT EXISTS `embargo` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `object_id` int NOT NULL,
-  `embargo_type` enum('full','metadata_only','digital_object','custom') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `embargo_type` VARCHAR(55) COMMENT 'full, metadata_only, digital_object, custom' COLLATE utf8mb4_unicode_ci NOT NULL,
   `start_date` date NOT NULL,
   `end_date` date DEFAULT NULL,
   `reason` text COLLATE utf8mb4_unicode_ci,
   `is_perpetual` tinyint(1) DEFAULT '0',
-  `status` enum('active','expired','lifted','pending') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `status` VARCHAR(44) COMMENT 'active, expired, lifted, pending' COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `created_by` int DEFAULT NULL,
   `lifted_by` int DEFAULT NULL,
   `lifted_at` timestamp NULL DEFAULT NULL,
@@ -157,7 +157,7 @@ DROP TABLE IF EXISTS `embargo_audit`;
 CREATE TABLE IF NOT EXISTS `embargo_audit` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `embargo_id` bigint unsigned NOT NULL,
-  `action` enum('created','modified','lifted','extended','exception_added','exception_removed') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` VARCHAR(83) COMMENT 'created, modified, lifted, extended, exception_added, exception_removed' COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_id` int DEFAULT NULL,
   `old_values` json DEFAULT NULL,
   `new_values` json DEFAULT NULL,
@@ -178,7 +178,7 @@ DROP TABLE IF EXISTS `embargo_exception`;
 CREATE TABLE IF NOT EXISTS `embargo_exception` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `embargo_id` bigint unsigned NOT NULL,
-  `exception_type` enum('user','group','ip_range','repository') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception_type` VARCHAR(45) COMMENT 'user, group, ip_range, repository' COLLATE utf8mb4_unicode_ci NOT NULL,
   `exception_id` int DEFAULT NULL,
   `ip_range_start` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `ip_range_end` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,

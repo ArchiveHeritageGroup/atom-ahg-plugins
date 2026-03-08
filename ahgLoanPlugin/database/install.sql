@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS ahg_loan (
 
     -- Loan identification
     loan_number VARCHAR(50) NOT NULL UNIQUE,
-    loan_type ENUM('out', 'in') NOT NULL,
-    sector ENUM('museum', 'gallery', 'archive', 'library', 'dam') NOT NULL DEFAULT 'museum',
+    loan_type VARCHAR(20) COMMENT 'out, in' NOT NULL,
+    sector VARCHAR(50) COMMENT 'museum, gallery, archive, library, dam' NOT NULL DEFAULT 'museum',
 
     -- Basic information
     title VARCHAR(500),
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS ahg_loan (
     return_date DATE,
 
     -- Insurance
-    insurance_type ENUM('borrower', 'lender', 'shared', 'government', 'self', 'none') DEFAULT 'borrower',
+    insurance_type VARCHAR(60) COMMENT 'borrower, lender, shared, government, self, none' DEFAULT 'borrower',
     insurance_value DECIMAL(15,2),
     insurance_currency VARCHAR(3) DEFAULT 'ZAR',
     insurance_policy_number VARCHAR(100),
@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS ahg_loan_object (
     display_requirements TEXT,
 
     -- Status
-    status ENUM('pending', 'approved', 'prepared', 'dispatched', 'received', 'on_display', 'packed', 'returned') DEFAULT 'pending',
+    status VARCHAR(91) COMMENT 'pending, approved, prepared, dispatched, received, on_display, packed, returned' DEFAULT 'pending',
 
     -- Dates
     dispatched_date DATE,
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS ahg_loan_facility_report (
     photography_allowed TINYINT(1) DEFAULT 1,
 
     -- Assessment
-    overall_rating ENUM('excellent', 'good', 'acceptable', 'marginal', 'unacceptable') DEFAULT 'acceptable',
+    overall_rating VARCHAR(63) COMMENT 'excellent, good, acceptable, marginal, unacceptable' DEFAULT 'acceptable',
     recommendations TEXT,
     conditions_required TEXT,
 
@@ -265,14 +265,14 @@ CREATE TABLE IF NOT EXISTS ahg_loan_condition_report (
     loan_object_id BIGINT UNSIGNED,
     information_object_id INT,
 
-    report_type ENUM('pre_loan', 'post_loan', 'in_transit', 'periodic') NOT NULL DEFAULT 'pre_loan',
+    report_type VARCHAR(53) COMMENT 'pre_loan, post_loan, in_transit, periodic' NOT NULL DEFAULT 'pre_loan',
 
     examination_date DATETIME NOT NULL,
     examiner_id INT,
     examiner_name VARCHAR(255),
     location VARCHAR(255),
 
-    overall_condition ENUM('excellent', 'good', 'fair', 'poor', 'critical') NOT NULL DEFAULT 'good',
+    overall_condition VARCHAR(49) COMMENT 'excellent, good, fair, poor, critical' NOT NULL DEFAULT 'good',
     condition_stable TINYINT(1) DEFAULT 1,
 
     structural_condition TEXT,
@@ -368,7 +368,7 @@ CREATE TABLE IF NOT EXISTS ahg_loan_shipment (
     loan_id BIGINT UNSIGNED NOT NULL,
     courier_id BIGINT UNSIGNED,
 
-    shipment_type ENUM('outbound', 'return') NOT NULL DEFAULT 'outbound',
+    shipment_type VARCHAR(28) COMMENT 'outbound, return' NOT NULL DEFAULT 'outbound',
     shipment_number VARCHAR(100),
     tracking_number VARCHAR(255),
     waybill_number VARCHAR(255),
@@ -381,7 +381,7 @@ CREATE TABLE IF NOT EXISTS ahg_loan_shipment (
     scheduled_delivery DATETIME,
     actual_delivery DATETIME,
 
-    status ENUM('planned', 'picked_up', 'in_transit', 'customs', 'out_for_delivery', 'delivered', 'failed', 'returned') DEFAULT 'planned',
+    status VARCHAR(98) COMMENT 'planned, picked_up, in_transit, customs, out_for_delivery, delivered, failed, returned' DEFAULT 'planned',
 
     handling_instructions TEXT,
     special_requirements TEXT,
@@ -457,7 +457,7 @@ CREATE TABLE IF NOT EXISTS ahg_loan_notification_log (
     subject VARCHAR(500),
     body TEXT,
 
-    status ENUM('pending', 'sent', 'failed', 'bounced') DEFAULT 'pending',
+    status VARCHAR(42) COMMENT 'pending, sent, failed, bounced' DEFAULT 'pending',
     sent_at DATETIME,
     error_message TEXT,
 
@@ -489,7 +489,7 @@ CREATE TABLE IF NOT EXISTS ahg_loan_cost (
     paid TINYINT(1) DEFAULT 0,
     paid_date DATE,
 
-    paid_by ENUM('lender', 'borrower', 'shared') DEFAULT 'borrower',
+    paid_by VARCHAR(36) COMMENT 'lender, borrower, shared' DEFAULT 'borrower',
 
     notes TEXT,
 

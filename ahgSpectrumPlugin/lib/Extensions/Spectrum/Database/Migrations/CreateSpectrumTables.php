@@ -70,7 +70,7 @@ class CreateSpectrumTables
             $schema->create('spectrum_loan', function (Blueprint $table) {
                 $table->id();
                 $table->string('loan_number', 50)->unique();
-                $table->enum('loan_type', ['incoming', 'outgoing']);
+                $table->VARCHAR(41) COMMENT 'loan_type, incoming, outgoing';
                 $table->integer('borrower_id')->unsigned()->nullable(); // actor_id
                 $table->integer('lender_id')->unsigned()->nullable(); // actor_id
                 $table->string('contact_name', 255)->nullable();
@@ -84,7 +84,7 @@ class CreateSpectrumTables
                 $table->date('loan_start_date')->nullable();
                 $table->date('loan_end_date')->nullable();
                 $table->date('actual_return_date')->nullable();
-                $table->enum('status', ['requested', 'approved', 'active', 'overdue', 'returned', 'cancelled'])->default('requested');
+                $table->VARCHAR(77) COMMENT 'status, requested, approved, active, overdue, returned, cancelled'->default('requested');
                 $table->decimal('insurance_value', 15, 2)->nullable();
                 $table->string('insurance_policy', 100)->nullable();
                 $table->integer('approved_by')->unsigned()->nullable();
@@ -129,7 +129,7 @@ class CreateSpectrumTables
             $schema->create('spectrum_label', function (Blueprint $table) {
                 $table->id();
                 $table->integer('object_id')->unsigned();
-                $table->enum('label_type', ['object', 'storage', 'exhibition', 'loan', 'qr', 'barcode']);
+                $table->VARCHAR(70) COMMENT 'label_type, object, storage, exhibition, loan, qr, barcode';
                 $table->string('template', 100)->default('standard');
                 $table->json('label_data')->nullable();
                 $table->string('file_path', 500)->nullable();

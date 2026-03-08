@@ -27,14 +27,14 @@ CREATE TABLE IF NOT EXISTS atom_migration_job (
     default_values JSON COMMENT 'Default values for unmapped required fields',
     
     -- Output options
-    output_mode ENUM('direct', 'export', 'both') DEFAULT 'direct' COMMENT 'Import directly or export CSV',
+    output_mode VARCHAR(32) COMMENT 'direct, export, both' DEFAULT 'direct' COMMENT 'Import directly or export CSV',
     export_file VARCHAR(500) COMMENT 'Path to exported CSV if applicable',
     
     -- Import options
     import_options JSON COMMENT 'Match existing, update mode, etc.',
     
     -- Status tracking
-    status ENUM('pending', 'mapping', 'validating', 'validated', 'importing', 'exporting', 'completed', 'failed', 'cancelled', 'rollback') DEFAULT 'pending',
+    status VARCHAR(113) COMMENT 'pending, mapping, validating, validated, importing, exporting, completed, failed, cancelled, rollback' DEFAULT 'pending',
     total_records INT UNSIGNED DEFAULT 0,
     processed_records INT UNSIGNED DEFAULT 0,
     imported_records INT UNSIGNED DEFAULT 0,
@@ -101,7 +101,7 @@ CREATE TABLE IF NOT EXISTS atom_migration_log (
     atom_slug VARCHAR(255),
     
     -- Action taken
-    action ENUM('created', 'updated', 'skipped', 'error') NOT NULL,
+    action VARCHAR(44) COMMENT 'created, updated, skipped, error' NOT NULL,
     
     -- Hierarchy tracking
     parent_source_id VARCHAR(255),
@@ -141,11 +141,11 @@ CREATE TABLE IF NOT EXISTS atom_migration_staged (
     mapped_data JSON COMMENT 'After field mapping applied',
     
     -- Validation
-    validation_status ENUM('pending', 'valid', 'warning', 'error') DEFAULT 'pending',
+    validation_status VARCHAR(42) COMMENT 'pending, valid, warning, error' DEFAULT 'pending',
     validation_messages JSON,
     
     -- Import tracking
-    import_status ENUM('pending', 'imported', 'skipped', 'error') DEFAULT 'pending',
+    import_status VARCHAR(45) COMMENT 'pending, imported, skipped, error' DEFAULT 'pending',
     
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     

@@ -35,8 +35,8 @@ CREATE TABLE IF NOT EXISTS ipsas_asset_category (
     code VARCHAR(20) NOT NULL UNIQUE,
     name VARCHAR(255) NOT NULL,
     description TEXT,
-    asset_type ENUM('heritage', 'operational', 'mixed') DEFAULT 'heritage',
-    depreciation_policy ENUM('none', 'straight_line', 'reducing_balance') DEFAULT 'none',
+    asset_type VARCHAR(40) COMMENT 'heritage, operational, mixed' DEFAULT 'heritage',
+    depreciation_policy VARCHAR(49) COMMENT 'none, straight_line, reducing_balance' DEFAULT 'none',
     useful_life_years INT COMMENT 'Default useful life, NULL for heritage',
     account_code VARCHAR(50) COMMENT 'GL account code',
     is_active TINYINT(1) DEFAULT 1,
@@ -69,19 +69,19 @@ CREATE TABLE IF NOT EXISTS ipsas_heritage_asset (
 
     -- Acquisition details
     acquisition_date DATE,
-    acquisition_method ENUM('purchase', 'donation', 'bequest', 'transfer', 'found', 'exchange', 'unknown') DEFAULT 'unknown',
+    acquisition_method VARCHAR(75) COMMENT 'purchase, donation, bequest, transfer, found, exchange, unknown' DEFAULT 'unknown',
     acquisition_source VARCHAR(255),
     acquisition_cost DECIMAL(15, 2),
     acquisition_currency VARCHAR(3) DEFAULT 'USD',
 
     -- Valuation
-    valuation_basis ENUM('historical_cost', 'fair_value', 'nominal', 'not_recognized') DEFAULT 'nominal',
+    valuation_basis VARCHAR(64) COMMENT 'historical_cost, fair_value, nominal, not_recognized' DEFAULT 'nominal',
     current_value DECIMAL(15, 2),
     current_value_currency VARCHAR(3) DEFAULT 'USD',
     current_value_date DATE,
 
     -- Depreciation (for operational assets only)
-    depreciation_policy ENUM('none', 'straight_line', 'reducing_balance') DEFAULT 'none',
+    depreciation_policy VARCHAR(49) COMMENT 'none, straight_line, reducing_balance' DEFAULT 'none',
     useful_life_years INT,
     residual_value DECIMAL(15, 2) DEFAULT 0,
     accumulated_depreciation DECIMAL(15, 2) DEFAULT 0,
@@ -92,11 +92,11 @@ CREATE TABLE IF NOT EXISTS ipsas_heritage_asset (
     insurance_expiry DATE,
 
     -- Status
-    status ENUM('active', 'on_loan', 'in_storage', 'under_conservation', 'disposed', 'lost', 'destroyed') DEFAULT 'active',
-    condition_rating ENUM('excellent', 'good', 'fair', 'poor', 'critical') DEFAULT 'good',
+    status VARCHAR(86) COMMENT 'active, on_loan, in_storage, under_conservation, disposed, lost, destroyed' DEFAULT 'active',
+    condition_rating VARCHAR(49) COMMENT 'excellent, good, fair, poor, critical' DEFAULT 'good',
 
     -- Risk assessment
-    risk_level ENUM('low', 'medium', 'high', 'critical') DEFAULT 'low',
+    risk_level VARCHAR(39) COMMENT 'low, medium, high, critical' DEFAULT 'low',
     risk_notes TEXT,
 
     created_by INT NOT NULL,
@@ -115,8 +115,8 @@ CREATE TABLE IF NOT EXISTS ipsas_valuation (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     asset_id BIGINT UNSIGNED NOT NULL,
     valuation_date DATE NOT NULL,
-    valuation_type ENUM('initial', 'revaluation', 'impairment', 'reversal', 'disposal') NOT NULL,
-    valuation_basis ENUM('historical_cost', 'fair_value', 'nominal', 'replacement_cost') NOT NULL,
+    valuation_type VARCHAR(64) COMMENT 'initial, revaluation, impairment, reversal, disposal' NOT NULL,
+    valuation_basis VARCHAR(66) COMMENT 'historical_cost, fair_value, nominal, replacement_cost' NOT NULL,
     previous_value DECIMAL(15, 2),
     new_value DECIMAL(15, 2) NOT NULL,
     currency VARCHAR(3) DEFAULT 'USD',
@@ -126,7 +126,7 @@ CREATE TABLE IF NOT EXISTS ipsas_valuation (
     -- Valuer details
     valuer_name VARCHAR(255),
     valuer_qualification VARCHAR(255),
-    valuer_type ENUM('internal', 'external', 'government') DEFAULT 'internal',
+    valuer_type VARCHAR(42) COMMENT 'internal, external, government' DEFAULT 'internal',
 
     -- Supporting documentation
     valuation_method TEXT COMMENT 'Description of method used',
@@ -185,7 +185,7 @@ CREATE TABLE IF NOT EXISTS ipsas_insurance (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     asset_id BIGINT UNSIGNED COMMENT 'NULL for blanket policies',
     policy_number VARCHAR(100) NOT NULL,
-    policy_type ENUM('all_risks', 'named_perils', 'blanket', 'transit', 'exhibition') NOT NULL,
+    policy_type VARCHAR(65) COMMENT 'all_risks, named_perils, blanket, transit, exhibition' NOT NULL,
     insurer VARCHAR(255) NOT NULL,
 
     coverage_start DATE NOT NULL,
@@ -199,7 +199,7 @@ CREATE TABLE IF NOT EXISTS ipsas_insurance (
     coverage_details TEXT,
     exclusions TEXT,
 
-    status ENUM('active', 'expired', 'cancelled', 'pending_renewal') DEFAULT 'active',
+    status VARCHAR(55) COMMENT 'active, expired, cancelled, pending_renewal' DEFAULT 'active',
     renewal_reminder_sent TINYINT(1) DEFAULT 0,
 
     broker_name VARCHAR(255),
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS ipsas_depreciation (
     closing_value DECIMAL(15, 2) NOT NULL,
     accumulated_depreciation DECIMAL(15, 2) NOT NULL,
 
-    calculation_method ENUM('straight_line', 'reducing_balance') NOT NULL,
+    calculation_method VARCHAR(43) COMMENT 'straight_line, reducing_balance' NOT NULL,
     rate_percent DECIMAL(8, 4),
 
     notes TEXT,
@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS ipsas_disposal (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     asset_id BIGINT UNSIGNED NOT NULL,
     disposal_date DATE NOT NULL,
-    disposal_method ENUM('sale', 'donation', 'destruction', 'loss', 'theft', 'transfer', 'deaccession') NOT NULL,
+    disposal_method VARCHAR(75) COMMENT 'sale, donation, destruction, loss, theft, transfer, deaccession' NOT NULL,
 
     carrying_value DECIMAL(15, 2) NOT NULL COMMENT 'Book value at disposal',
     disposal_proceeds DECIMAL(15, 2) DEFAULT 0,
@@ -294,7 +294,7 @@ CREATE TABLE IF NOT EXISTS ipsas_financial_year_summary (
     closing_total_assets INT DEFAULT 0,
     closing_total_value DECIMAL(15, 2) DEFAULT 0,
 
-    status ENUM('open', 'closed', 'audited') DEFAULT 'open',
+    status VARCHAR(33) COMMENT 'open, closed, audited' DEFAULT 'open',
     closed_by INT,
     closed_at DATETIME,
 

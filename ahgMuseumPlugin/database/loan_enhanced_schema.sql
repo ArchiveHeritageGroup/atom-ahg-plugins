@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS loan_facility_report (
     photography_allowed TINYINT(1) DEFAULT 1,
 
     -- Overall Assessment
-    overall_rating ENUM('excellent', 'good', 'acceptable', 'marginal', 'unacceptable') DEFAULT 'acceptable',
+    overall_rating VARCHAR(63) COMMENT 'excellent, good, acceptable, marginal, unacceptable' DEFAULT 'acceptable',
     recommendations TEXT,
     conditions_required TEXT,
 
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS loan_facility_image (
     file_name VARCHAR(255),
     mime_type VARCHAR(100),
     caption TEXT,
-    image_type ENUM('exterior', 'interior', 'display_area', 'storage', 'security', 'climate_control', 'other') DEFAULT 'other',
+    image_type VARCHAR(87) COMMENT 'exterior, interior, display_area, storage, security, climate_control, other' DEFAULT 'other',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS loan_condition_report (
     information_object_id INT,
 
     -- Report Type
-    report_type ENUM('pre_loan', 'post_loan', 'in_transit', 'periodic') NOT NULL DEFAULT 'pre_loan',
+    report_type VARCHAR(53) COMMENT 'pre_loan, post_loan, in_transit, periodic' NOT NULL DEFAULT 'pre_loan',
 
     -- Basic Info
     examination_date DATETIME NOT NULL,
@@ -114,7 +114,7 @@ CREATE TABLE IF NOT EXISTS loan_condition_report (
     location VARCHAR(255),
 
     -- Overall Condition
-    overall_condition ENUM('excellent', 'good', 'fair', 'poor', 'critical') NOT NULL DEFAULT 'good',
+    overall_condition VARCHAR(49) COMMENT 'excellent, good, fair, poor, critical' NOT NULL DEFAULT 'good',
     condition_stable TINYINT(1) DEFAULT 1,
 
     -- Structural Condition
@@ -176,12 +176,12 @@ CREATE TABLE IF NOT EXISTS loan_condition_image (
     mime_type VARCHAR(100),
 
     -- Image details
-    image_type ENUM('overall', 'detail', 'damage', 'measurement', 'comparison', 'other') DEFAULT 'overall',
+    image_type VARCHAR(67) COMMENT 'overall, detail, damage, measurement, comparison, other' DEFAULT 'overall',
     caption TEXT,
     annotation_data JSON,
 
     -- Position on object (for mapping)
-    view_position ENUM('front', 'back', 'top', 'bottom', 'left', 'right', 'detail', 'other') DEFAULT 'front',
+    view_position VARCHAR(64) COMMENT 'front, back, top, bottom, left, right, detail, other' DEFAULT 'front',
 
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS loan_shipment (
     courier_id BIGINT UNSIGNED,
 
     -- Shipment Type
-    shipment_type ENUM('outbound', 'return') NOT NULL DEFAULT 'outbound',
+    shipment_type VARCHAR(28) COMMENT 'outbound, return' NOT NULL DEFAULT 'outbound',
 
     -- Reference Numbers
     shipment_number VARCHAR(100),
@@ -249,7 +249,7 @@ CREATE TABLE IF NOT EXISTS loan_shipment (
     actual_delivery DATETIME,
 
     -- Status
-    status ENUM('planned', 'picked_up', 'in_transit', 'customs', 'out_for_delivery', 'delivered', 'failed', 'returned') DEFAULT 'planned',
+    status VARCHAR(98) COMMENT 'planned, picked_up, in_transit, customs, out_for_delivery, delivered, failed, returned' DEFAULT 'planned',
 
     -- Handling
     handling_instructions TEXT,
@@ -340,7 +340,7 @@ CREATE TABLE IF NOT EXISTS loan_notification_log (
     subject VARCHAR(500),
     body TEXT,
 
-    status ENUM('pending', 'sent', 'failed', 'bounced') DEFAULT 'pending',
+    status VARCHAR(42) COMMENT 'pending, sent, failed, bounced' DEFAULT 'pending',
     sent_at DATETIME,
     error_message TEXT,
 
@@ -424,7 +424,7 @@ CREATE TABLE IF NOT EXISTS loan_cost (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     loan_id BIGINT UNSIGNED NOT NULL,
 
-    cost_type ENUM('transport', 'insurance', 'conservation', 'framing', 'crating', 'customs', 'courier_fee', 'handling', 'photography', 'other') NOT NULL,
+    cost_type VARCHAR(116) COMMENT 'transport, insurance, conservation, framing, crating, customs, courier_fee, handling, photography, other' NOT NULL,
     description VARCHAR(500),
 
     amount DECIMAL(12,2) NOT NULL,
@@ -438,7 +438,7 @@ CREATE TABLE IF NOT EXISTS loan_cost (
     paid_date DATE,
 
     -- Who Pays
-    paid_by ENUM('lender', 'borrower', 'shared') DEFAULT 'borrower',
+    paid_by VARCHAR(36) COMMENT 'lender, borrower, shared' DEFAULT 'borrower',
 
     notes TEXT,
 

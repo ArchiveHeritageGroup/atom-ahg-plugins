@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS heritage_landing_config (
     -- Hero media
     hero_media JSON DEFAULT NULL,
     hero_rotation_seconds INT DEFAULT 8,
-    hero_effect ENUM('kenburns', 'fade', 'none') DEFAULT 'kenburns',
+    hero_effect VARCHAR(32) COMMENT 'kenburns, fade, none' DEFAULT 'kenburns',
 
     -- Sections enabled
     show_curated_stories TINYINT(1) DEFAULT 1,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS heritage_filter_type (
     code VARCHAR(50) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
     icon VARCHAR(50) DEFAULT NULL,
-    source_type ENUM('taxonomy', 'authority', 'field', 'custom') NOT NULL,
+    source_type VARCHAR(46) COMMENT 'taxonomy, authority, field, custom' NOT NULL,
     source_reference VARCHAR(255) DEFAULT NULL,
     is_system TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS heritage_curated_story (
     cover_image VARCHAR(500) DEFAULT NULL,
     story_type VARCHAR(50) DEFAULT 'collection',
 
-    link_type ENUM('collection', 'search', 'external', 'page') DEFAULT 'search',
+    link_type VARCHAR(46) COMMENT 'collection, search, external, page' DEFAULT 'search',
     link_reference VARCHAR(500) DEFAULT NULL,
 
     item_count INT DEFAULT NULL,
@@ -248,11 +248,11 @@ CREATE TABLE IF NOT EXISTS heritage_learned_term (
 
     term VARCHAR(255) NOT NULL,
     related_term VARCHAR(255) NOT NULL,
-    relationship_type ENUM('synonym', 'broader', 'narrower', 'related', 'spelling') DEFAULT 'related',
+    relationship_type VARCHAR(57) COMMENT 'synonym, broader, narrower, related, spelling' DEFAULT 'related',
     confidence_score DECIMAL(5,4) DEFAULT 0.5,
     usage_count INT DEFAULT 1,
 
-    source ENUM('user_behavior', 'admin', 'taxonomy', 'external') DEFAULT 'user_behavior',
+    source VARCHAR(52) COMMENT 'user_behavior, admin, taxonomy, external' DEFAULT 'user_behavior',
     is_verified TINYINT(1) DEFAULT 0,
     is_enabled TINYINT(1) DEFAULT 1,
 
@@ -273,7 +273,7 @@ CREATE TABLE IF NOT EXISTS heritage_search_suggestion (
     institution_id INT DEFAULT NULL,
 
     suggestion_text VARCHAR(255) NOT NULL,
-    suggestion_type ENUM('query', 'title', 'subject', 'creator', 'place') DEFAULT 'query',
+    suggestion_type VARCHAR(49) COMMENT 'query, title, subject, creator, place' DEFAULT 'query',
 
     search_count INT DEFAULT 1,
     click_count INT DEFAULT 0,
@@ -339,13 +339,13 @@ CREATE TABLE IF NOT EXISTS heritage_entity_cache (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     object_id INT NOT NULL,
 
-    entity_type ENUM('person', 'organization', 'place', 'date', 'event', 'work') NOT NULL,
+    entity_type VARCHAR(58) COMMENT 'person, organization, place, date, event, work' NOT NULL,
     entity_value VARCHAR(500) NOT NULL,
     normalized_value VARCHAR(500) DEFAULT NULL,
     confidence_score DECIMAL(5,4) DEFAULT 1.0,
 
     source_field VARCHAR(100) DEFAULT NULL,
-    extraction_method ENUM('taxonomy', 'ner', 'pattern', 'manual') DEFAULT 'taxonomy',
+    extraction_method VARCHAR(42) COMMENT 'taxonomy, ner, pattern, manual' DEFAULT 'taxonomy',
 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -368,7 +368,7 @@ CREATE TABLE IF NOT EXISTS heritage_contributor (
     password_hash VARCHAR(255) NOT NULL,
     avatar_url VARCHAR(500) DEFAULT NULL,
     bio TEXT DEFAULT NULL,
-    trust_level ENUM('new', 'contributor', 'trusted', 'expert') DEFAULT 'new',
+    trust_level VARCHAR(45) COMMENT 'new, contributor, trusted, expert' DEFAULT 'new',
     email_verified TINYINT(1) DEFAULT 0,
     email_verify_token VARCHAR(100) DEFAULT NULL,
     email_verify_expires TIMESTAMP NULL,
@@ -404,7 +404,7 @@ CREATE TABLE IF NOT EXISTS heritage_contribution_type (
     color VARCHAR(20) DEFAULT 'primary',
     requires_validation TINYINT(1) DEFAULT 1,
     points_value INT DEFAULT 10,
-    min_trust_level ENUM('new', 'contributor', 'trusted', 'expert') DEFAULT 'new',
+    min_trust_level VARCHAR(45) COMMENT 'new, contributor, trusted, expert' DEFAULT 'new',
     display_order INT DEFAULT 100,
     is_active TINYINT(1) DEFAULT 1,
     config_json JSON DEFAULT NULL,
@@ -422,7 +422,7 @@ CREATE TABLE IF NOT EXISTS heritage_contribution (
     information_object_id INT NOT NULL,
     contribution_type_id INT NOT NULL,
     content JSON NOT NULL,
-    status ENUM('pending', 'approved', 'rejected', 'superseded') DEFAULT 'pending',
+    status VARCHAR(51) COMMENT 'pending, approved, rejected, superseded' DEFAULT 'pending',
     reviewed_by INT DEFAULT NULL,
     reviewed_at TIMESTAMP NULL,
     review_notes TEXT DEFAULT NULL,
@@ -502,7 +502,7 @@ CREATE TABLE IF NOT EXISTS heritage_contributor_badge (
     description TEXT DEFAULT NULL,
     icon VARCHAR(50) DEFAULT 'bi-award',
     color VARCHAR(20) DEFAULT 'primary',
-    criteria_type ENUM('contribution_count', 'approval_rate', 'points', 'type_specific', 'manual') DEFAULT 'contribution_count',
+    criteria_type VARCHAR(76) COMMENT 'contribution_count, approval_rate, points, type_specific, manual' DEFAULT 'contribution_count',
     criteria_value INT DEFAULT 0,
     criteria_config JSON DEFAULT NULL,
     points_bonus INT DEFAULT 0,
@@ -640,7 +640,7 @@ CREATE TABLE IF NOT EXISTS heritage_purpose (
 CREATE TABLE IF NOT EXISTS heritage_embargo (
     id INT AUTO_INCREMENT PRIMARY KEY,
     object_id INT NOT NULL,
-    embargo_type ENUM('full', 'digital_only', 'metadata_hidden') DEFAULT 'full',
+    embargo_type VARCHAR(47) COMMENT 'full, digital_only, metadata_hidden' DEFAULT 'full',
     reason TEXT DEFAULT NULL,
     legal_basis VARCHAR(255) DEFAULT NULL,
     start_date DATE DEFAULT NULL,
@@ -668,7 +668,7 @@ CREATE TABLE IF NOT EXISTS heritage_access_request (
     justification TEXT DEFAULT NULL,
     research_description TEXT DEFAULT NULL,
     institution_affiliation VARCHAR(255) DEFAULT NULL,
-    status ENUM('pending', 'approved', 'denied', 'expired', 'withdrawn') DEFAULT 'pending',
+    status VARCHAR(57) COMMENT 'pending, approved, denied, expired, withdrawn' DEFAULT 'pending',
     decision_by INT DEFAULT NULL,
     decision_at TIMESTAMP NULL,
     decision_notes TEXT DEFAULT NULL,
@@ -695,10 +695,10 @@ CREATE TABLE IF NOT EXISTS heritage_access_rule (
     object_id INT DEFAULT NULL,
     collection_id INT DEFAULT NULL,
     repository_id INT DEFAULT NULL,
-    rule_type ENUM('allow', 'deny', 'require_approval') DEFAULT 'deny',
-    applies_to ENUM('all', 'anonymous', 'authenticated', 'trust_level') DEFAULT 'all',
+    rule_type VARCHAR(41) COMMENT 'allow, deny, require_approval' DEFAULT 'deny',
+    applies_to VARCHAR(54) COMMENT 'all, anonymous, authenticated, trust_level' DEFAULT 'all',
     trust_level_id INT DEFAULT NULL,
-    action ENUM('view', 'view_metadata', 'download', 'download_master', 'print', 'all') DEFAULT 'view',
+    action VARCHAR(70) COMMENT 'view, view_metadata, download, download_master, print, all' DEFAULT 'view',
     priority INT DEFAULT 100,
     is_enabled TINYINT(1) DEFAULT 1,
     notes TEXT DEFAULT NULL,
@@ -716,11 +716,11 @@ CREATE TABLE IF NOT EXISTS heritage_access_rule (
 CREATE TABLE IF NOT EXISTS heritage_popia_flag (
     id INT AUTO_INCREMENT PRIMARY KEY,
     object_id INT NOT NULL,
-    flag_type ENUM('personal_info', 'sensitive', 'children', 'health', 'biometric', 'criminal', 'financial', 'political', 'religious', 'sexual') NOT NULL,
-    severity ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+    flag_type VARCHAR(116) COMMENT 'personal_info, sensitive, children, health, biometric, criminal, financial, political, religious, sexual' NOT NULL,
+    severity VARCHAR(39) COMMENT 'low, medium, high, critical' DEFAULT 'medium',
     description TEXT DEFAULT NULL,
     affected_fields JSON DEFAULT NULL,
-    detected_by ENUM('automatic', 'manual', 'review') DEFAULT 'manual',
+    detected_by VARCHAR(37) COMMENT 'automatic, manual, review' DEFAULT 'manual',
     is_resolved TINYINT(1) DEFAULT 0,
     resolution_notes TEXT DEFAULT NULL,
     resolved_by INT DEFAULT NULL,
@@ -748,7 +748,7 @@ CREATE TABLE IF NOT EXISTS heritage_audit_log (
     object_type VARCHAR(100) DEFAULT 'information_object',
     object_identifier VARCHAR(255) DEFAULT NULL,
     action VARCHAR(100) NOT NULL,
-    action_category ENUM('create', 'update', 'delete', 'view', 'export', 'import', 'batch', 'access', 'system') DEFAULT 'update',
+    action_category VARCHAR(79) COMMENT 'create, update, delete, view, export, import, batch, access, system' DEFAULT 'update',
     field_name VARCHAR(100) DEFAULT NULL,
     old_value TEXT DEFAULT NULL,
     new_value TEXT DEFAULT NULL,
@@ -773,7 +773,7 @@ CREATE TABLE IF NOT EXISTS heritage_batch_job (
     id INT AUTO_INCREMENT PRIMARY KEY,
     job_type VARCHAR(100) NOT NULL,
     job_name VARCHAR(255) DEFAULT NULL,
-    status ENUM('pending', 'queued', 'processing', 'completed', 'failed', 'cancelled', 'paused') DEFAULT 'pending',
+    status VARCHAR(77) COMMENT 'pending, queued, processing, completed, failed, cancelled, paused' DEFAULT 'pending',
     user_id INT NOT NULL,
     total_items INT DEFAULT 0,
     processed_items INT DEFAULT 0,
@@ -802,7 +802,7 @@ CREATE TABLE IF NOT EXISTS heritage_batch_item (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     job_id INT NOT NULL,
     object_id INT NOT NULL,
-    status ENUM('pending', 'processing', 'success', 'failed', 'skipped') DEFAULT 'pending',
+    status VARCHAR(57) COMMENT 'pending, processing, success, failed, skipped' DEFAULT 'pending',
     old_values JSON DEFAULT NULL,
     new_values JSON DEFAULT NULL,
     error_message TEXT DEFAULT NULL,
@@ -891,8 +891,8 @@ CREATE TABLE IF NOT EXISTS heritage_analytics_alert (
     id INT AUTO_INCREMENT PRIMARY KEY,
     institution_id INT DEFAULT NULL,
     alert_type VARCHAR(100) NOT NULL,
-    category ENUM('content', 'search', 'access', 'quality', 'system', 'opportunity') DEFAULT 'system',
-    severity ENUM('info', 'warning', 'critical', 'success') DEFAULT 'info',
+    category VARCHAR(65) COMMENT 'content, search, access, quality, system, opportunity' DEFAULT 'system',
+    severity VARCHAR(44) COMMENT 'info, warning, critical, success' DEFAULT 'info',
     title VARCHAR(255) NOT NULL,
     message TEXT DEFAULT NULL,
     action_url VARCHAR(500) DEFAULT NULL,
@@ -954,7 +954,7 @@ CREATE TABLE IF NOT EXISTS heritage_featured_collection (
     text_color VARCHAR(7) DEFAULT '#ffffff',
 
     -- Link
-    link_type ENUM('collection', 'search', 'repository', 'external') DEFAULT 'search',
+    link_type VARCHAR(52) COMMENT 'collection, search, repository, external' DEFAULT 'search',
     link_reference VARCHAR(500) DEFAULT NULL,
     collection_id INT DEFAULT NULL,
     repository_id INT DEFAULT NULL,
@@ -965,7 +965,7 @@ CREATE TABLE IF NOT EXISTS heritage_featured_collection (
     image_count INT DEFAULT 0,
 
     -- Display
-    display_size ENUM('small', 'medium', 'large', 'featured') DEFAULT 'medium',
+    display_size VARCHAR(42) COMMENT 'small, medium, large, featured' DEFAULT 'medium',
     display_order INT DEFAULT 100,
     show_on_landing TINYINT(1) DEFAULT 1,
     is_featured TINYINT(1) DEFAULT 0,
@@ -1002,19 +1002,19 @@ CREATE TABLE IF NOT EXISTS heritage_hero_slide (
     image_path VARCHAR(500) NOT NULL,
     image_alt VARCHAR(255) DEFAULT NULL,
     video_url VARCHAR(500) DEFAULT NULL,
-    media_type ENUM('image', 'video') DEFAULT 'image',
+    media_type VARCHAR(24) COMMENT 'image, video' DEFAULT 'image',
 
     -- Visual effects
-    overlay_type ENUM('none', 'gradient', 'solid') DEFAULT 'gradient',
+    overlay_type VARCHAR(33) COMMENT 'none, gradient, solid' DEFAULT 'gradient',
     overlay_color VARCHAR(7) DEFAULT '#000000',
     overlay_opacity DECIMAL(3,2) DEFAULT 0.50,
-    text_position ENUM('left', 'center', 'right', 'bottom-left', 'bottom-right') DEFAULT 'left',
+    text_position VARCHAR(58) COMMENT 'left, center, right, bottom-left, bottom-right' DEFAULT 'left',
     ken_burns TINYINT(1) DEFAULT 1,
 
     -- Call to action
     cta_text VARCHAR(100) DEFAULT NULL,
     cta_url VARCHAR(500) DEFAULT NULL,
-    cta_style ENUM('primary', 'secondary', 'outline', 'light') DEFAULT 'primary',
+    cta_style VARCHAR(46) COMMENT 'primary, secondary, outline, light' DEFAULT 'primary',
 
     -- Attribution
     source_item_id INT DEFAULT NULL,
@@ -1060,12 +1060,12 @@ CREATE TABLE IF NOT EXISTS heritage_explore_category (
     text_color VARCHAR(7) DEFAULT '#ffffff',
 
     -- Data source
-    source_type ENUM('taxonomy', 'authority', 'field', 'facet', 'custom') NOT NULL,
+    source_type VARCHAR(53) COMMENT 'taxonomy, authority, field, facet, custom' NOT NULL,
     source_reference VARCHAR(255) DEFAULT NULL,
     taxonomy_id INT DEFAULT NULL,
 
     -- Display configuration
-    display_style ENUM('grid', 'list', 'timeline', 'map', 'carousel') DEFAULT 'grid',
+    display_style VARCHAR(47) COMMENT 'grid, list, timeline, map, carousel' DEFAULT 'grid',
     items_per_page INT DEFAULT 24,
     show_counts TINYINT(1) DEFAULT 1,
     show_thumbnails TINYINT(1) DEFAULT 1,
@@ -1285,7 +1285,7 @@ INSERT IGNORE INTO heritage_timeline_period (institution_id, name, short_name, s
 CREATE TABLE IF NOT EXISTS heritage_entity_graph_node (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    entity_type ENUM('person', 'organization', 'place', 'date', 'event', 'work', 'concept') NOT NULL,
+    entity_type VARCHAR(67) COMMENT 'person, organization, place, date, event, work, concept' NOT NULL,
     canonical_value VARCHAR(500) NOT NULL,
     normalized_value VARCHAR(500) NOT NULL,
 
@@ -1329,19 +1329,7 @@ CREATE TABLE IF NOT EXISTS heritage_entity_graph_edge (
     target_node_id BIGINT UNSIGNED NOT NULL,
 
     -- Relationship type
-    relationship_type ENUM(
-        'co_occurrence',      -- Appear in same document
-        'mentioned_with',     -- Mentioned together in text
-        'associated_with',    -- General association
-        'employed_by',        -- Person -> Organization
-        'located_in',         -- Entity -> Place
-        'occurred_at',        -- Event -> Date/Place
-        'related_to',         -- Generic relation
-        'same_as',            -- Duplicate/alias
-        'child_of',           -- Hierarchical relationship
-        'preceded_by',        -- Temporal relationship
-        'followed_by'         -- Temporal relationship
-    ) NOT NULL DEFAULT 'co_occurrence',
+    relationship_type VARCHAR(153) COMMENT 'co_occurrence, mentioned_with, associated_with, employed_by, located_in, occurred_at, related_to, same_as, child_of, preceded_by, followed_by' NOT NULL DEFAULT 'co_occurrence',
 
     -- Strength metrics
     weight DECIMAL(8,4) DEFAULT 1.0000,
@@ -1386,7 +1374,7 @@ CREATE TABLE IF NOT EXISTS heritage_entity_graph_object (
     mention_count INT DEFAULT 1,
     confidence DECIMAL(5,4) DEFAULT 1.0000,
     source_field VARCHAR(100) DEFAULT NULL,
-    extraction_method ENUM('taxonomy', 'ner', 'pattern', 'manual') DEFAULT 'ner',
+    extraction_method VARCHAR(42) COMMENT 'taxonomy, ner, pattern, manual' DEFAULT 'ner',
 
     -- Position info (for highlighting)
     positions JSON DEFAULT NULL,
@@ -1408,8 +1396,8 @@ CREATE TABLE IF NOT EXISTS heritage_entity_graph_object (
 CREATE TABLE IF NOT EXISTS heritage_graph_build_log (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    build_type ENUM('full', 'incremental', 'edges_only') NOT NULL DEFAULT 'incremental',
-    status ENUM('running', 'completed', 'failed') NOT NULL DEFAULT 'running',
+    build_type VARCHAR(41) COMMENT 'full, incremental, edges_only' NOT NULL DEFAULT 'incremental',
+    status VARCHAR(38) COMMENT 'running, completed, failed' NOT NULL DEFAULT 'running',
 
     nodes_created INT DEFAULT 0,
     nodes_updated INT DEFAULT 0,

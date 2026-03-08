@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS `research_comment` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `researcher_id` INT NOT NULL,
-  `entity_type` ENUM('report','report_section','annotation','journal_entry','collection') NOT NULL,
+  `entity_type` VARCHAR(73) COMMENT 'report, report_section, annotation, journal_entry, collection' NOT NULL,
   `entity_id` INT NOT NULL,
   `parent_id` INT DEFAULT NULL,
   `content` TEXT NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `research_peer_review` (
   `report_id` INT NOT NULL,
   `requested_by` INT NOT NULL,
   `reviewer_id` INT NOT NULL,
-  `status` ENUM('pending','in_progress','completed','declined') DEFAULT 'pending',
+  `status` VARCHAR(53) COMMENT 'pending, in_progress, completed, declined' DEFAULT 'pending',
   `feedback` TEXT,
   `rating` INT DEFAULT NULL,
   `requested_at` DATETIME DEFAULT CURRENT_TIMESTAMP,

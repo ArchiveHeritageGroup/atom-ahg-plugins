@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `privacy_compliance_rule` (
   `condition` VARCHAR(255) DEFAULT NULL,
   `error_message` TEXT,
   `legal_reference` VARCHAR(100) DEFAULT NULL,
-  `severity` ENUM('error', 'warning', 'info') DEFAULT 'error',
+  `severity` VARCHAR(32) COMMENT 'error, warning, info' DEFAULT 'error',
   `is_active` TINYINT(1) DEFAULT 1,
   `sort_order` INT DEFAULT 0,
   PRIMARY KEY (`id`),

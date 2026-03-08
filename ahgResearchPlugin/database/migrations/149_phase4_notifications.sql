@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS `research_notification` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
   `researcher_id` INT NOT NULL,
-  `type` ENUM('alert','invitation','comment','reply','system','reminder','collaboration') NOT NULL,
+  `type` VARCHAR(78) COMMENT 'alert, invitation, comment, reply, system, reminder, collaboration' NOT NULL,
   `title` VARCHAR(500) NOT NULL,
   `message` TEXT,
   `link` VARCHAR(1000) DEFAULT NULL,
@@ -25,6 +25,6 @@ CREATE TABLE IF NOT EXISTS `research_notification_preference` (
   `notification_type` VARCHAR(50) NOT NULL,
   `email_enabled` TINYINT(1) DEFAULT 1,
   `in_app_enabled` TINYINT(1) DEFAULT 1,
-  `digest_frequency` ENUM('immediate','daily','weekly','none') DEFAULT 'immediate',
+  `digest_frequency` VARCHAR(42) COMMENT 'immediate, daily, weekly, none' DEFAULT 'immediate',
   UNIQUE KEY `uk_researcher_type` (`researcher_id`, `notification_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

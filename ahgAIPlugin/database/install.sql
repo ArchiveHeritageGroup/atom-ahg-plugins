@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS ahg_ner_entity_link (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     entity_id BIGINT UNSIGNED NOT NULL,
     actor_id INT NOT NULL,
-    link_type ENUM('exact', 'fuzzy', 'manual') DEFAULT 'manual',
+    link_type VARCHAR(32) COMMENT 'exact, fuzzy, manual' DEFAULT 'manual',
     confidence DECIMAL(5,4) DEFAULT 1.0000,
     created_by INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS ahg_spellcheck_result (
     object_id INT NOT NULL,
     errors_json JSON DEFAULT NULL,
     error_count INT DEFAULT 0,
-    status ENUM('pending', 'reviewed', 'ignored') DEFAULT 'pending',
+    status VARCHAR(38) COMMENT 'pending, reviewed, ignored' DEFAULT 'pending',
     reviewed_by INT DEFAULT NULL,
     reviewed_at TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS ahg_translation_queue (
     source_culture VARCHAR(10) NOT NULL,
     target_culture VARCHAR(10) NOT NULL,
     fields TEXT NOT NULL COMMENT 'JSON array of fields to translate',
-    status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
+    status VARCHAR(50) COMMENT 'pending, processing, completed, failed' DEFAULT 'pending',
     error_message TEXT DEFAULT NULL,
     created_by INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS ahg_description_suggestion (
     prompt_template_id INT UNSIGNED,
     llm_config_id INT UNSIGNED,
     source_data JSON,                           -- {has_ocr: true, fields: [...]}
-    status ENUM('pending','approved','rejected','edited') DEFAULT 'pending',
+    status VARCHAR(47) COMMENT 'pending, approved, rejected, edited' DEFAULT 'pending',
     edited_text TEXT,
     reviewed_by INT,
     reviewed_at TIMESTAMP NULL,
@@ -259,7 +259,7 @@ CREATE TABLE IF NOT EXISTS ahg_ai_batch (
     name VARCHAR(255) NOT NULL,
     description TEXT,
     task_types JSON NOT NULL,                    -- ["ner", "summarize", "suggest", "translate", "spellcheck"]
-    status ENUM('pending', 'running', 'paused', 'completed', 'failed', 'cancelled') DEFAULT 'pending',
+    status VARCHAR(66) COMMENT 'pending, running, paused, completed, failed, cancelled' DEFAULT 'pending',
     priority TINYINT DEFAULT 5,                  -- 1=highest, 10=lowest
     total_items INT DEFAULT 0,
     completed_items INT DEFAULT 0,
@@ -297,7 +297,7 @@ CREATE TABLE IF NOT EXISTS ahg_ai_job (
     batch_id BIGINT UNSIGNED NOT NULL,
     object_id INT NOT NULL,
     task_type VARCHAR(50) NOT NULL,              -- 'ner', 'summarize', 'suggest', 'translate', 'spellcheck', 'ocr'
-    status ENUM('pending', 'queued', 'running', 'completed', 'failed', 'skipped') DEFAULT 'pending',
+    status VARCHAR(64) COMMENT 'pending, queued, running, completed, failed, skipped' DEFAULT 'pending',
     priority TINYINT DEFAULT 5,
 
     -- Execution
@@ -354,7 +354,7 @@ CREATE TABLE IF NOT EXISTS ahg_ai_pending_extraction (
     object_id INT NOT NULL,
     digital_object_id INT DEFAULT NULL,
     task_type VARCHAR(50) NOT NULL DEFAULT 'ner',
-    status ENUM('pending', 'processing', 'completed', 'failed') DEFAULT 'pending',
+    status VARCHAR(50) COMMENT 'pending, processing, completed, failed' DEFAULT 'pending',
     attempt_count INT DEFAULT 0,
     error_message TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

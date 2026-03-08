@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS atom_landing_page_version (
     id INT AUTO_INCREMENT PRIMARY KEY,
     page_id INT NOT NULL,
     version_number INT NOT NULL,
-    status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
+    status VARCHAR(38) COMMENT 'draft, published, archived' DEFAULT 'draft',
     snapshot JSON NOT NULL COMMENT 'Complete page state snapshot',
     notes TEXT,
     user_id INT,

@@ -5,13 +5,13 @@
 CREATE TABLE IF NOT EXISTS numbering_scheme (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    sector ENUM('archive', 'library', 'museum', 'gallery', 'dam', 'all') NOT NULL,
+    sector VARCHAR(55) COMMENT 'archive, library, museum, gallery, dam, all' NOT NULL,
     pattern VARCHAR(255) NOT NULL,
     description TEXT,
 
     -- Sequence settings
     current_sequence BIGINT DEFAULT 0,
-    sequence_reset ENUM('never', 'yearly', 'monthly') DEFAULT 'never',
+    sequence_reset VARCHAR(34) COMMENT 'never, yearly, monthly' DEFAULT 'never',
     last_reset_date DATE,
     fill_gaps TINYINT(1) DEFAULT 0,
 

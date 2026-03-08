@@ -14,7 +14,7 @@ return new class {
             // Rename entry_type to journal_type
             if (DB::schema()->hasColumn('heritage_journal_entry', 'entry_type') 
                 && !DB::schema()->hasColumn('heritage_journal_entry', 'journal_type')) {
-                DB::statement("ALTER TABLE `heritage_journal_entry` CHANGE `entry_type` `journal_type` ENUM('recognition','revaluation','depreciation','impairment','impairment_reversal','derecognition','adjustment','transfer') NOT NULL");
+                DB::statement("ALTER TABLE `heritage_journal_entry` CHANGE `entry_type` `journal_type` VARCHAR(120) COMMENT 'recognition, revaluation, depreciation, impairment, impairment_reversal, derecognition, adjustment, transfer' NOT NULL");
             }
             // Add missing columns
             if (!DB::schema()->hasColumn('heritage_journal_entry', 'journal_number')) {
@@ -70,10 +70,10 @@ return new class {
                 DB::statement("ALTER TABLE `heritage_movement_register` ADD COLUMN `actual_return_date` DATE NULL AFTER `expected_return_date`");
             }
             if (!DB::schema()->hasColumn('heritage_movement_register', 'condition_on_departure')) {
-                DB::statement("ALTER TABLE `heritage_movement_register` ADD COLUMN `condition_on_departure` ENUM('excellent','good','fair','poor') NULL AFTER `actual_return_date`");
+                DB::statement("ALTER TABLE `heritage_movement_register` ADD COLUMN `condition_on_departure` VARCHAR(39) COMMENT 'excellent, good, fair, poor' NULL AFTER `actual_return_date`");
             }
             if (!DB::schema()->hasColumn('heritage_movement_register', 'condition_on_return')) {
-                DB::statement("ALTER TABLE `heritage_movement_register` ADD COLUMN `condition_on_return` ENUM('excellent','good','fair','poor') NULL AFTER `condition_on_departure`");
+                DB::statement("ALTER TABLE `heritage_movement_register` ADD COLUMN `condition_on_return` VARCHAR(39) COMMENT 'excellent, good, fair, poor' NULL AFTER `condition_on_departure`");
             }
             if (!DB::schema()->hasColumn('heritage_movement_register', 'condition_notes')) {
                 DB::statement("ALTER TABLE `heritage_movement_register` ADD COLUMN `condition_notes` TEXT NULL AFTER `condition_on_return`");

@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS provenance_agent (
     id INT AUTO_INCREMENT PRIMARY KEY,
     actor_id INT NULL COMMENT 'Link to AtoM actor if exists',
-    agent_type ENUM('person', 'organization', 'family', 'unknown') DEFAULT 'person',
+    agent_type VARCHAR(49) COMMENT 'person, organization, family, unknown' DEFAULT 'person',
     name VARCHAR(500) NOT NULL,
     contact_info TEXT NULL,
     location VARCHAR(500) NULL,
@@ -42,23 +42,23 @@ CREATE TABLE IF NOT EXISTS provenance_record (
     donor_agreement_id INT NULL COMMENT 'Link to donor agreement if applicable',
     
     -- Current status
-    current_status ENUM('owned', 'on_loan', 'deposited', 'unknown', 'disputed') DEFAULT 'owned',
-    custody_type ENUM('permanent', 'temporary', 'loan', 'deposit') DEFAULT 'permanent',
+    current_status VARCHAR(56) COMMENT 'owned, on_loan, deposited, unknown, disputed' DEFAULT 'owned',
+    custody_type VARCHAR(47) COMMENT 'permanent, temporary, loan, deposit' DEFAULT 'permanent',
     
     -- Acquisition info
-    acquisition_type ENUM('donation', 'purchase', 'bequest', 'transfer', 'loan', 'deposit', 'exchange', 'field_collection', 'unknown') DEFAULT 'unknown',
+    acquisition_type VARCHAR(101) COMMENT 'donation, purchase, bequest, transfer, loan, deposit, exchange, field_collection, unknown' DEFAULT 'unknown',
     acquisition_date DATE NULL,
     acquisition_date_text VARCHAR(255) NULL COMMENT 'For imprecise dates like "circa 1950"',
     acquisition_price DECIMAL(15,2) NULL,
     acquisition_currency VARCHAR(3) NULL,
     
     -- Provenance certainty
-    certainty_level ENUM('certain', 'probable', 'possible', 'uncertain', 'unknown') DEFAULT 'unknown',
+    certainty_level VARCHAR(59) COMMENT 'certain, probable, possible, uncertain, unknown' DEFAULT 'unknown',
     has_gaps TINYINT(1) DEFAULT 0 COMMENT 'Are there gaps in provenance chain?',
     gap_description TEXT NULL,
     
     -- Research status
-    research_status ENUM('not_started', 'in_progress', 'complete', 'inconclusive') DEFAULT 'not_started',
+    research_status VARCHAR(60) COMMENT 'not_started, in_progress, complete, inconclusive' DEFAULT 'not_started',
     research_notes TEXT NULL,
     
     -- Nazi-era / WWII provenance (important for museums)
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS provenance_record (
     nazi_era_notes TEXT NULL,
     
     -- Cultural property
-    cultural_property_status ENUM('none', 'claimed', 'disputed', 'repatriated', 'cleared') DEFAULT 'none',
+    cultural_property_status VARCHAR(57) COMMENT 'none, claimed, disputed, repatriated, cleared' DEFAULT 'none',
     cultural_property_notes TEXT NULL,
     
     -- Summary
@@ -114,30 +114,14 @@ CREATE TABLE IF NOT EXISTS provenance_event (
     to_agent_id INT NULL COMMENT 'New owner/holder',
     
     -- Event details
-    event_type ENUM(
-        'creation', 'commission', 
-        'sale', 'purchase', 'auction',
-        'gift', 'donation', 'bequest',
-        'inheritance', 'descent',
-        'loan_out', 'loan_return',
-        'deposit', 'withdrawal',
-        'transfer', 'exchange',
-        'theft', 'recovery',
-        'confiscation', 'restitution', 'repatriation',
-        'discovery', 'excavation',
-        'import', 'export',
-        'authentication', 'appraisal',
-        'conservation', 'restoration',
-        'accessioning', 'deaccessioning',
-        'unknown', 'other'
-    ) NOT NULL DEFAULT 'unknown',
+    event_type VARCHAR(365) COMMENT 'creation, commission, sale, purchase, auction, gift, donation, bequest, inheritance, descent, loan_out, loan_return, deposit, withdrawal, transfer, exchange, theft, recovery, confiscation, restitution, repatriation, discovery, excavation, import, export, authentication, appraisal, conservation, restoration, accessioning, deaccessioning, unknown, other' NOT NULL DEFAULT 'unknown',
     
     -- Date (can be precise or imprecise)
     event_date DATE NULL,
     event_date_start DATE NULL,
     event_date_end DATE NULL,
     event_date_text VARCHAR(255) NULL COMMENT 'For display like "circa 1920" or "before 1945"',
-    date_certainty ENUM('exact', 'approximate', 'estimated', 'unknown') DEFAULT 'unknown',
+    date_certainty VARCHAR(50) COMMENT 'exact, approximate, estimated, unknown' DEFAULT 'unknown',
     
     -- Location
     event_location VARCHAR(500) NULL,
@@ -150,12 +134,12 @@ CREATE TABLE IF NOT EXISTS provenance_event (
     sale_reference VARCHAR(255) NULL COMMENT 'Auction lot number, invoice, etc.',
     
     -- Evidence/Documentation
-    evidence_type ENUM('documentary', 'physical', 'oral', 'circumstantial', 'none') DEFAULT 'none',
+    evidence_type VARCHAR(61) COMMENT 'documentary, physical, oral, circumstantial, none' DEFAULT 'none',
     evidence_description TEXT NULL,
     source_reference TEXT NULL COMMENT 'Bibliography, archive reference, etc.',
     
     -- Certainty
-    certainty ENUM('certain', 'probable', 'possible', 'uncertain') DEFAULT 'uncertain',
+    certainty VARCHAR(50) COMMENT 'certain, probable, possible, uncertain' DEFAULT 'uncertain',
     
     -- Sequence
     sequence_number INT DEFAULT 0 COMMENT 'Order in provenance chain',
@@ -196,17 +180,7 @@ CREATE TABLE IF NOT EXISTS provenance_document (
     provenance_record_id INT NULL,
     provenance_event_id INT NULL,
     
-    document_type ENUM(
-        'deed_of_gift', 'bill_of_sale', 'invoice', 'receipt',
-        'auction_catalog', 'exhibition_catalog', 
-        'inventory', 'insurance_record',
-        'photograph', 'correspondence', 'certificate',
-        'customs_document', 'export_license', 'import_permit',
-        'appraisal', 'condition_report',
-        'newspaper_clipping', 'publication',
-        'oral_history', 'affidavit', 'legal_document',
-        'other'
-    ) NOT NULL DEFAULT 'other',
+    document_type VARCHAR(322) COMMENT 'deed_of_gift, bill_of_sale, invoice, receipt, auction_catalog, exhibition_catalog, inventory, insurance_record, photograph, correspondence, certificate, customs_document, export_license, import_permit, appraisal, condition_report, newspaper_clipping, publication, oral_history, affidavit, legal_document, other' NOT NULL DEFAULT 'other',
     
     title VARCHAR(500) NULL,
     description TEXT NULL,

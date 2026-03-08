@@ -63,7 +63,7 @@ class ahgSpectrumInstallService
             id INT AUTO_INCREMENT PRIMARY KEY,
             event_id INT NOT NULL,
             approver_id INT NOT NULL,
-            status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+            status VARCHAR(39) COMMENT 'pending, approved, rejected' DEFAULT 'pending',
             comments TEXT,
             created_at DATETIME NOT NULL,
             updated_at DATETIME NOT NULL,
