@@ -56,8 +56,12 @@
         <td><span class="badge bg-secondary"><?php echo htmlspecialchars($erd->category, ENT_QUOTES, 'UTF-8'); ?></span></td>
         <td><span class="badge bg-light text-dark border"><?php echo is_array($tables) ? count($tables) : 0; ?></span></td>
         <td>
-          <?php if (!empty($erd->diagram)): ?>
-            <span class="badge bg-success"><i class="fas fa-check"></i></span>
+          <?php if (!empty($erd->diagram_image) && !empty($erd->diagram)): ?>
+            <span class="badge bg-success" title="Image + ASCII"><i class="fas fa-image me-1"></i><i class="fas fa-code"></i></span>
+          <?php elseif (!empty($erd->diagram_image)): ?>
+            <span class="badge bg-success" title="Image"><i class="fas fa-image"></i></span>
+          <?php elseif (!empty($erd->diagram)): ?>
+            <span class="badge bg-success" title="ASCII"><i class="fas fa-code"></i></span>
           <?php else: ?>
             <span class="badge bg-light text-muted border">-</span>
           <?php endif; ?>

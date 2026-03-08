@@ -23,7 +23,7 @@
 
 <h1 class="h3 mb-4"><?php echo $isNew ? __('Add ERD Entry') : __('Edit ERD Entry'); ?></h1>
 
-<form method="post" action="<?php echo $isNew
+<form method="post" enctype="multipart/form-data" action="<?php echo $isNew
   ? url_for(['module' => 'registry', 'action' => 'adminErdEdit'])
   : url_for(['module' => 'registry', 'action' => 'adminErdEdit', 'id' => $e->id]); ?>">
 
@@ -225,6 +225,39 @@
       </div>
 
       <div class="card mb-4">
+        <div class="card-header"><h5 class="mb-0"><?php echo __('ERD Diagram Image / Document'); ?></h5></div>
+        <div class="card-body">
+          <?php if (!empty($e->diagram_image)): ?>
+          <div class="mb-3 p-3 bg-light rounded">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <strong class="small"><?php echo __('Current file:'); ?></strong>
+              <input type="hidden" name="remove_diagram_image" id="remove_diagram_image" value="0">
+              <button type="button" class="btn btn-outline-danger btn-sm" id="btnRemoveDiagram" onclick="toggleRemoveDiagram()">
+                <i class="fas fa-trash-alt me-1"></i><?php echo __('Remove'); ?>
+              </button>
+            </div>
+            <?php
+              $imgPath = $e->diagram_image;
+              $ext = strtolower(pathinfo($imgPath, PATHINFO_EXTENSION));
+              $isImage = in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']);
+            ?>
+            <div id="diagramPreview">
+            <?php if ($isImage): ?>
+              <img src="<?php echo htmlspecialchars($imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="ERD Diagram" class="img-fluid rounded border" style="max-height: 300px;">
+            <?php else: ?>
+              <a href="<?php echo htmlspecialchars($imgPath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-file-pdf me-1"></i><?php echo basename($imgPath); ?>
+              </a>
+            <?php endif; ?>
+            </div>
+          </div>
+          <?php endif; ?>
+          <input type="file" class="form-control" name="diagram_image" accept="image/*,.pdf,.svg">
+          <div class="form-text"><?php echo __('Upload an ERD diagram image (PNG, JPG, SVG, WebP) or PDF document. Complements or replaces the ASCII diagram below.'); ?></div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
         <div class="card-header"><h5 class="mb-0"><?php echo __('ASCII ERD Diagram'); ?></h5></div>
         <div class="card-body">
           <textarea class="form-control font-monospace" name="diagram" rows="15" style="font-size: 0.8em;" placeholder="Paste ASCII diagram here..."><?php echo htmlspecialchars($e->diagram ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
@@ -302,6 +335,24 @@ document.querySelector('.dropdown-menu').addEventListener('click', function(e) {
     e.stopPropagation();
   }
 });
+function toggleRemoveDiagram() {
+  var inp = document.getElementById('remove_diagram_image');
+  var btn = document.getElementById('btnRemoveDiagram');
+  var preview = document.getElementById('diagramPreview');
+  if (inp.value === '0') {
+    inp.value = '1';
+    btn.classList.remove('btn-outline-danger');
+    btn.classList.add('btn-danger');
+    btn.innerHTML = '<i class="fas fa-undo me-1"></i><?php echo __("Undo Remove"); ?>';
+    if (preview) { preview.style.opacity = '0.3'; preview.style.textDecoration = 'line-through'; }
+  } else {
+    inp.value = '0';
+    btn.classList.remove('btn-danger');
+    btn.classList.add('btn-outline-danger');
+    btn.innerHTML = '<i class="fas fa-trash-alt me-1"></i><?php echo __("Remove"); ?>';
+    if (preview) { preview.style.opacity = '1'; preview.style.textDecoration = 'none'; }
+  }
+}
 </script>
 
 <?php end_slot(); ?>

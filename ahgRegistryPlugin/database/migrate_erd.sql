@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `registry_erd` (
   `description` text COMMENT 'Short description of this ERD group',
   `tables_json` json DEFAULT NULL COMMENT 'Array of table names to auto-render schema from information_schema',
   `diagram` longtext COMMENT 'ASCII ERD diagram (rendered in <pre> block)',
+  `diagram_image` varchar(500) DEFAULT NULL COMMENT 'Uploaded ERD diagram image/document path',
   `notes` text COMMENT 'Additional notes or markdown content',
   `icon` varchar(100) DEFAULT 'fas fa-database' COMMENT 'Font Awesome icon class',
   `color` varchar(50) DEFAULT 'primary' COMMENT 'Bootstrap color class',

@@ -5334,6 +5334,50 @@ class registryActions extends AhgController
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
 
+            // Handle diagram image upload
+            $imgFile = $_FILES['diagram_image'] ?? null;
+            if ($imgFile && $imgFile['error'] === UPLOAD_ERR_OK && $imgFile['size'] > 0) {
+                $allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/svg+xml',
+                            'application/pdf', 'image/vnd.microsoft.icon'];
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $mime = $finfo->file($imgFile['tmp_name']);
+
+                if (in_array($mime, $allowed)) {
+                    $uploadDir = \sfConfig::get('sf_root_dir') . '/uploads/registry/erd';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0775, true);
+                    }
+                    $ext = pathinfo($imgFile['name'], PATHINFO_EXTENSION) ?: 'png';
+                    $filename = 'erd-' . ($id > 0 ? $id : time()) . '-' . time() . '.' . strtolower($ext);
+                    if (move_uploaded_file($imgFile['tmp_name'], $uploadDir . '/' . $filename)) {
+                        $data['diagram_image'] = '/uploads/registry/erd/' . $filename;
+
+                        // Remove old image if replacing
+                        if ($id > 0) {
+                            $existing = $db::table('registry_erd')->where('id', $id)->value('diagram_image');
+                            if ($existing && $existing !== $data['diagram_image']) {
+                                $oldPath = \sfConfig::get('sf_root_dir') . $existing;
+                                if (file_exists($oldPath)) {
+                                    @unlink($oldPath);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Handle image removal
+            if ($request->getParameter('remove_diagram_image') == '1' && $id > 0) {
+                $existing = $db::table('registry_erd')->where('id', $id)->value('diagram_image');
+                if ($existing) {
+                    $oldPath = \sfConfig::get('sf_root_dir') . $existing;
+                    if (file_exists($oldPath)) {
+                        @unlink($oldPath);
+                    }
+                }
+                $data['diagram_image'] = null;
+            }
+
             if ($id > 0) {
                 $db::table('registry_erd')->where('id', $id)->update($data);
             } else {

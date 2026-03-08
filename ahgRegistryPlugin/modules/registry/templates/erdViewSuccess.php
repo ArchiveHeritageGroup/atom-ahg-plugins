@@ -58,11 +58,41 @@
 </div>
 <?php endif; ?>
 
+<!-- ERD Diagram Image -->
+<?php if (!empty($erd->diagram_image)): ?>
+<?php
+  $_imgPath = $erd->diagram_image;
+  $_ext = strtolower(pathinfo(sfOutputEscaper::unescape($_imgPath), PATHINFO_EXTENSION));
+  $_isImg = in_array($_ext, ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']);
+?>
+<div class="card mb-4">
+  <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Entity Relationship Diagram'); ?></h5>
+    <a href="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="btn btn-outline-light btn-sm">
+      <i class="fas fa-external-link-alt me-1"></i><?php echo __('Open Full Size'); ?>
+    </a>
+  </div>
+  <div class="card-body text-center p-3">
+    <?php if ($_isImg): ?>
+      <a href="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank">
+        <img src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo $erd->display_name; ?> ERD" class="img-fluid rounded" style="max-height: 800px;">
+      </a>
+    <?php elseif ($_ext === 'pdf'): ?>
+      <embed src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" type="application/pdf" width="100%" height="700px" class="rounded border">
+    <?php else: ?>
+      <a href="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="btn btn-primary">
+        <i class="fas fa-download me-1"></i><?php echo __('Download Diagram'); ?>
+      </a>
+    <?php endif; ?>
+  </div>
+</div>
+<?php endif; ?>
+
 <!-- ASCII ERD Diagram -->
 <?php if (!empty($erd->diagram)): ?>
 <div class="card mb-4">
   <div class="card-header bg-dark text-white">
-    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Entity Relationship Diagram'); ?></h5>
+    <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo !empty($erd->diagram_image) ? __('ASCII Diagram (Detail)') : __('Entity Relationship Diagram'); ?></h5>
   </div>
   <div class="card-body p-0">
     <pre class="p-4 mb-0 text-white" style="font-size: 0.78em; overflow-x: auto; background: #1a1a2e;"><?php echo htmlspecialchars($erd->diagram, ENT_QUOTES, 'UTF-8'); ?></pre>
