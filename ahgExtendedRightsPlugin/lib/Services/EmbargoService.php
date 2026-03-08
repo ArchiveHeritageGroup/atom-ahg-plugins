@@ -163,7 +163,7 @@ class EmbargoService
         }
 
         // Map reason to enum if possible
-        $reasonEnum = $this->mapReasonToVARCHAR(20) COMMENT 'reason';
+        $reasonEnum = $this->mapReasonToEnum($data['reason'] ?? null);
 
         $embargoId = DB::table('rights_embargo')->insertGetId([
             'object_id' => $objectId,
@@ -212,7 +212,7 @@ class EmbargoService
         if (isset($data['is_perpetual'])) $updateData['auto_release'] = !$data['is_perpetual'];
         if (isset($data['status'])) $updateData['status'] = $data['status'];
         if (isset($data['notify_days_before'])) $updateData['notify_before_days'] = $data['notify_days_before'];
-        if (isset($data['reason'])) $updateData['reason'] = $this->mapReasonToVARCHAR(20) COMMENT 'reason';
+        if (isset($data['reason'])) $updateData['reason'] = $this->mapReasonToEnum($data['reason']);
 
         $updated = DB::table('rights_embargo')
             ->where('id', $embargoId)
