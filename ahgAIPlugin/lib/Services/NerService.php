@@ -10,9 +10,41 @@ class ahgNerService
 
     public function __construct()
     {
-        $this->apiUrl = 'http://192.168.0.112:5004/ai/v1';
-        $this->apiKey = 'ahg_ai_demo_internal_2026';
-        $this->timeout = 300;  // 5 minutes for OCR processing
+        $this->apiUrl = $this->loadSetting('api_url', 'http://192.168.0.112:5004/ai/v1');
+        $this->apiKey = $this->loadSetting('api_key', '');
+        $this->timeout = (int) $this->loadSetting('api_timeout', '300');
+    }
+
+    /**
+     * Load a setting from ahg_ai_settings (general feature) with ahg_ner_settings fallback.
+     */
+    private function loadSetting(string $key, string $default): string
+    {
+        try {
+            \AhgCore\Core\AhgDb::init();
+            $db = \Illuminate\Database\Capsule\Manager::class;
+
+            // Try ahg_ai_settings first
+            $value = $db::table('ahg_ai_settings')
+                ->where('feature', 'general')
+                ->where('setting_key', $key)
+                ->value('setting_value');
+            if ($value !== null && $value !== '') {
+                return $value;
+            }
+
+            // Fallback to ahg_ner_settings
+            $value = $db::table('ahg_ner_settings')
+                ->where('setting_key', $key)
+                ->value('setting_value');
+            if ($value !== null && $value !== '') {
+                return $value;
+            }
+        } catch (\Exception $e) {
+            // DB not available yet (CLI bootstrap, etc.)
+        }
+
+        return $default;
     }
 
     /**
