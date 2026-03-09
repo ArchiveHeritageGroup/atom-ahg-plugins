@@ -264,6 +264,8 @@ class exhibitionActions extends AhgController
             'display_position' => $request->getParameter('display_location'),
             'sequence_order' => $request->getParameter('display_order') ?: 0,
             'installation_notes' => $request->getParameter('display_notes'),
+            'requires_loan' => $request->getParameter('requires_loan') ? 1 : 0,
+            'lender_institution' => $request->getParameter('lender_institution'),
         ];
 
         try {
