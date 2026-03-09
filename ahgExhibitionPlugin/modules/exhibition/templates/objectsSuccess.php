@@ -62,6 +62,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
                 <th>Object</th>
                 <th>Section</th>
                 <th>Location</th>
+                <th>Loan</th>
                 <th>Display Order</th>
                 <th class="text-end">Actions</th>
               </tr>
@@ -95,6 +96,32 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
                     <?php endif; ?>
                   </td>
                   <td>
+                    <?php if (!empty($object['requires_loan'])): ?>
+                      <?php if (!empty($object['loan_id'])): ?>
+                        <?php
+                          $loanStatus = \Illuminate\Database\Capsule\Manager::table('ahg_loan')->where('id', $object['loan_id'])->value('status');
+                        ?>
+                        <a href="<?php echo url_for(['module' => 'loan', 'action' => 'show', 'id' => $object['loan_id']]); ?>" class="badge bg-success text-decoration-none" title="<?php echo __('View Loan'); ?>">
+                          <i class="fas fa-handshake me-1"></i><?php echo htmlspecialchars($loanStatus ?? 'linked'); ?>
+                        </a>
+                      <?php else: ?>
+                        <span class="badge bg-warning text-dark" title="<?php echo htmlspecialchars($object['lender_institution'] ?? __('Loan required')); ?>">
+                          <i class="fas fa-hand-holding me-1"></i><?php echo __('Needed'); ?>
+                        </span>
+                        <?php if (in_array('ahgLoanPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+                          <a href="<?php echo url_for(['module' => 'loan', 'action' => 'add', 'type' => 'in', 'object_id' => $object['information_object_id'], 'exhibition_id' => $exhibition['id']]); ?>" class="btn btn-xs btn-outline-success ms-1" title="<?php echo __('Create Loan'); ?>">
+                            <i class="fas fa-plus"></i>
+                          </a>
+                        <?php endif; ?>
+                      <?php endif; ?>
+                      <?php if (!empty($object['lender_institution'])): ?>
+                        <br><small class="text-muted"><?php echo htmlspecialchars($object['lender_institution']); ?></small>
+                      <?php endif; ?>
+                    <?php else: ?>
+                      <span class="text-muted">-</span>
+                    <?php endif; ?>
+                  </td>
+                  <td>
                     <span class="badge bg-secondary"><?php echo $object['sequence_order'] ?? '-'; ?></span>
                   </td>
                   <td class="text-end">
@@ -106,6 +133,8 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
                               data-location="<?php echo htmlspecialchars($object['display_position'] ?? ''); ?>"
                               data-notes="<?php echo htmlspecialchars($object['installation_notes'] ?? ''); ?>"
                               data-order="<?php echo $object['sequence_order'] ?? ''; ?>"
+                              data-requires-loan="<?php echo !empty($object['requires_loan']) ? '1' : '0'; ?>"
+                              data-lender="<?php echo htmlspecialchars($object['lender_institution'] ?? ''); ?>"
                               title="Edit">
                         <i class="fas fa-edit"></i>
                       </button>
@@ -223,6 +252,19 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
             <label class="form-label">Display Notes</label>
             <textarea name="display_notes" class="form-control" rows="2" placeholder="Special display requirements..."></textarea>
           </div>
+
+          <hr>
+          <h6 class="text-muted"><i class="fas fa-handshake me-1"></i> Loan Details</h6>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" name="requires_loan" id="addRequiresLoan" value="1" onchange="document.getElementById('addLenderFields').style.display = this.checked ? 'block' : 'none';">
+            <label class="form-check-label" for="addRequiresLoan"><?php echo __('Requires loan from another institution'); ?></label>
+          </div>
+          <div id="addLenderFields" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label"><?php echo __('Lender Institution'); ?></label>
+              <input type="text" name="lender_institution" class="form-control" placeholder="<?php echo __('Institution lending the object'); ?>">
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -269,6 +311,19 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
           <div class="mb-3">
             <label class="form-label">Display Order</label>
             <input type="number" name="display_order" id="editOrder" class="form-control" min="0">
+          </div>
+
+          <hr>
+          <h6 class="text-muted"><i class="fas fa-handshake me-1"></i> Loan Details</h6>
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" name="requires_loan" id="editRequiresLoan" value="1" onchange="document.getElementById('editLenderFields').style.display = this.checked ? 'block' : 'none';">
+            <label class="form-check-label" for="editRequiresLoan"><?php echo __('Requires loan from another institution'); ?></label>
+          </div>
+          <div id="editLenderFields" style="display: none;">
+            <div class="mb-3">
+              <label class="form-label"><?php echo __('Lender Institution'); ?></label>
+              <input type="text" name="lender_institution" id="editLenderInstitution" class="form-control" placeholder="<?php echo __('Institution lending the object'); ?>">
+            </div>
           </div>
         </div>
         <div class="modal-footer">
@@ -336,6 +391,10 @@ document.getElementById('editObjectModal').addEventListener('show.bs.modal', fun
   document.getElementById('editLocation').value = button.dataset.location || '';
   document.getElementById('editNotes').value = button.dataset.notes || '';
   document.getElementById('editOrder').value = button.dataset.order || '';
+  var requiresLoan = button.dataset.requiresLoan === '1';
+  document.getElementById('editRequiresLoan').checked = requiresLoan;
+  document.getElementById('editLenderFields').style.display = requiresLoan ? 'block' : 'none';
+  document.getElementById('editLenderInstitution').value = button.dataset.lender || '';
 });
 
 // Remove object
