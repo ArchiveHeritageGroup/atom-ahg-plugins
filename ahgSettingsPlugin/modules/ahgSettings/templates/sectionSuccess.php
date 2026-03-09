@@ -2420,6 +2420,256 @@ slot('title', $title);
                             </div>
                             <?php break; ?>
 
+                        <?php case 'library': ?>
+                            <?php
+                                $loanRules = \Illuminate\Database\Capsule\Manager::table('library_loan_rule')->orderBy('material_type')->orderBy('patron_type')->get();
+                            ?>
+                            <!-- Loan Rules -->
+                            <div class="card mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i><?php echo __('Loan Rules'); ?></h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <p class="text-muted px-3 pt-3 mb-2"><?php echo __('Configure loan periods, renewal limits, and fine rates per material type and patron type.'); ?></p>
+                                    <table class="table table-striped table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th><?php echo __('Material Type'); ?></th>
+                                                <th><?php echo __('Patron Type'); ?></th>
+                                                <th class="text-center"><?php echo __('Loan Days'); ?></th>
+                                                <th class="text-center"><?php echo __('Renewal Days'); ?></th>
+                                                <th class="text-center"><?php echo __('Max Renewals'); ?></th>
+                                                <th class="text-center"><?php echo __('Fine/Day'); ?></th>
+                                                <th class="text-center"><?php echo __('Fine Cap'); ?></th>
+                                                <th class="text-center"><?php echo __('Grace Days'); ?></th>
+                                                <th class="text-center"><?php echo __('Loanable'); ?></th>
+                                                <th><?php echo __('Actions'); ?></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php foreach ($loanRules as $rule): ?>
+                                            <tr>
+                                                <td><strong><?php echo esc_specialchars($rule->material_type); ?></strong></td>
+                                                <td><?php echo $rule->patron_type === '*' ? __('All') : esc_specialchars($rule->patron_type); ?></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][loan_period_days]" value="<?php echo $rule->loan_period_days; ?>" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][renewal_period_days]" value="<?php echo $rule->renewal_period_days; ?>" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][max_renewals]" value="<?php echo $rule->max_renewals; ?>" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][fine_per_day]" value="<?php echo $rule->fine_per_day; ?>" min="0" step="0.01" style="width:80px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][fine_cap]" value="<?php echo $rule->fine_cap ?? ''; ?>" min="0" step="0.01" style="width:80px;display:inline-block" placeholder="∞"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center" name="loan_rule[<?php echo $rule->id; ?>][grace_period_days]" value="<?php echo $rule->grace_period_days; ?>" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="checkbox" class="form-check-input" name="loan_rule[<?php echo $rule->id; ?>][is_loanable]" value="1" <?php echo $rule->is_loanable ? 'checked' : ''; ?>></td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete-rule" data-rule-id="<?php echo $rule->id; ?>" title="<?php echo __('Delete'); ?>">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                    <div class="p-3 border-top">
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-auto">
+                                                <label class="form-label small"><?php echo __('Material Type'); ?></label>
+                                                <select name="new_rule_material_type" class="form-select form-select-sm">
+                                                    <?php foreach (['monograph','serial','volume','issue','article','manuscript','map','pamphlet','score','electronic','audiovisual','microform','kit','realia','music_score','graphic_material','mixed_material','newspaper','thesis','government_document'] as $mt): ?>
+                                                        <option value="<?php echo $mt; ?>"><?php echo $mt; ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <label class="form-label small"><?php echo __('Patron Type'); ?></label>
+                                                <select name="new_rule_patron_type" class="form-select form-select-sm">
+                                                    <option value="*"><?php echo __('All (*)'); ?></option>
+                                                    <?php foreach (['public','student','faculty','staff','researcher','institutional'] as $pt): ?>
+                                                        <option value="<?php echo $pt; ?>"><?php echo $pt; ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-primary" id="btnAddRule">
+                                                    <i class="fas fa-plus me-1"></i><?php echo __('Add Rule'); ?>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Circulation Defaults -->
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Circulation Defaults'); ?></h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_default_loan_days" class="form-label"><?php echo __('Default Loan Period (days)'); ?></label>
+                                            <input type="number" class="form-control" id="library_default_loan_days" name="settings[library_default_loan_days]" value="<?php echo htmlspecialchars($settings['library_default_loan_days'] ?? '14'); ?>" min="1">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_max_renewals" class="form-label"><?php echo __('Default Max Renewals'); ?></label>
+                                            <input type="number" class="form-control" id="library_max_renewals" name="settings[library_max_renewals]" value="<?php echo htmlspecialchars($settings['library_max_renewals'] ?? '2'); ?>" min="0">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_currency" class="form-label"><?php echo __('Currency'); ?></label>
+                                            <input type="text" class="form-control" id="library_currency" name="settings[library_currency]" value="<?php echo htmlspecialchars($settings['library_currency'] ?? 'ZAR'); ?>" maxlength="3">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_auto_fine" name="settings[library_auto_fine]" value="true" <?php echo ($settings['library_auto_fine'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_auto_fine"><?php echo __('Auto-generate daily overdue fines'); ?></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_barcode_auto_generate" name="settings[library_barcode_auto_generate]" value="true" <?php echo ($settings['library_barcode_auto_generate'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_barcode_auto_generate"><?php echo __('Auto-generate barcodes for new copies'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_auto_expire_holds" name="settings[library_auto_expire_holds]" value="true" <?php echo ($settings['library_auto_expire_holds'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_auto_expire_holds"><?php echo __('Auto-expire unfulfilled holds'); ?></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_auto_expire_patrons" name="settings[library_auto_expire_patrons]" value="true" <?php echo ($settings['library_auto_expire_patrons'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_auto_expire_patrons"><?php echo __('Auto-expire patron memberships'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Patron Defaults -->
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-users me-2"></i><?php echo __('Patron Defaults'); ?></h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label"><?php echo __('Max Checkouts'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_patron_max_checkouts]" value="<?php echo htmlspecialchars($settings['library_patron_max_checkouts'] ?? '5'); ?>" min="1">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label"><?php echo __('Max Renewals'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_patron_max_renewals]" value="<?php echo htmlspecialchars($settings['library_patron_max_renewals'] ?? '2'); ?>" min="0">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label"><?php echo __('Max Holds'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_patron_max_holds]" value="<?php echo htmlspecialchars($settings['library_patron_max_holds'] ?? '3'); ?>" min="0">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label class="form-label"><?php echo __('Membership Duration (months)'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_patron_membership_months]" value="<?php echo htmlspecialchars($settings['library_patron_membership_months'] ?? '12'); ?>" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('Fine Threshold (block borrowing)'); ?></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><?php echo htmlspecialchars($settings['library_currency'] ?? 'ZAR'); ?></span>
+                                                <input type="number" class="form-control" name="settings[library_patron_fine_threshold]" value="<?php echo htmlspecialchars($settings['library_patron_fine_threshold'] ?? '50.00'); ?>" min="0" step="0.01">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('Default Patron Type'); ?></label>
+                                            <select class="form-select" name="settings[library_patron_default_type]">
+                                                <?php foreach (['public','student','faculty','staff','researcher','institutional'] as $pt): ?>
+                                                    <option value="<?php echo $pt; ?>" <?php echo ($settings['library_patron_default_type'] ?? 'public') === $pt ? 'selected' : ''; ?>><?php echo ucfirst($pt); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('Expiry Grace Period (days)'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_patron_expiry_grace_days]" value="<?php echo htmlspecialchars($settings['library_patron_expiry_grace_days'] ?? '7'); ?>" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OPAC Settings -->
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-globe me-2"></i><?php echo __('OPAC (Public Catalog)'); ?></h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_enabled" name="settings[library_opac_enabled]" value="true" <?php echo ($settings['library_opac_enabled'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_opac_enabled"><?php echo __('Enable public OPAC'); ?></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_show_availability" name="settings[library_opac_show_availability]" value="true" <?php echo ($settings['library_opac_show_availability'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_opac_show_availability"><?php echo __('Show copy availability in search results'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_show_covers" name="settings[library_opac_show_covers]" value="true" <?php echo ($settings['library_opac_show_covers'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_opac_show_covers"><?php echo __('Show book cover images'); ?></label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_allow_holds" name="settings[library_opac_allow_holds]" value="true" <?php echo ($settings['library_opac_allow_holds'] ?? 'true') === 'true' ? 'checked' : ''; ?>>
+                                                <label class="form-check-label" for="library_opac_allow_holds"><?php echo __('Allow patrons to place holds via OPAC'); ?></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('Results Per Page'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_opac_results_per_page]" value="<?php echo htmlspecialchars($settings['library_opac_results_per_page'] ?? '20'); ?>" min="5" max="100">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('New Arrivals Count'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_opac_new_arrivals_count]" value="<?php echo htmlspecialchars($settings['library_opac_new_arrivals_count'] ?? '8'); ?>" min="1" max="50">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('Popular Items — Days Window'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_opac_popular_days]" value="<?php echo htmlspecialchars($settings['library_opac_popular_days'] ?? '90'); ?>" min="7" max="365">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hold Settings -->
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-hand-paper me-2"></i><?php echo __('Hold Settings'); ?></h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('Hold Expiry (days after ready)'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_hold_expiry_days]" value="<?php echo htmlspecialchars($settings['library_hold_expiry_days'] ?? '7'); ?>" min="1">
+                                            <div class="form-text"><?php echo __('Days a hold remains ready for pickup before expiring.'); ?></div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label class="form-label"><?php echo __('Max Queue Size Per Item'); ?></label>
+                                            <input type="number" class="form-control" name="settings[library_hold_max_queue]" value="<?php echo htmlspecialchars($settings['library_hold_max_queue'] ?? '10'); ?>" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ISBN Providers -->
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-barcode me-2"></i><?php echo __('ISBN Providers'); ?></h5></div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3"><?php echo __('Manage ISBN lookup providers (Open Library, Google Books, WorldCat) for automatic metadata retrieval.'); ?></p>
+                                    <a href="<?php echo url_for('library/isbnProviders'); ?>" class="btn btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i><?php echo __('Manage ISBN Providers'); ?>
+                                    </a>
+                                </div>
+                            </div>
+                            <?php break; ?>
+
                         <?php endswitch; ?>
 
                         <!-- Submit Button -->
@@ -2592,6 +2842,32 @@ document.addEventListener('DOMContentLoaded', function() {
             if (textInput) {
                 textInput.value = this.value;
             }
+        });
+    });
+});
+
+// Library loan rule buttons
+document.addEventListener('DOMContentLoaded', function() {
+    var addBtn = document.getElementById('btnAddRule');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = '_add_rule';
+            hidden.value = '1';
+            this.closest('form').appendChild(hidden);
+            this.closest('form').submit();
+        });
+    }
+    document.querySelectorAll('.btn-delete-rule').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('Delete this loan rule?')) return;
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = '_delete_rule';
+            hidden.value = this.dataset.ruleId;
+            this.closest('form').appendChild(hidden);
+            this.closest('form').submit();
         });
     });
 });

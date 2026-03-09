@@ -112,8 +112,8 @@ class AhgSettingsIndexAction extends AhgController
             $this->sections['library'] = [
                 'label' => 'Library Settings',
                 'icon' => 'fa-book',
-                'description' => 'ISBN providers and library module configuration',
-                'url' => 'library/isbn-providers'
+                'description' => 'Loan rules, circulation, fines, patron defaults, OPAC, ISBN providers',
+                'url' => 'admin/ahg-settings/section?section=library'
             ];
         }
 

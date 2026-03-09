@@ -89,6 +89,17 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $patron->any('patron_index', '/patron', 'index');
         $patron->register($routing);
 
+        // Acquisition API routes (must be registered before UI routes)
+        $api = new \AtomFramework\Routing\RouteLoader('acquisition');
+        $api->any('library_api_batch', '/api/library/batch/:api_action', 'api', ['api_action' => '[a-z-]+']);
+        $api->any('library_api_budgets', '/api/library/budgets', 'api');
+        $api->any('library_api_order_line_receive', '/api/library/orders/:id/lines/:line_id/receive', 'api', ['id' => '\d+', 'line_id' => '\d+']);
+        $api->any('library_api_order_line', '/api/library/orders/:id/lines/:line_id', 'api', ['id' => '\d+', 'line_id' => '\d+']);
+        $api->any('library_api_order_lines', '/api/library/orders/:id/lines', 'api', ['id' => '\d+']);
+        $api->any('library_api_order', '/api/library/orders/:id', 'api', ['id' => '\d+']);
+        $api->any('library_api_orders', '/api/library/orders', 'api');
+        $api->register($routing);
+
         // Acquisition module routes
         $acq = new \AtomFramework\Routing\RouteLoader('acquisition');
         $acq->any('acquisition_order_view', '/acquisition/order/:order_id', 'order', ['order_id' => '\d+']);
@@ -96,6 +107,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $acq->any('acquisition_add_line', '/acquisition/add-line', 'addLine');
         $acq->any('acquisition_receive', '/acquisition/receive', 'receive');
         $acq->any('acquisition_budgets', '/acquisition/budgets', 'budgets');
+        $acq->any('acquisition_batch_capture', '/acquisition/batch-capture', 'batchCapture');
         $acq->any('acquisition_index', '/acquisition', 'index');
         $acq->register($routing);
 

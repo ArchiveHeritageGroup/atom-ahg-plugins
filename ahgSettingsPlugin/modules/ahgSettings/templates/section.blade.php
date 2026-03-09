@@ -2569,6 +2569,304 @@
                             </div>
                             @break
 
+                        @case('library')
+                            {{-- ===== LOAN RULES ===== --}}
+                            <div class="card mb-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i>{{ __('Loan Rules') }}</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <p class="text-muted px-3 pt-3 mb-2">{{ __('Configure loan periods, renewal limits, and fine rates per material type and patron type. Rules are matched in order: exact match → material default (*) → global default.') }}</p>
+                                    @php
+                                        $loanRules = \Illuminate\Database\Capsule\Manager::table('library_loan_rule')->orderBy('material_type')->orderBy('patron_type')->get();
+                                    @endphp
+                                    <table class="table table-striped table-hover mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>{{ __('Material Type') }}</th>
+                                                <th>{{ __('Patron Type') }}</th>
+                                                <th class="text-center">{{ __('Loan Days') }}</th>
+                                                <th class="text-center">{{ __('Renewal Days') }}</th>
+                                                <th class="text-center">{{ __('Max Renewals') }}</th>
+                                                <th class="text-center">{{ __('Fine/Day') }}</th>
+                                                <th class="text-center">{{ __('Fine Cap') }}</th>
+                                                <th class="text-center">{{ __('Grace Days') }}</th>
+                                                <th class="text-center">{{ __('Loanable') }}</th>
+                                                <th>{{ __('Actions') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="loanRulesBody">
+                                            @foreach ($loanRules as $rule)
+                                            <tr data-rule-id="{{ $rule->id }}">
+                                                <td><strong>{{ $rule->material_type }}</strong></td>
+                                                <td>{{ $rule->patron_type === '*' ? __('All') : $rule->patron_type }}</td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][loan_period_days]" value="{{ $rule->loan_period_days }}" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][renewal_period_days]" value="{{ $rule->renewal_period_days }}" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][max_renewals]" value="{{ $rule->max_renewals }}" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][fine_per_day]" value="{{ $rule->fine_per_day }}" min="0" step="0.01" style="width:80px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][fine_cap]" value="{{ $rule->fine_cap ?? '' }}" min="0" step="0.01" style="width:80px;display:inline-block" placeholder="∞"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][grace_period_days]" value="{{ $rule->grace_period_days }}" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center">
+                                                    <input type="checkbox" class="form-check-input loan-field" name="loan_rule[{{ $rule->id }}][is_loanable]" value="1" {{ $rule->is_loanable ? 'checked' : '' }}>
+                                                </td>
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-delete-rule" data-rule-id="{{ $rule->id }}" title="{{ __('Delete') }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <div class="p-3 border-top">
+                                        <div class="row g-2 align-items-end">
+                                            <div class="col-auto">
+                                                <label class="form-label small">{{ __('Material Type') }}</label>
+                                                <select name="new_rule_material_type" class="form-select form-select-sm" id="newRuleMaterial">
+                                                    @foreach (['monograph','serial','volume','issue','article','manuscript','map','pamphlet','score','electronic','audiovisual','microform','kit','realia','music_score','graphic_material','mixed_material','newspaper','thesis','government_document'] as $mt)
+                                                        <option value="{{ $mt }}">{{ $mt }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <label class="form-label small">{{ __('Patron Type') }}</label>
+                                                <select name="new_rule_patron_type" class="form-select form-select-sm" id="newRulePatron">
+                                                    <option value="*">{{ __('All (*)') }}</option>
+                                                    @foreach (['public','student','faculty','staff','researcher','institutional'] as $pt)
+                                                        <option value="{{ $pt }}">{{ $pt }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-auto">
+                                                <button type="button" class="btn btn-sm btn-primary" id="btnAddRule">
+                                                    <i class="fas fa-plus me-1"></i>{{ __('Add Rule') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ===== CIRCULATION DEFAULTS ===== --}}
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>{{ __('Circulation Defaults') }}</h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_default_loan_days" class="form-label">{{ __('Default Loan Period (days)') }}</label>
+                                            <input type="number" class="form-control" id="library_default_loan_days"
+                                                   name="settings[library_default_loan_days]"
+                                                   value="{{ $settings['library_default_loan_days'] ?? '14' }}" min="1">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_max_renewals" class="form-label">{{ __('Default Max Renewals') }}</label>
+                                            <input type="number" class="form-control" id="library_max_renewals"
+                                                   name="settings[library_max_renewals]"
+                                                   value="{{ $settings['library_max_renewals'] ?? '2' }}" min="0">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_currency" class="form-label">{{ __('Currency') }}</label>
+                                            <input type="text" class="form-control" id="library_currency"
+                                                   name="settings[library_currency]"
+                                                   value="{{ $settings['library_currency'] ?? 'ZAR' }}" maxlength="3">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_auto_fine"
+                                                       name="settings[library_auto_fine]" value="true"
+                                                       {{ ($settings['library_auto_fine'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_auto_fine">{{ __('Auto-generate daily overdue fines') }}</label>
+                                            </div>
+                                            <div class="form-text">{{ __('When enabled, library:process-fines cron creates daily fine entries for overdue items.') }}</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_barcode_auto_generate"
+                                                       name="settings[library_barcode_auto_generate]" value="true"
+                                                       {{ ($settings['library_barcode_auto_generate'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_barcode_auto_generate">{{ __('Auto-generate barcodes for new copies') }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_auto_expire_holds"
+                                                       name="settings[library_auto_expire_holds]" value="true"
+                                                       {{ ($settings['library_auto_expire_holds'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_auto_expire_holds">{{ __('Auto-expire unfulfilled holds') }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_auto_expire_patrons"
+                                                       name="settings[library_auto_expire_patrons]" value="true"
+                                                       {{ ($settings['library_auto_expire_patrons'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_auto_expire_patrons">{{ __('Auto-expire patron memberships') }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ===== PATRON DEFAULTS ===== --}}
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-users me-2"></i>{{ __('Patron Defaults') }}</h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <label for="library_patron_max_checkouts" class="form-label">{{ __('Max Checkouts') }}</label>
+                                            <input type="number" class="form-control" id="library_patron_max_checkouts"
+                                                   name="settings[library_patron_max_checkouts]"
+                                                   value="{{ $settings['library_patron_max_checkouts'] ?? '5' }}" min="1">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label for="library_patron_max_renewals" class="form-label">{{ __('Max Renewals') }}</label>
+                                            <input type="number" class="form-control" id="library_patron_max_renewals"
+                                                   name="settings[library_patron_max_renewals]"
+                                                   value="{{ $settings['library_patron_max_renewals'] ?? '2' }}" min="0">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label for="library_patron_max_holds" class="form-label">{{ __('Max Holds') }}</label>
+                                            <input type="number" class="form-control" id="library_patron_max_holds"
+                                                   name="settings[library_patron_max_holds]"
+                                                   value="{{ $settings['library_patron_max_holds'] ?? '3' }}" min="0">
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <label for="library_patron_membership_months" class="form-label">{{ __('Membership Duration (months)') }}</label>
+                                            <input type="number" class="form-control" id="library_patron_membership_months"
+                                                   name="settings[library_patron_membership_months]"
+                                                   value="{{ $settings['library_patron_membership_months'] ?? '12' }}" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_patron_fine_threshold" class="form-label">{{ __('Fine Threshold (block borrowing)') }}</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">{{ $settings['library_currency'] ?? 'ZAR' }}</span>
+                                                <input type="number" class="form-control" id="library_patron_fine_threshold"
+                                                       name="settings[library_patron_fine_threshold]"
+                                                       value="{{ $settings['library_patron_fine_threshold'] ?? '50.00' }}" min="0" step="0.01">
+                                            </div>
+                                            <div class="form-text">{{ __('Patrons with outstanding fines above this amount cannot borrow.') }}</div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_patron_default_type" class="form-label">{{ __('Default Patron Type') }}</label>
+                                            <select class="form-select" id="library_patron_default_type" name="settings[library_patron_default_type]">
+                                                @foreach (['public','student','faculty','staff','researcher','institutional'] as $pt)
+                                                    <option value="{{ $pt }}" {{ ($settings['library_patron_default_type'] ?? 'public') === $pt ? 'selected' : '' }}>{{ ucfirst($pt) }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_patron_expiry_grace_days" class="form-label">{{ __('Expiry Grace Period (days)') }}</label>
+                                            <input type="number" class="form-control" id="library_patron_expiry_grace_days"
+                                                   name="settings[library_patron_expiry_grace_days]"
+                                                   value="{{ $settings['library_patron_expiry_grace_days'] ?? '7' }}" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ===== OPAC SETTINGS ===== --}}
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-globe me-2"></i>{{ __('OPAC (Public Catalog)') }}</h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_enabled"
+                                                       name="settings[library_opac_enabled]" value="true"
+                                                       {{ ($settings['library_opac_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_opac_enabled">{{ __('Enable public OPAC') }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_show_availability"
+                                                       name="settings[library_opac_show_availability]" value="true"
+                                                       {{ ($settings['library_opac_show_availability'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_opac_show_availability">{{ __('Show copy availability in search results') }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_show_covers"
+                                                       name="settings[library_opac_show_covers]" value="true"
+                                                       {{ ($settings['library_opac_show_covers'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_opac_show_covers">{{ __('Show book cover images') }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="library_opac_allow_holds"
+                                                       name="settings[library_opac_allow_holds]" value="true"
+                                                       {{ ($settings['library_opac_allow_holds'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="library_opac_allow_holds">{{ __('Allow patrons to place holds via OPAC') }}</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_opac_results_per_page" class="form-label">{{ __('Results Per Page') }}</label>
+                                            <input type="number" class="form-control" id="library_opac_results_per_page"
+                                                   name="settings[library_opac_results_per_page]"
+                                                   value="{{ $settings['library_opac_results_per_page'] ?? '20' }}" min="5" max="100">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_opac_new_arrivals_count" class="form-label">{{ __('New Arrivals Count') }}</label>
+                                            <input type="number" class="form-control" id="library_opac_new_arrivals_count"
+                                                   name="settings[library_opac_new_arrivals_count]"
+                                                   value="{{ $settings['library_opac_new_arrivals_count'] ?? '8' }}" min="1" max="50">
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_opac_popular_days" class="form-label">{{ __('Popular Items — Days Window') }}</label>
+                                            <input type="number" class="form-control" id="library_opac_popular_days"
+                                                   name="settings[library_opac_popular_days]"
+                                                   value="{{ $settings['library_opac_popular_days'] ?? '90' }}" min="7" max="365">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ===== HOLD SETTINGS ===== --}}
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-hand-paper me-2"></i>{{ __('Hold Settings') }}</h5></div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_hold_expiry_days" class="form-label">{{ __('Hold Expiry (days after ready)') }}</label>
+                                            <input type="number" class="form-control" id="library_hold_expiry_days"
+                                                   name="settings[library_hold_expiry_days]"
+                                                   value="{{ $settings['library_hold_expiry_days'] ?? '7' }}" min="1">
+                                            <div class="form-text">{{ __('Days a hold remains ready for pickup before expiring.') }}</div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <label for="library_hold_max_queue" class="form-label">{{ __('Max Queue Size Per Item') }}</label>
+                                            <input type="number" class="form-control" id="library_hold_max_queue"
+                                                   name="settings[library_hold_max_queue]"
+                                                   value="{{ $settings['library_hold_max_queue'] ?? '10' }}" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- ===== ISBN PROVIDERS LINK ===== --}}
+                            <div class="card mb-4">
+                                <div class="card-header"><h5 class="mb-0"><i class="fas fa-barcode me-2"></i>{{ __('ISBN Providers') }}</h5></div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-3">{{ __('Manage ISBN lookup providers (Open Library, Google Books, WorldCat) for automatic metadata retrieval.') }}</p>
+                                    <a href="{{ url_for('library/isbnProviders') }}" class="btn btn-outline-primary">
+                                        <i class="fas fa-external-link-alt me-1"></i>{{ __('Manage ISBN Providers') }}
+                                    </a>
+                                </div>
+                            </div>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->
@@ -2741,6 +3039,32 @@ document.addEventListener('DOMContentLoaded', function() {
             if (textInput) {
                 textInput.value = this.value;
             }
+        });
+    });
+});
+
+// Library loan rule buttons
+document.addEventListener('DOMContentLoaded', function() {
+    var addBtn = document.getElementById('btnAddRule');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = '_add_rule';
+            hidden.value = '1';
+            this.closest('form').appendChild(hidden);
+            this.closest('form').submit();
+        });
+    }
+    document.querySelectorAll('.btn-delete-rule').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!confirm('Delete this loan rule?')) return;
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = '_delete_rule';
+            hidden.value = this.dataset.ruleId;
+            this.closest('form').appendChild(hidden);
+            this.closest('form').submit();
         });
     });
 });

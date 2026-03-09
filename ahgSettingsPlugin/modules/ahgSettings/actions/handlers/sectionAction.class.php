@@ -38,6 +38,11 @@ class AhgSettingsSectionAction extends AhgController
             'icon' => 'fa-shield-alt',
             'description' => 'Password policy, account lockout, session security, and access control settings',
         ],
+        'library' => [
+            'label' => 'Library Settings',
+            'icon' => 'fa-book',
+            'description' => 'Loan rules, circulation, fines, patron defaults, OPAC, ISBN providers',
+        ],
     ];
 
     protected $checkboxFields = [
@@ -111,6 +116,16 @@ class AhgSettingsSectionAction extends AhgController
             'security_lockout_enabled',
             'security_force_password_change',
         ],
+        'library' => [
+            'library_opac_enabled',
+            'library_opac_show_availability',
+            'library_opac_show_covers',
+            'library_opac_allow_holds',
+            'library_auto_fine',
+            'library_auto_expire_holds',
+            'library_auto_expire_patrons',
+            'library_barcode_auto_generate',
+        ],
     ];
 
     
@@ -128,6 +143,7 @@ class AhgSettingsSectionAction extends AhgController
         'integrity' => 'ahgIntegrityPlugin',
         'accession' => 'ahgAccessionManagePlugin',
         'authority' => 'ahgAuthorityPlugin',
+        'library' => 'ahgLibraryPlugin',
     ];
 
     // Check if a plugin is enabled
@@ -223,6 +239,52 @@ class AhgSettingsSectionAction extends AhgController
                 $saved++;
             } catch (Exception $e) {
                 error_log("AHG Settings: Error saving $key: " . $e->getMessage());
+            }
+        }
+
+        // Handle library loan rules
+        if ($this->currentSection === 'library') {
+            $loanRules = $request->getParameter('loan_rule', []);
+            foreach ($loanRules as $ruleId => $fields) {
+                $update = [
+                    'loan_period_days'    => (int) ($fields['loan_period_days'] ?? 14),
+                    'renewal_period_days' => (int) ($fields['renewal_period_days'] ?? 14),
+                    'max_renewals'        => (int) ($fields['max_renewals'] ?? 2),
+                    'fine_per_day'        => (float) ($fields['fine_per_day'] ?? 1.00),
+                    'fine_cap'            => isset($fields['fine_cap']) && $fields['fine_cap'] !== '' ? (float) $fields['fine_cap'] : null,
+                    'grace_period_days'   => (int) ($fields['grace_period_days'] ?? 0),
+                    'is_loanable'         => isset($fields['is_loanable']) ? 1 : 0,
+                ];
+                DB::table('library_loan_rule')->where('id', (int) $ruleId)->update($update);
+            }
+
+            // Add new rule
+            $newMaterial = $request->getParameter('new_rule_material_type', '');
+            $newPatron = $request->getParameter('new_rule_patron_type', '');
+            if (!empty($newMaterial) && $request->getParameter('_add_rule', '')) {
+                $exists = DB::table('library_loan_rule')
+                    ->where('material_type', $newMaterial)
+                    ->where('patron_type', $newPatron)
+                    ->exists();
+                if (!$exists) {
+                    DB::table('library_loan_rule')->insert([
+                        'material_type'      => $newMaterial,
+                        'patron_type'        => $newPatron ?: '*',
+                        'loan_period_days'   => 14,
+                        'renewal_period_days' => 14,
+                        'max_renewals'       => 2,
+                        'fine_per_day'       => 1.00,
+                        'grace_period_days'  => 0,
+                        'is_loanable'        => 1,
+                        'created_at'         => DB::raw('NOW()'),
+                    ]);
+                }
+            }
+
+            // Delete rule
+            $deleteRuleId = $request->getParameter('_delete_rule', '');
+            if (!empty($deleteRuleId)) {
+                DB::table('library_loan_rule')->where('id', (int) $deleteRuleId)->delete();
             }
         }
 

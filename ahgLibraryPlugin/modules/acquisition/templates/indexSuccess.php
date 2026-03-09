@@ -68,6 +68,9 @@
     <a href="<?php echo url_for(['module' => 'acquisition', 'action' => 'budgets']); ?>" class="btn btn-outline-secondary">
       <i class="fas fa-wallet me-1"></i><?php echo __('Budgets'); ?>
     </a>
+    <a href="<?php echo url_for(['module' => 'acquisition', 'action' => 'batchCapture']); ?>" class="btn btn-outline-success">
+      <i class="fas fa-barcode me-1"></i><?php echo __('Batch Capture'); ?>
+    </a>
   </div>
   <span class="text-muted"><?php echo __('%1% order(s) found', ['%1%' => (int) $total]); ?></span>
 </div>
