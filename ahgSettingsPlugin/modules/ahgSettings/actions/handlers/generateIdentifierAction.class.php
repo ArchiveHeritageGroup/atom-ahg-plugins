@@ -84,12 +84,4 @@ class AhgSettingsGenerateIdentifierAction extends AhgController
         }
     }
 
-    private function renderJson(array $data, int $status = 200)
-    {
-        $this->response->setStatusCode($status);
-        $this->response->setContentType('application/json');
-        $this->response->setContent(json_encode($data));
-
-        return sfView::NONE;
-    }
 }
