@@ -800,28 +800,30 @@ function testConnection() {
 
 function testTranslation() {
     const endpoint = document.querySelector('input[name="mt_endpoint"]').value;
-    const baseUrl = endpoint.replace('/translate', '');
+    const baseUrl = endpoint.replace(/\/translate$/, '');
+    const apiKey = document.querySelector('input[name="api_key"]')?.value || 'ahg_ai_demo_internal_2026';
     const resultDiv = document.getElementById('connectionResult');
 
     resultDiv.className = 'alert alert-info';
     resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing OPUS-MT connection...';
     resultDiv.classList.remove('d-none');
 
-    fetch(baseUrl + '/health')
+    fetch(baseUrl + '/health', { headers: { 'X-API-Key': apiKey } })
         .then(response => response.json())
         .then(data => {
             if (data.status === 'ok') {
-                // Now test actual translation
+                const translatorModel = data.models?.translator || 'N/A';
                 return fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
                     body: JSON.stringify({ source: 'en', target: 'af', text: 'Hello, how are you?' })
                 }).then(r => r.json()).then(t => {
+                    const translated = t.translated || t.translatedText || 'N/A';
                     resultDiv.className = 'alert alert-success';
                     resultDiv.innerHTML = '<i class="fas fa-check-circle me-2"></i><strong>OPUS-MT Connection successful!</strong><br>' +
                         'Status: ' + data.status + '<br>' +
-                        'Models loaded: ' + data.models_loaded + '<br>' +
-                        '<strong>Test:</strong> "Hello, how are you?" → "' + t.translatedText + '"';
+                        'Translator: ' + translatorModel + '<br>' +
+                        '<strong>Test:</strong> "Hello, how are you?" &rarr; "' + translated + '"';
                 });
             }
         })
@@ -829,7 +831,7 @@ function testTranslation() {
             resultDiv.className = 'alert alert-danger';
             resultDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i><strong>OPUS-MT Connection failed!</strong><br>' +
                 'Error: ' + error.message + '<br>' +
-                'Make sure OPUS-MT is running: <code>systemctl status opus-mt</code>';
+                'Endpoint: ' + endpoint;
         });
 }
 </script>

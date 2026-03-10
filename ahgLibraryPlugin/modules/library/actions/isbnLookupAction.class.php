@@ -100,7 +100,7 @@ class libraryIsbnLookupAction extends AhgController
     /**
      * Render JSON response.
      */
-    private function renderJson(array $data, int $status = 200): string
+    protected function renderJson(array $data, int $status = 200): string
     {
         $this->getResponse()->setStatusCode($status);
         return $this->renderText(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));

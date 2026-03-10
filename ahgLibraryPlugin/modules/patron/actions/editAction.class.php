@@ -15,7 +15,7 @@ class patronEditAction extends AhgController
         // Load patron type options from ahg_dropdown
         require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
         $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
-        $this->patronTypes = $taxonomyService->getDropdownValues('patron_type');
+        $this->patronTypes = $taxonomyService->getTermsAsChoices('patron_type');
 
         $service = PatronService::getInstance();
         $id = (int) $request->getParameter('id');

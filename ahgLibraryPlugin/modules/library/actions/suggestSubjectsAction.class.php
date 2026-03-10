@@ -111,7 +111,7 @@ class librarySuggestSubjectsAction extends AhgController
      * @param array $data Data to encode
      * @return string JSON response
      */
-    protected function renderJson(array $data): string
+    protected function renderJson(array $data, int $status = 200): string
     {
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
         return sfView::NONE;
