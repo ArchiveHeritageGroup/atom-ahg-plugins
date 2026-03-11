@@ -571,14 +571,16 @@ class museumEditAction extends AhgController
         }
 
         if ($isNew) {
-            // Auto-generate object number if empty
-            if (empty($this->ccoData['object_number'])) {
-                try {
-                    $numberingSvc = \AtomExtensions\Services\NumberingService::getInstance();
+            // Auto-generate object number: consume sequence on save
+            try {
+                $numberingSvc = \AtomExtensions\Services\NumberingService::getInstance();
+                $preview = $numberingSvc->previewNextReference('museum');
+                // If user kept the auto-generated value (or left empty), consume the sequence
+                if (empty($this->ccoData['object_number']) || $this->ccoData['object_number'] === $preview) {
                     $this->ccoData['object_number'] = $numberingSvc->getNextReference('museum');
-                } catch (\Throwable $e) {
-                    // Numbering service not available
                 }
+            } catch (\Throwable $e) {
+                // Numbering service not available
             }
             // Create new information object
             $resourceId = $this->createInformationObject();
