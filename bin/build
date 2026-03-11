@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# ============================================================
+# Heratio Docs Builder
+# Usage: ./bin/build
+# ============================================================
+set -e
+
+DOCS_PATH="/usr/share/nginx/archive/atom-extensions-catalog"
+VENV="${DOCS_PATH}/venv"
+LOG_FILE="/var/log/heratio-docs-build.log"
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting Heratio docs build..." | tee -a "$LOG_FILE"
+
+cd "$DOCS_PATH"
+source "${VENV}/bin/activate"
+
+# Pull latest from GitHub
+echo "Pulling latest from origin/main..." | tee -a "$LOG_FILE"
+git pull origin main >> "$LOG_FILE" 2>&1
+
+# Build docs
+echo "Building MkDocs site..." | tee -a "$LOG_FILE"
+mkdocs build >> "$LOG_FILE" 2>&1
+
+deactivate
+
+PAGE_COUNT=$(find "${DOCS_PATH}/site" -name "*.html" | wc -l)
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] Build complete — ${PAGE_COUNT} pages" | tee -a "$LOG_FILE"

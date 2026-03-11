@@ -1,0 +1,9 @@
+:root {
+  --md-primary-fg-color: #3F51B5;
+  --md-primary-fg-color--light: #5C6BC0;
+  --md-primary-fg-color--dark: #303F9F;
+  --md-accent-fg-color: #3F51B5;
+}
+.md-typeset .grid.cards > ul > li {
+  border-left: 4px solid var(--md-primary-fg-color);
+}

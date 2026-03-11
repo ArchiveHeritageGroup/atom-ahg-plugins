@@ -1,0 +1,304 @@
+site_name: Heratio Documentation
+site_url: https://docs.theahg.co.za
+site_description: >-
+  Heratio — Unified GLAM platform for Archives, Museums, Libraries,
+  Galleries and Digital Asset Management. Built on AtoM 2.10.
+site_author: The Archive and Heritage Group (Pty) Ltd
+copyright: Copyright &copy; 2025 The Archive and Heritage Group (Pty) Ltd
+
+repo_name: ArchiveHeritageGroup/atom-extensions-catalog
+repo_url: https://github.com/ArchiveHeritageGroup/atom-extensions-catalog
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+
+theme:
+  name: material
+  favicon: assets/images/favicon.png
+  language: en
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  font:
+    text: Inter
+    code: JetBrains Mono
+
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
+
+plugins:
+  - search:
+      separator: '[\s\u200b\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      fallback_to_build_date: true
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+      title: On this page
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/ArchiveHeritageGroup
+    - icon: fontawesome/solid/globe
+      link: https://psis.theahg.co.za
+  version:
+    provider: mike
+    default: latest
+
+extra_css:
+  - assets/stylesheets/heratio.css
+
+nav:
+  - Home: README.md
+  - Getting Started:
+    - getting-started/README.md
+    - Installation: install/INSTALLATION.md
+  - User Guides:
+    - Advanced Search: advanced-search-user-guide.md
+    - AI Tools: ai-tools-user-guide.md
+    - Audit Trail: audit-trail-user-guide.md
+    - Backup & Restore: backup-restore-user-guide.md
+    - Barcode: barcode-user-guide.md
+    - Cart & E-commerce: cart-ecommerce-user-guide.md
+    - Condition Assessment: condition-assessment-user-guide.md
+    - Contact Management: contact-management-user-guide.md
+    - Custom Fields: custom-fields-user-guide.md
+    - DAM Module: dam-module-user-guide.md
+    - Data Ingest: data-ingest-user-guide.md
+    - Data Migration: data-migration-user-guide.md
+    - Discovery: discovery-user-guide.md
+    - DOI Integration: doi-user-guide.md
+    - Donor Agreement: donor-agreement-user-guide.md
+    - Duplicate Detection: duplicate-detection-user-guide.md
+    - Embargo: embargo-user-guide.md
+    - Encryption: encryption-user-guide.md
+    - Exhibition: exhibition-user-guide.md
+    - Export Data: export-data-user-guide.md
+    - Extended Rights: extended-rights-user-guide.md
+    - Favorites: favorites-user-guide.md
+    - Feedback System: feedback-user-guide.md
+    - Forms Builder: forms-builder-user-guide.md
+    - Fuzzy Search: fuzzy-search-user-guide.md
+    - Gallery Module: gallery-module-user-guide.md
+    - GLAM Browse: glam-browse-user-guide.md
+    - GraphQL API: graphql-user-guide.md
+    - Heritage Accounting: heritage-accounting-user-guide.md
+    - Heritage Sites: heritage-sites-user-guide.md
+    - ICIP Management: icip-user-guide.md
+    - IIIF Integration: iiif-integration-user-guide.md
+    - Knowledge Graph: knowledge-graph-user-guide.md
+    - Label Printing: label-printing-user-guide.md
+    - Landing Page: landing-page-user-guide.md
+    - Library Module: library-module-user-guide.md
+    - Loan Management: loan-module-user-guide.md
+    - Marketplace: marketplace-user-guide.md
+    - Metadata Export: metadata-export-user-guide.md
+    - Metadata Extraction: metadata-extraction-user-guide.md
+    - Migration Tools: migration-tools-user-guide.md
+    - Mirador Viewer: mirador-user-guide.md
+    - Multi-Tenancy: multi-tenant-user-guide.md
+    - Museum Module: museum-module-user-guide.md
+    - NER: ner-user-guide.md
+    - OpenSeadragon: openseadragon-user-guide.md
+    - PDF Merge: pdf-merge-user-guide.md
+    - Portable Export: portable-export-user-guide.md
+    - Preservation: preservation-user-guide.md
+    - Privacy Compliance: privacy-user-guide.md
+    - Provenance Tracking: provenance-user-guide.md
+    - Publish Gates: publish-gates-user-guide.md
+    - Registry & Community Hub: registry-community-hub-user-guide.md
+    - Report Builder: report-builder-user-guide.md
+    - Reports Dashboard: reports-dashboard-user-guide.md
+    - Repository Browse: repository-browse-user-guide.md
+    - Request to Publish: request-to-publish-user-guide.md
+    - Researcher Portal: researcher-user-guide.md
+    - RiC Explorer: ric-user-guide.md
+    - Rights Management: rights-management-user-guide.md
+    - Security Classification: security-classification-user-guide.md
+    - Security Compliance: security-compliance-user-guide.md
+    - Semantic Search: semantic-search-user-guide.md
+    - Settings Management: ahg-settings-user-guide.md
+    - Spectrum: spectrum-user-guide.md
+    - Statistics: statistics-user-guide.md
+    - Term & Taxonomy Browse: term-taxonomy-browse-user-guide.md
+    - Translation: translation-user-guide.md
+    - Vendor Management: vendor-user-guide.md
+    - Workflow System: workflow-user-guide.md
+    - 3D Model Viewer: 3d-model-viewer-user-guide.md
+    - Accession v2: accession-v2-user-guide.md
+    - Access Requests: access-requests-user-guide.md
+    - API: api-user-guide.md
+    - Audio Player: audio-player-user-guide.md
+    - Federation: federation-user-guide.md
+    - Integrity Assurance: integrity-assurance-user-guide.md
+    - Research Knowledge Platform: research-knowledge-platform-user-guide.md
+    - Research Training Manual: research-training-manual-user-guide.md
+  - Technical:
+    - technical/README.md
+    - Architecture: technical/ARCHITECTURE.md
+    - Database ERD: technical/DATABASE_ERD.md
+    - Database Views: technical/DATABASE_VIEWS.md
+    - Plugin Architecture: technical/PLUGIN_ARCHITECTURE.md
+    - Security Model: technical/SECURITY_MODEL.md
+    - System Flows: technical/SYSTEM_FLOWS.md
+    - API Reference: technical/api-technical-reference.md
+    - Semantic Search: technical/semantic-search-technical.md
+    - Fuzzy Search: technical/fuzzy-search-technical.md
+    - NER & Knowledge Graph: technical/ner-knowledge-graph-technical.md
+    - RiC Integration Guide: technical/RIC_INTEGRATION_GUIDE.md
+    - CSRF Policy: technical/CSRF_POLICY.md
+    - Outbound HTTP Policy: technical/OUTBOUND_HTTP_POLICY.md
+    - Shell Execution Policy: technical/SHELL_EXECUTION_POLICY.md
+    - NGINX Security Hardening: technical/NGINX_SECURITY_HARDENING.md
+    - Plugins:
+      - technical/PLUGIN_ARCHITECTURE.md
+      - ahgAccessRequestPlugin: technical/ahgAccessRequestPlugin.md
+      - ahgAIPlugin: technical/ahgAIPlugin.md
+      - ahgAPIPlugin: technical/ahgAPIPlugin.md
+      - ahgAuditTrailPlugin: technical/ahgAuditTrailPlugin.md
+      - ahgBackupPlugin: technical/ahgBackupPlugin.md
+      - ahgCartPlugin: technical/ahgCartPlugin.md
+      - ahgConditionPlugin: technical/ahgConditionPlugin.md
+      - ahgContactPlugin: technical/ahgContactPlugin.md
+      - ahgCorePlugin: technical/ahgCorePlugin.md
+      - ahgCustomFieldsPlugin: technical/ahgCustomFieldsPlugin.md
+      - ahgDAMPlugin: technical/ahgDAMPlugin.md
+      - ahgDataMigrationPlugin: technical/ahgDataMigrationPlugin.md
+      - ahgDedupePlugin: technical/ahgDedupePlugin.md
+      - ahgDiscoveryPlugin: technical/ahgDiscoveryPlugin.md
+      - ahgDisplayPlugin: technical/ahgDisplayPlugin.md
+      - ahgDoiPlugin: technical/ahgDoiPlugin.md
+      - ahgDonorAgreementPlugin: technical/ahgDonorAgreementPlugin.md
+      - ahgEmbargoPlugin: technical/ahgEmbargoPlugin.md
+      - ahgExhibitionPlugin: technical/ahgExhibitionPlugin.md
+      - ahgExportPlugin: technical/ahgExportPlugin.md
+      - ahgExtendedRightsPlugin: technical/ahgExtendedRightsPlugin.md
+      - ahgFavoritesPlugin: technical/ahgFavoritesPlugin.md
+      - ahgFederationPlugin: technical/ahgFederationPlugin.md
+      - ahgFeedbackPlugin: technical/ahgFeedbackPlugin.md
+      - ahgFormsPlugin: technical/ahgFormsPlugin.md
+      - ahgGalleryPlugin: technical/ahgGalleryPlugin.md
+      - ahgGraphQLPlugin: technical/ahgGraphQLPlugin.md
+      - ahgGrapPlugin: technical/ahgGrapPlugin.md
+      - ahgHeritagePlugin: technical/ahgHeritagePlugin.md
+      - ahgICIPPlugin: technical/ahgICIPPlugin.md
+      - ahgIiifPlugin: technical/ahgIiifPlugin.md
+      - ahgIngestPlugin: technical/ahgIngestPlugin.md
+      - ahgLabelPlugin: technical/ahgLabelPlugin.md
+      - ahgLandingPagePlugin: technical/ahgLandingPagePlugin.md
+      - ahgLibraryPlugin: technical/ahgLibraryPlugin.md
+      - ahgLoanPlugin: technical/ahgLoanPlugin.md
+      - ahgMarketplacePlugin: technical/ahgMarketplacePlugin.md
+      - ahgMetadataExportPlugin: technical/ahgMetadataExportPlugin.md
+      - ahgMetadataExtractionPlugin: technical/ahgMetadataExtractionPlugin.md
+      - ahgMigrationPlugin: technical/ahgMigrationPlugin.md
+      - ahgMultiTenantPlugin: technical/ahgMultiTenantPlugin.md
+      - ahgMuseumPlugin: technical/ahgMuseumPlugin.md
+      - ahgNerPlugin: technical/ahgNerPlugin.md
+      - ahgPortableExportPlugin: technical/ahgPortableExportPlugin.md
+      - ahgPreservationPlugin: technical/ahgPreservationPlugin.md
+      - ahgPrivacyPlugin: technical/ahgPrivacyPlugin.md
+      - ahgProvenancePlugin: technical/ahgProvenancePlugin.md
+      - ahgRegistryPlugin: technical/ahgRegistryPlugin.md
+      - ahgReportBuilderPlugin: technical/ahgReportBuilderPlugin.md
+      - ahgReportsPlugin: technical/ahgReportsPlugin.md
+      - ahgRepositoryBrowsePlugin: technical/ahgRepositoryBrowsePlugin.md
+      - ahgRequestToPublishPlugin: technical/ahgRequestToPublishPlugin.md
+      - ahgResearchPlugin: technical/ahgResearchPlugin.md
+      - ahgRicExplorerPlugin: technical/ahgRicExplorerPlugin.md
+      - ahgRightsPlugin: technical/ahgRightsPlugin.md
+      - ahgSecurityClearancePlugin: technical/ahgSecurityClearancePlugin.md
+      - ahgSemanticSearchPlugin: technical/ahgSemanticSearchPlugin.md
+      - ahgSettingsPlugin: technical/ahgSettingsPlugin.md
+      - ahgSpectrumPlugin: technical/ahgSpectrumPlugin.md
+      - ahgStatisticsPlugin: technical/ahgStatisticsPlugin.md
+      - ahgTermTaxonomyPlugin: technical/ahgTermTaxonomyPlugin.md
+      - ahgThemeB5Plugin: technical/ahgThemeB5Plugin.md
+      - ahgTiffPdfMergePlugin: technical/ahgTiffPdfMergePlugin.md
+      - ahgTranslationPlugin: technical/ahgTranslationPlugin.md
+      - ahgUiOverridesPlugin: technical/ahgUiOverridesPlugin.md
+      - ahgVendorPlugin: technical/ahgVendorPlugin.md
+      - ahgWorkflowPlugin: technical/ahgWorkflowPlugin.md
+      - ahg3DModelPlugin: technical/ahg3DModelPlugin.md
+  - Developer:
+    - developer/README.md
+  - Operations:
+    - operations/README.md
+  - Reference:
+    - reference/README.md
+  - Roadmap: ROADMAP.md
+  - Changelog: MEETING-NOTES.md
