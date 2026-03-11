@@ -20,7 +20,7 @@ function generateSummary(objectId) {
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Generating summary...';
     resultDiv.style.display = 'none';
     
-    fetch(`/ner/summarize/${objectId}`, { method: 'POST' })
+    fetch(`/index.php/ner/summarize/${objectId}`, { method: 'POST', credentials: 'same-origin' })
         .then(r => r.json())
         .then(data => {
             btn.disabled = false;
