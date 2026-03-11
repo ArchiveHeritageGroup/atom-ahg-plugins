@@ -35,6 +35,23 @@
         </div>
       </div>
 
+      <!-- Documentation Portal -->
+      <div class="card border-primary mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h5 class="card-title mb-1"><i class="fas fa-book me-2"></i><?php echo __('Documentation Portal') ?></h5>
+              <p class="card-text text-muted mb-0"><?php echo __('Full user guides, technical reference, plugin documentation, and API reference for Heratio.') ?></p>
+            </div>
+            <div class="col-md-4 text-md-end mt-2 mt-md-0">
+              <a href="https://docs.theahg.co.za" target="_blank" rel="noopener" class="btn btn-primary">
+                <i class="fas fa-external-link-alt me-1"></i><?php echo __('Open Documentation') ?>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Category Cards -->
       <h2 class="h4 mb-3"><?php echo __('Browse by Category') ?></h2>
       <div class="row g-3 mb-4">
