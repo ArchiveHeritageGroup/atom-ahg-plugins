@@ -110,6 +110,17 @@ class museumEditAction extends AhgController
             $this->resource = null;
             $this->ccoData = [];
             $this->itemLocation = [];
+
+            // Auto-generate object number from numbering scheme
+            try {
+                $numberingSvc = \AtomExtensions\Services\NumberingService::getInstance();
+                $nextRef = $numberingSvc->previewNextReference('museum');
+                if ($nextRef) {
+                    $this->ccoData['object_number'] = $nextRef;
+                }
+            } catch (\Throwable $e) {
+                // Numbering service not available — leave empty
+            }
         }
 
         // Get template
@@ -560,6 +571,15 @@ class museumEditAction extends AhgController
         }
 
         if ($isNew) {
+            // Auto-generate object number if empty
+            if (empty($this->ccoData['object_number'])) {
+                try {
+                    $numberingSvc = \AtomExtensions\Services\NumberingService::getInstance();
+                    $this->ccoData['object_number'] = $numberingSvc->getNextReference('museum');
+                } catch (\Throwable $e) {
+                    // Numbering service not available
+                }
+            }
             // Create new information object
             $resourceId = $this->createInformationObject();
         } else {
