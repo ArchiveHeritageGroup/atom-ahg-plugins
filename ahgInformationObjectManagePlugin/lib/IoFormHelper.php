@@ -9,37 +9,124 @@
 class IoFormHelper
 {
     /**
-     * Standard code → display_standard_id mapping.
-     */
-    public const STANDARD_IDS = [
-        'isad' => 353,
-        'dc'   => 354,
-        'mods' => 355,
-        'rad'  => 356,
-        'dacs' => 357,
-    ];
-
-    /**
-     * Reverse mapping: display_standard_id → standard code.
-     */
-    public const ID_TO_STANDARD = [
-        353 => 'isad',
-        354 => 'dc',
-        355 => 'mods',
-        356 => 'rad',
-        357 => 'dacs',
-    ];
-
-    /**
      * Standard code → module name for forwarding.
      */
     public const MODULE_MAP = [
-        'dc'   => 'dcManage',
-        'rad'  => 'radManage',
-        'mods' => 'modsManage',
-        'dacs' => 'dacsManage',
+        'dc'      => 'dcManage',
+        'rad'     => 'radManage',
+        'mods'    => 'modsManage',
+        'dacs'    => 'dacsManage',
+        'museum'  => 'museum',
+        'library' => 'library',
+        'gallery' => 'gallery',
+        'dam'     => 'dam',
         // 'isad' stays in ioManage — no forwarding
     ];
+
+    /**
+     * Term name patterns → standard code. Used for dynamic detection.
+     */
+    private const TERM_NAME_PATTERNS = [
+        'ISAD'    => 'isad',
+        'Dublin'  => 'dc',
+        'MODS'    => 'mods',
+        'RAD'     => 'rad',
+        'DACS'    => 'dacs',
+        'Museum'  => 'museum',
+        'CCO'     => 'museum',
+        'Library' => 'library',
+        'MARC'    => 'library',
+        'Gallery' => 'gallery',
+        'DAM'     => 'dam',
+        'IPTC'    => 'dam',
+    ];
+
+    /** @var array|null Cached id→code map (built once per request) */
+    private static ?array $idToStandard = null;
+
+    /** @var array|null Cached code→id map */
+    private static ?array $standardIds = null;
+
+    /**
+     * Build dynamic standard mappings from the database (cached per request).
+     */
+    private static function loadStandardMaps(): void
+    {
+        if (self::$idToStandard !== null) {
+            return;
+        }
+
+        self::$idToStandard = [];
+        self::$standardIds = [];
+
+        // Find the "Information object templates" taxonomy ID dynamically
+        $templateTaxId = \Illuminate\Database\Capsule\Manager::table('taxonomy_i18n')
+            ->where('name', 'Information object templates')
+            ->where('culture', 'en')
+            ->value('id');
+
+        $terms = collect([]);
+        if ($templateTaxId) {
+            $terms = \Illuminate\Database\Capsule\Manager::table('term')
+                ->leftJoin('term_i18n', function ($join) {
+                    $join->on('term.id', '=', 'term_i18n.id')
+                         ->where('term_i18n.culture', '=', 'en');
+                })
+                ->where('term.taxonomy_id', $templateTaxId)
+                ->select(['term.id', 'term_i18n.name'])
+                ->get();
+        }
+
+        foreach ($terms as $term) {
+            $name = $term->name ?? '';
+            foreach (self::TERM_NAME_PATTERNS as $pattern => $code) {
+                if (stripos($name, $pattern) !== false) {
+                    self::$idToStandard[$term->id] = $code;
+                    if (!isset(self::$standardIds[$code])) {
+                        self::$standardIds[$code] = $term->id;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Also check display_standard_sector for sector-based terms
+        $sectorTerms = \Illuminate\Database\Capsule\Manager::table('display_standard_sector as dss')
+            ->join('term_i18n as ti', function ($join) {
+                $join->on('dss.term_id', '=', 'ti.id')
+                     ->where('ti.culture', '=', 'en');
+            })
+            ->select(['dss.term_id', 'dss.sector', 'ti.name'])
+            ->get();
+
+        foreach ($sectorTerms as $row) {
+            $code = $row->sector;
+            if (!isset(self::$idToStandard[$row->term_id])) {
+                self::$idToStandard[$row->term_id] = $code;
+            }
+            if (!isset(self::$standardIds[$code])) {
+                self::$standardIds[$code] = $row->term_id;
+            }
+        }
+    }
+
+    /**
+     * Get dynamic standard code → term ID mapping.
+     */
+    public static function getStandardIds(): array
+    {
+        self::loadStandardMaps();
+        return self::$standardIds;
+    }
+
+    /**
+     * Get dynamic term ID → standard code mapping.
+     */
+    public static function getIdToStandard(): array
+    {
+        self::loadStandardMaps();
+        return self::$idToStandard;
+    }
 
     /**
      * Detect the descriptive standard for an IO (or global default for new).
@@ -47,13 +134,15 @@ class IoFormHelper
      * @param int|null $displayStandardId The IO's display_standard_id (null for new)
      * @param string   $culture           Current culture
      *
-     * @return string Standard code: 'isad', 'dc', 'rad', 'mods', 'dacs'
+     * @return string Standard code: 'isad', 'dc', 'rad', 'mods', 'dacs', 'museum', etc.
      */
     public static function detectStandard(?int $displayStandardId, string $culture = 'en'): string
     {
+        self::loadStandardMaps();
+
         // If the IO has a per-record standard, use it
-        if ($displayStandardId && isset(self::ID_TO_STANDARD[$displayStandardId])) {
-            return self::ID_TO_STANDARD[$displayStandardId];
+        if ($displayStandardId && isset(self::$idToStandard[$displayStandardId])) {
+            return self::$idToStandard[$displayStandardId];
         }
 
         // Fall back to global default_template setting
@@ -64,7 +153,7 @@ class IoFormHelper
             ->where('s.name', 'informationobject')
             ->value('si.value');
 
-        if ($global && in_array($global, array_keys(self::STANDARD_IDS), true)) {
+        if ($global && isset(self::$standardIds[$global])) {
             return $global;
         }
 
@@ -139,7 +228,7 @@ class IoFormHelper
 
             // For new records, check URL param or global default
             $urlStandard = $request->getParameter('standard', null);
-            if ($urlStandard && isset(self::STANDARD_IDS[$urlStandard])) {
+            if ($urlStandard && isset(self::getStandardIds()[$urlStandard])) {
                 $standard = $urlStandard;
             } else {
                 $standard = self::detectStandard(null, $culture);
