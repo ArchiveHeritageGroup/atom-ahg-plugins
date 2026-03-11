@@ -5,10 +5,12 @@
 heritage_landing:
   url: /heritage
   param: { module: heritage, action: landing }
+  requirements: { sf_method: get }
 
 heritage_index:
   url: /heritage/index
   param: { module: heritage, action: landing }
+  requirements: { sf_method: get }
 
 # Public Search/Browse
 heritage_search:
