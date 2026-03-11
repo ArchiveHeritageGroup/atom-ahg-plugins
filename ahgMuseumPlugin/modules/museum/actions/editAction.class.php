@@ -111,15 +111,10 @@ class museumEditAction extends AhgController
             $this->ccoData = [];
             $this->itemLocation = [];
 
-            // Auto-generate object number from numbering scheme
-            try {
-                $numberingSvc = \AtomExtensions\Services\NumberingService::getInstance();
-                $nextRef = $numberingSvc->previewNextReference('museum');
-                if ($nextRef) {
-                    $this->ccoData['object_number'] = $nextRef;
-                }
-            } catch (\Throwable $e) {
-                // Numbering service not available — leave empty
+            // Auto-generate object number from sector numbering settings
+            $nextRef = self::previewNextIdentifier('museum');
+            if ($nextRef) {
+                $this->ccoData['object_number'] = $nextRef;
             }
         }
 
@@ -571,16 +566,10 @@ class museumEditAction extends AhgController
         }
 
         if ($isNew) {
-            // Auto-generate object number: consume sequence on save
-            try {
-                $numberingSvc = \AtomExtensions\Services\NumberingService::getInstance();
-                $preview = $numberingSvc->previewNextReference('museum');
-                // If user kept the auto-generated value (or left empty), consume the sequence
-                if (empty($this->ccoData['object_number']) || $this->ccoData['object_number'] === $preview) {
-                    $this->ccoData['object_number'] = $numberingSvc->getNextReference('museum');
-                }
-            } catch (\Throwable $e) {
-                // Numbering service not available
+            // Auto-generate object number from sector numbering settings
+            $preview = self::previewNextIdentifier('museum');
+            if (empty($this->ccoData['object_number']) || $this->ccoData['object_number'] === $preview) {
+                $this->ccoData['object_number'] = self::consumeNextIdentifier('museum');
             }
             // Create new information object
             $resourceId = $this->createInformationObject();
@@ -1196,5 +1185,112 @@ class museumEditAction extends AhgController
             ->where('taxonomy_id', $taxonomyId)
             ->value('id');
         return $term ? (int) $term : null;
+    }
+
+    /**
+     * Get identifier mask and counter from sector numbering settings.
+     *
+     * Reads from the settings page (Admin > AHG Settings > Sector Numbering).
+     * Falls back to global identifier settings if no sector override.
+     *
+     * @return array{enabled: bool, mask: string, counter: int}
+     */
+    protected static function getSectorNumberingSettings(string $sector): array
+    {
+        $svc = '\\AtomExtensions\\Services\\SettingService';
+
+        // Check sector-specific override
+        $enabledSetting = $svc::getByName("sector_{$sector}__identifier_mask_enabled");
+        $enabled = $enabledSetting ? $enabledSetting->getValue(['sourceCulture' => true]) : '';
+
+        // If empty, inherit from global
+        if ($enabled === '' || $enabled === null) {
+            $globalEnabled = $svc::getByName('identifier_mask_enabled');
+            $enabled = $globalEnabled ? $globalEnabled->getValue(['sourceCulture' => true]) : '0';
+        }
+
+        if ($enabled !== '1') {
+            return ['enabled' => false, 'mask' => '', 'counter' => 0];
+        }
+
+        // Get mask
+        $maskSetting = $svc::getByName("sector_{$sector}__identifier_mask");
+        $mask = $maskSetting ? $maskSetting->getValue(['sourceCulture' => true]) : '';
+
+        // Fall back to global mask
+        if (empty($mask)) {
+            $globalMask = $svc::getByName('identifier_mask');
+            $mask = $globalMask ? $globalMask->getValue(['sourceCulture' => true]) : '';
+        }
+
+        // Get counter
+        $counterSetting = $svc::getByName("sector_{$sector}__identifier_counter");
+        $counter = $counterSetting ? (int) $counterSetting->getValue(['sourceCulture' => true]) : 0;
+
+        // Fall back to global counter
+        if ($counter === 0 && !$counterSetting) {
+            $globalCounter = $svc::getByName('identifier_counter');
+            $counter = $globalCounter ? (int) $globalCounter->getValue(['sourceCulture' => true]) : 0;
+        }
+
+        return ['enabled' => true, 'mask' => $mask, 'counter' => $counter];
+    }
+
+    /**
+     * Apply mask tokens to generate an identifier.
+     *
+     * Tokens: %Y% = 4-digit year, %y% = 2-digit year, %m% = month, %d% = day
+     *         %04i% = zero-padded counter, %i% = counter, %06i% etc.
+     */
+    protected static function applyMask(string $mask, int $counter): string
+    {
+        $result = $mask;
+        $result = str_replace('%Y%', date('Y'), $result);
+        $result = str_replace('%y%', date('y'), $result);
+        $result = str_replace('%m%', date('m'), $result);
+        $result = str_replace('%d%', date('d'), $result);
+
+        // Handle padded counters: %04i%, %06i%, etc.
+        $result = preg_replace_callback('/%0?(\d+)i%/', function ($m) use ($counter) {
+            return str_pad((string) $counter, (int) $m[1], '0', STR_PAD_LEFT);
+        }, $result);
+
+        // Simple counter %i%
+        $result = str_replace('%i%', (string) $counter, $result);
+
+        return $result;
+    }
+
+    /**
+     * Preview next identifier without consuming the counter.
+     */
+    protected static function previewNextIdentifier(string $sector): ?string
+    {
+        $settings = self::getSectorNumberingSettings($sector);
+        if (!$settings['enabled'] || empty($settings['mask'])) {
+            return null;
+        }
+
+        return self::applyMask($settings['mask'], $settings['counter'] + 1);
+    }
+
+    /**
+     * Generate and consume the next identifier (increments the counter).
+     */
+    protected static function consumeNextIdentifier(string $sector): ?string
+    {
+        $settings = self::getSectorNumberingSettings($sector);
+        if (!$settings['enabled'] || empty($settings['mask'])) {
+            return null;
+        }
+
+        $nextCounter = $settings['counter'] + 1;
+        $identifier = self::applyMask($settings['mask'], $nextCounter);
+
+        // Update the sector counter in settings
+        $ws = \AtomFramework\Services\Write\WriteServiceFactory::settings();
+        $ws->save("sector_{$sector}__identifier_counter", (string) $nextCounter);
+
+        return $identifier;
     }
 }
