@@ -1,0 +1,31 @@
+{
+    "name": "FTP / SFTP Upload",
+    "machine_name": "ahgFtpPlugin",
+    "version": "1.0.0",
+    "description": "Browser-based FTP/SFTP upload for CSV import digital objects. Provides drag-and-drop upload interface under Import > FTP Upload so users can place files on the server without external FTP client software. Prominently shows the path to use in CSV digitalObjectPath column.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0",
+    "requires": {
+        "atom_framework": ">=2.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgSettingsPlugin"
+    ],
+    "tables": [],
+    "category": "import",
+    "features": [
+        "Browser-based drag-and-drop file upload to FTP/SFTP server",
+        "Multi-file upload with per-file progress bars",
+        "Remote file listing with size, date, and delete",
+        "Prominent CSV path warning showing exact digitalObjectPath prefix",
+        "Admin-configurable FTP/SFTP connection settings",
+        "Test Connection button in settings",
+        "Supports FTP (active/passive) and SFTP protocols"
+    ],
+    "changelog": {
+        "1.0.0": "Initial release with FTP/SFTP upload, file management, and settings integration"
+    }
+}
