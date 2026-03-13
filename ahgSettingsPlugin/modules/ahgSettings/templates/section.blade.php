@@ -2867,6 +2867,191 @@
                             </div>
                             @break
 
+                            @case('ftp')
+                                <!-- FTP/SFTP Connection Settings -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="mb-0"><i class="fa fa-server me-2"></i>{{ __('FTP / SFTP Connection') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label for="ftp_protocol" class="form-label">{{ __('Protocol') }}</label>
+                                                <select class="form-select" id="ftp_protocol" name="settings[ftp_protocol]">
+                                                    <option value="sftp" {{ ($settings['ftp_protocol'] ?? 'sftp') === 'sftp' ? 'selected' : '' }}>SFTP (SSH)</option>
+                                                    <option value="ftp" {{ ($settings['ftp_protocol'] ?? 'sftp') === 'ftp' ? 'selected' : '' }}>FTP</option>
+                                                </select>
+                                                <div class="form-text">{{ __('SFTP recommended for security') }}</div>
+                                            </div>
+                                            <div class="col-md-5">
+                                                <label for="ftp_host" class="form-label">{{ __('Host') }}</label>
+                                                <input type="text" class="form-control" id="ftp_host" name="settings[ftp_host]"
+                                                       value="{{ e($settings['ftp_host'] ?? '') }}"
+                                                       placeholder="192.168.0.112">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label for="ftp_port" class="form-label">{{ __('Port') }}</label>
+                                                <input type="number" class="form-control" id="ftp_port" name="settings[ftp_port]"
+                                                       value="{{ e($settings['ftp_port'] ?? '22') }}" min="1" max="65535">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="ftp_username" class="form-label">{{ __('Username') }}</label>
+                                                <input type="text" class="form-control" id="ftp_username" name="settings[ftp_username]"
+                                                       value="{{ e($settings['ftp_username'] ?? '') }}">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label for="ftp_password" class="form-label">{{ __('Password') }}</label>
+                                                <input type="password" class="form-control" id="ftp_password" name="settings[ftp_password]"
+                                                       value="{{ e($settings['ftp_password'] ?? '') }}"
+                                                       placeholder="{{ __('Leave blank to keep current') }}">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label">&nbsp;</label>
+                                                <button type="button" class="btn btn-outline-secondary d-block w-100" id="test-ftp-btn">
+                                                    <i class="fa fa-plug me-1"></i>{{ __('Test Connection') }}
+                                                </button>
+                                            </div>
+                                            <div class="col-12">
+                                                <div id="ftp-test-result" class="alert d-none"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Remote Path Settings -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fa fa-folder-open me-2"></i>{{ __('Remote Path') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="ftp_remote_path" class="form-label">{{ __('Remote Base Path') }}</label>
+                                                <input type="text" class="form-control" id="ftp_remote_path" name="settings[ftp_remote_path]"
+                                                       value="{{ e($settings['ftp_remote_path'] ?? '/uploads') }}"
+                                                       placeholder="/uploads">
+                                                <div class="form-text">
+                                                    {{ __('Path as seen by the SFTP/FTP user (e.g. /uploads). Used for uploading and listing files.') }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="ftp_disk_path" class="form-label">{{ __('Server Disk Path') }}</label>
+                                                <input type="text" class="form-control" id="ftp_disk_path" name="settings[ftp_disk_path]"
+                                                       value="{{ e($settings['ftp_disk_path'] ?? '') }}"
+                                                       placeholder="/sftp/ftpuser/uploads">
+                                                <div class="form-text">
+                                                    {{ __('Actual filesystem path on the server where files land. Shown to users for the CSV digitalObjectPath column.') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- FTP Options -->
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="fa fa-cog me-2"></i>{{ __('Options') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="ftp_passive_mode"
+                                                           name="settings[ftp_passive_mode]" value="1"
+                                                           {{ ($settings['ftp_passive_mode'] ?? 'true') === 'true' || ($settings['ftp_passive_mode'] ?? '') === '1' ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="ftp_passive_mode">
+                                                        <strong>{{ __('Passive Mode') }}</strong>
+                                                    </label>
+                                                </div>
+                                                <div class="form-text">{{ __('Enable passive mode for FTP connections (recommended for firewalled servers). Only applies to FTP, not SFTP.') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Link -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-secondary text-white">
+                                        <h5 class="mb-0"><i class="fa fa-link me-2"></i>{{ __('Quick Links') }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <a href="{{ url_for(['module' => 'ftpUpload', 'action' => 'index']) }}" class="btn btn-outline-primary">
+                                            <i class="fa fa-cloud-upload-alt me-1"></i>{{ __('Go to FTP Upload Page') }}
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <!-- FTP Test Connection + Protocol Toggle Script -->
+                                <script @cspNonce>
+                                (function() {
+                                    // Toggle passive mode visibility based on protocol
+                                    var protocolSel = document.getElementById('ftp_protocol');
+                                    var passiveCard = document.getElementById('ftp_passive_mode')?.closest('.card.mb-4');
+                                    function togglePassive() {
+                                        if (passiveCard) {
+                                            passiveCard.style.display = protocolSel.value === 'ftp' ? '' : 'none';
+                                        }
+                                        // Update default port
+                                        var portInput = document.getElementById('ftp_port');
+                                        if (portInput && portInput.value === '22' && protocolSel.value === 'ftp') {
+                                            portInput.value = '21';
+                                        } else if (portInput && portInput.value === '21' && protocolSel.value === 'sftp') {
+                                            portInput.value = '22';
+                                        }
+                                    }
+                                    if (protocolSel) {
+                                        protocolSel.addEventListener('change', togglePassive);
+                                        togglePassive();
+                                    }
+
+                                    // Test Connection
+                                    document.getElementById('test-ftp-btn')?.addEventListener('click', function() {
+                                        var btn = this;
+                                        var resultDiv = document.getElementById('ftp-test-result');
+
+                                        btn.disabled = true;
+                                        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> {{ __("Testing...") }}';
+                                        resultDiv.classList.add('d-none');
+
+                                        fetch('{{ url_for(['module' => 'ahgSettings', 'action' => 'ftpTest']) }}', {
+                                            method: 'POST',
+                                            headers: {'Content-Type': 'application/json'},
+                                            body: JSON.stringify({
+                                                protocol: document.getElementById('ftp_protocol').value,
+                                                host: document.getElementById('ftp_host').value,
+                                                port: parseInt(document.getElementById('ftp_port').value) || 22,
+                                                username: document.getElementById('ftp_username').value,
+                                                password: document.getElementById('ftp_password').value,
+                                                remote_path: document.getElementById('ftp_remote_path').value,
+                                                passive_mode: document.getElementById('ftp_passive_mode').checked ? 'true' : 'false'
+                                            })
+                                        })
+                                        .then(function(r) { return r.json(); })
+                                        .then(function(data) {
+                                            btn.disabled = false;
+                                            btn.innerHTML = '<i class="fa fa-plug me-1"></i>{{ __("Test Connection") }}';
+                                            resultDiv.classList.remove('d-none', 'alert-success', 'alert-danger');
+
+                                            if (data.success) {
+                                                resultDiv.classList.add('alert-success');
+                                                resultDiv.innerHTML = '<i class="fa fa-check-circle me-2"></i>' + (data.message || '{{ __("Connection successful!") }}');
+                                            } else {
+                                                resultDiv.classList.add('alert-danger');
+                                                resultDiv.innerHTML = '<i class="fa fa-times-circle me-2"></i>' + (data.error || data.message || '{{ __("Connection failed") }}');
+                                            }
+                                        })
+                                        .catch(function(err) {
+                                            btn.disabled = false;
+                                            btn.innerHTML = '<i class="fa fa-plug me-1"></i>{{ __("Test Connection") }}';
+                                            resultDiv.classList.remove('d-none', 'alert-success');
+                                            resultDiv.classList.add('alert-danger');
+                                            resultDiv.innerHTML = '<i class="fa fa-times-circle me-2"></i>{{ __("Error") }}: ' + err.message;
+                                        });
+                                    });
+                                })();
+                                </script>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->

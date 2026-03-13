@@ -141,6 +141,11 @@ class ahgSettingsActions extends AhgController
         return $this->executeSettingsAction('fusekiTestAction', $request);
     }
 
+    public function executeFtpTest($request)
+    {
+        return $this->executeSettingsAction('ftpTestAction', $request);
+    }
+
     public function executePlugins($request)
     {
         return $this->executeSettingsAction('pluginsAction', $request);

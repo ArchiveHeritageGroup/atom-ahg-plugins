@@ -44,6 +44,9 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
         // Fuseki test
         $router->any('ahg_settings_fuseki_test', '/ahgSettings/fusekiTest', 'fusekiTest');
 
+        // FTP test
+        $router->any('ahg_settings_ftp_test', '/ahgSettings/ftpTest', 'ftpTest');
+
         // Plugins
         $router->any('ahg_settings_plugins', '/ahgSettings/plugins', 'plugins');
 

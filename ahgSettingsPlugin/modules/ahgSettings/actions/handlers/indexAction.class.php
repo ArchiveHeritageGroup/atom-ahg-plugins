@@ -117,6 +117,17 @@ class AhgSettingsIndexAction extends AhgController
             ];
         }
 
+        // FTP/SFTP Upload - show when ahgFtpPlugin is enabled
+        $hasFtp = in_array('ahgFtpPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($hasFtp) {
+            $this->sections['ftp'] = [
+                'label' => 'FTP / SFTP Upload',
+                'icon' => 'fa-upload',
+                'description' => 'FTP/SFTP connection settings for CSV import digital object uploads',
+                'url' => 'admin/ahg-settings/section?section=ftp'
+            ];
+        }
+
         // Levels of Description - show when any GLAM/DAM plugin enabled
         if ($hasGlamDam) {
             $this->sections['levels'] = [

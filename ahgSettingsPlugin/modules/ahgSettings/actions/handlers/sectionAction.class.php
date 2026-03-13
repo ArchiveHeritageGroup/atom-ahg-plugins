@@ -43,6 +43,11 @@ class AhgSettingsSectionAction extends AhgController
             'icon' => 'fa-book',
             'description' => 'Loan rules, circulation, fines, patron defaults, OPAC, ISBN providers',
         ],
+        'ftp' => [
+            'label' => 'FTP / SFTP',
+            'icon' => 'fa-upload',
+            'description' => 'FTP/SFTP upload settings for CSV import digital objects',
+        ],
     ];
 
     protected $checkboxFields = [
@@ -126,6 +131,9 @@ class AhgSettingsSectionAction extends AhgController
             'library_auto_expire_patrons',
             'library_barcode_auto_generate',
         ],
+        'ftp' => [
+            'ftp_passive_mode',
+        ],
     ];
 
     
@@ -144,6 +152,7 @@ class AhgSettingsSectionAction extends AhgController
         'accession' => 'ahgAccessionManagePlugin',
         'authority' => 'ahgAuthorityPlugin',
         'library' => 'ahgLibraryPlugin',
+        'ftp' => 'ahgFtpPlugin',
     ];
 
     // Check if a plugin is enabled
