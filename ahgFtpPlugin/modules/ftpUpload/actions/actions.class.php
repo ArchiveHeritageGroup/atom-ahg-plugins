@@ -153,7 +153,7 @@ class ftpUploadActions extends AhgController
     /**
      * Reassemble chunks into a single file and upload via FTP/SFTP.
      */
-    protected function assembleAndUpload(string $uploadId, string $uploadDir, string $fileName, int $totalChunks): \sfView
+    protected function assembleAndUpload(string $uploadId, string $uploadDir, string $fileName, int $totalChunks)
     {
         $assembledPath = self::CHUNK_DIR . '/' . $uploadId . '_assembled';
 

@@ -348,12 +348,9 @@ SFTPEOF";
         $opts = $this->sshOpts();
         $port = (int) $this->port;
         $userHost = escapeshellarg($this->username . '@' . $this->host);
+        $remotePath = escapeshellarg($this->remotePath);
 
-        // Use sftp batch mode to get long listing
-        $cmd = "{$prefix} sftp -P {$port} {$opts} {$userHost} 2>/dev/null <<SFTPEOF
-ls -l {$this->remotePath}
-bye
-SFTPEOF";
+        $cmd = "{$prefix} sftp -P {$port} {$opts} {$userHost} 2>/dev/null <<SFTPEOF\nls -l {$this->remotePath}\nbye\nSFTPEOF";
 
         $output = [];
         $exitCode = 0;
@@ -371,9 +368,10 @@ SFTPEOF";
                 continue;
             }
 
-            // Parse: -rw-r--r--    1 user  group  12345 Jan  1 12:00 filename
-            if (preg_match('/^-\S+\s+\d+\s+\S+\s+\S+\s+(\d+)\s+(\w+\s+\d+\s+[\d:]+)\s+(.+)$/', $line, $m)) {
-                $name = trim($m[3]);
+            // Parse: -rw-r--r--    ? 1005  1005  12345 Jan  1 12:00 /uploads/filename
+            // Link count may be a number or '?' depending on SFTP server
+            if (preg_match('/^-\S+\s+\S+\s+\S+\s+\S+\s+(\d+)\s+(\w+\s+\d+\s+[\d:]+)\s+(.+)$/', $line, $m)) {
+                $name = basename(trim($m[3]));
                 if ($name === '.' || $name === '..') {
                     continue;
                 }
@@ -395,17 +393,19 @@ SFTPEOF";
         $port = (int) $this->port;
         $userHost = escapeshellarg($this->username . '@' . $this->host);
 
-        $cmd = "{$prefix} sftp -P {$port} {$opts} {$userHost} 2>&1 <<SFTPEOF
-rm {$remoteFull}
-bye
-SFTPEOF";
+        $cmd = "{$prefix} sftp -P {$port} {$opts} {$userHost} 2>&1 <<SFTPEOF\nrm {$remoteFull}\nbye\nSFTPEOF";
 
         $output = [];
         $exitCode = 0;
         exec($cmd, $output, $exitCode);
 
+        $outputStr = implode(' ', $output);
+        if (stripos($outputStr, 'No such file') !== false || stripos($outputStr, 'Couldn\'t') !== false) {
+            return ['success' => false, 'message' => 'SFTP delete failed: ' . $outputStr];
+        }
+
         if ($exitCode !== 0) {
-            return ['success' => false, 'message' => 'SFTP delete failed: ' . implode(' ', $output)];
+            return ['success' => false, 'message' => 'SFTP delete failed: ' . $outputStr];
         }
 
         return ['success' => true, 'message' => 'File deleted successfully'];
