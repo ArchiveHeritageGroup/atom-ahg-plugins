@@ -4,7 +4,7 @@ A comprehensive 3D model viewing plugin for Access to Memory (AtoM) with IIIF 3D
 
 ## Features
 
-- **Multiple 3D Formats**: Support for GLB, glTF, OBJ, STL, FBX, PLY, and USDZ formats
+- **Multiple 3D Formats**: Support for GLB, glTF, OBJ, STL, PLY, and USDZ formats (FBX via Blender thumbnail only)
 - **Google Model Viewer**: Uses Google's `<model-viewer>` component for high-quality WebGL rendering
 - **Augmented Reality**: AR viewing on iOS (Quick Look) and Android (Scene Viewer)
 - **3D Hotspots**: Interactive annotation points with customizable types (info, damage, detail, link)
@@ -90,13 +90,14 @@ Navigate to **Admin > 3D Viewer Settings** to configure:
 
 ### NGINX Configuration
 
-Add MIME types for 3D files:
+Add MIME types for 3D files (GLB/GLTF already in default nginx mime.types):
 
 ```nginx
 types {
-    model/gltf-binary glb;
-    model/gltf+json gltf;
-    model/vnd.usdz+zip usdz;
+    model/obj                         obj;
+    model/stl                         stl;
+    model/vnd.usdz+zip               usdz;
+    application/x-ply                 ply;
 }
 ```
 
@@ -271,10 +272,10 @@ gltf-pipeline -i model.gltf -o model.glb
 
 ## Integration with Condition Reporting
 
-The 3D hotspots integrate with the ahgConditionPlugin for damage documentation:
+The 3D hotspots integrate with the ahgConditionPlugin for damage documentation. When a damage-type hotspot is created without an explicit `link_url`, the system automatically generates a link to the object's condition assessment page (`/{slug}/condition`).
 
 ```php
-// Add damage hotspot from condition report
+// Add damage hotspot — auto-links to condition page
 $service->addHotspot($modelId, [
     'hotspot_type' => 'damage',
     'title' => 'Surface crack',
@@ -283,6 +284,7 @@ $service->addHotspot($modelId, [
     'position_y' => 0.1,
     'position_z' => 0.3,
 ]);
+// link_url is automatically set to /index.php/{object-slug}/condition
 ```
 
 ## Changelog
