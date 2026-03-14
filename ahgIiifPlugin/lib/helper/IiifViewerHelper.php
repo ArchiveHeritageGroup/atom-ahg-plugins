@@ -364,7 +364,7 @@ endif;
 if (!function_exists('get_primary_3d_model')):
 function get_primary_3d_model($resource)
 {
-    $extensions = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz'];
+    $extensions = ['glb', 'gltf', 'obj', 'stl', 'ply', 'usdz'];
 
     try {
         $digitalObjects = get_digital_objects($resource);
@@ -688,7 +688,7 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
         'defaultSideBarPanel' => 'info',
     ]);
     
-    // OpenSeadragon loaded from CDN by the viewer manager module
+    // OpenSeadragon loaded locally by the viewer manager module
     $n = sfConfig::get('csp_nonce', '');
     $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
     $js = '<script type="module"' . $nonceAttr . '>' . "\n";

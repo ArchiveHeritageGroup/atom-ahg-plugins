@@ -247,12 +247,12 @@ $viewerId = 'redaction-viewer-' . $objectId;
 <link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" @cspNonce>
 
 @if($docInfo['is_pdf'])
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" @cspNonce></script>
+<script src="/plugins/ahgIiifPlugin/web/js/vendor/pdf.min.js" @cspNonce></script>
 <script @cspNonce>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/plugins/ahgIiifPlugin/web/js/vendor/pdf.worker.min.js';
 </script>
 @else
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js" @cspNonce></script>
+<script src="/plugins/ahgIiifPlugin/web/public/openseadragon/openseadragon.min.js" @cspNonce></script>
 <script src="{{ $frameworkPath }}/public/viewers/annotorious/openseadragon-annotorious.min.js" @cspNonce></script>
 @endif
 
@@ -545,7 +545,7 @@ document.addEventListener('DOMContentLoaded', function() {
         osdViewer = OpenSeadragon({
             id: 'osd-redaction-viewer',
             tileSources: iiifUrl,
-            prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/images/',
+            prefixUrl: '/plugins/ahgIiifPlugin/web/public/openseadragon/images/',
             showNavigator: true,
             navigatorPosition: 'BOTTOM_RIGHT',
             showRotationControl: true,

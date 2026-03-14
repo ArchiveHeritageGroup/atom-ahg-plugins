@@ -244,12 +244,12 @@ $viewerId = 'redaction-viewer-' . $objectId;
 <link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
 <?php if ($docInfo['is_pdf']): ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script src="/plugins/ahgIiifPlugin/web/js/vendor/pdf.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/plugins/ahgIiifPlugin/web/js/vendor/pdf.worker.min.js';
 </script>
 <?php else: ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script src="/plugins/ahgIiifPlugin/web/public/openseadragon/openseadragon.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script src="<?php echo $frameworkPath; ?>/public/viewers/annotorious/openseadragon-annotorious.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php endif; ?>
 
@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
         osdViewer = OpenSeadragon({
             id: 'osd-redaction-viewer',
             tileSources: iiifUrl,
-            prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/images/',
+            prefixUrl: '/plugins/ahgIiifPlugin/web/public/openseadragon/images/',
             showNavigator: true,
             navigatorPosition: 'BOTTOM_RIGHT',
             showRotationControl: true,

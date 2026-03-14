@@ -106,7 +106,7 @@
                     navigatorPosition: 'BOTTOM_RIGHT',
                     showReferenceStrip: tileSources.length > 1,
                     referenceStripScroll: 'horizontal',
-                    prefixUrl: 'https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/images/',
+                    prefixUrl: '/plugins/ahgIiifPlugin/web/public/openseadragon/images/',
                     gestureSettingsMouse: { clickToZoom: true },
                     animationTime: 0.5,
                     zoomPerClick: 1.5,
