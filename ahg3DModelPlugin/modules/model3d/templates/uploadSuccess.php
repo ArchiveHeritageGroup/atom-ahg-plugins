@@ -7,7 +7,7 @@ $allowedFormats = $sf_data->getRaw('allowedFormats');
 $maxFileSize = $sf_data->getRaw('maxFileSize');
 
 // Default formats if not set
-$formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usdz', 'obj', 'stl', 'fbx', 'ply'];
+$formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usdz', 'obj', 'stl', 'ply'];
 ?>
 
 <nav aria-label="breadcrumb" class="mb-3">
@@ -30,7 +30,7 @@ $formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usd
                     <div class="mb-4">
                         <label class="form-label"><strong>3D Model File</strong> <span class="text-danger">*</span></label>
                         <div class="upload-zone" id="upload-zone">
-                            <input type="file" name="model_file" id="model_file" accept=".glb,.gltf,.obj,.stl,.fbx,.ply,.usdz" required>
+                            <input type="file" name="model_file" id="model_file" accept=".glb,.gltf,.obj,.stl,.ply,.usdz" required>
                             <div class="upload-content">
                                 <i class="fas fa-cube fa-3x text-muted mb-3"></i>
                                 <p class="mb-1">Drag and drop your 3D model here</p>
@@ -100,7 +100,6 @@ $formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usd
                                 <li><strong>.usdz</strong> - Apple AR format</li>
                                 <li><strong>.obj</strong> - Wavefront OBJ</li>
                                 <li><strong>.stl</strong> - Stereolithography</li>
-                                <li><strong>.fbx</strong> - Autodesk FBX</li>
                                 <li><strong>.ply</strong> - Polygon File Format</li>
                             </ul>
 

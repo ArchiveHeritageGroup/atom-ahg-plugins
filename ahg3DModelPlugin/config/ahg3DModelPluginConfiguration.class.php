@@ -4,7 +4,7 @@
  * ahg3DModelPlugin Configuration
  * 
  * Provides 3D model viewing with IIIF 3D extension support for museum objects
- * Supports GLB, GLTF, OBJ, STL, FBX, PLY, and USDZ formats
+ * Supports GLB, GLTF, OBJ, STL, PLY, and USDZ formats (FBX via Blender thumbnail only)
  * 
  * @package ahg3DModelPlugin
  * @author Johan Pieterse - The Archive and Heritage Group

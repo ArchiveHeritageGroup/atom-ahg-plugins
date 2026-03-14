@@ -22,7 +22,6 @@ class Ar3dService implements Ar3dServiceInterface
         'model/gltf+json' => 'gltf',
         'model/obj' => 'obj',
         'model/stl' => 'stl',
-        'model/fbx' => 'fbx',
     ];
 
     public function __construct(

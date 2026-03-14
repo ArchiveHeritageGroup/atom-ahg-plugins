@@ -281,7 +281,6 @@ class model3dActions extends AhgController
             'gltf' => 'model/gltf+json',
             'obj' => 'model/obj',
             'stl' => 'model/stl',
-            'fbx' => 'application/octet-stream',
             'ply' => 'application/x-ply',
             'usdz' => 'model/vnd.usdz+zip',
         ];
@@ -738,6 +737,18 @@ class model3dActions extends AhgController
         $hotspotType = $input['hotspot_type'] ?? 'annotation';
         $color = $colors[$hotspotType] ?? '#1a73e8';
 
+        // Auto-link damage hotspots to condition assessment page if no explicit link
+        $linkUrl = $input['link_url'] ?? null;
+        if ($hotspotType === 'damage' && empty($linkUrl)) {
+            $model = $db::table('object_3d_model')->where('id', $modelId)->first();
+            if ($model) {
+                $slug = $db::table('slug')->where('object_id', $model->object_id)->value('slug');
+                if ($slug) {
+                    $linkUrl = '/index.php/' . $slug . '/condition';
+                }
+            }
+        }
+
         // Insert hotspot
         $hotspotId = $db::table('object_3d_hotspot')->insertGetId([
             'model_id' => $modelId,
@@ -749,7 +760,7 @@ class model3dActions extends AhgController
             'normal_y' => (float)($input['normal_y'] ?? 1),
             'normal_z' => (float)($input['normal_z'] ?? 0),
             'color' => $color,
-            'link_url' => $input['link_url'] ?? null,
+            'link_url' => $linkUrl,
             'link_target' => $input['link_target'] ?? '_blank',
             'display_order' => $maxOrder + 1,
             'is_visible' => 1,

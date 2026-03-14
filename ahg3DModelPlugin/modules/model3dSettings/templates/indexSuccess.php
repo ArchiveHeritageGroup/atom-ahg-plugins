@@ -213,7 +213,7 @@ function isSettingEnabled($settings, $key) {
                         <label class="form-label">Allowed Formats</label>
                         <?php 
                         $allowedFormats = json_decode(getSetting($settings, 'allowed_formats', '["glb","gltf","usdz"]'), true) ?: [];
-                        $allFormats = ['glb', 'gltf', 'usdz', 'obj', 'stl', 'fbx', 'ply'];
+                        $allFormats = ['glb', 'gltf', 'usdz', 'obj', 'stl', 'ply'];
                         ?>
                         <div class="row">
                             <?php foreach ($allFormats as $fmt): ?>

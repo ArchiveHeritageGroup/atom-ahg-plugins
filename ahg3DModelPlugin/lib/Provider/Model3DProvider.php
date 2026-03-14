@@ -20,12 +20,11 @@ class Model3DProvider implements Model3DProviderInterface
         'model/gltf+json' => 'gltf',
         'model/obj' => 'obj',
         'model/stl' => 'stl',
-        'application/octet-stream' => 'fbx',
         'application/x-ply' => 'ply',
         'model/vnd.usdz+zip' => 'usdz',
     ];
 
-    private const FORMAT_EXTENSIONS = ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz'];
+    private const FORMAT_EXTENSIONS = ['glb', 'gltf', 'obj', 'stl', 'ply', 'usdz'];
 
     /**
      * {@inheritdoc}

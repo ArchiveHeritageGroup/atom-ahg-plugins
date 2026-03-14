@@ -131,7 +131,7 @@ CREATE TABLE IF NOT EXISTS `object_3d_model` (
   `file_path` varchar(500) NOT NULL,
   `file_size` bigint DEFAULT NULL,
   `mime_type` varchar(100) DEFAULT NULL,
-  `format` VARCHAR(47) COMMENT 'glb, gltf, obj, fbx, stl, ply, usdz' DEFAULT 'glb',
+  `format` VARCHAR(47) COMMENT 'glb, gltf, obj, stl, ply, usdz' DEFAULT 'glb',
   `vertex_count` int DEFAULT NULL,
   `face_count` int DEFAULT NULL,
   `texture_count` int DEFAULT NULL,

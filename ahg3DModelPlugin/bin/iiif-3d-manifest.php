@@ -51,7 +51,7 @@ $digitalObjects = DB::table('digital_object as do')
     ->toArray();
 
 // Filter for 3D formats
-$threeDFormats = ['glb', 'gltf', 'obj', 'stl', 'ply', 'fbx', 'usdz'];
+$threeDFormats = ['glb', 'gltf', 'obj', 'stl', 'ply', 'usdz'];
 $threeDObjects = array_filter($digitalObjects, function($do) use ($threeDFormats) {
     $ext = strtolower(pathinfo($do['name'], PATHINFO_EXTENSION));
     return in_array($ext, $threeDFormats) || strpos($do['mime_type'], 'model') !== false;

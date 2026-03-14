@@ -339,7 +339,7 @@
      * @returns {Array} Array of extensions
      */
     Model3D.getSupportedExtensions = function() {
-        return ['glb', 'gltf', 'obj', 'stl', 'fbx', 'ply', 'usdz', 'splat', 'ksplat'];
+        return ['glb', 'gltf', 'obj', 'stl', 'ply', 'usdz', 'splat', 'ksplat'];
     };
 
     /**
