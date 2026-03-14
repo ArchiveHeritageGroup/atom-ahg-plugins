@@ -138,6 +138,8 @@ export class IiifViewerManager {
         const el = document.getElementById(elementId);
         if (el) {
             el.addEventListener(event, handler);
+        } else if (elementId.startsWith('btn-')) {
+            console.debug(`IiifViewerManager: DOM element #${elementId} not found (button may not be rendered)`);
         }
     }
 
@@ -308,6 +310,14 @@ export class IiifViewerManager {
                 });
             });
 
+            // Sync Annotorious overlay with OSD rotation to prevent upside-down annotations
+            this.osdViewer.addHandler('rotate', (event) => {
+                const overlay = document.querySelector(`#osd-${vid} .a9s-annotationlayer`);
+                if (overlay) {
+                    overlay.style.transform = `rotate(${event.degrees}deg)`;
+                }
+            });
+
             this.loaded.osd = true;
         } catch (error) {
             console.error('OpenSeadragon initialization failed:', error);
@@ -421,10 +431,12 @@ export class IiifViewerManager {
                 return;
             }
 
-            // Pre-fetch manifest to validate it
+            // Pre-fetch manifest to validate it (supports both v2.1 and v3.0)
             const manifest = await this.fetchManifest();
-            if (!manifest || !manifest.sequences || !manifest.sequences[0]?.canvases?.length) {
-                console.error('Invalid manifest for Mirador:', manifest);
+            const hasV2 = manifest?.sequences?.[0]?.canvases?.length > 0;
+            const hasV3 = manifest?.items?.length > 0;
+            if (!manifest || (!hasV2 && !hasV3)) {
+                console.error('Invalid manifest for Mirador (no canvases in v2.1 or v3.0):', manifest);
                 await this.showViewer('openseadragon');
                 return;
             }

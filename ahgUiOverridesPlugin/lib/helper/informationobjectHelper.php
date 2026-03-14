@@ -374,10 +374,10 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
     } elseif (in_array($ext, ['obj', 'stl'])) {
         // Three.js for OBJ/STL
         $html .= '<div id="' . $viewerId . '-threejs" style="width:100%;height:100%;border-radius:8px;"></div>';
-        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>';
-        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>';
-        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>';
-        $html .= '<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>';
+        $html .= '<script src="/plugins/ahgIiifPlugin/web/js/vendor/three.min.js"></script>';
+        $html .= '<script src="/plugins/ahgIiifPlugin/web/js/vendor/OBJLoader.js"></script>';
+        $html .= '<script src="/plugins/ahgIiifPlugin/web/js/vendor/STLLoader.js"></script>';
+        $html .= '<script src="/plugins/ahgIiifPlugin/web/js/vendor/OrbitControls.js"></script>';
         $html .= '<script ' . $nonceAttr . '>';
         $html .= '(function(){';
         $html .= 'var c=document.getElementById("' . $viewerId . '-threejs");if(!c)return;';

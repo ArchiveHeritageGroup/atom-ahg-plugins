@@ -12,6 +12,7 @@ class iiifActions extends AhgController
 {
     /**
      * Generate IIIF manifest by slug
+     * Default: v3. Use ?format=2 for v2.1 fallback.
      */
     public function executeManifest($request)
     {
@@ -22,15 +23,16 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Missing slug parameter']));
         }
 
-        if ($this->wantsV3($request)) {
-            return $this->generateManifestV3(['slug' => $slug]);
+        if ($this->wantsV2($request)) {
+            return $this->generateManifest(['slug' => $slug]);
         }
 
-        return $this->generateManifest(['slug' => $slug]);
+        return $this->generateManifestV3(['slug' => $slug]);
     }
 
     /**
      * Generate IIIF manifest by ID
+     * Default: v3. Use ?format=2 for v2.1 fallback.
      */
     public function executeManifestById($request)
     {
@@ -41,11 +43,11 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Missing or invalid id parameter']));
         }
 
-        if ($this->wantsV3($request)) {
-            return $this->generateManifestV3(['id' => (int) $id]);
+        if ($this->wantsV2($request)) {
+            return $this->generateManifest(['id' => (int) $id]);
         }
 
-        return $this->generateManifest(['id' => (int) $id]);
+        return $this->generateManifestV3(['id' => (int) $id]);
     }
 
     /**
@@ -64,16 +66,17 @@ class iiifActions extends AhgController
     }
 
     /**
-     * Detect if client wants v3 manifest via ?version=3 or Accept header.
+     * Detect if client explicitly requests v2.1 manifest via ?format=2, ?version=2, or Accept header.
+     * Default is now v3 (Presentation API 3.0).
      */
-    private function wantsV3($request): bool
+    private function wantsV2($request): bool
     {
-        if ($request->getParameter('version') === '3') {
+        if ($request->getParameter('format') === '2' || $request->getParameter('version') === '2') {
             return true;
         }
 
         $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
-        return stripos($accept, 'presentation/3') !== false;
+        return stripos($accept, 'presentation/2') !== false;
     }
 
     /**
@@ -384,6 +387,7 @@ class iiifActions extends AhgController
 
         $db = \Illuminate\Database\Capsule\Manager::class;
         $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $forceRefresh = !empty($_GET['refresh']);
 
         $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin';
         require_once $pluginDir . '/lib/Services/IiifViewerService.php';
@@ -435,6 +439,17 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Object not found']));
         }
 
+        // Check v3 manifest cache
+        $viewerService = new \AhgIiif\Services\IiifViewerService();
+        if (!$forceRefresh) {
+            $cached = $viewerService->getCachedManifest((int) $object['id'], $culture, 'v3');
+            if ($cached) {
+                $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+
+                return $this->renderText($cached['manifest_json']);
+            }
+        }
+
         $digitalObjects = $db::table('digital_object as do')
             ->where('do.object_id', $object['id'])
             ->orderBy('do.id')
@@ -449,7 +464,6 @@ class iiifActions extends AhgController
         }
 
         // Use cached page count if available
-        $viewerService = new \AhgIiif\Services\IiifViewerService();
         $cachedPageCount = $viewerService->getPageCount((int) $object['id']);
 
         $v3Service = new \AhgIiif\Services\IiifManifestV3Service();
@@ -457,7 +471,15 @@ class iiifActions extends AhgController
 
         $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
 
-        return $this->renderText(json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        // Cache the v3 manifest
+        $manifestJson = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        try {
+            $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, null, 'v3');
+        } catch (\Exception $e) {
+            // Cache write failure is non-fatal
+        }
+
+        return $this->renderText($manifestJson);
     }
 
     /**
@@ -657,6 +679,40 @@ class iiifActions extends AhgController
     }
 
     /**
+     * Modify an annotation (dispatches by HTTP method)
+     * PUT /iiif/annotations/:id  → update
+     * DELETE /iiif/annotations/:id → delete
+     * GET /iiif/annotations/:id → get single annotation
+     */
+    public function executeAnnotationsModify($request)
+    {
+        $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+
+        if ($method === 'DELETE') {
+            return $this->executeAnnotationsDelete($request);
+        }
+
+        if ($method === 'PUT' || $method === 'PATCH' || $method === 'POST') {
+            return $this->executeAnnotationsUpdate($request);
+        }
+
+        // GET — return single annotation
+        $this->response->setContentType('application/json');
+        $this->response->setHttpHeader('Access-Control-Allow-Origin', '*');
+        $annotationId = $request->getParameter('id');
+        $service = new IiifAnnotationService();
+        $existing = $service->getAnnotation($annotationId);
+
+        if (!$existing) {
+            $this->response->setStatusCode(404);
+
+            return $this->renderText(json_encode(['error' => 'Annotation not found']));
+        }
+
+        return $this->renderText(json_encode($existing, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
      * Update an annotation
      * PUT /iiif/annotations/:id
      */
@@ -760,6 +816,41 @@ class iiifActions extends AhgController
         } catch (\Exception $e) { /* non-fatal */ }
 
         return $this->renderText(json_encode(['success' => true]));
+    }
+
+    // =========================================================================
+    // IIIF COMPARISON VIEWER (#228)
+    // =========================================================================
+
+    /**
+     * Comparison viewer page.
+     * GET /iiif/compare?slugs=slug1,slug2 or ?manifest=url1&manifest=url2
+     */
+    public function executeCompare($request)
+    {
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'];
+        $baseUrl = "{$protocol}://{$host}";
+
+        // Accept slugs= (comma-separated) or manifest= (multiple)
+        $slugs = array_filter(explode(',', $request->getParameter('slugs', '')));
+        $manifests = (array) ($request->getParameter('manifest', []));
+
+        // Convert slugs to manifest URLs
+        foreach ($slugs as $slug) {
+            $manifests[] = "{$baseUrl}/iiif/manifest/" . trim($slug);
+        }
+
+        if (empty($manifests)) {
+            $this->forward404('No manifests specified. Use ?slugs=slug1,slug2 or ?manifest=url');
+        }
+
+        $this->manifests = $manifests;
+        $this->baseUrl = $baseUrl;
+        $this->pluginPath = sfConfig::get('app_iiif_plugin_path', '/plugins/ahgIiifPlugin/web');
+
+        $this->response->setTitle('IIIF Compare');
+        $this->setTemplate('compare');
     }
 
     // =========================================================================

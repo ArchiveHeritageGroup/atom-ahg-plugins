@@ -20,7 +20,7 @@ class AhgSettingsIndexAction extends AhgController
         $hasCondition = in_array('ahgConditionPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasAiCondition = in_array('ahgAiConditionPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasSpectrum = in_array('ahgSpectrumPlugin', sfProjectConfiguration::getActive()->getPlugins());
-        $hasIiif = in_array('IiifViewerFramework', sfProjectConfiguration::getActive()->getPlugins());
+        $hasIiif = in_array('ahgIiifPlugin', sfProjectConfiguration::getActive()->getPlugins());
         $hasLibrary = in_array('ahgLibraryPlugin', sfProjectConfiguration::getActive()->getPlugins());
         
         // GLAM/DAM plugins

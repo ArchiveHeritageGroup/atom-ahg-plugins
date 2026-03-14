@@ -250,6 +250,72 @@ class IiifAnnotationService
     }
 
     /**
+     * Sync a research annotation to an IIIF annotation.
+     * Called from ahgResearchPlugin when saving canvas-linked notes.
+     *
+     * @param int $researchAnnotationId  The research_annotation.id
+     * @param int|null $iiifAnnotationId Existing IIIF annotation to update (null = create new)
+     * @return int The IIIF annotation ID
+     */
+    public function syncResearchAnnotation(int $researchAnnotationId, ?int $iiifAnnotationId = null): int
+    {
+        $ra = DB::table('research_annotation')
+            ->where('id', $researchAnnotationId)
+            ->first();
+
+        if (!$ra) {
+            throw new \InvalidArgumentException("Research annotation #{$researchAnnotationId} not found");
+        }
+
+        $data = [
+            'object_id' => $ra->object_id,
+            'canvas_id' => $ra->canvas_id ?? null,
+            'target_canvas' => $ra->canvas_id ?? '',
+            'motivation' => self::MOTIVATION_COMMENTING,
+            'created_by' => $ra->user_id ?? null,
+        ];
+
+        // Parse target selector from research annotation
+        if (!empty($ra->target_selector)) {
+            $selector = json_decode($ra->target_selector, true);
+            $data['target_selector'] = is_array($selector) ? $selector : null;
+        }
+
+        // Build body from research annotation note
+        $noteText = $ra->note ?? $ra->content ?? '';
+        if (!empty($noteText)) {
+            $data['body'] = [
+                'type' => 'TextualBody',
+                'value' => $noteText,
+                'format' => 'text/plain',
+                'purpose' => 'commenting',
+            ];
+        }
+
+        if ($iiifAnnotationId) {
+            // Update existing IIIF annotation
+            $updateData = [];
+            if (isset($data['target_selector'])) {
+                $updateData['target_selector'] = $data['target_selector'];
+            }
+            if (!empty($data['body'])) {
+                $updateData['body'] = $data['body'];
+            }
+            $this->updateAnnotation($iiifAnnotationId, $updateData);
+        } else {
+            // Create new IIIF annotation
+            $iiifAnnotationId = $this->createAnnotation($data);
+
+            // Link back: update research_annotation with the IIIF annotation ID
+            DB::table('research_annotation')
+                ->where('id', $researchAnnotationId)
+                ->update(['iiif_annotation_id' => $iiifAnnotationId]);
+        }
+
+        return $iiifAnnotationId;
+    }
+
+    /**
      * Parse Annotorious annotation format to database format
      */
     public function parseAnnotoriousAnnotation(array $annoData, $objectId)

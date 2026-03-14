@@ -135,12 +135,16 @@ class IiifViewerService
 
     /**
      * Get cached manifest for an object.
+     *
+     * @param string $version 'v2' or 'v3' — appended to culture key to separate cache entries
      */
-    public function getCachedManifest(int $objectId, string $culture = 'en'): ?array
+    public function getCachedManifest(int $objectId, string $culture = 'en', string $version = 'v2'): ?array
     {
+        $cultureKey = $version === 'v2' ? $culture : "{$culture}:{$version}";
+
         $row = DB::table('iiif_manifest_cache')
             ->where('object_id', $objectId)
-            ->where('culture', $culture)
+            ->where('culture', $cultureKey)
             ->where(function ($q) {
                 $q->whereNull('expires_at')
                   ->orWhere('expires_at', '>', DB::raw('NOW()'));
@@ -159,13 +163,16 @@ class IiifViewerService
 
     /**
      * Store manifest in cache.
+     *
+     * @param string $version 'v2' or 'v3' — appended to culture key to separate cache entries
      */
-    public function setCachedManifest(int $objectId, string $culture, string $json, ?int $pageCount = null): void
+    public function setCachedManifest(int $objectId, string $culture, string $json, ?int $pageCount = null, string $version = 'v2'): void
     {
-        $signature = $this->buildCacheSignature($objectId, $culture);
+        $cultureKey = $version === 'v2' ? $culture : "{$culture}:{$version}";
+        $signature = $this->buildCacheSignature($objectId, $cultureKey);
 
         DB::table('iiif_manifest_cache')->updateOrInsert(
-            ['object_id' => $objectId, 'culture' => $culture],
+            ['object_id' => $objectId, 'culture' => $cultureKey],
             [
                 'manifest_json' => $json,
                 'cache_key' => $signature,

@@ -513,7 +513,7 @@ function ahg_iiif_render_viewer_controls($viewerId, $manifestUrl, $objectId, $op
     // IIIF badge
     $html .= '<div>';
     $html .= '<span class="badge bg-info"><i class="fas fa-certificate me-1"></i>IIIF</span>';
-    $html .= '<small class="text-muted ms-2 d-none d-sm-inline">Presentation API 2.1</small>';
+    $html .= '<small class="text-muted ms-2 d-none d-sm-inline">Presentation API 3.0</small>';
     $html .= '</div>';
     
     // Control buttons

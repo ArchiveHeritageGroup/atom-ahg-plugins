@@ -98,8 +98,9 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $iiif->any('iiif_settings', '/admin/iiif-settings', 'settings');
         $iiif->get('iiif_annotations_object', '/iiif/annotations/object/:id', 'annotationsList', ['id' => '\d+']);
         $iiif->post('iiif_annotations_create', '/iiif/annotations', 'annotationsCreate');
-        $iiif->any('iiif_annotations_update', '/iiif/annotations/:id', 'annotationsUpdate', ['id' => '\d+']);
-        $iiif->any('iiif_annotations_delete', '/iiif/annotations/:id', 'annotationsDelete', ['id' => '\d+']);
+        $iiif->any('iiif_annotations_modify', '/iiif/annotations/:id', 'annotationsModify', ['id' => '\d+']);
+        // IIIF Comparison Viewer
+        $iiif->get('iiif_compare', '/iiif/compare', 'compare');
         // IIIF Validation (#184)
         $iiif->any('iiif_validation', '/admin/iiif-validation', 'validationDashboard');
         $iiif->any('iiif_validation_run', '/admin/iiif-validation/run/:object_id', 'validationRun', ['object_id' => '\d+']);

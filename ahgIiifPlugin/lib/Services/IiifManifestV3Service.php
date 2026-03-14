@@ -35,7 +35,11 @@ class IiifManifestV3Service
      */
     public function generateV3Manifest(array $object, array $digitalObjects, string $culture = 'en', ?int $cachedPageCount = null): array
     {
-        $label = $object['title'] ?: $object['identifier'] ?: 'Untitled';
+        // Build multi-language labels from all available i18n rows
+        $multiLangLabels = $this->getMultiLanguageLabels((int) ($object['id'] ?? 0));
+        $label = !empty($multiLangLabels)
+            ? $multiLangLabels
+            : [$culture => [$object['title'] ?: $object['identifier'] ?: 'Untitled']];
         $manifestId = "{$this->baseUrl}/iiif/v3/manifest/{$object['slug']}";
 
         $items = [];
@@ -87,7 +91,7 @@ class IiifManifestV3Service
             '@context' => 'http://iiif.io/api/presentation/3/context.json',
             'id' => $manifestId,
             'type' => 'Manifest',
-            'label' => [$culture => [$label]],
+            'label' => $label,
             'metadata' => [],
             'items' => $items,
         ];
@@ -99,17 +103,23 @@ class IiifManifestV3Service
             ];
         }
 
+        // Multi-language summary/scope from i18n
+        $multiLangSummary = $this->getMultiLanguageField((int) ($object['id'] ?? 0), 'scope_and_content');
+        if (!empty($multiLangSummary)) {
+            $manifest['summary'] = $multiLangSummary;
+        }
+
         // Rights (#184): Pull from rights table → map to URI
-        $rightsUri = $this->resolveRightsUri($object['id'] ?? 0);
+        $rightsUri = $this->resolveRightsUri($object['id'] ?? 0, $culture);
         if ($rightsUri) {
             $manifest['rights'] = $rightsUri;
         }
 
-        // Required statement (#184): Institution attribution
+        // Required statement (#184): Institution attribution (multi-language)
         $attribution = $this->resolveRequiredStatement($object['id'] ?? 0, $culture);
         if ($attribution) {
             $manifest['requiredStatement'] = [
-                'label' => [$culture => ['Attribution']],
+                'label' => ['none' => ['Attribution']],
                 'value' => [$culture => [$attribution]],
             ];
         }
@@ -261,42 +271,46 @@ class IiifManifestV3Service
      * Resolve rights URI from the rights table for this object.
      * Maps to Creative Commons or RightsStatements.org URIs.
      */
-    private function resolveRightsUri(int $objectId): ?string
+    /**
+     * Resolve rights URI from the rights table for this object.
+     * In AtoM, rights are linked to objects via the `relation` table.
+     */
+    private function resolveRightsUri(int $objectId, string $culture = 'en'): ?string
     {
         if (!$objectId) {
             return null;
         }
 
-        $right = DB::table('rights as r')
-            ->leftJoin('rights_i18n as ri', function ($join) {
-                $join->on('r.id', '=', 'ri.id')->where('ri.culture', '=', 'en');
-            })
-            ->where('r.object_id', $objectId)
-            ->select('r.basis_id', 'ri.license_note', 'ri.rights_note')
-            ->first();
+        try {
+            // AtoM links rights to objects via the relation table
+            $right = DB::table('relation as rel')
+                ->join('rights as r', 'r.id', '=', 'rel.object_id')
+                ->leftJoin('rights_i18n as ri', function ($join) {
+                    $join->on('r.id', '=', 'ri.id')->where('ri.culture', '=', $culture);
+                })
+                ->where('rel.subject_id', $objectId)
+                ->where('rel.type_id', function ($q) {
+                    $q->select('id')->from('term')->where('taxonomy_id', 59)->limit(1);
+                })
+                ->select('r.basis_id', 'ri.license_note', 'ri.rights_note')
+                ->first();
 
-        if (!$right) {
-            return null;
-        }
+            if (!$right) {
+                return null;
+            }
 
-        // Check for Creative Commons URL in license_note
-        $licenseNote = $right->license_note ?? '';
-        if (preg_match('#https?://creativecommons\.org/\S+#', $licenseNote, $m)) {
-            return $m[0];
-        }
-
-        // Check for RightsStatements.org URL
-        if (preg_match('#https?://rightsstatements\.org/\S+#', $licenseNote, $m)) {
-            return $m[0];
-        }
-
-        // Check in rights_note as well
-        $rightsNote = $right->rights_note ?? '';
-        if (preg_match('#https?://creativecommons\.org/\S+#', $rightsNote, $m)) {
-            return $m[0];
-        }
-        if (preg_match('#https?://rightsstatements\.org/\S+#', $rightsNote, $m)) {
-            return $m[0];
+            // Check for Creative Commons or RightsStatements.org URL
+            foreach (['license_note', 'rights_note'] as $field) {
+                $text = $right->$field ?? '';
+                if (preg_match('#https?://creativecommons\.org/\S+#', $text, $m)) {
+                    return $m[0];
+                }
+                if (preg_match('#https?://rightsstatements\.org/\S+#', $text, $m)) {
+                    return $m[0];
+                }
+            }
+        } catch (\Exception $e) {
+            // Rights lookup failure is non-fatal
         }
 
         return null;
@@ -389,5 +403,62 @@ class IiifManifestV3Service
         ]];
 
         return $provider;
+    }
+
+    /**
+     * Get multi-language labels (title) for an object from all available cultures.
+     *
+     * @return array<string, string[]> e.g. {"en": ["Title"], "af": ["Titel"]}
+     */
+    private function getMultiLanguageLabels(int $objectId): array
+    {
+        if (!$objectId) {
+            return [];
+        }
+
+        $rows = DB::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->whereNotNull('title')
+            ->where('title', '!=', '')
+            ->select('culture', 'title')
+            ->get();
+
+        $labels = [];
+        foreach ($rows as $row) {
+            $labels[$row->culture] = [$row->title];
+        }
+
+        return $labels;
+    }
+
+    /**
+     * Get a multi-language field from information_object_i18n.
+     *
+     * @return array<string, string[]> Language map
+     */
+    private function getMultiLanguageField(int $objectId, string $field): array
+    {
+        if (!$objectId) {
+            return [];
+        }
+
+        $allowed = ['scope_and_content', 'extent_and_medium', 'archival_history', 'arrangement'];
+        if (!in_array($field, $allowed, true)) {
+            return [];
+        }
+
+        $rows = DB::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->whereNotNull($field)
+            ->where($field, '!=', '')
+            ->select('culture', $field)
+            ->get();
+
+        $values = [];
+        foreach ($rows as $row) {
+            $values[$row->culture] = [$row->$field];
+        }
+
+        return $values;
     }
 }
