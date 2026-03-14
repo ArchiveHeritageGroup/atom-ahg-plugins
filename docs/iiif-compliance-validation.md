@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **IIIF Compliance Hardening** enhancement brings AtoM Heratio's IIIF implementation into full alignment with the IIIF Presentation API 3.0 specification. It adds manifest validation, quality control dashboards, and integrates IIIF readiness checks into the publish gate system.
+The **IIIF Compliance Hardening** enhancement brings AtoM Heratio's IIIF implementation into full alignment with IIIF Presentation API 3.0, which is now the default manifest format (with v2.1 fallback via `?format=2`). It adds manifest validation, quality control dashboards, and integrates IIIF readiness checks into the publish gate system.
 
 This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Heritage Group (Pty) Ltd.
 
@@ -61,7 +61,8 @@ This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Her
 |-----|---------|
 | `/admin/iiif-validation` | IIIF validation dashboard |
 | `/admin/iiif-validation/run/:id` | Run validation for specific object (AJAX) |
-| `/iiif/v3/manifest/:slug` | Enhanced v3 manifest (now with rights, provider, seeAlso) |
+| `/iiif/manifest/:slug` | Default manifest endpoint (v3 since M2, ?format=2 for v2.1 fallback) |
+| `/iiif/compare` | Side-by-side comparison viewer (Mirador mosaic) |
 
 ## Sample Manifest Output (New Fields)
 
@@ -71,7 +72,7 @@ This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Her
   "type": "Manifest",
   "rights": "https://creativecommons.org/licenses/by/4.0/",
   "requiredStatement": {
-    "label": {"en": ["Attribution"]},
+    "label": {"none": ["Attribution"]},
     "value": {"en": ["National Archives of South Africa"]}
   },
   "provider": [{
@@ -113,6 +114,7 @@ This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Her
 - Creative Commons license URIs
 - RightsStatements.org vocabulary
 - W3C Web Annotation Data Model (existing annotation support)
+- IIIF Authentication API 1.0 (login, clickthrough, kiosk, external profiles)
 
 ---
 

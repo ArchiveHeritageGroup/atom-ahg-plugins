@@ -4,7 +4,7 @@
 
 The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperability Framework) capabilities for AtoM, including manifest generation, deep zoom viewing, media streaming with on-the-fly transcoding, annotation support, collection management, and authentication (IIIF Auth API 1.0). The plugin supports images, PDFs, multi-page TIFFs, 3D models, and audio/video content.
 
-**Version:** 1.2.0
+**Version:** 1.3.0
 **Category:** Media/Viewing
 **Dependencies:** atom >= 2.8.0, PHP >= 8.1, atom-framework
 
@@ -44,9 +44,9 @@ The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperabil
 │  │  │ manifest()    │ │ index()       │ │ login()       │ │ stream()      │ │ │
 │  │  │ manifestById()│ │ create()      │ │ token()       │ │ download()    │ │ │
 │  │  │ annotations() │ │ edit()        │ │ logout()      │ │ transcribe()  │ │ │
-│  │  │ settings()    │ │ manifest()    │ │ confirm()     │ │ convert()     │ │ │
-│  │  │               │ │ addItems()    │ │ check()       │ │ extract()     │ │ │
-│  │  │               │ │ reorder()     │ │ protect()     │ │ snippets()    │ │ │
+│  │  │ annotationsModify()│ │ manifest()│ │ confirm()     │ │ convert()     │ │ │
+│  │  │ compare()     │ │ addItems()    │ │ check()       │ │ extract()     │ │ │
+│  │  │ settings()    │ │ reorder()     │ │ protect()     │ │ snippets()    │ │ │
 │  │  └───────────────┘ └───────────────┘ └───────────────┘ └───────────────┘ │ │
 │  └────────────────────────────────────────────────────────────────────────────┘ │
 │                                      │                                           │
@@ -57,10 +57,10 @@ The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperabil
 │  │  │ IiifAnnotationService│ │ IiifCollectionService │ │ IiifAuthService    │ │ │
 │  │  │ (CRUD + W3C format)  │ │ (CRUD + hierarchy)   │ │ (tokens + access)  │ │ │
 │  │  └──────────────────────┘ └──────────────────────┘ └────────────────────┘ │ │
-│  │  ┌──────────────────────┐ ┌──────────────────────┐                        │ │
-│  │  │ TranscriptionService │ │ MediaConversionService│                        │ │
-│  │  │ (Whisper integration)│ │ (FFmpeg/IM/LO)       │                        │ │
-│  │  └──────────────────────┘ └──────────────────────┘                        │ │
+│  │  ┌──────────────────────┐ ┌──────────────────────┐ ┌────────────────────┐ │ │
+│  │  │ TranscriptionService │ │ MediaConversionService│ │IiifManifestV3Svc  │ │ │
+│  │  │ (Whisper integration)│ │ (FFmpeg/IM/LO)       │ │(v3 manifest gen)  │ │ │
+│  │  └──────────────────────┘ └──────────────────────┘ └────────────────────┘ │ │
 │  └────────────────────────────────────────────────────────────────────────────┘ │
 │                                      │                                           │
 │                                      ▼                                           │
@@ -104,6 +104,7 @@ The ahgIiifPlugin provides comprehensive IIIF (International Image Interoperabil
 | `iiif_auth_token` | Access tokens | token_hash (SHA-256), user_id, expires_at, is_revoked |
 | `iiif_auth_resource` | Per-object access control | object_id, service_id, apply_to_children, degraded_access |
 | `iiif_auth_access_log` | Audit trail | object_id, user_id, action, details (JSON) |
+| `iiif_manifest_cache` | Manifest JSON cache | object_id, culture, manifest_json, page_count, expires_at |
 
 ### Entity Relationships
 
@@ -137,8 +138,10 @@ Routes are registered in `ahgIiifPluginConfiguration.class.php` via the `routing
 
 | Method | Route | Action | Description |
 |--------|-------|--------|-------------|
-| GET | `/iiif/manifest/:slug` | manifest | IIIF 2.1 manifest by slug |
-| GET | `/iiif/manifest/id/:id` | manifestById | IIIF 2.1 manifest by ID |
+| GET | `/iiif/manifest/:slug` | manifest | IIIF manifest by slug (v3 default, ?format=2 for v2.1) |
+| GET | `/iiif/manifest/id/:id` | manifestById | IIIF manifest by ID (v3 default, ?format=2 for v2.1) |
+| GET | `/iiif/v3/manifest/:slug` | manifestV3 | Explicit v3 manifest endpoint |
+| GET | `/iiif/compare` | compare | Side-by-side comparison viewer |
 
 ### Annotation Routes
 
@@ -146,8 +149,7 @@ Routes are registered in `ahgIiifPluginConfiguration.class.php` via the `routing
 |--------|-------|--------|-------------|
 | GET | `/iiif/annotations/object/:id` | listAnnotations | Annotations for object |
 | POST | `/iiif/annotations` | createAnnotation | Create annotation |
-| PUT | `/iiif/annotations/:id` | updateAnnotation | Update annotation |
-| DELETE | `/iiif/annotations/:id` | deleteAnnotation | Delete annotation |
+| GET/PUT/DELETE | `/iiif/annotations/:id` | annotationsModify | Get/update/delete annotation (dispatches by HTTP method) |
 
 ### Collection Routes
 
@@ -197,7 +199,7 @@ Routes are registered in `ahgIiifPluginConfiguration.class.php` via the `routing
 3. Build IIIF identifier: `str_replace('/', '_SL_', $path . $name)`
 4. Check for multi-page TIFF (probe Cantaloupe for pages 2-100)
 5. Generate canvases (one per digital object, or one per page for multi-page TIFFs)
-6. Return IIIF Presentation API 2.1 manifest with CORS headers
+6. Return IIIF Presentation API 3.0 manifest (default), or 2.1 with ?format=2
 
 ### Multi-Page TIFF Detection
 
@@ -242,6 +244,56 @@ if ($page2Info !== false) {
 }
 ```
 
+### Manifest Structure (IIIF 3.0 — Default)
+
+```json
+{
+  "@context": "http://iiif.io/api/presentation/3/context.json",
+  "id": "https://host/iiif/v3/manifest/slug",
+  "type": "Manifest",
+  "label": {"en": ["Object Title"]},
+  "summary": {"en": ["Scope and content text"]},
+  "metadata": [...],
+  "rights": "https://creativecommons.org/licenses/by/4.0/",
+  "requiredStatement": {
+    "label": {"none": ["Attribution"]},
+    "value": {"en": ["Institution Name"]}
+  },
+  "provider": [{
+    "id": "https://host/repository-slug",
+    "type": "Agent",
+    "label": {"en": ["Institution Name"]}
+  }],
+  "seeAlso": [{
+    "id": "https://host/record-slug",
+    "type": "Dataset",
+    "format": "text/html"
+  }],
+  "items": [{
+    "id": "https://host/.../canvas/1",
+    "type": "Canvas",
+    "width": 4000,
+    "height": 3000,
+    "items": [{
+      "type": "AnnotationPage",
+      "items": [{
+        "type": "Annotation",
+        "motivation": "painting",
+        "body": {
+          "type": "Image",
+          "service": [
+            {"type": "ImageService2", "profile": "level2"},
+            {"type": "ImageService3", "profile": "level2"}
+          ]
+        }
+      }]
+    }]
+  }]
+}
+```
+
+Multi-language labels are automatically populated from all available `information_object_i18n` cultures.
+
 ---
 
 ## Viewer Manager (JavaScript)
@@ -254,11 +306,12 @@ ES6 module that manages all viewer types with lazy-loading and preference persis
 
 | Viewer | Content | Source | Library |
 |--------|---------|--------|---------|
-| OpenSeadragon | Images (deep zoom) | CDN + bundled | openseadragon@3.1.0 |
+| OpenSeadragon | Images (deep zoom) | Bundled | openseadragon@3.1.0 |
 | Mirador 3 | Rich IIIF workspace | Bundled | mirador.min.js |
-| PDF.js | PDF documents | CDN | pdf.js@3.11.174 |
-| model-viewer | 3D models | CDN | model-viewer@3.3.0 |
+| PDF.js | PDF documents | Bundled | pdf.js@3.11.174 |
+| model-viewer | 3D models | Bundled | model-viewer@3.3.0 |
 | Annotorious | Annotations on OSD | Bundled | annotorious-openseadragon |
+| Three.js | OBJ/STL 3D models | Bundled | three@0.128.0 |
 
 ### Viewer Selection Logic
 
@@ -387,6 +440,7 @@ deleteAnnotation(int $annotationId): bool
 formatAsAnnotationPage(array $annotations, int $objectId): array
 formatAnnotationAsIiif(object $annotation): array
 parseAnnotoriousAnnotation(array $annoData, int $objectId): array
+syncResearchAnnotation(int $researchAnnotationId, ?int $iiifAnnotationId = null): int
 ```
 
 ### Motivations
@@ -590,9 +644,8 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', ' nonce="', $n) . '"' : '';
 echo '<script type="module"' . $nonceAttr . '>';
 ```
 
-CDN domains must be whitelisted in `config/app.yml`:
-- `script-src`: `https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://ajax.googleapis.com`
-- `style-src`: Same + `'unsafe-hashes'` for inline style attributes
+All viewer libraries are bundled locally — no CDN whitelisting required for IIIF functionality.
+External CDN domains are only needed if other plugins load external scripts.
 
 ---
 
@@ -635,13 +688,18 @@ CDN domains must be whitelisted in `config/app.yml`:
 | `web/js/iiif-viewer-manager.js` | Main viewer manager (ES6) |
 | `web/js/atom-media-player.js` | Enhanced media player |
 
-### CDN Dependencies (lazy-loaded)
+### Bundled Libraries
 
-| Library | CDN URL |
-|---------|---------|
-| OpenSeadragon 3.1.0 | cdn.jsdelivr.net (fallback if bundled fails) |
-| PDF.js 3.11.174 | cdnjs.cloudflare.com |
-| model-viewer 3.3.0 | ajax.googleapis.com |
+All viewer libraries are served locally from `web/js/vendor/` — no CDN dependencies at runtime:
+
+| Library | Path |
+|---------|------|
+| OpenSeadragon 3.1.0 | `web/js/vendor/openseadragon.min.js` |
+| PDF.js 3.11.174 | `web/js/vendor/pdf.min.js` + `pdf.worker.min.js` |
+| model-viewer 3.3.0 | `web/js/vendor/model-viewer.min.js` |
+| Three.js 0.128.0 | `web/js/vendor/three.min.js` + loaders |
+| Mirador 3 | `web/public/mirador/mirador.min.js` |
+| Annotorious | `web/public/viewers/annotorious/` |
 
 ---
 
@@ -677,6 +735,7 @@ CDN domains must be whitelisted in `config/app.yml`:
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.3.0 | 2026-03 | M2-IIIF-Complete: v3 default manifest, annotation route fix, CDN→local bundling, compare viewer, multi-language labels, research annotation bridge, manifest caching for v3 |
 | 1.2.0 | 2026-02 | Added media streaming, transcription, format conversion, snippets, annotations REST API, 3D viewer, viewer manager JS |
 | 1.1.0 | 2025-01-24 | Added IIIF Auth API 1.0 support |
 | 1.0.0 | 2025-01-15 | Initial release with manifests and collections |

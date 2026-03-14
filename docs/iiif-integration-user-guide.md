@@ -20,7 +20,7 @@ View high-resolution images, stream audio/video, browse 3D models, annotate cont
 │  Mirador         Transcription                              │
 │                  Snippets                                    │
 │                                                             │
-│  Annotations     Collections      Authentication            │
+│  Annotations     Collections      Comparison  Authentication│
 │     │                │                │                      │
 │     ▼                ▼                ▼                      │
 │  W3C standard    Curated sets     Login/Clickthrough        │
@@ -77,7 +77,7 @@ When you view a record with digital objects, the IIIF system automatically:
           │   HTML5 player with on-the-fly transcoding
           │   (legacy formats converted to MP4/MP3)
           │
-          ├─ 3D Model (GLB, OBJ, STL, FBX, etc.)
+          ├─ 3D Model (GLB, OBJ, STL, PLY, USDZ)
           │     │
           │     ▼
           │   model-viewer with AR support
@@ -197,7 +197,7 @@ Your viewer preference is saved in your browser for next time.
 │  │                                                     │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
-│  Supported: GLB, GLTF, OBJ, STL, FBX, PLY, USDZ          │
+│  Supported: GLB, GLTF, OBJ, STL, PLY, USDZ               │
 │  AR: WebXR (Android), Quick Look (iOS)                      │
 │                                                             │
 │  Best for: Museum objects, archaeological finds, sculptures │
@@ -623,6 +623,20 @@ Mirador allows side-by-side comparison in a multi-window workspace:
   Both windows have independent zoom and pan.
 ```
 
+### Dedicated Comparison Page
+
+You can also compare images from different records using the dedicated comparison viewer:
+
+```
+URL: /iiif/compare?slugs=slug1,slug2
+
+Example: /iiif/compare?slugs=historical-photo-1,historical-photo-2
+```
+
+This opens a full-screen Mirador workspace in mosaic mode, with each manifest in its own panel. You can add more windows from the workspace controls.
+
+From the researcher workspace (ahgResearchPlugin), use the "Compare selected" button to open selected items in the comparison viewer.
+
 ---
 
 ## Tips
@@ -688,4 +702,4 @@ Contact your system administrator if you experience issues.
 ---
 
 *Part of the AtoM AHG Framework*
-*Last Updated: February 2026*
+*Last Updated: March 2026*

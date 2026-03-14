@@ -1,6 +1,6 @@
 # ahg3DModelPlugin - Technical Documentation
 
-**Version:** 1.2.0
+**Version:** 1.3.0
 **Category:** Digital Asset Management
 **Dependencies:** atom-framework, ahgCorePlugin
 
@@ -69,7 +69,6 @@ A comprehensive 3D model viewing plugin for Access to Memory (AtoM) providing We
 | Apple AR | `.usdz` | `model/vnd.usdz+zip` | iOS only | Required for iOS Quick Look |
 | Wavefront | `.obj` | `model/obj` | Limited | No animations, widely supported |
 | Stereolithography | `.stl` | `model/stl` | Limited | 3D printing standard, no textures |
-| Autodesk FBX | `.fbx` | `application/octet-stream` | No | Proprietary format |
 | Polygon File | `.ply` | `application/x-ply` | No | Point cloud support |
 | Gaussian Splat | `.splat`, `.ksplat` | N/A | No | Neural radiance fields |
 
@@ -92,7 +91,7 @@ A comprehensive 3D model viewing plugin for Access to Memory (AtoM) providing We
 |    file_path VARCHAR(500)        |
 |    file_size BIGINT              |
 |    mime_type VARCHAR(100)        |
-|    format ENUM(glb,gltf,...)     |
+|    format VARCHAR(47)            |
 |                                  |
 | -- Model Metadata --             |
 |    vertex_count INT              |
@@ -608,6 +607,37 @@ Model3D.formatBytes(5242880);  // '5.00 MB'
 
 ---
 
+## Vendor Libraries (Local)
+
+All frontend libraries are served locally — no external CDN dependencies:
+
+| Library | Path | Version |
+|---------|------|---------|
+| Google model-viewer | `/plugins/ahgCorePlugin/web/js/vendor/model-viewer.min.js` | 3.4.0 |
+| Three.js | `/plugins/ahg3DModelPlugin/web/vendor/threejs/three.min.js` | r128 |
+| OBJLoader | `/plugins/ahg3DModelPlugin/web/vendor/threejs/OBJLoader.js` | r128 |
+| STLLoader | `/plugins/ahg3DModelPlugin/web/vendor/threejs/STLLoader.js` | r128 |
+| OrbitControls | `/plugins/ahg3DModelPlugin/web/vendor/threejs/OrbitControls.js` | r128 |
+| GLTFLoader | `/plugins/ahg3DModelPlugin/web/vendor/threejs/GLTFLoader.js` | r128 |
+| GaussianSplats3D | `/plugins/ahg3DModelPlugin/web/vendor/gaussian-splats3d/` | - |
+
+### FBX Format Note
+
+FBX is **not supported** in the browser viewer (no FBXLoader.js is bundled). FBX is only supported in the Blender thumbnail pipeline (`blender_thumbnail.py`, `render_multiangle.py`) which can import FBX natively for offline rendering.
+
+---
+
+## Condition Assessment Integration
+
+Damage-type hotspots (`hotspot_type='damage'`) automatically link to the object's condition assessment page via the ahgConditionPlugin:
+
+- When a damage hotspot is created without an explicit `link_url`, the system auto-generates: `/{slug}/condition`
+- Clicking a red damage hotspot in the viewer navigates to the condition assessment page
+- The condition plugin route `/:slug/condition` displays condition checks for that object
+- No database foreign key is required — linking is by URL convention
+
+---
+
 ## Viewer Integration
 
 ### Model Viewer (Google WebXR)
@@ -764,15 +794,25 @@ Integration with ahgAuditTrailPlugin for central logging is automatic when avail
 
 ## NGINX Configuration
 
-Add MIME types for 3D files:
+Add MIME types for 3D files. GLB and GLTF are included in default nginx `mime.types`; add the remaining formats in your server block:
 
 ```nginx
 types {
-    model/gltf-binary glb;
-    model/gltf+json gltf;
-    model/vnd.usdz+zip usdz;
-    model/obj obj;
-    model/stl stl;
+    model/obj                         obj;
+    model/stl                         stl;
+    model/vnd.usdz+zip               usdz;
+    application/x-ply                 ply;
+}
+```
+
+Also add 3D file extensions to your static asset serving pattern:
+
+```nginx
+location ~* ^/(plugins|web)/.*\.(glb|gltf|obj|stl|usdz|ply)$ {
+    root /usr/share/nginx/archive;
+    try_files $uri =404;
+    expires 30d;
+    add_header Cache-Control "public, immutable";
 }
 ```
 
