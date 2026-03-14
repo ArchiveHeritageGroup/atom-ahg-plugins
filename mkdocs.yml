@@ -20,15 +20,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -209,6 +209,7 @@ nav:
     - Research Training Manual: research-training-manual-user-guide.md
   - Technical:
     - technical/README.md
+    - Framework PHP Reference: https://docs.theahg.co.za/technical/framework-api/
     - Architecture: technical/ARCHITECTURE.md
     - Database ERD: technical/DATABASE_ERD.md
     - Database Views: technical/DATABASE_VIEWS.md
