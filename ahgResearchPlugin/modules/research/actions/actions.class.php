@@ -5284,6 +5284,56 @@ class researchActions extends AhgController
             }
         }
 
+        // Detect 3D model for media-aware annotation (direct DB query to avoid helper redeclaration conflicts)
+        $this->has3DModel = false;
+        $this->model3D = null;
+        try {
+            $model3d = DB::table('object_3d_model')
+                ->where('object_id', $objectId)
+                ->where('is_public', 1)
+                ->orderByDesc('is_primary')
+                ->orderBy('display_order')
+                ->first();
+            if ($model3d) {
+                $this->has3DModel = true;
+                $this->model3D = $model3d;
+            }
+        } catch (\Exception $e) {
+            // object_3d_model table doesn't exist — ahg3DModelPlugin not installed
+        }
+
+        // Fallback: detect 3D digital objects (glb/gltf/obj) when object_3d_model has no entry
+        if (!$this->has3DModel && $do) {
+            $threeDMimes = ['model/gltf-binary', 'model/gltf+json', 'model/obj', 'model/stl', 'model/vnd.usdz+zip'];
+            $threeDExts = ['glb', 'gltf', 'obj', 'stl', 'usdz', 'ply'];
+            $doMime = $do->mime_type ?? '';
+            $doExt = strtolower(pathinfo($do->name ?? '', PATHINFO_EXTENSION));
+
+            if (in_array($doMime, $threeDMimes) || in_array($doExt, $threeDExts)) {
+                $this->has3DModel = true;
+                // Build a compatible object mimicking object_3d_model structure
+                $this->model3D = (object) [
+                    'id' => $do->id,
+                    'object_id' => $objectId,
+                    'filename' => $do->name,
+                    'original_filename' => $do->name,
+                    'file_path' => $do->path,
+                    'file_size' => $do->byte_size ?? 0,
+                    'mime_type' => $doMime,
+                    'format' => $doExt ?: 'glb',
+                    'auto_rotate' => 1,
+                    'shadow_intensity' => '1.00',
+                    'background_color' => '#1a1a2e',
+                    'is_primary' => 1,
+                    'is_public' => 1,
+                ];
+                // Only clear imageUrl if no reference image was already found
+                if (empty($this->imageUrl)) {
+                    $this->imageUrl = null;
+                }
+            }
+        }
+
         // Slug for "View Full Record" link
         $this->objectSlug = DB::table('slug')->where('object_id', $objectId)->value('slug');
     }

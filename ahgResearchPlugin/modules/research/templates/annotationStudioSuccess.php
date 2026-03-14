@@ -26,9 +26,26 @@
     </div>
 </div>
 
-<?php if (!empty($imageUrl)): ?>
+<?php
+    $has3D = !empty($has3DModel) && !empty($model3D);
+    $hasImage = !empty($imageUrl);
+    $defaultMode = ($has3D && !$hasImage) ? '3d' : 'image';
+?>
+
+<?php if ($has3D && $hasImage): ?>
+<div class="btn-group btn-group-sm mb-2" id="annotation-mode-toggle">
+    <button class="btn btn-outline-primary active" data-mode="image">
+        <i class="fas fa-image me-1"></i>2D Image
+    </button>
+    <button class="btn btn-outline-primary" data-mode="3d">
+        <i class="fas fa-cube me-1"></i>3D Model
+    </button>
+</div>
+<?php endif; ?>
+
+<?php if ($hasImage): ?>
 <!-- Image Annotation Canvas -->
-<div class="row">
+<div class="row" id="annotation-image-panel">
     <div class="col-lg-9">
         <div class="card">
             <!-- Drawing Toolbar -->
@@ -181,7 +198,145 @@
         </div>
     </div>
 </div>
-<?php else: ?>
+<?php endif; ?>
+
+<?php if ($has3D): ?>
+<!-- 3D Model Annotation Panel -->
+<div id="annotation-3d-panel" class="row" style="<?php echo $hasImage ? 'display:none;' : ''; ?>">
+    <div class="col-lg-9">
+        <div class="card">
+            <div class="card-header p-2">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-sm btn-primary active" id="btn3dSelect" title="Orbit mode - rotate the model">
+                            <i class="fas fa-sync-alt me-1"></i>Orbit
+                        </button>
+                        <button type="button" class="btn btn-sm btn-secondary" id="btn3dPlace" title="Freeze model and click to place annotation">
+                            <i class="fas fa-map-marker-alt me-1"></i>Freeze &amp; Place
+                        </button>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 ms-2">
+                        <label class="form-label mb-0 small">Color:</label>
+                        <input type="color" id="ann3dColor" value="#1a73e8" class="border rounded" style="width:32px;height:26px;padding:1px;cursor:pointer;">
+                    </div>
+                    <small class="text-muted ms-2" id="status3dText">Click <i class="fas fa-map-marker-alt"></i> then click on the model surface to place an annotation</small>
+                    <span class="ms-auto small text-muted" id="annotation3dCount">0 3D annotations</span>
+                </div>
+            </div>
+            <div class="card-body p-0" style="position:relative;">
+                <model-viewer
+                    id="annotation-model-viewer"
+                    src="<?php echo htmlspecialchars('/' . ltrim($model3D->file_path, '/') . $model3D->filename); ?>"
+                    camera-controls touch-action="pan-y"
+                    <?php echo $model3D->auto_rotate ? 'auto-rotate' : ''; ?>
+                    shadow-intensity="<?php echo htmlspecialchars($model3D->shadow_intensity ?? '1'); ?>"
+                    style="width:100%;height:600px;background:<?php echo htmlspecialchars($model3D->background_color ?? '#1a1a2e'); ?>;border-radius:0 0 8px 8px;">
+                </model-viewer>
+            </div>
+            <div class="card-footer py-1 d-flex justify-content-between small text-muted">
+                <span><?php echo htmlspecialchars($model3D->original_filename ?? $model3D->filename); ?> (<?php echo strtoupper($model3D->format ?? 'glb'); ?>)</span>
+                <span id="hit3dInfo">-</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <!-- Save 3D annotation form -->
+        <div class="card mb-3">
+            <div class="card-header py-2"><h6 class="mb-0"><i class="fas fa-cube me-1"></i>Save 3D Annotation</h6></div>
+            <div class="card-body py-2">
+                <p class="small text-muted mb-2">Click a point on the 3D model, then save as a W3C annotation.</p>
+                <div class="mb-2">
+                    <label class="form-label form-label-sm mb-1">Motivation</label>
+                    <select id="new3dMotivation" class="form-select form-select-sm">
+                        <option value="commenting">Commenting</option>
+                        <option value="describing">Describing</option>
+                        <option value="classifying">Classifying</option>
+                        <option value="tagging">Tagging</option>
+                        <option value="highlighting">Highlighting</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label form-label-sm mb-1">Note</label>
+                    <textarea id="new3dBody" class="form-control form-control-sm" rows="2" placeholder="Annotation text..."></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label form-label-sm mb-1">Visibility</label>
+                    <select id="new3dVisibility" class="form-select form-select-sm">
+                        <option value="private">Private</option>
+                        <option value="shared">Shared</option>
+                        <option value="public">Public</option>
+                    </select>
+                </div>
+                <button id="save3dAnnotationBtn" class="btn btn-primary btn-sm w-100" disabled><i class="fas fa-plus me-1"></i>Save 3D Point</button>
+            </div>
+        </div>
+        <!-- Existing 3D annotations list -->
+        <div class="card">
+            <div class="card-header py-2">
+                <h6 class="mb-0"><i class="fas fa-list me-1"></i>3D Annotations</h6>
+            </div>
+            <div class="card-body py-0 px-0" style="max-height:400px;overflow-y:auto;" id="annotations3dList">
+                <?php
+                    $has3dAnnotations = false;
+                    if (!empty($annotations)):
+                        foreach ($annotations as $ann):
+                            $targets3d = [];
+                            try {
+                                $targets3d = \Illuminate\Database\Capsule\Manager::table('research_annotation_target')
+                                    ->where('annotation_id', $ann->id)->orderBy('id')->get()->toArray();
+                            } catch (\Exception $e) {}
+                            $is3d = false;
+                            $sel3dData = [];
+                            foreach ($targets3d as $t3d) {
+                                if (($t3d->selector_type ?? '') === 'PointSelector3D') {
+                                    $is3d = true;
+                                    $sel3dData = is_string($t3d->selector_json ?? null) ? json_decode($t3d->selector_json, true) : [];
+                                    break;
+                                }
+                            }
+                            if (!$is3d) continue;
+                            $has3dAnnotations = true;
+                            $rawBody3d = sfOutputEscaper::unescape($ann->body_json ?? null);
+                            if (is_string($rawBody3d)) {
+                                $body3d = json_decode($rawBody3d, true) ?: [];
+                            } elseif (is_object($rawBody3d)) {
+                                $body3d = json_decode(json_encode($rawBody3d), true) ?: [];
+                            } else {
+                                $body3d = is_array($rawBody3d) ? $rawBody3d : [];
+                            }
+                            $bodyText3d = $body3d['value'] ?? $body3d['text'] ?? '';
+                ?>
+                <div class="border-bottom p-2 annotation-3d-list-item"
+                     data-annotation-id="<?php echo (int) $ann->id; ?>"
+                     data-selector="<?php echo htmlspecialchars(json_encode(array_merge(['type' => 'PointSelector3D'], $sel3dData))); ?>"
+                     style="cursor:pointer;font-size:0.85em;">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span>
+                            <span class="badge bg-info" style="font-size:0.7em;"><?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?></span>
+                            <i class="fas fa-cube text-primary ms-1" style="font-size:0.7em;" title="3D annotation"></i>
+                        </span>
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-link btn-sm p-0 text-warning edit-ann-btn" data-id="<?php echo (int) $ann->id; ?>" data-body="<?php echo htmlspecialchars($bodyText3d); ?>" data-motivation="<?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?>" title="Edit"><i class="fas fa-edit" style="font-size:0.75em;"></i></button>
+                            <button class="btn btn-link btn-sm p-0 text-danger delete-ann-btn" data-id="<?php echo (int) $ann->id; ?>" title="Delete"><i class="fas fa-trash" style="font-size:0.75em;"></i></button>
+                        </div>
+                    </div>
+                    <div class="mt-1 text-truncate ann-title"><?php echo htmlspecialchars($bodyText3d ?: '(no text)'); ?></div>
+                    <small class="text-primary"><i class="fas fa-cube me-1"></i>3D point</small>
+                </div>
+                <?php
+                        endforeach;
+                    endif;
+                    if (!$has3dAnnotations):
+                ?>
+                <p class="text-muted small text-center py-3 mb-0">No 3D annotations yet.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (!$hasImage && !$has3D): ?>
 <!-- No image available - text-only mode -->
 <div class="alert alert-warning">
     <i class="fas fa-exclamation-triangle me-2"></i>No digital object image found for this record. You can still create text annotations below.
@@ -280,11 +435,17 @@
 
 <!-- Fabric.js -->
 <script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js" <?php echo $nonceAttr; ?>></script>
+<?php if ($has3D): ?>
+<script type="module" src="/plugins/ahgCorePlugin/web/js/vendor/model-viewer.min.js" <?php echo $nonceAttr; ?>></script>
+<?php endif; ?>
 
 <script <?php echo $nonceAttr; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var objectId = <?php echo (int) $objectId; ?>;
     var imageUrl = <?php echo json_encode($imageUrl ?? ''); ?>;
+    var has3DModel = <?php echo json_encode($has3D); ?>;
+    var modelId = <?php echo json_encode($has3D ? (int) $model3D->id : null); ?>;
+    var currentMode = <?php echo json_encode($defaultMode); ?>;
 
     // Text-only mode (no image)
     var textOnlyBtn = document.getElementById('createTextAnnotationBtn');
@@ -307,18 +468,17 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // If no image, skip canvas setup
-    if (!imageUrl) {
-        bindDeleteButtons();
-        return;
-    }
+    // If no image, skip canvas setup but continue for 3D init
+    var skipCanvas = !imageUrl;
 
     // ========================
     // FABRIC.JS CANVAS SETUP
     // ========================
+    var canvas = null;
+    if (!skipCanvas) {
     var canvasEl = document.getElementById('annotationCanvas');
     var wrapper = document.getElementById('canvasWrapper');
-    var canvas = new fabric.Canvas(canvasEl, { selection: true, preserveObjectStacking: true });
+    canvas = new fabric.Canvas(canvasEl, { selection: true, preserveObjectStacking: true });
     var currentTool = 'select';
     var currentColor = '#FF0000';
     var isDrawing = false;
@@ -806,12 +966,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Common buttons (edit/delete) for both modes
-    bindDeleteButtons();
-    bindEditButtons();
-
     // Load the image
     loadImage();
+    } // end if (!skipCanvas)
+
+    // Common buttons (edit/delete) for both modes — always bind
+    bindDeleteButtons();
+    bindEditButtons();
 
     function bindDeleteButtons() {
         document.querySelectorAll('.delete-ann-btn').forEach(function(btn) {
@@ -991,10 +1152,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var trainBtn = document.getElementById('contributeTrainingBtn');
     if (trainBtn) {
         trainBtn.addEventListener('click', function() {
-            if (!fabricCanvas) { alert('Canvas not loaded'); return; }
+            if (!canvas) { alert('Canvas not loaded'); return; }
 
             // Get all rectangle/shape objects from the canvas as bounding box annotations
-            var objects = fabricCanvas.getObjects();
+            var objects = canvas.getObjects();
             var annotations = [];
             objects.forEach(function(obj) {
                 if (obj.type === 'rect' || obj.type === 'group' || obj.type === 'path') {
@@ -1022,7 +1183,7 @@ document.addEventListener('DOMContentLoaded', function() {
             trainBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Sending...';
 
             // Get canvas image as base64
-            var dataUrl = fabricCanvas.toDataURL({format: 'jpeg', quality: 0.85});
+            var dataUrl = canvas.toDataURL({format: 'jpeg', quality: 0.85});
             var base64 = dataUrl.split(',')[1];
 
             fetch('/index.php/aiCondition/apiContribute', {
@@ -1055,5 +1216,321 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // ========================
+    // MODE TOGGLE (2D / 3D)
+    // ========================
+    var load3DAnnotationsFn = null; // set by init3DAnnotationSystem
+    var modeToggle = document.getElementById('annotation-mode-toggle');
+    if (modeToggle) {
+        modeToggle.querySelectorAll('button').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var mode = btn.dataset.mode;
+                currentMode = mode;
+                modeToggle.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+
+                var canvasRow = document.getElementById('annotation-image-panel');
+                var panel3d = document.getElementById('annotation-3d-panel');
+
+                if (mode === '3d') {
+                    if (canvasRow) canvasRow.style.display = 'none';
+                    if (panel3d) { panel3d.style.display = ''; if (load3DAnnotationsFn) load3DAnnotationsFn(); }
+                } else {
+                    if (canvasRow) canvasRow.style.display = '';
+                    if (panel3d) panel3d.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // ========================
+    // 3D ANNOTATION SYSTEM
+    // ========================
+    var mv = document.getElementById('annotation-model-viewer');
+    if (mv && has3DModel) {
+        // CRITICAL: model-viewer.min.js is loaded as type="module" (deferred).
+        // DOMContentLoaded may fire BEFORE the custom element is registered,
+        // so mv.surfaceFromPoint won't exist yet. Wait for registration.
+        function init3DAnnotationSystem() {
+        var placing3D = false;
+        var pending3DHit = null;
+        var hotspotCounter = 0;
+
+        // Mode buttons
+        var btn3dPlace = document.getElementById('btn3dPlace');
+        var btn3dSelect = document.getElementById('btn3dSelect');
+        var status3d = document.getElementById('status3dText');
+
+        function enterPlaceMode() {
+            placing3D = true;
+            btn3dPlace.classList.remove('btn-secondary');
+            btn3dPlace.classList.add('btn-primary', 'active');
+            btn3dSelect.classList.remove('btn-primary', 'active');
+            btn3dSelect.classList.add('btn-secondary');
+            mv.removeAttribute('auto-rotate');
+            mv.removeAttribute('camera-controls');
+            // Inject crosshair cursor into shadow DOM
+            var shadow = mv.shadowRoot;
+            if (shadow) {
+                var cs = shadow.getElementById('ann-cursor-override');
+                if (!cs) { cs = document.createElement('style'); cs.id = 'ann-cursor-override'; shadow.appendChild(cs); }
+                cs.textContent = ':host, canvas { cursor: crosshair !important; }';
+            }
+            if (status3d) status3d.innerHTML = '<i class="fas fa-map-marker-alt me-1 text-primary"></i>Click on the model to place a point';
+        }
+
+        function enterOrbitMode() {
+            placing3D = false;
+            btn3dSelect.classList.remove('btn-secondary');
+            btn3dSelect.classList.add('btn-primary', 'active');
+            btn3dPlace.classList.remove('btn-primary', 'active');
+            btn3dPlace.classList.add('btn-secondary');
+            mv.setAttribute('camera-controls', '');
+            // Restore default cursor
+            var shadow = mv.shadowRoot;
+            if (shadow) {
+                var cs = shadow.getElementById('ann-cursor-override');
+                if (cs) cs.textContent = '';
+            }
+            if (status3d) status3d.innerHTML = 'Orbit mode — drag to rotate, scroll to zoom';
+        }
+
+        if (btn3dPlace) btn3dPlace.addEventListener('click', enterPlaceMode);
+        if (btn3dSelect) btn3dSelect.addEventListener('click', enterOrbitMode);
+
+        // Click handler — positionAndNormalFromPoint expects raw clientX/clientY
+        mv.addEventListener('click', function(e) {
+            if (!placing3D) return;
+
+            // API expects raw client coordinates (it calls getNDC internally)
+            var hit = mv.positionAndNormalFromPoint(e.clientX, e.clientY);
+
+            if (!hit || !hit.position) {
+                if (status3d) status3d.innerHTML = '<i class="fas fa-exclamation-triangle me-1 text-warning"></i>Missed the surface — click directly on the model';
+                return;
+            }
+
+            // Use model-viewer's native toString() for data attributes (exact format: "Xm Ym Zm")
+            var posStr = hit.position.toString();
+            var nrmStr = hit.normal ? hit.normal.toString() : '0m 1m 0m';
+
+            pending3DHit = {
+                x: hit.position.x,
+                y: hit.position.y,
+                z: hit.position.z,
+                normalX: hit.normal ? hit.normal.x : 0,
+                normalY: hit.normal ? hit.normal.y : 1,
+                normalZ: hit.normal ? hit.normal.z : 0,
+                positionStr: posStr,
+                normalStr: nrmStr
+            };
+
+            // Remove previous temp hotspot
+            var prevTemp = mv.querySelector('#temp-hotspot');
+            if (prevTemp) prevTemp.remove();
+
+            // Add temporary hotspot
+            var tempBtn = document.createElement('button');
+            tempBtn.id = 'temp-hotspot';
+            tempBtn.className = 'hotspot hotspot-temp';
+            tempBtn.slot = 'hotspot-temp';
+            tempBtn.dataset.position = posStr;
+            tempBtn.dataset.normal = nrmStr;
+            var color3d = document.getElementById('ann3dColor')?.value || '#1a73e8';
+            tempBtn.style.setProperty('--hotspot-color', color3d);
+            tempBtn.innerHTML = '<div class="hotspot-annotation">New annotation</div>';
+            mv.appendChild(tempBtn);
+
+            // Enable save button
+            var saveBtn3d = document.getElementById('save3dAnnotationBtn');
+            if (saveBtn3d) saveBtn3d.disabled = false;
+
+            var hitInfo = document.getElementById('hit3dInfo');
+            if (hitInfo) hitInfo.textContent = 'Point: (' + pending3DHit.x.toFixed(3) + ', ' + pending3DHit.y.toFixed(3) + ', ' + pending3DHit.z.toFixed(3) + ')';
+
+            if (status3d) status3d.innerHTML = '<i class="fas fa-check-circle me-1 text-success"></i>Point placed — enter note and click Save 3D Point';
+        });
+
+        // Save 3D annotation
+        var save3dBtn = document.getElementById('save3dAnnotationBtn');
+        if (save3dBtn) {
+            save3dBtn.addEventListener('click', function() {
+                var bodyText = document.getElementById('new3dBody').value.trim();
+                if (!bodyText) { alert('Please enter annotation text.'); return; }
+                if (!pending3DHit) { alert('Click on the 3D model to place a point first.'); return; }
+
+                var color3d = document.getElementById('ann3dColor')?.value || '#1a73e8';
+                var btn = this;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
+
+                fetch('/research/annotation-v2/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        motivation: document.getElementById('new3dMotivation').value,
+                        body: { type: 'TextualBody', value: bodyText, format: 'text/plain' },
+                        visibility: document.getElementById('new3dVisibility').value,
+                        targets: [{
+                            source_type: 'information_object',
+                            source_id: objectId,
+                            selector_type: 'PointSelector3D',
+                            selector_json: {
+                                x: pending3DHit.x,
+                                y: pending3DHit.y,
+                                z: pending3DHit.z,
+                                normalX: pending3DHit.normalX,
+                                normalY: pending3DHit.normalY,
+                                normalZ: pending3DHit.normalZ,
+                                modelId: modelId,
+                                hotspotType: 'annotation',
+                                color: color3d
+                            }
+                        }]
+                    })
+                }).then(function(r) { return r.json(); }).then(function(d) {
+                    if (d.success) {
+                        location.reload();
+                    } else {
+                        alert(d.error || 'Error creating 3D annotation');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-plus me-1"></i>Save 3D Point';
+                    }
+                }).catch(function(err) {
+                    alert('Network error: ' + err.message);
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-plus me-1"></i>Save 3D Point';
+                });
+            });
+        }
+
+        // Load existing 3D annotations as hotspots on the model
+        function loadExisting3DAnnotations() {
+            // Remove any previously loaded annotation hotspots (but not temp)
+            mv.querySelectorAll('.hotspot-saved').forEach(function(h) { h.remove(); });
+
+            var items = document.querySelectorAll('.annotation-3d-list-item');
+            var count = 0;
+            items.forEach(function(el) {
+                var selectorStr = el.dataset.selector;
+                if (!selectorStr) return;
+                var selector;
+                try { selector = JSON.parse(selectorStr); } catch(e) { return; }
+                if (selector.type !== 'PointSelector3D') return;
+
+                count++;
+                var annId = el.dataset.annotationId;
+                var btn = document.createElement('button');
+                btn.className = 'hotspot hotspot-saved';
+                btn.slot = 'hotspot-ann-' + annId;
+                btn.dataset.position = (selector.x || 0) + 'm ' + (selector.y || 0) + 'm ' + (selector.z || 0) + 'm';
+                btn.dataset.normal = (selector.normalX || 0) + 'm ' + (selector.normalY || 1) + 'm ' + (selector.normalZ || 0) + 'm';
+                btn.style.setProperty('--hotspot-color', selector.color || '#1a73e8');
+                var title = el.querySelector('.ann-title')?.textContent || '';
+                btn.innerHTML = '<div class="hotspot-annotation">' + title + '</div>';
+
+                // Click hotspot to highlight in sidebar
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    document.querySelectorAll('.annotation-3d-list-item').forEach(function(i) { i.style.backgroundColor = ''; });
+                    el.style.backgroundColor = '#e8f0fe';
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                });
+
+                mv.appendChild(btn);
+            });
+
+            var countEl = document.getElementById('annotation3dCount');
+            if (countEl) countEl.textContent = count + ' 3D annotation' + (count !== 1 ? 's' : '');
+        }
+
+        // Click sidebar item to fly to hotspot
+        document.querySelectorAll('.annotation-3d-list-item').forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-ann-btn') || e.target.closest('.delete-ann-btn')) return;
+                var selectorStr = item.dataset.selector;
+                if (!selectorStr) return;
+                var selector;
+                try { selector = JSON.parse(selectorStr); } catch(e) { return; }
+                // Highlight in sidebar
+                document.querySelectorAll('.annotation-3d-list-item').forEach(function(i) { i.style.backgroundColor = ''; });
+                item.style.backgroundColor = '#e8f0fe';
+            });
+        });
+
+        // Expose for mode toggle
+        load3DAnnotationsFn = loadExisting3DAnnotations;
+
+        // Auto-load 3D annotations if 3D is the default mode
+        if (currentMode === '3d') {
+            mv.addEventListener('load', function() {
+                loadExisting3DAnnotations();
+            });
+            if (mv.loaded) loadExisting3DAnnotations();
+        }
+        } // end init3DAnnotationSystem
+
+        // Wait for model-viewer custom element to be registered before init
+        if (customElements.get('model-viewer')) {
+            init3DAnnotationSystem();
+        } else {
+            customElements.whenDefined('model-viewer').then(init3DAnnotationSystem);
+        }
+    }
 });
 </script>
+
+<?php if ($has3D): ?>
+<!-- 3D Hotspot Styles for Annotation Studio -->
+<style <?php echo $nonceAttr; ?>>
+#annotation-model-viewer .hotspot {
+    --hotspot-color: #1a73e8;
+    display: block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background: var(--hotspot-color);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    position: relative;
+    padding: 0;
+    transition: transform 0.15s;
+}
+#annotation-model-viewer .hotspot:hover {
+    transform: scale(1.3);
+}
+#annotation-model-viewer .hotspot-temp {
+    animation: pulse3d 1.5s infinite;
+}
+@keyframes pulse3d {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(26,115,232,0.5); }
+    50% { box-shadow: 0 0 0 8px rgba(26,115,232,0); }
+}
+#annotation-model-viewer .hotspot-annotation {
+    display: none;
+    position: absolute;
+    background: white;
+    color: #333;
+    padding: 6px 10px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    white-space: nowrap;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 10;
+}
+#annotation-model-viewer .hotspot:hover .hotspot-annotation {
+    display: block;
+}
+.annotation-3d-list-item:hover {
+    background-color: #f8f9fa;
+}
+</style>
+<?php endif; ?>
