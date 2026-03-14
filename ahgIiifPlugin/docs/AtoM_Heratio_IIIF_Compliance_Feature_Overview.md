@@ -4,7 +4,7 @@
 
 The **IIIF Compliance Hardening** enhancement brings AtoM Heratio's IIIF implementation into full alignment with the IIIF Presentation API 3.0 specification. It adds manifest validation, quality control dashboards, and integrates IIIF readiness checks into the publish gate system.
 
-This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Heritage Group (Pty) Ltd.
+This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Heritage Group (Pty) Ltd. As of v1.3.0 (March 2026), Presentation API 3.0 is the default manifest format, with full backward compatibility via `?format=2`.
 
 ## Key Features
 
@@ -15,6 +15,10 @@ This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Her
 - **Provider**: Adds institution details (name, homepage) from the linked repository
 - **seeAlso**: Links back to the AtoM archival description page
 - **Thumbnail Dimensions**: Explicit width/height on thumbnail resources (200px scaled)
+- **v3 Default**: Presentation API 3.0 is now the default manifest format for all endpoints
+- **Multi-language Labels**: Manifest labels, summaries, and metadata populated from all available i18n cultures
+- **Comparison Viewer**: Side-by-side Mirador comparison at `/iiif/compare?slugs=slug1,slug2`
+- **Research Annotation Bridge**: Canvas-linked annotations sync between ahgResearchPlugin and IIIF annotation store
 
 ### IIIF Validation Service
 - **Structural Checks**: Validates manifest label, canvases, annotations, and context
@@ -62,6 +66,8 @@ This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Her
 | `/admin/iiif-validation` | IIIF validation dashboard |
 | `/admin/iiif-validation/run/:id` | Run validation for specific object (AJAX) |
 | `/iiif/v3/manifest/:slug` | Enhanced v3 manifest (now with rights, provider, seeAlso) |
+| `/iiif/manifest/:slug` | IIIF manifest (v3 default, ?format=2 for v2.1 fallback) |
+| `/iiif/compare` | Side-by-side comparison viewer |
 
 ## Sample Manifest Output (New Fields)
 
@@ -71,7 +77,7 @@ This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Her
   "type": "Manifest",
   "rights": "https://creativecommons.org/licenses/by/4.0/",
   "requiredStatement": {
-    "label": {"en": ["Attribution"]},
+    "label": {"none": ["Attribution"]},
     "value": {"en": ["National Archives of South Africa"]}
   },
   "provider": [{
@@ -113,6 +119,15 @@ This feature is part of the AtoM Heratio framework v2.8.2 by The Archive and Her
 - Creative Commons license URIs
 - RightsStatements.org vocabulary
 - W3C Web Annotation Data Model (existing annotation support)
+- IIIF Authentication API 1.0
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.3.0 | 2026-03 | M2-IIIF-Complete: v3 default, multi-language labels, compare viewer, CDN→local, annotation route fix |
+| 1.2.0 | 2026-02 | Media streaming, annotations REST API, format conversion |
+| 1.0.0 | 2025-01 | Initial IIIF compliance hardening release |
 
 ---
 
