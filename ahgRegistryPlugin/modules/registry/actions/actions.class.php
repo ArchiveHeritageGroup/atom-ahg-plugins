@@ -74,6 +74,11 @@ class registryActions extends AhgController
     protected function logError(string $message, ?\Throwable $e = null): void
     {
         try {
+            // Enrich empty messages with exception class and SQLSTATE code
+            if ($e && (empty(trim($message)) || str_ends_with(trim($message), ':'))) {
+                $message .= ' ' . get_class($e) . ':' . ($e->getCode() ?: 'unknown');
+            }
+
             \AhgCore\Services\ErrorNotificationService::logToDatabase(
                 'error',
                 '[Registry] ' . $message,
