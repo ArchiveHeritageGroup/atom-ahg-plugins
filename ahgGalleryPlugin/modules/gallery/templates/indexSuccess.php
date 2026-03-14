@@ -62,8 +62,8 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
               <script type="importmap">
               {
                 "imports": {
-                  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-                  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+                  "three": "/plugins/ahgGalleryPlugin/web/vendor/threejs-esm/three.module.js",
+                  "three/addons/": "/plugins/ahgGalleryPlugin/web/vendor/threejs-esm/addons/"
                 }
               }
               </script>
@@ -889,8 +889,8 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    "three": "/plugins/ahgGalleryPlugin/web/vendor/threejs-esm/three.module.js",
+    "three/addons/": "/plugins/ahgGalleryPlugin/web/vendor/threejs-esm/addons/"
   }
 }
 </script>

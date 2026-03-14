@@ -75,8 +75,8 @@ function initFullscreenThreeJs(container, modelPath, ext) {
     _doInitFullscreenThreeJs(container, modelPath, ext);
     return;
   }
-  var cdn = 'https://cdn.jsdelivr.net/npm/three@0.128.0';
-  var srcs = [cdn+'/build/three.min.js', cdn+'/examples/js/loaders/OBJLoader.js', cdn+'/examples/js/loaders/STLLoader.js', cdn+'/examples/js/controls/OrbitControls.js'];
+  var local = '/plugins/ahg3DModelPlugin/web/vendor/threejs';
+  var srcs = [local+'/three.min.js', local+'/OBJLoader.js', local+'/STLLoader.js', local+'/OrbitControls.js'];
   var idx = 0;
   if (typeof THREE !== 'undefined') { idx = 1; }
   function loadNext() {
