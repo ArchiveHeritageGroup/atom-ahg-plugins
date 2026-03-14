@@ -8,6 +8,10 @@
 $showResearch = false;
 $researcherId = null;
 if ($sf_user->isAuthenticated()) {
+    // Admins always see research tools
+    if ($sf_user->isAdministrator()) {
+        $showResearch = true;
+    }
     try {
         $userId = $sf_user->getAttribute('user_id');
         $researcher = \Illuminate\Database\Capsule\Manager::table('research_researcher')

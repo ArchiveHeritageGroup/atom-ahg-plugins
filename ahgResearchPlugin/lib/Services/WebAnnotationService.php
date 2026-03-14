@@ -601,7 +601,7 @@ class WebAnnotationService
 
                             if ($selectorType && in_array($selectorType, [
                                 'TextQuoteSelector', 'FragmentSelector', 'SvgSelector',
-                                'PointSelector', 'RangeSelector', 'TimeSelector',
+                                'PointSelector', 'PointSelector3D', 'RangeSelector', 'TimeSelector',
                             ])) {
                                 $target['selector_type'] = $selectorType;
                             }
