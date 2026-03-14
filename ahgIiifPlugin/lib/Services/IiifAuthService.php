@@ -5,10 +5,11 @@ use Illuminate\Database\Capsule\Manager as DB;
 /**
  * IIIF Authentication Service
  *
- * Implements IIIF Authentication API 1.0 for access control.
+ * Implements IIIF Authentication API 1.0 and 2.0 for access control.
  * Supports login, clickthrough, kiosk, and external authentication profiles.
  *
  * @see https://iiif.io/api/auth/1.0/
+ * @see https://iiif.io/api/auth/2.0/
  */
 class IiifAuthService
 {
@@ -17,6 +18,15 @@ class IiifAuthService
     public const PROFILE_KIOSK = 'kiosk';
     public const PROFILE_EXTERNAL = 'external';
     public const TOKEN_COOKIE = 'iiif_auth_token';
+
+    // Auth API versions
+    public const AUTH_VERSION_1 = '1.0';
+    public const AUTH_VERSION_2 = '2.0';
+
+    // Auth 2.0 access profiles
+    public const ACCESS_ACTIVE = 'active';
+    public const ACCESS_KIOSK = 'kiosk';
+    public const ACCESS_EXTERNAL = 'external';
 
     protected string $baseUrl;
 
@@ -474,5 +484,342 @@ class IiifAuthService
             ->offset($offset)
             ->get()
             ->toArray();
+    }
+
+    // ========================================================================
+    // Auth API 2.0 — Probe Service Pattern
+    // ========================================================================
+
+    /**
+     * Probe access for Auth 2.0.
+     * Returns an AuthProbeResult2 structure.
+     *
+     * @param int $objectId The information_object ID
+     * @param string|null $bearerToken Bearer token from Authorization header
+     * @return array AuthProbeResult2 structure
+     */
+    public function probeAccess(int $objectId, ?string $bearerToken = null): array
+    {
+        $authResource = $this->getAuthResourceForObject($objectId);
+
+        // No auth configured — full access
+        if (!$authResource) {
+            return [
+                'type' => 'AuthProbeResult2',
+                'status' => 200,
+            ];
+        }
+
+        $service = $this->getAuthService($authResource->service_id);
+        if (!$service || !$service->is_active) {
+            return [
+                'type' => 'AuthProbeResult2',
+                'status' => 200,
+            ];
+        }
+
+        // Check bearer token
+        $tokenRecord = null;
+        if ($bearerToken) {
+            $tokenHash = hash('sha256', $bearerToken);
+            $tokenRecord = DB::table('iiif_auth_token')
+                ->where('token_hash', $tokenHash)
+                ->where('is_revoked', 0)
+                ->where('expires_at', '>', now())
+                ->where('service_id', $service->id)
+                ->first();
+
+            if ($tokenRecord) {
+                DB::table('iiif_auth_token')
+                    ->where('id', $tokenRecord->id)
+                    ->update(['last_used_at' => now()]);
+            }
+        }
+
+        // Also check cookie-based token (Auth 1.0 backward compat)
+        if (!$tokenRecord) {
+            $tokenRecord = $this->validateCurrentToken($service->id);
+        }
+
+        if ($tokenRecord) {
+            $this->logAccess($objectId, $tokenRecord->user_id, (int) $tokenRecord->id, 'probe_ok');
+            return [
+                'type' => 'AuthProbeResult2',
+                'status' => 200,
+            ];
+        }
+
+        // Access denied — build probe error response
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $result = [
+            'type' => 'AuthProbeResult2',
+            'status' => 401,
+        ];
+
+        // Heading and note from service config
+        if (!empty($service->heading)) {
+            $result['heading'] = [$culture => [$service->heading]];
+        }
+        if (!empty($service->note)) {
+            $result['note'] = [$culture => [$service->note]];
+        }
+
+        // Substitute resources for degraded access
+        if ($authResource->degraded_access) {
+            $substitutes = $this->buildSubstituteResources($objectId, (int) ($authResource->degraded_width ?: 200));
+            if (!empty($substitutes)) {
+                $result['substitute'] = $substitutes;
+            }
+        }
+
+        $this->logAccess($objectId, null, null, 'probe_deny', ['service' => $service->name]);
+
+        return $result;
+    }
+
+    /**
+     * Issue an access token for Auth 2.0 (postMessage delivery, no cookie).
+     *
+     * @param object $service The auth service
+     * @param int|null $userId Authenticated user ID
+     * @param string|null $origin Request origin for CORS
+     * @param string|null $messageId Client-generated message ID
+     * @return array Token response for postMessage
+     */
+    public function issueAccessToken2(object $service, ?int $userId, ?string $origin = null, ?string $messageId = null): array
+    {
+        $token = bin2hex(random_bytes(32));
+        $tokenHash = hash('sha256', $token);
+        $ttl = $service->token_ttl ?? 3600;
+        $expiresAt = date('Y-m-d H:i:s', time() + $ttl);
+
+        DB::table('iiif_auth_token')->insert([
+            'token_hash' => $tokenHash,
+            'user_id' => $userId,
+            'service_id' => $service->id,
+            'session_id' => session_id() ?: null,
+            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+            'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+            'expires_at' => $expiresAt,
+        ]);
+
+        $tokenId = DB::getPdo()->lastInsertId();
+        $this->logAccess(null, $userId, (int) $tokenId, 'token2_grant', ['service' => $service->name]);
+
+        // Auth 2.0: also set cookie for backward compat with Auth 1.0 clients
+        $this->setTokenCookie($token, $ttl);
+
+        $response = [
+            'type' => 'AuthAccessToken2',
+            'accessToken' => $token,
+            'expiresIn' => $ttl,
+        ];
+
+        if ($messageId) {
+            $response['messageId'] = $messageId;
+        }
+
+        return $response;
+    }
+
+    /**
+     * Format Auth 2.0 service description for embedding in manifests.
+     *
+     * @param object $service The auth service (must have auth_version = '2.0')
+     * @return array Auth 2.0 probe service description
+     */
+    public function formatServiceDescriptionV2(object $service): array
+    {
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $accessProfile = $service->access_profile ?? $this->mapProfileToAccessProfile($service->profile);
+
+        $accessService = [
+            'id' => $this->baseUrl . '/iiif/auth/2/access/' . $service->name,
+            'type' => 'AuthAccessService2',
+            'profile' => $accessProfile,
+            'label' => [$culture => [$service->label]],
+            'service' => [
+                [
+                    'id' => $this->baseUrl . '/iiif/auth/2/token/' . $service->name,
+                    'type' => 'AuthAccessTokenService2',
+                ],
+            ],
+        ];
+
+        // Heading and note for the access service
+        if (!empty($service->heading)) {
+            $accessService['heading'] = [$culture => [$service->heading]];
+        }
+        if (!empty($service->note)) {
+            $accessService['note'] = [$culture => [$service->note]];
+        }
+
+        // Add logout for login/external profiles
+        if ($service->profile === self::PROFILE_LOGIN || $service->profile === self::PROFILE_EXTERNAL) {
+            $accessService['service'][] = [
+                'id' => $this->baseUrl . '/iiif/auth/2/logout/' . $service->name,
+                'type' => 'AuthLogoutService2',
+                'label' => [$culture => ['Logout']],
+            ];
+        }
+
+        // Probe service wraps the access service
+        return [
+            'id' => $this->baseUrl . '/iiif/auth/2/probe/' . $service->name,
+            'type' => 'AuthProbeService2',
+            'service' => [$accessService],
+        ];
+    }
+
+    /**
+     * Map Auth 1.0 profile to Auth 2.0 access profile.
+     */
+    public function mapProfileToAccessProfile(string $v1Profile): string
+    {
+        return match ($v1Profile) {
+            self::PROFILE_KIOSK => self::ACCESS_KIOSK,
+            self::PROFILE_EXTERNAL => self::ACCESS_EXTERNAL,
+            default => self::ACCESS_ACTIVE,
+        };
+    }
+
+    /**
+     * Build substitute resource array for Auth 2.0 probe response (degraded access).
+     *
+     * @param int $objectId The information_object ID
+     * @param int $maxWidth Max width for substitute images
+     * @return array Array of substitute resource descriptions
+     */
+    public function buildSubstituteResources(int $objectId, int $maxWidth = 200): array
+    {
+        $digitalObjects = DB::table('digital_object')
+            ->where('object_id', $objectId)
+            ->select('id', 'name', 'path', 'mime_type')
+            ->get();
+
+        if ($digitalObjects->isEmpty()) {
+            return [];
+        }
+
+        $substitutes = [];
+
+        foreach ($digitalObjects as $do) {
+            $imagePath = ltrim($do->path, '/');
+            $cantaloupeId = str_replace('/', '_SL_', $imagePath) . $do->name;
+            $imageUrl = $this->baseUrl . '/iiif/2/' . $cantaloupeId . '/full/' . $maxWidth . ',/0/default.jpg';
+
+            $substitutes[] = [
+                'id' => $imageUrl,
+                'type' => 'Image',
+                'format' => 'image/jpeg',
+                'width' => $maxWidth,
+            ];
+        }
+
+        return $substitutes;
+    }
+
+    /**
+     * Get Auth 2.0 service for an object (if one exists).
+     * Prefers v2.0 services over v1.0 if both are configured.
+     */
+    public function getAuth2ServiceForObject(int $objectId): ?object
+    {
+        $authResource = $this->getAuthResourceForObject($objectId);
+        if (!$authResource) {
+            return null;
+        }
+
+        $service = $this->getAuthService($authResource->service_id);
+        if (!$service || !$service->is_active) {
+            return null;
+        }
+
+        // If service is v2.0, return it directly
+        if (($service->auth_version ?? '1.0') === self::AUTH_VERSION_2) {
+            return $service;
+        }
+
+        // Try to find a v2.0 equivalent (same profile pattern)
+        $v2Name = $service->name . '-v2';
+        $v2Service = DB::table('iiif_auth_service')
+            ->where('name', $v2Name)
+            ->where('auth_version', self::AUTH_VERSION_2)
+            ->where('is_active', 1)
+            ->first();
+
+        return $v2Service ?: $service;
+    }
+
+    /**
+     * Cantaloupe authorization check (internal endpoint).
+     * Called by delegates.rb to validate access.
+     *
+     * @param string $identifier Cantaloupe image identifier
+     * @param string|null $cookie iiif_auth_token cookie value
+     * @param string|null $bearer Bearer token from Authorization header
+     * @return array {allowed: bool, max_scale?: float}
+     */
+    public function cantaloupeCheck(string $identifier, ?string $cookie = null, ?string $bearer = null): array
+    {
+        // Extract object_id from identifier path
+        // Identifiers look like: uploads_SL_r_SL_REPO_SL_...
+        $decodedPath = str_replace('_SL_', '/', $identifier);
+
+        // Strip page suffix (;N) for multi-page TIFF
+        $decodedPath = preg_replace('/;[0-9]+$/', '', $decodedPath);
+
+        // Find digital object by path+name
+        $parts = pathinfo($decodedPath);
+        $dirPath = '/' . ltrim(($parts['dirname'] ?? '') . '/', '/');
+        $fileName = $parts['basename'] ?? '';
+
+        $objectId = DB::table('digital_object')
+            ->where('path', $dirPath)
+            ->where('name', $fileName)
+            ->value('object_id');
+
+        if (!$objectId) {
+            // No matching digital object — allow (unprotected)
+            return ['allowed' => true];
+        }
+
+        $authResource = $this->getAuthResourceForObject((int) $objectId);
+        if (!$authResource) {
+            return ['allowed' => true];
+        }
+
+        $service = $this->getAuthService($authResource->service_id);
+        if (!$service || !$service->is_active) {
+            return ['allowed' => true];
+        }
+
+        // Check token (cookie or bearer)
+        $token = $bearer ?: $cookie;
+        if ($token) {
+            $tokenHash = hash('sha256', $token);
+            $tokenRecord = DB::table('iiif_auth_token')
+                ->where('token_hash', $tokenHash)
+                ->where('is_revoked', 0)
+                ->where('expires_at', '>', now())
+                ->where('service_id', $service->id)
+                ->first();
+
+            if ($tokenRecord) {
+                return ['allowed' => true];
+            }
+        }
+
+        // No valid token — check for degraded access
+        if ($authResource->degraded_access) {
+            $maxWidth = $authResource->degraded_width ?: 200;
+            return [
+                'allowed' => false,
+                'degraded' => true,
+                'max_scale' => $maxWidth,
+            ];
+        }
+
+        return ['allowed' => false];
     }
 }

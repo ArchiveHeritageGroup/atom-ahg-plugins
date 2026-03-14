@@ -136,6 +136,13 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $auth->any('iiif_auth_check', '/iiif/auth/check/:id', 'check', ['id' => '\d+']);
         $auth->any('iiif_auth_protect', '/admin/iiif-auth/protect', 'protect');
         $auth->any('iiif_auth_unprotect', '/admin/iiif-auth/unprotect', 'unprotect');
+
+        // IIIF Auth API 2.0 routes
+        $auth->get('iiif_auth2_probe', '/iiif/auth/2/probe/:service', 'probe');
+        $auth->get('iiif_auth2_access', '/iiif/auth/2/access/:service', 'accessService');
+        $auth->get('iiif_auth2_token', '/iiif/auth/2/token/:service', 'accessToken2');
+        $auth->get('iiif_auth2_logout', '/iiif/auth/2/logout/:service', 'logout');
+        $auth->any('iiif_auth2_cantaloupe_check', '/iiif/auth/cantaloupe-check', 'cantaloupeCheck');
         $auth->register($routing);
 
         // ===================

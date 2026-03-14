@@ -293,11 +293,16 @@ CREATE TABLE IF NOT EXISTS `iiif_auth_service` (
     `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL UNIQUE,
     `profile` VARCHAR(48) COMMENT 'login, clickthrough, kiosk, external' NOT NULL DEFAULT 'login',
+    `auth_version` VARCHAR(10) NOT NULL DEFAULT '1.0' COMMENT '1.0, 2.0',
+    `access_profile` VARCHAR(20) DEFAULT NULL COMMENT 'active, kiosk, external -- Auth 2.0 access profile',
     `label` VARCHAR(255) NOT NULL,
     `description` TEXT NULL,
     `confirm_label` VARCHAR(100) DEFAULT 'Login',
     `failure_header` VARCHAR(255) DEFAULT 'Authentication Required',
     `failure_description` TEXT NULL,
+    `heading` VARCHAR(255) DEFAULT NULL COMMENT 'Auth 2.0 heading for probe error response',
+    `note` TEXT DEFAULT NULL COMMENT 'Auth 2.0 note for probe error response',
+    `probe_substitute_width` INT DEFAULT NULL COMMENT 'Width for substitute/degraded image in Auth 2.0 probe response',
     `login_url` VARCHAR(500) NULL COMMENT 'External login URL for login profile',
     `logout_url` VARCHAR(500) NULL,
     `token_ttl` INT DEFAULT 3600 COMMENT 'Token time-to-live in seconds',
@@ -394,8 +399,11 @@ CREATE TABLE IF NOT EXISTS `iiif_manifest_cache` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Insert default auth services
-INSERT INTO `iiif_auth_service` (`name`, `profile`, `label`, `description`, `confirm_label`, `failure_header`, `failure_description`) VALUES
-('public', 'clickthrough', 'Public Access', 'Click to access this resource', 'I Agree', 'Access Required', 'Please click to acknowledge terms of use.'),
-('login', 'login', 'Login Required', 'This resource requires authentication', 'Login', 'Authentication Required', 'Please log in to access this resource.'),
-('restricted', 'login', 'Restricted Access', 'This resource has restricted access', 'Request Access', 'Restricted Content', 'This content is restricted. Please contact the repository for access.')
+INSERT INTO `iiif_auth_service` (`name`, `profile`, `auth_version`, `access_profile`, `label`, `description`, `confirm_label`, `failure_header`, `failure_description`, `heading`, `note`) VALUES
+('public', 'clickthrough', '1.0', NULL, 'Public Access', 'Click to access this resource', 'I Agree', 'Access Required', 'Please click to acknowledge terms of use.', NULL, NULL),
+('login', 'login', '1.0', NULL, 'Login Required', 'This resource requires authentication', 'Login', 'Authentication Required', 'Please log in to access this resource.', NULL, NULL),
+('restricted', 'login', '1.0', NULL, 'Restricted Access', 'This resource has restricted access', 'Request Access', 'Restricted Content', 'This content is restricted. Please contact the repository for access.', NULL, NULL),
+('public-v2', 'clickthrough', '2.0', 'active', 'Public Access', 'Click to access this resource', 'I Agree', 'Access Required', 'Please click to acknowledge terms of use.', 'Terms of Use', 'Please accept the terms of use to access this resource.'),
+('login-v2', 'login', '2.0', 'active', 'Login Required', 'This resource requires authentication', 'Login', 'Authentication Required', 'Please log in to access this resource.', 'Authentication Required', 'You need to log in to view this content.'),
+('restricted-v2', 'login', '2.0', 'active', 'Restricted Access', 'This resource has restricted access', 'Request Access', 'Restricted Content', 'This content is restricted. Please contact the repository for access.', 'Restricted Content', 'This content is restricted. Contact the archive for access.')
 ON DUPLICATE KEY UPDATE `label` = VALUES(`label`);

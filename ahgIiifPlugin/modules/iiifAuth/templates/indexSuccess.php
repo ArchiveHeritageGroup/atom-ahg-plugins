@@ -12,6 +12,7 @@
                 <tr>
                     <th>Name</th>
                     <th>Profile</th>
+                    <th>Auth Version</th>
                     <th>Label</th>
                     <th>Status</th>
                 </tr>
@@ -22,6 +23,13 @@
                     <td><code><?php echo esc_specialchars($service->name) ?></code></td>
                     <td>
                         <span class="badge bg-secondary"><?php echo esc_specialchars($service->profile) ?></span>
+                        <?php if (!empty($service->access_profile)): ?>
+                            <span class="badge bg-info"><?php echo esc_specialchars($service->access_profile) ?></span>
+                        <?php endif ?>
+                    </td>
+                    <td>
+                        <?php $ver = $service->auth_version ?? '1.0'; ?>
+                        <span class="badge bg-<?php echo $ver === '2.0' ? 'primary' : 'secondary' ?>">v<?php echo esc_specialchars($ver) ?></span>
                     </td>
                     <td><?php echo esc_specialchars($service->label) ?></td>
                     <td>

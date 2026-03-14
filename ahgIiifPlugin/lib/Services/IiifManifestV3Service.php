@@ -169,7 +169,43 @@ class IiifManifestV3Service
             }
         }
 
+        // Auth 2.0 service injection
+        $authService = $this->resolveAuthService((int) ($object['id'] ?? 0));
+        if ($authService) {
+            // Add auth context
+            $manifest['@context'] = [
+                'http://iiif.io/api/presentation/3/context.json',
+                'http://iiif.io/api/auth/2/context.json',
+            ];
+            $manifest['service'] = [$authService];
+        }
+
         return $manifest;
+    }
+
+    /**
+     * Resolve Auth 2.0 service description for this object (if protected).
+     */
+    private function resolveAuthService(int $objectId): ?array
+    {
+        if (!$objectId) {
+            return null;
+        }
+
+        try {
+            require_once dirname(__DIR__) . '/Services/IiifAuthService.php';
+            $auth = new \IiifAuthService($this->baseUrl);
+            $service = $auth->getAuth2ServiceForObject($objectId);
+
+            if (!$service) {
+                return null;
+            }
+
+            return $auth->formatServiceDescriptionV2($service);
+        } catch (\Exception $e) {
+            // Auth lookup failure is non-fatal
+            return null;
+        }
     }
 
     /**

@@ -281,7 +281,8 @@ export class IiifViewerManager {
                 showFlipControl: true,
                 gestureSettingsMouse: { scrollToZoom: true },
                 crossOriginPolicy: 'Anonymous',
-                ajaxWithCredentials: false,
+                ajaxWithCredentials: this._authToken ? true : false,
+                ...(this._authToken ? { ajaxHeaders: { 'Authorization': 'Bearer ' + this._authToken } } : {}),
                 ...this.options.osdConfig
             };
 
@@ -791,13 +792,255 @@ export class IiifViewerManager {
         if (this._manifest) return this._manifest;
 
         try {
-            const response = await fetch(this.options.manifestUrl);
+            const headers = {};
+            if (this._authToken) {
+                headers['Authorization'] = 'Bearer ' + this._authToken;
+            }
+            const response = await fetch(this.options.manifestUrl, { headers });
             this._manifest = await response.json();
+
+            // Check for Auth 2.0 services in the manifest
+            await this.handleAuth2(this._manifest);
+
             return this._manifest;
         } catch (error) {
             console.error('Failed to fetch manifest:', error);
             return null;
         }
+    }
+
+    // ========================================================================
+    // IIIF Auth API 2.0
+    // ========================================================================
+
+    /**
+     * Handle Auth 2.0 probe service pattern.
+     * Checks manifest for AuthProbeService2, probes for access,
+     * and triggers auth flow if needed.
+     */
+    async handleAuth2(manifest) {
+        if (!manifest || !manifest.service) return;
+
+        // Find AuthProbeService2 in manifest services
+        const services = Array.isArray(manifest.service) ? manifest.service : [manifest.service];
+        const probeService = services.find(s => s.type === 'AuthProbeService2');
+
+        if (!probeService) return;
+
+        console.log('Auth 2.0: Found probe service:', probeService.id);
+
+        // Probe for access (no token initially)
+        const probeResult = await this.probeAuth2(probeService.id);
+
+        if (probeResult && probeResult.status === 200) {
+            console.log('Auth 2.0: Access granted');
+            return;
+        }
+
+        console.log('Auth 2.0: Access denied, status:', probeResult?.status);
+
+        // Find access service
+        const accessServices = probeService.service || [];
+        const accessService = accessServices.find(s => s.type === 'AuthAccessService2');
+
+        if (!accessService) {
+            console.error('Auth 2.0: No access service found');
+            return;
+        }
+
+        // Try token service first (may already have session from prior auth)
+        const tokenService = (accessService.service || []).find(s => s.type === 'AuthAccessTokenService2');
+
+        if (tokenService) {
+            const tokenResult = await this.requestAuth2Token(tokenService.id);
+
+            if (tokenResult && tokenResult.accessToken) {
+                this._authToken = tokenResult.accessToken;
+                console.log('Auth 2.0: Token obtained from existing session');
+                // Re-probe with token
+                const reProbe = await this.probeAuth2(probeService.id);
+                if (reProbe && reProbe.status === 200) {
+                    // Invalidate cached manifest to re-fetch with auth
+                    this._manifest = null;
+                    return;
+                }
+            }
+        }
+
+        // Show auth prompt to user
+        await this.showAuth2Prompt(accessService, probeService, tokenService, probeResult);
+    }
+
+    /**
+     * Call Auth 2.0 probe endpoint.
+     */
+    async probeAuth2(probeUrl) {
+        try {
+            const headers = {};
+            if (this._authToken) {
+                headers['Authorization'] = 'Bearer ' + this._authToken;
+            }
+            // Append object ID as query param
+            const url = new URL(probeUrl, window.location.origin);
+            if (this.options.objectId) {
+                url.searchParams.set('id', this.options.objectId);
+            }
+            const response = await fetch(url.toString(), {
+                headers,
+                credentials: 'include'
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Auth 2.0: Probe failed:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Request Auth 2.0 access token via postMessage iframe.
+     */
+    requestAuth2Token(tokenServiceUrl) {
+        return new Promise((resolve) => {
+            const messageId = 'auth2-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+            // Build token URL with params
+            const url = new URL(tokenServiceUrl, window.location.origin);
+            url.searchParams.set('messageId', messageId);
+            url.searchParams.set('origin', window.location.origin);
+
+            // Listen for postMessage response
+            const handler = (event) => {
+                const data = event.data;
+                if (data && data.messageId === messageId) {
+                    window.removeEventListener('message', handler);
+                    iframe.remove();
+                    clearTimeout(timeout);
+
+                    if (data.type === 'AuthAccessToken2' && data.accessToken) {
+                        resolve(data);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            };
+
+            window.addEventListener('message', handler);
+
+            // Create hidden iframe
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url.toString();
+            document.body.appendChild(iframe);
+
+            // Timeout after 5 seconds
+            const timeout = setTimeout(() => {
+                window.removeEventListener('message', handler);
+                iframe.remove();
+                resolve(null);
+            }, 5000);
+        });
+    }
+
+    /**
+     * Show Auth 2.0 prompt modal.
+     */
+    async showAuth2Prompt(accessService, probeService, tokenService, probeResult) {
+        const vid = this.viewerId;
+        const label = this.extractLabel(accessService.label);
+        const heading = this.extractLabel(accessService.heading || probeResult?.heading);
+        const note = this.extractLabel(accessService.note || probeResult?.note);
+
+        // Build modal HTML
+        const modalId = `auth2-modal-${vid}`;
+        const modalHtml = `
+            <div class="modal fade" id="${modalId}" tabindex="-1" data-bs-backdrop="static">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${heading || label || 'Authentication Required'}</h5>
+                        </div>
+                        <div class="modal-body">
+                            <p>${note || 'This resource requires authentication to access.'}</p>
+                            ${probeResult?.substitute ? '<p class="text-muted"><small>A lower-resolution preview may be available.</small></p>' : ''}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="${modalId}-login">${label || 'Log In'}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Inject modal
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = modalHtml;
+        document.body.appendChild(wrapper);
+
+        // Show modal
+        let modal;
+        if (window.bootstrap && window.bootstrap.Modal) {
+            modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+        } else {
+            document.getElementById(modalId).style.display = 'block';
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        // Handle login button
+        const loginBtn = document.getElementById(`${modalId}-login`);
+        if (loginBtn) {
+            loginBtn.addEventListener('click', async () => {
+                // Open access service in new tab
+                const authWindow = window.open(accessService.id, '_blank');
+
+                // Poll for tab closure
+                const pollInterval = setInterval(async () => {
+                    if (authWindow && authWindow.closed) {
+                        clearInterval(pollInterval);
+
+                        // Try to get token via iframe postMessage
+                        if (tokenService) {
+                            const tokenResult = await this.requestAuth2Token(tokenService.id);
+                            if (tokenResult && tokenResult.accessToken) {
+                                this._authToken = tokenResult.accessToken;
+                                console.log('Auth 2.0: Token obtained after login');
+
+                                // Close modal and reload viewer
+                                if (modal) modal.hide();
+                                wrapper.remove();
+
+                                // Re-init viewer with auth
+                                this._manifest = null;
+                                this.osdViewer = null;
+                                this.miradorInstance = null;
+                                this.loaded.osd = false;
+                                this.loaded.mirador = false;
+                                await this.showViewer(this.currentViewer);
+                                return;
+                            }
+                        }
+
+                        // Token retrieval failed
+                        if (modal) modal.hide();
+                        wrapper.remove();
+                        console.error('Auth 2.0: Failed to obtain token after login');
+                    }
+                }, 500);
+            });
+        }
+    }
+
+    /**
+     * Extract a label string from a IIIF language map.
+     */
+    extractLabel(langMap) {
+        if (!langMap) return null;
+        if (typeof langMap === 'string') return langMap;
+
+        // Try current language, then 'en', then 'none', then first available
+        const lang = document.documentElement.lang || 'en';
+        const values = langMap[lang] || langMap['en'] || langMap['none'] || Object.values(langMap)[0];
+        return Array.isArray(values) ? values[0] : values;
     }
 
     loadScript(src, type = 'text/javascript') {
