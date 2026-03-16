@@ -168,6 +168,8 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
         <?php $renderSection([
             'where am I' => 'Announce current page and available actions',
             'how many results' => 'Announce the number of results on browse pages',
+            'disable voice / voice off' => 'Disable voice commands until re-enabled',
+            'enable voice / voice on' => 'Re-enable voice commands',
         ]); ?>
 
         <h6><i class="bi bi-question-circle me-1"></i><?php echo __('Help'); ?></h6>

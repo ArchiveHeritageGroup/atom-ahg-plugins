@@ -106,14 +106,23 @@ class ahgVoiceDescribeImageAction extends sfAction
             $informationObject = DB::table('information_object')->where('id', $objectId)->first();
         }
 
-        // ── PDF detection: check for transcript/OCR before sending to LLM ──
+        // ── Media type detection: check for transcript before sending to LLM ──
         $mimeType = $digitalObject->mime_type ?? '';
+
+        // PDF detection
         if (stripos($mimeType, 'pdf') !== false || stripos($digitalObject->name ?? '', '.pdf') !== false) {
             $pdfResult = $this->handlePdf($digitalObject, $objectId);
             if ($pdfResult !== null) {
                 return $this->renderJson($pdfResult);
             }
-            // If handlePdf returns null, fall through to visual description (user said "describe image" on a PDF with no text)
+        }
+
+        // Video/Audio detection — check media_transcription before sending thumbnail to LLM
+        if (preg_match('/^(video|audio)\//i', $mimeType)) {
+            $mediaResult = $this->handleMedia($digitalObject, $objectId, $mimeType);
+            if ($mediaResult !== null) {
+                return $this->renderJson($mediaResult);
+            }
         }
 
         // Resolve image file — prefer reference/thumbnail derivative (already JPEG)
@@ -236,6 +245,76 @@ class ahgVoiceDescribeImageAction extends sfAction
             'description' => null,
             'information_object_id' => $objectId,
             'message'     => 'This is a PDF document that has not been OCR\'d. The text content is not readable. An administrator can run OCR to extract the text.',
+        ];
+    }
+
+    /**
+     * Handle video/audio digital objects — check media_transcription for transcript.
+     * Returns response array if handled, or null to fall through.
+     */
+    protected function handleMedia($digitalObject, $objectId, $mimeType)
+    {
+        $doId = $digitalObject->id;
+        $isVideo = stripos($mimeType, 'video') === 0;
+        $mediaLabel = $isVideo ? 'video' : 'audio';
+
+        // Check media_transcription table
+        $transcript = null;
+        try {
+            $row = DB::table('media_transcription')
+                ->where('digital_object_id', $doId)
+                ->whereRaw('LENGTH(full_text) > 10')
+                ->first();
+            if ($row && !empty($row->full_text)) {
+                $transcript = $row->full_text;
+            }
+        } catch (\Exception $e) {
+            // Table may not exist
+        }
+
+        // Also check property transcript as fallback
+        if (!$transcript) {
+            try {
+                $prop = DB::table('property')
+                    ->join('property_i18n', 'property.id', '=', 'property_i18n.id')
+                    ->where('property.object_id', $doId)
+                    ->where('property.name', 'transcript')
+                    ->whereRaw('LENGTH(property_i18n.value) > 10')
+                    ->first();
+                if ($prop && !empty($prop->value)) {
+                    $transcript = $prop->value;
+                }
+            } catch (\Exception $e) {
+                // Silent
+            }
+        }
+
+        if ($transcript) {
+            $speechText = mb_strlen($transcript) > 2000
+                ? mb_substr($transcript, 0, 2000) . '... Transcript continues.'
+                : $transcript;
+
+            return [
+                'success'     => true,
+                'type'        => 'media_transcript',
+                'media_type'  => $mediaLabel,
+                'description' => $speechText,
+                'full_text'   => $transcript,
+                'text_length' => mb_strlen($transcript),
+                'source'      => 'transcription',
+                'information_object_id' => $objectId,
+                'message'     => 'This is a ' . $mediaLabel . ' file with a transcript. Say "read PDF" to hear the transcript.',
+            ];
+        }
+
+        // Video/audio without transcript — don't send thumbnail to LLM (it would hallucinate)
+        return [
+            'success'     => true,
+            'type'        => 'media_no_transcript',
+            'media_type'  => $mediaLabel,
+            'description' => null,
+            'information_object_id' => $objectId,
+            'message'     => 'This is a ' . $mediaLabel . ' file without a transcript. AI image description is not available for ' . $mediaLabel . ' content. You can generate a transcript from the admin panel.',
         ];
     }
 

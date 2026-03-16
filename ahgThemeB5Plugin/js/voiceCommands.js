@@ -1332,7 +1332,7 @@ class AHGVoiceCommands {
    */
   _announcePageContext() {
     // Only auto-announce if the user has previously activated voice in this session
-    if (!sessionStorage.getItem('ahg_voice_active')) return;
+    if (!sessionStorage.getItem('ahg_voice_active') || this._voiceDisabled) return;
 
     var path = window.location.pathname;
     var ctx = AHGVoiceCommands.detectContext();
@@ -1374,7 +1374,7 @@ class AHGVoiceCommands {
 
     document.addEventListener('mouseover', function (e) {
       // Check if hover read is enabled
-      if (!self._hoverReadEnabled) return;
+      if (!self._hoverReadEnabled || self._voiceDisabled) return;
       // Only read when voice is active
       if (!sessionStorage.getItem('ahg_voice_active')) return;
       // Don't interrupt ongoing speech from commands
@@ -1486,9 +1486,9 @@ class AHGVoiceCommands {
       meta.hasDigitalObject = true;
     }
 
-    // Also detect via IIIF viewer, OpenSeadragon, or 3D viewer containers
+    // Also detect via IIIF viewer, OpenSeadragon, PDF viewer, or 3D viewer containers
     if (!meta.hasDigitalObject) {
-      if (document.querySelector('.iiif-viewer-container, .osd-viewer, [id^="container-iiif-viewer"], [id^="viewer-3d-"]')) {
+      if (document.querySelector('.iiif-viewer-container, .osd-viewer, [id^="container-iiif-viewer"], [id^="pdf-wrapper-iiif-viewer"], [id^="pdf-frame-iiif-viewer"], [id^="viewer-3d-"]')) {
         meta.hasDigitalObject = true;
         if (!meta.mediaType) meta.mediaType = 'image';
       }
@@ -1534,12 +1534,12 @@ class AHGVoiceCommands {
       if (doIdAttr) meta.digitalObjectId = parseInt(doIdAttr.getAttribute('data-do-id'), 10);
     }
 
-    // IIIF viewer container IDs contain the INFORMATION OBJECT ID (not digital object ID).
+    // IIIF/PDF viewer container IDs contain the INFORMATION OBJECT ID (not digital object ID).
     // Do NOT store as digitalObjectId — describeImage() handles this in Strategy 4b.
-    if (!meta.digitalObjectId) {
-      var iiifContainer = document.querySelector('[id^="container-iiif-viewer-"]');
+    if (!meta.digitalObjectId && !meta.informationObjectId) {
+      var iiifContainer = document.querySelector('[id^="container-iiif-viewer-"], [id^="pdf-wrapper-iiif-viewer-"], [id^="pdf-frame-iiif-viewer-"]');
       if (iiifContainer) {
-        var iiifMatch = iiifContainer.id.match(/container-iiif-viewer-(\d+)/);
+        var iiifMatch = iiifContainer.id.match(/(?:container-iiif-viewer|pdf-wrapper-iiif-viewer|pdf-frame-iiif-viewer)-(\d+)/);
         if (iiifMatch) meta.informationObjectId = parseInt(iiifMatch[1], 10);
       }
     }
@@ -1700,16 +1700,17 @@ class AHGVoiceCommands {
       console.log('[Voice] Strategy 4 (data-object-id): infoObjectId=' + infoObjectId);
     }
 
-    // Strategy 4b: IIIF viewer container IDs contain the information object ID
-    // Patterns: container-iiif-viewer-{objectId}-{hash}, osd-iiif-viewer-{objectId}-{hash}, osd-{objectId}, mirador-{objectId}-wrapper
+    // Strategy 4b: IIIF/PDF viewer container IDs contain the information object ID
+    // Patterns: container-iiif-viewer-{objectId}-{hash}, osd-iiif-viewer-{objectId}-{hash}, osd-{objectId}, mirador-{objectId}-wrapper,
+    //           pdf-wrapper-iiif-viewer-{objectId}-{hash}, pdf-frame-iiif-viewer-{objectId}-{hash}
     if (!doId && !infoObjectId) {
-      var iiifEl = document.querySelector('[id^="container-iiif-viewer-"], [id^="osd-iiif-viewer-"], [id^="osd-"], [id^="mirador-"]');
+      var iiifEl = document.querySelector('[id^="container-iiif-viewer-"], [id^="osd-iiif-viewer-"], [id^="osd-"], [id^="mirador-"], [id^="pdf-wrapper-iiif-viewer-"], [id^="pdf-frame-iiif-viewer-"]');
       if (iiifEl) {
-        var idMatch = iiifEl.id.match(/(?:container-iiif-viewer|osd-iiif-viewer|osd|mirador)-(\d+)/);
+        var idMatch = iiifEl.id.match(/(?:container-iiif-viewer|osd-iiif-viewer|pdf-wrapper-iiif-viewer|pdf-frame-iiif-viewer|osd|mirador)-(\d+)/);
         if (idMatch) infoObjectId = parseInt(idMatch[1], 10);
-        console.log('[Voice] Strategy 4b (IIIF container): id=' + iiifEl.id + ', infoObjectId=' + infoObjectId);
+        console.log('[Voice] Strategy 4b (IIIF/PDF container): id=' + iiifEl.id + ', infoObjectId=' + infoObjectId);
       } else {
-        console.log('[Voice] Strategy 4b (IIIF container): no IIIF element found');
+        console.log('[Voice] Strategy 4b (IIIF/PDF container): no IIIF element found');
       }
     }
 
@@ -1793,6 +1794,19 @@ class AHGVoiceCommands {
         if (data.type === 'pdf_no_ocr') {
           self.speak(data.message);
           self.showToast('PDF not OCR\'d — text not readable', 'warning');
+          return;
+        }
+        if (data.type === 'media_transcript') {
+          self.speak(data.message);
+          self.showToast(data.media_type + ' with transcript (' + data.text_length + ' chars) — say "read PDF"', 'info');
+          self._pendingPdfText = data.full_text || data.description;
+          self._pendingPdfSpeech = data.description;
+          self._pendingInfoObjectId = data.information_object_id || null;
+          return;
+        }
+        if (data.type === 'media_no_transcript') {
+          self.speak(data.message);
+          self.showToast(data.media_type + ' — no transcript available', 'warning');
           return;
         }
 
@@ -1891,9 +1905,9 @@ class AHGVoiceCommands {
       if (ioEl) infoObjectId = ioEl.getAttribute('data-object-id') || ioEl.value;
     }
     if (!doId && !infoObjectId) {
-      var iiifEl = document.querySelector('[id^="container-iiif-viewer-"], [id^="osd-iiif-viewer-"], [id^="osd-"], [id^="mirador-"]');
+      var iiifEl = document.querySelector('[id^="container-iiif-viewer-"], [id^="osd-iiif-viewer-"], [id^="osd-"], [id^="mirador-"], [id^="pdf-wrapper-iiif-viewer-"], [id^="pdf-frame-iiif-viewer-"]');
       if (iiifEl) {
-        var idMatch = iiifEl.id.match(/(?:container-iiif-viewer|osd-iiif-viewer|osd|mirador)-(\d+)/);
+        var idMatch = iiifEl.id.match(/(?:container-iiif-viewer|osd-iiif-viewer|pdf-wrapper-iiif-viewer|pdf-frame-iiif-viewer|osd|mirador)-(\d+)/);
         if (idMatch) infoObjectId = parseInt(idMatch[1], 10);
       }
     }
