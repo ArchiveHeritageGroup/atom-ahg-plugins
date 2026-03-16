@@ -285,6 +285,63 @@ class displayActions extends AhgController
             $this->applyFilters($query);
         }
 
+        // ── Embargo enforcement: exclude fully embargoed records from browse ──
+        if (!$this->isAuthenticated || !$this->getContext()->getUser()->isAdministrator()) {
+            try {
+                $embargoedIds = DB::table('rights_embargo')
+                    ->where('status', 'active')
+                    ->where('embargo_type', 'full')
+                    ->where(function ($q) {
+                        $q->whereNull('end_date')
+                          ->orWhere('end_date', '>=', date('Y-m-d'));
+                    })
+                    ->where(function ($q) {
+                        $q->whereNull('start_date')
+                          ->orWhere('start_date', '<=', date('Y-m-d'));
+                    })
+                    ->pluck('object_id')
+                    ->toArray();
+
+                if (!empty($embargoedIds)) {
+                    // Check for user exceptions
+                    $userId = $this->getContext()->getUser()->getAttribute('user_id');
+                    if ($userId) {
+                        $exceptionIds = DB::table('embargo_exception as ex')
+                            ->join('rights_embargo as re', 'ex.embargo_id', '=', 're.id')
+                            ->where('re.status', 'active')
+                            ->where('re.embargo_type', 'full')
+                            ->where(function ($q) use ($userId) {
+                                $q->where(function ($q2) use ($userId) {
+                                    $q2->where('ex.exception_type', 'user')
+                                       ->where('ex.exception_id', $userId);
+                                })->orWhere(function ($q2) use ($userId) {
+                                    $q2->where('ex.exception_type', 'group')
+                                       ->whereIn('ex.exception_id', function ($sub) use ($userId) {
+                                           $sub->select('group_id')
+                                               ->from('aclUserGroup')
+                                               ->where('user_id', $userId);
+                                       });
+                                });
+                            })
+                            ->where(function ($q) {
+                                $q->whereNull('ex.valid_until')
+                                  ->orWhere('ex.valid_until', '>=', date('Y-m-d'));
+                            })
+                            ->pluck('re.object_id')
+                            ->toArray();
+
+                        $embargoedIds = array_diff($embargoedIds, $exceptionIds);
+                    }
+
+                    if (!empty($embargoedIds)) {
+                        $query->whereNotIn('io.id', $embargoedIds);
+                    }
+                }
+            } catch (\Exception $e) {
+                // rights_embargo table may not exist — silently continue
+            }
+        }
+
         // Handle parent/breadcrumb
         if ($this->parentId) {
             $this->parent = DB::table('information_object as io')
