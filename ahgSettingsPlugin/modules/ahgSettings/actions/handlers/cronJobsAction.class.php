@@ -1997,6 +1997,22 @@ class SettingsCronJobsAction extends AhgController
                 'category' => 'ahg',
             ],
             [
+                'name' => 'Museum AAT Sync — Getty Vocabulary Cache',
+                'command' => 'php symfony museum:aat-sync',
+                'description' => 'Downloads Getty AAT (Art & Architecture Thesaurus) terms to a local cache table (getty_aat_cache) for instant autocomplete on the CCO cataloguing form. Without this sync, every keystroke queries the remote Getty SPARQL endpoint which is slow. After sync, autocomplete searches MySQL locally.',
+                'options' => [
+                    '--category=CAT' => 'Sync specific category: object_types, materials, techniques, styles_periods, or all (default: all)',
+                    '--depth=N' => 'Hierarchy traversal depth 1-3 (default: 2). Higher = more terms but slower sync',
+                    '--clear' => 'Clear existing cache before re-syncing',
+                    '--stats' => 'Show current cache statistics only',
+                    '--dry-run' => 'Preview what would be synced without writing',
+                ],
+                'schedule' => 'Monthly or after initial install — one-time sync is sufficient',
+                'example' => '0 2 1 * * cd {root} && php symfony museum:aat-sync --depth=3 >> /var/log/atom/museum-aat-sync.log 2>&1',
+                'duration' => 'Medium (3-10 minutes depending on depth)',
+                'category' => 'ahg',
+            ],
+            [
                 'name' => 'Museum Exhibition Management',
                 'command' => 'php symfony museum:exhibition',
                 'description' => 'Manages museum exhibitions — checks for upcoming openings/closings, moves objects between exhibition and storage status, and sends notifications.',
@@ -2548,6 +2564,12 @@ class SettingsCronJobsAction extends AhgController
                 $categories[$cat]['jobs'][] = $job;
             }
         }
+
+        // Sort jobs alphabetically by name within each category
+        foreach ($categories as &$cat) {
+            usort($cat['jobs'], fn($a, $b) => strcasecmp($a['name'], $b['name']));
+        }
+        unset($cat);
 
         // Remove empty categories
         return array_filter($categories, fn($cat) => !empty($cat['jobs']));
