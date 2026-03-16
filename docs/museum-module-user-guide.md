@@ -637,6 +637,32 @@ The museum module integrates with Getty vocabularies for standardized terminolog
 - **ULAN** (Union List of Artist Names) - Creator/maker names
 - **TGN** (Thesaurus of Geographic Names) - Place names
 
+### Local AAT Cache (Recommended)
+
+By default, autocomplete fields query the remote Getty SPARQL endpoint on every keystroke, which can be slow. To enable **instant local autocomplete**, sync AAT terms to a local database cache:
+
+```bash
+# Initial sync — downloads ~1,000+ AAT terms across all categories
+php symfony museum:aat-sync
+
+# Deeper sync for more granular terms (depth 3)
+php symfony museum:aat-sync --category=object_types --depth=3
+
+# View cache statistics
+php symfony museum:aat-sync --stats
+```
+
+Once synced, the CCO cataloguing form autocomplete fields search MySQL locally first and only fall back to the Getty API for terms not in the cache. Any Getty API results are also automatically cached for future searches (write-through caching).
+
+| Category | Typical Terms (depth 2) | Typical Terms (depth 3) |
+|----------|------------------------|------------------------|
+| Object Types | ~310 | ~785 |
+| Materials | ~136 | ~300+ |
+| Techniques | ~78 | ~200+ |
+| Styles/Periods | ~58 | ~100+ |
+
+**Re-sync monthly** or after Getty updates their vocabulary. Use `--clear` to start fresh.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  MATERIAL (AAT Lookup)                                      │
@@ -661,6 +687,27 @@ The museum module integrates with Getty vocabularies for standardized terminolog
 For administrators, the museum module provides CLI commands:
 
 ```bash
+# --- AAT Vocabulary Cache ---
+# Sync all Getty AAT categories to local cache (recommended after install)
+php symfony museum:aat-sync
+
+# Sync specific category with deeper hierarchy
+php symfony museum:aat-sync --category=object_types --depth=3
+
+# View cache statistics
+php symfony museum:aat-sync --stats
+
+# Clear and re-sync
+php symfony museum:aat-sync --clear
+
+# Preview without writing
+php symfony museum:aat-sync --dry-run
+
+# --- Getty Term Linking ---
+# Link taxonomy terms to Getty vocabulary URIs
+php symfony museum:getty-link --taxonomy-id=35
+
+# --- Exhibitions ---
 # List exhibitions
 php symfony museum:exhibition --list
 

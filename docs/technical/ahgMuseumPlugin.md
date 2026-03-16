@@ -110,6 +110,25 @@ museum_condition_report
 └── next_review_date
 ```
 
+### Getty AAT Local Cache
+
+```sql
+-- Local cache of Getty AAT terms for instant autocomplete
+-- Populated via: php symfony museum:aat-sync
+getty_aat_cache
+├── id (PK, auto-increment)
+├── aat_id (UNIQUE, e.g. '300033618')
+├── uri (full Getty URI)
+├── pref_label (English preferred label)
+├── scope_note (definition text)
+├── broader_label (parent term label)
+├── broader_id (parent AAT ID)
+├── category (object_types|materials|techniques|styles_periods|general)
+└── synced_at (timestamp)
+```
+
+The autocomplete endpoint (`/museum/getty`) searches this table first via LIKE query with relevance ordering (exact > starts-with > contains). Falls back to live Getty SPARQL API if no local results. Getty API results are also written through to this cache automatically.
+
 ### Exhibition Tables (13 tables)
 
 ```sql
@@ -484,7 +503,19 @@ Routes are defined in `ahgMuseumPluginConfiguration.class.php`:
 ## CLI Commands
 
 ```bash
-# Exhibition management
+# --- AAT Vocabulary Cache (getty_aat_cache table) ---
+php symfony museum:aat-sync                             # Sync all categories (depth 2)
+php symfony museum:aat-sync --category=object_types --depth=3  # Deeper sync for object types
+php symfony museum:aat-sync --stats                     # Show cache statistics
+php symfony museum:aat-sync --clear                     # Clear cache and re-sync
+php symfony museum:aat-sync --dry-run                   # Preview without writing
+
+# --- Getty Term Linking (getty_vocabulary_link table) ---
+php symfony museum:getty-link --taxonomy-id=35           # Link terms to AAT
+php symfony museum:getty-link --vocabulary=tgn --taxonomy-id=42  # Link places to TGN
+php symfony museum:getty-link --taxonomy-id=35 --dry-run # Preview matches
+
+# --- Exhibition Management ---
 php symfony museum:exhibition --list                    # List all exhibitions
 php symfony museum:exhibition --show --id=5             # Show exhibition details
 php symfony museum:exhibition --create                  # Interactive creation
@@ -575,9 +606,15 @@ php symfony cc
    - Check `ahgMuseumPluginConfiguration.class.php` has routes defined
    - Verify routing cache is cleared
 
-3. **Getty lookups failing**
-   - Check network connectivity to Getty SPARQL endpoint
+3. **Getty lookups slow**
+   - Run `php symfony museum:aat-sync` to populate local cache (recommended)
+   - After sync, autocomplete searches local MySQL instead of remote Getty SPARQL
+   - Check `php symfony museum:aat-sync --stats` for cache status
+
+4. **Getty lookups failing (no local cache)**
+   - Check network connectivity to Getty SPARQL endpoint (`http://vocab.getty.edu/sparql`)
    - Verify `getty_api_enabled: true` in config
+   - Run `php symfony museum:aat-sync` to avoid depending on live Getty API
 
 4. **Workflow transitions blocked**
    - Check current state allows the transition
