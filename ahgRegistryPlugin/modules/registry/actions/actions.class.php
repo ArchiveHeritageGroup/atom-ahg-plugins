@@ -102,10 +102,22 @@ class registryActions extends AhgController
         $userId = $this->getCurrentUserId();
         $db = \Illuminate\Database\Capsule\Manager::class;
 
-        // Admin can switch institutions via ?inst= parameter
-        if ($this->isAdmin()) {
-            $switchId = (int) \sfContext::getInstance()->getRequest()->getParameter('inst', 0);
-            if ($switchId) {
+        // Switch institution via ?inst= parameter
+        $switchId = (int) \sfContext::getInstance()->getRequest()->getParameter('inst', 0);
+        if ($switchId) {
+            // Admin can access any institution
+            if ($this->isAdmin()) {
+                $inst = $db::table('registry_institution')->where('id', $switchId)->first();
+                if ($inst) {
+                    return $inst;
+                }
+            }
+            // Regular user must have junction table access
+            $hasAccess = $db::table('registry_user_institution')
+                ->where('user_id', $userId)
+                ->where('institution_id', $switchId)
+                ->exists();
+            if ($hasAccess) {
                 $inst = $db::table('registry_institution')->where('id', $switchId)->first();
                 if ($inst) {
                     return $inst;
@@ -113,16 +125,76 @@ class registryActions extends AhgController
             }
         }
 
+        // Check junction table for primary institution first
+        $primary = $db::table('registry_user_institution')
+            ->where('user_id', $userId)
+            ->where('is_primary', 1)
+            ->first();
+        if ($primary) {
+            $inst = $db::table('registry_institution')->where('id', $primary->institution_id)->first();
+            if ($inst) {
+                return $inst;
+            }
+        }
+
+        // Fallback: first institution in junction table
+        $link = $db::table('registry_user_institution')
+            ->where('user_id', $userId)
+            ->orderBy('id', 'asc')
+            ->first();
+        if ($link) {
+            $inst = $db::table('registry_institution')->where('id', $link->institution_id)->first();
+            if ($inst) {
+                return $inst;
+            }
+        }
+
+        // Legacy fallback: created_by
         $inst = $db::table('registry_institution')
             ->where('created_by', $userId)->first();
 
-        // Admin fallback: use first institution if none matched by created_by
+        // Admin fallback: use first institution if none matched
         if (!$inst && $this->isAdmin()) {
             $inst = $db::table('registry_institution')
                 ->orderBy('id', 'asc')->first();
         }
 
         return $inst;
+    }
+
+    /**
+     * Get all institutions the current user can manage.
+     */
+    protected function getMyInstitutions(): array
+    {
+        $userId = $this->getCurrentUserId();
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        if ($this->isAdmin()) {
+            return $db::table('registry_institution')
+                ->orderBy('name')
+                ->get()
+                ->all();
+        }
+
+        // Junction table
+        $linked = $db::table('registry_user_institution as rui')
+            ->join('registry_institution as ri', 'ri.id', '=', 'rui.institution_id')
+            ->where('rui.user_id', $userId)
+            ->select('ri.*', 'rui.role', 'rui.is_primary')
+            ->orderBy('rui.is_primary', 'desc')
+            ->orderBy('ri.name')
+            ->get()
+            ->all();
+
+        if (!empty($linked)) {
+            return $linked;
+        }
+
+        // Legacy fallback
+        $inst = $db::table('registry_institution')
+            ->where('created_by', $userId)->first();
+        return $inst ? [$inst] : [];
     }
 
     /**
@@ -622,6 +694,7 @@ class registryActions extends AhgController
         try {
             $svc->join($slug, $email, $user->getAttribute('user_name', ''), $userId, null);
         } catch (\Throwable $e) {
+            if ($e instanceof \sfStopException) { throw $e; }
             $this->logError('Group join failed (slug=' . $slug . '): ' . $e->getMessage(), $e);
             $user->setFlash('error', 'An error occurred while joining the group.');
             $this->redirect(url_for(['module' => 'registry', 'action' => 'groupView', 'slug' => $slug]));
@@ -804,6 +877,7 @@ class registryActions extends AhgController
                     }
                     $this->errors = [$result['error'] ?? 'Failed to create discussion'];
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Discussion create failed (group=' . $slug . '): ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while creating the discussion.';
                 }
@@ -847,6 +921,7 @@ class registryActions extends AhgController
                     }
                 }
             } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
                 $this->logError('Discussion reply failed (id=' . $id . '): ' . $e->getMessage(), $e);
             }
         }
@@ -973,6 +1048,7 @@ class registryActions extends AhgController
                     ->where('id', $post->id)
                     ->update(['comment_count' => $commentCount]);
             } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
                 $this->logError('Blog reply failed (slug=' . $slug . '): ' . $e->getMessage(), $e);
             }
         }
@@ -1058,6 +1134,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Institution register failed: ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while registering the institution.';
                 }
@@ -1065,6 +1142,15 @@ class registryActions extends AhgController
 
             $this->formData = (object) $data;
         }
+
+        // Load standards from DB for dynamic rendering
+        $this->dbStandards = \Illuminate\Database\Capsule\Manager::table('registry_standard')
+            ->where('is_active', 1)
+            ->orderBy('category')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get()
+            ->all();
     }
 
     public function executeInstitutionEdit($request)
@@ -1095,6 +1181,15 @@ class registryActions extends AhgController
             ->where('entity_type', 'institution')
             ->where('entity_id', $this->institution->id)
             ->orderBy('tag')
+            ->get()
+            ->all();
+
+        // Load standards from DB for dynamic rendering
+        $this->dbStandards = \Illuminate\Database\Capsule\Manager::table('registry_standard')
+            ->where('is_active', 1)
+            ->orderBy('category')
+            ->orderBy('sort_order')
+            ->orderBy('name')
             ->get()
             ->all();
 
@@ -1193,6 +1288,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Institution update failed (id=' . $this->institution->id . '): ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while saving the institution.';
                 }
@@ -1269,6 +1365,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Institution contact add failed: ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while saving the contact.';
                 }
@@ -1318,6 +1415,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Contact update failed (id=' . $id . '): ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while saving the contact.';
                 }
@@ -1345,6 +1443,16 @@ class registryActions extends AhgController
 
         $svc = $this->loadService('InstanceService');
         $this->instances = $svc->findByInstitution($this->institution->id);
+
+        // Load orphaned instances (no institution) for admin
+        $this->orphanedInstances = [];
+        if ($this->isAdmin()) {
+            $this->orphanedInstances = \Illuminate\Database\Capsule\Manager::table('registry_instance')
+                ->whereNull('institution_id')
+                ->orderBy('name')
+                ->get()
+                ->all();
+        }
     }
 
     public function executeMyInstitutionInstanceAdd($request)
@@ -1513,6 +1621,71 @@ class registryActions extends AhgController
         $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionInstances']));
     }
 
+    public function executeMyInstitutionInstanceDelink($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $id = (int) $request->getParameter('id');
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $instance = $db::table('registry_instance')->where('id', $id)->first();
+
+        if (!$instance) {
+            $this->forward404();
+            return;
+        }
+
+        $db::table('registry_instance')->where('id', $id)->update([
+            'institution_id' => null,
+        ]);
+
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionInstances']));
+    }
+
+    public function executeMyInstitutionInstanceRelink($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $this->setTemplate('instanceRelink');
+
+        $id = (int) $request->getParameter('id');
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $this->instance = $db::table('registry_instance')->where('id', $id)->first();
+
+        if (!$this->instance) {
+            $this->forward404();
+            return;
+        }
+
+        // Load all institutions for picker
+        $this->institutions = $db::table('registry_institution')
+            ->where('is_active', 1)
+            ->orderBy('name')
+            ->select('id', 'name', 'slug', 'city', 'country')
+            ->get()
+            ->all();
+
+        $this->errors = [];
+
+        if ($request->isMethod('post')) {
+            $targetId = (int) $request->getParameter('institution_id');
+            if (!$targetId) {
+                $this->errors[] = 'Please select an institution.';
+            } else {
+                $db::table('registry_instance')->where('id', $id)->update([
+                    'institution_id' => $targetId,
+                ]);
+                $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionInstances']));
+                return;
+            }
+        }
+    }
+
     public function executeMyInstitutionSoftware($request)
     {
         $user = $this->requireLogin();
@@ -1590,6 +1763,35 @@ class registryActions extends AhgController
 
         $svc = $this->loadService('RelationshipService');
         $this->vendors = $svc->getInstitutionVendors($this->institution->id);
+    }
+
+    public function executeMyInstitutionVendorRemove($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $institution = $this->getMyInstitution();
+        if (!$institution) {
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
+            return;
+        }
+
+        $relationshipId = (int) $request->getParameter('id');
+        $svc = $this->loadService('RelationshipService');
+
+        // Verify the relationship belongs to this institution
+        $rel = \Illuminate\Database\Capsule\Manager::table('registry_vendor_institution')
+            ->where('id', $relationshipId)
+            ->where('institution_id', $institution->id)
+            ->first();
+
+        if ($rel) {
+            $svc->removeVendorRelationship($relationshipId);
+        }
+
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']));
     }
 
     public function executeMyInstitutionReview($request)
@@ -1726,6 +1928,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Vendor register failed: ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while registering the vendor.';
                 }
@@ -1833,6 +2036,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Vendor update failed (id=' . $this->vendor->id . '): ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while saving the vendor.';
                 }
@@ -1909,6 +2113,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Vendor contact add failed: ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while saving the contact.';
                 }
@@ -2108,6 +2313,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Software add failed: ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while adding the software.';
                 }
@@ -2606,6 +2812,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Group create failed: ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while creating the group.';
                 }
@@ -2770,6 +2977,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Blog create failed: ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while creating the blog post.';
                 }
@@ -2819,6 +3027,7 @@ class registryActions extends AhgController
 
                     return;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Blog update failed (id=' . $id . '): ' . $e->getMessage(), $e);
                     $this->errors[] = 'An error occurred while saving the blog post.';
                 }
@@ -3525,6 +3734,112 @@ class registryActions extends AhgController
             ->get();
     }
 
+    public function executeAdminDropdowns($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $this->setTemplate('adminDropdowns');
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $this->selectedGroup = $request->getParameter('group', '');
+
+        $this->groups = $db::table('registry_dropdown')
+            ->select('dropdown_group')
+            ->distinct()
+            ->orderBy('dropdown_group')
+            ->pluck('dropdown_group')
+            ->all();
+
+        $query = $db::table('registry_dropdown')->orderBy('dropdown_group')->orderBy('sort_order')->orderBy('label');
+        if ($this->selectedGroup) {
+            $query->where('dropdown_group', $this->selectedGroup);
+        }
+        $this->items = $query->get()->all();
+    }
+
+    public function executeAdminDropdownEdit($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $this->setTemplate('adminDropdownEdit');
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $id = (int) $request->getParameter('id', 0);
+        $this->item = $id ? $db::table('registry_dropdown')->where('id', $id)->first() : null;
+        $this->errors = [];
+
+        $this->existingGroups = $db::table('registry_dropdown')
+            ->select('dropdown_group')
+            ->distinct()
+            ->orderBy('dropdown_group')
+            ->pluck('dropdown_group')
+            ->all();
+
+        if ($request->isMethod('post')) {
+            $data = [
+                'dropdown_group' => trim($request->getParameter('dropdown_group', '')),
+                'value' => trim($request->getParameter('value', '')),
+                'label' => trim($request->getParameter('label', '')),
+                'badge_color' => trim($request->getParameter('badge_color', '')) ?: null,
+                'sort_order' => (int) $request->getParameter('sort_order', 100),
+                'is_active' => $request->getParameter('is_active', 0) ? 1 : 0,
+            ];
+
+            if (empty($data['dropdown_group']) || empty($data['value']) || empty($data['label'])) {
+                $this->errors[] = 'Group, value, and label are required.';
+            }
+
+            if (empty($this->errors)) {
+                try {
+                    if ($this->item) {
+                        $db::table('registry_dropdown')->where('id', $id)->update($data);
+                    } else {
+                        $data['created_at'] = date('Y-m-d H:i:s');
+                        $db::table('registry_dropdown')->insert($data);
+                    }
+                    $this->redirect(url_for(['module' => 'registry', 'action' => 'adminDropdowns', 'group' => $data['dropdown_group']]));
+
+                    return;
+                } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) {
+                        throw $e;
+                    }
+                    $this->errors[] = 'Save failed: ' . $e->getMessage();
+                }
+            }
+
+            $this->item = (object) $data;
+            if ($id) {
+                $this->item->id = $id;
+            }
+        }
+    }
+
+    public function executeAdminDropdownDelete($request)
+    {
+        $user = $this->requireAdminUser();
+        if (!$user) {
+            return;
+        }
+
+        $id = (int) $request->getParameter('id');
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $item = $db::table('registry_dropdown')->where('id', $id)->first();
+        $group = $item->dropdown_group ?? '';
+
+        if ($item) {
+            $db::table('registry_dropdown')->where('id', $id)->delete();
+        }
+
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'adminDropdowns', 'group' => $group]));
+    }
+
     public function executeAdminSettings($request)
     {
         $admin = $this->requireAdminUser();
@@ -3808,6 +4123,7 @@ class registryActions extends AhgController
                     $db::table('object')->where('id', $userId)->delete();
                 }
             } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
                 $this->logError('Admin user ' . $formAction . ' failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
             }
         }
@@ -3874,6 +4190,7 @@ class registryActions extends AhgController
                     $db::table('object')->where('id', $userId)->delete();
                 }
             } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
                 $this->logError('Admin user manage ' . $formAction . ' failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
             }
         }
@@ -4053,6 +4370,7 @@ class registryActions extends AhgController
 
                     $this->saved = true;
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     $this->logError('Admin user edit failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
                 }
 
@@ -4112,6 +4430,7 @@ class registryActions extends AhgController
 
             $this->getUser()->setFlash('notice', 'Password reset successfully.');
         } catch (\Throwable $e) {
+            if ($e instanceof \sfStopException) { throw $e; }
             $this->logError('Password reset failed (user_id=' . $userId . '): ' . $e->getMessage(), $e);
             $this->getUser()->setFlash('error', 'Password reset failed. Please try again.');
         }
@@ -4800,6 +5119,7 @@ class registryActions extends AhgController
 
                 $db::connection()->commit();
             } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
                 $db::connection()->rollBack();
                 $this->logError('Registration failed for email=' . $email . ': ' . $e->getMessage(), $e);
                 $this->error = 'Registration failed. Please try again.';
@@ -4826,6 +5146,7 @@ class registryActions extends AhgController
                                 ->where('id', $groupId)
                                 ->increment('member_count');
                         } catch (\Throwable $e) {
+                            if ($e instanceof \sfStopException) { throw $e; }
                             // Non-critical — user account still created
                         }
                     }
@@ -4843,6 +5164,7 @@ class registryActions extends AhgController
                         'auto_confirm' => true,
                     ]);
                 } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
                     // Non-critical
                 }
             }

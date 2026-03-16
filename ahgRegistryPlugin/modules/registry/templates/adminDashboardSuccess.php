@@ -245,6 +245,15 @@
   </div>
 
   <div class="col">
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminDropdowns']); ?>" class="card text-decoration-none h-100">
+      <div class="card-body text-center">
+        <i class="fas fa-list fa-2x text-info mb-2"></i>
+        <h6 class="card-title"><?php echo __('Dropdown Manager'); ?></h6>
+      </div>
+    </a>
+  </div>
+
+  <div class="col">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminSetupGuides']); ?>" class="card text-decoration-none h-100">
       <div class="card-body text-center">
         <i class="fas fa-book-open fa-2x text-secondary mb-2"></i>

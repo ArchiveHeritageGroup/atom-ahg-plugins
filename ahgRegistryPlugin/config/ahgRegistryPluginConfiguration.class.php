@@ -74,6 +74,10 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_admin_blog', '/registry/admin/blog', 'adminBlog');
         $loader->any('registry_admin_reviews', '/registry/admin/reviews', 'adminReviews');
         $loader->any('registry_admin_sync', '/registry/admin/sync', 'adminSync');
+        $loader->any('registry_admin_dropdowns', '/registry/admin/dropdowns', 'adminDropdowns');
+        $loader->any('registry_admin_dropdown_edit', '/registry/admin/dropdowns/:id/edit', 'adminDropdownEdit', ['id' => '\d+']);
+        $loader->post('registry_admin_dropdown_delete', '/registry/admin/dropdowns/:id/delete', 'adminDropdownDelete', ['id' => '\d+']);
+        $loader->any('registry_admin_dropdown_new', '/registry/admin/dropdowns/new', 'adminDropdownEdit');
         $loader->any('registry_admin_settings', '/registry/admin/settings', 'adminSettings');
         $loader->any('registry_admin_footer', '/registry/admin/footer', 'adminFooter');
         $loader->any('registry_admin_email', '/registry/admin/email', 'adminEmail');
@@ -103,8 +107,11 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_my_institution_instances', '/registry/my/institution/instances', 'myInstitutionInstances');
         $loader->any('registry_my_institution_instance_add', '/registry/my/institution/instances/add', 'myInstitutionInstanceAdd');
         $loader->any('registry_my_institution_instance_edit', '/registry/my/institution/instances/:id/edit', 'myInstitutionInstanceEdit', ['id' => '\d+']);
+        $loader->any('registry_my_institution_instance_delink', '/registry/my/institution/instances/:id/delink', 'myInstitutionInstanceDelink', ['id' => '\d+']);
+        $loader->any('registry_my_institution_instance_relink', '/registry/my/institution/instances/:id/relink', 'myInstitutionInstanceRelink', ['id' => '\d+']);
         $loader->any('registry_my_institution_software', '/registry/my/institution/software', 'myInstitutionSoftware');
         $loader->any('registry_my_institution_vendors', '/registry/my/institution/vendors', 'myInstitutionVendors');
+        $loader->post('registry_my_institution_vendor_remove', '/registry/my/institution/vendors/:id/remove', 'myInstitutionVendorRemove', ['id' => '\d+']);
         $loader->any('registry_my_institution_review', '/registry/my/institution/review/:type/:id', 'myInstitutionReview', ['type' => '[a-z]+', 'id' => '\d+']);
 
         // ============================================================

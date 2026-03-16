@@ -44,7 +44,7 @@
             <div class="col-md-4">
               <label class="form-label"><?php echo __('Vendor Type'); ?></label>
               <?php
-                $vTypes = ['developer' => __('Developer'), 'hosting_provider' => __('Hosting Provider'), 'consultant' => __('Consultant'), 'digitization' => __('Digitization Service'), 'training' => __('Training Provider'), 'integrator' => __('Systems Integrator'), 'service_provider' => __('Service Provider'), 'hosting' => __('Hosting'), 'reseller' => __('Reseller'), 'other' => __('Other')];
+                $vTypes = \AhgRegistry\Services\DropdownService::getOptions('vendor_type');
                 $rawVt = sfOutputEscaper::unescape($f->vendor_type ?? '[]');
                 $selTypes = is_array($rawVt) ? $rawVt : (is_string($rawVt) ? (json_decode($rawVt, true) ?: []) : []);
                 foreach ($vTypes as $val => $label): ?>

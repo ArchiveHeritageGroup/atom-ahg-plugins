@@ -45,15 +45,10 @@
               <label for="edit-type" class="form-label"><?php echo __('Institution Type'); ?></label>
               <select class="form-select" id="edit-type" name="institution_type">
                 <?php
-                  $types = [
-                    'archive' => __('Archive'), 'library' => __('Library'), 'museum' => __('Museum'),
-                    'gallery' => __('Gallery'), 'dam' => __('Digital Asset Management'),
-                    'heritage_site' => __('Heritage Site'), 'research_centre' => __('Research Centre'),
-                    'government' => __('Government'), 'university' => __('University'), 'other' => __('Other'),
-                  ];
+                  $types = \AhgRegistry\Services\DropdownService::getOptions('institution_type');
                   $selType = $f->institution_type ?? 'archive';
                   foreach ($types as $val => $label): ?>
-                    <option value="<?php echo $val; ?>"<?php echo $selType === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
+                    <option value="<?php echo htmlspecialchars($val, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selType === $val ? ' selected' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -246,31 +241,80 @@
         </div>
       </div>
 
-      <!-- Section 6: Descriptive Standards -->
+      <!-- Section 6: Standards & Systems -->
       <div class="card mb-4">
-        <div class="card-header fw-semibold"><i class="fas fa-list-check me-2 text-secondary"></i><?php echo __('Descriptive Standards'); ?></div>
+        <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+          <span><i class="fas fa-list-check me-2 text-secondary"></i><?php echo __('Standards & Systems'); ?></span>
+          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardBrowse']); ?>" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="fas fa-external-link-alt me-1"></i><?php echo __('Browse Standards'); ?></a>
+        </div>
         <div class="card-body">
+          <p class="text-muted small mb-3"><?php echo __('Select all standards used by your institution. Click a standard name to view its details.'); ?></p>
           <?php
-            $standards = [
-              'ISAD(G)' => __('ISAD(G)'), 'DACS' => __('DACS'), 'RAD' => __('RAD'),
-              'Dublin Core' => __('Dublin Core'), 'MODS' => __('MODS'), 'EAD' => __('EAD'),
-              'ISAAR(CPF)' => __('ISAAR(CPF)'), 'ISDIAH' => __('ISDIAH'), 'ISDF' => __('ISDF'),
-              'RiC' => __('RiC'), 'MARC' => __('MARC 21'), 'CCO' => __('CCO'),
-              'Spectrum' => __('Spectrum 5.1'), 'Other' => __('Other'),
-            ];
             $selectedStandards = [];
             if (!empty($f->descriptive_standards)) {
               $rawStd = sfOutputEscaper::unescape($f->descriptive_standards);
               $selectedStandards = is_string($rawStd) ? json_decode($rawStd, true) : (array) $rawStd;
               if (!is_array($selectedStandards)) { $selectedStandards = []; }
             }
+
+            // Group standards by category
+            $grouped = [];
+            if (isset($dbStandards)) {
+              foreach ($dbStandards as $std) {
+                $cat = $std->category ?? 'other';
+                $grouped[$cat][] = $std;
+              }
+            }
+
+            $catLabels = [
+              'descriptive' => __('Descriptive Standards'),
+              'metadata' => __('Metadata Standards'),
+              'interchange' => __('Interchange Formats'),
+              'preservation' => __('Digital Preservation'),
+              'rights' => __('Rights & Licensing'),
+              'sector' => __('Sector Standards'),
+              'compliance' => __('Compliance & Regulatory'),
+              'accounting' => __('Heritage Accounting'),
+            ];
+            $catIcons = [
+              'descriptive' => 'fa-file-alt', 'metadata' => 'fa-tags', 'interchange' => 'fa-exchange-alt',
+              'preservation' => 'fa-shield-alt', 'rights' => 'fa-balance-scale', 'sector' => 'fa-industry',
+              'compliance' => 'fa-gavel', 'accounting' => 'fa-calculator',
+            ];
           ?>
-          <div class="row">
-            <?php foreach ($standards as $val => $label): ?>
-            <div class="col-md-6">
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="edit-std-<?php echo strtolower(str_replace(['(', ')', ' '], '', $val)); ?>" name="descriptive_standards[]" value="<?php echo htmlspecialchars($val, ENT_QUOTES, 'UTF-8'); ?>"<?php echo in_array($val, $selectedStandards) ? ' checked' : ''; ?>>
-                <label class="form-check-label" for="edit-std-<?php echo strtolower(str_replace(['(', ')', ' '], '', $val)); ?>"><?php echo $label; ?></label>
+          <div class="accordion" id="standards-accordion">
+            <?php $idx = 0; foreach ($grouped as $cat => $stds): $idx++; ?>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="std-head-<?php echo $idx; ?>">
+                <button class="accordion-button<?php echo $idx > 1 ? ' collapsed' : ''; ?>" type="button" data-bs-toggle="collapse" data-bs-target="#std-body-<?php echo $idx; ?>" aria-expanded="<?php echo $idx === 1 ? 'true' : 'false'; ?>">
+                  <i class="fas <?php echo $catIcons[$cat] ?? 'fa-list'; ?> me-2 text-secondary"></i>
+                  <?php echo $catLabels[$cat] ?? ucfirst($cat); ?>
+                  <span class="badge bg-secondary ms-2"><?php echo count($stds); ?></span>
+                </button>
+              </h2>
+              <div id="std-body-<?php echo $idx; ?>" class="accordion-collapse collapse<?php echo $idx === 1 ? ' show' : ''; ?>" data-bs-parent="#standards-accordion">
+                <div class="accordion-body">
+                  <div class="row">
+                    <?php foreach ($stds as $std):
+                      // Match by acronym or name
+                      $matchVal = $std->acronym ?: $std->name;
+                      $isChecked = in_array($matchVal, $selectedStandards) || in_array($std->name, $selectedStandards) || in_array($std->acronym, $selectedStandards);
+                      $cbId = 'edit-std-' . $std->id;
+                    ?>
+                    <div class="col-md-6">
+                      <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="<?php echo $cbId; ?>" name="descriptive_standards[]" value="<?php echo htmlspecialchars($matchVal, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $isChecked ? ' checked' : ''; ?>>
+                        <label class="form-check-label" for="<?php echo $cbId; ?>">
+                          <?php if ($std->acronym): ?>
+                            <strong><?php echo htmlspecialchars($std->acronym, ENT_QUOTES, 'UTF-8'); ?></strong> —
+                          <?php endif; ?>
+                          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardView', 'slug' => $std->slug]); ?>" target="_blank" class="text-decoration-none"><?php echo htmlspecialchars($std->name, ENT_QUOTES, 'UTF-8'); ?></a>
+                        </label>
+                      </div>
+                    </div>
+                    <?php endforeach; ?>
+                  </div>
+                </div>
               </div>
             </div>
             <?php endforeach; ?>

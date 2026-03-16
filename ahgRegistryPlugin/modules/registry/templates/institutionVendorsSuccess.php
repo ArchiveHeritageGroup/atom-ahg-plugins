@@ -1,6 +1,6 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
 
-<?php slot('title'); ?><?php echo __('Vendor Relationships'); ?><?php end_slot(); ?>
+<?php slot('title'); ?><?php echo __('Service Provider Relationships'); ?><?php end_slot(); ?>
 
 <?php slot('content'); ?>
 
@@ -8,11 +8,11 @@
   ['label' => __('Home'), 'url' => url_for('@homepage')],
   ['label' => __('Registry'), 'url' => url_for(['module' => 'registry', 'action' => 'index'])],
   ['label' => __('My Institution'), 'url' => url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard'])],
-  ['label' => __('Vendor Relationships')],
+  ['label' => __('Service Providers')],
 ]]); ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 mb-0"><?php echo __('Vendor Relationships'); ?></h1>
+  <h1 class="h3 mb-0"><?php echo __('Service Provider Relationships'); ?></h1>
   <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']); ?>" class="btn btn-outline-secondary btn-sm">
     <i class="fas fa-arrow-left me-1"></i> <?php echo __('Back'); ?>
   </a>
@@ -28,6 +28,7 @@
           <th><?php echo __('Relationship Type'); ?></th>
           <th><?php echo __('Service Description'); ?></th>
           <th class="text-center"><?php echo __('Status'); ?></th>
+          <th class="text-end"><?php echo __('Actions'); ?></th>
         </tr>
       </thead>
       <tbody>
@@ -62,6 +63,13 @@
               <span class="badge bg-secondary"><?php echo __('Inactive'); ?></span>
             <?php endif; ?>
           </td>
+          <td class="text-end">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionVendorRemove', 'id' => (int) $rel->relationship_id]); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this service provider relationship? The vendor will not be deleted, only de-linked from your institution.'); ?>');">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove relationship'); ?>">
+                <i class="fas fa-unlink me-1"></i><?php echo __('Remove'); ?>
+              </button>
+            </form>
+          </td>
         </tr>
         <?php endforeach; ?>
       </tbody>
@@ -71,8 +79,8 @@
 <?php else: ?>
 <div class="text-center py-5">
   <i class="fas fa-handshake fa-3x text-muted mb-3"></i>
-  <h5><?php echo __('No vendor relationships'); ?></h5>
-  <p class="text-muted"><?php echo __('Vendor relationships are established by vendors through the registry. Browse vendors to connect.'); ?></p>
+  <h5><?php echo __('No service provider relationships'); ?></h5>
+  <p class="text-muted"><?php echo __('Service provider relationships are established by vendors through the registry. Browse vendors to connect.'); ?></p>
   <a href="<?php echo url_for(['module' => 'registry', 'action' => 'vendorBrowse']); ?>" class="btn btn-primary">
     <i class="fas fa-search me-1"></i> <?php echo __('Browse Vendors'); ?>
   </a>

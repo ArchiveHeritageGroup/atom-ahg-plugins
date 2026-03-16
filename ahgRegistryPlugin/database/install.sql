@@ -1,7 +1,7 @@
 -- =====================================================
 -- ahgRegistryPlugin - Database Schema
 -- AtoM/Heratio Community Hub & Registry
--- 18 tables + seed data
+-- 24 tables + seed data
 -- DO NOT include INSERT INTO atom_plugin
 -- =====================================================
 
@@ -36,10 +36,10 @@ CREATE TABLE IF NOT EXISTS `registry_institution` (
   `accreditation` varchar(255) DEFAULT NULL,
   `collection_summary` text,
   `collection_strengths` json DEFAULT NULL,
-  `total_holdings` varchar(100) DEFAULT NULL,
+  `total_holdings` text,
   `digitization_percentage` int DEFAULT NULL,
   `descriptive_standards` json DEFAULT NULL,
-  `management_system` varchar(100) DEFAULT NULL,
+  `management_system` varchar(500) DEFAULT NULL,
   `uses_atom` tinyint(1) DEFAULT 0,
   `open_to_public` tinyint(1) DEFAULT 1,
   `institution_url` varchar(500) DEFAULT NULL,  -- main website URL (separate from AtoM URL)
@@ -734,4 +734,37 @@ CREATE TABLE IF NOT EXISTS `registry_newsletter_send_log` (
   PRIMARY KEY (`id`),
   KEY `idx_newsletter` (`newsletter_id`),
   KEY `idx_subscriber` (`subscriber_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------
+-- 23. registry_user_institution (multi-institution per user)
+-- ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registry_user_institution` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `institution_id` bigint unsigned NOT NULL,
+  `role` varchar(50) NOT NULL DEFAULT 'manager' COMMENT 'owner, manager, editor, viewer',
+  `is_primary` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_user_inst` (`user_id`, `institution_id`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_inst` (`institution_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------
+-- 24. registry_dropdown (DB-driven dropdown values)
+-- ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registry_dropdown` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `dropdown_group` varchar(100) NOT NULL COMMENT 'e.g., institution_type, hosting_type, relationship_type',
+  `value` varchar(100) NOT NULL,
+  `label` varchar(255) NOT NULL,
+  `badge_color` varchar(30) DEFAULT NULL COMMENT 'Bootstrap color class for badges',
+  `sort_order` int NOT NULL DEFAULT 100,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_group_value` (`dropdown_group`, `value`),
+  KEY `idx_group_active` (`dropdown_group`, `is_active`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

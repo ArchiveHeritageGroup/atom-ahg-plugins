@@ -50,10 +50,10 @@
               <label for="if-type" class="form-label"><?php echo __('Instance Type'); ?></label>
               <select class="form-select" id="if-type" name="instance_type">
                 <?php
-                  $instTypes = ['production' => __('Production'), 'staging' => __('Staging'), 'dev' => __('Development'), 'demo' => __('Demo'), 'offline' => __('Offline / Air-gapped')];
+                  $instTypes = \AhgRegistry\Services\DropdownService::getOptions('instance_type');
                   $selType = $f->instance_type ?? 'production';
                   foreach ($instTypes as $val => $label): ?>
-                    <option value="<?php echo $val; ?>"<?php echo $selType === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
+                    <option value="<?php echo htmlspecialchars($val, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selType === $val ? ' selected' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -96,10 +96,10 @@
               <select class="form-select" id="if-hosting" name="hosting">
                 <option value=""><?php echo __('-- Select --'); ?></option>
                 <?php
-                  $hostTypes = ['self_hosted' => __('Self-Hosted'), 'cloud' => __('Cloud'), 'vendor_hosted' => __('Vendor Hosted'), 'saas' => __('SaaS')];
+                  $hostTypes = \AhgRegistry\Services\DropdownService::getOptions('hosting_type');
                   $selHost = $f->hosting ?? '';
                   foreach ($hostTypes as $val => $label): ?>
-                    <option value="<?php echo $val; ?>"<?php echo $selHost === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
+                    <option value="<?php echo htmlspecialchars($val, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selHost === $val ? ' selected' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
                 <?php endforeach; ?>
               </select>
             </div>
@@ -170,11 +170,18 @@
               <select class="form-select" id="if-standard" name="descriptive_standard">
                 <option value=""><?php echo __('-- Select --'); ?></option>
                 <?php
-                  $stds = ['RAD' => 'RAD', 'ISAD(G)' => 'ISAD(G)', 'DACS' => 'DACS', 'Dublin Core' => 'Dublin Core', 'MODS' => 'MODS', 'Other' => __('Other')];
+                  $descStds = \Illuminate\Database\Capsule\Manager::table('registry_standard')
+                    ->where('is_active', 1)
+                    ->where('category', 'descriptive')
+                    ->orderBy('sort_order')->orderBy('name')
+                    ->get()->all();
                   $selStd = $f->descriptive_standard ?? '';
-                  foreach ($stds as $val => $label): ?>
-                    <option value="<?php echo $val; ?>"<?php echo $selStd === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
+                  foreach ($descStds as $_s):
+                    $sVal = $_s->acronym ?: $_s->name;
+                  ?>
+                    <option value="<?php echo htmlspecialchars($sVal, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selStd === $sVal ? ' selected' : ''; ?>><?php echo htmlspecialchars(($_s->acronym ? $_s->acronym . ' — ' : '') . $_s->name, ENT_QUOTES, 'UTF-8'); ?></option>
                 <?php endforeach; ?>
+                  <option value="Other"<?php echo $selStd === 'Other' ? ' selected' : ''; ?>><?php echo __('Other'); ?></option>
               </select>
             </div>
           </div>

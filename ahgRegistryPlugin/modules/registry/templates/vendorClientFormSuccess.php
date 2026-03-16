@@ -48,12 +48,7 @@
               <label for="vcf-reltype" class="form-label"><?php echo __('Relationship Type'); ?></label>
               <select class="form-select" id="vcf-reltype" name="relationship_type">
                 <?php
-                  $relTypes = [
-                    'developer' => __('Developer'), 'hosting' => __('Hosting'),
-                    'maintenance' => __('Maintenance'), 'consulting' => __('Consulting'),
-                    'digitization' => __('Digitization'), 'training' => __('Training'),
-                    'integration' => __('Integration'),
-                  ];
+                  $relTypes = \AhgRegistry\Services\DropdownService::getOptions('relationship_type');
                   $selRel = $sf_request->getParameter('relationship_type', 'developer');
                   foreach ($relTypes as $val => $label): ?>
                     <option value="<?php echo $val; ?>"<?php echo $selRel === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
