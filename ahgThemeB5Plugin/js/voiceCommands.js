@@ -72,6 +72,19 @@ class AHGVoiceCommands {
     this.indicator = document.getElementById('voice-indicator');
     this.toastContainer = document.getElementById('voice-toast-container');
 
+    // Restore disabled state from session
+    try {
+      if (sessionStorage.getItem('ahg_voice_disabled') === '1') {
+        this._voiceDisabled = true;
+        document.querySelectorAll('.voice-ui').forEach(function(el) { el.style.display = 'none'; });
+        if (this.floatingBtn) {
+          this.floatingBtn.style.display = 'flex';
+          this.floatingBtn.style.opacity = '0.3';
+          this.floatingBtn.title = 'Voice disabled \u2014 right-click to type "enable voice"';
+        }
+      }
+    } catch (e) { /* ignore */ }
+
     // Inject navbar mic button next to the search box
     this._injectNavbarButton();
 
@@ -146,6 +159,10 @@ class AHGVoiceCommands {
    */
   toggle() {
     if (this._toggleDebounce) return;
+    if (this._voiceDisabled) {
+      this.showToast('Voice disabled — right-click and type "enable voice"', 'warning');
+      return;
+    }
     this._toggleDebounce = true;
     var self = this;
     setTimeout(function() { self._toggleDebounce = false; }, 500);
@@ -196,6 +213,46 @@ class AHGVoiceCommands {
     }
     this.isListening = false;
     this._updateUI(false);
+  }
+
+  /**
+   * Disable voice commands — stops listening, hides all voice UI, persists to session.
+   * Can be re-enabled via typed command "enable voice" (right-click) or page reload after enableVoice().
+   */
+  disableVoice() {
+    if (this.isListening) {
+      try { this.recognition.stop(); } catch (e) { /* ignore */ }
+      this.isListening = false;
+    }
+    this.speak('Voice commands disabled. Right-click the mic and type enable voice to re-enable.');
+    var self = this;
+    setTimeout(function() {
+      document.querySelectorAll('.voice-ui').forEach(function(el) { el.style.display = 'none'; });
+      // Keep floating btn visible but dimmed so user can right-click to re-enable
+      if (self.floatingBtn) {
+        self.floatingBtn.style.display = 'flex';
+        self.floatingBtn.style.opacity = '0.3';
+        self.floatingBtn.title = 'Voice disabled — right-click to type "enable voice"';
+      }
+      self._voiceDisabled = true;
+      try { sessionStorage.setItem('ahg_voice_disabled', '1'); } catch (e) { /* ignore */ }
+      self._updateUI(false);
+    }, 2000);
+  }
+
+  /**
+   * Re-enable voice commands — shows UI, restores state.
+   */
+  enableVoice() {
+    this._voiceDisabled = false;
+    try { sessionStorage.removeItem('ahg_voice_disabled'); } catch (e) { /* ignore */ }
+    document.querySelectorAll('.voice-ui').forEach(function(el) { el.style.display = ''; });
+    if (this.floatingBtn) {
+      this.floatingBtn.style.opacity = '';
+      this.floatingBtn.title = 'Voice commands';
+    }
+    this.showToast('Voice commands enabled', 'success');
+    this.speak('Voice commands enabled.');
   }
 
   // ---------------------------------------------------------------

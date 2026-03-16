@@ -15,7 +15,7 @@ AHG Theme - Uses CSS Custom Properties for dynamic theming
   --ahg-background-light: #F3EFD4;
   --ahg-background-white: #FFFFFF;
   --ahg-text-primary: #58585B;
-  --ahg-text-light: #939597;
+  --ahg-text-light: #6c757d;
   --ahg-text-white: #FFFFFF;
   --ahg-border-color: #99c6b3;
   
@@ -507,4 +507,60 @@ video.ahg-native-video::-webkit-media-controls {
 }
 .ahg-media-player video {
     pointer-events: auto !important;
+}
+
+// ====================================
+// ACCESSIBILITY — WCAG 2.1 AA
+// ====================================
+
+// Focus visible indicator (CSS, not JS-injected)
+*:focus-visible {
+  outline: 3px solid #0d6efd !important;
+  outline-offset: 2px;
+}
+
+// Screen reader only utility
+.ahg-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Reduced motion — disable animations/transitions for users who prefer it
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// High contrast / forced colours — ensure borders on interactive elements
+@media (forced-colors: active) {
+  .btn,
+  .button,
+  .card,
+  a,
+  input,
+  select,
+  textarea {
+    border: 1px solid ButtonText;
+  }
+
+  .card-header {
+    border-bottom: 2px solid ButtonText;
+  }
+
+  *:focus-visible {
+    outline: 3px solid Highlight !important;
+  }
 }

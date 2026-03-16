@@ -819,6 +819,22 @@ var AHGVoiceRegistry = (function () {
       description: 'Announce the number of results',
       feedback: null, // action handles its own speech
       contextCheck: function () { return !!document.querySelector('.result-count, .pager, .pagination, .display.browse, #counts-block'); }
+    },
+
+    // -- Enable / Disable Voice ---------------------------------------------
+    {
+      patterns: ['disable voice', 'voice off', 'turn off voice', 'disable voice commands'],
+      action: function () { var v = window.ahgVoice; if (v) v.disableVoice(); },
+      mode: 'global',
+      description: 'Disable voice commands until re-enabled',
+      feedback: null
+    },
+    {
+      patterns: ['enable voice', 'voice on', 'turn on voice', 'enable voice commands'],
+      action: function () { var v = window.ahgVoice; if (v) v.enableVoice(); },
+      mode: 'global',
+      description: 'Re-enable voice commands',
+      feedback: null
     }
   ];
 

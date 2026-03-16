@@ -153,6 +153,7 @@ function getItemUrl($obj) {
 <?php end_slot(); ?>
 
 <?php slot('sidebar'); ?>
+  <nav aria-label="<?php echo __('Filter results'); ?>">
   <div class="card mb-3 glam-filter-header">
     <div class="card-body py-2 text-white text-center">
       <i class="fas fa-filter"></i> <?php echo __('Narrow your results by:'); ?>
@@ -162,7 +163,7 @@ function getItemUrl($obj) {
   <!-- GLAM Type Facet - OPEN by default -->
   <?php if (!empty($types)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetType">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="true" aria-controls="facetType" data-bs-toggle="collapse" data-bs-target="#facetType">
       <strong><?php echo __('GLAM Type'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse show" id="facetType">
@@ -191,7 +192,7 @@ function getItemUrl($obj) {
   <!-- Creator Facet - CLOSED by default -->
   <?php if (!empty($creators)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetCreator">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetCreator" data-bs-toggle="collapse" data-bs-target="#facetCreator">
       <strong><?php echo __('Creator'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetCreator">
@@ -218,7 +219,7 @@ function getItemUrl($obj) {
   <!-- Place Facet - CLOSED by default -->
   <?php if (!empty($places)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetPlace">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetPlace" data-bs-toggle="collapse" data-bs-target="#facetPlace">
       <strong><?php echo __('Place'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetPlace">
@@ -245,7 +246,7 @@ function getItemUrl($obj) {
   <!-- Subject Facet - CLOSED by default -->
   <?php if (!empty($subjects)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetSubject">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetSubject" data-bs-toggle="collapse" data-bs-target="#facetSubject">
       <strong><?php echo __('Subject'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetSubject">
@@ -272,7 +273,7 @@ function getItemUrl($obj) {
   <!-- Genre Facet - CLOSED by default -->
   <?php if (!empty($genres)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetGenre">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetGenre" data-bs-toggle="collapse" data-bs-target="#facetGenre">
       <strong><?php echo __('Genre'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetGenre">
@@ -299,7 +300,7 @@ function getItemUrl($obj) {
   <!-- Level Facet - CLOSED by default -->
   <?php if (!empty($levels)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetLevel">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetLevel" data-bs-toggle="collapse" data-bs-target="#facetLevel">
       <strong><?php echo __('Level of description'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetLevel">
@@ -326,7 +327,7 @@ function getItemUrl($obj) {
   <!-- Media Type Facet - CLOSED by default -->
   <?php if (!empty($mediaTypes)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetMedia">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetMedia" data-bs-toggle="collapse" data-bs-target="#facetMedia">
       <strong><?php echo __('Media type'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetMedia">
@@ -354,7 +355,7 @@ function getItemUrl($obj) {
   <!-- Repository Facet - CLOSED by default -->
   <?php if (!empty($repositories)): ?>
   <div class="card mb-2">
-    <div class="card-header bg-light py-2 cursor-pointer" data-bs-toggle="collapse" data-bs-target="#facetRepo">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetRepo" data-bs-toggle="collapse" data-bs-target="#facetRepo">
       <strong><?php echo __('Repository'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
     </div>
     <div class="collapse" id="facetRepo">
@@ -377,6 +378,7 @@ function getItemUrl($obj) {
     </div>
   </div>
   <?php endif ?>
+  </nav>
 <?php end_slot(); ?>
 
 <?php slot('before-content'); ?>
@@ -509,10 +511,10 @@ function getItemUrl($obj) {
   <div class="d-flex flex-wrap gap-2 mb-3">
     <a href="<?php echo url_for(array_merge(['module' => 'display', 'action' => 'print'], array_filter($fp))) ?>" target="_blank" class="btn btn-success btn-sm"><i class="fas fa-print"></i> <?php echo __('Print'); ?></a>
     <a href="<?php echo url_for(array_merge(['module' => 'display', 'action' => 'exportCsv'], array_filter($fp))) ?>" class="btn btn-success btn-sm"><i class="fas fa-download"></i> <?php echo __('CSV'); ?></a>
-    <a href="<?php echo buildUrl($fp, ['view' => 'card']) ?>" class="btn btn-sm <?php echo $viewMode === 'card' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Card view'); ?>"><i class="fas fa-th-large"></i></a>
-    <a href="<?php echo buildUrl($fp, ['view' => 'grid']) ?>" class="btn btn-sm <?php echo $viewMode === 'grid' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Grid view'); ?>"><i class="fas fa-th"></i></a>
-    <a href="<?php echo buildUrl($fp, ['view' => 'table']) ?>" class="btn btn-sm <?php echo $viewMode === 'table' ? 'btn-success' : 'btn-outline-success' ?>"><i class="fas fa-list"></i></a>
-    <a href="<?php echo buildUrl($fp, ['view' => 'full']) ?>" class="btn btn-sm <?php echo $viewMode === 'full' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Full width'); ?>"><i class="fas fa-bars"></i></a>
+    <a href="<?php echo buildUrl($fp, ['view' => 'card']) ?>" class="btn btn-sm <?php echo $viewMode === 'card' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Card view'); ?>" aria-label="<?php echo __('Card view'); ?>"><i class="fas fa-th-large"></i></a>
+    <a href="<?php echo buildUrl($fp, ['view' => 'grid']) ?>" class="btn btn-sm <?php echo $viewMode === 'grid' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Grid view'); ?>" aria-label="<?php echo __('Grid view'); ?>"><i class="fas fa-th"></i></a>
+    <a href="<?php echo buildUrl($fp, ['view' => 'table']) ?>" class="btn btn-sm <?php echo $viewMode === 'table' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Table view'); ?>" aria-label="<?php echo __('Table view'); ?>"><i class="fas fa-list"></i></a>
+    <a href="<?php echo buildUrl($fp, ['view' => 'full']) ?>" class="btn btn-sm <?php echo $viewMode === 'full' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Full width'); ?>" aria-label="<?php echo __('Full width'); ?>"><i class="fas fa-bars"></i></a>
     
     <div class="dropdown">
       <button class="btn btn-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><?php echo $limit ?>/<?php echo __('page'); ?></button>
@@ -576,9 +578,9 @@ function getItemUrl($obj) {
               <tr>
                 <td class="text-center p-2">
                   <?php if ($obj->thumbnail): ?>
-                    <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded img-thumbnail browse-thumb-lg"></a>
+                    <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>" class="rounded img-thumbnail browse-thumb-lg"></a>
                   <?php else: ?>
-                    <a href="<?php echo getItemUrl($obj) ?>"><div class="bg-light rounded d-flex align-items-center justify-content-center browse-placeholder-lg"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></div></a>
+                    <a href="<?php echo getItemUrl($obj) ?>" aria-label="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>"><div class="bg-light rounded d-flex align-items-center justify-content-center browse-placeholder-lg"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></div></a>
                   <?php endif ?>
                 </td>
                 <td class="align-middle">
@@ -595,8 +597,8 @@ function getItemUrl($obj) {
                 <td class="align-middle"><span class="badge bg-<?php echo $cfg['color'] ?> small"><?php echo ucfirst($obj->object_type ?: '?') ?></span></td>
                 <td class="align-middle">
                   <div class="d-flex flex-column gap-1">
-                    <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a>
-                    <button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
+                    <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm" aria-label="<?php echo __('View'); ?>"><i class="fas fa-eye"></i></a>
+                    <button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard" aria-label="<?php echo __('Add to clipboard'); ?>"><i class="fas fa-paperclip"></i></button>
                   </div>
                 </td>
               </tr>
@@ -608,7 +610,7 @@ function getItemUrl($obj) {
   <?php elseif ($viewMode === 'grid'): ?>
     <!-- GRID VIEW -->
     <?php if (empty($objects)): ?>
-      <div class="text-center text-muted py-5"><i class="fas fa-inbox fa-4x mb-3"></i><h4><?php echo __('No results'); ?></h4></div>
+      <div class="text-center text-muted py-5"><i class="fas fa-inbox fa-4x mb-3"></i><h2 class="h4"><?php echo __('No results'); ?></h2></div>
     <?php else: ?>
       <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
         <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
@@ -616,9 +618,9 @@ function getItemUrl($obj) {
             <div class="card h-100 shadow-sm">
               <div class="card-img-top bg-light d-flex align-items-center justify-content-center grid-img-wrapper">
                 <?php if ($obj->thumbnail): ?>
-                  <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid grid-img"></a>
+                  <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>" class="img-fluid grid-img"></a>
                 <?php else: ?>
-                  <a href="<?php echo getItemUrl($obj) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-3x text-<?php echo $cfg['color'] ?>"></i></a>
+                  <a href="<?php echo getItemUrl($obj) ?>" aria-label="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-3x text-<?php echo $cfg['color'] ?>"></i></a>
                 <?php endif ?>
               </div>
               <div class="card-body p-2">
@@ -632,21 +634,21 @@ function getItemUrl($obj) {
   <?php elseif ($viewMode === 'full'): ?>
     <!-- FULL WIDTH VIEW -->
     <?php if (empty($objects)): ?>
-      <div class="text-center text-muted py-5"><i class="fas fa-inbox fa-4x mb-3"></i><h4><?php echo __('No results'); ?></h4></div>
+      <div class="text-center text-muted py-5"><i class="fas fa-inbox fa-4x mb-3"></i><h2 class="h4"><?php echo __('No results'); ?></h2></div>
     <?php else: ?>
       <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
         <div class="card mb-3 shadow-sm">
           <div class="row g-0">
             <div class="col-12 col-md-6 position-relative overflow-hidden full-img-bg">
               <?php if ($obj->thumbnail): ?>
-                <a href="<?php echo getItemUrl($obj) ?>" class="d-block w-100 h-100"><img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded full-img"></a>
+                <a href="<?php echo getItemUrl($obj) ?>" class="d-block w-100 h-100"><img src="<?php echo $obj->thumbnail ?>" alt="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>" class="rounded full-img"></a>
               <?php else: ?>
-                <a href="<?php echo getItemUrl($obj) ?>" class="d-flex align-items-center justify-content-center w-100 h-100"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></a>
+                <a href="<?php echo getItemUrl($obj) ?>" class="d-flex align-items-center justify-content-center w-100 h-100" aria-label="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-5x text-<?php echo $cfg['color'] ?>"></i></a>
               <?php endif ?>
             </div>
             <div class="col-12 col-md-6">
               <div class="card-body">
-                <h4 class="card-title"><a href="<?php echo getItemUrl($obj) ?>" class="text-success text-decoration-none"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a></h4>
+                <h3 class="h4 card-title"><a href="<?php echo getItemUrl($obj) ?>" class="text-success text-decoration-none"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a></h3>
                 <p class="card-text mb-2"><span class="badge bg-<?php echo $cfg['color'] ?>"><?php echo $cfg['label'] ?></span> <span class="badge bg-light text-dark"><?php echo esc_entities($obj->level_name ?: '-') ?></span></p>
                 <?php if ($obj->identifier): ?><p class="card-text"><strong><?php echo __('Identifier'); ?>:</strong> <?php echo esc_entities($obj->identifier) ?></p><?php endif ?>
                 <?php if ($obj->scope_and_content): ?><p class="card-text text-muted"><?php echo esc_entities(mb_substr($obj->scope_and_content, 0, 500)) ?>...</p><?php endif ?>
@@ -660,23 +662,23 @@ function getItemUrl($obj) {
   <?php else: ?>
     <!-- CARD VIEW (default) -->
     <?php if (empty($objects)): ?>
-      <div class="text-center text-muted py-5"><i class="fas fa-inbox fa-4x mb-3"></i><h4><?php echo __('No results'); ?></h4></div>
+      <div class="text-center text-muted py-5"><i class="fas fa-inbox fa-4x mb-3"></i><h2 class="h4"><?php echo __('No results'); ?></h2></div>
     <?php else: ?>
       <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
         <div class="card mb-2 shadow-sm">
           <div class="row g-0">
             <div class="col-md-2 d-flex align-items-center justify-content-center p-2 bg-light">
               <?php if ($obj->thumbnail): ?>
-                <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid rounded card-img-browse"></a>
+                <a href="<?php echo getItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>" class="img-fluid rounded card-img-browse"></a>
               <?php else: ?>
-                <a href="<?php echo getItemUrl($obj) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-4x text-<?php echo $cfg['color'] ?>"></i></a>
+                <a href="<?php echo getItemUrl($obj) ?>" aria-label="<?php echo esc_entities($obj->title ?: __('Untitled')) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-4x text-<?php echo $cfg['color'] ?>"></i></a>
               <?php endif ?>
             </div>
             <div class="col-md-9">
               <div class="card-body py-2">
-                <h6 class="card-title mb-1">
+                <h3 class="h6 card-title mb-1">
                   <a href="<?php echo getItemUrl($obj) ?>" class="text-success text-decoration-none"><?php echo esc_entities($obj->title ?: '[Untitled]') ?></a>
-                </h6>
+                </h3>
                 <p class="card-text mb-1 small">
                   <span class="text-success"><?php echo esc_entities($obj->identifier ?: '') ?></span>
                   <?php if ($obj->level_name): ?><span class="mx-1">&middot;</span><?php echo esc_entities($obj->level_name) ?><?php endif ?>
@@ -689,7 +691,7 @@ function getItemUrl($obj) {
               </div>
             </div>
             <div class="col-md-1 d-flex flex-column align-items-center justify-content-center border-start gap-1">
-              <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard"><i class="fas fa-paperclip"></i></button>
+              <a href="<?php echo getItemUrl($obj) ?>" class="btn btn-outline-success btn-sm" aria-label="<?php echo __('View'); ?>"><i class="fas fa-eye"></i></a><button class="btn btn-outline-success btn-sm clipboard" data-clipboard-slug="<?php echo $obj->slug; ?>" data-clipboard-type="informationObject" data-tooltip="true" data-title="Add to clipboard" data-alt-title="Remove from clipboard" aria-label="<?php echo __('Add to clipboard'); ?>"><i class="fas fa-paperclip"></i></button>
             </div>
           </div>
           <?php if ($discoveryMode && isset($discoveryMeta[$obj->id])): ?>
@@ -811,7 +813,7 @@ function getItemUrl($obj) {
 
   <!-- Semantic Search Modal -->
   <div class="modal-backdrop fade" id="semanticSearchBackdrop" style="display:none;"></div>
-<div class="modal fade" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true">
+<div class="modal fade" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true" aria-modal="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">

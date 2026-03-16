@@ -55,11 +55,11 @@ try {
 </div>
 
 <?php if ($isAuthenticated): ?>
-<div class="modal fade" id="saveGlamSearchModal" tabindex="-1">
+<div class="modal fade" id="saveGlamSearchModal" tabindex="-1" aria-labelledby="saveGlamSearchModalLabel" aria-modal="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title"><?php echo __('Save This Search'); ?></h5>
+        <h5 class="modal-title" id="saveGlamSearchModalLabel"><?php echo __('Save This Search'); ?></h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
