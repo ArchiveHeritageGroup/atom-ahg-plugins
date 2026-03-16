@@ -284,14 +284,16 @@ document.addEventListener('click', function(e) {
         });
     })
     .then(function(base64) {
-        return fetch('<?php echo $baseUrl; ?>/aiCondition/apiSubmit', {
+        var photoId = btn.dataset.photoId;
+        var objectId = window.AHG_CONDITION ? window.AHG_CONDITION.objectId : null;
+        var params = new URLSearchParams();
+        params.append('photo_id', photoId);
+        params.append('object_id', objectId || '');
+        params.append('material_type', window.AHG_CONDITION ? (window.AHG_CONDITION.materialType || 'unknown') : 'unknown');
+        return fetch('/index.php/condition/ai-assess', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                image_base64: base64,
-                object_id: window.AHG_CONDITION.objectId || null,
-                confidence: 0.25
-            })
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest'},
+            body: params.toString()
         });
     })
     .then(function(r) { return r.json(); })
@@ -306,22 +308,25 @@ document.addEventListener('click', function(e) {
         }
 
         var gradeColors = {excellent:'success',good:'info',fair:'warning',poor:'danger',critical:'dark'};
-        var grade = data.condition_grade || 'unknown';
-        var score = data.overall_score != null ? parseFloat(data.overall_score).toFixed(1) : '--';
+        var grade = data.overall_rating || 'unknown';
+        var severity = data.severity || 'unknown';
 
         var html = '<div class="text-center mb-3">';
         html += '<span class="badge bg-' + (gradeColors[grade]||'secondary') + ' fs-5 me-2">' + grade.charAt(0).toUpperCase() + grade.slice(1) + '</span>';
-        html += '<span class="badge bg-primary fs-5">Score: ' + score + '/100</span>';
+        html += '<span class="badge bg-' + (gradeColors[severity]||'secondary') + ' fs-5">Severity: ' + severity.charAt(0).toUpperCase() + severity.slice(1) + '</span>';
         html += '</div>';
 
-        if (data.overlay_base64) {
-            html += '<div class="text-center mb-3"><img src="data:image/jpeg;base64,' + data.overlay_base64 + '" class="img-fluid rounded border" style="max-height:400px"></div>';
+        if (data.description) {
+            html += '<p class="mb-3">' + data.description + '</p>';
         }
 
-        if (data.damages && data.damages.length) {
-            html += '<h6><?php echo __('Damages Detected'); ?> (' + data.damages.length + ')</h6><ul class="list-group list-group-flush">';
-            data.damages.forEach(function(d) {
-                html += '<li class="list-group-item py-1 d-flex justify-content-between"><span><span class="badge" style="background:' + (d.color||'#6c757d') + '">' + (d.damage_type||'unknown').replace(/_/g,' ') + '</span></span><span class="small text-muted">' + Math.round((d.confidence||0)*100) + '% conf</span></li>';
+        if (data.damage_types && data.damage_types.length) {
+            html += '<h6><?php echo __('Damages Detected'); ?> (' + data.damage_types.length + ')</h6><ul class="list-group list-group-flush mb-3">';
+            data.damage_types.forEach(function(d) {
+                var dtype = (d.type || 'unknown').replace(/_/g, ' ');
+                var sev = d.severity || severity;
+                var sevColor = gradeColors[sev] || 'secondary';
+                html += '<li class="list-group-item py-1 d-flex justify-content-between"><span class="badge bg-' + sevColor + '">' + dtype + '</span><small class="text-muted">' + sev + '</small></li>';
             });
             html += '</ul>';
         } else {
@@ -329,15 +334,14 @@ document.addEventListener('click', function(e) {
         }
 
         if (data.recommendations) {
-            var recs = Array.isArray(data.recommendations) ? data.recommendations.join('<br>') : data.recommendations;
-            html += '<div class="mt-3"><h6><?php echo __('Recommendations'); ?></h6><p class="small text-muted">' + recs + '</p></div>';
+            html += '<div class="mt-2"><h6><?php echo __('Recommendations'); ?></h6><p class="small text-muted">' + data.recommendations + '</p></div>';
         }
 
         resultEl.innerHTML = html;
         document.getElementById('aiScanFooter').style.display = '';
 
-        if (data.assessment_id) {
-            document.getElementById('aiScanViewFull').href = '<?php echo $baseUrl; ?>/ai-condition/view/' + data.assessment_id;
+        if (data.condition_check_id) {
+            document.getElementById('aiScanViewFull').href = '/index.php/condition/check/' + data.condition_check_id + '/view';
         }
     })
     .catch(function(err) {
