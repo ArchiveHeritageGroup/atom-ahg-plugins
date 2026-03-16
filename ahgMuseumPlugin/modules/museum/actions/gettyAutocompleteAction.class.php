@@ -1,11 +1,16 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
+use Illuminate\Database\Capsule\Manager as DB;
+
 /**
  * Getty Vocabulary Autocomplete Action.
  *
  * AJAX endpoint for searching Getty vocabularies (AAT, TGN, ULAN).
- * Returns JSON results for use in form autocomplete fields.
+ * Searches local cache first (getty_aat_cache table) for instant results,
+ * falls back to live Getty SPARQL API if no local matches found.
+ *
+ * Local cache populated via: php symfony museum:aat-sync
  *
  * @package ahgMuseumPlugin
  */
@@ -29,12 +34,29 @@ class museumGettyAutocompleteAction extends AhgController
         }
 
         try {
-            $results = $this->searchGetty($query, $vocabulary, $limit);
+            $results = [];
+            $source = 'getty';
+
+            // Try local cache first (AAT only — TGN/ULAN are not cached)
+            if ($vocabulary === 'aat') {
+                $results = $this->searchLocalCache($query, $category, $limit);
+
+                if (!empty($results)) {
+                    $source = 'local_cache';
+                }
+            }
+
+            // Fall back to Getty SPARQL if no local results
+            if (empty($results)) {
+                $results = $this->searchGetty($query, $vocabulary, $limit);
+                $source = 'getty_api';
+            }
 
             return $this->renderText(json_encode([
                 'success' => true,
                 'query' => $query,
                 'vocabulary' => $vocabulary,
+                'source' => $source,
                 'results' => $results,
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         } catch (\Exception $e) {
@@ -46,7 +68,66 @@ class museumGettyAutocompleteAction extends AhgController
     }
 
     /**
-     * Search Getty vocabulary via SPARQL.
+     * Search local getty_aat_cache table.
+     */
+    private function searchLocalCache(string $term, ?string $category, int $limit): array
+    {
+        // Check table exists
+        try {
+            $tableCheck = DB::select("SHOW TABLES LIKE 'getty_aat_cache'");
+            if (empty($tableCheck)) {
+                return [];
+            }
+        } catch (\Exception $e) {
+            return [];
+        }
+
+        $q = DB::table('getty_aat_cache')
+            ->select('aat_id', 'uri', 'pref_label', 'scope_note', 'broader_label', 'category');
+
+        // Category filter
+        if ($category) {
+            $q->where('category', $category);
+        }
+
+        // Search: try MATCH first for relevance ranking, then LIKE as fallback
+        $termSafe = addcslashes($term, '%_');
+
+        // Use LIKE for consistent results (FULLTEXT requires minimum word length)
+        $q->where(function ($query) use ($termSafe) {
+            $query->where('pref_label', 'LIKE', '%' . $termSafe . '%');
+        });
+
+        // Order: exact match first, starts-with second, then alphabetical
+        $q->orderByRaw("
+            CASE
+                WHEN LOWER(pref_label) = LOWER(?) THEN 0
+                WHEN LOWER(pref_label) LIKE LOWER(CONCAT(?, '%')) THEN 1
+                ELSE 2
+            END,
+            pref_label ASC
+        ", [$term, $term]);
+
+        $rows = $q->limit($limit)->get();
+
+        $results = [];
+        foreach ($rows as $row) {
+            $results[] = [
+                'id' => $row->aat_id,
+                'uri' => $row->uri,
+                'label' => $row->pref_label,
+                'scopeNote' => $row->scope_note,
+                'broader' => $row->broader_label,
+                'vocabulary' => 'aat',
+                'vocabularyLabel' => 'Art & Architecture Thesaurus',
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * Search Getty vocabulary via SPARQL (fallback).
      */
     private function searchGetty(string $term, string $vocabulary, int $limit): array
     {
@@ -56,9 +137,8 @@ class museumGettyAutocompleteAction extends AhgController
             'ulan' => 'Union List of Artist Names',
         ];
 
-        // Escape for SPARQL and regex
+        // Escape for SPARQL
         $termEscaped = addslashes($term);
-        $termRegex = strtolower(preg_quote($term, '/'));
 
         // Build vocabulary-specific SPARQL query
         $sparql = $this->buildSparqlQuery($vocabulary, $termEscaped, $limit * 3);
@@ -132,26 +212,78 @@ class museumGettyAutocompleteAction extends AhgController
         }
 
         // Sort by relevance (exact match first, then starts with, then contains)
-        usort($results, function($a, $b) use ($term) {
+        usort($results, function ($a, $b) use ($term) {
             $aLabel = strtolower($a['label']);
             $bLabel = strtolower($b['label']);
             $termLower = strtolower($term);
-            
+
             // Exact match first
-            if ($aLabel === $termLower && $bLabel !== $termLower) return -1;
-            if ($bLabel === $termLower && $aLabel !== $termLower) return 1;
-            
+            if ($aLabel === $termLower && $bLabel !== $termLower) {
+                return -1;
+            }
+            if ($bLabel === $termLower && $aLabel !== $termLower) {
+                return 1;
+            }
+
             // Starts with second
             $aStarts = strpos($aLabel, $termLower) === 0;
             $bStarts = strpos($bLabel, $termLower) === 0;
-            if ($aStarts && !$bStarts) return -1;
-            if ($bStarts && !$aStarts) return 1;
-            
+            if ($aStarts && !$bStarts) {
+                return -1;
+            }
+            if ($bStarts && !$aStarts) {
+                return 1;
+            }
+
             // Alphabetical
             return strcmp($aLabel, $bLabel);
         });
 
+        // Cache results locally for future searches (write-through)
+        if ($vocabulary === 'aat' && !empty($results)) {
+            $this->cacheResults($results);
+        }
+
         return array_slice($results, 0, $limit);
+    }
+
+    /**
+     * Cache Getty API results in the local table for future searches.
+     */
+    private function cacheResults(array $results): void
+    {
+        try {
+            $tableCheck = DB::select("SHOW TABLES LIKE 'getty_aat_cache'");
+            if (empty($tableCheck)) {
+                return;
+            }
+
+            foreach ($results as $result) {
+                $aatId = $result['id'] ?? '';
+                if (empty($aatId) || !is_numeric($aatId)) {
+                    continue;
+                }
+
+                $exists = DB::table('getty_aat_cache')->where('aat_id', $aatId)->exists();
+                if ($exists) {
+                    continue;
+                }
+
+                DB::table('getty_aat_cache')->insert([
+                    'aat_id' => $aatId,
+                    'uri' => $result['uri'] ?? 'http://vocab.getty.edu/aat/' . $aatId,
+                    'pref_label' => $result['label'] ?? '',
+                    'scope_note' => $result['scopeNote'] ?? null,
+                    'broader_label' => $result['broader'] ?? null,
+                    'broader_id' => null,
+                    'category' => 'general',
+                    'synced_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Silent fail — caching is best-effort
+            error_log('Getty cache write error: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -173,9 +305,9 @@ SELECT DISTINCT ?subject ?label ?scopeNote ?parentLabel WHERE {
            gvp:prefLabelGVP/xl:literalForm ?label .
   FILTER(CONTAINS(LCASE(?label), LCASE("{$term}")))
   OPTIONAL { ?subject skos:scopeNote/rdf:value ?scopeNote }
-  OPTIONAL { 
+  OPTIONAL {
     ?subject gvp:broaderPreferred ?parent .
-    ?parent gvp:prefLabelGVP/xl:literalForm ?parentLabel 
+    ?parent gvp:prefLabelGVP/xl:literalForm ?parentLabel
   }
   FILTER(lang(?label) = "en" || lang(?label) = "")
 }
@@ -217,9 +349,9 @@ SELECT DISTINCT ?subject ?prefLabel ?scopeNote ?broaderLabel WHERE {
            gvp:prefLabelGVP/xl:literalForm ?prefLabel .
   FILTER(CONTAINS(LCASE(?prefLabel), LCASE("{$term}")))
   OPTIONAL { ?subject skos:scopeNote/rdf:value ?scopeNote }
-  OPTIONAL { 
+  OPTIONAL {
     ?subject gvp:broaderPreferred ?broader .
-    ?broader gvp:prefLabelGVP/xl:literalForm ?broaderLabel 
+    ?broader gvp:prefLabelGVP/xl:literalForm ?broaderLabel
   }
   FILTER(lang(?prefLabel) = "en" || lang(?prefLabel) = "")
 }
