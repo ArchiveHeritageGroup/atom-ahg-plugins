@@ -97,6 +97,62 @@ foreach ($backups as $backup) {
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#fullBackupModal">
                         <i class="fas fa-archive me-1"></i><?php echo __('Full Backup') ?>
                     </button>
+                    <button type="button" class="btn btn-outline-info btn-sm" id="btn-incremental-backup">
+                        <i class="fas fa-layer-group me-1"></i><?php echo __('Incremental Backup') ?>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scheduled Backups -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-clock me-2"></i><?php echo __('Schedules') ?></h5>
+                <button type="button" class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#createScheduleModal">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <?php if (empty($schedules)): ?>
+                    <p class="text-muted text-center py-3 mb-0"><?php echo __('No schedules configured') ?></p>
+                <?php else: ?>
+                    <ul class="list-group list-group-flush">
+                        <?php foreach ($schedules as $sched): ?>
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-2">
+                                <div>
+                                    <strong><?php echo esc_entities($sched->name) ?></strong>
+                                    <br><small class="text-muted">
+                                        <?php echo ucfirst($sched->frequency) ?>
+                                        <?php if ($sched->frequency === 'weekly' && $sched->day_of_week !== null): ?>
+                                            — <?php echo ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][(int)$sched->day_of_week] ?>
+                                        <?php elseif ($sched->frequency === 'monthly' && $sched->day_of_month !== null): ?>
+                                            — Day <?php echo (int)$sched->day_of_month ?>
+                                        <?php endif; ?>
+                                        @ <?php echo substr($sched->time ?? '02:00', 0, 5) ?>
+                                        · <?php echo (int)$sched->retention_days ?>d retention
+                                    </small>
+                                    <?php if ($sched->last_run): ?>
+                                        <br><small class="text-muted">Last: <?php echo $sched->last_run ?></small>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="btn-group btn-group-sm">
+                                    <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'toggleSchedule']) ?>" class="d-inline">
+                                        <input type="hidden" name="id" value="<?php echo $sched->id ?>">
+                                        <button type="submit" class="btn btn-sm <?php echo $sched->is_active ? 'btn-success' : 'btn-outline-secondary' ?>" title="<?php echo $sched->is_active ? __('Active — click to pause') : __('Paused — click to activate') ?>">
+                                            <i class="fas <?php echo $sched->is_active ? 'fa-check' : 'fa-pause' ?>"></i>
+                                        </button>
+                                    </form>
+                                    <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'deleteSchedule']) ?>" class="d-inline" onsubmit="return confirm('Delete this schedule?')">
+                                        <input type="hidden" name="id" value="<?php echo $sched->id ?>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+                <div class="card-footer small text-muted">
+                    <i class="fas fa-info-circle me-1"></i>Cron: <code>0 * * * * cd <?php echo sfConfig::get('sf_root_dir') ?> && php symfony backup:run-scheduled</code>
                 </div>
             </div>
         </div>
@@ -491,5 +547,116 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.disabled = false;
         });
     }
+
+    // Incremental backup
+    var incrBtn = document.getElementById('btn-incremental-backup');
+    if (incrBtn) {
+        incrBtn.addEventListener('click', function() {
+            if (!confirm('Create an incremental backup? This includes only changes since the last full backup.')) return;
+            var btn = this;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Creating...';
+            btn.disabled = true;
+
+            fetch('<?php echo url_for(['module' => 'backup', 'action' => 'createIncremental']) ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                body: 'database=1&uploads=1&plugins=1&framework=1'
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.error) { alert('Error: ' + data.error); }
+                else { location.reload(); }
+            })
+            .catch(function(e) { alert('Error: ' + e.message); })
+            .finally(function() { btn.innerHTML = '<i class="fas fa-layer-group me-1"></i>Incremental Backup'; btn.disabled = false; });
+        });
+    }
+});
+</script>
+
+<!-- Create Schedule Modal -->
+<div class="modal fade" id="createScheduleModal" tabindex="-1" aria-labelledby="createScheduleModalLabel" aria-modal="true">
+    <div class="modal-dialog">
+        <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'createSchedule']) ?>">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createScheduleModalLabel"><i class="fas fa-clock me-2"></i><?php echo __('Create Backup Schedule') ?></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="sched-name"><?php echo __('Name') ?></label>
+                        <input type="text" class="form-control" id="sched-name" name="name" value="Daily Database Backup" required>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label" for="sched-frequency"><?php echo __('Frequency') ?></label>
+                            <select class="form-select" id="sched-frequency" name="frequency">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="hourly">Hourly</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="sched-time"><?php echo __('Time') ?></label>
+                            <input type="time" class="form-control" id="sched-time" name="time" value="02:00">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6" id="sched-dow-group" style="display:none">
+                            <label class="form-label" for="sched-dow"><?php echo __('Day of Week') ?></label>
+                            <select class="form-select" id="sched-dow" name="day_of_week">
+                                <option value="0">Sunday</option>
+                                <option value="1">Monday</option>
+                                <option value="2">Tuesday</option>
+                                <option value="3">Wednesday</option>
+                                <option value="4">Thursday</option>
+                                <option value="5">Friday</option>
+                                <option value="6">Saturday</option>
+                            </select>
+                        </div>
+                        <div class="col-6" id="sched-dom-group" style="display:none">
+                            <label class="form-label" for="sched-dom"><?php echo __('Day of Month') ?></label>
+                            <input type="number" class="form-control" id="sched-dom" name="day_of_month" min="1" max="28" value="1">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="sched-retention"><?php echo __('Retention (days)') ?></label>
+                            <input type="number" class="form-control" id="sched-retention" name="retention_days" min="1" max="365" value="30">
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="text-muted small mb-2"><?php echo __('Components to include:') ?></p>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="include_database" id="sched-db" value="1" checked>
+                        <label class="form-check-label" for="sched-db"><i class="fas fa-database text-success"></i> DB</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="include_uploads" id="sched-uploads" value="1">
+                        <label class="form-check-label" for="sched-uploads"><i class="fas fa-images text-warning"></i> Uploads</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="include_plugins" id="sched-plugins" value="1" checked>
+                        <label class="form-check-label" for="sched-plugins"><i class="fas fa-puzzle-piece text-info"></i> Plugins</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="include_framework" id="sched-fw" value="1" checked>
+                        <label class="form-check-label" for="sched-fw"><i class="fas fa-code text-secondary"></i> Framework</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel') ?></button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i><?php echo __('Create Schedule') ?></button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Show/hide day selectors based on frequency
+document.getElementById('sched-frequency').addEventListener('change', function() {
+    document.getElementById('sched-dow-group').style.display = this.value === 'weekly' ? '' : 'none';
+    document.getElementById('sched-dom-group').style.display = this.value === 'monthly' ? '' : 'none';
 });
 </script>
