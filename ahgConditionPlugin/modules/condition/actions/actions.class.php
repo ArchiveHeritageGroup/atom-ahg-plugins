@@ -17,7 +17,7 @@ class conditionActions extends AhgController
     public function boot(): void
     {
         // For AJAX actions, start output buffering to prevent any stray output
-        $ajaxActions = ['upload', 'deletePhoto', 'getAnnotation', 'saveAnnotation', 'listPhotos', 'updatePhotoMeta'];
+        $ajaxActions = ['upload', 'deletePhoto', 'getAnnotation', 'saveAnnotation', 'listPhotos', 'updatePhotoMeta', 'aiAssess'];
         $action = $this->getActionName();
         if (in_array($action, $ajaxActions)) {
             ob_start();
@@ -520,6 +520,43 @@ class conditionActions extends AhgController
             $this->byCondition = collect();
             $this->totalPhotos = 0;
             $this->totalAnnotations = 0;
+        }
+    }
+
+    /**
+     * AI Condition Assessment — analyze a photo via LLaVA and save results.
+     * POST /condition/ai-assess (AJAX)
+     * Params: photo_id, object_id, material_type (optional)
+     */
+    public function executeAiAssess($request)
+    {
+        if (!$request->isMethod('post')) {
+            return $this->renderJson(['success' => false, 'error' => 'POST required']);
+        }
+
+        $user = $this->getContext()->getUser();
+        if (!$user->isAuthenticated()) {
+            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        }
+
+        $photoId = (int) $request->getParameter('photo_id');
+        $objectId = (int) $request->getParameter('object_id');
+        $materialType = $request->getParameter('material_type', 'unknown');
+
+        if (!$photoId || !$objectId) {
+            return $this->renderJson(['success' => false, 'error' => 'photo_id and object_id required']);
+        }
+
+        $userId = (int) $user->getAttribute('user_id');
+
+        try {
+            require_once dirname(__FILE__) . '/../../../lib/Service/ConditionAIService.php';
+            $aiService = new \AhgCondition\Service\ConditionAIService();
+            $result = $aiService->analyzeAndSave($objectId, $photoId, $materialType, $userId);
+
+            return $this->renderJson($result);
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
         }
     }
 }

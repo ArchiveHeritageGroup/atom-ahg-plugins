@@ -42,6 +42,9 @@ class ahgConditionPluginConfiguration extends sfPluginConfiguration
         $router->any('condition_report_export', '/condition/check/:id/export', 'exportReport', ['id' => '\d+']);
         $router->any('condition_list_photos', '/condition/check/:id/list', 'listPhotos', ['id' => '\d+|new']);
 
+        // AI condition assessment (AJAX)
+        $router->any('condition_ai_assess', '/condition/ai-assess', 'aiAssess');
+
         // Admin dashboard
         $router->any('condition_admin', '/admin/condition', 'admin');
 
