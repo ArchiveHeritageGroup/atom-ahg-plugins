@@ -1,0 +1,106 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: PHP Syntax Check
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: none
+
+      - name: Check PHP syntax
+        run: |
+          errors=0
+          while IFS= read -r file; do
+            if ! php -l "$file" > /dev/null 2>&1; then
+              php -l "$file"
+              errors=$((errors + 1))
+            fi
+          done < <(find . -name '*.php' -not -path './vendor/*')
+          if [ "$errors" -gt 0 ]; then
+            echo "Found $errors file(s) with syntax errors."
+            exit 1
+          fi
+          echo "All PHP files passed syntax check."
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+
+      - name: Composer audit
+        run: |
+          if [ -f composer.json ]; then
+            composer audit --no-interaction
+          else
+            echo "No composer.json found, skipping composer audit."
+          fi
+
+      - name: Scan for hardcoded secrets
+        run: |
+          echo "Scanning for potential hardcoded secrets..."
+          PATTERNS=(
+            'password\s*=\s*["\x27][^"\x27]+'
+            'api[_-]?key\s*=\s*["\x27][^"\x27]+'
+            'api[_-]?secret\s*=\s*["\x27][^"\x27]+'
+            'access[_-]?token\s*=\s*["\x27][^"\x27]+'
+            'secret[_-]?key\s*=\s*["\x27][^"\x27]+'
+            'private[_-]?key\s*=\s*["\x27][^"\x27]+'
+            'auth[_-]?token\s*=\s*["\x27][^"\x27]+'
+            'client[_-]?secret\s*=\s*["\x27][^"\x27]+'
+            'AKIA[0-9A-Z]{16}'
+          )
+          found=0
+          for pattern in "${PATTERNS[@]}"; do
+            if grep -rniE "$pattern" --include='*.php' --include='*.json' --include='*.xml' --include='*.env' --include='*.ini' --include='*.conf' . 2>/dev/null | grep -v 'vendor/' | grep -v '.md' | grep -v '.yml'; then
+              found=1
+            fi
+          done
+          if [ "$found" -eq 1 ]; then
+            echo "WARNING: Potential secrets detected. Please review the matches above."
+            exit 1
+          fi
+          echo "No hardcoded secrets detected."
+
+  phpstan:
+    name: PHPStan Analysis
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: phpstan
+
+      - name: Run PHPStan at level 0
+        run: |
+          LIB_DIRS=$(find . -type d -name 'lib' -not -path './vendor/*' | tr '\n' ' ')
+          if [ -z "$LIB_DIRS" ]; then
+            echo "No lib/ directories found, skipping PHPStan."
+            exit 0
+          fi
+          echo "Analyzing directories: $LIB_DIRS"
+          phpstan analyse --level=0 --no-progress $LIB_DIRS
