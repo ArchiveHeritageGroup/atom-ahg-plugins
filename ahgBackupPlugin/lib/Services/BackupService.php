@@ -314,7 +314,222 @@ class BackupService
         
         return $result;
     }
-    
+
+    /**
+     * Create an incremental backup — only files changed since the last full backup.
+     * Database is always full (mysqldump). File components use tar --newer.
+     */
+    public function createIncrementalBackup(array $options = []): array
+    {
+        // Find the last completed full backup
+        $lastFull = DB::table('backup_history')
+            ->where('status', 'completed')
+            ->where('backup_type', '!=', 'incremental')
+            ->orderBy('completed_at', 'desc')
+            ->first();
+
+        if (!$lastFull) {
+            // No full backup exists — create a full one instead
+            $this->log('No full backup found — falling back to full backup');
+            return $this->createBackup(array_merge($options, ['preset' => 'full']));
+        }
+
+        $sinceDate = $lastFull->completed_at ?? $lastFull->created_at;
+        $this->log("Creating incremental backup (changes since {$sinceDate})");
+
+        $backupPath = $this->settings->get('backup_path', '/var/backups/atom');
+        $backupId = date('Y-m-d_H-i-s') . '_incr_' . substr(md5(uniqid()), 0, 8);
+        $backupDir = $backupPath . '/' . $backupId;
+        mkdir($backupDir, 0755, true);
+
+        $result = [
+            'id' => $backupId,
+            'path' => $backupDir,
+            'preset' => 'incremental',
+            'reference_backup' => $lastFull->backup_id,
+            'since' => $sinceDate,
+            'started_at' => date('Y-m-d H:i:s'),
+            'components' => [],
+            'status' => 'in_progress',
+        ];
+
+        try {
+            DB::table('backup_history')->insert([
+                'backup_id' => $backupId,
+                'backup_path' => $backupDir,
+                'backup_type' => 'incremental',
+                'status' => 'in_progress',
+                'started_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            // Continue
+        }
+
+        try {
+            // Database is always full
+            if ($options['database'] ?? true) {
+                $result['components']['database'] = $this->backupDatabase($backupDir);
+            }
+
+            // Uploads — only changed files
+            if ($options['uploads'] ?? true) {
+                $result['components']['uploads'] = $this->backupUploadsIncremental($backupDir, $sinceDate);
+            }
+
+            // Plugins — only changed files
+            if ($options['plugins'] ?? true) {
+                $result['components']['plugins'] = $this->backupPluginsIncremental($backupDir, $sinceDate);
+            }
+
+            // Framework — only changed files
+            if ($options['framework'] ?? true) {
+                $result['components']['framework'] = $this->backupFrameworkIncremental($backupDir, $sinceDate);
+            }
+
+            $zipFile = $this->createZipArchive($backupDir, $backupId, ['preset' => 'incremental']);
+            if ($zipFile) {
+                $result['zip_file'] = $zipFile;
+                $result['zip_size'] = filesize($zipFile);
+            }
+
+            $result['status'] = 'completed';
+            $result['completed_at'] = date('Y-m-d H:i:s');
+            $result['size'] = $this->getDirectorySize($backupDir);
+
+            file_put_contents($backupDir . '/manifest.json', json_encode($result, JSON_PRETTY_PRINT));
+            $this->log("Incremental backup completed: {$backupId}");
+
+            try {
+                DB::table('backup_history')->where('backup_id', $backupId)->update([
+                    'status' => 'completed',
+                    'size_bytes' => $result['size'],
+                    'zip_path' => $zipFile ?? null,
+                    'components' => json_encode($result['components']),
+                    'completed_at' => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\Exception $e) {
+                // Continue
+            }
+
+            $this->cleanupOldBackups();
+        } catch (\Exception $e) {
+            $result['status'] = 'failed';
+            $result['error'] = $e->getMessage();
+            $this->log("Incremental backup failed: " . $e->getMessage());
+
+            try {
+                DB::table('backup_history')->where('backup_id', $backupId)->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage(),
+                    'completed_at' => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\Exception $e2) {
+                // Continue
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Incremental uploads backup — only files modified since $sinceDate.
+     */
+    private function backupUploadsIncremental(string $backupDir, string $sinceDate): array
+    {
+        $atomRoot = $this->settings->getAtomRoot();
+        $uploadsDir = $atomRoot . '/uploads';
+
+        if (!is_dir($uploadsDir)) {
+            return ['status' => 'skipped', 'reason' => 'uploads directory not found'];
+        }
+
+        $tarFile = $backupDir . '/uploads_incremental.tar.gz';
+
+        $cmd = sprintf(
+            "tar -czf '%s' -C '%s' --newer='%s' . --exclude='backups' --warning=no-file-changed 2>/dev/null || true",
+            $tarFile,
+            $uploadsDir,
+            $sinceDate
+        );
+        exec($cmd, $output, $returnCode);
+
+        $size = file_exists($tarFile) ? filesize($tarFile) : 0;
+
+        return [
+            'status' => $size > 0 ? 'success' : 'empty',
+            'type' => 'incremental',
+            'since' => $sinceDate,
+            'file' => $tarFile,
+            'size' => $size,
+        ];
+    }
+
+    /**
+     * Incremental plugins backup — only files modified since $sinceDate.
+     */
+    private function backupPluginsIncremental(string $backupDir, string $sinceDate): array
+    {
+        $atomRoot = BackupSettingsService::getAtomRoot();
+        $ahgPluginsDir = $atomRoot . '/atom-ahg-plugins';
+
+        if (!is_dir($ahgPluginsDir)) {
+            return ['status' => 'skipped', 'reason' => 'atom-ahg-plugins not found'];
+        }
+
+        $tarFile = $backupDir . '/plugins_incremental.tar.gz';
+
+        $cmd = sprintf(
+            "tar -czf '%s' -C '%s' --newer='%s' . --exclude='.git' --exclude='vendor' --warning=no-file-changed 2>/dev/null || true",
+            $tarFile,
+            $ahgPluginsDir,
+            $sinceDate
+        );
+        exec($cmd, $output, $returnCode);
+
+        $size = file_exists($tarFile) ? filesize($tarFile) : 0;
+
+        return [
+            'status' => $size > 0 ? 'success' : 'empty',
+            'type' => 'incremental',
+            'since' => $sinceDate,
+            'file' => $tarFile,
+            'size' => $size,
+        ];
+    }
+
+    /**
+     * Incremental framework backup — only files modified since $sinceDate.
+     */
+    private function backupFrameworkIncremental(string $backupDir, string $sinceDate): array
+    {
+        $atomRoot = BackupSettingsService::getAtomRoot();
+        $frameworkDir = $atomRoot . '/atom-framework';
+
+        if (!is_dir($frameworkDir)) {
+            return ['status' => 'skipped', 'reason' => 'atom-framework not found'];
+        }
+
+        $tarFile = $backupDir . '/framework_incremental.tar.gz';
+
+        $cmd = sprintf(
+            "tar -czf '%s' -C '%s' --newer='%s' . --exclude='.git' --exclude='vendor' --warning=no-file-changed 2>/dev/null || true",
+            $tarFile,
+            $frameworkDir,
+            $sinceDate
+        );
+        exec($cmd, $output, $returnCode);
+
+        $size = file_exists($tarFile) ? filesize($tarFile) : 0;
+
+        return [
+            'status' => $size > 0 ? 'success' : 'empty',
+            'type' => 'incremental',
+            'since' => $sinceDate,
+            'file' => $tarFile,
+            'size' => $size,
+        ];
+    }
+
     /**
      * Create ZIP archive of backup
      */

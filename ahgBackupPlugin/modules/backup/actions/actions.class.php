@@ -107,6 +107,129 @@ if (!$this->getUser()->isAdministrator()) {
     }
 
     // ==========================================
+    // INCREMENTAL BACKUP
+    // ==========================================
+
+    public function executeCreateIncremental($request)
+    {
+        if (!$request->isXmlHttpRequest() && !$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        try {
+            $service = new \AhgBackup\Services\BackupService();
+            $result = $service->createIncrementalBackup([
+                'database' => (bool) $request->getParameter('database', true),
+                'uploads' => (bool) $request->getParameter('uploads', true),
+                'plugins' => (bool) $request->getParameter('plugins', true),
+                'framework' => (bool) $request->getParameter('framework', true),
+            ]);
+            return $this->renderJson($result);
+        } catch (\Exception $e) {
+            return $this->renderJson(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    // ==========================================
+    // SCHEDULE MANAGEMENT
+    // ==========================================
+
+    public function executeSchedules($request)
+    {
+        $scheduleService = new \AtomExtensions\Services\ScheduleService();
+        $this->schedules = $scheduleService->getSchedules();
+    }
+
+    public function executeCreateSchedule($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $scheduleService = new \AtomExtensions\Services\ScheduleService();
+
+        try {
+            $id = $scheduleService->createSchedule([
+                'name' => $request->getParameter('name', 'Scheduled Backup'),
+                'frequency' => $request->getParameter('frequency', 'daily'),
+                'time' => $request->getParameter('time', '02:00:00'),
+                'day_of_week' => $request->getParameter('day_of_week'),
+                'day_of_month' => $request->getParameter('day_of_month'),
+                'include_database' => (bool) $request->getParameter('include_database', true),
+                'include_uploads' => (bool) $request->getParameter('include_uploads', true),
+                'include_plugins' => (bool) $request->getParameter('include_plugins', true),
+                'include_framework' => (bool) $request->getParameter('include_framework', true),
+                'retention_days' => (int) $request->getParameter('retention_days', 30),
+            ]);
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->renderJson(['success' => true, 'id' => $id]);
+            }
+
+            $this->getUser()->setFlash('notice', 'Schedule created successfully');
+            $this->redirect(['module' => 'backup', 'action' => 'index']);
+        } catch (\Exception $e) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->renderJson(['success' => false, 'error' => $e->getMessage()], 500);
+            }
+            $this->getUser()->setFlash('error', 'Failed to create schedule: ' . $e->getMessage());
+            $this->redirect(['module' => 'backup', 'action' => 'index']);
+        }
+    }
+
+    public function executeToggleSchedule($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $id = (int) $request->getParameter('id');
+        $scheduleService = new \AtomExtensions\Services\ScheduleService();
+
+        try {
+            $scheduleService->toggleSchedule($id);
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->renderJson(['success' => true]);
+            }
+
+            $this->getUser()->setFlash('notice', 'Schedule updated');
+            $this->redirect(['module' => 'backup', 'action' => 'index']);
+        } catch (\Exception $e) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->renderJson(['success' => false, 'error' => $e->getMessage()], 500);
+            }
+            $this->redirect(['module' => 'backup', 'action' => 'index']);
+        }
+    }
+
+    public function executeDeleteSchedule($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $id = (int) $request->getParameter('id');
+        $scheduleService = new \AtomExtensions\Services\ScheduleService();
+
+        try {
+            $scheduleService->deleteSchedule($id);
+
+            if ($request->isXmlHttpRequest()) {
+                return $this->renderJson(['success' => true]);
+            }
+
+            $this->getUser()->setFlash('notice', 'Schedule deleted');
+            $this->redirect(['module' => 'backup', 'action' => 'index']);
+        } catch (\Exception $e) {
+            if ($request->isXmlHttpRequest()) {
+                return $this->renderJson(['success' => false, 'error' => $e->getMessage()], 500);
+            }
+            $this->redirect(['module' => 'backup', 'action' => 'index']);
+        }
+    }
+
+    // ==========================================
     // UPLOAD FUNCTIONALITY
     // ==========================================
 
