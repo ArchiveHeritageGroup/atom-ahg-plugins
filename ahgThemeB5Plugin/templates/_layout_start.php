@@ -45,4 +45,5 @@
   <body class="d-flex flex-column min-vh-100 <?php echo $sf_context->getModuleName(); ?> <?php echo $sf_context->getActionName(); ?><?php echo sfConfig::get('app_show_tooltips') ? ' show-edit-tooltips' : ''; ?>">
     <?php echo get_component('default', 'tagManager', ['code' => 'noscript']); ?>
     <?php echo get_partial('header'); ?>
+    <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_accessibilityHelpers.php'); ?>
     <?php include_slot('pre'); ?>
