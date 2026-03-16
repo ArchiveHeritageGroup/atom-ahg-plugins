@@ -1780,6 +1780,23 @@ class AHGVoiceCommands {
       if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
 
       if (data.success) {
+        // ── PDF handling ──
+        if (data.type === 'pdf_transcript') {
+          self.speak(data.message);
+          self.showToast('PDF with text (' + data.text_length + ' chars) — say "read PDF"', 'info');
+          // Store transcript for "read PDF" command
+          self._pendingPdfText = data.full_text || data.description;
+          self._pendingPdfSpeech = data.description;
+          self._pendingInfoObjectId = data.information_object_id || null;
+          return;
+        }
+        if (data.type === 'pdf_no_ocr') {
+          self.speak(data.message);
+          self.showToast('PDF not OCR\'d — text not readable', 'warning');
+          return;
+        }
+
+        // ── Normal image description ──
         var source = data.source || 'AI';
         self.speak(data.description);
         self.showToast('Description generated (' + source + ')', 'success');
@@ -1813,6 +1830,29 @@ class AHGVoiceCommands {
       self.speak(errMsg);
       self.showToast(errMsg, 'danger');
     });
+  }
+
+  /**
+   * Read PDF transcript text aloud (after "describe image" detected a PDF with OCR text).
+   */
+  readPdf() {
+    if (!this._pendingPdfSpeech) {
+      this.speak('No PDF text available. Try saying describe image on a page with a PDF document.');
+      this.showToast('No PDF text available', 'warning');
+      return;
+    }
+
+    this.speak(this._pendingPdfSpeech);
+    this.showToast('Reading PDF text...', 'info');
+
+    // Offer save after reading
+    var self = this;
+    setTimeout(function () {
+      if (self._pendingPdfText) {
+        self._pendingDescription = self._pendingPdfText;
+        self._promptSaveDescription();
+      }
+    }, Math.max(2000, this._pendingPdfSpeech.length * 50));
   }
 
   /**

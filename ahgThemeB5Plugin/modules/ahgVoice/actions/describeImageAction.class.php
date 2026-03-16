@@ -106,6 +106,16 @@ class ahgVoiceDescribeImageAction extends sfAction
             $informationObject = DB::table('information_object')->where('id', $objectId)->first();
         }
 
+        // ── PDF detection: check for transcript/OCR before sending to LLM ──
+        $mimeType = $digitalObject->mime_type ?? '';
+        if (stripos($mimeType, 'pdf') !== false || stripos($digitalObject->name ?? '', '.pdf') !== false) {
+            $pdfResult = $this->handlePdf($digitalObject, $objectId);
+            if ($pdfResult !== null) {
+                return $this->renderJson($pdfResult);
+            }
+            // If handlePdf returns null, fall through to visual description (user said "describe image" on a PDF with no text)
+        }
+
         // Resolve image file — prefer reference/thumbnail derivative (already JPEG)
         // over converting a potentially large master TIFF
         $useObject = $this->findBestDerivative($digitalObject) ?? $digitalObject;
@@ -138,6 +148,95 @@ class ahgVoiceDescribeImageAction extends sfAction
         $result['information_object_id'] = $objectId;
 
         return $this->renderJson($result);
+    }
+
+    /**
+     * Handle PDF digital objects — check for existing transcript/OCR text.
+     * Returns response array if PDF handled, or null to fall through to visual description.
+     */
+    protected function handlePdf($digitalObject, $objectId)
+    {
+        $doId = $digitalObject->id;
+        $transcript = null;
+        $source = null;
+
+        // Strategy 1: Base AtoM transcript (property table — populated by digitalobject:extract-text / pdftotext)
+        try {
+            $prop = DB::table('property')
+                ->join('property_i18n', 'property.id', '=', 'property_i18n.id')
+                ->where('property.object_id', $doId)
+                ->where('property.name', 'transcript')
+                ->whereRaw('LENGTH(property_i18n.value) > 10')
+                ->first();
+            if ($prop && !empty($prop->value)) {
+                $transcript = $prop->value;
+                $source = 'transcript';
+            }
+        } catch (\Exception $e) {
+            // property_i18n may not have expected join — try object_id instead
+        }
+
+        // Strategy 2: IIIF OCR text (iiif_ocr_text table — populated by Tesseract OCR)
+        if (!$transcript) {
+            try {
+                $ocr = DB::table('iiif_ocr_text')
+                    ->where('digital_object_id', $doId)
+                    ->whereRaw('LENGTH(full_text) > 10')
+                    ->first();
+                if ($ocr && !empty($ocr->full_text)) {
+                    $transcript = $ocr->full_text;
+                    $source = 'ocr';
+                }
+            } catch (\Exception $e) {
+                // Table may not exist
+            }
+        }
+
+        // Strategy 3: Try via information object ID (transcript may be linked to IO, not DO)
+        if (!$transcript && $objectId) {
+            try {
+                $prop = DB::table('property')
+                    ->join('property_i18n', 'property.id', '=', 'property_i18n.id')
+                    ->where('property.object_id', $objectId)
+                    ->where('property.name', 'transcript')
+                    ->whereRaw('LENGTH(property_i18n.value) > 10')
+                    ->first();
+                if ($prop && !empty($prop->value)) {
+                    $transcript = $prop->value;
+                    $source = 'transcript';
+                }
+            } catch (\Exception $e) {
+                // Silent
+            }
+        }
+
+        if ($transcript) {
+            // PDF with readable text — offer to read it
+            // Truncate very long text for speech (keep full for display)
+            $speechText = mb_strlen($transcript) > 2000
+                ? mb_substr($transcript, 0, 2000) . '... Document continues.'
+                : $transcript;
+
+            return [
+                'success'     => true,
+                'type'        => 'pdf_transcript',
+                'description' => $speechText,
+                'full_text'   => $transcript,
+                'text_length' => mb_strlen($transcript),
+                'source'      => $source,
+                'information_object_id' => $objectId,
+                'message'     => 'This is a PDF document with readable text. Say "read PDF" to hear the content.',
+            ];
+        }
+
+        // PDF without OCR/transcript
+        return [
+            'success'     => true,
+            'type'        => 'pdf_no_ocr',
+            'description' => null,
+            'information_object_id' => $objectId,
+            'message'     => 'This is a PDF document that has not been OCR\'d. The text content is not readable. An administrator can run OCR to extract the text.',
+        ];
     }
 
     /**

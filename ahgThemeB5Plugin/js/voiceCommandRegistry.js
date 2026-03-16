@@ -821,6 +821,15 @@ var AHGVoiceRegistry = (function () {
       contextCheck: function () { return !!document.querySelector('.result-count, .pager, .pagination, .display.browse, #counts-block'); }
     },
 
+    // -- PDF Reading ----------------------------------------------------------
+    {
+      patterns: ['read pdf', 'read the pdf', 'read document', 'read text', 'read pdf text'],
+      action: function () { var v = window.ahgVoice; if (v) v.readPdf(); },
+      mode: 'global',
+      description: 'Read PDF transcript text aloud',
+      feedback: null
+    },
+
     // -- Enable / Disable Voice ---------------------------------------------
     {
       patterns: ['disable voice', 'voice off', 'turn off voice', 'disable voice commands'],
