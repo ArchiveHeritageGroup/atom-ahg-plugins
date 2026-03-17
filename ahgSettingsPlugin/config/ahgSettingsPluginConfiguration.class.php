@@ -27,8 +27,6 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
         $router->any('admin_ahg_settings_email', '/admin/ahg-settings/email', 'email');
 
         // Settings index (short URL alias)
-        // Named 'settings' so url_for('settings') resolves correctly (AtoM menu path has no slash)
-        $router->any('settings', '/settings', 'index');
         $router->any('settings_index', '/settings', 'index');
 
         // Settings index and section
