@@ -519,7 +519,7 @@ class dedupeActions extends AhgController
         require_once $this->config('sf_root_dir') . '/plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
         $service = new \ahgDedupePlugin\Services\DedupeService();
 
-        $matches = $service->realtimeCheck(['title' => $title], 5);
+        $matches = $service->realtimeCheck($title);
 
         return $this->renderText(json_encode(['matches' => $matches]));
     }

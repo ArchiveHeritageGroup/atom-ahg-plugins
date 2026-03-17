@@ -126,6 +126,7 @@ class DedupeService
                     'title' => $candidate->title,
                     'slug' => $candidate->slug,
                     'score' => round($score, 4),
+                    'similarity' => round($score, 4),
                 ];
             }
         }
