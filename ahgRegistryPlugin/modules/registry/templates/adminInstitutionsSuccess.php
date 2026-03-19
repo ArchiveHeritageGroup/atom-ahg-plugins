@@ -81,6 +81,9 @@
         </td>
         <td class="text-end">
           <div class="btn-group btn-group-sm">
+            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminInstitutionUsers', 'id' => (int) $item->id]); ?>" class="btn btn-sm btn-outline-info" title="<?php echo __('Manage Users'); ?>">
+              <i class="fas fa-users"></i>
+            </a>
             <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionEdit', 'id' => (int) $item->id]); ?>" class="btn btn-sm btn-outline-secondary" title="<?php echo __('Edit'); ?>">
               <i class="fas fa-edit"></i>
             </a>

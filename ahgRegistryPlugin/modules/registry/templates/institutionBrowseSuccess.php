@@ -117,7 +117,7 @@
     <?php if (!empty($result['items'])): ?>
       <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
         <?php foreach ($result['items'] as $inst): ?>
-          <?php include_partial('registry/institutionCard', ['item' => $inst]); ?>
+          <?php include_partial('registry/institutionCard', ['item' => $inst, 'myInstitutionIds' => $myInstitutionIds ?? []]); ?>
         <?php endforeach; ?>
       </div>
 

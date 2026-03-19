@@ -38,6 +38,9 @@
             <?php endif; ?>
           </h6>
           <span class="badge <?php echo $typeClass; ?>" style="<?php echo $typeStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $type)), ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php if (!empty($myInstitutionIds) && is_array($myInstitutionIds) && in_array($item->id, $myInstitutionIds)): ?>
+            <span class="badge bg-info ms-1"><i class="fas fa-user me-1"></i><?php echo __('My Institution'); ?></span>
+          <?php endif; ?>
           <?php if (!empty($item->is_featured)): ?>
             <span class="badge bg-warning text-dark ms-1"><i class="fas fa-star me-1"></i><?php echo __('Featured'); ?></span>
           <?php endif; ?>
