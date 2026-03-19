@@ -1096,6 +1096,9 @@ class registryActions extends AhgController
         $this->contacts = $contactSvc->findByEntity('institution', $this->institution->id);
         $this->vendors = $relSvc->getInstitutionVendors($this->institution->id);
         $this->software = $relSvc->getInstitutionSoftware($this->institution->id);
+
+        // Load all institutions the user can manage (for switcher)
+        $this->myInstitutions = $this->getMyInstitutions();
     }
 
     public function executeInstitutionRegister($request)

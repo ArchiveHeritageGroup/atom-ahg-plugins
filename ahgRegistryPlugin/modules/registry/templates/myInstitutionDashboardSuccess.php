@@ -23,18 +23,15 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <h1 class="h3 mb-0"><?php echo __('My Institution Dashboard'); ?></h1>
-    <?php if ($sfUser->hasCredential('administrator')): ?>
-      <?php $allInst = \Illuminate\Database\Capsule\Manager::table('registry_institution')->where('is_active', 1)->orderBy('name')->get(); ?>
-      <?php if (count($allInst) > 1): ?>
+    <?php if (isset($myInstitutions) && count($myInstitutions) > 1): ?>
       <form method="get" action="" class="mt-1 d-inline-flex align-items-center gap-2">
-        <select name="inst" class="form-select form-select-sm" style="max-width: 300px;" onchange="this.form.submit()">
-          <?php foreach ($allInst as $opt): ?>
+        <select name="inst" class="form-select form-select-sm" style="max-width: 350px;" onchange="this.form.submit()">
+          <?php foreach ($myInstitutions as $opt): ?>
             <option value="<?php echo (int) $opt->id; ?>"<?php echo ($opt->id == $institution->id) ? ' selected' : ''; ?>><?php echo htmlspecialchars($opt->name, ENT_QUOTES, 'UTF-8'); ?></option>
           <?php endforeach; ?>
         </select>
-        <small class="text-muted"><?php echo __('Admin: switch institution'); ?></small>
+        <small class="text-muted"><?php echo __('Switch institution'); ?></small>
       </form>
-      <?php endif; ?>
     <?php endif; ?>
   </div>
   <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionEdit']); ?>" class="btn btn-primary btn-sm">
