@@ -84,9 +84,12 @@ class InstitutionRepository
                 ->where(function ($q) use ($likeTerm) {
                     $q->where('name', 'LIKE', $likeTerm)
                       ->orWhere('description', 'LIKE', $likeTerm)
+                      ->orWhere('short_description', 'LIKE', $likeTerm)
                       ->orWhere('collection_summary', 'LIKE', $likeTerm)
                       ->orWhere('city', 'LIKE', $likeTerm)
-                      ->orWhere('country', 'LIKE', $likeTerm);
+                      ->orWhere('country', 'LIKE', $likeTerm)
+                      ->orWhere('parent_body', 'LIKE', $likeTerm)
+                      ->orWhere('management_system', 'LIKE', $likeTerm);
                 });
 
             $total = $query->count();
