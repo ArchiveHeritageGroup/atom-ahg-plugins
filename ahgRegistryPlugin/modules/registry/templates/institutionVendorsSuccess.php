@@ -18,6 +18,47 @@
   </a>
 </div>
 
+<!-- Link vendor form -->
+<?php if (!empty($allVendors)): ?>
+<div class="card mb-4">
+  <div class="card-header fw-semibold"><i class="fas fa-handshake me-2 text-success"></i><?php echo __('Link Service Provider'); ?></div>
+  <div class="card-body">
+    <form method="post" class="row g-2 align-items-end">
+      <input type="hidden" name="form_action" value="add">
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold"><?php echo __('Vendor'); ?></label>
+        <select name="vendor_id" class="form-select" required>
+          <option value=""><?php echo __('-- Select vendor --'); ?></option>
+          <?php foreach ($allVendors as $v): ?>
+            <option value="<?php echo (int) $v->id; ?>"><?php echo htmlspecialchars($v->name, ENT_QUOTES, 'UTF-8'); ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold"><?php echo __('Relationship type'); ?></label>
+        <select name="relationship_type" class="form-select" required>
+          <option value=""><?php echo __('-- Select type --'); ?></option>
+          <option value="developer"><?php echo __('Developer'); ?></option>
+          <option value="hosting"><?php echo __('Hosting'); ?></option>
+          <option value="maintenance"><?php echo __('Maintenance'); ?></option>
+          <option value="consulting"><?php echo __('Consulting'); ?></option>
+          <option value="digitization"><?php echo __('Digitization'); ?></option>
+          <option value="training"><?php echo __('Training'); ?></option>
+          <option value="integration"><?php echo __('Integration'); ?></option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold"><?php echo __('Service description'); ?></label>
+        <input type="text" name="service_description" class="form-control" placeholder="<?php echo __('Optional'); ?>">
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-success w-100"><i class="fas fa-link me-1"></i> <?php echo __('Link Vendor'); ?></button>
+      </div>
+    </form>
+  </div>
+</div>
+<?php endif; ?>
+
 <?php if (!empty($vendors) && count($vendors) > 0): ?>
 <div class="card">
   <div class="table-responsive">
@@ -79,8 +120,8 @@
 <?php else: ?>
 <div class="text-center py-5">
   <i class="fas fa-handshake fa-3x text-muted mb-3"></i>
-  <h5><?php echo __('No service provider relationships'); ?></h5>
-  <p class="text-muted"><?php echo __('Service provider relationships are established by vendors through the registry. Browse vendors to connect.'); ?></p>
+  <h5><?php echo __('No service provider relationships yet'); ?></h5>
+  <p class="text-muted"><?php echo __('Use the form above to link a vendor, or browse vendors to find service providers.'); ?></p>
   <a href="<?php echo url_for(['module' => 'registry', 'action' => 'vendorBrowse']); ?>" class="btn btn-primary">
     <i class="fas fa-search me-1"></i> <?php echo __('Browse Vendors'); ?>
   </a>

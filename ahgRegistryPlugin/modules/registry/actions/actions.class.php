@@ -1772,8 +1772,42 @@ class registryActions extends AhgController
             return;
         }
 
+        $db = \Illuminate\Database\Capsule\Manager::class;
         $svc = $this->loadService('RelationshipService');
+
+        // Handle POST: add vendor relationship
+        if ($request->isMethod('post')) {
+            $formAction = $request->getParameter('form_action', '');
+
+            if ('add' === $formAction) {
+                $vendorId = (int) $request->getParameter('vendor_id', 0);
+                $relType = trim($request->getParameter('relationship_type', ''));
+                $serviceDesc = trim($request->getParameter('service_description', ''));
+
+                if ($vendorId > 0 && '' !== $relType) {
+                    $svc->createVendorRelationship([
+                        'vendor_id' => $vendorId,
+                        'institution_id' => $this->institution->id,
+                        'relationship_type' => $relType,
+                        'service_description' => $serviceDesc ?: null,
+                    ]);
+                }
+            }
+
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']));
+
+            return;
+        }
+
         $this->vendors = $svc->getInstitutionVendors($this->institution->id);
+
+        // Get all active vendors for dropdown
+        $this->allVendors = $db::table('registry_vendor')
+            ->where('is_active', 1)
+            ->orderBy('name', 'asc')
+            ->select('id', 'name')
+            ->get()
+            ->all();
     }
 
     public function executeMyInstitutionVendorRemove($request)
