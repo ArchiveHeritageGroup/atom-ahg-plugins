@@ -145,7 +145,7 @@ class InstitutionService
 
         // Regenerate slug if name changed
         if (isset($data['name']) && $data['name'] !== $institution->name) {
-            $data['slug'] = $this->generateSlug($data['name']);
+            $data['slug'] = $this->generateSlug($data['name'], $id);
         }
 
         // Handle JSON fields
@@ -327,14 +327,18 @@ class InstitutionService
     /**
      * Generate a unique URL-safe slug from name.
      */
-    public function generateSlug(string $name): string
+    public function generateSlug(string $name, ?int $excludeId = null): string
     {
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
         $slug = preg_replace('/-+/', '-', $slug);
 
         $baseSlug = $slug;
         $counter = 1;
-        while ($this->institutionRepo->findBySlug($slug)) {
+        while (true) {
+            $existing = $this->institutionRepo->findBySlug($slug);
+            if (!$existing || ($excludeId && (int) $existing->id === $excludeId)) {
+                break;
+            }
             $slug = $baseSlug . '-' . $counter;
             $counter++;
         }

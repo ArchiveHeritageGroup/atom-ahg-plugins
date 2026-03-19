@@ -30,7 +30,7 @@
 
     <?php $f = $institution; ?>
 
-    <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'institutionEdit']); ?>" enctype="multipart/form-data">
+    <form method="post" action="<?php echo url_for(array_merge(['module' => 'registry', 'action' => 'institutionEdit'], isset($sf_request) && $sf_request->getParameter('id') ? ['id' => (int) $sf_request->getParameter('id')] : [])); ?>" enctype="multipart/form-data">
 
       <!-- Section 1: Basic Info -->
       <div class="card mb-4">

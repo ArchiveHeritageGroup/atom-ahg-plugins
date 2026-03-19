@@ -30,7 +30,7 @@
       </a>
     </div>
 
-    <?php if (!empty($errors)): ?>
+    <?php if (isset($errors) && count($errors) > 0): ?>
       <div class="alert alert-danger">
         <?php foreach ($errors as $err): ?>
           <div><?php echo htmlspecialchars($err, ENT_QUOTES, 'UTF-8'); ?></div>
@@ -38,7 +38,7 @@
       </div>
     <?php endif; ?>
 
-    <?php if (!empty($success)): ?>
+    <?php if (isset($success) && $success): ?>
       <div class="alert alert-success"><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
