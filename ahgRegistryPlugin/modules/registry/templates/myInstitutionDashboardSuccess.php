@@ -138,6 +138,7 @@
       <div class="card-body text-center">
         <i class="fas fa-laptop-code fa-2x text-info mb-2"></i>
         <h6 class="card-title mb-0"><?php echo __('Software Used'); ?></h6>
+        <small class="text-muted"><?php echo __('Add / Remove'); ?></small>
       </div>
     </a>
   </div>
@@ -146,6 +147,7 @@
       <div class="card-body text-center">
         <i class="fas fa-handshake fa-2x text-warning mb-2"></i>
         <h6 class="card-title mb-0"><?php echo __('Vendor Relationships'); ?></h6>
+        <small class="text-muted"><?php echo __('Link / Remove'); ?></small>
       </div>
     </a>
   </div>
