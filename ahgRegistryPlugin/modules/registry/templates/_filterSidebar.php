@@ -6,6 +6,10 @@
 ?>
 <form method="get" action="<?php echo url_for(['module' => 'registry', 'action' => $action]); ?>">
 
+  <?php if ($sf_request->getParameter('q', '')): ?>
+    <input type="hidden" name="q" value="<?php echo htmlspecialchars($sf_request->getParameter('q', ''), ENT_QUOTES, 'UTF-8'); ?>">
+  <?php endif; ?>
+
   <?php if (!empty($filters)): ?>
     <?php foreach ($filters as $filter): ?>
       <?php

@@ -78,12 +78,22 @@
 </div>
 
 <script <?php echo $na; ?>>
-document.getElementById('inst-filter').addEventListener('input', function() {
-  var q = this.value.toLowerCase();
-  document.querySelectorAll('.inst-item').forEach(function(el) {
-    el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+(function() {
+  var filter = document.getElementById('inst-filter');
+  if (!filter) return;
+
+  // Prevent Enter key from submitting the form
+  filter.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') e.preventDefault();
   });
-});
+
+  filter.addEventListener('input', function() {
+    var q = this.value.toLowerCase();
+    document.querySelectorAll('.inst-item').forEach(function(el) {
+      el.style.display = el.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+})();
 </script>
 
 <?php end_slot(); ?>
