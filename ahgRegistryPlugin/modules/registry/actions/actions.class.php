@@ -434,6 +434,17 @@ class registryActions extends AhgController
             'sort' => $request->getParameter('sort', 'name'),
             'direction' => $request->getParameter('dir', 'asc'),
         ]);
+
+        // Load current user's institution IDs for "My Institution" badge
+        $this->myInstitutionIds = [];
+        $userId = $this->getCurrentUserId();
+        if ($userId) {
+            $db = \Illuminate\Database\Capsule\Manager::class;
+            $this->myInstitutionIds = $db::table('registry_user_institution')
+                ->where('user_id', $userId)
+                ->pluck('institution_id')
+                ->all();
+        }
     }
 
     public function executeInstanceView($request)
@@ -3114,6 +3125,101 @@ class registryActions extends AhgController
         }
 
         $this->redirect(url_for(['module' => 'registry', 'action' => 'adminInstitutions']));
+    }
+
+    /**
+     * Admin: manage users linked to an institution.
+     */
+    public function executeAdminInstitutionUsers($request)
+    {
+        $admin = $this->requireAdminUser();
+        if (!$admin) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $instId = (int) $request->getParameter('id');
+
+        $this->institution = $db::table('registry_institution')->where('id', $instId)->first();
+        if (!$this->institution) {
+            $this->forward404();
+            return;
+        }
+
+        $this->errors = [];
+        $this->success = null;
+
+        // Handle POST actions: link, delink, set-primary
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('form_action', '');
+
+            if ('link' === $action) {
+                $searchEmail = trim($request->getParameter('user_email', ''));
+                $role = $request->getParameter('role', 'manager');
+                $validRoles = ['owner', 'manager', 'editor', 'viewer'];
+                if (!in_array($role, $validRoles)) {
+                    $role = 'manager';
+                }
+
+                if ('' === $searchEmail) {
+                    $this->errors[] = 'Please enter a user email address.';
+                } else {
+                    $targetUser = $db::table('user')->where('email', $searchEmail)->first();
+                    if (!$targetUser) {
+                        $this->errors[] = 'No user found with email: ' . $searchEmail;
+                    } else {
+                        $exists = $db::table('registry_user_institution')
+                            ->where('user_id', $targetUser->id)
+                            ->where('institution_id', $instId)
+                            ->exists();
+                        if ($exists) {
+                            $this->errors[] = 'User is already linked to this institution.';
+                        } else {
+                            $db::table('registry_user_institution')->insert([
+                                'user_id' => $targetUser->id,
+                                'institution_id' => $instId,
+                                'role' => $role,
+                                'is_primary' => 0,
+                                'created_at' => date('Y-m-d H:i:s'),
+                            ]);
+                            $this->success = 'User linked successfully.';
+                        }
+                    }
+                }
+            } elseif ('delink' === $action) {
+                $linkId = (int) $request->getParameter('link_id');
+                $db::table('registry_user_institution')->where('id', $linkId)->where('institution_id', $instId)->delete();
+                $this->success = 'User delinked.';
+            } elseif ('set-primary' === $action) {
+                $linkId = (int) $request->getParameter('link_id');
+                $link = $db::table('registry_user_institution')->where('id', $linkId)->where('institution_id', $instId)->first();
+                if ($link) {
+                    // Clear other primary flags for this user
+                    $db::table('registry_user_institution')->where('user_id', $link->user_id)->update(['is_primary' => 0]);
+                    $db::table('registry_user_institution')->where('id', $linkId)->update(['is_primary' => 1]);
+                    $this->success = 'Set as primary institution for this user.';
+                }
+            } elseif ('update-role' === $action) {
+                $linkId = (int) $request->getParameter('link_id');
+                $role = $request->getParameter('role', 'manager');
+                $validRoles = ['owner', 'manager', 'editor', 'viewer'];
+                if (in_array($role, $validRoles)) {
+                    $db::table('registry_user_institution')->where('id', $linkId)->where('institution_id', $instId)->update(['role' => $role]);
+                    $this->success = 'Role updated.';
+                }
+            }
+        }
+
+        // Load linked users
+        $this->linkedUsers = $db::table('registry_user_institution as rui')
+            ->join('user as u', 'u.id', '=', 'rui.user_id')
+            ->where('rui.institution_id', $instId)
+            ->select('rui.id as link_id', 'rui.user_id', 'rui.role', 'rui.is_primary', 'rui.created_at',
+                     'u.email', 'u.username')
+            ->orderBy('rui.is_primary', 'desc')
+            ->orderBy('u.email')
+            ->get()
+            ->all();
     }
 
     public function executeAdminVendors($request)

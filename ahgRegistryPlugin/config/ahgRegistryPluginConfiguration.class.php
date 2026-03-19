@@ -55,6 +55,7 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_admin', '/registry/admin', 'adminDashboard');
         $loader->any('registry_admin_institutions', '/registry/admin/institutions', 'adminInstitutions');
         $loader->post('registry_admin_institution_verify', '/registry/admin/institutions/verify', 'adminInstitutionVerify');
+        $loader->any('registry_admin_institution_users', '/registry/admin/institutions/:id/users', 'adminInstitutionUsers', ['id' => '\d+']);
         $loader->any('registry_admin_vendors', '/registry/admin/vendors', 'adminVendors');
         $loader->post('registry_admin_vendor_verify', '/registry/admin/vendors/verify', 'adminVendorVerify');
         $loader->any('registry_admin_software', '/registry/admin/software', 'adminSoftware');
