@@ -82,6 +82,54 @@
               <label for="if-version" class="form-label"><?php echo __('Software Version'); ?></label>
               <input type="text" class="form-control" id="if-version" name="software_version" value="<?php echo htmlspecialchars($f->software_version ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="2.8.2">
             </div>
+            <div class="col-md-6">
+              <label for="if-languages" class="form-label"><?php echo __('Interface Languages'); ?></label>
+              <?php
+                $langDisplay = '';
+                $rawLangs = $f->languages ?? '';
+                if (!empty($rawLangs)) {
+                  $rawLangs = sfOutputEscaper::unescape($rawLangs);
+                  if (is_string($rawLangs)) {
+                    $decoded = json_decode($rawLangs, true);
+                    $langDisplay = is_array($decoded) ? implode(', ', $decoded) : $rawLangs;
+                  } elseif (is_array($rawLangs)) {
+                    $langDisplay = implode(', ', $rawLangs);
+                  }
+                }
+              ?>
+              <input type="text" class="form-control" id="if-languages" name="languages" value="<?php echo htmlspecialchars($langDisplay, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Comma-separated: English, French, Afrikaans'); ?>">
+            </div>
+            <div class="col-md-6">
+              <label for="if-desc" class="form-label"><?php echo __('Description'); ?></label>
+              <input type="text" class="form-control" id="if-desc-short" name="description" value="<?php echo htmlspecialchars($f->description ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Brief description of this instance'); ?>">
+            </div>
+            <div class="col-md-4">
+              <label for="if-deploy" class="form-label"><?php echo __('Deployment Architecture'); ?></label>
+              <select class="form-select" id="if-deploy" name="deployment_architecture">
+                <option value=""><?php echo __('-- Select --'); ?></option>
+                <?php
+                  $deployTypes = [
+                    'single_site' => __('Single site (edit + public)'),
+                    'split_edit_public' => __('Separate edit & public sites'),
+                    'mirror' => __('Mirror / read-only sync'),
+                    'other' => __('Other'),
+                  ];
+                  $selDeploy = $f->deployment_architecture ?? '';
+                  foreach ($deployTypes as $val => $label): ?>
+                    <option value="<?php echo $val; ?>"<?php echo $selDeploy === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" id="if-multi-repo" name="multi_repository" value="1"<?php echo !empty($f->multi_repository) ? ' checked' : ''; ?>>
+                <label class="form-check-label" for="if-multi-repo"><?php echo __('Multi-repository instance'); ?></label>
+              </div>
+            </div>
+            <div class="col-md-4" id="repo-count-group">
+              <label for="if-repo-count" class="form-label"><?php echo __('Number of Repositories'); ?></label>
+              <input type="number" class="form-control" id="if-repo-count" name="repository_count" value="<?php echo htmlspecialchars($f->repository_count ?? '', ENT_QUOTES, 'UTF-8'); ?>" min="1">
+            </div>
           </div>
         </div>
       </div>
@@ -127,23 +175,6 @@
               <label for="if-os" class="form-label"><?php echo __('OS Environment'); ?></label>
               <input type="text" class="form-control" id="if-os" name="os_environment" value="<?php echo htmlspecialchars($f->os_environment ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., Ubuntu 22.04, RHEL 9, Windows Server 2022'); ?>">
             </div>
-            <div class="col-md-6">
-              <label for="if-languages" class="form-label"><?php echo __('Languages'); ?></label>
-              <?php
-                $langDisplay = '';
-                $rawLangs = $f->languages ?? '';
-                if (!empty($rawLangs)) {
-                  $rawLangs = sfOutputEscaper::unescape($rawLangs);
-                  if (is_string($rawLangs)) {
-                    $decoded = json_decode($rawLangs, true);
-                    $langDisplay = is_array($decoded) ? implode(', ', $decoded) : $rawLangs;
-                  } elseif (is_array($rawLangs)) {
-                    $langDisplay = implode(', ', $rawLangs);
-                  }
-                }
-              ?>
-              <input type="text" class="form-control" id="if-languages" name="languages" value="<?php echo htmlspecialchars($langDisplay, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Comma-separated: English, French, Afrikaans'); ?>">
-            </div>
           </div>
         </div>
       </div>
@@ -166,23 +197,34 @@
               <input type="number" class="form-control" id="if-storage" name="storage_gb" value="<?php echo htmlspecialchars($f->storage_gb ?? '', ENT_QUOTES, 'UTF-8'); ?>" min="0" step="0.1">
             </div>
             <div class="col-md-3">
-              <label for="if-standard" class="form-label"><?php echo __('Descriptive Standard'); ?></label>
-              <select class="form-select" id="if-standard" name="descriptive_standard">
-                <option value=""><?php echo __('-- Select --'); ?></option>
-                <?php
-                  $descStds = \Illuminate\Database\Capsule\Manager::table('registry_standard')
-                    ->where('is_active', 1)
-                    ->where('category', 'descriptive')
-                    ->orderBy('sort_order')->orderBy('name')
-                    ->get()->all();
-                  $selStd = $f->descriptive_standard ?? '';
-                  foreach ($descStds as $_s):
-                    $sVal = $_s->acronym ?: $_s->name;
-                  ?>
-                    <option value="<?php echo htmlspecialchars($sVal, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selStd === $sVal ? ' selected' : ''; ?>><?php echo htmlspecialchars(($_s->acronym ? $_s->acronym . ' — ' : '') . $_s->name, ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php endforeach; ?>
-                  <option value="Other"<?php echo $selStd === 'Other' ? ' selected' : ''; ?>><?php echo __('Other'); ?></option>
-              </select>
+              <label class="form-label"><?php echo __('Descriptive Standard(s)'); ?></label>
+              <?php
+                $descStds = \Illuminate\Database\Capsule\Manager::table('registry_standard')
+                  ->where('is_active', 1)
+                  ->where('category', 'descriptive')
+                  ->orderBy('sort_order')->orderBy('name')
+                  ->get()->all();
+                $selStdRaw = $f->descriptive_standard ?? '';
+                // Support both single string and JSON array
+                $selectedStds = [];
+                if (!empty($selStdRaw)) {
+                  $rawVal = sfOutputEscaper::unescape($selStdRaw);
+                  if (is_string($rawVal)) {
+                    $decoded = json_decode($rawVal, true);
+                    $selectedStds = is_array($decoded) ? $decoded : [$rawVal];
+                  } elseif (is_array($rawVal)) {
+                    $selectedStds = $rawVal;
+                  }
+                }
+                foreach ($descStds as $_s):
+                  $sVal = $_s->acronym ?: $_s->name;
+                  $isChk = in_array($sVal, $selectedStds);
+              ?>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="descriptive_standard[]" value="<?php echo htmlspecialchars($sVal, ENT_QUOTES, 'UTF-8'); ?>" id="if-std-<?php echo (int) $_s->id; ?>"<?php echo $isChk ? ' checked' : ''; ?>>
+                  <label class="form-check-label small" for="if-std-<?php echo (int) $_s->id; ?>"><?php echo htmlspecialchars(($_s->acronym ? $_s->acronym . ' — ' : '') . $_s->name, ENT_QUOTES, 'UTF-8'); ?></label>
+                </div>
+              <?php endforeach; ?>
             </div>
           </div>
         </div>
@@ -263,10 +305,6 @@
                 <input class="form-check-input" type="checkbox" id="if-public" name="is_public" value="1"<?php echo (!$instance || !empty($f->is_public)) ? ' checked' : ''; ?>>
                 <label class="form-check-label" for="if-public"><?php echo __('Publicly visible in directory'); ?></label>
               </div>
-            </div>
-            <div class="col-12">
-              <label for="if-desc" class="form-label"><?php echo __('Description'); ?></label>
-              <textarea class="form-control" id="if-desc" name="description" rows="3"><?php echo htmlspecialchars($f->description ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
           </div>
         </div>

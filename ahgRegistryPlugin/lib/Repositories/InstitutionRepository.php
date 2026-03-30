@@ -20,7 +20,8 @@ class InstitutionRepository
 
     public function findAll(array $params = []): array
     {
-        $query = DB::table($this->table);
+        $query = DB::table($this->table)
+            ->selectRaw($this->table . '.*, (SELECT COUNT(*) FROM registry_instance WHERE registry_instance.institution_id = ' . $this->table . '.id) as instance_count');
         if (empty($params['include_inactive'])) {
             $query->where('is_active', 1);
         }
@@ -71,6 +72,7 @@ class InstitutionRepository
     {
         // Try FULLTEXT search first
         $query = DB::table($this->table)
+            ->selectRaw($this->table . '.*, (SELECT COUNT(*) FROM registry_instance WHERE registry_instance.institution_id = ' . $this->table . '.id) as instance_count')
             ->where('is_active', 1)
             ->whereRaw("MATCH(name, description, collection_summary) AGAINST(? IN BOOLEAN MODE)", [$term]);
 
@@ -80,6 +82,7 @@ class InstitutionRepository
         if ($total === 0) {
             $likeTerm = '%' . $term . '%';
             $query = DB::table($this->table)
+                ->selectRaw($this->table . '.*, (SELECT COUNT(*) FROM registry_instance WHERE registry_instance.institution_id = ' . $this->table . '.id) as instance_count')
                 ->where('is_active', 1)
                 ->where(function ($q) use ($likeTerm) {
                     $q->where('name', 'LIKE', $likeTerm)

@@ -22,7 +22,7 @@
 <div class="card mb-4">
   <div class="card-header fw-semibold"><i class="fas fa-plus-circle me-2 text-success"></i><?php echo __('Add Software'); ?></div>
   <div class="card-body">
-    <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']); ?>">
+    <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']); ?><?php echo $sf_request->getParameter('inst') ? '?inst=' . (int) $sf_request->getParameter('inst') : ''; ?>">
       <input type="hidden" name="form_action" value="add">
       <div class="row g-3 align-items-end">
         <div class="col-md-5">
@@ -95,7 +95,7 @@
           </td>
           <td><?php echo htmlspecialchars($sw->notes ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
           <td class="text-end">
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this software?'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']); ?><?php echo $sf_request->getParameter('inst') ? '?inst=' . (int) $sf_request->getParameter('inst') : ''; ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Remove this software?'); ?>');">
               <input type="hidden" name="form_action" value="remove">
               <input type="hidden" name="assignment_id" value="<?php echo (int) $sw->assignment_id; ?>">
               <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Remove'); ?>">

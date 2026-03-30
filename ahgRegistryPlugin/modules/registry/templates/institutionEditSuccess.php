@@ -123,33 +123,18 @@
         <div class="card-header fw-semibold"><i class="fas fa-globe me-2 text-info"></i><?php echo __('Online Presence'); ?></div>
         <div class="card-body">
           <div class="row g-3">
-            <div class="col-md-6">
-              <label for="edit-website" class="form-label"><?php echo __('Website URL'); ?></label>
-              <input type="url" class="form-control" id="edit-website" name="website" value="<?php echo htmlspecialchars($f->website ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
-            <div class="col-md-6">
-              <label for="edit-inst-url" class="form-label"><?php echo __('AtoM Instance URL'); ?></label>
-              <input type="url" class="form-control" id="edit-inst-url" name="institution_url" value="<?php echo htmlspecialchars($f->institution_url ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+            <div class="col-md-8">
+              <label for="edit-website" class="form-label"><?php echo __('Institution Website URL'); ?></label>
+              <input type="url" class="form-control" id="edit-website" name="website" value="<?php echo htmlspecialchars($f->website ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://www.example.org">
             </div>
             <div class="col-md-4">
-              <label for="edit-email" class="form-label"><?php echo __('Email'); ?></label>
-              <input type="email" class="form-control" id="edit-email" name="email" value="<?php echo htmlspecialchars($f->email ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
-            <div class="col-md-4">
-              <label for="edit-phone" class="form-label"><?php echo __('Phone'); ?></label>
-              <input type="tel" class="form-control" id="edit-phone" name="phone" value="<?php echo htmlspecialchars($f->phone ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
-            <div class="col-md-4">
-              <label for="edit-fax" class="form-label"><?php echo __('Fax'); ?></label>
-              <input type="tel" class="form-control" id="edit-fax" name="fax" value="<?php echo htmlspecialchars($f->fax ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
-            <div class="col-12">
-              <div class="form-check">
+              <div class="form-check mt-4">
                 <input class="form-check-input" type="checkbox" id="edit-open-public" name="open_to_public" value="1"<?php echo !empty($f->open_to_public) ? ' checked' : ''; ?>>
                 <label class="form-check-label" for="edit-open-public"><?php echo __('Open to the public'); ?></label>
               </div>
             </div>
           </div>
+          <div class="form-text text-muted mt-2"><?php echo __('Contact details (email, phone) should be added in the Contacts section for specific people.'); ?></div>
         </div>
       </div>
 
@@ -162,7 +147,7 @@
               <label for="edit-size" class="form-label"><?php echo __('Size'); ?></label>
               <select class="form-select" id="edit-size" name="size">
                 <option value=""><?php echo __('-- Select --'); ?></option>
-                <?php $sizes = ['small' => __('Small'), 'medium' => __('Medium'), 'large' => __('Large'), 'national' => __('National')]; $selSize = $f->size ?? '';
+                <?php $sizes = ['small' => __('Small (1–5 staff)'), 'medium' => __('Medium (6–20 staff)'), 'large' => __('Large (21+ staff)')]; $selSize = $f->size ?? '';
                   foreach ($sizes as $val => $label): ?>
                     <option value="<?php echo $val; ?>"<?php echo $selSize === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
                 <?php endforeach; ?>
@@ -172,7 +157,7 @@
               <label for="edit-governance" class="form-label"><?php echo __('Governance'); ?></label>
               <select class="form-select" id="edit-governance" name="governance">
                 <option value=""><?php echo __('-- Select --'); ?></option>
-                <?php $govTypes = ['public' => __('Public'), 'private' => __('Private'), 'ngo' => __('NGO'), 'academic' => __('Academic'), 'government' => __('Government'), 'tribal' => __('Tribal'), 'community' => __('Community')]; $selGov = $f->governance ?? '';
+                <?php $govTypes = ['public' => __('Public / Government'), 'private' => __('Private'), 'ngo' => __('NGO / Non-Profit'), 'academic' => __('Academic'), 'indigenous' => __('Indigenous'), 'community' => __('Community')]; $selGov = $f->governance ?? '';
                   foreach ($govTypes as $val => $label): ?>
                     <option value="<?php echo $val; ?>"<?php echo $selGov === $val ? ' selected' : ''; ?>><?php echo $label; ?></option>
                 <?php endforeach; ?>

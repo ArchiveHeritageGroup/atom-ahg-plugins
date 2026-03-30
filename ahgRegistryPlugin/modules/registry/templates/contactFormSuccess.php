@@ -71,7 +71,7 @@
         <div class="card-body">
           <p class="text-muted small mb-3"><?php echo __('Select all roles that apply to this contact.'); ?></p>
           <?php
-            $allRoles = ['primary' => __('Primary Contact'), 'technical' => __('Technical'), 'billing' => __('Billing'), 'collections' => __('Collections'), 'director' => __('Director'), 'archivist' => __('Archivist'), 'it' => __('IT')];
+            $allRoles = ['management' => __('Management'), 'atom_admin' => __('AtoM Administrator'), 'office_admin' => __('Office Administrator (Billing)'), 'it_support' => __('IT / Technical Support'), 'records_professional' => __('Archivist / Librarian / Curator'), 'collections' => __('Collections')];
             $currentRoles = [];
             if (!empty($c->roles)) {
               $rawRoles = sfOutputEscaper::unescape($c->roles);

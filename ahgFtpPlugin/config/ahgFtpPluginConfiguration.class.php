@@ -49,23 +49,17 @@ class ahgFtpPluginConfiguration extends sfPluginConfiguration
         $nonce = sfConfig::get('csp_nonce', '');
         $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
         $listUrl = $context->getRouting()->generate('ftp_upload_list');
+        $importUrl = $context->getRouting()->generate('ftp_upload_import');
 
-        // Get disk path for display
-        $diskPath = '';
-        try {
-            $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-            if (file_exists($frameworkPath)) {
-                require_once $frameworkPath;
-            }
-            $row = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
-                ->where('setting_key', 'ftp_disk_path')
-                ->value('setting_value');
-            $diskPath = $row ?: '';
-        } catch (\Exception $e) {
-            // Ignore
+        // Extract the resource slug from the URL
+        // Formats: /{slug}/addDigitalObject or /{slug}/object/addDigitalObject
+        $resourceSlug = '';
+        if (preg_match('#/([^/]+)/object/addDigitalObject#i', $uri, $m)) {
+            $resourceSlug = $m[1];
+        } elseif (preg_match('#/([^/]+)/addDigitalObject#i', $uri, $m)) {
+            $resourceSlug = $m[1];
         }
-
-        $diskPathJs = json_encode(rtrim($diskPath, '/'));
+        $resourceSlugJs = json_encode($resourceSlug);
 
         $script = <<<FTPJS
 <script {$nonceAttr}>
@@ -102,7 +96,7 @@ class ahgFtpPluginConfiguration extends sfPluginConfiguration
                     container.innerHTML = '<div class="alert alert-info mb-0"><i class="fa fa-info-circle me-2"></i>No files on FTP server. <a href="/index.php/ftp-upload">Upload files first</a>.</div>';
                     return;
                 }
-                var html = '<p class="text-muted small mb-2">Select a file to link as a digital object. The file path will be set automatically.</p>';
+                var html = '<p class="text-muted small mb-2">Select a file to upload as a digital object (with thumbnails and derivatives).</p>';
                 html += '<div class="list-group">';
                 data.files.forEach(function(f) {
                     var size = formatBytes(f.size);
@@ -120,28 +114,48 @@ class ahgFtpPluginConfiguration extends sfPluginConfiguration
                     el.addEventListener('click', function(e) {
                         e.preventDefault();
                         var filename = this.getAttribute('data-filename');
-                        var fullPath = {$diskPathJs} + '/' + filename;
+                        var slug = {$resourceSlugJs};
 
-                        // Set the URL field and expand its accordion
-                        var urlField = document.querySelector('input[name="url"]') || document.querySelector('#external-collapse input[type="text"]');
-                        if (urlField) {
-                            urlField.value = fullPath;
-                            // Expand the external link accordion
-                            var extCollapse = document.getElementById('external-collapse');
-                            if (extCollapse && !extCollapse.classList.contains('show')) {
-                                var bsCollapse = new bootstrap.Collapse(extCollapse, {show: true});
-                            }
-                            // Close FTP accordion
-                            var ftpCollapse = document.getElementById('ftp-collapse');
-                            if (ftpCollapse) {
-                                var bsFtp = bootstrap.Collapse.getInstance(ftpCollapse);
-                                if (bsFtp) bsFtp.hide();
-                            }
+                        if (!slug) {
+                            alert('Cannot determine resource. Please use the normal upload instead.');
+                            return;
                         }
 
                         // Highlight selected
                         container.querySelectorAll('.ftp-select-file').forEach(function(s) { s.classList.remove('active'); });
                         this.classList.add('active');
+
+                        // Show uploading state
+                        var origHtml = this.innerHTML;
+                        this.innerHTML = '<div class="d-flex align-items-center"><span class="spinner-border spinner-border-sm me-2"></span><strong>Importing ' + escapeHtml(filename) + '...</strong> <span class="text-muted ms-2">Creating derivatives</span></div>';
+                        this.style.pointerEvents = 'none';
+
+                        // Disable all other file links
+                        container.querySelectorAll('.ftp-select-file').forEach(function(s) { s.style.pointerEvents = 'none'; s.style.opacity = '0.5'; });
+                        this.style.opacity = '1';
+
+                        // POST to import endpoint
+                        fetch('{$importUrl}', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({ filename: filename, slug: slug })
+                        })
+                        .then(function(r) { return r.json(); })
+                        .then(function(result) {
+                            if (result.success && result.redirect) {
+                                window.location.href = result.redirect;
+                            } else {
+                                alert('Import failed: ' + (result.message || 'Unknown error'));
+                                // Restore links
+                                container.querySelectorAll('.ftp-select-file').forEach(function(s) { s.style.pointerEvents = ''; s.style.opacity = ''; });
+                                el.innerHTML = origHtml;
+                            }
+                        })
+                        .catch(function(err) {
+                            alert('Import failed: ' + err.message);
+                            container.querySelectorAll('.ftp-select-file').forEach(function(s) { s.style.pointerEvents = ''; s.style.opacity = ''; });
+                            el.innerHTML = origHtml;
+                        });
                     });
                 });
             })
@@ -171,6 +185,7 @@ FTPJS;
         $r->any('ftp_upload_chunk', '/ftp-upload/chunk', 'uploadChunk');
         $r->any('ftp_upload_list', '/ftp-upload/list', 'listFiles');
         $r->any('ftp_upload_delete', '/ftp-upload/delete', 'deleteFile');
+        $r->any('ftp_upload_import', '/ftp-upload/import-as-upload', 'importAsUpload');
 
         $r->register($routing);
     }

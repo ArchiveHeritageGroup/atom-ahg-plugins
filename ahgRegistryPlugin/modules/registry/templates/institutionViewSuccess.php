@@ -42,7 +42,19 @@
               <i class="fas fa-check-circle text-primary ms-1" title="<?php echo __('Verified'); ?>"></i>
             <?php endif; ?>
           </h1>
-          <?php $canEdit = (!empty($isAdmin) || (!empty($currentUserId) && isset($detail->created_by) && (int) $detail->created_by === (int) $currentUserId)); ?>
+          <?php
+            $canEdit = !empty($isAdmin);
+            if (!$canEdit && !empty($currentUserId)) {
+                if (isset($detail->created_by) && (int) $detail->created_by === (int) $currentUserId) {
+                    $canEdit = true;
+                } else {
+                    $canEdit = \Illuminate\Database\Capsule\Manager::table('registry_user_institution')
+                        ->where('user_id', (int) $currentUserId)
+                        ->where('institution_id', (int) $detail->id)
+                        ->exists();
+                }
+            }
+          ?>
           <div class="d-flex gap-1 ms-2">
             <?php if ($sf_user->isAuthenticated()): ?>
             <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'favoriteToggle']); ?>" class="d-inline">
@@ -54,7 +66,16 @@
               </button>
             </form>
             <?php endif; ?>
-            <?php if (!empty($detail->is_featured)): ?>
+            <?php if (!empty($isAdmin)): ?>
+              <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminInstitutionVerify']); ?>" class="d-inline">
+                <input type="hidden" name="form_action" value="feature">
+                <input type="hidden" name="id" value="<?php echo (int) $detail->id; ?>">
+                <input type="hidden" name="return" value="<?php echo url_for(['module' => 'registry', 'action' => 'institutionView', 'slug' => $detail->slug]); ?>">
+                <button type="submit" class="btn btn-sm <?php echo !empty($detail->is_featured) ? 'btn-success' : 'btn-outline-secondary'; ?>" title="<?php echo !empty($detail->is_featured) ? __('Unfeature') : __('Feature'); ?>">
+                  <i class="fas fa-award me-1"></i><?php echo !empty($detail->is_featured) ? __('Featured') : __('Feature'); ?>
+                </button>
+              </form>
+            <?php elseif (!empty($detail->is_featured)): ?>
               <span class="btn btn-sm btn-outline-success disabled"><i class="fas fa-award me-1"></i><?php echo __('Featured'); ?></span>
             <?php endif; ?>
             <?php if ($canEdit): ?>
@@ -135,31 +156,74 @@
     <?php endif; ?>
 
     <!-- Standards & systems -->
+    <?php
+      $rawDescriptiveStandards = !empty($detail->descriptive_standards) ? sfOutputEscaper::unescape($detail->descriptive_standards) : null;
+      $selectedStdNames = [];
+      if ($rawDescriptiveStandards) {
+        $selectedStdNames = is_string($rawDescriptiveStandards) ? json_decode($rawDescriptiveStandards, true) : (array) $rawDescriptiveStandards;
+        if (!is_array($selectedStdNames)) { $selectedStdNames = []; }
+      }
+      $hasStandards = !empty($selectedStdNames);
+    ?>
+    <?php if ($hasStandards || !empty($detail->management_system)): ?>
     <div class="card mb-4">
       <div class="card-header fw-semibold"><?php echo __('Standards & Systems'); ?></div>
       <div class="card-body">
-        <div class="row g-3">
-          <?php if (!empty($detail->descriptive_standards)): ?>
-          <div class="col-sm-6">
-            <strong><?php echo __('Descriptive Standards'); ?></strong><br>
-            <?php
-              $rawDescriptiveStandards = sfOutputEscaper::unescape($detail->descriptive_standards);
-              $standards = is_string($rawDescriptiveStandards) ? json_decode($rawDescriptiveStandards, true) : (array) $rawDescriptiveStandards;
-              if (is_array($standards)):
-                foreach ($standards as $st): ?>
-                  <span class="badge bg-info text-dark me-1"><?php echo htmlspecialchars($st, ENT_QUOTES, 'UTF-8'); ?></span>
-            <?php endforeach; endif; ?>
+        <?php if ($hasStandards):
+          // Look up standards from DB to group by category and get slugs for linking
+          $dbStdRecords = \Illuminate\Database\Capsule\Manager::table('registry_standard')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')->orderBy('name')
+            ->get()->all();
+          $catLabels = [
+            'descriptive' => __('Descriptive Standards'),
+            'metadata' => __('Metadata Standards'),
+            'interchange' => __('Interchange Formats'),
+            'preservation' => __('Digital Preservation'),
+            'rights' => __('Rights & Licensing'),
+            'sector' => __('Sector Standards'),
+            'compliance' => __('Compliance & Regulatory'),
+            'accounting' => __('Heritage Accounting'),
+          ];
+          // Group matched standards by category
+          $grouped = [];
+          $matched = [];
+          foreach ($dbStdRecords as $rec) {
+            $matchVal = $rec->acronym ?: $rec->name;
+            if (in_array($matchVal, $selectedStdNames) || in_array($rec->name, $selectedStdNames) || in_array($rec->acronym, $selectedStdNames)) {
+              $cat = $rec->category ?? 'other';
+              $grouped[$cat][] = $rec;
+              $matched[] = $matchVal;
+            }
+          }
+          // Any unmatched standards (custom entries)
+          $unmatched = array_diff($selectedStdNames, $matched);
+        ?>
+          <?php foreach ($grouped as $cat => $stds): ?>
+          <div class="mb-2">
+            <strong class="small text-muted"><?php echo $catLabels[$cat] ?? ucfirst($cat); ?></strong><br>
+            <?php foreach ($stds as $st): ?>
+              <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardView', 'slug' => $st->slug]); ?>" class="badge bg-info text-dark me-1 text-decoration-none"><?php echo htmlspecialchars($st->acronym ?: $st->name, ENT_QUOTES, 'UTF-8'); ?></a>
+            <?php endforeach; ?>
+          </div>
+          <?php endforeach; ?>
+          <?php if (!empty($unmatched)): ?>
+          <div class="mb-2">
+            <?php foreach ($unmatched as $um): ?>
+              <span class="badge bg-secondary me-1"><?php echo htmlspecialchars($um, ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php endforeach; ?>
           </div>
           <?php endif; ?>
-          <?php if (!empty($detail->management_system)): ?>
-          <div class="col-sm-6">
-            <strong><?php echo __('Management System'); ?></strong><br>
-            <?php echo htmlspecialchars($detail->management_system, ENT_QUOTES, 'UTF-8'); ?>
-          </div>
-          <?php endif; ?>
+        <?php endif; ?>
+        <?php if (!empty($detail->management_system)): ?>
+        <div class="mt-2">
+          <strong class="small text-muted"><?php echo __('Management System'); ?></strong><br>
+          <?php echo htmlspecialchars($detail->management_system, ENT_QUOTES, 'UTF-8'); ?>
         </div>
+        <?php endif; ?>
       </div>
     </div>
+    <?php endif; ?>
 
     <!-- Map -->
     <?php if (!empty($detail->latitude) && !empty($detail->longitude)): ?>
@@ -258,7 +322,7 @@
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
         <?php echo __('System Instances'); ?>
         <?php if ($canEdit): ?>
-          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceAdd']); ?>" class="btn btn-sm btn-outline-primary">
+          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceAdd']); ?>?inst=<?php echo (int) $detail->id; ?>" class="btn btn-sm btn-outline-primary">
             <i class="fas fa-plus me-1"></i><?php echo __('Add'); ?>
           </a>
         <?php endif; ?>
@@ -277,7 +341,7 @@
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
         <?php echo __('Software Used'); ?>
         <?php if ($canEdit): ?>
-          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']); ?>" class="btn btn-sm btn-outline-primary">
+          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']); ?>?inst=<?php echo (int) $detail->id; ?>" class="btn btn-sm btn-outline-primary">
             <i class="fas fa-cog me-1"></i><?php echo __('Manage'); ?>
           </a>
         <?php endif; ?>
@@ -309,7 +373,7 @@
       <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
         <?php echo __('Service Providers'); ?>
         <?php if ($canEdit): ?>
-          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']); ?>" class="btn btn-sm btn-outline-primary">
+          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']); ?>?inst=<?php echo (int) $detail->id; ?>" class="btn btn-sm btn-outline-primary">
             <i class="fas fa-cog me-1"></i><?php echo __('Manage'); ?>
           </a>
         <?php endif; ?>

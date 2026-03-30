@@ -20,21 +20,54 @@
   <div class="alert alert-danger alert-dismissible fade show"><?php echo $sfUser->getFlash('error'); ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
 <?php endif; ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h1 class="h3 mb-0"><?php echo __('My Institution Dashboard'); ?></h1>
-    <?php if (isset($myInstitutions) && count($myInstitutions) > 1): ?>
-      <form method="get" action="" class="mt-1 d-inline-flex align-items-center gap-2">
-        <select name="inst" class="form-select form-select-sm" style="max-width: 350px;" onchange="this.form.submit()">
-          <?php foreach ($myInstitutions as $opt): ?>
-            <option value="<?php echo (int) $opt->id; ?>"<?php echo ($opt->id == $institution->id) ? ' selected' : ''; ?>><?php echo htmlspecialchars($opt->name, ENT_QUOTES, 'UTF-8'); ?></option>
-          <?php endforeach; ?>
-        </select>
-        <small class="text-muted"><?php echo __('Switch institution'); ?></small>
-      </form>
-    <?php endif; ?>
+<!-- My Institutions -->
+<?php if (isset($myInstitutions) && count($myInstitutions) > 1): ?>
+<div class="card mb-4">
+  <div class="card-header fw-semibold"><i class="fas fa-university me-2 text-primary"></i><?php echo __('My Institutions'); ?> <span class="badge bg-secondary ms-1"><?php echo count($myInstitutions); ?></span></div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th><?php echo __('Institution'); ?></th>
+          <th><?php echo __('Type'); ?></th>
+          <th class="text-center"><?php echo __('Primary'); ?></th>
+          <th class="text-end"><?php echo __('Actions'); ?></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($myInstitutions as $mi): ?>
+        <tr<?php echo ($mi->id == $institution->id) ? ' class="table-active"' : ''; ?>>
+          <td>
+            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionView', 'slug' => $mi->slug ?? $mi->id]); ?>" class="fw-semibold text-decoration-none">
+              <?php echo htmlspecialchars($mi->name ?? '', ENT_QUOTES, 'UTF-8'); ?>
+            </a>
+          </td>
+          <td><span class="badge bg-secondary"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $mi->institution_type ?? '')), ENT_QUOTES, 'UTF-8'); ?></span></td>
+          <td class="text-center">
+            <?php if (!empty($mi->is_primary)): ?>
+              <span class="badge bg-success"><i class="fas fa-star"></i></span>
+            <?php endif; ?>
+          </td>
+          <td class="text-end">
+            <?php if ($mi->id != $institution->id): ?>
+              <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']); ?>?inst=<?php echo (int) $mi->id; ?>" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-exchange-alt me-1"></i><?php echo __('Switch'); ?>
+              </a>
+            <?php else: ?>
+              <span class="badge bg-info"><?php echo __('Current'); ?></span>
+            <?php endif; ?>
+          </td>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
   </div>
-  <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionEdit']); ?>" class="btn btn-primary btn-sm">
+</div>
+<?php endif; ?>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0"><?php echo htmlspecialchars($institution->name ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
+  <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionEdit', 'id' => (int) $institution->id]); ?>" class="btn btn-primary btn-sm">
     <i class="fas fa-edit me-1"></i> <?php echo __('Edit Profile'); ?>
   </a>
 </div>

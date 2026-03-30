@@ -38,6 +38,10 @@
           <div class="alert alert-success py-2 small"><i class="fas fa-check-circle me-1"></i> Account created successfully! Please sign in below.</div>
         <?php endif; ?>
 
+        <?php if (sfContext::getInstance()->getRequest()->getParameter('password_reset')): ?>
+          <div class="alert alert-success py-2 small"><i class="fas fa-check-circle me-1"></i> Password has been reset successfully. Please sign in with your new password.</div>
+        <?php endif; ?>
+
         <?php if (sfContext::getInstance()->getRequest()->getParameter('error')): ?>
           <div class="alert alert-warning py-2 small">
             <?php
@@ -77,6 +81,10 @@
           <button type="submit" class="btn btn-primary w-100 mb-2">
             <i class="fas fa-sign-in-alt me-1"></i> Sign In
           </button>
+
+          <div class="text-end">
+            <a href="/registry/forgot-password" class="small text-muted">Forgot password?</a>
+          </div>
         </form>
 
         <?php if (!empty($oauthProviders)): ?>

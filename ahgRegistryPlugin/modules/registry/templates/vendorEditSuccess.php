@@ -113,6 +113,14 @@
             <div class="col-md-4"><input type="text" class="form-control" name="province_state" value="<?php echo htmlspecialchars($f->province_state ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Province / State'); ?>"></div>
             <div class="col-md-4"><input type="text" class="form-control" name="postal_code" value="<?php echo htmlspecialchars($f->postal_code ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Postal Code'); ?>"></div>
             <div class="col-md-4"><input type="text" class="form-control" name="country" value="<?php echo htmlspecialchars($f->country ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Country'); ?>"></div>
+            <div class="col-md-4">
+              <label for="ve-lat" class="form-label small"><?php echo __('Latitude'); ?></label>
+              <input type="number" step="any" class="form-control" id="ve-lat" name="latitude" value="<?php echo htmlspecialchars($f->latitude ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., -33.9249'); ?>">
+            </div>
+            <div class="col-md-4">
+              <label for="ve-lng" class="form-label small"><?php echo __('Longitude'); ?></label>
+              <input type="number" step="any" class="form-control" id="ve-lng" name="longitude" value="<?php echo htmlspecialchars($f->longitude ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., 18.4241'); ?>">
+            </div>
           </div>
         </div>
       </div>

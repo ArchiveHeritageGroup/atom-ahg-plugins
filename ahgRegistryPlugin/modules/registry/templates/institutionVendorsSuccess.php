@@ -23,7 +23,7 @@
 <div class="card mb-4">
   <div class="card-header fw-semibold"><i class="fas fa-handshake me-2 text-success"></i><?php echo __('Link Service Provider'); ?></div>
   <div class="card-body">
-    <form method="post" class="row g-2 align-items-end">
+    <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']); ?><?php echo $sf_request->getParameter('inst') ? '?inst=' . (int) $sf_request->getParameter('inst') : ''; ?>" class="row g-2 align-items-end">
       <input type="hidden" name="form_action" value="add">
       <div class="col-md-3">
         <label class="form-label small fw-semibold"><?php echo __('Vendor'); ?></label>

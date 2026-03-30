@@ -19,7 +19,25 @@ require_once SF_ROOT_DIR.'/config/ProjectConfiguration.class.php';
 $configuration = ProjectConfiguration::getApplicationConfiguration('qubit', 'prod', false);
 sfContext::createInstance($configuration);
 
-require_once SF_ROOT_DIR.'/plugins/ahgThemeB5Plugin/lib/ahgUniversalMetadataExtractor.php';
+// Find ahgUniversalMetadataExtractor dynamically — check plugin paths
+$extractorPaths = [
+    SF_ROOT_DIR . '/atom-ahg-plugins/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php',
+    SF_ROOT_DIR . '/plugins/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php',
+    SF_ROOT_DIR . '/atom-ahg-plugins/ahgThemeB5Plugin/lib/ahgUniversalMetadataExtractor.php',
+    SF_ROOT_DIR . '/plugins/ahgThemeB5Plugin/lib/ahgUniversalMetadataExtractor.php',
+];
+$extractorLoaded = false;
+foreach ($extractorPaths as $p) {
+    if (file_exists($p)) {
+        require_once $p;
+        $extractorLoaded = true;
+        break;
+    }
+}
+if (!$extractorLoaded) {
+    error_log("process_metadata: ahgUniversalMetadataExtractor not found in any plugin path");
+    exit(0);
+}
 
 use Illuminate\Database\Capsule\Manager as DB;
 

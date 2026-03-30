@@ -277,6 +277,135 @@ class ftpUploadActions extends AhgController
     }
 
     /**
+     * Import a local FTP file as if it were uploaded via Choose File.
+     *
+     * Reads the file from disk, creates QubitDigitalObject + QubitAsset,
+     * which triggers derivative generation (thumbnails, reference images).
+     *
+     * POST params: filename, slug (resource slug)
+     */
+    public function executeImportAsUpload(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->json(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        if (!$request->isMethod('post')) {
+            return $this->json(['success' => false, 'message' => 'POST required']);
+        }
+
+        $filename = $request->getParameter('filename', '');
+        $slug = $request->getParameter('slug', '');
+
+        if (empty($filename) || empty($slug)) {
+            return $this->json(['success' => false, 'message' => 'Missing filename or slug']);
+        }
+
+        // Sanitize filename — only allow basename (no path traversal)
+        $filename = basename($filename);
+
+        // Get the disk path from settings
+        $diskPath = '';
+        try {
+            $diskPath = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                ->where('setting_key', 'ftp_disk_path')
+                ->value('setting_value');
+        } catch (\Exception $e) {
+            return $this->json(['success' => false, 'message' => 'Cannot read FTP settings']);
+        }
+
+        if (empty($diskPath)) {
+            return $this->json(['success' => false, 'message' => 'FTP disk path not configured']);
+        }
+
+        $filePath = rtrim($diskPath, '/') . '/' . $filename;
+
+        if (!file_exists($filePath) || !is_readable($filePath)) {
+            return $this->json(['success' => false, 'message' => 'File not found or not readable: ' . $filename]);
+        }
+
+        // Check file size — refuse files > 2 GB
+        $fileSize = filesize($filePath);
+        if ($fileSize > 2 * 1024 * 1024 * 1024) {
+            return $this->json(['success' => false, 'message' => 'File too large (max 2 GB)']);
+        }
+
+        // Resolve the resource from slug via Laravel QB (reliable across instances)
+        $objectId = \Illuminate\Database\Capsule\Manager::table('slug')
+            ->where('slug', $slug)
+            ->value('object_id');
+        if (!$objectId) {
+            return $this->json(['success' => false, 'message' => 'Resource not found for slug: ' . $slug]);
+        }
+
+        // Load as InformationObject first, fall back to Actor
+        $resource = \QubitInformationObject::getById($objectId);
+        if (!$resource) {
+            $resource = \QubitActor::getById($objectId);
+        }
+        if (!$resource) {
+            return $this->json(['success' => false, 'message' => 'Resource object not found (id: ' . $objectId . ')']);
+        }
+
+        // Check ACL
+        if (!AclService::check($resource, 'update')) {
+            return $this->json(['success' => false, 'message' => 'Permission denied']);
+        }
+
+        // Check if resource already has a digital object
+        if (null !== $resource->getDigitalObject()) {
+            return $this->json(['success' => false, 'message' => 'Resource already has a digital object']);
+        }
+
+        // Check upload limits
+        if (!\QubitDigitalObject::isUploadAllowed()) {
+            return $this->json(['success' => false, 'message' => 'Upload limit reached']);
+        }
+
+        try {
+            // Read file content and create digital object exactly like a normal upload
+            $content = file_get_contents($filePath);
+            if ($content === false) {
+                return $this->json(['success' => false, 'message' => 'Failed to read file']);
+            }
+
+            $digitalObject = new \QubitDigitalObject();
+            $digitalObject->assets[] = new \QubitAsset($filename, $content);
+            $digitalObject->usageId = \QubitTerm::MASTER_ID;
+
+            $resource->digitalObjectsRelatedByobjectId[] = $digitalObject;
+            $resource->save();
+
+            // Free memory
+            unset($content);
+
+            // Run metadata extraction in background if available
+            if ($resource instanceof \QubitInformationObject) {
+                $script = \sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/lib/process_metadata.php';
+                if (file_exists($script)) {
+                    $ioId = $resource->id;
+                    $cmd = "php $script $ioId >> /var/log/atom_metadata.log 2>&1 &";
+                    exec($cmd);
+                }
+
+                // Update XML exports
+                $resource->updateXmlExports();
+            }
+
+            // Build redirect URL
+            $redirectUrl = \sfContext::getInstance()->getRouting()->generate(null, [$resource, 'module' => 'object']);
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Digital object uploaded successfully with derivatives',
+                'redirect' => $redirectUrl,
+            ]);
+        } catch (\Exception $e) {
+            return $this->json(['success' => false, 'message' => 'Import failed: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
      * AJAX: delete a remote file.
      */
     public function executeDeleteFile(sfWebRequest $request)

@@ -221,6 +221,8 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_login', '/registry/login', 'login');
         $loader->any('registry_register', '/registry/register', 'register');
         $loader->any('registry_logout', '/registry/logout', 'logout');
+        $loader->any('registry_forgot_password', '/registry/forgot-password', 'forgotPassword');
+        $loader->any('registry_reset_password', '/registry/reset-password', 'resetPassword');
         $loader->any('registry_oauth_start', '/registry/oauth/:provider', 'oauthStart', ['provider' => '[a-z]+']);
         $loader->any('registry_oauth_callback', '/registry/oauth/:provider/callback', 'oauthCallback', ['provider' => '[a-z]+']);
 

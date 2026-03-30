@@ -340,6 +340,95 @@ def handle_relationship():
         return jsonify({'success': False, 'error': str(e)})
 
 
+import os
+from werkzeug.utils import secure_filename
+
+UPLOAD_DIR = '/mnt/nas/heratio/ric-uploads'
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'tif', 'tiff', 'pdf', 'webp'}
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+@app.route('/api/editor/upload', methods=['POST'])
+def upload_file():
+    """Upload an image/file and link it to a RiC entity as rico:Instantiation."""
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'}), 400
+
+    f = request.files['file']
+    entity_uri = request.form.get('entity_uri', '').strip()
+
+    if not f.filename:
+        return jsonify({'error': 'Empty filename'}), 400
+    if not entity_uri:
+        return jsonify({'error': 'entity_uri is required'}), 400
+
+    ext = f.filename.rsplit('.', 1)[-1].lower() if '.' in f.filename else ''
+    if ext not in ALLOWED_EXTENSIONS:
+        return jsonify({'error': f'File type .{ext} not allowed. Accepted: {", ".join(ALLOWED_EXTENSIONS)}'}), 400
+
+    # Save file: /mnt/nas/heratio/ric-uploads/{entity-slug}/{filename}
+    entity_slug = entity_uri.rstrip('/').split('/')[-1]
+    entity_dir = os.path.join(UPLOAD_DIR, entity_slug)
+    os.makedirs(entity_dir, exist_ok=True)
+
+    filename = secure_filename(f.filename)
+    filepath = os.path.join(entity_dir, filename)
+    f.save(filepath)
+
+    # Create a rico:Instantiation in the graph store
+    inst_id = uuid.uuid4().hex[:8]
+    inst_uri = f"{BASE_URI}/instantiation/{entity_slug}-{inst_id}"
+    public_url = f"https://heratio.theahg.co.za/ric-uploads/{entity_slug}/{filename}"
+
+    update = f"""
+    INSERT DATA {{
+        <{inst_uri}> a rico:Instantiation ;
+            rico:title "{filename}" ;
+            rico:identifier "{inst_id}" ;
+            rico:hasProductionTechniqueType "digital" ;
+            rdfs:seeAlso <{public_url}> .
+        <{entity_uri}> rico:hasInstantiation <{inst_uri}> .
+    }}
+    """
+    ok = sparql_update(update)
+
+    if ok:
+        return jsonify({
+            'success': True,
+            'uri': inst_uri,
+            'file_url': public_url,
+            'filename': filename,
+            'entity_uri': entity_uri,
+        })
+    else:
+        return jsonify({'error': 'Failed to update graph store'}), 500
+
+
+@app.route('/api/editor/files/<path:entity_uri>')
+def list_files(entity_uri):
+    """List files (Instantiations) attached to an entity."""
+    if not entity_uri.startswith('http'):
+        entity_uri = f"https://{entity_uri}"
+
+    query = f"""
+    SELECT ?inst ?title ?url WHERE {{
+        <{entity_uri}> rico:hasInstantiation ?inst .
+        ?inst a rico:Instantiation .
+        OPTIONAL {{ ?inst rico:title ?title }}
+        OPTIONAL {{ ?inst rdfs:seeAlso ?url }}
+    }}
+    """
+    result = sparql_query(query)
+    files = []
+    if result:
+        for row in result['results']['bindings']:
+            files.append({
+                'uri': row['inst']['value'],
+                'title': row.get('title', {}).get('value', ''),
+                'url': row.get('url', {}).get('value', ''),
+            })
+    return jsonify({'files': files, 'count': len(files)})
+
+
 if __name__ == '__main__':
     print("RiC Editor API starting on port 5002...")
     app.run(host='0.0.0.0', port=5002, debug=True)

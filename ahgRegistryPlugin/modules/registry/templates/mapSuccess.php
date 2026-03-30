@@ -13,10 +13,15 @@
 ]]); ?>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h3 mb-0"><?php echo __('Institutions Map'); ?></h1>
-  <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionBrowse']); ?>" class="btn btn-outline-primary btn-sm">
-    <i class="fas fa-list me-1"></i> <?php echo __('List View'); ?>
-  </a>
+  <h1 class="h3 mb-0"><?php echo __('Institutions & Vendors Map'); ?></h1>
+  <div>
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionBrowse']); ?>" class="btn btn-outline-primary btn-sm">
+      <i class="fas fa-university me-1"></i> <?php echo __('Institutions'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'vendorBrowse']); ?>" class="btn btn-outline-success btn-sm">
+      <i class="fas fa-building me-1"></i> <?php echo __('Vendors'); ?>
+    </a>
+  </div>
 </div>
 
 <div class="row">
@@ -136,6 +141,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
       listContainer.appendChild(item);
     }
+  });
+
+  // ---- Vendor markers ----
+  var vendors = <?php echo json_encode($vendors ?? [], JSON_UNESCAPED_UNICODE); ?>;
+
+  vendors.forEach(function(v) {
+    if (!v.latitude || !v.longitude) return;
+
+    var vendorColor = '#198754'; // green for vendors
+    var typeLabel = (v.vendor_type || 'vendor').replace(/_/g, ' ');
+    typeLabel = typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1);
+
+    var vIcon = L.divIcon({
+      className: 'registry-marker',
+      html: '<div style="background-color: ' + vendorColor + '; width: 12px; height: 12px; border-radius: 2px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transform: rotate(45deg);"></div>',
+      iconSize: [16, 16],
+      iconAnchor: [8, 8]
+    });
+
+    var popup = '<div style="min-width: 200px;">'
+      + '<strong>' + escapeHtml(v.name) + '</strong>'
+      + '<br><span class="badge bg-success" style="font-size: 10px;"><i class="fas fa-building me-1"></i>' + typeLabel + '</span>';
+
+    if (v.city || v.country) {
+      popup += '<br><small class="text-muted">' + escapeHtml([v.city, v.country].filter(Boolean).join(', ')) + '</small>';
+    }
+    if (v.slug) {
+      popup += '<br><a href="/registry/vendors/' + escapeHtml(v.slug) + '" class="small"><?php echo __('View Profile'); ?> &rarr;</a>';
+    }
+    popup += '</div>';
+
+    L.marker([parseFloat(v.latitude), parseFloat(v.longitude)], { icon: vIcon })
+      .addTo(map)
+      .bindPopup(popup);
   });
 
   function escapeHtml(str) {

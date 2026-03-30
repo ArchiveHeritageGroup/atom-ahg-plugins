@@ -170,14 +170,7 @@ class registryActions extends AhgController
         $userId = $this->getCurrentUserId();
         $db = \Illuminate\Database\Capsule\Manager::class;
 
-        if ($this->isAdmin()) {
-            return $db::table('registry_institution')
-                ->orderBy('name')
-                ->get()
-                ->all();
-        }
-
-        // Junction table
+        // Junction table — same for admin and regular users
         $linked = $db::table('registry_user_institution as rui')
             ->join('registry_institution as ri', 'ri.id', '=', 'rui.institution_id')
             ->where('rui.user_id', $userId)
@@ -408,6 +401,16 @@ class registryActions extends AhgController
     {
         $svc = $this->loadService('InstitutionService');
         $this->institutions = $svc->getForMap();
+
+        // Vendors with coordinates
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $this->vendors = $db::table('registry_vendor')
+            ->where('is_active', 1)
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->select('id', 'name', 'slug', 'vendor_type', 'city', 'country', 'latitude', 'longitude', 'logo_path', 'is_verified')
+            ->get()->all();
+
         $this->defaultLat = $this->getRegistrySetting('map_default_lat', '-30.5595');
         $this->defaultLng = $this->getRegistrySetting('map_default_lng', '22.9375');
         $this->defaultZoom = $this->getRegistrySetting('map_default_zoom', '5');
@@ -435,8 +438,9 @@ class registryActions extends AhgController
             'direction' => $request->getParameter('dir', 'asc'),
         ]);
 
-        // Load current user's institution IDs for "My Institution" badge
+        // Load current user's institution IDs and full objects for pinned section
         $this->myInstitutionIds = [];
+        $this->myInstitutions = [];
         $userId = $this->getCurrentUserId();
         if ($userId) {
             $db = \Illuminate\Database\Capsule\Manager::class;
@@ -444,6 +448,15 @@ class registryActions extends AhgController
                 ->where('user_id', $userId)
                 ->pluck('institution_id')
                 ->all();
+            if (!empty($this->myInstitutionIds)) {
+                $this->myInstitutions = $db::table('registry_institution')
+                    ->selectRaw('registry_institution.*, (SELECT COUNT(*) FROM registry_instance WHERE registry_instance.institution_id = registry_institution.id) as instance_count')
+                    ->whereIn('id', $this->myInstitutionIds)
+                    ->where('is_active', 1)
+                    ->orderBy('name')
+                    ->get()
+                    ->all();
+            }
         }
     }
 
@@ -1521,11 +1534,14 @@ class registryActions extends AhgController
                 'record_count' => $request->getParameter('record_count', '') !== '' ? (int) $request->getParameter('record_count') : null,
                 'digital_object_count' => $request->getParameter('digital_object_count', '') !== '' ? (int) $request->getParameter('digital_object_count') : null,
                 'storage_gb' => $request->getParameter('storage_gb', '') !== '' ? $request->getParameter('storage_gb') : null,
-                'descriptive_standard' => $request->getParameter('descriptive_standard', '') ?: null,
+                'descriptive_standard' => is_array($request->getParameter('descriptive_standard')) ? json_encode($request->getParameter('descriptive_standard')) : ($request->getParameter('descriptive_standard', '') ?: null),
                 'feature_usage' => $featureUsage,
                 'sync_enabled' => $request->getParameter('sync_enabled', 0) ? 1 : 0,
                 'description' => trim($request->getParameter('description', '')),
                 'is_public' => $request->getParameter('is_public', 0) ? 1 : 0,
+                'multi_repository' => $request->getParameter('multi_repository', 0) ? 1 : 0,
+                'repository_count' => $request->getParameter('repository_count', '') !== '' ? (int) $request->getParameter('repository_count') : null,
+                'deployment_architecture' => $request->getParameter('deployment_architecture', '') ?: null,
             ];
 
             if ('' === $data['name']) {
@@ -1595,11 +1611,14 @@ class registryActions extends AhgController
                 'record_count' => $request->getParameter('record_count', '') !== '' ? (int) $request->getParameter('record_count') : null,
                 'digital_object_count' => $request->getParameter('digital_object_count', '') !== '' ? (int) $request->getParameter('digital_object_count') : null,
                 'storage_gb' => $request->getParameter('storage_gb', '') !== '' ? $request->getParameter('storage_gb') : null,
-                'descriptive_standard' => $request->getParameter('descriptive_standard', '') ?: null,
+                'descriptive_standard' => is_array($request->getParameter('descriptive_standard')) ? json_encode($request->getParameter('descriptive_standard')) : ($request->getParameter('descriptive_standard', '') ?: null),
                 'feature_usage' => $featureUsage,
                 'sync_enabled' => $request->getParameter('sync_enabled', 0) ? 1 : 0,
                 'description' => trim($request->getParameter('description', '')),
                 'is_public' => $request->getParameter('is_public', 0) ? 1 : 0,
+                'multi_repository' => $request->getParameter('multi_repository', 0) ? 1 : 0,
+                'repository_count' => $request->getParameter('repository_count', '') !== '' ? (int) $request->getParameter('repository_count') : null,
+                'deployment_architecture' => $request->getParameter('deployment_architecture', '') ?: null,
             ];
 
             if ('' === $data['name']) {
@@ -1709,7 +1728,13 @@ class registryActions extends AhgController
 
         $this->setTemplate('institutionSoftware');
 
-        $this->institution = $this->getMyInstitution();
+        // Admin can target a specific institution via ?inst= parameter
+        $targetId = (int) $request->getParameter('inst', 0);
+        if ($targetId && $this->isAdmin()) {
+            $this->institution = \Illuminate\Database\Capsule\Manager::table('registry_institution')->where('id', $targetId)->first();
+        } else {
+            $this->institution = $this->getMyInstitution();
+        }
         if (!$this->institution) {
             $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
@@ -1743,7 +1768,8 @@ class registryActions extends AhgController
                 }
             }
 
-            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']));
+            $instParam = $targetId ? '?inst=' . $targetId : '';
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']) . $instParam);
 
             return;
         }
@@ -1768,7 +1794,13 @@ class registryActions extends AhgController
 
         $this->setTemplate('institutionVendors');
 
-        $this->institution = $this->getMyInstitution();
+        // Admin can target a specific institution via ?inst= parameter
+        $targetId = (int) $request->getParameter('inst', 0);
+        if ($targetId && $this->isAdmin()) {
+            $this->institution = \Illuminate\Database\Capsule\Manager::table('registry_institution')->where('id', $targetId)->first();
+        } else {
+            $this->institution = $this->getMyInstitution();
+        }
         if (!$this->institution) {
             $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
 
@@ -1797,7 +1829,8 @@ class registryActions extends AhgController
                 }
             }
 
-            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']));
+            $instParam = $targetId ? '?inst=' . $targetId : '';
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']) . $instParam);
 
             return;
         }
@@ -2039,6 +2072,8 @@ class registryActions extends AhgController
                 'province_state' => trim($request->getParameter('province_state', '')),
                 'postal_code' => trim($request->getParameter('postal_code', '')),
                 'country' => trim($request->getParameter('country', '')),
+                'latitude' => $request->getParameter('latitude', '') !== '' ? $request->getParameter('latitude') : null,
+                'longitude' => $request->getParameter('longitude', '') !== '' ? $request->getParameter('longitude') : null,
                 'company_registration' => trim($request->getParameter('company_registration', '')) ?: null,
                 'vat_number' => trim($request->getParameter('vat_number', '')) ?: null,
                 'established_year' => $request->getParameter('established_year', '') !== '' ? (int) $request->getParameter('established_year') : null,
@@ -3161,7 +3196,8 @@ class registryActions extends AhgController
             $svc->delete($id);
         }
 
-        $this->redirect(url_for(['module' => 'registry', 'action' => 'adminInstitutions']));
+        $returnUrl = $request->getParameter('return', '');
+        $this->redirect($returnUrl ?: url_for(['module' => 'registry', 'action' => 'adminInstitutions']));
     }
 
     /**
@@ -5327,6 +5363,192 @@ class registryActions extends AhgController
         }
 
         $this->redirect('/registry/login');
+    }
+
+    public function executeForgotPassword($request)
+    {
+        $this->error = null;
+        $this->success = null;
+
+        if ($request->isMethod('post')) {
+            $email = trim($request->getParameter('email', ''));
+            if (empty($email)) {
+                $this->error = 'Please enter your email address.';
+
+                return;
+            }
+
+            $db = \Illuminate\Database\Capsule\Manager::class;
+            $userRow = $db::table('user')->where('email', $email)->first();
+
+            // Always show success to prevent email enumeration
+            if (!$userRow) {
+                $this->success = 'If an account with that email exists, a password reset link has been sent.';
+
+                return;
+            }
+
+            // Generate token
+            $token = bin2hex(random_bytes(32));
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+            // Invalidate any existing tokens for this user
+            $db::table('registry_password_reset')
+                ->where('user_id', $userRow->id)
+                ->whereNull('used_at')
+                ->update(['used_at' => date('Y-m-d H:i:s')]);
+
+            // Insert new token
+            $db::table('registry_password_reset')->insert([
+                'user_id' => $userRow->id,
+                'email' => $email,
+                'token' => $token,
+                'expires_at' => $expiresAt,
+            ]);
+
+            // Build reset URL
+            $baseUrl = $request->getUriPrefix();
+            $resetUrl = $baseUrl . '/registry/reset-password?token=' . $token;
+
+            // Send email
+            $this->sendPasswordResetEmail($email, $resetUrl);
+
+            $this->success = 'If an account with that email exists, a password reset link has been sent.';
+        }
+    }
+
+    public function executeResetPassword($request)
+    {
+        $this->error = null;
+        $this->success = null;
+        $this->validToken = false;
+
+        $token = $request->getParameter('token', '');
+        if (empty($token)) {
+            $this->error = 'Invalid or missing reset token.';
+
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $reset = $db::table('registry_password_reset')
+            ->where('token', $token)
+            ->whereNull('used_at')
+            ->where('expires_at', '>', date('Y-m-d H:i:s'))
+            ->first();
+
+        if (!$reset) {
+            $this->error = 'This reset link has expired or is invalid. Please request a new one.';
+
+            return;
+        }
+
+        $this->validToken = true;
+        $this->token = $token;
+
+        if ($request->isMethod('post')) {
+            $password = $request->getParameter('password', '');
+            $passwordConfirm = $request->getParameter('password_confirm', '');
+
+            if (strlen($password) < 8) {
+                $this->error = 'Password must be at least 8 characters.';
+
+                return;
+            }
+
+            if ($password !== $passwordConfirm) {
+                $this->error = 'Passwords do not match.';
+
+                return;
+            }
+
+            try {
+                // Update password
+                $salt = bin2hex(random_bytes(16));
+                $sha1 = sha1($salt . $password);
+                $hash = password_hash($sha1, PASSWORD_ARGON2I);
+
+                $db::table('user')->where('id', $reset->user_id)->update([
+                    'salt' => $salt,
+                    'password_hash' => $hash,
+                ]);
+
+                // Mark token as used
+                $db::table('registry_password_reset')
+                    ->where('id', $reset->id)
+                    ->update(['used_at' => date('Y-m-d H:i:s')]);
+
+                $this->redirect('/registry/login?password_reset=1');
+
+                return;
+            } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
+                $this->logError('Password reset failed: ' . $e->getMessage(), $e);
+                $this->error = 'Password reset failed. Please try again.';
+            }
+        }
+    }
+
+    private function sendPasswordResetEmail(string $email, string $resetUrl): bool
+    {
+        $nlSvc = $this->loadService('NewsletterService');
+        $smtp = $nlSvc->getSmtpSettings();
+
+        $subject = 'AtoM Registry — Password Reset';
+        $htmlContent = '<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">'
+            . '<h2 style="color: #0d6efd;">Password Reset Request</h2>'
+            . '<p>You (or someone) requested a password reset for your AtoM Registry account.</p>'
+            . '<p><a href="' . htmlspecialchars($resetUrl, ENT_QUOTES, 'UTF-8') . '" style="display: inline-block; padding: 10px 24px; background: #0d6efd; color: #fff; text-decoration: none; border-radius: 5px;">Reset My Password</a></p>'
+            . '<p>This link will expire in 1 hour.</p>'
+            . '<p style="color: #999; font-size: 12px;">If you did not request this, you can safely ignore this email.</p>'
+            . '</div>';
+
+        // Try PHPMailer/SMTP first
+        if (!empty($smtp['smtp_enabled'])) {
+            if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+                $autoload = \sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
+                if (file_exists($autoload)) {
+                    require_once $autoload;
+                }
+            }
+        }
+        if (!empty($smtp['smtp_enabled']) && class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
+            try {
+                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                $mail->isSMTP();
+                $mail->Host = $smtp['smtp_host'];
+                $mail->Port = (int) $smtp['smtp_port'];
+                $mail->SMTPAuth = true;
+                $mail->Username = $smtp['smtp_username'];
+                $mail->Password = $smtp['smtp_password'];
+                if ('tls' === $smtp['smtp_encryption']) {
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                } elseif ('ssl' === $smtp['smtp_encryption']) {
+                    $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                }
+                $mail->setFrom($smtp['smtp_from_email'] ?: 'noreply@theahg.co.za', $smtp['smtp_from_name'] ?: 'AtoM Registry');
+                $mail->addAddress($email);
+                $mail->isHTML(true);
+                $mail->Subject = $subject;
+                $mail->Body = $htmlContent;
+                $mail->send();
+
+                return true;
+            } catch (\Exception $e) {
+                error_log('Registry password reset SMTP error: ' . $e->getMessage());
+            }
+        }
+
+        // Fallback to mail()
+        $fromEmail = $smtp['smtp_from_email'] ?: 'noreply@theahg.co.za';
+        $fromName = $smtp['smtp_from_name'] ?: 'AtoM Registry';
+        $headers = [
+            'MIME-Version: 1.0',
+            'Content-type: text/html; charset=UTF-8',
+            'From: ' . $fromName . ' <' . $fromEmail . '>',
+        ];
+
+        return @mail($email, $subject, $htmlContent, implode("\r\n", $headers));
     }
 
     public function executeOauthStart($request)

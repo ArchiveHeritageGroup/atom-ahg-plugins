@@ -114,6 +114,23 @@
 
   <!-- Results grid -->
   <div class="col-lg-9">
+
+    <?php
+      $_page = (int) ($result['page'] ?? 1);
+      $_hasMyInst = isset($myInstitutions) && count($myInstitutions) > 0;
+    ?>
+    <?php if ($_hasMyInst && $_page === 1): ?>
+    <div class="mb-4">
+      <h6 class="text-muted mb-2"><i class="fas fa-user me-1"></i><?php echo __('My Institutions'); ?></h6>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3 mb-3">
+        <?php foreach ($myInstitutions as $myInst): ?>
+          <?php include_partial('registry/institutionCard', ['item' => $myInst, 'myInstitutionIds' => $myInstitutionIds ?? []]); ?>
+        <?php endforeach; ?>
+      </div>
+      <hr>
+    </div>
+    <?php endif; ?>
+
     <?php if (!empty($result['items'])): ?>
       <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3">
         <?php foreach ($result['items'] as $inst): ?>
