@@ -1114,6 +1114,53 @@ class registryActions extends AhgController
         $this->myInstitutions = $this->getMyInstitutions();
     }
 
+    public function executeMyInstitutionClaim($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $instId = (int) $request->getParameter('institution_id', 0);
+        $userId = $this->getCurrentUserId();
+        $role = $request->getParameter('role', 'manager');
+        $validRoles = ['owner', 'manager'];
+        if (!in_array($role, $validRoles)) {
+            $role = 'manager';
+        }
+
+        // Only admins can claim as owner; regular users claim as manager
+        if ('owner' === $role && !$this->isAdmin()) {
+            $role = 'manager';
+        }
+
+        $inst = $db::table('registry_institution')->where('id', $instId)->first();
+        if (!$inst) {
+            $this->forward404();
+            return;
+        }
+
+        // Check if already linked
+        $exists = $db::table('registry_user_institution')
+            ->where('user_id', $userId)
+            ->where('institution_id', $instId)
+            ->exists();
+
+        if (!$exists) {
+            $db::table('registry_user_institution')->insert([
+                'user_id' => $userId,
+                'institution_id' => $instId,
+                'role' => $role,
+                'is_primary' => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $this->getUser()->setFlash('success', 'Institution claimed successfully as ' . $role . '.');
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']) . '?inst=' . $instId);
+    }
+
     public function executeInstitutionRegister($request)
     {
         $user = $this->requireLogin();
@@ -4032,7 +4079,10 @@ class registryActions extends AhgController
         $this->saved = false;
 
         if ($request->isMethod('post')) {
-            foreach ($this->settings as $setting) {
+            // Re-read from DB to avoid sfOutputEscaper double-encoding on fallback values
+            $freshSettings = \Illuminate\Database\Capsule\Manager::table('registry_settings')
+                ->orderBy('setting_key')->get();
+            foreach ($freshSettings as $setting) {
                 $value = $request->getParameter('setting_' . $setting->setting_key, $setting->setting_value);
                 \Illuminate\Database\Capsule\Manager::table('registry_settings')
                     ->where('id', $setting->id)

@@ -113,6 +113,7 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_my_institution_software', '/registry/my/institution/software', 'myInstitutionSoftware');
         $loader->any('registry_my_institution_vendors', '/registry/my/institution/vendors', 'myInstitutionVendors');
         $loader->post('registry_my_institution_vendor_remove', '/registry/my/institution/vendors/:id/remove', 'myInstitutionVendorRemove', ['id' => '\d+']);
+        $loader->post('registry_my_institution_claim', '/registry/my/institution/claim', 'myInstitutionClaim');
         $loader->any('registry_my_institution_review', '/registry/my/institution/review/:type/:id', 'myInstitutionReview', ['type' => '[a-z]+', 'id' => '\d+']);
 
         // ============================================================
