@@ -66,10 +66,14 @@ class ConditionAIService
         // Call Ollama
         $url = rtrim($this->ollamaUrl, '/') . '/api/generate';
         $payload = json_encode([
-            'model'  => $this->model,
-            'prompt' => $prompt,
-            'images' => [$base64],
-            'stream' => false,
+            'model'   => $this->model,
+            'prompt'  => $prompt,
+            'images'  => [$base64],
+            'stream'  => false,
+            'options' => [
+                'temperature' => 0,
+                'seed'        => 42,
+            ],
         ]);
 
         $ch = curl_init($url);
@@ -137,6 +141,7 @@ class ConditionAIService
         $checkId = DB::table('spectrum_condition_check')->insertGetId([
             'object_id'              => $objectId,
             'check_date'             => date('Y-m-d'),
+            'checked_by'             => 'AI (' . $this->model . ')',
             'overall_condition'      => $result['overall_rating'],
             'condition_rating'       => $result['overall_rating'],
             'condition_description'  => $result['description'],
@@ -151,10 +156,13 @@ class ConditionAIService
             'updated_at'             => date('Y-m-d H:i:s'),
         ]);
 
-        // Link photo to this check
-        DB::table('spectrum_condition_photo')
-            ->where('id', $photoId)
-            ->update(['condition_check_id' => $checkId]);
+        // Link photo to this check — duplicate the reference, don't move from original check
+        $photoData = (array) $photo;
+        unset($photoData['id']);
+        $photoData['condition_check_id'] = $checkId;
+        $photoData['created_at'] = date('Y-m-d H:i:s');
+        $photoData['updated_at'] = null;
+        DB::table('spectrum_condition_photo')->insert($photoData);
 
         // Insert damage records
         if (!empty($result['damage_types'])) {

@@ -105,9 +105,9 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
               <tbody>
                 <?php foreach ($conditions as $condition): ?>
                   <tr>
-                    <td><?php echo esc_entities($condition->check_date ?? '') ?></td>
+                    <td><?php echo $condition->check_date ? date('d M Y', strtotime($condition->check_date)) : '-' ?></td>
                     <td>
-                      <?php 
+                      <?php
                       $status = $condition->overall_condition ?? 'unknown';
                       $badgeClass = match($status) {
                           'good', 'excellent' => 'bg-success',
@@ -118,14 +118,31 @@ $baseUrl = sfContext::getInstance()->getRequest()->getRelativeUrlRoot() . '/inde
                       ?>
                       <span class="badge <?php echo $badgeClass ?>"><?php echo esc_entities(ucfirst($status)) ?></span>
                     </td>
-                    <td><?php echo esc_entities($condition->check_type ?? '') ?></td>
-                    <td><?php echo esc_entities($condition->assessor ?? '') ?></td>
-                    <td><?php echo esc_entities(truncate_text($condition->notes ?? '', 50)) ?></td>
                     <td>
-                      <a href="<?php echo url_for('@condition_photos?id=' . $condition->id) ?>" 
-                         class="btn btn-sm btn-outline-primary" title="<?php echo __('View Photos') ?>">
-                        <i class="fas fa-images"></i>
-                      </a>
+                      <?php
+                      $wfState = $condition->workflow_state ?? 'unknown';
+                      $wfBadge = match($wfState) {
+                          'completed' => 'bg-success',
+                          'scheduled' => 'bg-info',
+                          'in_progress' => 'bg-warning text-dark',
+                          default => 'bg-secondary'
+                      };
+                      ?>
+                      <span class="badge <?php echo $wfBadge ?>"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $wfState))) ?></span>
+                    </td>
+                    <td><?php echo esc_entities($condition->checked_by ?? '-') ?></td>
+                    <td><?php echo esc_entities(mb_substr($condition->condition_note ?? '', 0, 50)) ?><?php echo mb_strlen($condition->condition_note ?? '') > 50 ? '...' : '' ?></td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="/condition/check/<?php echo $condition->id ?>/view"
+                           class="btn btn-sm btn-outline-success" title="<?php echo __('View Full Report') ?>">
+                          <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="<?php echo url_for('@condition_photos?id=' . $condition->id) ?>"
+                           class="btn btn-sm btn-outline-primary" title="<?php echo __('View Photos') ?>">
+                          <i class="fas fa-images"></i>
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 <?php endforeach; ?>

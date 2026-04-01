@@ -59,8 +59,8 @@ class DisplayTypeDetector
         'map' => 'dam',
         'poster' => 'dam',
 
-        // Universal
-        'collection' => 'universal',
+        // Archive (default — parent/event detection overrides for other sectors)
+        'collection' => 'archive',
     ];
 
     /**

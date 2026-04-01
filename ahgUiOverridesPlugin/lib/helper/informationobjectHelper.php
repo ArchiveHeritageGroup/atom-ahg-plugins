@@ -36,6 +36,21 @@ function render_digital_object_viewer($resource, $digitalObject = null, array $o
         $ext = strtolower(pathinfo($digitalObject->name ?? '', PATHINFO_EXTENSION));
         $doId = $digitalObject->id ?? 0;
 
+        // External URI (usage_id 166) -> embed or link, not IIIF
+        // Unescape Propel object to reliably access usageId (sfOutputEscaper hides __get properties)
+        $rawDo = (method_exists($digitalObject, 'getRawValue'))
+            ? $digitalObject->getRawValue()
+            : (class_exists('sfOutputEscaper') ? sfOutputEscaper::unescape($digitalObject) : $digitalObject);
+        $usageId = $rawDo->usageId ?? null;
+        $doPath = $rawDo->path ?? '';
+        if ($usageId == 166 && preg_match('#^https?://#', $doPath)) {
+            return _render_external_uri_viewer($doPath, $rawDo);
+        }
+        // Also catch external URLs stored in path without usage_id set
+        if (!$usageId && !$ext && preg_match('#^https?://#', $doPath)) {
+            return _render_external_uri_viewer($doPath, $rawDo);
+        }
+
         // Extension-based routing for special formats (BEFORE video/audio check)
         // PSD / CR2 / RAW camera formats -> converted image viewer
         if (in_array($ext, ['psd', 'cr2', 'nef', 'arw', 'dng'])) {
@@ -156,6 +171,99 @@ endif;
 // ========================================================================
 // Format-specific viewer renderers
 // ========================================================================
+
+/**
+ * Render external URI viewer (usage_id 166)
+ * Embeds known platforms (Sketchfab, YouTube, Vimeo) via iframe,
+ * falls back to a styled link for other URLs.
+ */
+function _render_external_uri_viewer(string $url, $digitalObject): string
+{
+    $safeUrl = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+    $n = sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
+
+    // Sketchfab 3D models
+    if (preg_match('#sketchfab\.com/3d-models/([a-z0-9-]+)#i', $url, $m)) {
+        // Extract the model hash (last 32 hex chars of the slug)
+        $slug = $m[1];
+        if (preg_match('/([a-f0-9]{32})$/i', $slug, $hm)) {
+            $embedUrl = 'https://sketchfab.com/models/' . $hm[1] . '/embed';
+        } else {
+            $embedUrl = 'https://sketchfab.com/models/' . $slug . '/embed';
+        }
+        $safeEmbed = htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8');
+        $uid = 'sf-' . substr(md5($url), 0, 8);
+
+        $html = '<div class="btn-group btn-group-sm mb-2 d-flex justify-content-center" role="group">';
+        $html .= '<button type="button" class="btn btn-primary" data-ext-toggle="' . $uid . '" data-ext-view="embed">';
+        $html .= '<i class="fas fa-cube me-1"></i>Embedded Viewer</button>';
+        $html .= '<button type="button" class="btn btn-outline-primary" data-ext-toggle="' . $uid . '" data-ext-view="link">';
+        $html .= '<i class="fas fa-external-link-alt me-1"></i>View on Sketchfab</button>';
+        $html .= '</div>';
+
+        // Embedded viewer (default visible)
+        $html .= '<div id="' . $uid . '-embed" data-ext-panel="' . $uid . '">';
+        $html .= '<div class="ratio ratio-16x9 mb-2">';
+        $html .= '<iframe src="' . $safeEmbed . '" ';
+        $html .= 'allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen frameborder="0"></iframe>';
+        $html .= '</div></div>';
+
+        // Sketchfab link card (hidden by default)
+        $html .= '<div id="' . $uid . '-link" class="d-none" data-ext-panel="' . $uid . '">';
+        $html .= '<div class="card border-secondary"><div class="card-body text-center py-5">';
+        $html .= '<i class="fas fa-cube fa-4x text-muted mb-3 d-block"></i>';
+        $html .= '<h5>3D Model on Sketchfab</h5>';
+        $html .= '<p class="text-muted mb-3">This 3D model is hosted on Sketchfab and will open in a new tab.</p>';
+        $html .= '<a href="' . $safeUrl . '" target="_blank" rel="noopener" class="btn btn-primary">';
+        $html .= '<i class="fas fa-external-link-alt me-1"></i>Open on Sketchfab</a>';
+        $html .= '</div></div></div>';
+
+        // Toggle script (CSP-safe with nonce)
+        $html .= '<script ' . $nonceAttr . '>';
+        $html .= 'document.querySelectorAll("[data-ext-toggle=\'' . $uid . '\']").forEach(function(btn){';
+        $html .= 'btn.addEventListener("click",function(){';
+        $html .= 'var v=this.getAttribute("data-ext-view");';
+        $html .= 'document.querySelectorAll("[data-ext-panel=\'' . $uid . '\']").forEach(function(p){p.classList.add("d-none");});';
+        $html .= 'document.getElementById("' . $uid . '-"+v).classList.remove("d-none");';
+        $html .= 'document.querySelectorAll("[data-ext-toggle=\'' . $uid . '\']").forEach(function(b){b.classList.remove("btn-primary");b.classList.add("btn-outline-primary");});';
+        $html .= 'this.classList.remove("btn-outline-primary");this.classList.add("btn-primary");';
+        $html .= '});});</script>';
+
+        return $html;
+    }
+
+    // YouTube
+    if (preg_match('#(?:youtube\.com/watch\?v=|youtu\.be/)([\w-]+)#i', $url, $m)) {
+        $html = '<div class="ratio ratio-16x9 mb-2">';
+        $html .= '<iframe src="https://www.youtube-nocookie.com/embed/' . htmlspecialchars($m[1]) . '" ';
+        $html .= 'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen frameborder="0"></iframe>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    // Vimeo
+    if (preg_match('#vimeo\.com/(\d+)#i', $url, $m)) {
+        $html = '<div class="ratio ratio-16x9 mb-2">';
+        $html .= '<iframe src="https://player.vimeo.com/video/' . $m[1] . '" ';
+        $html .= 'allow="autoplay; fullscreen; picture-in-picture" allowfullscreen frameborder="0"></iframe>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    // Generic external URI — render as a styled link
+    $name = $digitalObject->name ?? basename(parse_url($url, PHP_URL_PATH) ?: $url);
+    $host = parse_url($url, PHP_URL_HOST) ?: 'external resource';
+    $html = '<div class="card border-secondary">';
+    $html .= '<div class="card-body text-center">';
+    $html .= '<i class="fas fa-external-link-alt fa-3x text-muted mb-3 d-block"></i>';
+    $html .= '<h5 class="card-title">' . htmlspecialchars($name) . '</h5>';
+    $html .= '<p class="card-text text-muted">External resource hosted on ' . htmlspecialchars($host) . '</p>';
+    $html .= '<a href="' . $safeUrl . '" target="_blank" rel="noopener" class="btn btn-primary">';
+    $html .= '<i class="fas fa-external-link-alt me-1"></i>Open External Resource</a>';
+    $html .= '</div></div>';
+    return $html;
+}
 
 /**
  * Render converted image viewer (PSD, CR2, JPS, RAW formats)
