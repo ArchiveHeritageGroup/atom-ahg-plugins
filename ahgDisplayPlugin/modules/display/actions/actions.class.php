@@ -57,7 +57,7 @@ class displayActions extends AhgController
         // Get all filter parameters
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
-        $this->topLevelOnly = $request->getParameter('topLevel', '1');
+        $this->topLevelOnly = $request->getParameter('topLevel', '0');
         $this->page = max(1, (int) $request->getParameter('page', 1));
         // Read limit from raw GET: QubitLimitResults filter caps $request->limit
         // to app_hits_per_page, but display browse has its own 10-100 range control.
@@ -491,10 +491,12 @@ class displayActions extends AhgController
         // Filter by publication status - only show Published items (status_id = 160) for guests
         // Authenticated users (editors/admins) can see all items
         if (!$this->getContext()->getUser()->isAuthenticated()) {
-            $query->join('status as pub_st', function($j) {
-                $j->on('pub_st.object_id', '=', 'io.id')
-                  ->where('pub_st.type_id', '=', 158)  // publication status type
-                  ->where('pub_st.status_id', '=', 160); // Published
+            $query->whereExists(function($q) {
+                $q->select(DB::raw(1))
+                  ->from('status')
+                  ->whereRaw('status.object_id = io.id')
+                  ->where('status.type_id', 158)   // publication status type
+                  ->where('status.status_id', 160); // Published
             });
         }
 
@@ -729,7 +731,7 @@ class displayActions extends AhgController
     {
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
-        $this->topLevelOnly = $request->getParameter('topLevel', '1');
+        $this->topLevelOnly = $request->getParameter('topLevel', '0');
         $this->sort = $request->getParameter('sort', 'date');
         $this->sortDir = $request->getParameter('dir', 'desc');
 
@@ -800,7 +802,7 @@ class displayActions extends AhgController
     {
         $typeFilter = $request->getParameter('type');
         $parentId = $request->getParameter('parent');
-        $topLevelOnly = $request->getParameter('topLevel', '1');
+        $topLevelOnly = $request->getParameter('topLevel', '0');
         $sort = $request->getParameter('sort', 'date');
         $sortDir = $request->getParameter('dir', 'desc');
 
