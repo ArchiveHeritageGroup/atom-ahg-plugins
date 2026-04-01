@@ -47,6 +47,19 @@ $discoveryMode = $sf_data->getRaw('discoveryMode') ?: false;
 $discoveryExpanded = $sf_data->getRaw('discoveryExpanded') ?: null;
 $discoveryMeta = $sf_data->getRaw('discoveryMeta') ?: [];
 
+// Separate broken records (no slug) — admin-only diagnostics
+$isAdmin = $sf_user->isAuthenticated() && $sf_user->isAdministrator();
+$brokenItems = [];
+$validObjects = [];
+foreach ($objects as $obj) {
+    if (empty($obj->slug)) {
+        $brokenItems[] = $obj;
+    } else {
+        $validObjects[] = $obj;
+    }
+}
+$objects = $validObjects;
+
 // Build filter params for URLs
 $fp = [
     'type' => $typeFilter,
@@ -505,6 +518,30 @@ function getItemUrl($obj) {
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
+
+  <?php if ($isAdmin && !empty($brokenItems)): ?>
+  <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+    <h6 class="alert-heading mb-2"><i class="fas fa-exclamation-triangle me-1"></i> Data integrity issues detected (<?php echo count($brokenItems); ?> record<?php echo count($brokenItems) > 1 ? 's' : ''; ?>) <span class="fw-normal text-muted">(Administrator view only)</span></h6>
+    <p class="small mb-2">The following records have no slug and cannot be linked. They are excluded from browse results. Run <code>php symfony propel:generate-slugs</code> to fix, or delete if they are test data.</p>
+    <table class="table table-sm table-bordered mb-0 small bg-white">
+      <thead><tr><th>ID</th><th>Title</th><th>Identifier</th><th>Level</th><th>Type</th><th>Issue</th></tr></thead>
+      <tbody>
+        <?php foreach ($brokenItems as $broken): ?>
+        <tr>
+          <td><code><?php echo $broken->id; ?></code></td>
+          <td><?php echo esc_entities($broken->title ?: '[Untitled]'); ?></td>
+          <td><?php echo esc_entities($broken->identifier ?: '-'); ?></td>
+          <td><?php echo esc_entities($broken->level_name ?: '-'); ?></td>
+          <td><?php echo ucfirst($broken->object_type ?: '?'); ?></td>
+          <td><span class="text-danger">Missing slug</span></td>
+        </tr>
+        <?php endforeach; ?>
+      </tbody>
+    </table>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+  <?php endif; ?>
+
   <?php include_partial("displaySearch/glamAdvancedSearchEnhancements"); ?>
   <?php include_partial("displaySearch/glamAdvancedSearch"); ?>
   <!-- Toolbar -->
