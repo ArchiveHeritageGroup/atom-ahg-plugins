@@ -43,15 +43,36 @@
                 .then(r => r.json())
                 .then(manifest => {
                     const tileSources = [];
-                    const sequences = manifest.sequences || [];
-                    for (const seq of sequences) {
-                        for (const canvas of (seq.canvases || [])) {
-                            for (const image of (canvas.images || [])) {
-                                const service = image.resource && image.resource.service;
-                                if (service) {
-                                    const serviceId = service['@id'] || service.id;
-                                    if (serviceId) {
-                                        tileSources.push(serviceId + '/info.json');
+                    if (manifest.sequences) {
+                        // IIIF Presentation API 2.1
+                        for (const seq of manifest.sequences) {
+                            for (const canvas of (seq.canvases || [])) {
+                                for (const image of (canvas.images || [])) {
+                                    const service = image.resource && image.resource.service;
+                                    if (service) {
+                                        const serviceId = service['@id'] || service.id;
+                                        if (serviceId) {
+                                            tileSources.push(serviceId + '/info.json');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } else if (manifest.items) {
+                        // IIIF Presentation API 3.0
+                        for (const canvas of manifest.items) {
+                            for (const annoPage of (canvas.items || [])) {
+                                for (const anno of (annoPage.items || [])) {
+                                    const body = anno.body;
+                                    if (body && body.service) {
+                                        const services = Array.isArray(body.service) ? body.service : [body.service];
+                                        for (const svc of services) {
+                                            const serviceId = svc['@id'] || svc.id;
+                                            if (serviceId) {
+                                                tileSources.push(serviceId + '/info.json');
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
                             }
