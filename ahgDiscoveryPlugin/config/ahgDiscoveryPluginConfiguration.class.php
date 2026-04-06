@@ -60,6 +60,11 @@ class ahgDiscoveryPluginConfiguration extends sfPluginConfiguration
         $loader->any('discovery_click', '/discovery/click', 'click');
         $loader->get('discovery_popular', '/discovery/popular', 'popular');
 
+        // PageIndex routes
+        $loader->get('discovery_pageindex', '/discovery/pageindex', 'pageindex');
+        $loader->any('discovery_build', '/discovery/build', 'build');
+        $loader->any('discovery_pageindex_api', '/discovery/pageindex/api', 'pageindexApi');
+
         $loader->register($routing);
     }
 

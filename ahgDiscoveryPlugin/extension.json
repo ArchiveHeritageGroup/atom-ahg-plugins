@@ -1,8 +1,8 @@
 {
     "name": "Discovery",
     "machine_name": "ahgDiscoveryPlugin",
-    "version": "0.2.0",
-    "description": "Topic discovery and related content — natural language search across collections using NER entities, synonym expansion, and hierarchical context",
+    "version": "1.0.0",
+    "description": "Topic discovery and related content — natural language search with NER, synonym expansion, hierarchical context, and PageIndex LLM-driven retrieval over EAD, PDF, and RiC-O records",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "category": "search",
@@ -16,15 +16,27 @@
     "optional_dependencies": ["ahgAIPlugin", "ahgSemanticSearchPlugin", "ahgSecurityClearancePlugin"],
     "tables": [
         "ahg_discovery_cache",
-        "ahg_discovery_log"
+        "ahg_discovery_log",
+        "ahg_pageindex_tree",
+        "ahg_pageindex_query_log"
     ],
     "features": [
         "Natural language query expansion with synonym lookup",
         "Three-strategy search: keyword, NER entity, hierarchical",
         "Result grouping by collection/fonds",
         "Related content sidebar for record views",
-        "Search analytics and caching"
+        "Search analytics and caching",
+        "PageIndex LLM-driven retrieval: vectorless, reasoning-based search over records",
+        "Tree index builder for EAD finding aids, uploaded PDFs, and RiC-O metadata",
+        "Ollama-powered tree construction and retrieval reasoning (llama3.1:8b)",
+        "Explainable search results with tree node breadcrumb paths",
+        "Admin trigger to index individual information objects"
     ],
+    "llm": {
+        "provider": "ollama",
+        "endpoint": "http://192.168.0.112:11434",
+        "model": "llama3.1:8b"
+    },
     "is_core": false,
     "is_locked": false
 }

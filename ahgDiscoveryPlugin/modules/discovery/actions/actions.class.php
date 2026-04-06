@@ -25,6 +25,11 @@ class discoveryActions extends AhgController
         require_once $pluginDir . '/VectorSearchStrategy.php';
         require_once $pluginDir . '/ResultMerger.php';
         require_once $pluginDir . '/ResultEnricher.php';
+
+        // PageIndex framework services
+        $frameworkDir = \sfConfig::get('sf_root_dir') . '/atom-framework/src/Services';
+        require_once $frameworkDir . '/OllamaPageIndexClient.php';
+        require_once $frameworkDir . '/PageIndexService.php';
     }
 
     /**
@@ -256,6 +261,227 @@ class discoveryActions extends AhgController
         return $this->renderJson([
             'success' => true,
             'topics' => $topics,
+        ]);
+    }
+
+    // ── PageIndex Actions ─────────────────────────────────────────────
+
+    /**
+     * PageIndex search UI — search across all indexed trees using LLM reasoning.
+     *
+     * GET /discovery/pageindex?q=...&type=ead|pdf|rico|all
+     */
+    public function executePageindex($request)
+    {
+        $this->query = trim($request->getParameter('q', ''));
+        $this->type = $request->getParameter('type', 'all');
+
+        if (!in_array($this->type, ['ead', 'pdf', 'rico', 'all'])) {
+            $this->type = 'all';
+        }
+
+        $service = new \AtomFramework\Services\PageIndexService();
+
+        // Get index status counts by type
+        $this->indexCounts = [
+            'ead' => 0,
+            'pdf' => 0,
+            'rico' => 0,
+            'total' => 0,
+        ];
+
+        try {
+            $counts = DB::table('ahg_pageindex_tree')
+                ->select('object_type', DB::raw('COUNT(*) as cnt'), DB::raw("SUM(CASE WHEN status = 'ready' THEN 1 ELSE 0 END) as ready_cnt"))
+                ->groupBy('object_type')
+                ->get();
+
+            foreach ($counts as $row) {
+                $this->indexCounts[$row->object_type] = (int) $row->ready_cnt;
+                $this->indexCounts['total'] += (int) $row->ready_cnt;
+            }
+        } catch (\Exception $e) {
+            // Table may not exist yet
+        }
+
+        // If a query is provided, search all ready trees
+        $this->results = [];
+        $this->totalMatches = 0;
+        $this->searchPerformed = false;
+
+        if (!empty($this->query)) {
+            $this->searchPerformed = true;
+            $objectType = ($this->type === 'all') ? null : $this->type;
+
+            $searchResult = $service->searchAll(
+                $this->query,
+                $objectType,
+                20,
+                $this->userId()
+            );
+
+            if ($searchResult['success']) {
+                $this->results = $searchResult['results'];
+                $this->totalMatches = $searchResult['total_matches'];
+            }
+
+            // Enrich results with record titles from the database
+            foreach ($this->results as &$treeResult) {
+                $title = DB::table('information_object_i18n')
+                    ->where('id', $treeResult['object_id'])
+                    ->where('culture', $this->culture())
+                    ->value('title');
+
+                $slug = DB::table('slug')
+                    ->where('object_id', $treeResult['object_id'])
+                    ->value('slug');
+
+                $treeResult['record_title'] = $title ?? 'Record #' . $treeResult['object_id'];
+                $treeResult['record_slug'] = $slug ?? '';
+            }
+            unset($treeResult);
+        }
+    }
+
+    /**
+     * Build/rebuild a PageIndex tree for a record.
+     *
+     * GET  /discovery/build?id=123&type=ead  — show index status
+     * POST /discovery/build                  — trigger build (AJAX returns JSON)
+     */
+    public function executeBuild($request)
+    {
+        $objectId = (int) $request->getParameter('id', 0);
+        $objectType = $request->getParameter('type', 'ead');
+
+        if (!in_array($objectType, ['ead', 'pdf', 'rico'])) {
+            $objectType = 'ead';
+        }
+
+        if ($objectId <= 0) {
+            if ($request->isMethod('POST') || $request->isMethod('post')) {
+                return $this->renderJsonError('Missing or invalid object ID', 400);
+            }
+            $this->forward404('Missing object ID');
+        }
+
+        $service = new \AtomFramework\Services\PageIndexService();
+
+        // POST: trigger the build
+        if ($request->isMethod('POST') || $request->isMethod('post')) {
+            $result = $service->buildTree($objectId, $objectType, $this->culture());
+
+            return $this->renderJson([
+                'success' => $result['success'],
+                'tree_id' => $result['tree_id'] ?? null,
+                'node_count' => $result['node_count'] ?? 0,
+                'model' => $result['model'] ?? '',
+                'error' => $result['error'] ?? null,
+            ]);
+        }
+
+        // GET: show the status page
+        $this->objectId = $objectId;
+        $this->objectType = $objectType;
+
+        // Load record info
+        $culture = $this->culture();
+
+        $this->objectTitle = DB::table('information_object_i18n')
+            ->where('id', $objectId)
+            ->where('culture', $culture)
+            ->value('title') ?? 'Record #' . $objectId;
+
+        $this->objectIdentifier = DB::table('information_object')
+            ->where('id', $objectId)
+            ->value('identifier') ?? '';
+
+        $this->objectSlug = DB::table('slug')
+            ->where('object_id', $objectId)
+            ->value('slug') ?? '';
+
+        // Load current index status
+        $this->indexStatus = $service->getStatus($objectId, $objectType);
+
+        // Load tree if ready
+        $this->tree = null;
+        if ($this->indexStatus && $this->indexStatus['status'] === 'ready') {
+            $this->tree = $service->getTree($objectId, $objectType);
+        }
+    }
+
+    /**
+     * PageIndex API — JSON endpoint for async retrieval queries.
+     *
+     * POST /discovery/pageindex/api
+     * Body: {query, tree_id} or {query, object_id, object_type}
+     */
+    public function executePageindexApi($request)
+    {
+        if (!$request->isMethod('POST') && !$request->isMethod('post')) {
+            return $this->renderJsonError('POST required', 405);
+        }
+
+        $rawBody = file_get_contents('php://input');
+        $body = json_decode($rawBody, true) ?: [];
+
+        $query = trim($body['query'] ?? $request->getParameter('query', ''));
+
+        if (empty($query)) {
+            return $this->renderJsonError('Missing query parameter', 400);
+        }
+
+        $service = new \AtomFramework\Services\PageIndexService();
+        $userId = $this->userId();
+
+        // Query a specific tree by tree_id
+        if (!empty($body['tree_id'])) {
+            $treeId = (int) $body['tree_id'];
+            $result = $service->query($treeId, $query, $userId);
+
+            return $this->renderJson([
+                'success' => $result['success'],
+                'matches' => $result['matches'] ?? [],
+                'reasoning' => $result['reasoning'] ?? '',
+                'model' => $result['model'] ?? '',
+                'error' => $result['error'] ?? null,
+            ]);
+        }
+
+        // Search all trees, optionally filtered by object type
+        $objectType = $body['object_type'] ?? null;
+        if ($objectType && !in_array($objectType, ['ead', 'pdf', 'rico'])) {
+            $objectType = null;
+        }
+
+        $objectId = (int) ($body['object_id'] ?? 0);
+
+        // If object_id is given, query that specific tree
+        if ($objectId > 0 && $objectType) {
+            $status = $service->getStatus($objectId, $objectType);
+
+            if (!$status || $status['status'] !== 'ready') {
+                return $this->renderJsonError('No ready index found for this object', 404);
+            }
+
+            $result = $service->query($status['tree_id'], $query, $userId);
+
+            return $this->renderJson([
+                'success' => $result['success'],
+                'matches' => $result['matches'] ?? [],
+                'reasoning' => $result['reasoning'] ?? '',
+                'model' => $result['model'] ?? '',
+                'error' => $result['error'] ?? null,
+            ]);
+        }
+
+        // Search all ready trees
+        $searchResult = $service->searchAll($query, $objectType, 20, $userId);
+
+        return $this->renderJson([
+            'success' => $searchResult['success'],
+            'results' => $searchResult['results'] ?? [],
+            'total_matches' => $searchResult['total_matches'] ?? 0,
         ]);
     }
 
