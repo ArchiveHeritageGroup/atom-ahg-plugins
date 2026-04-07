@@ -63,9 +63,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var map = L.map('map').setView([0, 0], 2);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'&copy; OpenStreetMap'}).addTo(map);
 
-    var points = <?php echo json_encode(array_map(function($pt) {
+    var points = <?php $rawPoints = sfOutputEscaper::unescape($points); echo json_encode(array_map(function($pt) {
         return ['id' => $pt->id, 'lat' => (float) $pt->latitude, 'lng' => (float) $pt->longitude, 'label' => $pt->label, 'place' => $pt->place_name ?? ''];
-    }, $points)); ?>;
+    }, $rawPoints)); ?>;
     var bounds = [];
     points.forEach(function(pt) {
         var popup = '<strong>' + escHtml(pt.label) + '</strong>' + (pt.place ? '<br>' + escHtml(pt.place) : '')
