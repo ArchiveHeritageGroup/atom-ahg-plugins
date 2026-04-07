@@ -90,12 +90,18 @@
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
-    new TomSelect('#jobCollectionId', {
-        placeholder: 'Select a collection...',
-        allowEmptyOption: false,
-        render: { no_results: function() { return '<div class="no-results">No collections found — create one first</div>'; } }
+    var tsInit = false;
+    document.getElementById('createJobModal').addEventListener('shown.bs.modal', function() {
+        if (!tsInit) {
+            new TomSelect('#jobCollectionId', {
+                placeholder: 'Select a collection...',
+                allowEmptyOption: false,
+                render: { no_results: function() { return '<div class="no-results">No collections found — create one first</div>'; } }
+            });
+            new TomSelect('#jobExtractionType');
+            tsInit = true;
+        }
     });
-    new TomSelect('#jobExtractionType');
 
     // Cancel job
     document.querySelectorAll('.cancel-job-btn').forEach(function(btn) {
