@@ -57,6 +57,7 @@
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="https://cdn.jsdelivr.net/npm/vis-timeline@7/dist/vis-timeline-graph2d.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+    if (typeof vis === 'undefined') { document.getElementById('timeline').innerHTML = '<p class="text-muted p-3">Timeline library failed to load.</p>'; return; }
     var projectId = <?php echo (int) $projectId; ?>;
     var container = document.getElementById('timeline');
     var items = new vis.DataSet(<?php echo json_encode(array_map(function($ev) {
@@ -116,16 +117,52 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="modal-header"><h5 class="modal-title">Auto-populate from Collection</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
                 <p class="text-muted">Select an evidence set (collection) to auto-generate timeline events from its item dates.</p>
-                <div class="mb-3"><label class="form-label">Collection ID</label><input type="number" id="autoCollectionId" class="form-control" required></div>
+                <div class="mb-3"><label class="form-label">Collection</label><select id="autoCollectionId"></select></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" id="autoPopulateBtn">Populate</button></div>
         </div>
     </div>
 </div>
 
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var projectId = <?php echo (int) $projectId; ?>;
+
+    // TomSelect for auto-populate collection
+    var tsInit = false;
+    document.getElementById('autoPopulateModal').addEventListener('shown.bs.modal', function() {
+        if (!tsInit) {
+            new TomSelect('#autoCollectionId', {
+                valueField: 'id',
+                labelField: 'title',
+                searchField: ['title', 'identifier'],
+                placeholder: 'Type to search archival descriptions...',
+                loadThrottle: 300,
+                maxItems: 1,
+                load: function(query, callback) {
+                    if (!query.length || query.length < 2) return callback();
+                    fetch('/index.php/research/ajax/search-items?q=' + encodeURIComponent(query))
+                        .then(function(r) { return r.json(); })
+                        .then(function(j) { callback(j.items || []); })
+                        .catch(function() { callback(); });
+                },
+                render: {
+                    option: function(data, escape) {
+                        var html = '<div class="py-1"><span class="fw-semibold">' + escape(data.title || 'Untitled') + '</span>';
+                        if (data.identifier) html += ' <small class="text-muted">(' + escape(data.identifier) + ')</small>';
+                        return html + '</div>';
+                    },
+                    item: function(data, escape) {
+                        return '<div>' + escape(data.title || 'Untitled') + '</div>';
+                    },
+                    no_results: function() { return '<div class="no-results">No descriptions found</div>'; }
+                }
+            });
+            tsInit = true;
+        }
+    });
 
     // Create event
     document.getElementById('saveEvent')?.addEventListener('click', function() {
@@ -170,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-populate
     document.getElementById('autoPopulateBtn')?.addEventListener('click', function() {
         var cid = parseInt(document.getElementById('autoCollectionId').value);
-        if (!cid) { alert('Enter a collection ID'); return; }
+        if (!cid) { alert('Select a collection first'); return; }
         this.disabled = true; this.textContent = 'Populating...';
         fetch('/research/timeline-event-api', {
             method:'POST', headers:{'Content-Type':'application/json'},
