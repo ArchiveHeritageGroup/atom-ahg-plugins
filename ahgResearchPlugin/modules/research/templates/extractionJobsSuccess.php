@@ -76,7 +76,7 @@
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">New Extraction Job</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Collection ID</label><input type="number" name="collection_id" id="jobCollectionId" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Collection</label><select name="collection_id" id="jobCollectionId" required><option value="">Select a collection...</option><?php foreach ($collections as $c): ?><option value="<?php echo (int) $c->id; ?>"><?php echo htmlspecialchars($c->title); ?></option><?php endforeach; ?></select></div>
                     <div class="mb-3"><label class="form-label">Extraction Type</label><select name="extraction_type" class="form-select"><option value="ner">NER</option><option value="ocr">OCR</option><option value="summarize">Summarize</option><option value="translate">Translate</option><option value="spellcheck">Spellcheck</option><option value="face_detection">Face Detection</option><option value="form_extraction">Form Extraction</option></select></div>
                     <div class="mb-3"><label class="form-label">Language (optional)</label><input type="text" name="language" class="form-control" placeholder="en"></div>
                 </div>
@@ -86,8 +86,15 @@
     </div>
 </div>
 
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#jobCollectionId', {
+        placeholder: 'Select a collection...',
+        allowEmptyOption: false
+    });
+
     // Cancel job
     document.querySelectorAll('.cancel-job-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {

@@ -5665,6 +5665,7 @@ class researchActions extends AhgController
 
         $extractionService = $this->loadExtractionService();
         $this->jobs = $extractionService->getProjectJobs($projectId);
+        $this->collections = $this->service->getCollections($this->researcher->id);
     }
 
     public function executeCreateExtractionJob($request)
