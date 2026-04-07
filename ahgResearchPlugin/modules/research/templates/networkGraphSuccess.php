@@ -20,7 +20,6 @@
             <option value="spatial">Spatial</option>
             <option value="relational">Relational</option>
             <option value="attributive">Attributive</option>
-            <option value="ric">RiC</option>
         </select>
         <select id="filterStatus" class="form-select form-select-sm" style="width:auto;">
             <option value="">All Statuses</option>
