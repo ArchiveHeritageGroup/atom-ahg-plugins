@@ -77,7 +77,7 @@
                 <div class="modal-header"><h5 class="modal-title">New Extraction Job</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <div class="mb-3"><label class="form-label">Collection</label><select name="collection_id" id="jobCollectionId" required><option value="">Select a collection...</option><?php foreach ($collections as $c): ?><option value="<?php echo (int) $c->id; ?>"><?php echo htmlspecialchars($c->title); ?></option><?php endforeach; ?></select></div>
-                    <div class="mb-3"><label class="form-label">Extraction Type</label><select name="extraction_type" class="form-select"><option value="ner">NER</option><option value="ocr">OCR</option><option value="summarize">Summarize</option><option value="translate">Translate</option><option value="spellcheck">Spellcheck</option><option value="face_detection">Face Detection</option><option value="form_extraction">Form Extraction</option></select></div>
+                    <div class="mb-3"><label class="form-label">Extraction Type</label><select name="extraction_type" id="jobExtractionType"><option value="ner">NER</option><option value="ocr">OCR</option><option value="summarize">Summarize</option><option value="translate">Translate</option><option value="spellcheck">Spellcheck</option><option value="face_detection">Face Detection</option><option value="form_extraction">Form Extraction</option></select></div>
                     <div class="mb-3"><label class="form-label">Language (optional)</label><input type="text" name="language" class="form-control" placeholder="en"></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Create Job</button></div>
@@ -92,8 +92,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     new TomSelect('#jobCollectionId', {
         placeholder: 'Select a collection...',
-        allowEmptyOption: false
+        allowEmptyOption: false,
+        render: { no_results: function() { return '<div class="no-results">No collections found — create one first</div>'; } }
     });
+    new TomSelect('#jobExtractionType');
 
     // Cancel job
     document.querySelectorAll('.cancel-job-btn').forEach(function(btn) {
