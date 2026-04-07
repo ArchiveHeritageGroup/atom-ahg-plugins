@@ -60,9 +60,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof vis === 'undefined') { document.getElementById('timeline').innerHTML = '<p class="text-muted p-3">Timeline library failed to load.</p>'; return; }
     var projectId = <?php echo (int) $projectId; ?>;
     var container = document.getElementById('timeline');
-    var items = new vis.DataSet(<?php echo json_encode(array_map(function($ev) {
+    var items = new vis.DataSet(<?php $rawEvents = sfOutputEscaper::unescape($events); echo json_encode(array_map(function($ev) {
         return ['id' => $ev->id, 'content' => $ev->label, 'start' => $ev->date_start, 'end' => $ev->date_end ?? null, 'style' => $ev->color ? 'background-color:' . $ev->color : ''];
-    }, $events)); ?>);
+    }, $rawEvents)); ?>);
     var timeline = new vis.Timeline(container, items, {
         editable: {add: false, updateTime: true, updateGroup: false, remove: false},
         onMove: function(item, callback) {
