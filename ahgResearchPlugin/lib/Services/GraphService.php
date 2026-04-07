@@ -83,10 +83,124 @@ class GraphService
             }
         }
 
+        // Merge RiC relations from project collection items
+        $this->mergeRicRelations($projectId, $nodes, $edges);
+
         return [
             'nodes' => array_values($nodes),
             'edges' => $edges,
         ];
+    }
+
+    /**
+     * Merge RiC (Records in Contexts) relations into the graph.
+     *
+     * Pulls relations from the relation + ric_relation_meta tables
+     * scoped to entities in the project's collections. If no collections
+     * exist, pulls a sample of RiC relations to populate the graph.
+     */
+    private function mergeRicRelations(int $projectId, array &$nodes, array &$edges): void
+    {
+        // Get entity IDs from the project's collections
+        $collectionObjectIds = DB::table('research_collection as rc')
+            ->join('research_collection_item as rci', 'rci.collection_id', '=', 'rc.id')
+            ->where('rc.project_id', $projectId)
+            ->pluck('rci.object_id')
+            ->toArray();
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        $query = DB::table('relation as r')
+            ->join('ric_relation_meta as rrm', 'rrm.relation_id', '=', 'r.id')
+            ->leftJoin('actor_i18n as ai_s', function ($j) use ($culture) {
+                $j->on('ai_s.id', '=', 'r.subject_id')->where('ai_s.culture', '=', $culture);
+            })
+            ->leftJoin('actor_i18n as ai_o', function ($j) use ($culture) {
+                $j->on('ai_o.id', '=', 'r.object_id')->where('ai_o.culture', '=', $culture);
+            })
+            ->leftJoin('information_object_i18n as ioi_s', function ($j) use ($culture) {
+                $j->on('ioi_s.id', '=', 'r.subject_id')->where('ioi_s.culture', '=', $culture);
+            })
+            ->leftJoin('information_object_i18n as ioi_o', function ($j) use ($culture) {
+                $j->on('ioi_o.id', '=', 'r.object_id')->where('ioi_o.culture', '=', $culture);
+            })
+            ->select(
+                'r.subject_id', 'r.object_id',
+                'rrm.rico_predicate', 'rrm.domain_class', 'rrm.range_class',
+                DB::raw('COALESCE(ai_s.authorized_form_of_name, ioi_s.title) as subject_label'),
+                DB::raw('COALESCE(ai_o.authorized_form_of_name, ioi_o.title) as object_label')
+            );
+
+        if (!empty($collectionObjectIds)) {
+            // Scope to relations involving project collection items
+            $query->where(function ($q) use ($collectionObjectIds) {
+                $q->whereIn('r.subject_id', $collectionObjectIds)
+                  ->orWhereIn('r.object_id', $collectionObjectIds);
+            });
+        }
+
+        $ricRelations = $query->limit(500)->get();
+
+        foreach ($ricRelations as $rel) {
+            $subjectType = $this->ricDomainToType($rel->domain_class, $rel->subject_label);
+            $objectType = $this->ricDomainToType($rel->range_class, $rel->object_label);
+
+            $subjectKey = $subjectType . ':' . $rel->subject_id;
+            $objectKey = $objectType . ':' . $rel->object_id;
+
+            if (!isset($nodes[$subjectKey])) {
+                $nodes[$subjectKey] = (object) [
+                    'id' => $subjectKey,
+                    'type' => $subjectType,
+                    'label' => $rel->subject_label ?? $subjectKey,
+                    'group' => $subjectType,
+                ];
+            }
+
+            if (!isset($nodes[$objectKey])) {
+                $nodes[$objectKey] = (object) [
+                    'id' => $objectKey,
+                    'type' => $objectType,
+                    'label' => $rel->object_label ?? $objectKey,
+                    'group' => $objectType,
+                ];
+            }
+
+            $edges[] = (object) [
+                'source' => $subjectKey,
+                'target' => $objectKey,
+                'label' => $this->ricPredicateLabel($rel->rico_predicate),
+                'type' => 'ric',
+                'status' => 'verified',
+                'confidence' => null,
+            ];
+        }
+    }
+
+    /**
+     * Map RiC domain/range class to a graph node type.
+     */
+    private function ricDomainToType(?string $class, ?string $label): string
+    {
+        $map = [
+            'Agent' => 'actor', 'Person' => 'person', 'CorporateBody' => 'organization',
+            'Record' => 'information_object', 'RecordResource' => 'information_object',
+            'Activity' => 'event', 'Place' => 'place',
+            'Instantiation' => 'object', 'Rule' => 'object',
+        ];
+        return $map[$class] ?? 'information_object';
+    }
+
+    /**
+     * Simplify a RiC predicate URI to a readable label.
+     */
+    private function ricPredicateLabel(string $predicate): string
+    {
+        // "rico:hasOrHadSubject" → "has or had subject"
+        $local = str_replace('rico:', '', $predicate);
+        // camelCase to words
+        $words = preg_replace('/([a-z])([A-Z])/', '$1 $2', $local);
+        return strtolower($words);
     }
 
     /**
