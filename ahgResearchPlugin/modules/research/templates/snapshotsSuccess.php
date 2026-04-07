@@ -45,10 +45,22 @@
                 <div class="modal-body">
                     <div class="mb-3"><label class="form-label">Title</label><input type="text" name="title" class="form-control" required></div>
                     <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="3"></textarea></div>
-                    <div class="mb-3"><label class="form-label">Collection ID (optional - freezes collection)</label><input type="number" name="collection_id" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label">Collection (optional - freezes collection)</label><select name="collection_id" id="snapshotCollectionId"><option value="">None</option><?php foreach ($collections as $c): ?><option value="<?php echo (int) $c->id; ?>"><?php echo htmlspecialchars($c->title); ?></option><?php endforeach; ?></select></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Create</button></div>
             </div>
         </form>
     </div>
 </div>
+
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#snapshotCollectionId', {
+        placeholder: 'Select a collection...',
+        allowEmptyOption: true,
+        render: { no_results: function() { return '<div class="no-results">No collections found</div>'; } }
+    });
+});
+</script>

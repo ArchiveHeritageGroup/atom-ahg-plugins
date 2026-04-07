@@ -4954,6 +4954,7 @@ class researchActions extends AhgController
 
         $snapshotService = $this->loadSnapshotService();
         $this->snapshots = $snapshotService->getProjectSnapshots($projectId);
+        $this->collections = $this->service->getCollections($this->researcher->id);
     }
 
     public function executeCreateSnapshot($request)
