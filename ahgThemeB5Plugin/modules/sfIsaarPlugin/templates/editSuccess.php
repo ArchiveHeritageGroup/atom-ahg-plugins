@@ -103,9 +103,11 @@
                 ->help(__('"Record any document, law, directive or charter which acts as a source of authority for the powers, functions and responsibilities of the entity being described, together with information on the jurisdiction(s) and covering dates when the mandate(s) applied or were changed." (ISAAR 5.2.6)'))
                 ->label(__('Mandates/sources of authority')), $resource); ?>
 
-            <?php echo render_field($form->internalStructures
+            <?php if ($sf_user->isAdministrator()) { ?>
+              <?php echo render_field($form->internalStructures
                 ->help(__('"Describe the internal structure of a corporate body and the dates of any changes to that structure that are significant to the understanding of the way that corporate body conducted its affairs (e.g. by means of dated organization charts). Describe the genealogy of a family (e.g. by means of a family tree) in a way that demonstrates the inter-relationships of its members with covering dates." (ISAAR 5.2.7)'))
                 ->label(__('Internal structures/genealogy')), $resource); ?>
+            <?php } ?>
 
             <?php echo render_field($form->generalContext
                 ->help(__('"Provide any significant information on the social, cultural, economic, political and/or historical context in which the entity being described operated." (ISAAR 5.2.8)')), $resource); ?>
