@@ -76,7 +76,7 @@
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">New Extraction Job</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
-                    <div class="mb-3"><label class="form-label">Collection</label><select name="collection_id" id="jobCollectionId" required><option value="">Select a collection...</option><?php foreach ($collections as $c): ?><option value="<?php echo (int) $c->id; ?>"><?php echo htmlspecialchars($c->name); ?></option><?php endforeach; ?></select></div>
+                    <div class="mb-3"><label class="form-label">Collection</label><select name="collection_id" id="jobCollectionId" required></select></div>
                     <div class="mb-3"><label class="form-label">Extraction Type</label><select name="extraction_type" id="jobExtractionType"><option value="ner">NER</option><option value="ocr">OCR</option><option value="summarize">Summarize</option><option value="translate">Translate</option><option value="spellcheck">Spellcheck</option><option value="face_detection">Face Detection</option><option value="form_extraction">Form Extraction</option></select></div>
                     <div class="mb-3"><label class="form-label">Language (optional)</label><input type="text" name="language" class="form-control" placeholder="en"></div>
                 </div>
@@ -94,9 +94,30 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('createJobModal').addEventListener('shown.bs.modal', function() {
         if (!tsInit) {
             new TomSelect('#jobCollectionId', {
-                placeholder: 'Select a collection...',
-                allowEmptyOption: false,
-                render: { no_results: function() { return '<div class="no-results">No collections found — create one first</div>'; } }
+                valueField: 'id',
+                labelField: 'title',
+                searchField: ['title', 'identifier'],
+                placeholder: 'Type to search archival descriptions...',
+                loadThrottle: 300,
+                maxItems: 1,
+                load: function(query, callback) {
+                    if (!query.length || query.length < 2) return callback();
+                    fetch('/index.php/research/ajax/search-items?q=' + encodeURIComponent(query))
+                        .then(function(r) { return r.json(); })
+                        .then(function(j) { callback(j.items || []); })
+                        .catch(function() { callback(); });
+                },
+                render: {
+                    option: function(data, escape) {
+                        var html = '<div class="py-1"><span class="fw-semibold">' + escape(data.title || 'Untitled') + '</span>';
+                        if (data.identifier) html += ' <small class="text-muted">(' + escape(data.identifier) + ')</small>';
+                        return html + '</div>';
+                    },
+                    item: function(data, escape) {
+                        return '<div>' + escape(data.title || 'Untitled') + '</div>';
+                    },
+                    no_results: function() { return '<div class="no-results">No descriptions found</div>'; }
+                }
             });
             new TomSelect('#jobExtractionType');
             tsInit = true;

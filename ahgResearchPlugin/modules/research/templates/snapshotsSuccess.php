@@ -45,7 +45,7 @@
                 <div class="modal-body">
                     <div class="mb-3"><label class="form-label">Title</label><input type="text" name="title" class="form-control" required></div>
                     <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="3"></textarea></div>
-                    <div class="mb-3"><label class="form-label">Collection (optional - freezes collection)</label><select name="collection_id" id="snapshotCollectionId"><option value=""></option><?php foreach ($collections as $c): ?><option value="<?php echo (int) $c->id; ?>"><?php echo htmlspecialchars($c->name); ?></option><?php endforeach; ?></select></div>
+                    <div class="mb-3"><label class="form-label">Collection (optional - freezes collection)</label><select name="collection_id" id="snapshotCollectionId"></select></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Create</button></div>
             </div>
@@ -61,9 +61,30 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('createSnapshotModal').addEventListener('shown.bs.modal', function() {
         if (!tsInit) {
             new TomSelect('#snapshotCollectionId', {
-                placeholder: 'Select a collection...',
-                allowEmptyOption: true,
-                render: { no_results: function() { return '<div class="no-results">No collections found</div>'; } }
+                valueField: 'id',
+                labelField: 'title',
+                searchField: ['title', 'identifier'],
+                placeholder: 'Type to search archival descriptions...',
+                loadThrottle: 300,
+                maxItems: 1,
+                load: function(query, callback) {
+                    if (!query.length || query.length < 2) return callback();
+                    fetch('/index.php/research/ajax/search-items?q=' + encodeURIComponent(query))
+                        .then(function(r) { return r.json(); })
+                        .then(function(j) { callback(j.items || []); })
+                        .catch(function() { callback(); });
+                },
+                render: {
+                    option: function(data, escape) {
+                        var html = '<div class="py-1"><span class="fw-semibold">' + escape(data.title || 'Untitled') + '</span>';
+                        if (data.identifier) html += ' <small class="text-muted">(' + escape(data.identifier) + ')</small>';
+                        return html + '</div>';
+                    },
+                    item: function(data, escape) {
+                        return '<div>' + escape(data.title || 'Untitled') + '</div>';
+                    },
+                    no_results: function() { return '<div class="no-results">No descriptions found</div>'; }
+                }
             });
             tsInit = true;
         }
