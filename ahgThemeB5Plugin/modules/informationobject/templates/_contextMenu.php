@@ -67,7 +67,7 @@ if (isset($resource)) {
     <li><a href="/index.php/heritage/add?io_id=<?php echo $resource->id; ?>"><?php echo __('Heritage Assets'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasOais): ?>
-    <li><?php echo link_to(__('Digital Preservation (OAIS)'), ['module' => 'preservation', 'action' => 'packages']); ?></li>
+    <li><a href="/admin/preservation/packages/?object_id=<?php echo $resource->id; ?>"><?php echo __('Digital Preservation (OAIS)'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasResearch): ?>
     <li><?php echo link_to(__('Cite this Record'), ['module' => 'research', 'action' => 'cite', 'slug' => $resourceSlug]); ?></li>

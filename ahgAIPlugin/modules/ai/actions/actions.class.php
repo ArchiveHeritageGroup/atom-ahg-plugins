@@ -1805,7 +1805,7 @@ class aiActions extends AhgController
                 return $this->renderText(json_encode(['success' => false, 'error' => $result['error'] ?? 'LLM request failed']));
             }
 
-            $description = trim($result['content'] ?? '');
+            $description = trim($result['text'] ?? $result['content'] ?? '');
 
             return $this->renderText(json_encode([
                 'success' => true,
