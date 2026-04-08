@@ -368,6 +368,20 @@ class StatisticsService
                 ->sum('final_cost'),
         ];
 
+        // Breakdown: projects by status
+        $stats['projects_by_status'] = DB::table('research_project')
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->orderByDesc('count')
+            ->get()->toArray();
+
+        // Breakdown: reproductions by status
+        $stats['reproductions_by_status'] = DB::table('research_reproduction_request')
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->orderByDesc('count')
+            ->get()->toArray();
+
         return $stats;
     }
 
