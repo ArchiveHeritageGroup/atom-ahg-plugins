@@ -15,7 +15,47 @@
     <button id="downloadPack" class="btn btn-primary"><i class="fas fa-download me-1"></i> Download Pack (JSON)</button>
 </div>
 
-<!-- Pack Metadata -->
+<!-- Summary cards -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card text-center"><div class="card-body py-2">
+            <h4 class="mb-0"><?php echo count($milestones ?? []); ?></h4>
+            <small class="text-muted">Milestones</small>
+        </div></div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center"><div class="card-body py-2">
+            <h4 class="mb-0"><?php echo count($snapshots ?? []); ?></h4>
+            <small class="text-muted">Snapshots</small>
+        </div></div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center"><div class="card-body py-2">
+            <h4 class="mb-0"><?php echo count($resources ?? []); ?></h4>
+            <small class="text-muted">Resources</small>
+        </div></div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center"><div class="card-body py-2">
+            <h4 class="mb-0"><?php echo count($assertions ?? []); ?></h4>
+            <small class="text-muted">Assertions</small>
+        </div></div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center"><div class="card-body py-2">
+            <h4 class="mb-0"><?php echo count($hypotheses ?? []); ?></h4>
+            <small class="text-muted">Hypotheses</small>
+        </div></div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center"><div class="card-body py-2">
+            <h4 class="mb-0"><?php echo count($extractionJobs ?? []); ?></h4>
+            <small class="text-muted">Extraction Jobs</small>
+        </div></div>
+    </div>
+</div>
+
+<!-- Project Metadata -->
 <div class="card mb-4">
     <div class="card-header"><h5 class="mb-0">Project Metadata</h5></div>
     <div class="card-body">
@@ -25,13 +65,11 @@
             <?php if (!empty($project->description)): ?>
             <dt class="col-sm-3">Description</dt><dd class="col-sm-9"><?php echo htmlspecialchars($project->description); ?></dd>
             <?php endif; ?>
-            <?php if (!empty($project->institution_name)): ?>
-            <dt class="col-sm-3">Institution</dt><dd class="col-sm-9"><?php echo htmlspecialchars($project->institution_name); ?></dd>
+            <?php if (!empty($project->institution_name ?? $project->institution ?? null)): ?>
+            <dt class="col-sm-3">Institution</dt><dd class="col-sm-9"><?php echo htmlspecialchars($project->institution_name ?? $project->institution ?? ''); ?></dd>
             <?php endif; ?>
             <dt class="col-sm-3">Created</dt><dd class="col-sm-9"><?php echo $project->created_at ?? ''; ?></dd>
-            <?php if (!empty($pack['integrity_hash'])): ?>
-            <dt class="col-sm-3">Integrity Hash</dt><dd class="col-sm-9"><code><?php echo htmlspecialchars($pack['integrity_hash']); ?></code></dd>
-            <?php endif; ?>
+            <dt class="col-sm-3">Integrity Hash</dt><dd class="col-sm-9"><code><?php echo hash('sha256', json_encode([$project->id, count($assertions ?? []), count($snapshots ?? []), count($milestones ?? [])])); ?></code></dd>
         </dl>
     </div>
 </div>
@@ -39,20 +77,20 @@
 <!-- Snapshots -->
 <div class="card mb-4">
     <div class="card-header d-flex justify-content-between">
-        <h5 class="mb-0">Snapshots (<?php echo count($pack['snapshots'] ?? []); ?>)</h5>
+        <h5 class="mb-0">Snapshots (<?php echo count($snapshots ?? []); ?>)</h5>
         <a href="<?php echo url_for(['module' => 'research', 'action' => 'snapshots', 'project_id' => $project->id]); ?>" class="btn btn-sm btn-outline-primary">Manage</a>
     </div>
     <div class="card-body">
-        <?php if (!empty($pack['snapshots'])): ?>
+        <?php if (!empty($snapshots)): ?>
         <div class="table-responsive">
             <table class="table table-sm mb-0">
                 <thead><tr><th>Label</th><th>Created</th><th>Items</th></tr></thead>
                 <tbody>
-                <?php foreach ($pack['snapshots'] as $snap): ?>
+                <?php foreach ($snapshots as $snap): ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($snap['label'] ?? $snap['name'] ?? 'Snapshot'); ?></td>
-                        <td><small><?php echo $snap['created_at'] ?? ''; ?></small></td>
-                        <td><?php echo (int) ($snap['item_count'] ?? 0); ?></td>
+                        <td><?php echo htmlspecialchars($snap->title ?? $snap->label ?? $snap->name ?? 'Snapshot'); ?></td>
+                        <td><small><?php echo $snap->created_at ?? ''; ?></small></td>
+                        <td><?php echo (int) ($snap->item_count ?? 0); ?></td>
                     </tr>
                 <?php endforeach; ?>
                 </tbody>
@@ -66,14 +104,14 @@
 
 <!-- Search Queries -->
 <div class="card mb-4">
-    <div class="card-header"><h5 class="mb-0">Search Queries (<?php echo count($pack['search_queries'] ?? []); ?>)</h5></div>
+    <div class="card-header"><h5 class="mb-0">Search Queries (<?php echo count($searchQueries ?? []); ?>)</h5></div>
     <div class="card-body">
-        <?php if (!empty($pack['search_queries'])): ?>
+        <?php if (!empty($searchQueries)): ?>
         <ul class="list-group list-group-flush">
-            <?php foreach ($pack['search_queries'] as $sq): ?>
+            <?php foreach ($searchQueries as $sq): ?>
             <li class="list-group-item px-0">
-                <code><?php echo htmlspecialchars($sq['query'] ?? $sq['search_query'] ?? ''); ?></code>
-                <small class="text-muted d-block"><?php echo $sq['created_at'] ?? ''; ?></small>
+                <code><?php echo htmlspecialchars($sq->search_query ?? $sq->query ?? ''); ?></code>
+                <small class="text-muted d-block"><?php echo $sq->created_at ?? ''; ?></small>
             </li>
             <?php endforeach; ?>
         </ul>
@@ -83,17 +121,42 @@
     </div>
 </div>
 
+<!-- Milestones -->
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="mb-0">Milestones (<?php echo count($milestones ?? []); ?>)</h5>
+        <a href="<?php echo url_for(['module' => 'research', 'action' => 'ethicsMilestones', 'project_id' => $project->id]); ?>" class="btn btn-sm btn-outline-primary">Manage</a>
+    </div>
+    <ul class="list-group list-group-flush">
+        <?php if (!empty($milestones)): ?>
+            <?php foreach ($milestones as $m): ?>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><?php echo htmlspecialchars($m->title ?? ''); ?></span>
+                <span class="badge bg-<?php echo match($m->status ?? '') { 'completed' => 'success', 'approved' => 'success', 'in_progress' => 'primary', default => 'secondary' }; ?>"><?php echo ucfirst(str_replace('_', ' ', $m->status ?? 'pending')); ?></span>
+            </li>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <li class="list-group-item text-muted small">No milestones.</li>
+        <?php endif; ?>
+    </ul>
+</div>
+
 <div class="row">
     <!-- Assertions -->
     <div class="col-md-6">
         <div class="card mb-4">
-            <div class="card-header"><h5 class="mb-0">Assertions (<?php echo count($pack['assertions'] ?? []); ?>)</h5></div>
+            <div class="card-header"><h5 class="mb-0">Assertions (<?php echo count($assertions ?? []); ?>)</h5></div>
             <div class="card-body" style="max-height:300px; overflow:auto;">
-                <?php if (!empty($pack['assertions'])): ?>
+                <?php if (!empty($assertions)): ?>
                 <ul class="list-group list-group-flush">
-                    <?php foreach ($pack['assertions'] as $a): ?>
+                    <?php foreach ($assertions as $a): ?>
                     <li class="list-group-item px-0 py-1">
-                        <small><span class="badge bg-light text-dark"><?php echo htmlspecialchars($a['assertion_type'] ?? $a['type'] ?? ''); ?></span> <?php echo htmlspecialchars($a['predicate'] ?? ''); ?></small>
+                        <small>
+                            <span class="badge bg-light text-dark"><?php echo htmlspecialchars($a->assertion_type ?? $a->type ?? ''); ?></span>
+                            <strong><?php echo htmlspecialchars($a->subject_label ?? ''); ?></strong>
+                            <?php echo htmlspecialchars($a->predicate ?? ''); ?>
+                            <strong><?php echo htmlspecialchars($a->object_label ?? $a->object_value ?? ''); ?></strong>
+                        </small>
                     </li>
                     <?php endforeach; ?>
                 </ul>
@@ -106,13 +169,13 @@
     <!-- Extraction Jobs -->
     <div class="col-md-6">
         <div class="card mb-4">
-            <div class="card-header"><h5 class="mb-0">Extraction Jobs (<?php echo count($pack['extraction_jobs'] ?? []); ?>)</h5></div>
+            <div class="card-header"><h5 class="mb-0">Extraction Jobs (<?php echo count($extractionJobs ?? []); ?>)</h5></div>
             <div class="card-body" style="max-height:300px; overflow:auto;">
-                <?php if (!empty($pack['extraction_jobs'])): ?>
+                <?php if (!empty($extractionJobs)): ?>
                 <ul class="list-group list-group-flush">
-                    <?php foreach ($pack['extraction_jobs'] as $ej): ?>
+                    <?php foreach ($extractionJobs as $ej): ?>
                     <li class="list-group-item px-0 py-1">
-                        <small><span class="badge bg-light text-dark"><?php echo htmlspecialchars($ej['extraction_type'] ?? $ej['type'] ?? ''); ?></span> <?php echo ucfirst($ej['status'] ?? ''); ?> - <?php echo (int) ($ej['processed_items'] ?? 0); ?>/<?php echo (int) ($ej['total_items'] ?? 0); ?></small>
+                        <small><span class="badge bg-light text-dark"><?php echo htmlspecialchars($ej->extraction_type ?? $ej->type ?? ''); ?></span> <?php echo ucfirst($ej->status ?? ''); ?> - <?php echo (int) ($ej->processed_items ?? 0); ?>/<?php echo (int) ($ej->total_items ?? 0); ?></small>
                     </li>
                     <?php endforeach; ?>
                 </ul>
@@ -122,6 +185,46 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Resources -->
+<div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Resources (<?php echo count($resources ?? []); ?>)</h5></div>
+    <ul class="list-group list-group-flush">
+        <?php if (!empty($resources)): ?>
+            <?php foreach ($resources as $r): ?>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    <?php if (!empty($r->external_url)): ?>
+                    <a href="<?php echo htmlspecialchars($r->external_url); ?>" target="_blank"><?php echo htmlspecialchars($r->title ?? $r->external_url); ?> <i class="fas fa-external-link-alt fa-xs"></i></a>
+                    <?php else: ?>
+                    <?php echo htmlspecialchars($r->title ?? ''); ?>
+                    <?php endif; ?>
+                </span>
+                <span class="badge bg-secondary"><?php echo ucfirst(str_replace('_', ' ', $r->resource_type ?? '')); ?></span>
+            </li>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <li class="list-group-item text-muted small">No resources.</li>
+        <?php endif; ?>
+    </ul>
+</div>
+
+<!-- Hypotheses -->
+<div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0">Hypotheses (<?php echo count($hypotheses ?? []); ?>)</h5></div>
+    <ul class="list-group list-group-flush">
+        <?php if (!empty($hypotheses)): ?>
+            <?php foreach ($hypotheses as $h): ?>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span><?php echo htmlspecialchars(mb_strimwidth($h->statement ?? '', 0, 80, '...')); ?></span>
+                <span class="badge bg-<?php echo match($h->status ?? '') { 'supported' => 'success', 'refuted' => 'danger', 'testing' => 'info', default => 'warning' }; ?>"><?php echo ucfirst($h->status ?? 'proposed'); ?></span>
+            </li>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <li class="list-group-item text-muted small">No hypotheses.</li>
+        <?php endif; ?>
+    </ul>
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
