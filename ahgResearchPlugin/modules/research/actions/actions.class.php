@@ -3238,13 +3238,32 @@ class researchActions extends AhgController
                     $equipmentId,
                     $request->getParameter('maintenance_description'),
                     $request->getParameter('new_condition', 'good'),
-                    $request->getParameter('next_maintenance_date')
+                    $request->getParameter('next_maintenance_date'),
+                    (int) $this->getUser()->getAttribute('user_id')
                 );
                 $this->getUser()->setFlash('success', 'Maintenance logged');
             }
 
             $this->redirect('research/equipment?room_id=' . $roomId);
         }
+    }
+
+    /**
+     * AJAX: Get maintenance history for a piece of equipment.
+     */
+    public function executeEquipmentHistory($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/EquipmentService.php';
+        $equipmentService = new EquipmentService();
+        $equipmentId = (int) $request->getParameter('equipment_id');
+        $items = $equipmentService->getMaintenanceHistory($equipmentId);
+
+        return $this->renderText(json_encode(['items' => $items]));
     }
 
     /**

@@ -429,8 +429,27 @@ class EquipmentService
         int $equipmentId,
         string $description,
         string $newCondition = 'good',
-        ?string $nextMaintenanceDate = null
+        ?string $nextMaintenanceDate = null,
+        ?int $performedBy = null
     ): bool {
+        // Get current condition before update
+        $current = DB::table('research_equipment')->where('id', $equipmentId)->first();
+        $conditionBefore = $current->condition_status ?? 'unknown';
+
+        // Log to maintenance history table
+        try {
+            DB::table('research_equipment_maintenance')->insert([
+                'equipment_id' => $equipmentId,
+                'description' => $description,
+                'condition_before' => $conditionBefore,
+                'condition_after' => $newCondition,
+                'next_maintenance_date' => $nextMaintenanceDate,
+                'performed_by' => $performedBy,
+                'performed_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) { /* table may not exist yet */ }
+
+        // Update equipment record
         return DB::table('research_equipment')
             ->where('id', $equipmentId)
             ->update([
@@ -438,9 +457,28 @@ class EquipmentService
                 'is_available' => $newCondition !== 'out_of_service' ? 1 : 0,
                 'last_maintenance_date' => date('Y-m-d'),
                 'next_maintenance_date' => $nextMaintenanceDate,
-                'notes' => DB::raw("CONCAT(IFNULL(notes, ''), '\n[Maintenance " . date('Y-m-d') . ": " . addslashes($description) . "]')"),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]) > 0;
+    }
+
+    /**
+     * Get maintenance history for a piece of equipment.
+     */
+    public function getMaintenanceHistory(int $equipmentId): array
+    {
+        try {
+            return DB::table('research_equipment_maintenance as m')
+                ->leftJoin('user as u', 'm.performed_by', '=', 'u.id')
+                ->leftJoin('actor_i18n as ai', function ($j) {
+                    $j->on('u.id', '=', 'ai.id')->where('ai.culture', '=', 'en');
+                })
+                ->where('m.equipment_id', $equipmentId)
+                ->select('m.*', 'ai.authorized_form_of_name as performer_name')
+                ->orderByDesc('m.performed_at')
+                ->get()->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**

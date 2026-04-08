@@ -1746,6 +1746,19 @@ CREATE TABLE IF NOT EXISTS `research_room_manifest` (
     FOREIGN KEY (`room_id`) REFERENCES `research_room`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `research_equipment_maintenance` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `equipment_id` INT NOT NULL,
+    `description` TEXT,
+    `condition_before` VARCHAR(50),
+    `condition_after` VARCHAR(50),
+    `next_maintenance_date` DATE,
+    `performed_by` INT,
+    `performed_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_equipment` (`equipment_id`),
+    FOREIGN KEY (`equipment_id`) REFERENCES `research_equipment`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- Dropdown Manager seed data (ahg_dropdown)
 -- ============================================================
