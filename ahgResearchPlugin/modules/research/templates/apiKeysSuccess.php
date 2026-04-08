@@ -41,9 +41,9 @@
                     <?php foreach ($apiKeys as $key): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($key->name); ?></td>
-                            <td><code><?php echo substr($key->api_key_hash ?? $key->api_key ?? '', 0, 8); ?>...</code></td>
+                            <td><code><?php echo htmlspecialchars($key->api_key_prefix ?? substr($key->api_key ?? '', 0, 8)); ?>...</code></td>
                             <td><?php
-                                $perms = json_decode($key->permissions ?? '[]', true) ?: [];
+                                $perms = json_decode($key->scopes ?? '[]', true) ?: [];
                                 if (empty($perms)) { echo '<small class="text-muted">All</small>'; }
                                 else { foreach ($perms as $p) { echo '<span class="badge bg-light text-dark me-1">' . htmlspecialchars($p) . '</span>'; } }
                             ?></td>

@@ -2854,7 +2854,7 @@ class researchActions extends AhgController
             $this->redirect('user/login');
         }
 
-        $userId = $this->getUser()->getAttribute('user_id');
+        $userId = (int) $this->getUser()->getAttribute('user_id');
         $this->researcher = $this->service->getResearcherByUserId($userId);
 
         if (!$this->researcher || $this->researcher->status !== 'approved') {
@@ -2862,7 +2862,11 @@ class researchActions extends AhgController
             $this->redirect('research/dashboard');
         }
 
-        $this->apiKeys = $this->service->getApiKeys($this->researcher->id);
+        // List keys from ahg_api_key (the real API key table)
+        $this->apiKeys = DB::table('ahg_api_key')
+            ->where('user_id', $userId)
+            ->orderByDesc('created_at')
+            ->get()->toArray();
 
         if ($request->isMethod('post')) {
             $action = $request->getParameter('form_action');
@@ -2872,24 +2876,32 @@ class researchActions extends AhgController
                 $permissions = $request->getParameter('permissions', []);
                 $expiresAt = $request->getParameter('expires_at');
 
-                $expiryDays = 365;
-                if ($expiresAt) {
-                    $diff = (int) ((strtotime($expiresAt) - time()) / 86400);
-                    if ($diff > 0) { $expiryDays = $diff; }
-                }
-                $result = $this->service->generateApiKey($this->researcher->id, $name, $permissions, $expiryDays);
+                $rawKey = bin2hex(random_bytes(32));
+                $prefix = substr($rawKey, 0, 8);
 
-                if (isset($result['error'])) {
-                    $this->getUser()->setFlash('error', $result['error']);
-                } else {
-                    $this->getUser()->setFlash('success', 'API key generated. Key: <strong>' . $result['key'] . '</strong> - Save this now, it will not be shown again.');
-                }
+                DB::table('ahg_api_key')->insert([
+                    'user_id' => $userId,
+                    'name' => $name,
+                    'api_key' => $rawKey,
+                    'api_key_prefix' => $prefix,
+                    'scopes' => !empty($permissions) ? json_encode($permissions) : null,
+                    'rate_limit' => 1000,
+                    'expires_at' => $expiresAt ?: null,
+                    'is_active' => 1,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+
+                $this->getUser()->setFlash('success', 'API key generated. Key: <strong>' . $rawKey . '</strong> — Save this now, it will not be shown again.');
                 $this->redirect('research/apiKeys');
             }
 
             if ($action === 'revoke') {
                 $keyId = (int) $request->getParameter('key_id');
-                $this->service->revokeApiKey($keyId, $this->researcher->id);
+                DB::table('ahg_api_key')
+                    ->where('id', $keyId)
+                    ->where('user_id', $userId)
+                    ->update(['is_active' => 0, 'updated_at' => date('Y-m-d H:i:s')]);
                 $this->getUser()->setFlash('success', 'API key revoked');
                 $this->redirect('research/apiKeys');
             }
