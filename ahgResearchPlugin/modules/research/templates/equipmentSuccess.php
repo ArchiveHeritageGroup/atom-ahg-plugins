@@ -130,6 +130,11 @@ $equipmentConditions = $taxonomyService->getEquipmentConditions(false);
                                                 onclick="logMaintenance(<?php echo $item->id ?>)">
                                             <i class="fas fa-wrench"></i>
                                         </button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                onclick="viewHistory(<?php echo $item->id ?>, '<?php echo htmlspecialchars($item->name, ENT_QUOTES) ?>')"
+                                                title="Maintenance History">
+                                            <i class="fas fa-history"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
@@ -335,9 +340,64 @@ function logMaintenance(equipmentId) {
     new bootstrap.Modal(document.getElementById('maintenanceModal')).show();
 }
 
+function viewHistory(equipmentId, equipmentName) {
+    document.getElementById('historyModalLabel').textContent = 'Maintenance History — ' + equipmentName;
+    var tbody = document.getElementById('historyTableBody');
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3"><i class="fas fa-spinner fa-spin me-1"></i>Loading...</td></tr>';
+    new bootstrap.Modal(document.getElementById('historyModal')).show();
+
+    fetch('/research/equipment/history?equipment_id=' + equipmentId)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.items || data.items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No maintenance history.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            data.items.forEach(function(m) {
+                var row = '<tr>';
+                row += '<td><small>' + (m.performed_at || '-') + '</small></td>';
+                row += '<td>' + (m.description || '-') + '</td>';
+                row += '<td><span class="badge bg-secondary">' + (m.condition_before || '-') + '</span> → <span class="badge bg-primary">' + (m.condition_after || '-') + '</span></td>';
+                row += '<td>' + (m.performer_name || '-') + '</td>';
+                row += '<td>' + (m.next_maintenance_date || '-') + '</td>';
+                row += '</tr>';
+                tbody.innerHTML += row;
+            });
+        })
+        .catch(function() {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-3">Failed to load history.</td></tr>';
+        });
+}
+
 document.getElementById('addEquipmentModal').addEventListener('hidden.bs.modal', function () {
     document.getElementById('equipmentModalTitle').textContent = 'Add Equipment';
     document.getElementById('equipmentAction').value = 'create';
     document.getElementById('equipmentForm').reset();
 });
 </script>
+
+<!-- Maintenance History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historyModalLabel">Maintenance History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="table-light">
+                            <tr><th>Date</th><th>Description</th><th>Condition</th><th>Performed By</th><th>Next Due</th></tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -76,6 +76,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_activity_view', '/research/activities/:id', 'viewActivity', ['id' => '\d+']);
         $research->any('research_activities', '/research/activities', 'activities');
         $research->any('research_walk_in', '/research/walk-in', 'walkIn');
+        $research->any('research_equipment_history', '/research/equipment/history', 'equipmentHistory');
         $research->any('research_equipment_book', '/research/equipment/book', 'bookEquipment');
         $research->any('research_equipment', '/research/equipment', 'equipment');
         $research->any('research_seat_map', '/research/seats/map', 'seatMap');
