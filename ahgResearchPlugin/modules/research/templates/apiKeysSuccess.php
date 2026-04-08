@@ -29,6 +29,7 @@
                     <tr>
                         <th>Name</th>
                         <th>Key Prefix</th>
+                        <th>Permissions</th>
                         <th>Created</th>
                         <th>Last Used</th>
                         <th>Expires</th>
@@ -40,7 +41,12 @@
                     <?php foreach ($apiKeys as $key): ?>
                         <tr>
                             <td><?php echo htmlspecialchars($key->name); ?></td>
-                            <td><code><?php echo substr($key->api_key_hash, 0, 8); ?>...</code></td>
+                            <td><code><?php echo substr($key->api_key_hash ?? $key->api_key ?? '', 0, 8); ?>...</code></td>
+                            <td><?php
+                                $perms = json_decode($key->permissions ?? '[]', true) ?: [];
+                                if (empty($perms)) { echo '<small class="text-muted">All</small>'; }
+                                else { foreach ($perms as $p) { echo '<span class="badge bg-light text-dark me-1">' . htmlspecialchars($p) . '</span>'; } }
+                            ?></td>
                             <td><?php echo date('M j, Y', strtotime($key->created_at)); ?></td>
                             <td><?php echo $key->last_used_at ? date('M j, Y H:i', strtotime($key->last_used_at)) : 'Never'; ?></td>
                             <td><?php echo $key->expires_at ? date('M j, Y', strtotime($key->expires_at)) : 'Never'; ?></td>
@@ -127,9 +133,24 @@
                         <small class="text-muted">A descriptive name to identify this key</small>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Permissions</label>
+                        <div class="form-check">
+                            <input type="checkbox" name="permissions[]" value="read" class="form-check-input" id="permRead" checked>
+                            <label class="form-check-label" for="permRead">Read <small class="text-muted">(collections, annotations, bibliographies)</small></label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" name="permissions[]" value="write" class="form-check-input" id="permWrite">
+                            <label class="form-check-label" for="permWrite">Write <small class="text-muted">(create/update collections, annotations)</small></label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" name="permissions[]" value="search" class="form-check-input" id="permSearch" checked>
+                            <label class="form-check-label" for="permSearch">Search <small class="text-muted">(query the catalogue)</small></label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Expiration Date</label>
                         <input type="date" name="expires_at" class="form-control" min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>">
-                        <small class="text-muted">Leave blank for no expiration</small>
+                        <small class="text-muted">Leave blank for default (1 year)</small>
                     </div>
                     <div class="alert alert-warning mb-0">
                         <i class="fas fa-exclamation-triangle me-2"></i>
