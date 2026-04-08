@@ -1,14 +1,14 @@
 <?php use_helper('Date') ?>
-
-<?php echo get_partial('layout_start', ['title' => 'Research Rooms']) ?>
+<?php decorate_with('layout_2col') ?>
+<?php slot('sidebar') ?>
+<?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
+<?php end_slot() ?>
 
 <?php
-// Detect if these are reading rooms (admin) or IIIF collaboration rooms (project)
 $isIiifRooms = isset($projectId) && $projectId > 0;
 ?>
 
-<div class="container-fluid py-3">
-    <nav aria-label="breadcrumb">
+<nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/research">Research</a></li>
             <?php if ($isIiifRooms && !empty($project)): ?>
@@ -123,7 +123,6 @@ $isIiifRooms = isset($projectId) && $projectId > 0;
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
-</div>
 
 <?php if ($isIiifRooms): ?>
 <!-- Create Room Modal (IIIF rooms only) -->
@@ -160,4 +159,3 @@ $isIiifRooms = isset($projectId) && $projectId > 0;
 <?php endif; ?>
 
 <?php include_partial('research/accessibilityHelpers') ?>
-<?php echo get_partial('layout_end') ?>
