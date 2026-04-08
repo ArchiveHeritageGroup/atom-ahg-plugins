@@ -119,21 +119,7 @@ $showInventory = ahg_show_inventory($resource);
     <?php } ?>
 
     <li>
-      <?php $browseAncestor = $resourceId; ?>
-      <?php if (isset($resource) && sfConfig::get('app_enable_institutional_scoping') && $sf_user->hasAttribute('search-realm')) { ?>
-        <a class="atom-icon-link" href="<?php echo url_for([
-            'module' => 'informationobject',
-            'action' => 'browse',
-            'ancestor' => $browseAncestor,
-            'repos' => $sf_user->getAttribute('search-realm'),
-            'topLod' => false, ]); ?>">
-      <?php } else { ?>
-        <a class="atom-icon-link" href="<?php echo url_for([
-            'module' => 'informationobject',
-            'action' => 'browse',
-            'ancestor' => $browseAncestor,
-            'topLod' => false, ]); ?>">
-      <?php } ?>
+        <a class="atom-icon-link" href="/glam/browse?ancestor=<?php echo $resourceId; ?>&topLevel=0">
         <i class="fas fa-fw fa-list me-1" aria-hidden="true">
         </i><?php echo __('Browse as list'); ?>
       </a>
@@ -141,13 +127,7 @@ $showInventory = ahg_show_inventory($resource);
 
     <?php if ($hasDigitalObject) { ?>
       <li>
-        <a class="atom-icon-link" href="<?php echo url_for([
-            'module' => 'informationobject',
-            'action' => 'browse',
-            'ancestor' => $browseAncestor,
-            'topLod' => false,
-            'view' => 'card',
-            'onlyMedia' => true, ]); ?>">
+        <a class="atom-icon-link" href="/glam/browse?ancestor=<?php echo $resourceId; ?>&topLevel=0&view=grid&hasDigital=1">
           <i class="fas fa-fw fa-image me-1" aria-hidden="true">
           </i><?php echo __('Browse digital objects'); ?>
         </a>

@@ -27,24 +27,7 @@
     <?php } ?>
 
     <li>
-      <?php
-        // Use ancestor= for proper filtering (collection= fails for top-level records)
-        $browseAncestor = $resource->id;
-      ?>
-      <?php if (isset($resource) && sfConfig::get('app_enable_institutional_scoping') && $sf_user->hasAttribute('search-realm')) { ?>
-        <a class="atom-icon-link" href="<?php echo url_for([
-            'module' => 'informationobject',
-            'action' => 'browse',
-            'ancestor' => $browseAncestor,
-            'repos' => $sf_user->getAttribute('search-realm'),
-            'topLod' => false, ]); ?>">
-      <?php } else { ?>
-        <a class="atom-icon-link" href="<?php echo url_for([
-            'module' => 'informationobject',
-            'action' => 'browse',
-            'ancestor' => $browseAncestor,
-            'topLod' => false, ]); ?>">
-      <?php } ?>
+        <a class="atom-icon-link" href="/glam/browse?ancestor=<?php echo $resource->id; ?>&topLevel=0">
         <i class="fas fa-fw fa-list me-1" aria-hidden="true">
         </i><?php echo __('Browse as list'); ?>
       </a>
@@ -52,13 +35,7 @@
 
     <?php if (!empty($resource->getDigitalObject())) { ?>
       <li>
-        <a class="atom-icon-link" href="<?php echo url_for([
-            'module' => 'informationobject',
-            'action' => 'browse',
-            'ancestor' => $browseAncestor,
-            'topLod' => false,
-            'view' => 'card',
-            'onlyMedia' => true, ]); ?>">
+        <a class="atom-icon-link" href="/glam/browse?ancestor=<?php echo $resource->id; ?>&topLevel=0&view=grid&hasDigital=1">
           <i class="fas fa-fw fa-image me-1" aria-hidden="true">
           </i><?php echo __('Browse digital objects'); ?>
         </a>
