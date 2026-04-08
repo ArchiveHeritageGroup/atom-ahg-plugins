@@ -6614,7 +6614,6 @@ class researchActions extends AhgController
         $this->researcher = $this->service->getResearcherByUserId($userId);
         if (!$this->researcher) { $this->redirect('research/register'); }
 
-        $reproService = $this->loadReproducibilityService();
         $projectId = (int) $request->getParameter('project_id');
 
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
@@ -6622,20 +6621,34 @@ class researchActions extends AhgController
         $this->project = $projectService->getProject($projectId, $this->researcher->id);
         if (!$this->project) { $this->forward404('Project not found'); }
 
+        // Query each table directly (matches Heratio)
+        $this->milestones = DB::table('research_project_milestone')->where('project_id', $projectId)->orderBy('sort_order')->get()->toArray();
+        $this->resources = DB::table('research_project_resource')->where('project_id', $projectId)->get()->toArray();
+        $this->assertions = DB::table('research_assertion')->where('project_id', $projectId)->get()->toArray();
+        $this->hypotheses = DB::table('research_hypothesis')->where('project_id', $projectId)->get()->toArray();
+        $this->snapshots = DB::table('research_snapshot')->where('project_id', $projectId)->get()->toArray();
+        $this->extractionJobs = DB::table('research_extraction_job')->where('project_id', $projectId)->get()->toArray();
+
+        $this->searchQueries = [];
         try {
-            $pack = $reproService->generatePack($projectId);
-        } catch (\Exception $e) {
-            $pack = ['error' => $e->getMessage()];
-        }
+            $this->searchQueries = DB::table('research_saved_search')->where('researcher_id', $this->researcher->id)->get()->toArray();
+        } catch (\Exception $e) {}
 
         // JSON download mode
         if ($request->getParameter('format') === 'json') {
             $this->getResponse()->setContentType('application/json');
-            return $this->renderText(json_encode($pack, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            return $this->renderText(json_encode([
+                'project' => $this->project,
+                'milestones' => $this->milestones,
+                'resources' => $this->resources,
+                'assertions' => $this->assertions,
+                'hypotheses' => $this->hypotheses,
+                'snapshots' => $this->snapshots,
+                'extraction_jobs' => $this->extractionJobs,
+                'search_queries' => $this->searchQueries,
+                'integrity_hash' => hash('sha256', json_encode([$this->project->id, count($this->assertions), count($this->snapshots), count($this->milestones)])),
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
         }
-
-        // HTML mode — render template
-        $this->pack = $pack;
     }
 
     public function executeProjectJsonLd($request)
@@ -6755,6 +6768,19 @@ class researchActions extends AhgController
                         ->where('project_id', $projectId)
                         ->update(['status' => $newStatus, 'updated_at' => date('Y-m-d H:i:s')]);
                     $this->getUser()->setFlash('success', 'Milestone status updated');
+                } elseif ($formAction === 'edit_milestone') {
+                    $milestoneId = (int) $request->getParameter('milestone_id');
+                    DB::table('research_project_milestone')
+                        ->where('id', $milestoneId)
+                        ->where('project_id', $projectId)
+                        ->update([
+                            'title' => $request->getParameter('title'),
+                            'description' => $request->getParameter('description'),
+                            'milestone_type' => $request->getParameter('milestone_type', 'ethics'),
+                            'due_date' => $request->getParameter('due_date') ?: null,
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                    $this->getUser()->setFlash('success', 'Milestone updated');
                 } elseif ($formAction === 'delete_milestone') {
                     $milestoneId = (int) $request->getParameter('milestone_id');
                     DB::table('research_project_milestone')

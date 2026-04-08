@@ -38,6 +38,7 @@
                 <td><small><?php echo $m->created_at ?? ''; ?></small></td>
                 <td>
                     <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary milestone-edit-btn" data-id="<?php echo (int) $m->id; ?>" data-title="<?php echo htmlspecialchars($m->title ?? '', ENT_QUOTES); ?>" data-description="<?php echo htmlspecialchars($m->description ?? '', ENT_QUOTES); ?>" data-type="<?php echo htmlspecialchars($m->milestone_type ?? 'ethics', ENT_QUOTES); ?>" data-due="<?php echo htmlspecialchars($m->due_date ?? '', ENT_QUOTES); ?>" title="Edit"><i class="fas fa-pencil-alt"></i></button>
                         <?php if (($m->status ?? '') === 'pending'): ?>
                             <button class="btn btn-outline-success milestone-status-btn" data-id="<?php echo (int) $m->id; ?>" data-status="approved" title="Approve"><i class="fas fa-check"></i></button>
                             <button class="btn btn-outline-danger milestone-status-btn" data-id="<?php echo (int) $m->id; ?>" data-status="rejected" title="Reject"><i class="fas fa-times"></i></button>
@@ -82,9 +83,51 @@
     </div>
 </div>
 
+<!-- Edit Milestone Modal -->
+<div class="modal fade" id="editMilestoneModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'ethicsMilestones', 'project_id' => $project->id]); ?>">
+            <input type="hidden" name="form_action" value="edit_milestone">
+            <input type="hidden" name="milestone_id" id="editMilestoneId">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Milestone</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Title</label><input type="text" name="title" id="editMilestoneTitle" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Description</label><textarea name="description" id="editMilestoneDesc" class="form-control" rows="3"></textarea></div>
+                    <div class="mb-3">
+                        <label class="form-label">Type</label>
+                        <select name="milestone_type" id="editMilestoneType" class="form-select">
+                            <option value="ethics">Ethics Review</option>
+                            <option value="irb_approval">IRB Approval</option>
+                            <option value="consent">Informed Consent</option>
+                            <option value="data_management">Data Management Plan</option>
+                            <option value="risk_assessment">Risk Assessment</option>
+                            <option value="compliance_check">Compliance Check</option>
+                        </select>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Due Date</label><input type="date" name="due_date" id="editMilestoneDue" class="form-control"></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var projectId = <?php echo (int) $project->id; ?>;
+
+    // Edit buttons
+    document.querySelectorAll('.milestone-edit-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('editMilestoneId').value = this.dataset.id;
+            document.getElementById('editMilestoneTitle').value = this.dataset.title;
+            document.getElementById('editMilestoneDesc').value = this.dataset.description;
+            document.getElementById('editMilestoneType').value = this.dataset.type;
+            document.getElementById('editMilestoneDue').value = this.dataset.due;
+            new bootstrap.Modal(document.getElementById('editMilestoneModal')).show();
+        });
+    });
 
     // Status change buttons
     document.querySelectorAll('.milestone-status-btn').forEach(function(btn) {
