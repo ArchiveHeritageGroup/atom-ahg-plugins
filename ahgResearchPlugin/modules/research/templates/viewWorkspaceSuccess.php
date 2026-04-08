@@ -162,6 +162,9 @@ try {
                                     </div>
                                     <span class="badge bg-secondary mb-2"><?php echo ucfirst($res->resource_type); ?></span>
                                     <h6 class="mb-1"><?php echo htmlspecialchars($res->title ?: 'Untitled'); ?></h6>
+                                    <?php if (!empty($res->external_url)): ?>
+                                        <a href="<?php echo htmlspecialchars($res->external_url); ?>" target="_blank" class="small d-block mb-1"><i class="fas fa-external-link-alt fa-xs me-1"></i><?php echo htmlspecialchars($res->external_url); ?></a>
+                                    <?php endif; ?>
                                     <?php if ($res->description ?? $res->notes ?? null): ?>
                                         <small class="text-muted"><?php echo htmlspecialchars($res->description ?? $res->notes ?? ''); ?></small>
                                     <?php endif; ?>
