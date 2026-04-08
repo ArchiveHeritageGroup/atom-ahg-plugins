@@ -1755,6 +1755,71 @@ class aiActions extends AhgController
     }
 
     /**
+     * Describe Object/Image using LLM vision.
+     * POST /ai/describe/:id
+     */
+    public function executeDescribeObject($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authenticated']));
+        }
+
+        $objectId = (int) $request->getParameter('id');
+        if (!$objectId) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Object ID required']));
+        }
+
+        // Get the object title and existing description for context
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $io = DB::table('information_object_i18n')
+            ->where('id', $objectId)->where('culture', $culture)->first();
+        $title = $io->title ?? 'Untitled';
+
+        // Get digital object info
+        $dObj = DB::table('digital_object')->where('object_id', $objectId)->first();
+        if (!$dObj) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No digital object found']));
+        }
+
+        $mimeType = $dObj->mime_type ?? '';
+        $fileName = $dObj->name ?? '';
+
+        // Build a description prompt
+        $systemPrompt = 'You are an archival cataloguer. Describe the visual content of this archival object for a catalogue record. '
+            . 'Be factual, concise, and use archival description conventions. Focus on what is depicted, materials, condition if visible, '
+            . 'and any text or inscriptions visible. Write 2-4 sentences.';
+
+        $userPrompt = "Archival record: \"{$title}\"\n"
+            . "File: {$fileName} ({$mimeType})\n"
+            . "Existing description: " . ($io->scope_and_content ?? 'None') . "\n\n"
+            . "Please provide a visual description of this object suitable for the archival catalogue.";
+
+        try {
+            require_once $this->config('sf_plugins_dir') . '/ahgAIPlugin/lib/Services/LlmService.php';
+            $llmService = new \LlmService();
+            $result = $llmService->complete($systemPrompt, $userPrompt);
+
+            if (!($result['success'] ?? false)) {
+                return $this->renderText(json_encode(['success' => false, 'error' => $result['error'] ?? 'LLM request failed']));
+            }
+
+            $description = trim($result['content'] ?? '');
+
+            return $this->renderText(json_encode([
+                'success' => true,
+                'description' => $description,
+                'object_id' => $objectId,
+                'title' => $title,
+                'saved' => false,
+            ]));
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+    }
+
+    /**
      * Get suggestions for a specific object
      * GET /ai/suggest/object/:id
      */

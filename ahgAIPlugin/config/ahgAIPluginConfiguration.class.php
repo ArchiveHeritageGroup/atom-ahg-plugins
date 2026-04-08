@@ -48,6 +48,9 @@ class ahgAIPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_ai_llm_health', '/ai/llm/health', 'llmHealth');
         $router->any('ahg_ai_templates', '/ai/templates', 'templates');
 
+        // Visual description route
+        $router->any('ahg_ai_describe', '/ai/describe/:id', 'describeObject', ['id' => '\d+']);
+
         // NER PDF Overlay Display routes (Issue #20)
         $router->any('ahg_ai_ner_pdf_overlay', '/ai/ner/pdf-overlay/:id', 'pdfOverlay', ['id' => '\d+']);
         $router->any('ahg_ai_ner_approved_entities', '/ai/ner/approved-entities/:id', 'getApprovedEntities', ['id' => '\d+']);

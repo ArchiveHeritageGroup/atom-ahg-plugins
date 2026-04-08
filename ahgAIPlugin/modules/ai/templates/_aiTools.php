@@ -58,6 +58,30 @@ try {
     </div>
     <?php endif; ?>
 
+    <!-- Describe Object/Image Button -->
+    <?php
+    $hasImage = false;
+    $imageUrl = '';
+    try {
+        $dObj = Illuminate\Database\Capsule\Manager::table('digital_object')
+            ->where('object_id', $resource->id)
+            ->first();
+        if ($dObj) {
+            $hasImage = true;
+            $slug = Illuminate\Database\Capsule\Manager::table('slug')
+                ->where('object_id', $resource->id)->value('slug');
+            $imageUrl = '/uploads/r/' . $dObj->path;
+        }
+    } catch (Exception $e) {}
+    ?>
+    <?php if ($hasImage): ?>
+    <div class="mb-2">
+        <button type="button" class="btn btn-outline-warning btn-sm w-100" id="aiDescribeBtn" onclick="describeObject(<?php echo $resource->id ?>)">
+            <i class="bi bi-eye me-1"></i>Describe Object/Image
+        </button>
+    </div>
+    <?php endif; ?>
+
     <!-- Results Area -->
     <div id="aiResultsArea" class="mt-2" style="display: none;"></div>
 </div>
@@ -133,6 +157,33 @@ function showResult(type, message, showRefresh = false) {
     }
     resultDiv.innerHTML = html;
     resultDiv.style.display = 'block';
+}
+
+function describeObject(objectId) {
+    const btn = document.getElementById('aiDescribeBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Analysing...';
+
+    fetch('/ai/describe/' + objectId, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-eye me-1"></i>Describe Object/Image';
+            if (!data.success) {
+                showResult('danger', data.error || 'Description failed');
+                return;
+            }
+            let html = '<strong>Visual Description:</strong><br>' + data.description;
+            if (data.saved) {
+                html += '<br><small class="text-success"><i class="bi bi-check me-1"></i>Saved to record</small>';
+            }
+            showResult('info', html, true);
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-eye me-1"></i>Describe Object/Image';
+            showResult('danger', err.message);
+        });
 }
 
 // Request notification permission
