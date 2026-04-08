@@ -23,7 +23,7 @@
                 <label class="form-label form-label-sm mb-0">Target Type</label>
                 <select name="filter_target_type" class="form-select form-select-sm">
                     <option value="">All</option>
-                    <?php foreach (['collection', 'project', 'snapshot', 'annotation', 'assertion'] as $tt): ?>
+                    <?php foreach (['archival_description', 'collection', 'project', 'snapshot', 'annotation', 'assertion'] as $tt): ?>
                     <option value="<?php echo $tt; ?>" <?php echo (($filters['target_type'] ?? '') === $tt) ? 'selected' : ''; ?>><?php echo ucfirst($tt); ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -101,7 +101,17 @@
                 </td>
                 <td><small><?php echo htmlspecialchars($p->created_at ?? ''); ?></small></td>
                 <td>
-                    <button class="btn btn-sm btn-outline-danger delete-policy-btn" data-policy-id="<?php echo (int) $p->id; ?>" title="Delete"><i class="fas fa-trash"></i></button>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary edit-policy-btn"
+                            data-policy-id="<?php echo (int) $p->id; ?>"
+                            data-target-type="<?php echo htmlspecialchars($p->target_type, ENT_QUOTES); ?>"
+                            data-target-id="<?php echo (int) $p->target_id; ?>"
+                            data-policy-type="<?php echo htmlspecialchars($p->policy_type, ENT_QUOTES); ?>"
+                            data-action-type="<?php echo htmlspecialchars($p->action_type, ENT_QUOTES); ?>"
+                            data-constraints="<?php echo htmlspecialchars($p->constraints_json ?? '{}', ENT_QUOTES); ?>"
+                            title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                        <button class="btn btn-outline-danger delete-policy-btn" data-policy-id="<?php echo (int) $p->id; ?>" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -128,58 +138,160 @@
 
 <!-- Create Policy Modal -->
 <div class="modal fade" id="createPolicyModal" tabindex="-1">
-  <div class="modal-dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Create ODRL Policy</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Target Type *</label>
-          <select id="policyTargetType" class="form-select">
-            <option value="">Select...</option>
-            <option value="collection">Collection</option>
-            <option value="project">Project</option>
-            <option value="snapshot">Snapshot</option>
-            <option value="annotation">Annotation</option>
-            <option value="assertion">Assertion</option>
-          </select>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Target Type <span class="text-danger">*</span></label>
+            <select id="policyTargetType" class="form-select" required>
+              <option value="">Select...</option>
+              <option value="archival_description">Archival Description</option>
+              <option value="collection">Collection</option>
+              <option value="project">Project</option>
+              <option value="snapshot">Snapshot</option>
+              <option value="annotation">Annotation</option>
+              <option value="assertion">Assertion</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3" id="targetSearchGroup" style="display:none;">
+            <label class="form-label fw-semibold" id="targetSearchLabel">Target <span class="text-danger">*</span></label>
+            <select id="policyTargetSearch"></select>
+            <input type="hidden" id="policyTargetId" value="">
+            <small class="text-muted">Type at least 2 characters to search</small>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Target *</label>
-          <select id="policyTargetSearch" placeholder="Type 2+ characters to search..."></select>
-          <input type="hidden" id="policyTargetId" value="">
-          <small class="text-muted">Search for the project, collection, or other entity to apply this policy to.</small>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Policy Type</label>
+            <select id="policyType" class="form-select">
+              <option value="permission">Permission</option>
+              <option value="prohibition">Prohibition</option>
+              <option value="obligation">Obligation</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Action Type</label>
+            <select id="policyActionType" class="form-select">
+              <option value="use">Use</option>
+              <option value="reproduce">Reproduce</option>
+              <option value="distribute">Distribute</option>
+              <option value="modify">Modify</option>
+              <option value="archive">Archive</option>
+              <option value="display">Display</option>
+            </select>
+          </div>
         </div>
+        <hr class="my-3">
+        <h6 class="text-muted mb-3">Constraints <small>(optional)</small></h6>
         <div class="mb-3">
-          <label class="form-label">Policy Type *</label>
-          <select id="policyType" class="form-select">
-            <option value="permission">Permission</option>
-            <option value="prohibition">Prohibition</option>
-            <option value="obligation">Obligation</option>
-          </select>
+          <label class="form-label">Restrict to Researchers</label>
+          <select id="policyResearchers" multiple placeholder="Search researchers..."></select>
+          <small class="text-muted">Leave empty to apply to all researchers</small>
         </div>
-        <div class="mb-3">
-          <label class="form-label">Action Type *</label>
-          <select id="policyActionType" class="form-select">
-            <option value="use">Use</option>
-            <option value="reproduce">Reproduce</option>
-            <option value="distribute">Distribute</option>
-            <option value="modify">Modify</option>
-            <option value="archive">Archive</option>
-            <option value="display">Display</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Constraints (JSON, optional)</label>
-          <textarea id="policyConstraints" class="form-control" rows="3" placeholder='{"date_from": "2026-01-01", "max_uses": 10}'></textarea>
-          <small class="text-muted">Keys: researcher_ids (array), date_from, date_to, max_uses</small>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Date From</label>
+            <input type="date" id="policyDateFrom" class="form-control">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Date To</label>
+            <input type="date" id="policyDateTo" class="form-control">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Max Uses</label>
+            <input type="number" id="policyMaxUses" class="form-control" min="0" placeholder="Unlimited">
+          </div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="submitPolicyBtn">Create Policy</button>
+        <button type="button" class="btn btn-primary" id="submitPolicyBtn"><i class="fas fa-check me-1"></i>Create Policy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Policy Modal -->
+<div class="modal fade" id="editPolicyModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit ODRL Policy</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editPolicyId">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Target Type <span class="text-danger">*</span></label>
+            <select id="editTargetType" class="form-select" required>
+              <option value="">Select...</option>
+              <option value="archival_description">Archival Description</option>
+              <option value="collection">Collection</option>
+              <option value="project">Project</option>
+              <option value="snapshot">Snapshot</option>
+              <option value="annotation">Annotation</option>
+              <option value="assertion">Assertion</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold" id="editTargetSearchLabel">Target <span class="text-danger">*</span></label>
+            <select id="editTargetSearch"></select>
+            <input type="hidden" id="editTargetId" value="">
+            <small class="text-muted">Type at least 2 characters to search</small>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Policy Type</label>
+            <select id="editPolicyType" class="form-select">
+              <option value="permission">Permission</option>
+              <option value="prohibition">Prohibition</option>
+              <option value="obligation">Obligation</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Action Type</label>
+            <select id="editActionType" class="form-select">
+              <option value="use">Use</option>
+              <option value="reproduce">Reproduce</option>
+              <option value="distribute">Distribute</option>
+              <option value="modify">Modify</option>
+              <option value="archive">Archive</option>
+              <option value="display">Display</option>
+            </select>
+          </div>
+        </div>
+        <hr class="my-3">
+        <h6 class="text-muted mb-3">Constraints <small>(optional)</small></h6>
+        <div class="mb-3">
+          <label class="form-label">Restrict to Researchers</label>
+          <select id="editResearchers" multiple placeholder="Search researchers..."></select>
+          <small class="text-muted">Leave empty to apply to all researchers</small>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Date From</label>
+            <input type="date" id="editDateFrom" class="form-control">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Date To</label>
+            <input type="date" id="editDateTo" class="form-control">
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Max Uses</label>
+            <input type="number" id="editMaxUses" class="form-control" min="0" placeholder="Unlimited">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="updatePolicyBtn"><i class="fas fa-check me-1"></i>Save Changes</button>
       </div>
     </div>
   </div>
@@ -193,17 +305,25 @@
 <script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php echo $na; ?>></script>
 <script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function() {
-    // Target search Tom Select
-    var searchUrl = '/index.php/research/ajax/search-entities';
-    var targetEl = document.getElementById('policyTargetSearch');
-    var parentEl = targetEl.closest('.modal-body') || document.body;
+    var searchUrl = '/research/ajax/search-entities';
+    var modalBody = document.querySelector('#createPolicyModal .modal-body');
+    var targetLabels = {
+        archival_description: 'Archival Description',
+        collection: 'Collection',
+        project: 'Project',
+        snapshot: 'Snapshot',
+        annotation: 'Annotation',
+        assertion: 'Assertion'
+    };
+
+    // Target search TomSelect
     var tsTarget = new TomSelect('#policyTargetSearch', {
         valueField: 'id',
         labelField: 'title',
         searchField: ['title'],
         maxItems: 1,
-        dropdownParent: parentEl,
-        placeholder: 'Type 2+ characters to search...',
+        dropdownParent: modalBody,
+        placeholder: 'Select target type first...',
         load: function(query, callback) {
             if (!query.length || query.length < 2) return callback();
             var targetType = document.getElementById('policyTargetType').value;
@@ -211,10 +331,9 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch(searchUrl + '?q=' + encodeURIComponent(query) + '&type=' + encodeURIComponent(targetType))
                 .then(function(r) { return r.json(); })
                 .then(function(j) {
-                    var items = (j.items || []).map(function(i) {
+                    callback((j.items || []).map(function(i) {
                         return { id: String(i.id), title: i.title || ('ID: ' + i.id) };
-                    });
-                    callback(items);
+                    }));
                 })
                 .catch(function() { callback(); });
         },
@@ -228,10 +347,46 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Reset Tom Select when target type changes
+    // Researcher multi-select TomSelect
+    var tsResearchers = new TomSelect('#policyResearchers', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title'],
+        dropdownParent: modalBody,
+        placeholder: 'Search researchers...',
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            fetch(searchUrl + '?q=' + encodeURIComponent(query) + '&type=researcher')
+                .then(function(r) { return r.json(); })
+                .then(function(j) {
+                    callback((j.items || []).map(function(i) {
+                        return { id: String(i.id), title: i.title || i.email || ('ID: ' + i.id) };
+                    }));
+                })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item) { return '<div class="py-1">' + item.title + '</div>'; },
+            item: function(item) { return '<div>' + item.title + '</div>'; },
+            no_results: function() { return '<div class="no-results p-2 text-muted">No researchers found</div>'; }
+        }
+    });
+
+    // Show/hide target search when target type changes
     document.getElementById('policyTargetType').addEventListener('change', function() {
+        var type = this.value;
+        var group = document.getElementById('targetSearchGroup');
+        var label = document.getElementById('targetSearchLabel');
         tsTarget.clear(); tsTarget.clearOptions();
         document.getElementById('policyTargetId').value = '';
+        if (type) {
+            group.style.display = '';
+            label.innerHTML = (targetLabels[type] || 'Target') + ' <span class="text-danger">*</span>';
+            tsTarget.settings.placeholder = 'Search ' + (targetLabels[type] || 'target') + '...';
+            tsTarget.inputState();
+        } else {
+            group.style.display = 'none';
+        }
     });
 
     // Create policy
@@ -240,7 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
         var targetId = document.getElementById('policyTargetId').value;
         var policyType = document.getElementById('policyType').value;
         var actionType = document.getElementById('policyActionType').value;
-        var constraints = document.getElementById('policyConstraints').value.trim();
 
         if (!targetType || !targetId) {
             alert('Target Type and Target are required.');
@@ -253,12 +407,25 @@ document.addEventListener('DOMContentLoaded', function() {
             policy_type: policyType,
             action_type: actionType
         };
-        if (constraints) {
-            try { body.constraints_json = JSON.parse(constraints); }
-            catch (e) { alert('Invalid JSON in constraints.'); return; }
+
+        // Build constraints from form fields
+        var constraints = {};
+        var researcherIds = tsResearchers.getValue();
+        if (researcherIds && researcherIds.length > 0) {
+            constraints.researcher_ids = researcherIds.map(function(id) { return parseInt(id); });
+        }
+        var dateFrom = document.getElementById('policyDateFrom').value;
+        if (dateFrom) { constraints.date_from = dateFrom; }
+        var dateTo = document.getElementById('policyDateTo').value;
+        if (dateTo) { constraints.date_to = dateTo; }
+        var maxUses = document.getElementById('policyMaxUses').value;
+        if (maxUses !== '' && parseInt(maxUses) > 0) { constraints.max_uses = parseInt(maxUses); }
+
+        if (Object.keys(constraints).length > 0) {
+            body.constraints_json = constraints;
         }
 
-        fetch('/index.php/research/odrl/create', {
+        fetch('/research/odrl/create', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(body)
@@ -274,12 +441,170 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(function(err) { alert('Error: ' + err.message); });
     });
 
+    // ---- Edit Policy ----
+    var editModalBody = document.querySelector('#editPolicyModal .modal-body');
+
+    var tsEditTarget = new TomSelect('#editTargetSearch', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title'],
+        maxItems: 1,
+        dropdownParent: editModalBody,
+        placeholder: 'Search target...',
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            var tt = document.getElementById('editTargetType').value;
+            if (!tt) { callback(); return; }
+            fetch(searchUrl + '?q=' + encodeURIComponent(query) + '&type=' + encodeURIComponent(tt))
+                .then(function(r) { return r.json(); })
+                .then(function(j) {
+                    callback((j.items || []).map(function(i) {
+                        return { id: String(i.id), title: i.title || ('ID: ' + i.id) };
+                    }));
+                })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item) { return '<div class="py-1"><strong>' + item.title + '</strong></div>'; },
+            item: function(item) { return '<div>' + item.title + '</div>'; },
+            no_results: function() { return '<div class="no-results p-2 text-muted">No results found</div>'; }
+        },
+        onChange: function(value) {
+            document.getElementById('editTargetId').value = value || '';
+        }
+    });
+
+    var tsEditResearchers = new TomSelect('#editResearchers', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title'],
+        dropdownParent: editModalBody,
+        placeholder: 'Search researchers...',
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            fetch(searchUrl + '?q=' + encodeURIComponent(query) + '&type=researcher')
+                .then(function(r) { return r.json(); })
+                .then(function(j) {
+                    callback((j.items || []).map(function(i) {
+                        return { id: String(i.id), title: i.title || i.email || ('ID: ' + i.id) };
+                    }));
+                })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item) { return '<div class="py-1">' + item.title + '</div>'; },
+            item: function(item) { return '<div>' + item.title + '</div>'; },
+            no_results: function() { return '<div class="no-results p-2 text-muted">No researchers found</div>'; }
+        }
+    });
+
+    document.getElementById('editTargetType').addEventListener('change', function() {
+        tsEditTarget.clear(); tsEditTarget.clearOptions();
+        document.getElementById('editTargetId').value = '';
+        var label = document.getElementById('editTargetSearchLabel');
+        label.innerHTML = (targetLabels[this.value] || 'Target') + ' <span class="text-danger">*</span>';
+    });
+
+    // Edit button click — populate modal
+    document.querySelectorAll('.edit-policy-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var d = this.dataset;
+            document.getElementById('editPolicyId').value = d.policyId;
+            document.getElementById('editTargetType').value = d.targetType;
+            document.getElementById('editPolicyType').value = d.policyType;
+            document.getElementById('editActionType').value = d.actionType;
+
+            // Set target label
+            var label = document.getElementById('editTargetSearchLabel');
+            label.innerHTML = (targetLabels[d.targetType] || 'Target') + ' <span class="text-danger">*</span>';
+
+            // Pre-load the current target into TomSelect
+            tsEditTarget.clear(); tsEditTarget.clearOptions();
+            document.getElementById('editTargetId').value = d.targetId;
+            tsEditTarget.addOption({ id: String(d.targetId), title: d.targetType + ' #' + d.targetId });
+            tsEditTarget.setValue(String(d.targetId), true);
+
+            // Resolve target name via search endpoint
+            fetch(searchUrl + '?q=&type=' + encodeURIComponent(d.targetType) + '&id=' + d.targetId)
+                .catch(function() {});
+
+            // Parse constraints
+            var c = {};
+            try { c = JSON.parse(d.constraints || '{}'); } catch(e) {}
+            document.getElementById('editDateFrom').value = c.date_from || '';
+            document.getElementById('editDateTo').value = c.date_to || '';
+            document.getElementById('editMaxUses').value = c.max_uses || '';
+
+            // Researchers
+            tsEditResearchers.clear(); tsEditResearchers.clearOptions();
+            if (c.researcher_ids && Array.isArray(c.researcher_ids)) {
+                c.researcher_ids.forEach(function(rid) {
+                    tsEditResearchers.addOption({ id: String(rid), title: 'Researcher #' + rid });
+                    tsEditResearchers.addItem(String(rid), true);
+                });
+            }
+
+            new bootstrap.Modal(document.getElementById('editPolicyModal')).show();
+        });
+    });
+
+    // Save edit
+    document.getElementById('updatePolicyBtn').addEventListener('click', function() {
+        var policyId = document.getElementById('editPolicyId').value;
+        var targetType = document.getElementById('editTargetType').value;
+        var targetId = document.getElementById('editTargetId').value;
+        var policyType = document.getElementById('editPolicyType').value;
+        var actionType = document.getElementById('editActionType').value;
+
+        if (!targetType || !targetId) {
+            alert('Target Type and Target are required.');
+            return;
+        }
+
+        var body = {
+            target_type: targetType,
+            target_id: parseInt(targetId),
+            policy_type: policyType,
+            action_type: actionType
+        };
+
+        var constraints = {};
+        var rIds = tsEditResearchers.getValue();
+        if (rIds && rIds.length > 0) {
+            constraints.researcher_ids = rIds.map(function(id) { return parseInt(id); });
+        }
+        var df = document.getElementById('editDateFrom').value;
+        if (df) { constraints.date_from = df; }
+        var dt = document.getElementById('editDateTo').value;
+        if (dt) { constraints.date_to = dt; }
+        var mu = document.getElementById('editMaxUses').value;
+        if (mu !== '' && parseInt(mu) > 0) { constraints.max_uses = parseInt(mu); }
+
+        if (Object.keys(constraints).length > 0) {
+            body.constraints_json = constraints;
+        } else {
+            body.constraints_json = null;
+        }
+
+        fetch('/research/odrl/update/' + policyId, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.success) { window.location.reload(); }
+            else { alert(data.error || 'Failed to update policy.'); }
+        })
+        .catch(function(err) { alert('Error: ' + err.message); });
+    });
+
     // Delete policy
     document.querySelectorAll('.delete-policy-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
             if (!confirm('Delete this policy? This cannot be undone.')) return;
             var policyId = this.dataset.policyId;
-            fetch('/index.php/research/odrl/delete/' + policyId, {
+            fetch('/research/odrl/delete/' + policyId, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'}
             })

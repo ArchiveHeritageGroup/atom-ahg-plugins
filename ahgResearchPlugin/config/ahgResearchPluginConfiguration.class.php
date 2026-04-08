@@ -331,6 +331,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // =====================================================================
         $research->any('research_evaluate_access', '/research/odrl/evaluate', 'evaluateAccess');
         $research->any('research_create_odrl_policy', '/research/odrl/create', 'createOdrlPolicy');
+        $research->any('research_update_odrl_policy', '/research/odrl/update/:id', 'updateOdrlPolicy', ['id' => '\\d+']);
         $research->any('research_delete_odrl_policy', '/research/odrl/delete/:id', 'deleteOdrlPolicy', ['id' => '\\d+']);
         $research->any('research_odrl_policies', '/research/odrl/policies', 'odrlPolicies');
 

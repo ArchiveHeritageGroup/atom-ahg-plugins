@@ -1534,7 +1534,7 @@ class researchActions extends AhgController
             $researcherId = $researcher ? $researcher->id : 0;
             $items = DB::table('research_project')
                 ->where(function ($q) use ($researcherId) {
-                    $q->where('researcher_id', $researcherId)
+                    $q->where('owner_id', $researcherId)
                       ->orWhereExists(function ($sub) use ($researcherId) {
                           $sub->select(DB::raw(1))
                               ->from('research_project_collaborator')
@@ -1554,10 +1554,10 @@ class researchActions extends AhgController
             $researcherId = $researcher ? $researcher->id : 0;
             $items = DB::table('research_snapshot as rs')
                 ->join('research_project as rp', 'rs.project_id', '=', 'rp.id')
-                ->where('rp.researcher_id', $researcherId)
-                ->where('rs.label', 'LIKE', '%' . $query . '%')
-                ->select('rs.id', 'rs.label as title')
-                ->orderBy('rs.label')
+                ->where('rp.owner_id', $researcherId)
+                ->where('rs.title', 'LIKE', '%' . $query . '%')
+                ->select('rs.id', 'rs.title')
+                ->orderBy('rs.title')
                 ->limit(20)->get()->map(function ($s) {
                     return (object) ['id' => $s->id, 'title' => $s->title, 'slug' => null];
                 })->toArray();
@@ -1568,10 +1568,11 @@ class researchActions extends AhgController
             $items = DB::table('research_annotation')
                 ->where('researcher_id', $researcherId)
                 ->where(function ($q) use ($query) {
-                    $q->where('body', 'LIKE', '%' . $query . '%')
+                    $q->where('title', 'LIKE', '%' . $query . '%')
+                      ->orWhere('content', 'LIKE', '%' . $query . '%')
                       ->orWhere('annotation_type', 'LIKE', '%' . $query . '%');
                 })
-                ->select('id', DB::raw("CONCAT(annotation_type, ': ', LEFT(body, 60)) as title"))
+                ->select('id', DB::raw("COALESCE(NULLIF(title, ''), CONCAT(annotation_type, ': ', LEFT(content, 60))) as title"))
                 ->orderByDesc('created_at')
                 ->limit(20)->get()->map(function ($a) {
                     return (object) ['id' => $a->id, 'title' => $a->title, 'slug' => null];
@@ -1582,8 +1583,12 @@ class researchActions extends AhgController
             $researcherId = $researcher ? $researcher->id : 0;
             $items = DB::table('research_assertion')
                 ->where('researcher_id', $researcherId)
-                ->where('statement', 'LIKE', '%' . $query . '%')
-                ->select('id', DB::raw("LEFT(statement, 80) as title"))
+                ->where(function ($q) use ($query) {
+                    $q->where('predicate', 'LIKE', '%' . $query . '%')
+                      ->orWhere('subject_label', 'LIKE', '%' . $query . '%')
+                      ->orWhere('object_label', 'LIKE', '%' . $query . '%');
+                })
+                ->select('id', DB::raw("CONCAT(COALESCE(subject_label,''), ' ', predicate, ' ', COALESCE(object_label,'')) as title"))
                 ->orderByDesc('created_at')
                 ->limit(20)->get()->map(function ($a) {
                     return (object) ['id' => $a->id, 'title' => $a->title, 'slug' => null];
@@ -6567,6 +6572,32 @@ class researchActions extends AhgController
                 $body['created_by'] = (int) $this->getUser()->getAttribute('user_id');
                 $id = $odrlService->createPolicy($body);
                 return $this->renderText(json_encode(['success' => true, 'id' => $id]));
+            } catch (\Exception $e) {
+                return $this->renderText(json_encode(['error' => $e->getMessage()]));
+            }
+        }
+        return $this->renderText(json_encode(['error' => 'POST required']));
+    }
+
+    public function executeUpdateOdrlPolicy($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'Not authenticated']));
+        }
+
+        $id = (int) $request->getParameter('id');
+        if (!$id) {
+            return $this->renderText(json_encode(['error' => 'Policy ID required']));
+        }
+
+        $odrlService = $this->loadOdrlService();
+
+        if ($request->isMethod('post')) {
+            try {
+                $body = json_decode($request->getContent(), true) ?: [];
+                $updated = $odrlService->updatePolicy($id, $body);
+                return $this->renderText(json_encode(['success' => $updated]));
             } catch (\Exception $e) {
                 return $this->renderText(json_encode(['error' => $e->getMessage()]));
             }
