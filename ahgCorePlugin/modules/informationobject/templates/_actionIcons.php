@@ -26,6 +26,8 @@
       </li>
     <?php } ?>
 
+    <?php $hasChildren = Illuminate\Database\Capsule\Manager::table('information_object')->where('parent_id', $resource->id)->exists(); ?>
+    <?php if ($hasChildren): ?>
     <li>
         <a class="atom-icon-link" href="/glam/browse?ancestor=<?php echo $resource->id; ?>&topLevel=0">
         <i class="fas fa-fw fa-list me-1" aria-hidden="true">
@@ -41,6 +43,7 @@
         </a>
       </li>
     <?php } ?>
+    <?php endif; ?>
   </ul>
 
   <?php if ($sf_user->isAdministrator()) { ?>

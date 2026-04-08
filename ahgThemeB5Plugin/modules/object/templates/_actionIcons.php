@@ -118,6 +118,8 @@ $showInventory = ahg_show_inventory($resource);
       </li>
     <?php } ?>
 
+    <?php $hasChildren = Illuminate\Database\Capsule\Manager::table('information_object')->where('parent_id', $resourceId)->exists(); ?>
+    <?php if ($hasChildren): ?>
     <li>
         <a class="atom-icon-link" href="/glam/browse?ancestor=<?php echo $resourceId; ?>&topLevel=0">
         <i class="fas fa-fw fa-list me-1" aria-hidden="true">
@@ -133,6 +135,7 @@ $showInventory = ahg_show_inventory($resource);
         </a>
       </li>
     <?php } ?>
+    <?php endif; ?>
   </ul>
 
   <?php if ($sf_user->isAdministrator()) { ?>
