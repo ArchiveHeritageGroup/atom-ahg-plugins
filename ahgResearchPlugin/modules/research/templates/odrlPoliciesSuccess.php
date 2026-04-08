@@ -86,14 +86,29 @@
                 </td>
                 <td><code><?php echo htmlspecialchars($p->action_type); ?></code></td>
                 <td>
-                    <?php if (!empty($p->constraints_json)):
-                        $constraints = json_decode($p->constraints_json, true);
-                        if (is_array($constraints)):
-                            foreach ($constraints as $ck => $cv): ?>
-                                <small class="d-block text-muted"><?php echo htmlspecialchars($ck); ?>: <?php echo htmlspecialchars(is_array($cv) ? implode(', ', $cv) : $cv); ?></small>
-                            <?php endforeach;
-                        else: ?>
-                            <small class="text-muted">-</small>
+                    <?php
+                    $rawP = sfOutputEscaper::unescape($p);
+                    $cJson = $rawP->constraints_json ?? '';
+                    $cons = $cJson ? json_decode($cJson, true) : null;
+                    if (is_array($cons) && !empty($cons)):
+                        $rLabels = (array) ($rawP->researcher_labels ?? []);
+                        if (!empty($cons['researcher_ids'])): ?>
+                            <small class="d-block text-muted">Researchers: <?php
+                                $names = [];
+                                foreach ($cons['researcher_ids'] as $rid) {
+                                    $names[] = $rLabels[$rid] ?? ('ID: ' . $rid);
+                                }
+                                echo htmlspecialchars(implode(', ', $names));
+                            ?></small>
+                        <?php endif;
+                        if (!empty($cons['date_from'])): ?>
+                            <small class="d-block text-muted">From: <?php echo htmlspecialchars($cons['date_from']); ?></small>
+                        <?php endif;
+                        if (!empty($cons['date_to'])): ?>
+                            <small class="d-block text-muted">To: <?php echo htmlspecialchars($cons['date_to']); ?></small>
+                        <?php endif;
+                        if (!empty($cons['max_uses'])): ?>
+                            <small class="d-block text-muted">Max uses: <?php echo (int) $cons['max_uses']; ?></small>
                         <?php endif;
                     else: ?>
                         <small class="text-muted">None</small>
@@ -102,14 +117,16 @@
                 <td><small><?php echo htmlspecialchars($p->created_at ?? ''); ?></small></td>
                 <td>
                     <div class="btn-group btn-group-sm">
+                        <?php $raw = sfOutputEscaper::unescape($p); ?>
                         <button class="btn btn-outline-secondary edit-policy-btn"
-                            data-policy-id="<?php echo (int) $p->id; ?>"
-                            data-target-type="<?php echo htmlspecialchars($p->target_type, ENT_QUOTES); ?>"
-                            data-target-id="<?php echo (int) $p->target_id; ?>"
-                            data-target-label="<?php echo htmlspecialchars($p->target_label ?? '', ENT_QUOTES); ?>"
-                            data-policy-type="<?php echo htmlspecialchars($p->policy_type, ENT_QUOTES); ?>"
-                            data-action-type="<?php echo htmlspecialchars($p->action_type, ENT_QUOTES); ?>"
-                            data-constraints="<?php echo htmlspecialchars($p->constraints_json ?? '{}', ENT_QUOTES); ?>"
+                            data-policy-id="<?php echo (int) $raw->id; ?>"
+                            data-target-type="<?php echo htmlspecialchars($raw->target_type, ENT_QUOTES); ?>"
+                            data-target-id="<?php echo (int) $raw->target_id; ?>"
+                            data-target-label="<?php echo htmlspecialchars($raw->target_label ?? '', ENT_QUOTES); ?>"
+                            data-policy-type="<?php echo htmlspecialchars($raw->policy_type, ENT_QUOTES); ?>"
+                            data-action-type="<?php echo htmlspecialchars($raw->action_type, ENT_QUOTES); ?>"
+                            data-constraints="<?php echo htmlspecialchars($raw->constraints_json ?? '{}', ENT_QUOTES); ?>"
+                            data-researcher-labels="<?php echo htmlspecialchars(json_encode($raw->researcher_labels ?? []), ENT_QUOTES); ?>"
                             title="Edit"><i class="fas fa-pencil-alt"></i></button>
                         <button class="btn btn-outline-danger delete-policy-btn" data-policy-id="<?php echo (int) $p->id; ?>" title="Delete"><i class="fas fa-trash"></i></button>
                     </div>
@@ -533,11 +550,14 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('editDateTo').value = c.date_to || '';
             document.getElementById('editMaxUses').value = c.max_uses || '';
 
-            // Researchers
+            // Researchers — resolve names from data attribute
             tsEditResearchers.clear(); tsEditResearchers.clearOptions();
+            var researcherLabels = {};
+            try { researcherLabels = JSON.parse(d.researcherLabels || '{}'); } catch(e) {}
             if (c.researcher_ids && Array.isArray(c.researcher_ids)) {
                 c.researcher_ids.forEach(function(rid) {
-                    tsEditResearchers.addOption({ id: String(rid), title: 'Researcher #' + rid });
+                    var name = researcherLabels[String(rid)] || ('Researcher #' + rid);
+                    tsEditResearchers.addOption({ id: String(rid), title: name });
                     tsEditResearchers.addItem(String(rid), true);
                 });
             }

@@ -6631,6 +6631,23 @@ class researchActions extends AhgController
                         break;
                 }
             } catch (\Exception $e) { /* table may not exist */ }
+
+            // Resolve researcher names from constraints
+            $p->researcher_labels = [];
+            if (!empty($p->constraints_json)) {
+                $constraints = json_decode($p->constraints_json, true);
+                if (is_array($constraints) && !empty($constraints['researcher_ids'])) {
+                    try {
+                        $researchers = DB::table('research_researcher')
+                            ->whereIn('id', $constraints['researcher_ids'])
+                            ->select('id', 'first_name', 'last_name')
+                            ->get();
+                        foreach ($researchers as $r) {
+                            $p->researcher_labels[$r->id] = trim($r->first_name . ' ' . $r->last_name);
+                        }
+                    } catch (\Exception $e) {}
+                }
+            }
         }
         unset($p);
 
