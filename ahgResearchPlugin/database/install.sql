@@ -1808,10 +1808,18 @@ INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`
 ('reproduction_request_status', 'Reproduction Request Status', 'cancelled', 'Cancelled', 50);
 
 INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
-('equipment_type', 'Equipment Type', 'magnifying_glass', 'Magnifying Glass', 10),
-('equipment_type', 'Equipment Type', 'light_box', 'Light Box', 20),
-('equipment_type', 'Equipment Type', 'book_cradle', 'Book Cradle', 30),
-('equipment_type', 'Equipment Type', 'gloves', 'Cotton Gloves', 40),
-('equipment_type', 'Equipment Type', 'weights', 'Page Weights', 50),
-('equipment_type', 'Equipment Type', 'scanner', 'Scanner', 60),
-('equipment_type', 'Equipment Type', 'microfilm_reader', 'Microfilm Reader', 70);
+('equipment_type', 'Equipment Type', 'microfilm_reader', 'Microfilm Reader', 10),
+('equipment_type', 'Equipment Type', 'microfiche_reader', 'Microfiche Reader', 20),
+('equipment_type', 'Equipment Type', 'scanner', 'Scanner', 30),
+('equipment_type', 'Equipment Type', 'computer', 'Computer Workstation', 40),
+('equipment_type', 'Equipment Type', 'laptop', 'Laptop', 50),
+('equipment_type', 'Equipment Type', 'magnifier', 'Magnifier/Loupe', 60),
+('equipment_type', 'Equipment Type', 'book_cradle', 'Book Cradle', 60),
+('equipment_type', 'Equipment Type', 'light_box', 'Light Box', 70),
+('equipment_type', 'Equipment Type', 'camera_stand', 'Camera Stand', 80),
+('equipment_type', 'Equipment Type', 'projector', 'Projector', 90),
+('equipment_type', 'Equipment Type', 'gloves', 'Gloves', 90),
+('equipment_type', 'Equipment Type', 'audio_player', 'Audio Player', 100),
+('equipment_type', 'Equipment Type', 'weights', 'Weights', 100),
+('equipment_type', 'Equipment Type', 'video_player', 'Video Player', 110),
+('equipment_type', 'Equipment Type', 'other', 'Other', 200);

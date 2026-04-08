@@ -144,21 +144,36 @@ $equipmentConditions = $taxonomyService->getEquipmentConditions(false);
         <!-- Equipment Types Info -->
         <div class="col-md-4">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h6 class="mb-0"><i class="fas fa-list me-2"></i>Equipment Types</h6>
+                    <?php if ($sf_user->isAdministrator()): ?>
+                    <a href="<?php echo url_for(['module' => 'ahgDropdown', 'action' => 'index']); ?>?taxonomy=equipment_type" class="btn btn-sm btn-outline-secondary" title="Manage in Dropdown Manager"><i class="fas fa-cog"></i></a>
+                    <?php endif; ?>
                 </div>
                 <div class="card-body">
+                    <?php
+                    $eqIconMap = [
+                        'microfilm_reader' => 'fa-film',
+                        'microfiche_reader' => 'fa-th',
+                        'scanner' => 'fa-print',
+                        'computer' => 'fa-desktop',
+                        'laptop' => 'fa-laptop',
+                        'magnifier' => 'fa-search-plus',
+                        'book_cradle' => 'fa-book-open',
+                        'light_box' => 'fa-lightbulb',
+                        'camera_stand' => 'fa-camera',
+                        'projector' => 'fa-video',
+                        'gloves' => 'fa-hand-paper',
+                        'audio_player' => 'fa-headphones',
+                        'weights' => 'fa-weight-hanging',
+                        'video_player' => 'fa-play-circle',
+                        'other' => 'fa-ellipsis-h',
+                    ];
+                    ?>
                     <ul class="list-unstyled mb-0 small">
-                        <li><i class="fas fa-film text-muted me-2"></i> Microfilm Reader</li>
-                        <li><i class="fas fa-th text-muted me-2"></i> Microfiche Reader</li>
-                        <li><i class="fas fa-print text-muted me-2"></i> Scanner</li>
-                        <li><i class="fas fa-desktop text-muted me-2"></i> Computer</li>
-                        <li><i class="fas fa-search-plus text-muted me-2"></i> Magnifier</li>
-                        <li><i class="fas fa-book-open text-muted me-2"></i> Book Cradle</li>
-                        <li><i class="fas fa-lightbulb text-muted me-2"></i> Light Box</li>
-                        <li><i class="fas fa-camera text-muted me-2"></i> Camera Stand</li>
-                        <li><i class="fas fa-hand-paper text-muted me-2"></i> Cotton Gloves</li>
-                        <li><i class="fas fa-weight-hanging text-muted me-2"></i> Page Weights</li>
+                        <?php foreach ($equipmentTypes as $code => $label): ?>
+                        <li><i class="fas <?php echo $eqIconMap[$code] ?? 'fa-tools'; ?> text-muted me-2"></i> <?php echo htmlspecialchars($label); ?></li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
             </div>
