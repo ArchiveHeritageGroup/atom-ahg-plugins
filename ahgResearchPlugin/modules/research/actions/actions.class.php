@@ -261,6 +261,20 @@ class researchActions extends AhgController
             'search' => $request->getParameter('q'),
         ]);
         $this->currentStatus = $request->getParameter('status');
+
+        // Status counts for tabs
+        $this->statusCounts = [
+            'all' => DB::table('research_researcher')->count(),
+            'pending' => DB::table('research_researcher')->where('status', 'pending')->count(),
+            'approved' => DB::table('research_researcher')->where('status', 'approved')->count(),
+            'suspended' => DB::table('research_researcher')->where('status', 'suspended')->count(),
+            'expired' => DB::table('research_researcher')->where(function ($q) {
+                $q->where('status', 'expired')
+                  ->orWhere(function ($q2) {
+                      $q2->whereNotNull('expires_at')->where('expires_at', '<', date('Y-m-d H:i:s'));
+                  });
+            })->count(),
+        ];
     }
 
     public function executeViewResearcher($request)

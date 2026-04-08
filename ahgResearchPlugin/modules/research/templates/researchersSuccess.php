@@ -7,6 +7,18 @@
 <?php end_slot() ?>
 
 <?php slot('content') ?>
+<?php
+$counts = isset($statusCounts) ? (is_array($statusCounts) ? $statusCounts : (method_exists($statusCounts, 'getRawValue') ? $statusCounts->getRawValue() : [])) : [];
+$cs = $currentStatus ?? '';
+?>
+<h1 class="h2 mb-4"><i class="fas fa-users text-primary me-2"></i>Manage Researchers</h1>
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item"><a class="nav-link <?php echo !$cs ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>">All <span class="badge bg-<?php echo !$cs ? 'white text-primary' : 'secondary'; ?> ms-1"><?php echo (int) ($counts['all'] ?? 0); ?></span></a></li>
+    <li class="nav-item"><a class="nav-link <?php echo $cs === 'pending' ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>?status=pending">Pending <span class="badge bg-<?php echo $cs === 'pending' ? 'white text-primary' : 'warning text-dark'; ?> ms-1"><?php echo (int) ($counts['pending'] ?? 0); ?></span></a></li>
+    <li class="nav-item"><a class="nav-link <?php echo $cs === 'approved' ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>?status=approved">Approved <span class="badge bg-<?php echo $cs === 'approved' ? 'white text-primary' : 'success'; ?> ms-1"><?php echo (int) ($counts['approved'] ?? 0); ?></span></a></li>
+    <li class="nav-item"><a class="nav-link <?php echo $cs === 'suspended' ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>?status=suspended">Suspended <span class="badge bg-<?php echo $cs === 'suspended' ? 'white text-primary' : 'danger'; ?> ms-1"><?php echo (int) ($counts['suspended'] ?? 0); ?></span></a></li>
+    <li class="nav-item"><a class="nav-link <?php echo $cs === 'expired' ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>?status=expired">Expired <span class="badge bg-<?php echo $cs === 'expired' ? 'white text-primary' : 'secondary'; ?> ms-1"><?php echo (int) ($counts['expired'] ?? 0); ?></span></a></li>
+</ul>
 <div class="card">
   <div class="card-header">
     <div class="row align-items-center">
