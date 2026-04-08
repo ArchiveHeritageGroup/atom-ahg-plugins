@@ -123,6 +123,16 @@ if (isset($resource)) {
         <i class="bi bi-file-text me-1"></i><?php echo __('Generate Summary'); ?>
       </a>
     </li>
+    <?php
+    $hasDigitalObj = false;
+    try { $hasDigitalObj = Illuminate\Database\Capsule\Manager::table('digital_object')->where('object_id', $resource->id)->exists(); } catch (Exception $e) {}
+    if ($hasDigitalObj): ?>
+    <li>
+      <a href="#" id="aiDescribeBtn" data-object-id="<?php echo $resource->id; ?>">
+        <i class="bi bi-eye me-1"></i><?php echo __('Describe Object/Image'); ?>
+      </a>
+    </li>
+    <?php endif; ?>
     <?php if (isPluginActive('ahgTranslationPlugin')): ?>
     <li><?php include_partial('translation/translateModal', ['objectId' => $resource->id]); ?></li>
     <?php endif; ?>
@@ -156,6 +166,7 @@ if (isset($resource)) {
     */ ?>
   </ul>
   <div id="summaryResult" class="mt-2 ctx-hidden"></div>
+  <div id="describeResult" class="mt-2 ctx-hidden"></div>
   <div id="htrResult" class="mt-2 ctx-hidden"></div>
 </section>
 
@@ -263,6 +274,35 @@ function generateSummary(objectId) {
     });
 }
 
+function describeObject(objectId) {
+  var btn = document.getElementById('aiDescribeBtn');
+  var resultDiv = document.getElementById('describeResult');
+
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Analysing...';
+  resultDiv.classList.add('ctx-hidden');
+
+  fetch('/ai/describe/' + objectId, { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      btn.innerHTML = '<i class="bi bi-eye me-1"></i>Describe Object/Image';
+
+      if (!data.success) {
+        resultDiv.innerHTML = '<div class="alert alert-danger py-2 small"><i class="bi bi-exclamation-circle me-1"></i>' + (data.error || 'Failed') + '</div>';
+        resultDiv.classList.remove('ctx-hidden');
+        return;
+      }
+
+      resultDiv.innerHTML = '<div class="alert alert-info py-2 small"><i class="bi bi-eye me-1"></i><strong>Visual Description:</strong></div>' +
+        '<div class="card"><div class="card-body py-2 small ctx-prewrap">' + data.description + '</div></div>';
+      resultDiv.classList.remove('ctx-hidden');
+    })
+    .catch(function(err) {
+      btn.innerHTML = '<i class="bi bi-eye me-1"></i>Describe Object/Image';
+      resultDiv.innerHTML = '<div class="alert alert-danger py-2 small">' + err.message + '</div>';
+      resultDiv.classList.remove('ctx-hidden');
+    });
+}
+
 // Attach event listeners (CSP-safe, no inline onclick)
 document.addEventListener('DOMContentLoaded', function() {
   var nerBtn = document.getElementById('nerExtractBtn');
@@ -277,6 +317,13 @@ document.addEventListener('DOMContentLoaded', function() {
     sumBtn.addEventListener('click', function(e) {
       e.preventDefault();
       generateSummary(sumBtn.getAttribute('data-object-id'));
+    });
+  }
+  var descBtn = document.getElementById('aiDescribeBtn');
+  if (descBtn) {
+    descBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      describeObject(descBtn.getAttribute('data-object-id'));
     });
   }
   var piiBtn = document.getElementById('piiScanBtn');
