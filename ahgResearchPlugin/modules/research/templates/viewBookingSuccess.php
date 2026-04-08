@@ -125,16 +125,15 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
 
   <!-- Actions Sidebar -->
   <div class="col-md-4">
-    <?php if ($booking->status === 'pending' || $booking->status === 'confirmed'): ?>
+    <?php if (in_array($booking->status, ['pending', 'confirmed', 'checked_in'])): ?>
     <div class="card mb-4">
       <div class="card-header bg-dark text-white">
         <i class="fas fa-tasks me-2"></i><?php echo __('Actions'); ?>
       </div>
       <div class="card-body">
-        
+
         <?php if ($booking->status === 'pending'): ?>
           <?php if ($isStaff): ?>
-          <!-- Staff can confirm -->
           <form method="post" class="mb-2">
             <input type="hidden" name="booking_action" value="confirm">
             <button type="submit" class="btn btn-success w-100">
@@ -142,9 +141,8 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
             </button>
           </form>
           <?php endif; ?>
-          
+
           <?php if ($isStaff || $isOwner): ?>
-          <!-- Staff or owner can cancel pending booking -->
           <form method="post">
             <input type="hidden" name="booking_action" value="cancel">
             <button type="submit" class="btn btn-danger w-100" onclick="return confirm('<?php echo __('Cancel this booking?'); ?>')">
@@ -155,29 +153,19 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
         <?php endif; ?>
 
         <?php if ($booking->status === 'confirmed'): ?>
-          <?php if ($isStaff && $booking->booking_date === date('Y-m-d')): ?>
-            <?php if (!$booking->checked_in_at): ?>
+          <?php if ($isStaff): ?>
             <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkIn', 'id' => $booking->id]); ?>" class="btn btn-success w-100 mb-2" onclick="return confirm('<?php echo __('Check in researcher?'); ?>')">
               <i class="fas fa-sign-in-alt me-2"></i><?php echo __('Check In'); ?>
             </a>
-            <?php elseif (!$booking->checked_out_at): ?>
-            <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkOut', 'id' => $booking->id]); ?>" class="btn btn-warning w-100 mb-2" onclick="return confirm('<?php echo __('Check out researcher?'); ?>')">
-              <i class="fas fa-sign-out-alt me-2"></i><?php echo __('Check Out'); ?>
-            </a>
-            <?php endif; ?>
-            
-            <?php if (!$booking->checked_in_at): ?>
-            <form method="post" class="mt-2">
+            <form method="post" class="mb-2">
               <input type="hidden" name="booking_action" value="noshow">
-              <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('<?php echo __('Mark as no-show?'); ?>')">
+              <button type="submit" class="btn btn-outline-dark w-100" onclick="return confirm('<?php echo __('Mark as no-show?'); ?>')">
                 <i class="fas fa-user-slash me-2"></i><?php echo __('No Show'); ?>
               </button>
             </form>
-            <?php endif; ?>
           <?php endif; ?>
-          
-          <?php if ($isOwner && !$booking->checked_in_at): ?>
-          <!-- Owner can cancel confirmed booking if not yet checked in -->
+
+          <?php if ($isOwner): ?>
           <form method="post">
             <input type="hidden" name="booking_action" value="cancel">
             <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('<?php echo __('Cancel this booking?'); ?>')">
@@ -186,7 +174,15 @@ $isOwner = $currentResearcher && $currentResearcher->id == $booking->researcher_
           </form>
           <?php endif; ?>
         <?php endif; ?>
-        
+
+        <?php if ($booking->status === 'checked_in'): ?>
+          <?php if ($isStaff): ?>
+          <a href="<?php echo url_for(['module' => 'research', 'action' => 'checkOut', 'id' => $booking->id]); ?>" class="btn btn-warning w-100" onclick="return confirm('<?php echo __('Check out researcher?'); ?>')">
+            <i class="fas fa-sign-out-alt me-2"></i><?php echo __('Check Out'); ?>
+          </a>
+          <?php endif; ?>
+        <?php endif; ?>
+
       </div>
     </div>
     <?php endif; ?>
