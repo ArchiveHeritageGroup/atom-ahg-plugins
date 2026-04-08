@@ -65,6 +65,10 @@ $isAdmin = $sf_user->isAdministrator();
        class="list-group-item list-group-item-action <?php echo $active === 'entityResolution' ? 'active' : ''; ?>">
         <i class="fas fa-object-group me-2"></i><?php echo __('Entity Resolution'); ?>
     </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'browseAssessments']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'assessments' ? 'active' : ''; ?>">
+        <i class="fas fa-clipboard-check me-2"></i><?php echo __('Source Assessments'); ?>
+    </a>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'odrlPolicies']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'odrlPolicies' ? 'active' : ''; ?>">
         <i class="fas fa-balance-scale me-2"></i><?php echo __('ODRL Policies'); ?>
