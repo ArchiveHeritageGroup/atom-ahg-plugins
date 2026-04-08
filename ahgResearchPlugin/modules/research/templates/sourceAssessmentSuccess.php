@@ -29,21 +29,38 @@
             </div>
         </div>
 
-        <?php if (!empty($metrics)): ?>
         <div class="card mb-4">
-            <div class="card-header"><h5 class="mb-0">Quality Metrics</h5></div>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Quality Metrics</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addMetricModal"><i class="fas fa-plus me-1"></i>Add Metric</button>
+            </div>
             <div class="card-body">
-                <table class="table table-sm">
-                    <thead><tr><th>Metric</th><th>Value</th><th>Source</th><th>Date</th></tr></thead>
+                <?php if (!empty($metrics)): ?>
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Metric</th><th>Value</th><th>Source</th><th>Date</th><th></th></tr></thead>
                     <tbody>
                     <?php foreach ($metrics as $m): ?>
-                        <tr><td><?php echo htmlspecialchars($m->metric_type); ?></td><td><?php echo number_format((float) $m->metric_value, 4); ?></td><td><?php echo htmlspecialchars($m->source_service ?? ''); ?></td><td><?php echo $m->created_at; ?></td></tr>
+                        <tr>
+                            <td><?php echo ucfirst(str_replace('_', ' ', $m->metric_type)); ?></td>
+                            <td><?php echo number_format((float) $m->metric_value, 2); ?></td>
+                            <td><small><?php echo htmlspecialchars($m->source_service ?? '-'); ?></small></td>
+                            <td><small><?php echo $m->created_at; ?></small></td>
+                            <td>
+                                <form method="post" class="d-inline" onsubmit="return confirm('Delete this metric?');">
+                                    <input type="hidden" name="form_action" value="delete_metric">
+                                    <input type="hidden" name="metric_id" value="<?php echo (int) $m->id; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-times"></i></button>
+                                </form>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                     </tbody>
                 </table>
+                <?php else: ?>
+                <p class="text-muted mb-0">No quality metrics recorded yet.</p>
+                <?php endif; ?>
             </div>
         </div>
-        <?php endif; ?>
     </div>
     <div class="col-md-4">
         <div class="card">
@@ -53,5 +70,43 @@
                 <p class="text-muted">out of 100</p>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Add Metric Modal -->
+<div class="modal fade" id="addMetricModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post">
+            <input type="hidden" name="form_action" value="add_metric">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Add Quality Metric</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Metric Type *</label>
+                        <select name="metric_type" class="form-select" required>
+                            <option value="image_quality">Image Quality</option>
+                            <option value="ocr_confidence">OCR Confidence</option>
+                            <option value="digitisation_completeness">Digitisation Completeness</option>
+                            <option value="fixity_status">Fixity Status</option>
+                            <option value="colour_accuracy">Colour Accuracy</option>
+                            <option value="resolution_dpi">Resolution (DPI)</option>
+                            <option value="file_integrity">File Integrity</option>
+                            <option value="metadata_completeness">Metadata Completeness</option>
+                            <option value="legibility">Legibility</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Value * <small class="text-muted">(numeric, e.g. 85.5)</small></label>
+                        <input type="number" name="metric_value" class="form-control" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Source</label>
+                        <input type="text" name="source_service" class="form-control" placeholder="e.g. manual_check, ImageMagick">
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Add Metric</button></div>
+            </div>
+        </form>
     </div>
 </div>

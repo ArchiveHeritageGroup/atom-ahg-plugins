@@ -5382,6 +5382,31 @@ class researchActions extends AhgController
 
         $objectId = (int) $request->getParameter('object_id');
         $trustService = $this->loadTrustScoringService();
+
+        // Handle metric add/delete
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('form_action');
+            if ($action === 'add_metric') {
+                DB::table('research_quality_metric')->insert([
+                    'object_id' => $objectId,
+                    'metric_type' => $request->getParameter('metric_type'),
+                    'metric_value' => (float) $request->getParameter('metric_value'),
+                    'source_service' => $request->getParameter('source_service') ?: 'manual_check',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+                $this->getUser()->setFlash('success', 'Metric added');
+                $this->redirect('/research/source-assessment/' . $objectId);
+            }
+            if ($action === 'delete_metric') {
+                DB::table('research_quality_metric')
+                    ->where('id', (int) $request->getParameter('metric_id'))
+                    ->where('object_id', $objectId)
+                    ->delete();
+                $this->getUser()->setFlash('success', 'Metric deleted');
+                $this->redirect('/research/source-assessment/' . $objectId);
+            }
+        }
+
         $this->assessment = $trustService->getAssessment($objectId, $this->researcher->id);
         $this->history = $trustService->getAssessmentHistory($objectId);
         $this->metrics = $trustService->getQualityMetrics($objectId);
