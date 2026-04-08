@@ -2872,7 +2872,12 @@ class researchActions extends AhgController
                 $permissions = $request->getParameter('permissions', []);
                 $expiresAt = $request->getParameter('expires_at');
 
-                $result = $this->service->generateApiKey($this->researcher->id, $name, $permissions, $expiresAt ?: null);
+                $expiryDays = 365;
+                if ($expiresAt) {
+                    $diff = (int) ((strtotime($expiresAt) - time()) / 86400);
+                    if ($diff > 0) { $expiryDays = $diff; }
+                }
+                $result = $this->service->generateApiKey($this->researcher->id, $name, $permissions, $expiryDays);
 
                 if (isset($result['error'])) {
                     $this->getUser()->setFlash('error', $result['error']);
