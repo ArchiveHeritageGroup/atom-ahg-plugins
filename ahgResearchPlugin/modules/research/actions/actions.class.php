@@ -2281,6 +2281,15 @@ class researchActions extends AhgController
                     }
                 }
             }
+            // Check first item too
+            $firstItemId = $request->getParameter('first_item_id');
+            if ($firstItemId) {
+                $odrl = $this->enforceOdrl('archival_description', (int) $firstItemId, $this->researcher->id, 'reproduce');
+                if ($odrl && !$odrl['permitted']) {
+                    $this->redirect('research/reproductions');
+                    return;
+                }
+            }
 
             try {
                 $newId = $reproductionService->createRequest($this->researcher->id, [
@@ -2291,6 +2300,19 @@ class researchActions extends AhgController
                     'urgency' => $request->getParameter('urgency', 'normal'),
                     'special_instructions' => $request->getParameter('special_instructions'),
                 ]);
+
+                // Add first item if provided
+                $firstItemId = $request->getParameter('first_item_id');
+                if ($firstItemId) {
+                    $reproductionService->addItem($newId, [
+                        'object_id' => (int) $firstItemId,
+                        'reproduction_type' => $request->getParameter('first_item_type', 'digital_scan'),
+                        'format' => $request->getParameter('first_item_format', 'pdf'),
+                        'specifications' => $request->getParameter('first_item_specs'),
+                        'quantity' => 1,
+                    ]);
+                }
+
                 $this->getUser()->setFlash('success', 'Reproduction request created');
                 $this->redirect('/research/reproduction/' . $newId);
             } catch (\Exception $e) {

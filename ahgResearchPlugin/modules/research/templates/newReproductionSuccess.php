@@ -68,9 +68,36 @@
                         <textarea name="special_instructions" class="form-control" rows="2" placeholder="Any special requirements or notes..."></textarea>
                     </div>
 
-                    <div class="alert alert-info" role="status">
-                        <i class="fas fa-info-circle me-2" aria-hidden="true"></i>
-                        After creating the request, you can add individual items from your collections or by searching the archive.
+                    <hr class="my-4">
+                    <h6 class="text-muted mb-3">Optional: Add First Item</h6>
+                    <div class="mb-3">
+                        <label class="form-label">Archive Item</label>
+                        <select id="firstItemSearch" name="first_item_id"></select>
+                        <small class="text-muted">You can add more items after creating the request.</small>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Type</label>
+                            <select name="first_item_type" class="form-select">
+                                <option value="digital_scan">Scan</option>
+                                <option value="photocopy">Photocopy</option>
+                                <option value="photograph">Photograph</option>
+                                <option value="certified_copy">Certified Copy</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Format</label>
+                            <select name="first_item_format" class="form-select">
+                                <option value="pdf">PDF</option>
+                                <option value="tiff">TIFF</option>
+                                <option value="jpeg">JPEG</option>
+                                <option value="paper">Paper</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Specifications</label>
+                            <input type="text" name="first_item_specs" class="form-control" placeholder="e.g. 300dpi colour">
+                        </div>
                     </div>
 
                     <div class="d-flex gap-2">
@@ -100,3 +127,37 @@
         </div>
     </div>
 </div>
+
+<link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet">
+<?php $n = sfConfig::get('csp_nonce', ''); $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<script src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js" <?php echo $na; ?>></script>
+<script <?php echo $na; ?>>
+document.addEventListener('DOMContentLoaded', function() {
+    new TomSelect('#firstItemSearch', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title', 'identifier'],
+        maxItems: 1,
+        placeholder: 'Search archival descriptions...',
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            fetch('/research/ajax/search-entities?type=information_object&q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(j) {
+                    callback((j.items || []).map(function(i) {
+                        return { id: String(i.id), title: i.title || ('ID: ' + i.id), identifier: i.identifier || '' };
+                    }));
+                })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item, escape) {
+                return '<div class="py-1"><strong>' + escape(item.title) + '</strong>' +
+                    (item.identifier ? '<br><small class="text-muted">' + escape(item.identifier) + '</small>' : '') + '</div>';
+            },
+            item: function(item, escape) { return '<div>' + escape(item.title) + '</div>'; },
+            no_results: function() { return '<div class="no-results p-2 text-muted">No results found</div>'; }
+        }
+    });
+});
+</script>
