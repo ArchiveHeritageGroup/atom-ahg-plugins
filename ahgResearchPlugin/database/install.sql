@@ -1745,3 +1745,73 @@ CREATE TABLE IF NOT EXISTS `research_room_manifest` (
     INDEX `idx_room` (`room_id`),
     FOREIGN KEY (`room_id`) REFERENCES `research_room`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- Dropdown Manager seed data (ahg_dropdown)
+-- ============================================================
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('seat_type', 'Seat Type', 'standard', 'Regular desk/table', 10),
+('seat_type', 'Seat Type', 'accessible', 'Wheelchair accessible', 20),
+('seat_type', 'Seat Type', 'computer', 'With workstation', 30),
+('seat_type', 'Seat Type', 'microfilm', 'Microfilm reader', 40),
+('seat_type', 'Seat Type', 'oversize', 'Large format materials', 50),
+('seat_type', 'Seat Type', 'quiet', 'Silent study zone', 60),
+('seat_type', 'Seat Type', 'group', 'Group/collaborative', 70);
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('booking_status', 'Booking Status', 'pending', 'Pending', 10),
+('booking_status', 'Booking Status', 'confirmed', 'Confirmed', 20),
+('booking_status', 'Booking Status', 'checked_in', 'Checked In', 30),
+('booking_status', 'Booking Status', 'checked_out', 'Checked Out', 40),
+('booking_status', 'Booking Status', 'completed', 'Completed', 50),
+('booking_status', 'Booking Status', 'cancelled', 'Cancelled', 60),
+('booking_status', 'Booking Status', 'no_show', 'No Show', 70);
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('researcher_status', 'Researcher Status', 'pending', 'Pending', 10),
+('researcher_status', 'Researcher Status', 'approved', 'Approved', 20),
+('researcher_status', 'Researcher Status', 'suspended', 'Suspended', 30),
+('researcher_status', 'Researcher Status', 'expired', 'Expired', 40),
+('researcher_status', 'Researcher Status', 'rejected', 'Rejected', 50);
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('researcher_type', 'Researcher Type', 'academic', 'Academic Researcher', 10),
+('researcher_type', 'Researcher Type', 'independent', 'Independent Researcher', 20),
+('researcher_type', 'Researcher Type', 'student', 'Student', 30),
+('researcher_type', 'Researcher Type', 'government', 'Government Official', 40),
+('researcher_type', 'Researcher Type', 'journalist', 'Journalist', 50),
+('researcher_type', 'Researcher Type', 'genealogist', 'Genealogist', 60),
+('researcher_type', 'Researcher Type', 'legal', 'Legal Professional', 70),
+('researcher_type', 'Researcher Type', 'other', 'Other', 80);
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('material_request_status', 'Material Request Status', 'pending', 'Pending', 10),
+('material_request_status', 'Material Request Status', 'approved', 'Approved', 20),
+('material_request_status', 'Material Request Status', 'retrieved', 'Retrieved', 30),
+('material_request_status', 'Material Request Status', 'delivered', 'Delivered', 40),
+('material_request_status', 'Material Request Status', 'returned', 'Returned', 50),
+('material_request_status', 'Material Request Status', 'denied', 'Denied', 60);
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('reproduction_type', 'Reproduction Type', 'digital_scan', 'Digital Scan', 10),
+('reproduction_type', 'Reproduction Type', 'photocopy', 'Photocopy', 20),
+('reproduction_type', 'Reproduction Type', 'photograph', 'Photograph', 30),
+('reproduction_type', 'Reproduction Type', 'certified_copy', 'Certified Copy', 40),
+('reproduction_type', 'Reproduction Type', 'microfilm', 'Microfilm', 50);
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('reproduction_request_status', 'Reproduction Request Status', 'draft', 'Draft', 10),
+('reproduction_request_status', 'Reproduction Request Status', 'submitted', 'Submitted', 20),
+('reproduction_request_status', 'Reproduction Request Status', 'processing', 'Processing', 30),
+('reproduction_request_status', 'Reproduction Request Status', 'completed', 'Completed', 40),
+('reproduction_request_status', 'Reproduction Request Status', 'cancelled', 'Cancelled', 50);
+
+INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `sort_order`) VALUES
+('equipment_type', 'Equipment Type', 'magnifying_glass', 'Magnifying Glass', 10),
+('equipment_type', 'Equipment Type', 'light_box', 'Light Box', 20),
+('equipment_type', 'Equipment Type', 'book_cradle', 'Book Cradle', 30),
+('equipment_type', 'Equipment Type', 'gloves', 'Cotton Gloves', 40),
+('equipment_type', 'Equipment Type', 'weights', 'Page Weights', 50),
+('equipment_type', 'Equipment Type', 'scanner', 'Scanner', 60),
+('equipment_type', 'Equipment Type', 'microfilm_reader', 'Microfilm Reader', 70);
