@@ -239,6 +239,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // =====================================================================
         // ISSUE 159 PHASE 2a: SOURCE ASSESSMENT & TRUST
         // =====================================================================
+        $research->any('research_assessments_browse', '/research/assessments', 'browseAssessments');
         $research->any('research_save_source_assessment', '/research/source-assessment/save', 'saveSourceAssessment');
         $research->any('research_trust_score', '/research/trust-score/:object_id', 'trustScore', ['object_id' => '\\d+']);
         $research->any('research_source_assessment', '/research/source-assessment/:object_id', 'sourceAssessment', ['object_id' => '\\d+']);

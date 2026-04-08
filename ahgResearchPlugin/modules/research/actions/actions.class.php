@@ -5373,6 +5373,55 @@ class researchActions extends AhgController
         return new \TrustScoringService();
     }
 
+    /**
+     * Browse all source assessments.
+     * URL: /research/assessments
+     */
+    public function executeBrowseAssessments($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) { $this->redirect('research/register'); }
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $filterResearcher = $request->getParameter('researcher_id');
+
+        $query = DB::table('research_source_assessment as sa')
+            ->leftJoin('information_object_i18n as ioi', function ($j) use ($culture) {
+                $j->on('sa.object_id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 'sa.object_id', '=', 's.object_id')
+            ->leftJoin('research_researcher as r', 'sa.researcher_id', '=', 'r.id')
+            ->select(
+                'sa.*',
+                'ioi.title as object_title',
+                's.slug',
+                'r.first_name',
+                'r.last_name'
+            )
+            ->orderByDesc('sa.assessed_at');
+
+        if ($filterResearcher) {
+            $query->where('sa.researcher_id', (int) $filterResearcher);
+        }
+
+        $this->assessments = $query->limit(100)->get()->toArray();
+        $this->filterResearcherId = $filterResearcher;
+
+        // Metrics summary per object
+        $objectIds = array_unique(array_column($this->assessments, 'object_id'));
+        $this->metricCounts = [];
+        if (!empty($objectIds)) {
+            $counts = DB::table('research_quality_metric')
+                ->whereIn('object_id', $objectIds)
+                ->selectRaw('object_id, COUNT(*) as cnt')
+                ->groupBy('object_id')
+                ->pluck('cnt', 'object_id')->toArray();
+            $this->metricCounts = $counts;
+        }
+    }
+
     public function executeSourceAssessment($request)
     {
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
