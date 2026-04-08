@@ -146,15 +146,24 @@ try {
                         <?php foreach ($resources as $res): ?>
                             <div class="col-md-6 mb-3">
                                 <div class="border rounded p-3 position-relative">
-                                    <form method="post" class="position-absolute top-0 end-0 m-2" onsubmit="return confirm('Remove this resource?');">
-                                        <input type="hidden" name="form_action" value="remove_resource">
-                                        <input type="hidden" name="resource_id" value="<?php echo (int) $res->id; ?>">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove"><i class="fas fa-times"></i></button>
-                                    </form>
+                                    <div class="btn-group btn-group-sm position-absolute top-0 end-0 m-2">
+                                        <button type="button" class="btn btn-outline-secondary edit-res-btn"
+                                            data-id="<?php echo (int) $res->id; ?>"
+                                            data-title="<?php echo htmlspecialchars($res->title ?? '', ENT_QUOTES); ?>"
+                                            data-notes="<?php echo htmlspecialchars($res->description ?? '', ENT_QUOTES); ?>"
+                                            data-url="<?php echo htmlspecialchars($res->external_url ?? '', ENT_QUOTES); ?>"
+                                            data-type="<?php echo htmlspecialchars($res->resource_type ?? '', ENT_QUOTES); ?>"
+                                            title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                                        <form method="post" class="d-inline" onsubmit="return confirm('Remove this resource?');">
+                                            <input type="hidden" name="form_action" value="remove_resource">
+                                            <input type="hidden" name="resource_id" value="<?php echo (int) $res->id; ?>">
+                                            <button type="submit" class="btn btn-outline-danger" title="Remove"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </div>
                                     <span class="badge bg-secondary mb-2"><?php echo ucfirst($res->resource_type); ?></span>
                                     <h6 class="mb-1"><?php echo htmlspecialchars($res->title ?: 'Untitled'); ?></h6>
-                                    <?php if ($res->notes): ?>
-                                        <small class="text-muted"><?php echo htmlspecialchars($res->notes); ?></small>
+                                    <?php if ($res->description ?? $res->notes ?? null): ?>
+                                        <small class="text-muted"><?php echo htmlspecialchars($res->description ?? $res->notes ?? ''); ?></small>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -430,6 +439,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('resourceTitleInput').value = '';
     });
 
+    // Edit resource button handler
+    document.querySelectorAll('.edit-res-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('editResId').value = this.dataset.id;
+            document.getElementById('editResTitle').value = this.dataset.title;
+            document.getElementById('editResNotes').value = this.dataset.notes;
+            document.getElementById('editResUrl').value = this.dataset.url;
+            document.getElementById('editResUrlGroup').style.display = this.dataset.type === 'external_link' ? '' : 'none';
+            new bootstrap.Modal(document.getElementById('editResourceModal')).show();
+        });
+    });
+
     // Edit discussion button handler
     document.querySelectorAll('.edit-disc-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
@@ -460,6 +481,25 @@ document.addEventListener('DOMContentLoaded', function() {
                             <option value="public" <?php echo ($workspaceData->visibility ?? '') === 'public' ? 'selected' : ''; ?>>Public</option>
                         </select>
                     </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Resource Modal -->
+<div class="modal fade" id="editResourceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post">
+            <input type="hidden" name="form_action" value="edit_resource">
+            <input type="hidden" name="resource_id" id="editResId">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Resource</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Title *</label><input type="text" name="title" id="editResTitle" class="form-control" required></div>
+                    <div class="mb-3" id="editResUrlGroup"><label class="form-label">URL</label><input type="url" name="external_url" id="editResUrl" class="form-control" placeholder="https://"></div>
+                    <div class="mb-3"><label class="form-label">Notes</label><textarea name="notes" id="editResNotes" class="form-control" rows="2"></textarea></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
             </div>
