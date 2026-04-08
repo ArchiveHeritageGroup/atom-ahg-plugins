@@ -452,14 +452,15 @@ class StatisticsService
      */
     public function getMostViewedItems(int $limit = 20, ?string $dateFrom = null, ?string $dateTo = null): array
     {
+        // Try research_activity_log for any entity activity (not just 'view')
         $query = DB::table('research_activity_log as a')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('a.entity_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
-            ->where('a.activity_type', 'view')
-            ->where('a.entity_type', 'information_object')
-            ->selectRaw('a.entity_id, ioi.title, COUNT(*) as view_count')
-            ->groupBy('a.entity_id', 'ioi.title')
+            ->whereNotNull('a.entity_id')
+            ->where('a.entity_id', '>', 0)
+            ->selectRaw('a.entity_id, COALESCE(ioi.title, a.entity_title, CONCAT(a.entity_type, " #", a.entity_id)) as title, COUNT(*) as view_count')
+            ->groupBy('a.entity_id', 'ioi.title', 'a.entity_title', 'a.entity_type')
             ->orderByDesc('view_count')
             ->limit($limit);
 
@@ -470,7 +471,22 @@ class StatisticsService
             $query->where('a.created_at', '<=', $dateTo . ' 23:59:59');
         }
 
-        return $query->get()->toArray();
+        $results = $query->get()->toArray();
+
+        // Fallback: if no activity log data, show most collected items
+        if (empty($results)) {
+            $results = DB::table('research_collection_item as ci')
+                ->leftJoin('information_object_i18n as ioi', function ($join) {
+                    $join->on('ci.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+                })
+                ->selectRaw('ci.object_id as entity_id, COALESCE(ioi.title, CONCAT("Object #", ci.object_id)) as title, COUNT(*) as view_count')
+                ->groupBy('ci.object_id', 'ioi.title')
+                ->orderByDesc('view_count')
+                ->limit($limit)
+                ->get()->toArray();
+        }
+
+        return $results;
     }
 
     /**

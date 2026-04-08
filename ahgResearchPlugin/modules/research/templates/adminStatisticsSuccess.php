@@ -118,7 +118,7 @@ $s = sfOutputEscaper::unescape($stats);
     <!-- Most Viewed Items -->
     <div class="col-md-6 mb-4">
         <div class="card h-100">
-            <div class="card-header"><h5 class="mb-0"><i class="fas fa-eye me-2"></i>Most Viewed Items</h5></div>
+            <div class="card-header"><h5 class="mb-0"><i class="fas fa-fire me-2"></i>Most Active Items</h5></div>
             <div class="card-body p-0">
                 <?php if (!empty($mostViewed)): ?>
                     <table class="table table-hover mb-0">
