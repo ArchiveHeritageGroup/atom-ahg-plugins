@@ -30,6 +30,46 @@
         ]); ?>
     </div>
 </div>
+<?php
+// Shared collections for this workspace (via workspace_resource with resource_type=collection)
+$sharedCollections = [];
+try {
+    $collectionIds = Illuminate\Database\Capsule\Manager::table('research_workspace_resource')
+        ->where('workspace_id', $workspaceData->id)
+        ->where('resource_type', 'collection')
+        ->pluck('resource_id')->toArray();
+    if (!empty($collectionIds)) {
+        $sharedCollections = Illuminate\Database\Capsule\Manager::table('research_collection as c')
+            ->leftJoin('research_researcher as r', 'c.researcher_id', '=', 'r.id')
+            ->leftJoin(Illuminate\Database\Capsule\Manager::raw('(SELECT collection_id, COUNT(*) as cnt FROM research_collection_item GROUP BY collection_id) ci'), 'c.id', '=', 'ci.collection_id')
+            ->whereIn('c.id', $collectionIds)
+            ->select('c.id', 'c.name', 'r.first_name as owner_first_name', 'r.last_name as owner_last_name', Illuminate\Database\Capsule\Manager::raw('COALESCE(ci.cnt, 0) as item_count'))
+            ->orderBy('c.name')
+            ->get()->toArray();
+    }
+} catch (\Exception $e) {}
+?>
+
+<?php if (!empty($sharedCollections)): ?>
+<div class="card mb-4">
+    <div class="card-header"><h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Shared Collections</h5></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light"><tr><th>Collection</th><th>Items</th><th>Owner</th></tr></thead>
+            <tbody>
+            <?php foreach ($sharedCollections as $c): ?>
+                <tr>
+                    <td><a href="<?php echo url_for(['module' => 'research', 'action' => 'viewCollection', 'id' => $c->id]); ?>"><?php echo htmlspecialchars($c->name ?? ''); ?></a></td>
+                    <td><?php echo (int) ($c->item_count ?? 0); ?></td>
+                    <td><?php echo htmlspecialchars(trim(($c->owner_first_name ?? '') . ' ' . ($c->owner_last_name ?? ''))); ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="row">
     <div class="col-md-8">
         <!-- Discussions -->
