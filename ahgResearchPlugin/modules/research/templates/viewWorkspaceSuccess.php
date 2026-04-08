@@ -369,8 +369,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <select id="resourceSearch"></select>
                         <small class="text-muted"><?php echo __('Type to search by name or title'); ?></small>
                     </div>
-                    <div class="mb-3" id="externalLinkGroup" style="display:none;">
-                        <label class="form-label"><?php echo __('URL'); ?> *</label>
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo __('External URL'); ?></label>
                         <input type="url" name="external_url" id="externalUrlInput" class="form-control" placeholder="https://">
                     </div>
                     <div class="mb-3">
@@ -428,25 +428,66 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    // Toggle search vs URL input based on resource type
+    // Reset search when resource type changes
     document.getElementById('resourceTypeSelect').addEventListener('change', function() {
-        var isLink = this.value === 'external_link';
-        document.getElementById('resourceSearchGroup').style.display = isLink ? 'none' : '';
-        document.getElementById('externalLinkGroup').style.display = isLink ? '' : 'none';
         resourceSelect.clear();
         resourceSelect.clearOptions();
         document.getElementById('resourceIdHidden').value = '';
         document.getElementById('resourceTitleInput').value = '';
     });
 
+    // Edit resource TomSelect
+    var editTypeMap = {collection: 'collection', saved_search: 'saved_search', bibliography: 'bibliography', object: 'information_object'};
+    var editResSelect = new TomSelect('#editResSearch', {
+        valueField: 'id',
+        labelField: 'title',
+        searchField: ['title', 'identifier'],
+        placeholder: '<?php echo __("Type to search..."); ?>',
+        loadThrottle: 300,
+        load: function(query, callback) {
+            if (!query.length || query.length < 2) return callback();
+            var resType = document.getElementById('editResType').value;
+            var searchType = editTypeMap[resType] || 'information_object';
+            var url = '<?php echo url_for(["module" => "research", "action" => "searchEntities"]); ?>';
+            var sep = url.indexOf('?') >= 0 ? '&' : '?';
+            fetch(url + sep + 'type=' + searchType + '&q=' + encodeURIComponent(query))
+                .then(function(r) { return r.json(); })
+                .then(function(json) { callback(json.items || []); })
+                .catch(function() { callback(); });
+        },
+        render: {
+            option: function(item, escape) {
+                return '<div class="py-1"><strong>' + escape(item.title) + '</strong>' +
+                    (item.identifier ? '<br><small class="text-muted">' + escape(item.identifier) + '</small>' : '') + '</div>';
+            },
+            item: function(item, escape) { return '<div>' + escape(item.title) + '</div>'; }
+        },
+        onChange: function(value) {
+            document.getElementById('editResNewId').value = value;
+            var selected = this.options[value];
+            if (selected && selected.title) {
+                document.getElementById('editResTitle').value = selected.title;
+            }
+        }
+    });
+
+    // Reset edit search when resource type changes
+    document.getElementById('editResType').addEventListener('change', function() {
+        editResSelect.clear(); editResSelect.clearOptions();
+        document.getElementById('editResNewId').value = '';
+    });
+
     // Edit resource button handler
     document.querySelectorAll('.edit-res-btn').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            document.getElementById('editResId').value = this.dataset.id;
-            document.getElementById('editResTitle').value = this.dataset.title;
-            document.getElementById('editResNotes').value = this.dataset.notes;
-            document.getElementById('editResUrl').value = this.dataset.url;
-            document.getElementById('editResUrlGroup').style.display = this.dataset.type === 'external_link' ? '' : 'none';
+            var d = this.dataset;
+            document.getElementById('editResId').value = d.id;
+            document.getElementById('editResType').value = d.type;
+            document.getElementById('editResTitle').value = d.title;
+            document.getElementById('editResNotes').value = d.notes;
+            document.getElementById('editResUrl').value = d.url;
+            document.getElementById('editResNewId').value = '';
+            editResSelect.clear(); editResSelect.clearOptions();
             new bootstrap.Modal(document.getElementById('editResourceModal')).show();
         });
     });
@@ -494,11 +535,30 @@ document.addEventListener('DOMContentLoaded', function() {
         <form method="post">
             <input type="hidden" name="form_action" value="edit_resource">
             <input type="hidden" name="resource_id" id="editResId">
+            <input type="hidden" name="new_resource_id" id="editResNewId" value="">
             <div class="modal-content">
                 <div class="modal-header"><h5 class="modal-title">Edit Resource</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Resource Type *</label>
+                        <select name="resource_type" id="editResType" class="form-select" required>
+                            <option value="collection">Collection</option>
+                            <option value="saved_search">Saved Search</option>
+                            <option value="bibliography">Bibliography</option>
+                            <option value="object">Archive Object</option>
+                            <option value="external_link">External Link</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="editResSearchGroup">
+                        <label class="form-label">Search Resource</label>
+                        <select id="editResSearch"></select>
+                        <small class="text-muted">Type to search by name or title</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">External URL</label>
+                        <input type="url" name="external_url" id="editResUrl" class="form-control" placeholder="https://">
+                    </div>
                     <div class="mb-3"><label class="form-label">Title *</label><input type="text" name="title" id="editResTitle" class="form-control" required></div>
-                    <div class="mb-3" id="editResUrlGroup"><label class="form-label">URL</label><input type="url" name="external_url" id="editResUrl" class="form-control" placeholder="https://"></div>
                     <div class="mb-3"><label class="form-label">Notes</label><textarea name="notes" id="editResNotes" class="form-control" rows="2"></textarea></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
