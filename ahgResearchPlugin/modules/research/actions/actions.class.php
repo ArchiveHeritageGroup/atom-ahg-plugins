@@ -3445,22 +3445,33 @@ class researchActions extends AhgController
         $status = $request->getParameter('status');
         $type = $request->getParameter('type');
 
-        $query = DB::table('research_activity as a')
+        // Scheduled reading room activities
+        $roomQuery = DB::table('research_activity as a')
             ->leftJoin('research_reading_room as rm', 'a.reading_room_id', '=', 'rm.id');
-
-        if ($status) {
-            $query->where('a.status', $status);
-        }
-
-        if ($type) {
-            $query->where('a.activity_type', $type);
-        }
-
-        $this->activities = $query->select('a.*', 'rm.name as room_name')
+        if ($status) { $roomQuery->where('a.status', $status); }
+        if ($type) { $roomQuery->where('a.activity_type', $type); }
+        $this->activities = $roomQuery->select('a.*', 'rm.name as room_name')
             ->orderBy('a.start_date', 'desc')
             ->limit(50)
-            ->get()
-            ->toArray();
+            ->get()->toArray();
+
+        // Activity log (all research actions)
+        $logQuery = DB::table('research_activity_log as al')
+            ->leftJoin('research_researcher as r', 'al.researcher_id', '=', 'r.id');
+        $filterType = $request->getParameter('log_type');
+        if ($filterType) { $logQuery->where('al.activity_type', $filterType); }
+        $this->activityLog = $logQuery
+            ->select('al.*', 'r.first_name', 'r.last_name')
+            ->orderByDesc('al.created_at')
+            ->limit(100)
+            ->get()->toArray();
+
+        // Activity types for filter
+        $this->logTypes = DB::table('research_activity_log')
+            ->selectRaw('activity_type, COUNT(*) as cnt')
+            ->groupBy('activity_type')
+            ->orderByDesc('cnt')
+            ->get()->toArray();
 
         if ($request->isMethod('post') && $request->getParameter('form_action') === 'create') {
             $activityId = DB::table('research_activity')->insertGetId([

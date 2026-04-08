@@ -197,4 +197,50 @@ $rooms = isset($rooms) && is_array($rooms) ? $rooms : (isset($rooms) && method_e
   </div>
 </div>
 <?php endif; ?>
+
+<!-- Activity Log -->
+<h2 class="h4 mt-5 mb-3"><i class="fas fa-history text-primary me-2"></i>Activity Log</h2>
+<?php
+$activityLog = isset($activityLog) && is_array($activityLog) ? $activityLog : (isset($activityLog) && method_exists($activityLog, 'getRawValue') ? $activityLog->getRawValue() : []);
+$logTypes = isset($logTypes) && is_array($logTypes) ? $logTypes : (isset($logTypes) && method_exists($logTypes, 'getRawValue') ? $logTypes->getRawValue() : []);
+$currentLogType = $_GET['log_type'] ?? '';
+?>
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <select name="log_type" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit();">
+                <option value="">All Types (<?php echo array_sum(array_column($logTypes, 'cnt')); ?>)</option>
+                <?php foreach ($logTypes as $lt): ?>
+                <option value="<?php echo htmlspecialchars($lt->activity_type); ?>" <?php echo $currentLogType === $lt->activity_type ? 'selected' : ''; ?>><?php echo ucfirst(str_replace('_', ' ', $lt->activity_type)); ?> (<?php echo $lt->cnt; ?>)</option>
+                <?php endforeach; ?>
+            </select>
+        </form>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body p-0">
+        <?php if (!empty($activityLog)): ?>
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0">
+                <thead class="table-light">
+                    <tr><th>Date</th><th>Researcher</th><th>Type</th><th>Entity</th><th>Details</th></tr>
+                </thead>
+                <tbody>
+                <?php foreach ($activityLog as $log): ?>
+                    <tr>
+                        <td><small><?php echo date('M j, Y H:i', strtotime($log->created_at)); ?></small></td>
+                        <td><?php echo htmlspecialchars(trim(($log->first_name ?? '') . ' ' . ($log->last_name ?? '')) ?: '-'); ?></td>
+                        <td><span class="badge bg-<?php echo match($log->activity_type) { 'create' => 'success', 'policy_evaluated' => 'info', 'clipboard_add' => 'primary', 'map_point_created' => 'warning', default => 'secondary' }; ?>"><?php echo ucfirst(str_replace('_', ' ', $log->activity_type)); ?></span></td>
+                        <td><small><?php echo htmlspecialchars(($log->entity_type ?? '') . ($log->entity_id ? ' #' . $log->entity_id : '')); ?></small></td>
+                        <td><small class="text-muted"><?php echo htmlspecialchars(mb_strimwidth($log->entity_title ?? '', 0, 60, '...')); ?></small></td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <?php else: ?>
+        <div class="text-center text-muted py-4">No activity logged yet.</div>
+        <?php endif; ?>
+    </div>
+</div>
 <?php end_slot() ?>
