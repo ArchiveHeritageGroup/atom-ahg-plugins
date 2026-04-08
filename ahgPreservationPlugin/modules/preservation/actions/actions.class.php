@@ -837,11 +837,30 @@ class preservationActions extends AhgController
 
         $type = $request->getParameter('type');
         $status = $request->getParameter('status');
+        $objectId = (int) $request->getParameter('object_id');
 
-        $this->packages = $this->service->getPackages($type, $status, 50);
+        if ($objectId) {
+            // Filter packages for a specific archival description
+            $query = DB::table('preservation_package')
+                ->where('information_object_id', $objectId)
+                ->orderBy('created_at', 'desc');
+            if ($type) { $query->where('package_type', $type); }
+            if ($status) { $query->where('status', $status); }
+            $this->packages = $query->limit(50)->get()->all();
+
+            // Resolve the AD title
+            $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+            $this->filterObject = DB::table('information_object_i18n')
+                ->where('id', $objectId)->where('culture', $culture)->first();
+        } else {
+            $this->packages = $this->service->getPackages($type, $status, 50);
+            $this->filterObject = null;
+        }
+
         $this->stats = $this->service->getPackageStatistics();
         $this->currentType = $type;
         $this->currentStatus = $status;
+        $this->currentObjectId = $objectId;
     }
 
     /**

@@ -65,6 +65,13 @@
     </div>
 </div>
 
+<?php if (!empty($filterObject)): ?>
+<div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
+    <span><i class="bi bi-funnel me-2"></i>Showing packages for: <strong><?php echo htmlspecialchars($filterObject->title ?? 'Object #' . $currentObjectId); ?></strong></span>
+    <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x me-1"></i>Clear Filter</a>
+</div>
+<?php endif; ?>
+
 <!-- Actions and Filters -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -128,6 +135,7 @@
             <thead class="table-light">
                 <tr>
                     <th><?php echo __('Package'); ?></th>
+                    <th><?php echo __('Archival Description'); ?></th>
                     <th><?php echo __('Type'); ?></th>
                     <th><?php echo __('Status'); ?></th>
                     <th><?php echo __('Objects'); ?></th>
@@ -139,7 +147,7 @@
             <tbody>
                 <?php if (empty($packages)): ?>
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="8" class="text-center text-muted py-4">
                         <i class="bi bi-archive fs-1 d-block mb-2 opacity-25"></i>
                         <?php echo __('No packages found.'); ?>
                         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit']); ?>" class="d-block mt-2"><?php echo __('Create your first package'); ?></a>
@@ -154,6 +162,20 @@
                             </a>
                             <br>
                             <small class="text-muted font-monospace"><?php echo substr($pkg->uuid, 0, 8); ?>...</small>
+                        </td>
+                        <td>
+                            <?php if ($pkg->information_object_id):
+                                $ioTitle = Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                                    ->where('id', $pkg->information_object_id)
+                                    ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
+                                    ->value('title');
+                                $ioSlug = Illuminate\Database\Capsule\Manager::table('slug')
+                                    ->where('object_id', $pkg->information_object_id)->value('slug');
+                            ?>
+                                <a href="/<?php echo htmlspecialchars($ioSlug ?? ''); ?>"><?php echo htmlspecialchars($ioTitle ?? 'ID: ' . $pkg->information_object_id); ?></a>
+                            <?php else: ?>
+                                <small class="text-muted">-</small>
+                            <?php endif; ?>
                         </td>
                         <td>
                             <?php
