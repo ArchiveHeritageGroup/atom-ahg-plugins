@@ -19,7 +19,7 @@ $levelFilter = $sf_request->getParameter('level');
 $mediaFilter = $sf_request->getParameter('media');
 $repoFilter = $sf_request->getParameter('repo');
 $hasDigital = $sf_request->getParameter('hasDigital');
-$parentId = $sf_request->getParameter('parent');
+$parentId = $sf_request->getParameter('parent') ?: $sf_request->getParameter('ancestor');
 
 // Get data from action
 $total = $sf_data->getRaw('total') ?: 0;
