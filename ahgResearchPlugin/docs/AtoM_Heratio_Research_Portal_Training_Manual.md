@@ -1,9 +1,9 @@
 # AtoM Heratio Research Portal — Training Manual
 
-**Plugin:** ahgResearchPlugin v3.1.0
+**Plugin:** ahgResearchPlugin v3.2.0
 **Platform:** AtoM Heratio (AtoM 2.10 + AHG Framework v2.8.2)
 **Author:** The Archive and Heritage Group (Pty) Ltd
-**Last Updated:** February 2026
+**Last Updated:** April 2026
 
 ---
 
@@ -1567,20 +1567,47 @@ All decorative Font Awesome icons include `aria-hidden="true"` to prevent screen
 
 **URL:** `/research/odrl/policies`
 
-ODRL (Open Digital Rights Language) policies define structured access rules for research materials.
+ODRL (Open Digital Rights Language) policies define structured access rules for research materials. Policies are **enforced** at key access points throughout the Research Portal.
 
 ### Creating Policies
 
-**Policy Fields:**
-- Target type (project, collection, object)
-- Target ID
-- Policy type: permission, prohibition, obligation
-- Action: use, reproduce, distribute, modify, archive, display
-- Assignee (researcher or group)
-- Constraint (time period, purpose, jurisdiction)
-- Duty (attribution, payment, notification)
+Click **Create Policy** to open the policy form:
 
-### Access Evaluation
+1. **Target Type** — select from: Archival Description, Collection, Project, Snapshot, Annotation, Assertion
+2. **Target** — TomSelect autocomplete searches by name (not raw IDs)
+3. **Policy Type** — Permission, Prohibition, or Obligation
+4. **Action Type** — Use, Reproduce, Distribute, Modify, Archive, Display
+5. **Constraints** (optional):
+   - **Restrict to Researchers** — multi-select TomSelect to limit policy to specific researchers
+   - **Date From / Date To** — temporal validity window
+   - **Max Uses** — maximum number of permitted uses
+
+### Editing Policies
+
+Click the pencil icon on any policy row to edit. All fields are pre-populated including researcher names (not IDs).
+
+### Policy Display
+
+The policy list shows:
+- Target with resolved name (e.g., "AI Test 4" instead of "#901233")
+- Constraints displayed as readable text (researcher names, dates, max uses)
+
+### Enforcement
+
+Policies are enforced at these access points:
+
+| Access Point | Target Type | Action Checked |
+|-------------|-------------|----------------|
+| View Project | project | use |
+| View Collection | collection | use |
+| View Snapshot | snapshot | use |
+| Share Project | project | distribute |
+| Reproducibility Pack | project | use |
+| New Reproduction | archival_description | reproduce |
+
+**Default behaviour:** Resources with no policies are accessible (default-allow). Only explicit prohibitions block access. All decisions are logged to `research_access_decision` for audit.
+
+### Access Evaluation API
 
 **URL:** `/research/odrl/evaluate`
 
@@ -1679,11 +1706,16 @@ JSON API for real-time notification polling:
 **URL:** `/research/profile/api-keys`
 
 Generate API keys for programmatic access:
-1. Click "Generate New Key"
-2. Enter a name/description
-3. Set permissions (optional)
-4. Set expiry (default: 365 days)
-5. Copy the generated key (shown only once)
+1. Click **Generate Key**
+2. Enter a descriptive name (e.g., "Python Script")
+3. Select **Permissions**:
+   - **Read** — access collections, annotations, bibliographies (checked by default)
+   - **Write** — create/update collections, annotations
+   - **Search** — query the catalogue (checked by default)
+4. Set **Expiration Date** (leave blank for default 1 year)
+5. Copy the generated key immediately — it is shown only once
+
+Keys are stored in the central `ahg_api_key` table with scope enforcement. The key list shows: name, prefix, permissions, created date, last used, expiry, and status. Active keys can be revoked.
 
 ### API Endpoints
 
@@ -1827,32 +1859,79 @@ Each audit entry contains:
 
 ## 33. Administration
 
-### Researcher Approval
+### Researcher Management
 
 **URL:** `/research/researchers`
 
-Admin workflow for managing researchers:
-1. View all pending researchers
-2. Review registration details
-3. Approve — sets status to "approved", creates access request
-4. Reject — archives data, deactivates user, records reason
+Status pill tabs with live counts: **All**, **Pending**, **Approved**, **Suspended**, **Expired**.
 
-### Reading Room Management
-
-**URL:** `/research/rooms`
-
-Configure reading rooms:
-- Name, Location, Description
-- Capacity
-- Opening time, Closing time
-- Days open (bitmask)
-- Active/Inactive status
+Admin workflow:
+1. Filter by status tab or search by name
+2. Click a researcher to view details
+3. Approve — sets status to "approved"
+4. Suspend — blocks access until reinstated
+5. View bookings, collections, and activity history
 
 ### Researcher Type Management
 
 **URL:** `/research/admin/types`
 
-Configure researcher types with booking limits and permissions (see Section 4).
+Configure researcher types with booking limits and permissions:
+- Max advance booking days, max hours/day, max materials per booking
+- Auto-approve, remote access, reproduction, export permissions
+- Expiry period, priority level
+- **Delete button** with protection — cannot delete types assigned to researchers
+
+### Reading Room Management
+
+**URL:** `/research/rooms`
+
+Configure reading rooms with the research sidebar:
+- Name, Location, Description, Code
+- Capacity, Opening/Closing time, Days open
+- Active/Inactive status
+- Seat management and equipment inventory links
+
+### Equipment Management
+
+**URL:** `/research/equipment?room_id=X`
+
+- Equipment inventory per room with type, brand, model, serial number, condition
+- **Equipment types from Dropdown Manager** — admin-configurable (15 types: Microfilm Reader, Scanner, Computer, etc.)
+- **Manage in Dropdown Manager** button for admins
+- **Maintenance logging** with condition before/after, performer, next due date
+- **Maintenance history** modal (AJAX-loaded) per equipment item
+
+### Statistics Dashboard
+
+**URL:** `/research/admin/statistics`
+
+- **Summary cards**: Researchers, Bookings, Reproductions, Citations (with sub-stats)
+- **Charts**: Registrations over time (line), Bookings by room (bar)
+- **Tables**: Projects & Collections, Bookings & Materials
+- **Breakdown cards**: Researcher Types, Projects by Status, Reproductions by Status
+- **Most Active Items** and **Most Cited Items** tables
+- **Most Active Researchers** with booking and collection counts
+- Date range filter with This Month / This Year shortcuts
+
+### Activity Log
+
+**URL:** `/research/activities`
+
+- Scheduled reading room activities (workshops, tours, orientations)
+- **Activity Log** section showing all research actions from `research_activity_log`
+- Filter by activity type with counts
+- Shows: date, researcher name, type badge, entity, details
+
+### Compliance Dashboard
+
+**URL:** `/research/compliance/:project_id`
+
+Per-project compliance overview:
+- Ethics milestone status (overall + individual milestones)
+- ODRL policies applied to the project
+- Security classification levels of linked resources
+- Source trust scores with progress bars
 
 ### Statistics Dashboard
 

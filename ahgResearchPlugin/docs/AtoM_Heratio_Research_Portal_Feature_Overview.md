@@ -1,10 +1,10 @@
 # AtoM Heratio Research Portal — Feature Overview
 
 **Product:** AtoM Heratio Research Portal (ahgResearchPlugin)
-**Version:** 3.1.0
+**Version:** 3.2.0
 **Vendor:** The Archive and Heritage Group (Pty) Ltd
 **Contact:** johan@theahg.co.za
-**Date:** February 2026
+**Date:** April 2026
 
 ---
 
@@ -63,6 +63,16 @@ A full physical chain-of-custody system that records every handoff of archival m
 | Full custody chain view | A unified timeline combining custody handoffs, Spectrum movement records, and provenance events |
 | Spectrum 5.1 integration | Every custody event auto-generates a Spectrum-compliant movement record |
 
+### 4a. Equipment Management
+
+| Feature | Description |
+|---------|-------------|
+| Equipment inventory | Track equipment per reading room with type, brand, model, serial number, and condition |
+| Equipment types | Managed via Dropdown Manager — admin-configurable (Microfilm Reader, Scanner, Computer, etc.) |
+| Equipment booking | Researchers book equipment alongside reading room sessions |
+| Maintenance logging | Log maintenance actions with condition before/after, performer, and next maintenance date |
+| Maintenance history | Full audit trail of all maintenance per equipment item with AJAX-loaded history viewer |
+
 ### 5. Request Lifecycle and SLA
 
 End-to-end lifecycle management for material and reproduction requests:
@@ -83,6 +93,8 @@ End-to-end lifecycle management for material and reproduction requests:
 | Feature | Description |
 |---------|-------------|
 | Online submission | Researchers submit reproduction requests with purpose, format, quality, and delivery preferences |
+| Inline first item | Add the first archive item (with TomSelect autocomplete) directly on the creation form — type, format, specifications |
+| ODRL enforcement | Reproduction requests are checked against ODRL policies before creation |
 | Item-level detail | Add specific items with page/section requirements and per-item notes |
 | Pricing engine | Costs calculated based on item count, format, quality, and urgency |
 | Invoice generation | Staff generate invoices attached to reproduction requests |
@@ -114,7 +126,10 @@ End-to-end lifecycle management for material and reproduction requests:
 | Feature | Description |
 |---------|-------------|
 | Research projects | Create projects with collaborators, shared collections, and milestones |
-| Workspaces | Shared workspaces for team research |
+| Ethics milestones | Track ethics review steps with type (IRB, consent, risk assessment), status, due date, and inline editing |
+| Workspaces | Shared workspaces with discussions, shared resources, member management, and role-based access |
+| Workspace CRUD | Full edit/delete for workspace details, discussions, resources (with TomSelect search), and members (role change, remove) |
+| Shared collections | Workspace-linked collections with item counts and owner display |
 | Peer review | Invite peers to review and comment on research outputs |
 | Institutional sharing | Share research across partner institutions |
 
@@ -124,6 +139,7 @@ End-to-end lifecycle management for material and reproduction requests:
 |---------|-------------|
 | Bibliographies | Manage bibliographies with RIS, BibTeX, and Zotero export |
 | Reports | Generate research reports in PDF and DOCX format with rich text editing |
+| Reproducibility pack | Comprehensive pack with summary cards (milestones, snapshots, resources, assertions, hypotheses, extraction jobs), computed integrity hash, and JSON download |
 | Immutable snapshots | Create hash-verified snapshots of research state for reproducibility |
 | RO-Crate packaging | Package research outputs as Research Object Crates |
 | DOI minting | Mint DOIs for published research outputs via DataCite |
@@ -146,6 +162,41 @@ End-to-end lifecycle management for material and reproduction requests:
 | Geographic map | Plot archival items and events on interactive maps |
 | Network graph | Visualise relationships between entities and assertions |
 | Knowledge graph | Explore assertions and hypotheses as an interactive graph |
+
+### 13. ODRL Policy Enforcement
+
+| Feature | Description |
+|---------|-------------|
+| Policy management | Create, edit, and delete ODRL policies via a full-featured admin UI |
+| Target types | Policies can target archival descriptions, collections, projects, snapshots, annotations, and assertions |
+| Target autocomplete | TomSelect-powered search for all target types — shows names, not IDs |
+| Policy types | Permission, Prohibition, and Obligation with constraint support |
+| Constraints | Researcher whitelist (multi-select), date windows (from/to), and usage limits (max uses) |
+| Enforcement layer | Policies enforced at 6 access points: view project, view collection, view snapshot, share project, reproducibility pack, reproduction requests |
+| Default-allow | Resources with no policies are accessible by default — only explicit prohibitions block access |
+| Audit logging | Every access evaluation is logged to `research_access_decision` with rationale |
+
+### 14. API Keys and Research API
+
+| Feature | Description |
+|---------|-------------|
+| API key management | Generate, list, and revoke API keys from the researcher profile |
+| Scope-based permissions | Keys support Read, Write, and Search scopes — enforced by the API middleware |
+| Unified key system | Research API keys are stored in the central `ahg_api_key` table with full scope enforcement |
+| REST endpoints | Profile, projects, collections, bookings, bibliographies, annotations, statistics, citations |
+| Rate limiting | Per-key rate limits with usage tracking |
+
+### 15. Admin Tools
+
+| Feature | Description |
+|---------|-------------|
+| Researcher management | Status tabs (All, Pending, Approved, Suspended, Expired) with live counts |
+| Researcher types | CRUD with delete protection (cannot delete types assigned to researchers) |
+| Statistics dashboard | Summary cards, registrations chart, bookings by room chart, breakdown by status |
+| Activity log | All research actions logged and viewable with type filtering |
+| Compliance dashboard | Ethics milestones, ODRL policies, security classification, trust scores per project |
+| Dropdown Manager integration | Seat types, equipment types, ID types managed via Dropdown Manager |
+| Seed data | All dropdown taxonomies included in `install.sql` for new installations |
 
 ---
 
@@ -191,10 +242,10 @@ The Research Portal is designed for accessibility compliance across all screens:
 
 ## Database Footprint
 
-The Research Portal uses 66 dedicated database tables (no modifications to core AtoM tables). Key tables include:
+The Research Portal uses 80+ dedicated database tables (no modifications to core AtoM tables). Key tables include:
 
 - Researcher management (registration, types, audit)
-- Reading room configuration (rooms, seats, bookings, equipment)
+- Reading room configuration (rooms, seats, bookings, equipment, equipment maintenance)
 - Material requests (retrieval queue, scheduling, status history)
 - Custody tracking (handoff records, Spectrum movement integration)
 - Reproduction workflow (requests, items, files, invoices)
@@ -202,7 +253,10 @@ The Research Portal uses 66 dedicated database tables (no modifications to core 
 - Collections, annotations, projects, workspaces
 - AI extraction, validation, entity resolution
 - Reports, snapshots, bibliographies
-- ODRL policies, API keys, notification preferences
+- ODRL policies and access decisions (enforcement audit trail)
+- API keys (integrated with central ahg_api_key table)
+- Notification preferences and activity log
+- Dropdown Manager seed data (7 taxonomies: seat_type, booking_status, researcher_status, researcher_type, material_request_status, reproduction_type, reproduction_request_status, equipment_type)
 
 ---
 
