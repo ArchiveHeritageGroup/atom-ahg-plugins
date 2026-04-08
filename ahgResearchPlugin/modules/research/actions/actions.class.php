@@ -540,16 +540,20 @@ class researchActions extends AhgController
         $userId = $this->getUser()->getAttribute('user_id');
         $researcher = $this->service->getResearcherByUserId($userId);
         if (!$researcher) { $this->redirect('research/register'); }
-        
+
         $id = (int) $request->getParameter('id');
         $this->collection = $this->service->getCollection($id);
         if (!$this->collection) { $this->forward404('Not found'); }
-        
+
         // Verify ownership
         if ($this->collection->researcher_id != $researcher->id) {
             $this->getUser()->setFlash('error', 'Access denied');
             $this->redirect('research/collections');
         }
+
+        // ODRL enforcement
+        $odrl = $this->enforceOdrl('collection', $id, $researcher->id, 'use');
+        if ($odrl && !$odrl['permitted']) { $this->redirect('research/collections'); }
         
         if ($request->isMethod('post')) {
             $action = $request->getParameter('booking_action');
@@ -1941,6 +1945,10 @@ class researchActions extends AhgController
             $this->forward404('Project not found');
         }
 
+        // ODRL enforcement
+        $odrl = $this->enforceOdrl('project', $projectId, $this->researcher->id, 'use');
+        if ($odrl && !$odrl['permitted']) { $this->redirect('research/dashboard'); }
+
         $this->collaborators = $projectService->getCollaborators($projectId);
         $this->resources = DB::table('research_project_resource')
             ->where('project_id', $projectId)
@@ -2262,6 +2270,18 @@ class researchActions extends AhgController
         $reproductionService = new ReproductionService();
 
         if ($request->isMethod('post')) {
+            // ODRL enforcement — check all items in the reproduction request
+            $itemIds = $request->getParameter('item_ids');
+            if ($itemIds && is_array($itemIds)) {
+                foreach ($itemIds as $objectId) {
+                    $odrl = $this->enforceOdrl('archival_description', (int) $objectId, $this->researcher->id, 'reproduce');
+                    if ($odrl && !$odrl['permitted']) {
+                        $this->redirect('research/reproductions');
+                        return;
+                    }
+                }
+            }
+
             try {
                 $newId = $reproductionService->createRequest($this->researcher->id, [
                     'purpose' => $request->getParameter('purpose'),
@@ -4171,6 +4191,10 @@ class researchActions extends AhgController
         $this->project = $projectService->getProject($projectId);
         if (!$this->project) { $this->forward404('Project not found'); }
 
+        // ODRL enforcement — sharing requires 'distribute' permission
+        $odrl = $this->enforceOdrl('project', $projectId, $this->researcher->id, 'distribute');
+        if ($odrl && !$odrl['permitted']) { $this->redirect('research/dashboard'); }
+
         $shareService = $this->loadShareService();
         $this->shares = $shareService->getShares($projectId);
         $this->institutions = $shareService->getInstitutions();
@@ -5003,6 +5027,10 @@ class researchActions extends AhgController
         $id = (int) $request->getParameter('id');
         $this->snapshot = $snapshotService->getSnapshot($id);
         if (!$this->snapshot) { $this->forward404('Snapshot not found'); }
+
+        // ODRL enforcement
+        $odrl = $this->enforceOdrl('snapshot', $id, $this->researcher->id, 'use');
+        if ($odrl && !$odrl['permitted']) { $this->redirect('research/dashboard'); }
 
         $page = (int) $request->getParameter('page', 1);
         $this->items = $snapshotService->getSnapshotItems($id, $page, 50);
@@ -6494,6 +6522,40 @@ class researchActions extends AhgController
         return new \OdrlService();
     }
 
+    /**
+     * Enforce ODRL policy for a given target + action.
+     * Returns the evaluation result array or null if no policies apply.
+     * If denied and $blockOnDeny is true, sends a 403 JSON/flash response.
+     *
+     * @param string $targetType  e.g. 'archival_description', 'project', 'collection', 'snapshot'
+     * @param int    $targetId
+     * @param int    $researcherId
+     * @param string $action      e.g. 'use', 'reproduce', 'distribute', 'modify', 'archive', 'display'
+     * @param bool   $jsonMode    If true, render 403 JSON; otherwise set flash + redirect
+     * @return array|null ['permitted' => bool, 'rationale' => string, ...] or null if check skipped
+     */
+    protected function enforceOdrl(string $targetType, int $targetId, int $researcherId, string $action, bool $jsonMode = false): ?array
+    {
+        try {
+            $odrlService = $this->loadOdrlService();
+            $result = $odrlService->evaluateAccess($targetType, $targetId, $researcherId, $action);
+        } catch (\Exception $e) {
+            return null; // ODRL tables may not exist; fail open
+        }
+
+        if (!$result['permitted']) {
+            if ($jsonMode) {
+                $this->getResponse()->setStatusCode(403);
+                $this->getResponse()->setContentType('application/json');
+                echo json_encode(['error' => 'Access denied', 'rationale' => $result['rationale']]);
+            } else {
+                $this->getUser()->setFlash('error', 'Access denied: ' . $result['rationale']);
+            }
+        }
+
+        return $result;
+    }
+
     public function executeOdrlPolicies($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
@@ -6529,6 +6591,48 @@ class researchActions extends AhgController
         $offset = ($page - 1) * $limit;
 
         $result = $odrlService->getAllPolicies($filters, $limit, $offset);
+
+        // Resolve target names for display
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        foreach ($result['items'] as &$p) {
+            $p->target_label = null;
+            try {
+                switch ($p->target_type) {
+                    case 'archival_description':
+                        $row = DB::table('information_object_i18n')
+                            ->where('id', $p->target_id)->where('culture', $culture)
+                            ->value('title');
+                        $p->target_label = $row ?: null;
+                        break;
+                    case 'collection':
+                        $p->target_label = DB::table('research_collection')
+                            ->where('id', $p->target_id)->value('name');
+                        break;
+                    case 'project':
+                        $p->target_label = DB::table('research_project')
+                            ->where('id', $p->target_id)->value('title');
+                        break;
+                    case 'snapshot':
+                        $p->target_label = DB::table('research_snapshot')
+                            ->where('id', $p->target_id)->value('title');
+                        break;
+                    case 'annotation':
+                        $p->target_label = DB::table('research_annotation')
+                            ->where('id', $p->target_id)->value('title');
+                        break;
+                    case 'assertion':
+                        $row = DB::table('research_assertion')
+                            ->where('id', $p->target_id)
+                            ->select('assertion_type', 'subject_label', 'predicate', 'object_label')
+                            ->first();
+                        if ($row) {
+                            $p->target_label = trim(($row->subject_label ?? '') . ' ' . ($row->predicate ?? '') . ' ' . ($row->object_label ?? ''));
+                        }
+                        break;
+                }
+            } catch (\Exception $e) { /* table may not exist */ }
+        }
+        unset($p);
 
         $this->policies = $result;
         $this->currentPage = $page;
@@ -6655,6 +6759,14 @@ class researchActions extends AhgController
         $projectService = new \ProjectService();
         $this->project = $projectService->getProject($projectId, $this->researcher->id);
         if (!$this->project) { $this->forward404('Project not found'); }
+
+        // ODRL enforcement
+        $isJson = $request->getParameter('format') === 'json';
+        $odrl = $this->enforceOdrl('project', $projectId, $this->researcher->id, 'use', $isJson);
+        if ($odrl && !$odrl['permitted']) {
+            if ($isJson) { return sfView::NONE; }
+            $this->redirect('research/dashboard');
+        }
 
         // Query each table directly (matches Heratio)
         $this->milestones = DB::table('research_project_milestone')->where('project_id', $projectId)->orderBy('sort_order')->get()->toArray();

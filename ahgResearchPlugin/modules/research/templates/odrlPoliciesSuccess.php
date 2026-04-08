@@ -72,8 +72,8 @@
             <tr>
                 <td><?php echo (int) $p->id; ?></td>
                 <td>
-                    <span class="badge bg-secondary"><?php echo htmlspecialchars($p->target_type); ?></span>
-                    #<?php echo (int) $p->target_id; ?>
+                    <span class="badge bg-secondary"><?php echo ucfirst(str_replace('_', ' ', $p->target_type)); ?></span>
+                    <?php echo htmlspecialchars($p->target_label ?? ('ID: ' . $p->target_id)); ?>
                 </td>
                 <td>
                     <?php
@@ -106,6 +106,7 @@
                             data-policy-id="<?php echo (int) $p->id; ?>"
                             data-target-type="<?php echo htmlspecialchars($p->target_type, ENT_QUOTES); ?>"
                             data-target-id="<?php echo (int) $p->target_id; ?>"
+                            data-target-label="<?php echo htmlspecialchars($p->target_label ?? '', ENT_QUOTES); ?>"
                             data-policy-type="<?php echo htmlspecialchars($p->policy_type, ENT_QUOTES); ?>"
                             data-action-type="<?php echo htmlspecialchars($p->action_type, ENT_QUOTES); ?>"
                             data-constraints="<?php echo htmlspecialchars($p->constraints_json ?? '{}', ENT_QUOTES); ?>"
@@ -521,12 +522,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Pre-load the current target into TomSelect
             tsEditTarget.clear(); tsEditTarget.clearOptions();
             document.getElementById('editTargetId').value = d.targetId;
-            tsEditTarget.addOption({ id: String(d.targetId), title: d.targetType + ' #' + d.targetId });
+            var displayLabel = d.targetLabel || (d.targetType + ' #' + d.targetId);
+            tsEditTarget.addOption({ id: String(d.targetId), title: displayLabel });
             tsEditTarget.setValue(String(d.targetId), true);
-
-            // Resolve target name via search endpoint
-            fetch(searchUrl + '?q=&type=' + encodeURIComponent(d.targetType) + '&id=' + d.targetId)
-                .catch(function() {});
 
             // Parse constraints
             var c = {};
