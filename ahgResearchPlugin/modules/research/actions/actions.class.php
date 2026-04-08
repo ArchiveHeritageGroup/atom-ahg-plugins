@@ -2864,6 +2864,23 @@ class researchActions extends AhgController
         $this->mostCited = $statisticsService->getMostCitedItems(10, $dateFrom, $dateTo);
         $this->activeResearchers = $statisticsService->getActiveResearchers(10);
 
+        // Chart data: registrations by month and bookings by room
+        $this->vizData = [
+            'registrations' => DB::table('research_researcher')
+                ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as period, COUNT(*) as count")
+                ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
+                ->orderBy('period')
+                ->get()->toArray(),
+            'bookings_by_room' => DB::table('research_booking as b')
+                ->join('research_reading_room as rm', 'b.reading_room_id', '=', 'rm.id')
+                ->whereBetween('b.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->selectRaw('rm.name as room_name, COUNT(*) as count')
+                ->groupBy('rm.name')
+                ->orderByDesc('count')
+                ->get()->toArray(),
+        ];
+
         $this->dateFrom = $dateFrom;
         $this->dateTo = $dateTo;
     }

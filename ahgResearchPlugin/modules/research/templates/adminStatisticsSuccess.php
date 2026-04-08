@@ -34,6 +34,10 @@
     </div>
 </div>
 
+<?php
+// Unescape stats from Symfony output escaper
+$s = sfOutputEscaper::unescape($stats);
+?>
 <!-- Summary Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
@@ -41,11 +45,12 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="mb-0"><?php echo number_format($stats['total_researchers'] ?? 0); ?></h3>
+                        <h3 class="mb-0"><?php echo number_format($s['researchers']['total'] ?? 0); ?></h3>
                         <small>Total Researchers</small>
                     </div>
                     <i class="fas fa-users fa-2x opacity-50"></i>
                 </div>
+                <small class="opacity-75"><?php echo (int) ($s['researchers']['new_in_period'] ?? 0); ?> new in period</small>
             </div>
         </div>
     </div>
@@ -54,11 +59,12 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="mb-0"><?php echo number_format($stats['total_bookings'] ?? 0); ?></h3>
+                        <h3 class="mb-0"><?php echo number_format($s['bookings']['total'] ?? 0); ?></h3>
                         <small>Bookings</small>
                     </div>
                     <i class="fas fa-calendar-check fa-2x opacity-50"></i>
                 </div>
+                <small class="opacity-75"><?php echo (int) ($s['bookings']['in_period'] ?? 0); ?> in period | <?php echo (int) ($s['bookings']['today'] ?? 0); ?> today</small>
             </div>
         </div>
     </div>
@@ -67,11 +73,12 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="mb-0"><?php echo number_format($stats['total_views'] ?? 0); ?></h3>
-                        <small>Item Views</small>
+                        <h3 class="mb-0"><?php echo number_format($s['reproductions']['total'] ?? 0); ?></h3>
+                        <small>Reproductions</small>
                     </div>
-                    <i class="fas fa-eye fa-2x opacity-50"></i>
+                    <i class="fas fa-copy fa-2x opacity-50"></i>
                 </div>
+                <small class="opacity-75"><?php echo (int) ($s['reproductions']['pending'] ?? 0); ?> pending</small>
             </div>
         </div>
     </div>
@@ -80,11 +87,12 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="mb-0"><?php echo number_format($stats['total_citations'] ?? 0); ?></h3>
+                        <h3 class="mb-0"><?php echo number_format($s['citations']['total'] ?? 0); ?></h3>
                         <small>Citations</small>
                     </div>
                     <i class="fas fa-quote-right fa-2x opacity-50"></i>
                 </div>
+                <small class="opacity-75"><?php echo (int) ($s['citations']['in_period'] ?? 0); ?> in period</small>
             </div>
         </div>
     </div>
@@ -209,54 +217,50 @@
 
 <!-- Additional Stats -->
 <div class="row">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Researcher Types</h6></div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="mb-0">Researchers by Status</h6></div>
             <ul class="list-group list-group-flush">
-                <?php if (!empty($stats['by_type'])): ?>
-                    <?php foreach ($stats['by_type'] as $type): ?>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <?php echo htmlspecialchars($type->name ?? 'Unspecified'); ?>
-                            <span class="badge bg-secondary"><?php echo $type->count; ?></span>
-                        </li>
+                <?php foreach (['approved', 'pending', 'suspended', 'expired'] as $rs): ?>
+                <li class="list-group-item d-flex justify-content-between">
+                    <?php echo ucfirst($rs); ?>
+                    <span class="badge bg-<?php echo match($rs) { 'approved' => 'success', 'pending' => 'warning', 'suspended' => 'danger', default => 'secondary' }; ?>"><?php echo (int) ($s['researchers'][$rs] ?? 0); ?></span>
+                </li>
+                <?php endforeach; ?>
+                <?php if (!empty($s['researchers']['by_type'])): ?>
+                <li class="list-group-item"><small class="text-muted fw-semibold">By Type</small></li>
+                    <?php foreach ($s['researchers']['by_type'] as $typeName => $cnt): ?>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <small><?php echo htmlspecialchars($typeName); ?></small>
+                        <span class="badge bg-secondary"><?php echo $cnt; ?></span>
+                    </li>
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <li class="list-group-item text-muted">No data</li>
                 <?php endif; ?>
             </ul>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Projects by Status</h6></div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="mb-0">Projects & Collections</h6></div>
             <ul class="list-group list-group-flush">
-                <?php if (!empty($stats['projects_by_status'])): ?>
-                    <?php foreach ($stats['projects_by_status'] as $status): ?>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <?php echo ucfirst($status->status); ?>
-                            <span class="badge bg-secondary"><?php echo $status->count; ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <li class="list-group-item text-muted">No data</li>
-                <?php endif; ?>
+                <li class="list-group-item d-flex justify-content-between">Total Projects <span class="badge bg-primary"><?php echo (int) ($s['projects']['total'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">Active Projects <span class="badge bg-success"><?php echo (int) ($s['projects']['active'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">New in Period <span class="badge bg-info"><?php echo (int) ($s['projects']['created_in_period'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">Collections <span class="badge bg-secondary"><?php echo (int) ($s['collections']['total'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">Collection Items <span class="badge bg-secondary"><?php echo (int) ($s['collections']['total_items'] ?? 0); ?></span></li>
             </ul>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Reproduction Requests</h6></div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header"><h6 class="mb-0">Bookings & Materials</h6></div>
             <ul class="list-group list-group-flush">
-                <?php if (!empty($stats['reproductions_by_status'])): ?>
-                    <?php foreach ($stats['reproductions_by_status'] as $status): ?>
-                        <li class="list-group-item d-flex justify-content-between">
-                            <?php echo ucfirst(str_replace('_', ' ', $status->status)); ?>
-                            <span class="badge bg-secondary"><?php echo $status->count; ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <li class="list-group-item text-muted">No data</li>
-                <?php endif; ?>
+                <li class="list-group-item d-flex justify-content-between">Bookings in Period <span class="badge bg-primary"><?php echo (int) ($s['bookings']['in_period'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">Completed <span class="badge bg-success"><?php echo (int) ($s['bookings']['completed_in_period'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">No Shows <span class="badge bg-danger"><?php echo (int) ($s['bookings']['no_shows_in_period'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">This Week <span class="badge bg-info"><?php echo (int) ($s['bookings']['this_week'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">Materials Requested <span class="badge bg-secondary"><?php echo (int) ($s['materials']['requested_in_period'] ?? 0); ?></span></li>
+                <li class="list-group-item d-flex justify-content-between">Currently In Use <span class="badge bg-warning text-dark"><?php echo (int) ($s['materials']['currently_in_use'] ?? 0); ?></span></li>
             </ul>
         </div>
     </div>
