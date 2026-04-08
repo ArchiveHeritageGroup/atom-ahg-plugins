@@ -45,6 +45,9 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
         $preservation->any('preservation_policies', '/admin/preservation/policies', 'policies');
         $preservation->any('preservation_reports', '/admin/preservation/reports', 'reports');
 
+        // Slug-based preservation view (e.g. /preservation/egyptian-boat)
+        $preservation->any('preservation_by_slug', '/preservation/:slug', 'packagesBySlug');
+
         // OAIS Package routes
         $preservation->any('preservation_packages', '/admin/preservation/packages', 'packages');
         $preservation->any('preservation_package_edit', '/admin/preservation/package/edit', 'packageEdit');

@@ -831,6 +831,24 @@ class preservationActions extends AhgController
     /**
      * OAIS Packages Dashboard
      */
+    /**
+     * View preservation packages for a record by slug.
+     * URL: /preservation/:slug (e.g. /preservation/egyptian-boat)
+     */
+    public function executePackagesBySlug($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $slug = $request->getParameter('slug');
+        $objectId = DB::table('slug')->where('slug', $slug)->value('object_id');
+        if (!$objectId) { $this->forward404('Record not found'); }
+
+        // Redirect to the packages page with object_id filter
+        $this->redirect('/admin/preservation/packages/?object_id=' . $objectId);
+    }
+
     public function executePackages($request)
     {
         $this->checkAdminAccess();
