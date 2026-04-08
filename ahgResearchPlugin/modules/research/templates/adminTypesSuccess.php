@@ -60,9 +60,16 @@
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="<?php echo url_for(['module' => 'research', 'action' => 'editResearcherType', 'id' => $type->id]); ?>" class="btn btn-sm btn-outline-primary">
-                                    <i class="fas fa-edit"></i>
-                                </a>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="<?php echo url_for(['module' => 'research', 'action' => 'editResearcherType', 'id' => $type->id]); ?>" class="btn btn-outline-primary" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" class="d-inline" onsubmit="return confirm('Delete this researcher type?');">
+                                        <input type="hidden" name="form_action" value="delete_type">
+                                        <input type="hidden" name="type_id" value="<?php echo (int) $type->id; ?>">
+                                        <button type="submit" class="btn btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>

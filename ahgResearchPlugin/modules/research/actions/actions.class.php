@@ -1840,6 +1840,19 @@ class researchActions extends AhgController
         }
 
         $this->types = $this->service->getResearcherTypes();
+
+        if ($request->isMethod('post') && $request->getParameter('form_action') === 'delete_type') {
+            $typeId = (int) $request->getParameter('type_id');
+            $inUse = DB::table('research_researcher')->where('researcher_type_id', $typeId)->exists();
+            if ($inUse) {
+                $this->getUser()->setFlash('error', 'Cannot delete — type is assigned to researchers');
+            } else {
+                DB::table('research_researcher_type_i18n')->where('id', $typeId)->delete();
+                DB::table('research_researcher_type')->where('id', $typeId)->delete();
+                $this->getUser()->setFlash('success', 'Researcher type deleted');
+            }
+            $this->redirect('research/adminTypes');
+        }
     }
 
     /**
