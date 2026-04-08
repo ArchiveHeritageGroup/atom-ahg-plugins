@@ -70,7 +70,7 @@ class JournalService
     public function updateEntry(int $id, int $researcherId, array $data): bool
     {
         $update = [];
-        foreach (['title', 'content', 'content_format', 'entry_date', 'project_id', 'time_spent_minutes', 'tags', 'is_private'] as $field) {
+        foreach (['title', 'content', 'content_format', 'entry_date', 'entry_type', 'project_id', 'time_spent_minutes', 'tags', 'is_private'] as $field) {
             if (array_key_exists($field, $data)) {
                 $update[$field] = $data[$field];
             }

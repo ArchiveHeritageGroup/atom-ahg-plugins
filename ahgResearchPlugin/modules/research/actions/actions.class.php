@@ -3553,9 +3553,11 @@ class researchActions extends AhgController
                 'content' => $content,
                 'content_format' => 'html',
                 'project_id' => $request->getParameter('project_id') ?: null,
+                'entry_type' => $request->getParameter('entry_type') ?: 'manual',
                 'time_spent_minutes' => $request->getParameter('time_spent_minutes') ?: null,
                 'tags' => $request->getParameter('tags'),
                 'entry_date' => $request->getParameter('entry_date') ?: $this->entry->entry_date,
+                'is_private' => $request->getParameter('is_private') ? 1 : 0,
             ]);
             $this->getUser()->setFlash('success', 'Entry updated');
             $this->redirect('/research/journal/entry/' . $id);
