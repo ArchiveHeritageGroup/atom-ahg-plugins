@@ -119,18 +119,19 @@ $showInventory = ahg_show_inventory($resource);
     <?php } ?>
 
     <li>
+      <?php $browseAncestor = $resourceId; ?>
       <?php if (isset($resource) && sfConfig::get('app_enable_institutional_scoping') && $sf_user->hasAttribute('search-realm')) { ?>
         <a class="atom-icon-link" href="<?php echo url_for([
             'module' => 'informationobject',
             'action' => 'browse',
-            'collection' => $collectionRootId,
+            'ancestor' => $browseAncestor,
             'repos' => $sf_user->getAttribute('search-realm'),
             'topLod' => false, ]); ?>">
       <?php } else { ?>
         <a class="atom-icon-link" href="<?php echo url_for([
             'module' => 'informationobject',
             'action' => 'browse',
-            'collection' => $collectionRootId,
+            'ancestor' => $browseAncestor,
             'topLod' => false, ]); ?>">
       <?php } ?>
         <i class="fas fa-fw fa-list me-1" aria-hidden="true">
@@ -143,7 +144,7 @@ $showInventory = ahg_show_inventory($resource);
         <a class="atom-icon-link" href="<?php echo url_for([
             'module' => 'informationobject',
             'action' => 'browse',
-            'collection' => $collectionRootId,
+            'ancestor' => $browseAncestor,
             'topLod' => false,
             'view' => 'card',
             'onlyMedia' => true, ]); ?>">

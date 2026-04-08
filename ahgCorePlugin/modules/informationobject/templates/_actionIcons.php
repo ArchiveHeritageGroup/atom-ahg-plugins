@@ -27,18 +27,22 @@
     <?php } ?>
 
     <li>
+      <?php
+        // Use ancestor= for proper filtering (collection= fails for top-level records)
+        $browseAncestor = $resource->id;
+      ?>
       <?php if (isset($resource) && sfConfig::get('app_enable_institutional_scoping') && $sf_user->hasAttribute('search-realm')) { ?>
         <a class="atom-icon-link" href="<?php echo url_for([
             'module' => 'informationobject',
             'action' => 'browse',
-            'collection' => $resource->getCollectionRoot()->id,
+            'ancestor' => $browseAncestor,
             'repos' => $sf_user->getAttribute('search-realm'),
             'topLod' => false, ]); ?>">
       <?php } else { ?>
         <a class="atom-icon-link" href="<?php echo url_for([
             'module' => 'informationobject',
             'action' => 'browse',
-            'collection' => $resource->getCollectionRoot()->id,
+            'ancestor' => $browseAncestor,
             'topLod' => false, ]); ?>">
       <?php } ?>
         <i class="fas fa-fw fa-list me-1" aria-hidden="true">
@@ -51,7 +55,7 @@
         <a class="atom-icon-link" href="<?php echo url_for([
             'module' => 'informationobject',
             'action' => 'browse',
-            'collection' => $resource->getCollectionRoot()->id,
+            'ancestor' => $browseAncestor,
             'topLod' => false,
             'view' => 'card',
             'onlyMedia' => true, ]); ?>">
