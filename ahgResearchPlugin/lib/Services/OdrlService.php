@@ -264,11 +264,16 @@ class OdrlService
             }
         }
 
-        // Default: if no matching policies found, deny access
+        // Default: if no policies exist for this target+action, allow (open access)
+        // Only deny if policies exist but none grant permission
         if ($permitted === null) {
-            $permitted = false;
-            $rationale = 'No matching policy found for action "' . $action . '" on ' . $targetType . ':' . $targetId
-                . '. Access denied by default.';
+            if (empty($policies)) {
+                $permitted = true;
+                $rationale = 'No policies defined for ' . $targetType . ':' . $targetId . '. Access allowed by default.';
+            } else {
+                $permitted = false;
+                $rationale = 'Policies exist but none grant "' . $action . '" on ' . $targetType . ':' . $targetId . '.';
+            }
         }
 
         // Record the access decision
