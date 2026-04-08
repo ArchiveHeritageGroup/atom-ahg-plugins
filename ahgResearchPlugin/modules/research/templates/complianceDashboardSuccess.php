@@ -37,7 +37,7 @@
         <div class="card text-center">
             <div class="card-body py-3">
                 <?php $sens = $sensitivitySummary ?? []; $maxLevel = $sens['max_level'] ?? 'none'; ?>
-                <div class="fs-4 fw-bold text-<?php echo match($maxLevel) { 'top_secret' => 'danger', 'secret' => 'warning', 'confidential' => 'info', default => 'success' }; ?>">
+                <div class="fs-4 fw-bold text-<?php echo match($maxLevel) { 'top secret' => 'danger', 'secret' => 'warning', 'confidential' => 'info', 'restricted' => 'info', default => 'success' }; ?>">
                     <?php echo ucfirst(str_replace('_', ' ', $maxLevel)); ?>
                 </div>
                 <small class="text-muted">Max Security Level</small>
@@ -101,7 +101,7 @@
                     <tr>
                         <td><span class="badge bg-<?php echo match($p->policy_type ?? '') { 'permission' => 'success', 'prohibition' => 'danger', 'obligation' => 'warning', default => 'secondary' }; ?>"><?php echo ucfirst($p->policy_type ?? ''); ?></span></td>
                         <td><?php echo htmlspecialchars($p->target_type ?? ''); ?></td>
-                        <td><?php echo htmlspecialchars($p->action ?? ''); ?></td>
+                        <td><?php echo htmlspecialchars($p->action_type ?? ''); ?></td>
                         <td><small><?php echo $p->created_at ?? ''; ?></small></td>
                     </tr>
                 <?php endforeach; ?>
@@ -123,7 +123,7 @@
             <?php foreach ($sensitivityBreakdown as $level => $count): ?>
             <div class="col-md-3 mb-2">
                 <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-<?php echo match($level) { 'top_secret' => 'danger', 'secret' => 'warning', 'confidential' => 'info', 'unclassified' => 'success', default => 'secondary' }; ?>"><?php echo ucfirst(str_replace('_', ' ', $level)); ?></span>
+                    <span class="badge bg-<?php echo match($level) { 'top secret' => 'danger', 'secret' => 'warning', 'confidential' => 'info', 'restricted' => 'info', 'internal' => 'secondary', 'public' => 'success', default => 'secondary' }; ?>"><?php echo ucfirst($level); ?></span>
                     <strong><?php echo (int) $count; ?></strong> items
                 </div>
             </div>

@@ -6351,7 +6351,8 @@ class researchActions extends AhgController
 
         // ODRL policies for project
         $this->odrlPolicies = DB::table('research_rights_policy')
-            ->where('project_id', $projectId)
+            ->where('target_type', 'project')
+            ->where('target_id', $projectId)
             ->orderBy('created_at', 'desc')
             ->get()->toArray();
         $this->odrlPolicyCount = count($this->odrlPolicies);
@@ -6365,14 +6366,17 @@ class researchActions extends AhgController
         $this->sensitivitySummary = ['max_level' => 'none'];
         try {
             if ($resourceIds->count() > 0) {
-                $clearances = DB::table('object_security_classification')
-                    ->whereIn('object_id', $resourceIds)
+                $clearances = DB::table('object_security_classification as osc')
+                    ->join('security_classification as sc', 'osc.classification_id', '=', 'sc.id')
+                    ->whereIn('osc.object_id', $resourceIds)
+                    ->where('osc.active', 1)
+                    ->select('sc.name as level')
                     ->get();
                 $breakdown = [];
-                $levelOrder = ['unclassified' => 0, 'confidential' => 1, 'secret' => 2, 'top_secret' => 3];
+                $levelOrder = ['public' => 0, 'internal' => 1, 'restricted' => 2, 'confidential' => 3, 'secret' => 4, 'top secret' => 5];
                 $maxLevel = 'none';
                 foreach ($clearances as $c) {
-                    $lev = $c->level ?? 'unclassified';
+                    $lev = strtolower($c->level ?? 'public');
                     $breakdown[$lev] = ($breakdown[$lev] ?? 0) + 1;
                     if (($levelOrder[$lev] ?? 0) > ($levelOrder[$maxLevel] ?? -1)) {
                         $maxLevel = $lev;
