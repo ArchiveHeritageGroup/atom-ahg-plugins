@@ -2745,13 +2745,19 @@ class researchActions extends AhgController
 
             if ($action === 'edit_resource') {
                 $resId = (int) $request->getParameter('resource_id');
+                $updateData = [
+                    'title' => $request->getParameter('title'),
+                    'description' => $request->getParameter('notes'),
+                    'external_url' => $request->getParameter('external_url') ?: null,
+                    'resource_type' => $request->getParameter('resource_type'),
+                ];
+                $newResId = $request->getParameter('new_resource_id');
+                if ($newResId) {
+                    $updateData['resource_id'] = (int) $newResId;
+                }
                 DB::table('research_workspace_resource')
                     ->where('id', $resId)->where('workspace_id', $workspaceId)
-                    ->update([
-                        'title' => $request->getParameter('title'),
-                        'description' => $request->getParameter('notes'),
-                        'external_url' => $request->getParameter('external_url') ?: null,
-                    ]);
+                    ->update($updateData);
                 $this->getUser()->setFlash('success', 'Resource updated');
                 $this->redirect('/research/workspaces/' . $workspaceId);
             }
