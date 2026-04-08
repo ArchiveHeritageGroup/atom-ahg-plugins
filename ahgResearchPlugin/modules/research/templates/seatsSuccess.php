@@ -3,6 +3,14 @@
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
 <?php use_helper('Date') ?>
+<?php
+$seatTypes = Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
+    ->where('taxonomy', 'seat_type')
+    ->where('is_active', 1)
+    ->orderBy('sort_order')
+    ->select('code', 'label')
+    ->get()->toArray();
+?>
 
 <div class="container-fluid py-4">
     <div class="row">
@@ -165,13 +173,9 @@
                         <div class="mb-3">
                             <label class="form-label">Seat Type</label>
                             <select name="seat_type" class="form-select">
-                                <option value="standard">Standard</option>
-                                <option value="accessible">Accessible</option>
-                                <option value="computer">Computer</option>
-                                <option value="microfilm">Microfilm Reader</option>
-                                <option value="oversize">Oversize</option>
-                                <option value="quiet">Quiet Zone</option>
-                                <option value="group">Group Table</option>
+                                <?php foreach ($seatTypes as $st): ?>
+                                <option value="<?php echo htmlspecialchars($st->code); ?>"><?php echo htmlspecialchars($st->label); ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -237,13 +241,9 @@
                             <div class="mb-3">
                                 <label class="form-label">Type</label>
                                 <select name="seat_type" id="seatType" class="form-select">
-                                    <option value="standard">Standard</option>
-                                    <option value="accessible">Accessible</option>
-                                    <option value="computer">Computer</option>
-                                    <option value="microfilm">Microfilm Reader</option>
-                                    <option value="oversize">Oversize</option>
-                                    <option value="quiet">Quiet Zone</option>
-                                    <option value="group">Group Table</option>
+                                    <?php foreach ($seatTypes as $st): ?>
+                                    <option value="<?php echo htmlspecialchars($st->code); ?>"><?php echo htmlspecialchars($st->label); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
