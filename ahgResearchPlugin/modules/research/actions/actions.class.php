@@ -2710,6 +2710,64 @@ class researchActions extends AhgController
                 }
                 $this->redirect('/research/workspaces/' . $workspaceId);
             }
+
+            if ($action === 'edit_workspace') {
+                DB::table('research_workspace')->where('id', $workspaceId)->update([
+                    'name' => $request->getParameter('name'),
+                    'description' => $request->getParameter('description'),
+                    'visibility' => $request->getParameter('visibility', 'private'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+                $this->getUser()->setFlash('success', 'Workspace updated');
+                $this->redirect('/research/workspaces/' . $workspaceId);
+            }
+
+            if ($action === 'edit_discussion') {
+                $discId = (int) $request->getParameter('discussion_id');
+                DB::table('research_discussion')
+                    ->where('id', $discId)->where('workspace_id', $workspaceId)
+                    ->update([
+                        'subject' => $request->getParameter('title'),
+                        'content' => $request->getParameter('content'),
+                        'updated_at' => date('Y-m-d H:i:s'),
+                    ]);
+                $this->getUser()->setFlash('success', 'Discussion updated');
+                $this->redirect('/research/workspaces/' . $workspaceId);
+            }
+
+            if ($action === 'delete_discussion') {
+                $discId = (int) $request->getParameter('discussion_id');
+                DB::table('research_discussion')
+                    ->where('id', $discId)->where('workspace_id', $workspaceId)->delete();
+                $this->getUser()->setFlash('success', 'Discussion deleted');
+                $this->redirect('/research/workspaces/' . $workspaceId);
+            }
+
+            if ($action === 'remove_resource') {
+                $resId = (int) $request->getParameter('resource_id');
+                DB::table('research_workspace_resource')
+                    ->where('id', $resId)->where('workspace_id', $workspaceId)->delete();
+                $this->getUser()->setFlash('success', 'Resource removed');
+                $this->redirect('/research/workspaces/' . $workspaceId);
+            }
+
+            if ($action === 'remove_member') {
+                $memberId = (int) $request->getParameter('member_id');
+                DB::table('research_workspace_member')
+                    ->where('id', $memberId)->where('workspace_id', $workspaceId)->delete();
+                $this->getUser()->setFlash('success', 'Member removed');
+                $this->redirect('/research/workspaces/' . $workspaceId);
+            }
+
+            if ($action === 'change_role') {
+                $memberId = (int) $request->getParameter('member_id');
+                $newRole = $request->getParameter('role');
+                DB::table('research_workspace_member')
+                    ->where('id', $memberId)->where('workspace_id', $workspaceId)
+                    ->update(['role' => $newRole]);
+                $this->getUser()->setFlash('success', 'Role updated');
+                $this->redirect('/research/workspaces/' . $workspaceId);
+            }
         }
     }
 

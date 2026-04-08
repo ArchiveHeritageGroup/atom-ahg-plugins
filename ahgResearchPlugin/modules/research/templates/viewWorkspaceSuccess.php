@@ -21,7 +21,8 @@
             <?php echo ucfirst($workspaceData->visibility); ?>
         </span>
     </div>
-    <div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editWorkspaceModal" title="Edit workspace"><i class="fas fa-pencil-alt"></i></button>
         <?php include_partial('research/favoriteResearchButton', [
             'objectId' => $workspaceData->id,
             'objectType' => 'research_workspace',
@@ -97,9 +98,21 @@ try {
                                             <?php endif; ?>
                                         </small>
                                     </div>
-                                    <?php if ($disc->is_resolved ?? false): ?>
-                                        <span class="badge bg-success">Resolved</span>
-                                    <?php endif; ?>
+                                    <div class="d-flex align-items-center gap-1">
+                                        <?php if ($disc->is_resolved ?? false): ?>
+                                            <span class="badge bg-success">Resolved</span>
+                                        <?php endif; ?>
+                                        <button class="btn btn-sm btn-outline-secondary edit-disc-btn"
+                                            data-id="<?php echo (int) $disc->id; ?>"
+                                            data-title="<?php echo htmlspecialchars($disc->title ?? $disc->subject ?? '', ENT_QUOTES); ?>"
+                                            data-content="<?php echo htmlspecialchars($disc->content ?? '', ENT_QUOTES); ?>"
+                                            title="Edit"><i class="fas fa-pencil-alt"></i></button>
+                                        <form method="post" class="d-inline" onsubmit="return confirm('Delete this discussion?');">
+                                            <input type="hidden" name="form_action" value="delete_discussion">
+                                            <input type="hidden" name="discussion_id" value="<?php echo (int) $disc->id; ?>">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -132,7 +145,12 @@ try {
                     <div class="row">
                         <?php foreach ($resources as $res): ?>
                             <div class="col-md-6 mb-3">
-                                <div class="border rounded p-3">
+                                <div class="border rounded p-3 position-relative">
+                                    <form method="post" class="position-absolute top-0 end-0 m-2" onsubmit="return confirm('Remove this resource?');">
+                                        <input type="hidden" name="form_action" value="remove_resource">
+                                        <input type="hidden" name="resource_id" value="<?php echo (int) $res->id; ?>">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove"><i class="fas fa-times"></i></button>
+                                    </form>
                                     <span class="badge bg-secondary mb-2"><?php echo ucfirst($res->resource_type); ?></span>
                                     <h6 class="mb-1"><?php echo htmlspecialchars($res->title ?: 'Untitled'); ?></h6>
                                     <?php if ($res->notes): ?>
@@ -161,16 +179,36 @@ try {
             <?php if (!empty($members)): ?>
                 <ul class="list-group list-group-flush">
                     <?php foreach ($members as $member): ?>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <?php echo htmlspecialchars($member->first_name . ' ' . $member->last_name); ?>
-                                <?php if ($member->role === 'owner'): ?>
-                                    <i class="fas fa-crown text-warning ms-1" title="Owner"></i>
-                                <?php endif; ?>
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <?php echo htmlspecialchars($member->first_name . ' ' . $member->last_name); ?>
+                                    <?php if ($member->role === 'owner'): ?>
+                                        <i class="fas fa-crown text-warning ms-1" title="Owner"></i>
+                                    <?php endif; ?>
+                                </div>
+                                <span class="badge bg-<?php echo $member->status === 'accepted' ? 'success' : 'warning'; ?>">
+                                    <?php echo ucfirst($member->role); ?>
+                                </span>
                             </div>
-                            <span class="badge bg-<?php echo $member->status === 'accepted' ? 'success' : 'warning'; ?>">
-                                <?php echo ucfirst($member->role); ?>
-                            </span>
+                            <?php if ($member->role !== 'owner'): ?>
+                            <div class="mt-1 d-flex gap-1 justify-content-end">
+                                <form method="post" class="d-inline">
+                                    <input type="hidden" name="form_action" value="change_role">
+                                    <input type="hidden" name="member_id" value="<?php echo (int) $member->id; ?>">
+                                    <select name="role" class="form-select form-select-sm d-inline-block" style="width:auto;" onchange="this.form.submit();">
+                                        <?php foreach (['viewer', 'member', 'editor', 'admin'] as $r): ?>
+                                        <option value="<?php echo $r; ?>" <?php echo ($member->role === $r) ? 'selected' : ''; ?>><?php echo ucfirst($r); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </form>
+                                <form method="post" class="d-inline" onsubmit="return confirm('Remove this member?');">
+                                    <input type="hidden" name="form_action" value="remove_member">
+                                    <input type="hidden" name="member_id" value="<?php echo (int) $member->id; ?>">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove"><i class="fas fa-times"></i></button>
+                                </form>
+                            </div>
+                            <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -391,5 +429,58 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('resourceIdHidden').value = '';
         document.getElementById('resourceTitleInput').value = '';
     });
+
+    // Edit discussion button handler
+    document.querySelectorAll('.edit-disc-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('editDiscId').value = this.dataset.id;
+            document.getElementById('editDiscTitle').value = this.dataset.title;
+            document.getElementById('editDiscContent').value = this.dataset.content;
+            new bootstrap.Modal(document.getElementById('editDiscussionModal')).show();
+        });
+    });
 });
 </script>
+
+<!-- Edit Workspace Modal -->
+<div class="modal fade" id="editWorkspaceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post">
+            <input type="hidden" name="form_action" value="edit_workspace">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Workspace</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Name *</label><input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($workspaceData->name, ENT_QUOTES); ?>" required></div>
+                    <div class="mb-3"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="3"><?php echo htmlspecialchars($workspaceData->description ?? ''); ?></textarea></div>
+                    <div class="mb-3">
+                        <label class="form-label">Visibility</label>
+                        <select name="visibility" class="form-select">
+                            <option value="private" <?php echo ($workspaceData->visibility ?? '') === 'private' ? 'selected' : ''; ?>>Private</option>
+                            <option value="members" <?php echo ($workspaceData->visibility ?? '') === 'members' ? 'selected' : ''; ?>>Members Only</option>
+                            <option value="public" <?php echo ($workspaceData->visibility ?? '') === 'public' ? 'selected' : ''; ?>>Public</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Discussion Modal -->
+<div class="modal fade" id="editDiscussionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post">
+            <input type="hidden" name="form_action" value="edit_discussion">
+            <input type="hidden" name="discussion_id" id="editDiscId">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Edit Discussion</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label class="form-label">Title *</label><input type="text" name="title" id="editDiscTitle" class="form-control" required></div>
+                    <div class="mb-3"><label class="form-label">Content *</label><textarea name="content" id="editDiscContent" class="form-control" rows="4" required></textarea></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Changes</button></div>
+            </div>
+        </form>
+    </div>
+</div>
