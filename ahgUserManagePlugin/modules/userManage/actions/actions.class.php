@@ -97,13 +97,13 @@ class userManageActions extends AhgController
         // Get translate languages
         $this->translateLanguages = \AhgUserManage\Services\UserCrudService::getTranslateLanguages($this->userRecord['id']);
 
-        // Get security clearance if plugin is active
+        // Get security clearance if framework service is available
         $this->clearance = null;
-        if (class_exists('\\AhgSecurityClearance\\Services\\SecurityClearanceService')) {
+        if (class_exists('\\AtomExtensions\\Services\\SecurityClearanceService')) {
             try {
-                $this->clearance = \AhgSecurityClearance\Services\SecurityClearanceService::getUserClearance($this->userRecord['id']);
+                $this->clearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance($this->userRecord['id']);
             } catch (\Exception $e) {
-                // Plugin not fully installed
+                // Service not fully installed
             }
         }
     }

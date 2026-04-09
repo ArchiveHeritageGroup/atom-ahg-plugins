@@ -118,13 +118,19 @@
 
 </div>
 
-<?php if (class_exists('\\AhgSecurityClearance\\Services\\SecurityClearanceService')) { ?>
+<?php if (class_exists('\\AtomExtensions\\Services\\SecurityClearanceService')) { ?>
 <div class="section border-bottom" id="securityClearance">
 
   <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Security clearance'); ?></h2>
 
   <?php if ($clearance !== null) { ?>
-    <?php echo render_show(__('Clearance level'), render_value_inline($clearance->level_name ?? __('None')) . ' ' . link_to(__('Manage'), '@security_clearance_user?slug=' . $userRecord['slug'], ['class' => 'btn btn-sm atom-btn-outline-light ms-2'])); ?>
+    <?php
+        $levelLabel = $clearance->classification_name ?? __('None');
+        if (isset($clearance->level)) {
+            $levelLabel .= ' (Level ' . (int) $clearance->level . ')';
+        }
+    ?>
+    <?php echo render_show(__('Clearance level'), render_value_inline($levelLabel) . ' ' . link_to(__('Manage'), '@security_clearance_user?slug=' . $userRecord['slug'], ['class' => 'btn btn-sm atom-btn-outline-light ms-2'])); ?>
     <?php if (!empty($clearance->granted_at)) { ?>
       <?php echo render_show(__('Granted'), render_value_inline($clearance->granted_at)); ?>
     <?php } ?>
