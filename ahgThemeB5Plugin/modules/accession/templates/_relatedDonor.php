@@ -39,7 +39,10 @@
           </td>
         </tr>
         <?php foreach ($relatedDonorRecord as $item) { ?>
-          <tr id="<?php echo url_for([$item, 'module' => 'accession', 'action' => 'relatedDonor']); ?>">
+          <tr
+            id="<?php echo url_for([$item, 'module' => 'accession', 'action' => 'relatedDonor']); ?>"
+            data-donor-uri="<?php echo url_for([$item->object, 'module' => 'donor']); ?>"
+            data-donor-name="<?php echo esc_specialchars(render_title($item->object)); ?>">
             <td data-field-id="<?php echo $form->resource->renderId(); ?>">
               <?php echo render_title($item->object); ?>
             </td>
@@ -93,22 +96,34 @@
 
           <?php echo $form->renderHiddenFields(); ?>
 
-          <?php
-              $extraInputs = '<input class="list" type="hidden" value="'
-                  .url_for(['module' => 'donor', 'action' => 'autocomplete'])
-                  .'"><input class="add" type="hidden" data-link-existing="true" value="'
-                  .url_for(['module' => 'donor', 'action' => 'add'])
-                  .' #authorizedFormOfName">';
-              echo render_field(
-                  $form->resource
-                      ->label(__('Name'))
-                      ->help(__(
-                          'This is the legal entity field and provides the contact information for the person(s) or the institution that donated or transferred the materials. It has the option of multiple instances and provides the option of creating more than one contact record using the same form.'
-                      )),
-                  null,
-                  ['class' => 'form-autocomplete', 'extraInputs' => $extraInputs]
-              );
-          ?>
+          <div class="form-item mb-3">
+            <label class="form-label" for="<?php echo $form->resource->renderId(); ?>">
+              <?php echo __('Name'); ?>
+            </label>
+            <div class="input-group">
+              <select
+                id="<?php echo $form->resource->renderId(); ?>"
+                name="<?php echo $form->resource->renderName(); ?>"
+                class="form-select tom-remote-donor"
+                data-remote-url="<?php echo url_for(['module' => 'donor', 'action' => 'autocomplete']); ?>"
+                data-primary-contact-base="/donor"
+                data-placeholder="<?php echo esc_specialchars(__('Search donors…')); ?>">
+              </select>
+              <a
+                class="btn atom-btn-outline-light"
+                href="<?php echo url_for(['module' => 'donor', 'action' => 'add']); ?>"
+                target="_blank"
+                rel="noopener"
+                title="<?php echo esc_specialchars(__('Open donor add page in a new tab')); ?>">
+                <i class="fas fa-plus me-1" aria-hidden="true"></i><?php echo __('New donor'); ?>
+              </a>
+            </div>
+            <div class="form-text">
+              <?php echo __(
+                  'This is the legal entity field and provides the contact information for the person(s) or the institution that donated or transferred the materials. It has the option of multiple instances and provides the option of creating more than one contact record using the same form.'
+              ); ?>
+            </div>
+          </div>
 
           <h5>
             <?php echo __('Primary contact information'); ?>
@@ -192,3 +207,5 @@
     </div>
   </div>
 </div>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/atom-framework/public/js/donor-tom-select.js?v=1"></script>

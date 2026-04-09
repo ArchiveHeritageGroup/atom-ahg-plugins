@@ -51,8 +51,13 @@ class SettingsMenuComponent extends sfComponent
             $node['active'] = $this->context->getActionName() === $node['action'];
         }
 
+        // Re-key after possible unset() so usort doesn't see gaps, then sort
+        // alphabetically using a case-insensitive natural compare so e.g.
+        // "Clipboard" sorts before "CSV Validator" (the case-sensitive
+        // strnatcmp put uppercase blocks ahead of lowercase neighbours).
+        $this->nodes = array_values($this->nodes);
         usort($this->nodes, function ($el1, $el2) {
-            return strnatcmp($el1['label'], $el2['label']);
+            return strnatcasecmp($el1['label'], $el2['label']);
         });
     }
 }
