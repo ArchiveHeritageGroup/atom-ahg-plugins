@@ -45,6 +45,17 @@ EOF;
         require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityCompletenessService.php';
         require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityIdentifierService.php';
 
+        // Check if auto-recalculation is enabled
+        $autoRecalc = \Illuminate\Database\Capsule\Manager::table('ahg_authority_config')
+            ->where('config_key', 'completeness_auto_recalc')
+            ->value('config_value');
+
+        if ($autoRecalc === '0') {
+            $this->logSection('authority', 'Auto-recalculate completeness is disabled in Authority settings. Skipping.');
+
+            return;
+        }
+
         $service = new \AhgAuthority\Services\AuthorityCompletenessService();
         $limit = (int) $options['limit'];
 

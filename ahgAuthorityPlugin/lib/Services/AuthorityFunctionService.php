@@ -25,10 +25,34 @@ class AuthorityFunctionService
     ];
 
     /**
+     * Get plugin config value from ahg_authority_config.
+     */
+    protected function getConfig(string $key, string $default = ''): string
+    {
+        $row = DB::table('ahg_authority_config')
+            ->where('config_key', $key)
+            ->first();
+
+        return $row ? ($row->config_value ?? $default) : $default;
+    }
+
+    /**
+     * Check if function linking is enabled.
+     */
+    public function isEnabled(): bool
+    {
+        return $this->getConfig('function_linking_enabled', '1') === '1';
+    }
+
+    /**
      * Get all function links for an actor.
      */
     public function getFunctionLinks(int $actorId): array
     {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
         return DB::table('ahg_actor_function_link as afl')
             ->leftJoin('information_object_i18n as ioi', function ($j) {
                 $j->on('afl.function_id', '=', 'ioi.id')
@@ -112,6 +136,10 @@ class AuthorityFunctionService
      */
     public function searchFunctions(string $query, int $limit = 10): array
     {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
         // Try ahgFunctionManagePlugin first
         $funcServiceFile = \sfConfig::get('sf_root_dir') .
             '/atom-ahg-plugins/ahgFunctionManagePlugin/lib/Services/FunctionBrowseService.php';
@@ -147,6 +175,10 @@ class AuthorityFunctionService
      */
     public function browseFunctions(): array
     {
+        if (!$this->isEnabled()) {
+            return [];
+        }
+
         // Get all functions
         $functions = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function ($j) {

@@ -125,16 +125,39 @@ class AuthorityNerPipelineService
     }
 
     /**
+     * Get plugin config value from ahg_authority_config.
+     */
+    protected function getConfig(string $key, string $default = ''): string
+    {
+        $row = DB::table('ahg_authority_config')
+            ->where('config_key', $key)
+            ->first();
+
+        return $row ? ($row->config_value ?? $default) : $default;
+    }
+
+    /**
      * Create a stub authority record from a NER entity.
      */
     public function createStub(int $nerEntityId, int $userId): ?int
     {
+        // Check if auto-stub creation is enabled
+        if ($this->getConfig('ner_auto_stub_enabled', '0') !== '1') {
+            return null;
+        }
+
         // Get the NER entity
         $entity = DB::table('ner_entity')
             ->where('id', $nerEntityId)
             ->first();
 
         if (!$entity) {
+            return null;
+        }
+
+        // Check confidence threshold
+        $threshold = (float) $this->getConfig('ner_auto_stub_threshold', '0.85');
+        if (($entity->confidence ?? 0) < $threshold) {
             return null;
         }
 

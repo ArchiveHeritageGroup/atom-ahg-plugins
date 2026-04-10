@@ -162,6 +162,26 @@ class ActorBrowseService
             }
         }
 
+        // Hide stub authority records from public browse when setting is enabled
+        if (!isset($params['_authenticated']) || !$params['_authenticated']) {
+            try {
+                $hideStubs = DB::table('ahg_authority_config')
+                    ->where('config_key', 'hide_stubs_from_public')
+                    ->value('config_value');
+                if ($hideStubs === '1') {
+                    $stubIds = DB::table('ahg_actor_completeness')
+                        ->where('completeness_level', 'stub')
+                        ->pluck('actor_id')
+                        ->toArray();
+                    if (!empty($stubIds) && count($stubIds) <= 10000) {
+                        $mustNot[] = ['terms' => ['identifier' => array_map('strval', $stubIds)]];
+                    }
+                }
+            } catch (\Exception $e) {
+                // Tables may not exist
+            }
+        }
+
         // Build the bool query
         $boolQuery = [];
         if (!empty($must)) {

@@ -216,6 +216,58 @@ class AuthorityLookupService
     }
 
     // =========================================================================
+    // ISNI (International Standard Name Identifier)
+    // =========================================================================
+
+    /**
+     * Search ISNI for authority records.
+     */
+    public function searchIsni(string $query, int $limit = 10): array
+    {
+        if (!$this->isSourceEnabled('isni')) {
+            return ['error' => 'ISNI is not enabled'];
+        }
+
+        $url = 'https://isni.org/isni/search?' . http_build_query([
+            'query'  => 'pall all "' . $query . '"',
+            'format' => 'json',
+        ]);
+
+        $response = $this->httpGet($url);
+        if (!$response) {
+            return ['error' => 'Failed to connect to ISNI'];
+        }
+
+        $data = json_decode($response, true);
+        $records = $data['ISNIMetadata'] ?? [];
+
+        $results = [];
+        foreach (array_slice($records, 0, $limit) as $item) {
+            $isni = $item['ISNIAssigned'] ?? ($item['ISNIUnassigned'] ?? '');
+            $personal = $item['identity']['personOrFiction']['personalName'] ?? null;
+            $orgName = $item['identity']['organisation']['organisationName']['mainName'] ?? null;
+            $label = '';
+            if ($personal) {
+                $label = trim(($personal['forename'] ?? '') . ' ' . ($personal['surname'] ?? ''));
+            } elseif ($orgName) {
+                $label = $orgName;
+            }
+            if (!$label || !$isni) {
+                continue;
+            }
+            $results[] = [
+                'id'          => $isni,
+                'label'       => $label,
+                'description' => '',
+                'uri'         => 'https://isni.org/isni/' . $isni,
+                'source'      => 'isni',
+            ];
+        }
+
+        return ['results' => $results];
+    }
+
+    // =========================================================================
     // HELPER
     // =========================================================================
 

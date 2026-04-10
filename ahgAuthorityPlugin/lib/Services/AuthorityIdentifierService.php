@@ -87,7 +87,25 @@ class AuthorityIdentifierService
 
         $row['created_at'] = date('Y-m-d H:i:s');
 
-        return (int) DB::table('ahg_actor_identifier')->insertGetId($row);
+        $newId = (int) DB::table('ahg_actor_identifier')->insertGetId($row);
+
+        // Auto-verify Wikidata identifiers added via reconciliation
+        if ($type === 'wikidata' && in_array($row['source'] ?? '', ['reconciliation', 'lookup'])) {
+            $autoVerify = DB::table('ahg_authority_config')
+                ->where('config_key', 'auto_verify_wikidata')
+                ->value('config_value');
+            if ($autoVerify === '1') {
+                DB::table('ahg_actor_identifier')
+                    ->where('id', $newId)
+                    ->update([
+                        'is_verified' => 1,
+                        'verified_at' => date('Y-m-d H:i:s'),
+                        'updated_at'  => date('Y-m-d H:i:s'),
+                    ]);
+            }
+        }
+
+        return $newId;
     }
 
     /**

@@ -251,6 +251,25 @@ class AhgSettingsSectionAction extends AhgController
             }
         }
 
+        // Sync authority settings to ahg_authority_config (plugin reads from there)
+        if ($this->currentSection === 'authority') {
+            $prefix = 'authority_';
+            foreach ($settings as $key => $value) {
+                if (strpos($key, $prefix) === 0) {
+                    $configKey = substr($key, strlen($prefix));
+                    $configValue = ($value === 'true') ? '1' : (($value === 'false') ? '0' : $value);
+                    try {
+                        DB::table('ahg_authority_config')->updateOrInsert(
+                            ['config_key' => $configKey],
+                            ['config_value' => $configValue, 'updated_at' => DB::raw('NOW()')]
+                        );
+                    } catch (\Exception $e) {
+                        // Table may not exist if plugin not installed
+                    }
+                }
+            }
+        }
+
         // Handle library loan rules
         if ($this->currentSection === 'library') {
             $loanRules = $request->getParameter('loan_rule', []);

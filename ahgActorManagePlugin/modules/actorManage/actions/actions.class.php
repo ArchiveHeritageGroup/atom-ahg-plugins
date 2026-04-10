@@ -46,6 +46,9 @@ class actorManageActions extends AhgController
             'emptyField' => $request->getParameter('emptyField'),
             'relatedType' => $request->getParameter('relatedType'),
             'relatedAuthority' => $request->getParameter('relatedAuthority'),
+
+            // Auth flag for stub filtering
+            '_authenticated' => $this->getUser()->isAuthenticated(),
         ];
 
         // Collect advanced search criteria (sq0/sf0/so0 ...)
