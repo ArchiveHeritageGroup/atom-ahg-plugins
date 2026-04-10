@@ -70,7 +70,7 @@ class AhgSettingsSectionAction extends AhgController
         'faces' => ['face_detect_enabled', 'face_auto_match', 'face_auto_link', 'face_blur_unmatched', 'face_store_embeddings'],
         'media' => ['media_autoplay', 'media_show_controls', 'media_loop', 'media_show_waveform', 'media_transcription_enabled'],
         'photos' => ['photo_create_thumbnails', 'photo_extract_exif', 'photo_auto_rotate'],
-        'jobs' => ['jobs_enabled', 'jobs_notify_failure'],
+        'jobs' => ['jobs_enabled', 'jobs_notify_on_failure'],
 		'fuseki' => ['fuseki_sync_enabled', 'fuseki_queue_enabled', 'fuseki_sync_on_save', 'fuseki_sync_on_delete', 'fuseki_cascade_delete'],
         'ingest' => [
             'ingest_ner', 'ingest_ocr', 'ingest_virus_scan', 'ingest_summarize',
