@@ -1447,6 +1447,17 @@ class IngestCommitService
             return;
         }
 
+        // Read spellcheck language from settings, default to 'en'
+        $spellLang = 'en';
+        try {
+            $val = DB::table('ahg_settings')
+                ->where('setting_key', 'ingest_spellcheck_lang')
+                ->value('setting_value');
+            if (!empty($val)) {
+                $spellLang = $val;
+            }
+        } catch (\Exception $e) {}
+
         $rows = DB::table('ingest_row')
             ->where('session_id', $session->id)
             ->whereNotNull('created_atom_id')
@@ -1462,7 +1473,7 @@ class IngestCommitService
                 if (strlen(trim($text)) < 5) continue;
 
                 $proc = proc_open(
-                    'aspell -a --lang=en 2>/dev/null',
+                    'aspell -a --lang=' . escapeshellarg($spellLang) . ' 2>/dev/null',
                     [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
                     $pipes
                 );
@@ -1585,6 +1596,17 @@ class IngestCommitService
 
         $targetLang = $session->process_translate_lang ?: 'af';
 
+        // Read source language from settings, default to 'en'
+        $sourceLang = 'en';
+        try {
+            $val = DB::table('ahg_settings')
+                ->where('setting_key', 'ingest_translate_from')
+                ->value('setting_value');
+            if (!empty($val)) {
+                $sourceLang = $val;
+            }
+        } catch (\Exception $e) {}
+
         $rows = DB::table('ingest_row')
             ->where('session_id', $session->id)
             ->whereNotNull('created_atom_id')
@@ -1610,15 +1632,16 @@ class IngestCommitService
 
                 $escaped = escapeshellarg($text);
                 $escapedLang = escapeshellarg($targetLang);
+                $escapedSrc = escapeshellarg($sourceLang);
                 $cmd = "python3 -c \"
 import sys
 try:
     from argostranslate import translate
-    t = translate.get_translation_from_codes('en', sys.argv[2])
+    t = translate.get_translation_from_codes(sys.argv[3], sys.argv[2])
     if t: print(t.translate(sys.argv[1]))
     else: print('')
 except: print('')
-\" {$escaped} {$escapedLang} 2>/dev/null";
+\" {$escaped} {$escapedLang} {$escapedSrc} 2>/dev/null";
 
                 $translated = trim(shell_exec($cmd) ?? '');
                 if (!empty($translated) && $translated !== $text) {
