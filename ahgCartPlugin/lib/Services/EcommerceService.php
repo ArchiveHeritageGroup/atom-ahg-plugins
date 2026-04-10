@@ -302,10 +302,11 @@ class EcommerceService
         // Generate MD5 signature
         $pfData['signature'] = md5($signatureString);
 
-        // Create payment record
+        // Create payment record (use configured gateway)
+        $gateway = $settings->payment_gateway ?? 'payfast';
         $this->ecommerceRepo->createPayment([
             'order_id' => $orderId,
-            'payment_gateway' => 'payfast',
+            'payment_gateway' => $gateway,
             'amount' => $order->total,
             'currency' => $order->currency,
             'status' => 'pending',
@@ -355,6 +356,9 @@ class EcommerceService
 
             // Generate download tokens for digital items
             $this->generateDownloadTokens($order->id);
+
+            // Send admin notification email if configured
+            $this->notifyAdmin($order, $transactionId);
 
             return ['success' => true, 'message' => 'Payment processed.'];
         }
@@ -427,5 +431,36 @@ class EcommerceService
     public function getAllPricing(?int $repositoryId = null): array
     {
         return $this->ecommerceRepo->getPricing($repositoryId);
+    }
+
+    /**
+     * Send admin notification email when an order is paid.
+     */
+    protected function notifyAdmin(object $order, ?string $transactionId): void
+    {
+        try {
+            $settings = $this->getSettings($order->repository_id);
+            $email = $settings->admin_notification_email ?? null;
+
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return;
+            }
+
+            $subject = '[AtoM Heratio] Order paid: ' . $order->order_number;
+            $body = sprintf(
+                "Order %s has been paid.\n\nCustomer: %s (%s)\nTotal: %s %s\nTransaction: %s\nTime: %s\n",
+                $order->order_number,
+                $order->customer_name ?? 'N/A',
+                $order->customer_email ?? 'N/A',
+                $order->currency,
+                number_format((float) $order->total, 2),
+                $transactionId ?? 'N/A',
+                date('Y-m-d H:i:s')
+            );
+
+            @mail($email, $subject, $body, 'From: noreply@' . (gethostname() ?: 'localhost'));
+        } catch (\Exception $e) {
+            // Notification is best-effort
+        }
     }
 }

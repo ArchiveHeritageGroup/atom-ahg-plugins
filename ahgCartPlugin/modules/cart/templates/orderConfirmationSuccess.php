@@ -71,7 +71,17 @@
                 <td class="text-end"><?php echo $order->currency; ?> <?php echo number_format($order->subtotal, 2); ?></td>
               </tr>
               <tr>
-                <td><strong><?php echo __('VAT'); ?></strong></td>
+                <td>
+                  <strong><?php echo __('VAT'); ?></strong>
+                  <?php
+                    $vatNum = \Illuminate\Database\Capsule\Manager::table('ahg_ecommerce_settings')
+                        ->whereNull('repository_id')
+                        ->value('vat_number');
+                    if (!empty($vatNum)) {
+                        echo '<br><small class="text-muted">' . __('VAT No:') . ' ' . esc_specialchars($vatNum) . '</small>';
+                    }
+                  ?>
+                </td>
                 <td class="text-end"><?php echo $order->currency; ?> <?php echo number_format($order->vat_amount, 2); ?></td>
               </tr>
               <tr class="fw-bold">
