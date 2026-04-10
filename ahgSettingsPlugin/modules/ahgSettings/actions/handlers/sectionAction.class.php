@@ -270,6 +270,25 @@ class AhgSettingsSectionAction extends AhgController
             }
         }
 
+        // Sync accession settings to accession_config (plugin reads from there)
+        if ($this->currentSection === 'accession') {
+            $prefix = 'accession_';
+            foreach ($settings as $key => $value) {
+                if (strpos($key, $prefix) === 0) {
+                    $configKey = substr($key, strlen($prefix));
+                    $configValue = ($value === 'true') ? '1' : (($value === 'false') ? '0' : $value);
+                    try {
+                        DB::table('accession_config')->updateOrInsert(
+                            ['config_key' => $configKey, 'tenant_id' => null],
+                            ['config_value' => $configValue, 'updated_at' => DB::raw('NOW()')]
+                        );
+                    } catch (\Exception $e) {
+                        // Table may not exist if plugin not installed
+                    }
+                }
+            }
+        }
+
         // Handle library loan rules
         if ($this->currentSection === 'library') {
             $loanRules = $request->getParameter('loan_rule', []);

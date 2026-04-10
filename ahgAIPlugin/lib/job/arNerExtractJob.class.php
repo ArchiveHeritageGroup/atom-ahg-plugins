@@ -89,13 +89,17 @@ class arNerExtractJob extends arBaseJob
     {
         $apiUrl = rtrim($settings['api_url'], '/') . '/ner/extract';
         
+        // Adjust timeout based on processing_mode
+        $mode = $settings['processing_mode'] ?? 'job';
+        $timeout = ($mode === 'hybrid') ? 30 : 60;
+
         $ch = curl_init($apiUrl);
         curl_setopt_array($ch, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode(['text' => substr($text, 0, 100000)]),
             CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'X-API-Key: ' . ($settings['api_key'] ?? '')],
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT => 60
+            CURLOPT_TIMEOUT => $timeout
         ]);
 
         $response = curl_exec($ch);
@@ -138,9 +142,21 @@ class arNerExtractJob extends arBaseJob
             'extracted_at' => date('Y-m-d H:i:s')
         ]);
 
+        // Filter entity types if configured
+        $allowedTypes = null;
+        $settings = $this->getSettings();
+        $entityTypesJson = $settings['ner_entity_types'] ?? '';
+        if (!empty($entityTypesJson)) {
+            $decoded = json_decode($entityTypesJson, true);
+            if (is_array($decoded) && !empty($decoded)) {
+                $allowedTypes = array_map('strtoupper', $decoded);
+            }
+        }
+
         // API returns: {"PERSON": ["Name1", "Name2"], "ORG": ["Org1"], ...}
         foreach ($entities as $type => $values) {
             if (!is_array($values)) continue;
+            if ($allowedTypes !== null && !in_array(strtoupper($type), $allowedTypes)) continue;
             foreach ($values as $value) {
                 $db->table('ahg_ner_entity')->insert([
                     'extraction_id' => $extractionId,

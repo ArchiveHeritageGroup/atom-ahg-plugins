@@ -333,12 +333,21 @@ class IiifAiService
      */
     public function extractTranslation(int $objectId, string $text, ?int $createdBy = null): array
     {
+        // Check if translation is enabled
+        $translationEnabled = $this->getTranslationSetting('translation_enabled', '1');
+        if ($translationEnabled !== '1') {
+            return ['status' => 'skipped', 'reason' => 'Translation disabled'];
+        }
+
         $startTime = microtime(true);
 
-        // Get translation settings from ahg_ner_settings (legacy) or ahg_ai_settings
+        // Get translation settings from ahg_ner_settings
         $sourceLang = $this->getTranslationSetting('translation_source_lang', 'en');
         $targetLang = $this->getTranslationSetting('translation_target_lang', 'af');
         $mtEndpoint = $this->getTranslationSetting('mt_endpoint', 'http://127.0.0.1:5100/translate');
+        $overwrite = $this->getTranslationSetting('translation_overwrite', '0') === '1';
+        $saveCulture = $this->getTranslationSetting('translation_save_culture', '1') === '1';
+        $mode = $this->getTranslationSetting('translation_mode', 'review');
         $apiKey = $this->getAiApiKey();
 
         $response = $this->apiRequest('POST', $mtEndpoint, [
@@ -357,6 +366,7 @@ class IiifAiService
         }
 
         $translatedText = $response['translatedText'];
+        $translationStatus = ($mode === 'auto') ? 'applied' : 'draft';
 
         // Log to translation log table
         try {
@@ -368,11 +378,31 @@ class IiifAiService
                 'source_text' => mb_substr($text, 0, 65000),
                 'translated_text' => mb_substr($translatedText, 0, 65000),
                 'translation_engine' => 'argos',
+                'status' => $translationStatus,
                 'created_by' => $createdBy,
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
-            // Translation log table may not exist
+            // Translation log table may not exist or missing status column
+        }
+
+        // Auto-apply: save translation to information_object_i18n if mode is 'auto'
+        if ($mode === 'auto' && $saveCulture) {
+            try {
+                $existing = DB::table('information_object_i18n')
+                    ->where('id', $objectId)
+                    ->where('culture', $targetLang)
+                    ->first();
+
+                if (!$existing || $overwrite) {
+                    DB::table('information_object_i18n')->updateOrInsert(
+                        ['id' => $objectId, 'culture' => $targetLang],
+                        ['scope_and_content' => $translatedText]
+                    );
+                }
+            } catch (\Exception $e) {
+                // Culture row may not exist
+            }
         }
 
         // Create translation annotation on canvas
@@ -381,7 +411,7 @@ class IiifAiService
         return $this->logExtraction(
             $objectId, null, 'translate', 'completed',
             null, null, $elapsed,
-            ['source_lang' => $sourceLang, 'target_lang' => $targetLang, 'translated_length' => strlen($translatedText)]
+            ['source_lang' => $sourceLang, 'target_lang' => $targetLang, 'translated_length' => strlen($translatedText), 'mode' => $mode]
         );
     }
 

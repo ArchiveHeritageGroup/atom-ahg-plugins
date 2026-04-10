@@ -26,15 +26,46 @@ class VectorSearchStrategy
     private string $embedScript;
 
     /** Minimum similarity score to include (0-1 for cosine) */
-    private const MIN_SCORE = 0.25;
+    private float $minScore = 0.25;
 
-    public function __construct(?string $collection = null, string $qdrantUrl = 'http://localhost:6333')
+    /** Embedding model name (passed to embed script) */
+    private string $model = 'all-MiniLM-L6-v2';
+
+    public function __construct(?string $collection = null, ?string $qdrantUrl = null)
     {
-        $this->qdrantUrl = rtrim($qdrantUrl, '/');
-        // Auto-detect collection from database name: archive → archive_records, atom → anc_records
-        $this->collection = $collection ?? self::detectCollection();
+        // Read settings from ahg_ner_settings (AI Services settings page)
+        $settings = self::loadSettings();
+
+        $this->qdrantUrl = rtrim($qdrantUrl ?? ($settings['qdrant_url'] ?? 'http://localhost:6333'), '/');
+        $this->collection = $collection ?? ($settings['qdrant_collection'] ?? '') ?: self::detectCollection();
+        $this->model = $settings['qdrant_model'] ?? 'all-MiniLM-L6-v2';
+
+        $minScore = $settings['qdrant_min_score'] ?? '';
+        if (is_numeric($minScore)) {
+            $this->minScore = (float) $minScore;
+        }
+
         $this->embedScript = \sfConfig::get('sf_plugins_dir')
             . '/ahgDiscoveryPlugin/scripts/embed_query.py';
+    }
+
+    /**
+     * Load Qdrant settings from ahg_ner_settings table.
+     */
+    private static function loadSettings(): array
+    {
+        try {
+            $rows = \Illuminate\Database\Capsule\Manager::table('ahg_ner_settings')
+                ->whereIn('setting_key', ['qdrant_enabled', 'qdrant_url', 'qdrant_collection', 'qdrant_model', 'qdrant_min_score'])
+                ->get();
+            $settings = [];
+            foreach ($rows as $row) {
+                $settings[$row->setting_key] = $row->setting_value;
+            }
+            return $settings;
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
     /**
@@ -62,6 +93,12 @@ class VectorSearchStrategy
      */
     public function search(array $expanded, int $limit = 50): array
     {
+        // Check if Qdrant is enabled in settings
+        $settings = self::loadSettings();
+        if (($settings['qdrant_enabled'] ?? '0') !== '1') {
+            return [];
+        }
+
         // Build query text from expanded terms
         $queryText = $this->buildQueryText($expanded);
         if (empty($queryText)) {
@@ -115,7 +152,8 @@ class VectorSearchStrategy
         }
 
         $escapedText = escapeshellarg($text);
-        $cmd = sprintf('python3 %s %s 2>/dev/null', escapeshellarg($this->embedScript), $escapedText);
+        $modelArg = escapeshellarg($this->model);
+        $cmd = sprintf('python3 %s %s --model %s 2>/dev/null', escapeshellarg($this->embedScript), $escapedText, $modelArg);
 
         $output = shell_exec($cmd);
         if (empty($output)) {
@@ -147,7 +185,7 @@ class VectorSearchStrategy
             'query'      => $vector,
             'limit'      => $limit,
             'with_payload' => true,
-            'score_threshold' => self::MIN_SCORE,
+            'score_threshold' => $this->minScore,
         ]);
 
         $ch = curl_init($url);
@@ -191,10 +229,18 @@ class VectorSearchStrategy
     /**
      * Check if Qdrant is available and collection exists.
      */
-    public static function isAvailable(?string $collection = null, string $qdrantUrl = 'http://localhost:6333'): bool
+    public static function isAvailable(?string $collection = null, ?string $qdrantUrl = null): bool
     {
-        $col = $collection ?? self::detectCollection();
-        $url = rtrim($qdrantUrl, '/') . '/collections/' . $col;
+        $settings = self::loadSettings();
+
+        // Respect enabled toggle
+        if (($settings['qdrant_enabled'] ?? '0') !== '1') {
+            return false;
+        }
+
+        $url = rtrim($qdrantUrl ?? ($settings['qdrant_url'] ?? 'http://localhost:6333'), '/');
+        $col = $collection ?? ($settings['qdrant_collection'] ?? '') ?: self::detectCollection();
+        $url .= '/collections/' . $col;
 
         $ch = curl_init($url);
         curl_setopt_array($ch, [
