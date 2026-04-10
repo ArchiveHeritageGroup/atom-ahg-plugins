@@ -49,6 +49,44 @@ function detect_viewer_type(string $mimeType, array $context = []): ?string
 }
 
 /**
+ * Get an IIIF viewer setting from the iiif_viewer_settings DB table.
+ * Falls back to sfConfig then to $default.
+ *
+ * @param string $key     Setting key (e.g. 'viewer_height', 'enable_fullscreen')
+ * @param mixed  $default Fallback value
+ * @return mixed
+ */
+function get_iiif_setting(string $key, $default = null)
+{
+    static $cache = null;
+
+    if ($cache === null) {
+        $cache = [];
+        try {
+            $rows = \Illuminate\Database\Capsule\Manager::table('iiif_viewer_settings')->get();
+            foreach ($rows as $row) {
+                $cache[$row->setting_key] = $row->setting_value;
+            }
+        } catch (\Exception $e) {
+            // Table may not exist
+        }
+    }
+
+    if (isset($cache[$key]) && $cache[$key] !== '') {
+        return $cache[$key];
+    }
+
+    // Fallback to sfConfig app_iiif_<key>
+    $sfKey = 'app_iiif_' . $key;
+    $sfVal = sfConfig::get($sfKey);
+    if ($sfVal !== null) {
+        return $sfVal;
+    }
+
+    return $default;
+}
+
+/**
  * Get base URL from current request or configuration
  * Auto-detects from request if not configured
  */
@@ -192,9 +230,24 @@ function get_digital_objects($resource)
  */
 function render_iiif_viewer($resource, $options = [])
 {
+    // Check show_on_view / show_on_browse settings
+    try {
+        $action = sfContext::getInstance()->getActionName();
+        $isView = in_array($action, ['index', 'view', 'show'], true);
+        $isBrowse = in_array($action, ['browse', 'list', 'search'], true);
+        if ($isView && get_iiif_setting('show_on_view', '1') !== '1') {
+            return render_standard_viewer($resource, $options);
+        }
+        if ($isBrowse && get_iiif_setting('show_on_browse', '1') !== '1') {
+            return render_standard_viewer($resource, $options);
+        }
+    } catch (\Exception $e) {
+        // Context may not be available in CLI
+    }
+
     // Get digital objects
     $digitalObjects = $resource->digitalObjectsRelatedByobjectId;
-    
+
     if (empty($digitalObjects) || count($digitalObjects) === 0) {
         // Check for 3D models
         if (has_3d_models($resource)) {
@@ -212,21 +265,25 @@ function render_iiif_viewer($resource, $options = [])
     $objectId = $resource->id;
     $slug = $resource->slug ?? $objectId;
     
-    // Configuration - use helper functions for dynamic URL resolution
+    // Configuration - read from iiif_viewer_settings DB, fallback to sfConfig
     $baseUrl = get_iiif_base_url();
     $cantaloupeUrl = get_iiif_cantaloupe_url();
     $pluginPath = sfConfig::get('app_iiif_plugin_path', '/plugins/ahgIiifPlugin/web');
-    $defaultViewer = sfConfig::get('app_iiif_default_viewer', 'openseadragon');
+    $defaultViewer = get_iiif_setting('viewer_type', 'openseadragon');
     $enableAnnotations = sfConfig::get('app_iiif_enable_annotations', true);
-    $viewerHeight = $options['height'] ?? sfConfig::get('app_iiif_viewer_height', '600px');
-    
-    // Merge options
+    $viewerHeight = $options['height'] ?? get_iiif_setting('viewer_height', '600px');
+    $bgColor = get_iiif_setting('background_color', '#1a1a1a');
+
+    // Merge options — DB settings as defaults, $options overrides
     $opts = array_merge([
         'viewer' => $defaultViewer,
         'height' => $viewerHeight,
         'enable_annotations' => $enableAnnotations,
         'enable_download' => false,
-        'enable_fullscreen' => true,
+        'enable_fullscreen' => get_iiif_setting('enable_fullscreen', '1') === '1',
+        'show_zoom_controls' => get_iiif_setting('show_zoom_controls', '1') === '1',
+        'background_color' => $bgColor,
+        'default_zoom' => (int) get_iiif_setting('default_zoom', 1),
     ], $options);
     
     // Build manifest URL
@@ -287,7 +344,7 @@ function render_iiif_viewer($resource, $options = [])
 
     // OpenSeadragon viewer (only for images)
     if ($hasImages) {
-        $html .= '<div id="osd-' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . $viewerHeight . ';background:#1a1a1a;border-radius:8px;"></div>';
+        $html .= '<div id="osd-' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . esc_specialchars($viewerHeight) . ';background:' . esc_specialchars($opts['background_color'] ?? '#1a1a1a') . ';border-radius:8px;"></div>';
 
         // Mirador wrapper (hidden by default)
         $html .= '<div id="mirador-wrapper-' . $viewerId . '" class="mirador-wrapper" style="display:none;position:relative;">';
@@ -675,11 +732,18 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
         'enableAnnotations' => $opts['enable_annotations'],
     ]);
     
+    $showZoom = $opts['show_zoom_controls'] ?? true;
+    $fullscreen = $opts['enable_fullscreen'] ?? true;
+    $defaultZoom = $opts['default_zoom'] ?? 1;
+
     $osdConfig = json_encode([
         'showNavigator' => true,
         'navigatorPosition' => 'BOTTOM_RIGHT',
         'showRotationControl' => true,
         'showFlipControl' => true,
+        'showZoomControl' => (bool) $showZoom,
+        'showFullPageControl' => (bool) $fullscreen,
+        'defaultZoomLevel' => (int) $defaultZoom,
         'gestureSettingsMouse' => ['scrollToZoom' => true],
     ]);
     
@@ -702,8 +766,15 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
     $js .= '        pluginPath: "' . $config['pluginPath'] . '",' . "\n";
     $js .= '        defaultViewer: "' . $opts['viewer'] . '",' . "\n";
     $js .= '        flags: ' . $flagsJson . ',' . "\n";
+    $carouselConfig = json_encode([
+        'autoplay' => get_iiif_setting('carousel_autoplay', '1') === '1',
+        'interval' => (int) get_iiif_setting('carousel_interval', 5000),
+        'showThumbnails' => get_iiif_setting('carousel_show_thumbnails', '1') === '1',
+        'showControls' => get_iiif_setting('carousel_show_controls', '1') === '1',
+    ]);
     $js .= '        osdConfig: ' . $osdConfig . ',' . "\n";
-    $js .= '        miradorConfig: ' . $miradorConfig . "\n";
+    $js .= '        miradorConfig: ' . $miradorConfig . ',' . "\n";
+    $js .= '        carouselConfig: ' . $carouselConfig . "\n";
     $js .= '    });' . "\n";
     $js .= '    viewer.init();' . "\n";
     $js .= '});' . "\n";

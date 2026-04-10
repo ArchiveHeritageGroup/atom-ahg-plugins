@@ -67,7 +67,7 @@ function render_mirador_viewer($iiifIdentifier, $objId, $root, $request)
     $baseUrl = sfConfig::get('app_iiif_base_url', 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
     $slug = is_object($root) ? ($root->slug ?? $objId) : $objId;
     $manifestUrl = $baseUrl . '/iiif/manifest/' . $slug;
-    $height = sfConfig::get('app_iiif_viewer_height', '600px');
+    $height = get_iiif_setting('viewer_height', '600px');
 
     $viewerId = 'mirador-' . $objId;
 
@@ -98,11 +98,13 @@ function render_mirador_viewer($iiifIdentifier, $objId, $root, $request)
  */
 function render_openseadragon_viewer($iiifIdentifier, $objId, $cantaloupeUrl)
 {
-    $height = sfConfig::get('app_iiif_viewer_height', '600px');
+    $height = get_iiif_setting('viewer_height', '600px');
+    $bgColor = get_iiif_setting('background_color', '#1a1a1a');
+    $showZoom = get_iiif_setting('show_zoom_controls', '1') === '1';
     $viewerId = 'osd-' . $objId;
     $infoUrl = rtrim($cantaloupeUrl, '/') . '/' . urlencode($iiifIdentifier) . '/info.json';
 
-    $html = '<div id="' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;"></div>';
+    $html = '<div id="' . $viewerId . '" class="osd-viewer" style="width:100%;height:' . esc_specialchars($height) . ';background:' . esc_specialchars($bgColor) . ';border-radius:8px;"></div>';
 
     // JavaScript initialization
     $n = sfConfig::get('csp_nonce', '');
@@ -111,13 +113,16 @@ function render_openseadragon_viewer($iiifIdentifier, $objId, $cantaloupeUrl)
     $html .= '<script' . $nonceAttr . '>';
     $html .= 'document.addEventListener("DOMContentLoaded", function() {';
     $html .= '  if (typeof OpenSeadragon !== "undefined") {';
+    $fullscreen = get_iiif_setting('enable_fullscreen', '1') === '1' ? 'true' : 'false';
     $html .= '    OpenSeadragon({';
     $html .= '      id: "' . $viewerId . '",';
     $html .= '      tileSources: "' . $infoUrl . '",';
     $html .= '      showNavigator: true,';
     $html .= '      navigatorPosition: "BOTTOM_RIGHT",';
     $html .= '      showRotationControl: true,';
-    $html .= '      showFlipControl: true';
+    $html .= '      showFlipControl: true,';
+    $html .= '      showZoomControl: ' . ($showZoom ? 'true' : 'false') . ',';
+    $html .= '      showFullPageControl: ' . $fullscreen;
     $html .= '    });';
     $html .= '  }';
     $html .= '});';
