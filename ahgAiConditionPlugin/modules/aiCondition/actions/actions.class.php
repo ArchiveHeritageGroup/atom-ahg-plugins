@@ -299,6 +299,46 @@ class aiConditionActions extends AhgController
     }
 
     /**
+     * Bulk scan status API endpoint.
+     * Returns status of the most recent bulk scan (from ahg_ai_condition_assessment).
+     */
+    public function executeApiBulkStatus($request)
+    {
+        if (!$this->getUser()->isAdministrator()) {
+            return $this->renderJson(['error' => 'Unauthorized'], 403);
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        // Count assessments created in the last hour (proxy for "running" scan)
+        $recentCount = $db::table('ahg_ai_condition_assessment')
+            ->where('source', 'bulk_scan')
+            ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime('-1 hour')))
+            ->count();
+
+        // Latest bulk assessment
+        $latest = $db::table('ahg_ai_condition_assessment')
+            ->where('source', 'bulk_scan')
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        // Check if CLI process is actively running
+        $running = false;
+        $output = [];
+        @exec("pgrep -f 'ai-condition:bulk-scan' 2>/dev/null", $output);
+        if (!empty($output)) {
+            $running = true;
+        }
+
+        return $this->renderJson([
+            'running'      => $running,
+            'recent_count' => $recentCount,
+            'last_scan_at' => $latest->created_at ?? null,
+            'last_grade'   => $latest->condition_grade ?? null,
+        ]);
+    }
+
+    /**
      * SaaS client management
      */
     public function executeClients($request)
