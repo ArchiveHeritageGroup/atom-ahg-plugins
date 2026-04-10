@@ -351,6 +351,27 @@ class researchActions extends AhgController
             }
             $this->getUser()->setFlash('success', 'Booking submitted');
 
+            // Notify admin of new booking if configured
+            try {
+                $notifyEmail = DB::table('email_setting')
+                    ->where('setting_key', 'notify_new_booking')
+                    ->value('setting_value');
+                if (!empty($notifyEmail) && filter_var($notifyEmail, FILTER_VALIDATE_EMAIL) && $this->loadEmailService()) {
+                    $placeholders = [
+                        'researcher_name' => $this->researcher->name ?? '',
+                        'booking_date' => $request->getParameter('booking_date'),
+                        'start_time' => $request->getParameter('start_time'),
+                        'end_time' => $request->getParameter('end_time'),
+                        'purpose' => $request->getParameter('purpose', ''),
+                    ];
+                    $subject = 'New reading room booking: ' . ($request->getParameter('booking_date'));
+                    $body = "A new booking has been submitted.\n\nResearcher: {researcher_name}\nDate: {booking_date}\nTime: {start_time} - {end_time}\nPurpose: {purpose}";
+                    $this->sendTemplatedEmail($notifyEmail, 'booking_new', $placeholders, $subject, $body);
+                }
+            } catch (\Exception $e) {
+                // Best-effort notification
+            }
+
             // Auto-journal: booking created
             try {
                 require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/JournalService.php';
