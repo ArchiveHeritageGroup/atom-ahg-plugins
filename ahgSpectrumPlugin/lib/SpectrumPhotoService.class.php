@@ -35,31 +35,57 @@ class SpectrumPhotoService
     protected function loadSettings()
     {
         $this->settings = [];
+        $db = \Illuminate\Database\Capsule\Manager::class;
 
+        // Try spectrum_media_settings first (dedicated table)
         try {
-            $rows = \Illuminate\Database\Capsule\Manager::table('spectrum_media_settings')
+            $rows = $db::table('spectrum_media_settings')
                 ->select('setting_key', 'setting_value', 'setting_type')
                 ->get();
 
             foreach ($rows as $row) {
                 $value = $row->setting_value;
-
                 switch ($row->setting_type) {
-                    case 'integer':
-                        $value = (int) $value;
-                        break;
-                    case 'boolean':
-                        $value = $value === 'true' || $value === '1';
-                        break;
-                    case 'json':
-                        $value = json_decode($value, true);
-                        break;
+                    case 'integer': $value = (int) $value; break;
+                    case 'boolean': $value = $value === 'true' || $value === '1'; break;
+                    case 'json':    $value = json_decode($value, true); break;
                 }
-
                 $this->settings[$row->setting_key] = $value;
             }
-        } catch (Exception $e) {
-            // Use defaults if database not available
+        } catch (\Exception $e) {
+            // Table doesn't exist — fall back to ahg_settings
+        }
+
+        // Merge from ahg_settings (photos section) — these take priority if set
+        try {
+            $ahgRows = $db::table('ahg_settings')
+                ->where('setting_group', 'photos')
+                ->get();
+
+            foreach ($ahgRows as $row) {
+                $key = $row->setting_key;
+                $val = $row->setting_value;
+
+                // Map individual thumbnail sizes to the array format the service expects
+                if ($key === 'photo_thumbnail_small' || $key === 'photo_thumbnail_medium' || $key === 'photo_thumbnail_large') {
+                    $sizes = $this->settings['photo_thumbnail_sizes'] ?? ['small' => 150, 'medium' => 300, 'large' => 600];
+                    $sizeKey = str_replace('photo_thumbnail_', '', $key);
+                    $sizes[$sizeKey] = (int) $val;
+                    $this->settings['photo_thumbnail_sizes'] = $sizes;
+                    continue;
+                }
+
+                // Convert boolean-style values
+                if ($val === 'true' || $val === 'false') {
+                    $val = $val === 'true';
+                } elseif (is_numeric($val)) {
+                    $val = strpos($val, '.') !== false ? (float) $val : (int) $val;
+                }
+
+                $this->settings[$key] = $val;
+            }
+        } catch (\Exception $e) {
+            // ahg_settings may not exist
         }
     }
     
@@ -110,11 +136,16 @@ class SpectrumPhotoService
             return false;
         }
         
-        // Get image dimensions
+        // Auto-rotate based on EXIF orientation if enabled
+        if ($this->getSetting('photo_auto_rotate', false)) {
+            $this->autoRotateImage($fullPath);
+        }
+
+        // Get image dimensions (after potential rotation)
         $imageInfo = getimagesize($fullPath);
         $width = $imageInfo[0] ?? null;
         $height = $imageInfo[1] ?? null;
-        
+
         // Create thumbnails
         if ($this->getSetting('photo_create_thumbnails', true)) {
             $this->createThumbnails($fullPath);
@@ -254,15 +285,16 @@ class SpectrumPhotoService
             $thumbPath = $basePath . '/' . $filename . '_' . $sizeName . '.' . $ext;
             
             // Save thumbnail
+            $jpegQuality = (int) $this->getSetting('photo_jpeg_quality', 85);
             switch ($mimeType) {
                 case 'image/jpeg':
-                    imagejpeg($thumb, $thumbPath, 85);
+                    imagejpeg($thumb, $thumbPath, $jpegQuality);
                     break;
                 case 'image/png':
                     imagepng($thumb, $thumbPath, 8);
                     break;
                 case 'image/webp':
-                    imagewebp($thumb, $thumbPath, 85);
+                    imagewebp($thumb, $thumbPath, $jpegQuality);
                     break;
             }
             
@@ -279,6 +311,11 @@ class SpectrumPhotoService
      */
     protected function extractExifData($filePath)
     {
+        // Check if EXIF extraction is enabled in settings
+        if (!$this->getSetting('photo_extract_exif', true)) {
+            return null;
+        }
+
         if (!function_exists('exif_read_data')) {
             return null;
         }
@@ -397,7 +434,62 @@ class SpectrumPhotoService
         
         // Recreate thumbnails
         $this->createThumbnails($fullPath);
-        
+
+        return true;
+    }
+
+    /**
+     * Auto-rotate image based on EXIF orientation data.
+     * Corrects phone/camera rotation so images display upright.
+     */
+    protected function autoRotateImage(string $filePath): bool
+    {
+        if (!function_exists('exif_read_data')) {
+            return false;
+        }
+
+        $exif = @exif_read_data($filePath);
+        if (!$exif || !isset($exif['Orientation'])) {
+            return false;
+        }
+
+        $orientation = (int) $exif['Orientation'];
+        if ($orientation <= 1) {
+            return false; // Already upright
+        }
+
+        $imageInfo = getimagesize($filePath);
+        if (!$imageInfo) {
+            return false;
+        }
+
+        switch ($imageInfo['mime']) {
+            case 'image/jpeg': $source = imagecreatefromjpeg($filePath); break;
+            case 'image/png':  $source = imagecreatefrompng($filePath); break;
+            case 'image/webp': $source = imagecreatefromwebp($filePath); break;
+            default: return false;
+        }
+
+        if (!$source) {
+            return false;
+        }
+
+        switch ($orientation) {
+            case 3: $source = imagerotate($source, 180, 0); break;
+            case 6: $source = imagerotate($source, -90, 0); break;
+            case 8: $source = imagerotate($source, 90, 0); break;
+            default: imagedestroy($source); return false;
+        }
+
+        $quality = (int) $this->getSetting('photo_jpeg_quality', 85);
+        switch ($imageInfo['mime']) {
+            case 'image/jpeg': imagejpeg($source, $filePath, $quality); break;
+            case 'image/png':  imagepng($source, $filePath, 8); break;
+            case 'image/webp': imagewebp($source, $filePath, $quality); break;
+        }
+
+        imagedestroy($source);
+
         return true;
     }
 }
