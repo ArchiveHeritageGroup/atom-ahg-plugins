@@ -4,6 +4,12 @@ class ahgMarketplacePluginConfiguration extends sfPluginConfiguration
 {
     public function initialize()
     {
+        // Enable the marketplace module so Symfony can resolve actions
+        sfConfig::set('sf_enabled_modules', array_merge(
+            sfConfig::get('sf_enabled_modules', []),
+            ['marketplace']
+        ));
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
     }

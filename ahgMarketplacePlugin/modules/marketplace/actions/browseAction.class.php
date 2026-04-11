@@ -57,6 +57,7 @@ class marketplaceBrowseAction extends AhgController
         $this->categories = $categories;
         $this->platformName = $settingsRepo->get('platform_name', 'AtoM Marketplace');
         $this->termsUrl = $settingsRepo->get('terms_url', '');
-        $this->supportedGateways = json_decode($settingsRepo->get('supported_payment_gateways', '["payfast"]'), true) ?: ['payfast'];
+        $gateways = $settingsRepo->get('supported_payment_gateways', '["payfast"]');
+        $this->supportedGateways = is_array($gateways) ? $gateways : (json_decode($gateways, true) ?: ['payfast']);
     }
 }
