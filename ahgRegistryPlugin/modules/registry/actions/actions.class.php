@@ -1286,8 +1286,8 @@ class registryActions extends AhgController
                 'province_state' => trim($request->getParameter('province_state', '')),
                 'postal_code' => trim($request->getParameter('postal_code', '')),
                 'country' => trim($request->getParameter('country', '')),
-                'latitude' => ('' !== trim((string) $request->getParameter('latitude', ''))) ? (float) $request->getParameter('latitude') : null,
-                'longitude' => ('' !== trim((string) $request->getParameter('longitude', ''))) ? (float) $request->getParameter('longitude') : null,
+                'latitude' => $this->clampCoord($request->getParameter('latitude', ''), -90, 90),
+                'longitude' => $this->clampCoord($request->getParameter('longitude', ''), -180, 180),
                 'size' => $request->getParameter('size', '') ?: null,
                 'governance' => $request->getParameter('governance', '') ?: null,
                 'parent_body' => trim($request->getParameter('parent_body', '')) ?: null,
@@ -2119,8 +2119,8 @@ class registryActions extends AhgController
                 'province_state' => trim($request->getParameter('province_state', '')),
                 'postal_code' => trim($request->getParameter('postal_code', '')),
                 'country' => trim($request->getParameter('country', '')),
-                'latitude' => $request->getParameter('latitude', '') !== '' ? $request->getParameter('latitude') : null,
-                'longitude' => $request->getParameter('longitude', '') !== '' ? $request->getParameter('longitude') : null,
+                'latitude' => $this->clampCoord($request->getParameter('latitude', ''), -90, 90),
+                'longitude' => $this->clampCoord($request->getParameter('longitude', ''), -180, 180),
                 'company_registration' => trim($request->getParameter('company_registration', '')) ?: null,
                 'vat_number' => trim($request->getParameter('vat_number', '')) ?: null,
                 'established_year' => $request->getParameter('established_year', '') !== '' ? (int) $request->getParameter('established_year') : null,
@@ -6394,5 +6394,22 @@ class registryActions extends AhgController
             ->orderBy('s.name')
             ->orderBy('g.sort_order')
             ->get()->all();
+    }
+
+    /**
+     * Validate and clamp a coordinate value to valid range.
+     * Returns null if empty/invalid, clamped float if out of range.
+     */
+    protected function clampCoord($value, float $min, float $max): ?float
+    {
+        $value = trim((string) $value);
+        if ($value === '' || !is_numeric($value)) {
+            return null;
+        }
+        $float = (float) $value;
+        if ($float < $min || $float > $max) {
+            return max($min, min($max, $float));
+        }
+        return $float;
     }
 }

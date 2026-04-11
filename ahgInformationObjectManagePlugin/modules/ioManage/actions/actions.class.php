@@ -332,6 +332,19 @@ class ioManageActions extends AhgController
         $culture = $this->culture();
         $repositoryId = (int) $request->getParameter('repositoryId', 0);
         $parentId = (int) $request->getParameter('parentId', 0);
+        $sector = $request->getParameter('sector', 'archive');
+
+        // Try sector-aware NumberingService first
+        try {
+            require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/NumberingService.php';
+            $service = \AtomFramework\Services\NumberingService::getInstance();
+            $identifier = $service->getNextReference($sector, [], $repositoryId ?: null);
+            if (!empty($identifier)) {
+                return $this->renderText(json_encode(['identifier' => $identifier]));
+            }
+        } catch (\Exception $e) {
+            // Fall through to legacy logic
+        }
 
         $DB = \Illuminate\Database\Capsule\Manager::class;
         $rootId = \AhgInformationObjectManage\Services\InformationObjectCrudService::ROOT_ID;
@@ -704,4 +717,5 @@ class ioManageActions extends AhgController
             }
         }
     }
+
 }

@@ -750,6 +750,21 @@ class InformationObjectEditAction extends DefaultEditAction
         // Pass if we're using mask or not to template, fill in identifier with generated
         // identifier if so.
         if ($this->mask) {
+            // Try sector-aware NumberingService first (reads sector_archive__* settings)
+            try {
+                require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
+                require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/NumberingService.php';
+                $service = \AtomFramework\Services\NumberingService::getInstance();
+                $repoId = $this->resource->repositoryId ?: null;
+                $identifier = $service->getNextReference('archive', [], $repoId);
+                if (!empty($identifier)) {
+                    $this->resource->identifier = $identifier;
+                    return;
+                }
+            } catch (\Exception $e) {
+                // Fall through to legacy mask
+            }
+
             $this->resource->identifier = QubitInformationObject::generateIdentifierFromMask();
         }
     }
