@@ -503,6 +503,14 @@ class icipActions extends AhgController
                 'updated_at' => date('Y-m-d H:i:s'),
             ];
 
+            // Auto-set follow-up date from default if not provided and status requires it
+            if (empty($data['follow_up_date']) && in_array($data['status'], ['follow_up_required', 'in_progress'])) {
+                $followUpDays = (int) ahgICIPService::getConfig('default_consultation_follow_up_days', 30);
+                if ($followUpDays > 0) {
+                    $data['follow_up_date'] = date('Y-m-d', strtotime("+{$followUpDays} days"));
+                }
+            }
+
             if ($this->id) {
                 DB::table('icip_consultation')
                     ->where('id', $this->id)

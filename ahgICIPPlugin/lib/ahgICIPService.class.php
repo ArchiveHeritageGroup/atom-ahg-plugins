@@ -122,22 +122,38 @@ class ahgICIPService
     /**
      * Get cultural notices for an object
      */
-    public static function getObjectNotices(int $objectId): array
+    public static function getObjectNotices(int $objectId, ?bool $isStaff = null): array
     {
-        return DB::table('icip_cultural_notice as n')
+        $query = DB::table('icip_cultural_notice as n')
             ->join('icip_cultural_notice_type as t', 'n.notice_type_id', '=', 't.id')
             ->leftJoin('icip_community as c', 'n.community_id', '=', 'c.id')
             ->where('n.information_object_id', $objectId)
             ->where('t.is_active', 1)
-            ->where(function ($query) {
-                $query->whereNull('n.start_date')
+            ->where(function ($q) {
+                $q->whereNull('n.start_date')
                     ->orWhere('n.start_date', '<=', date('Y-m-d'));
             })
-            ->where(function ($query) {
-                $query->whereNull('n.end_date')
+            ->where(function ($q) {
+                $q->whereNull('n.end_date')
                     ->orWhere('n.end_date', '>=', date('Y-m-d'));
-            })
-            ->select([
+            });
+
+        // Filter by public/staff visibility based on settings
+        if ($isStaff === false) {
+            // Public user — respect enable_public_notices setting
+            if (self::getConfig('enable_public_notices', '1') !== '1') {
+                return [];
+            }
+            $query->where('t.display_public', 1);
+        } elseif ($isStaff === true) {
+            // Staff user — respect enable_staff_notices setting
+            if (self::getConfig('enable_staff_notices', '1') !== '1') {
+                return [];
+            }
+            $query->where('t.display_staff', 1);
+        }
+
+        return $query->select([
                 'n.*',
                 't.code as notice_code',
                 't.name as notice_name',
@@ -160,6 +176,11 @@ class ahgICIPService
      */
     public static function getObjectTKLabels(int $objectId): array
     {
+        // Check if Local Contexts Hub integration is enabled
+        if (self::getConfig('local_contexts_hub_enabled', '1') !== '1') {
+            return [];
+        }
+
         return DB::table('icip_tk_label as l')
             ->join('icip_tk_label_type as t', 'l.label_type_id', '=', 't.id')
             ->leftJoin('icip_community as c', 'l.community_id', '=', 'c.id')
@@ -266,16 +287,21 @@ class ahgICIPService
             'restrictions' => [],
         ];
 
+        // Apply require_acknowledgement_default to all notices unless overridden per-type
+        $requireAckDefault = self::getConfig('require_acknowledgement_default', '0') === '1';
+
         // Get active notices that block access or require acknowledgement
         $notices = self::getObjectNotices($objectId);
         foreach ($notices as $notice) {
+            $requiresAck = $notice->requires_acknowledgement || $requireAckDefault;
+
             if ($notice->blocks_access) {
                 if (!$userId || !self::hasAcknowledged($notice->id, $userId)) {
                     $result['allowed'] = false;
                     $result['blocked_reason'] = 'Cultural notice requires acknowledgement before access';
                     $result['unacknowledged_notices'][] = $notice;
                 }
-            } elseif ($notice->requires_acknowledgement) {
+            } elseif ($requiresAck) {
                 if (!$userId || !self::hasAcknowledged($notice->id, $userId)) {
                     $result['requires_acknowledgement'] = true;
                     $result['unacknowledged_notices'][] = $notice;
@@ -288,7 +314,6 @@ class ahgICIPService
         foreach ($restrictions as $restriction) {
             $result['restrictions'][] = $restriction;
             if ($restriction->override_security_clearance) {
-                // These restrictions block standard access
                 if (in_array($restriction->restriction_type, [
                     'community_permission_required',
                     'initiated_only',
@@ -297,6 +322,24 @@ class ahgICIPService
                     $result['allowed'] = false;
                     $result['blocked_reason'] = 'ICIP restriction: ' . self::getRestrictionLabel($restriction->restriction_type);
                 }
+            }
+        }
+
+        // Audit ICIP access if enabled
+        if (self::getConfig('audit_all_icip_access', '0') === '1') {
+            try {
+                DB::table('icip_access_log')->insert([
+                    'information_object_id' => $objectId,
+                    'user_id' => $userId,
+                    'access_allowed' => $result['allowed'] ? 1 : 0,
+                    'blocked_reason' => $result['blocked_reason'],
+                    'notice_count' => count($notices),
+                    'restriction_count' => count($restrictions),
+                    'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\Exception $e) {
+                // icip_access_log table may not exist — best-effort
             }
         }
 
