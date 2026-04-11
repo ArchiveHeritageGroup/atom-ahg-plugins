@@ -100,21 +100,27 @@ class RicSyncListener
         }
     }
 
+    protected bool $syncOnSave = true;
+    protected bool $syncOnDelete = true;
+    protected bool $cascadeDelete = true;
+
     protected function loadConfiguration(): void
     {
         try {
-            // Load from ahg_settings table (AHG Settings UI) - fuseki section
-            $syncEnabled = DB::table('ahg_settings')
+            // Load all fuseki settings at once
+            $rows = DB::table('ahg_settings')
                 ->where('setting_group', 'fuseki')
-                ->where('setting_key', 'fuseki_sync_enabled')
-                ->value('setting_value');
-            $this->enabled = $syncEnabled === null || $syncEnabled === '1';
+                ->get();
+            $cfg = [];
+            foreach ($rows as $row) {
+                $cfg[$row->setting_key] = $row->setting_value;
+            }
 
-            $queueEnabled = DB::table('ahg_settings')
-                ->where('setting_group', 'fuseki')
-                ->where('setting_key', 'fuseki_queue_enabled')
-                ->value('setting_value');
-            $this->useQueue = $queueEnabled === null || $queueEnabled === '1';
+            $this->enabled = ($cfg['fuseki_sync_enabled'] ?? '1') === '1';
+            $this->useQueue = ($cfg['fuseki_queue_enabled'] ?? '1') === '1';
+            $this->syncOnSave = ($cfg['fuseki_sync_on_save'] ?? '1') === '1';
+            $this->syncOnDelete = ($cfg['fuseki_sync_on_delete'] ?? '1') === '1';
+            $this->cascadeDelete = ($cfg['fuseki_cascade_delete'] ?? '1') === '1';
         } catch (\Exception $e) {
             // Use defaults if table doesn't exist yet
             $this->enabled = true;
@@ -128,7 +134,7 @@ class RicSyncListener
 
     public function onSave(sfEvent $event): void
     {
-        if (!$this->enabled) {
+        if (!$this->enabled || !$this->syncOnSave) {
             return;
         }
 
@@ -163,7 +169,7 @@ class RicSyncListener
 
     public function onDelete(sfEvent $event): void
     {
-        if (!$this->enabled) {
+        if (!$this->enabled || !$this->syncOnDelete) {
             return;
         }
 
@@ -184,7 +190,7 @@ class RicSyncListener
                 $this->queueSync($entityType, $entityId, 'delete');
                 $this->log("RIC Sync: Queued delete for {$entityType}/{$entityId}");
             } elseif ($this->syncService) {
-                $this->syncService->handleDeletion($entityType, $entityId, true);
+                $this->syncService->handleDeletion($entityType, $entityId, $this->cascadeDelete);
                 $this->log("RIC Sync: Immediate delete completed for {$entityType}/{$entityId}");
             }
         } catch (\Exception $e) {

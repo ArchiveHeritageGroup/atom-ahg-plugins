@@ -49,10 +49,12 @@ class I18nService
      */
     public static function get(string $table, int $id, string $culture): ?object
     {
-        return DB::table($table)
+        $row = DB::table($table)
             ->where('id', $id)
             ->where('culture', $culture)
             ->first();
+
+        return $row ? self::decryptRow($row) : null;
     }
 
     /**
@@ -72,9 +74,11 @@ class I18nService
         }
 
         // Last resort: get any available culture
-        return DB::table($table)
+        $row = DB::table($table)
             ->where('id', $id)
             ->first();
+
+        return $row ? self::decryptRow($row) : null;
     }
 
     /**
@@ -94,5 +98,47 @@ class I18nService
             ->where('id', $id)
             ->pluck('culture')
             ->all();
+    }
+
+    /**
+     * Transparently decrypt any encrypted field values in a row.
+     *
+     * Encrypted values are prefixed with {AHG-ENC}. This method iterates
+     * all string properties and decrypts any that carry the prefix.
+     * Safe to call on unencrypted rows (no-op).
+     */
+    private static function decryptRow(object $row): object
+    {
+        static $hasService = null;
+
+        if ($hasService === null) {
+            $hasService = class_exists('\\AtomFramework\\Core\\Security\\EncryptableFieldService');
+            if ($hasService) {
+                $path = \sfConfig::get('sf_root_dir') . '/atom-framework/src/Core/Security/EncryptableFieldService.php';
+                if (!class_exists('\\AtomFramework\\Core\\Security\\EncryptableFieldService', false) && file_exists($path)) {
+                    require_once $path;
+                    require_once dirname($path) . '/EncryptionService.php';
+                    require_once dirname($path) . '/KeyManager.php';
+                }
+                $hasService = class_exists('\\AtomFramework\\Core\\Security\\EncryptableFieldService');
+            }
+        }
+
+        if (!$hasService) {
+            return $row;
+        }
+
+        $prefix = '{AHG-ENC}';
+        foreach (get_object_vars($row) as $key => $value) {
+            if (is_string($value) && str_starts_with($value, $prefix)) {
+                try {
+                    $row->$key = \AtomFramework\Core\Security\EncryptableFieldService::decryptValue($value);
+                } catch (\Exception $e) {
+                    // Leave encrypted value as-is if decryption fails
+                }
+            }
+        }
+
+        return $row;
     }
 }
