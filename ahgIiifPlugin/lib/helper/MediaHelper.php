@@ -78,6 +78,44 @@ function _media_nonce_attr(): string
     return $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
 }
 
+/**
+ * Load media settings from ahg_settings table (cached per request).
+ */
+function _load_media_settings(): array
+{
+    static $cache = null;
+    if ($cache !== null) {
+        return $cache;
+    }
+
+    $cache = [
+        'media_player_type' => 'enhanced',
+        'media_autoplay' => '0',
+        'media_show_controls' => '1',
+        'media_loop' => '0',
+        'media_default_volume' => '0.8',
+        'media_show_download' => '0',
+        'media_show_waveform' => '1',
+        'media_transcription_enabled' => '1',
+    ];
+
+    try {
+        $rows = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+            ->where('setting_group', 'media')
+            ->get();
+        foreach ($rows as $row) {
+            $val = $row->setting_value;
+            if ($val === 'true') $val = '1';
+            if ($val === 'false') $val = '0';
+            $cache[$row->setting_key] = $val;
+        }
+    } catch (\Exception $e) {
+        // Table may not exist
+    }
+
+    return $cache;
+}
+
 // ========================================================================
 // Full-featured JS media player (AhgMediaPlayer)
 // ========================================================================
@@ -143,6 +181,16 @@ function render_media_player($digitalObject, array $options = []): string
     $theme = $options['theme'] ?? 'dark';
     $allowSnippets = $options['allow_snippets'] ?? true;
 
+    // Load media settings from ahg_settings
+    $mediaSettings = _load_media_settings();
+    $autoplay = $options['autoplay'] ?? ($mediaSettings['media_autoplay'] === '1');
+    $showControls = $options['controls'] ?? ($mediaSettings['media_show_controls'] !== '0');
+    $loop = $options['loop'] ?? ($mediaSettings['media_loop'] === '1');
+    $defaultVolume = (float) ($mediaSettings['media_default_volume'] ?? '0.8');
+    $showDownload = $mediaSettings['media_show_download'] === '1';
+    $showWaveform = $mediaSettings['media_show_waveform'] !== '0';
+    $transcriptionEnabled = $mediaSettings['media_transcription_enabled'] !== '0';
+
     $nonceAttr = _media_nonce_attr();
 
     // Player container
@@ -165,10 +213,10 @@ function render_media_player($digitalObject, array $options = []): string
     $html .= '    digitalObjectId: ' . (int) $id . ',';
     $html .= '    objectId: ' . (int) $objectId . ',';
 
-    if ($waveformUrl) {
+    if ($waveformUrl && $showWaveform) {
         $html .= '    waveformUrl: "' . htmlspecialchars($waveformUrl) . '",';
     }
-    if ($transcriptUrl) {
+    if ($transcriptUrl && $transcriptionEnabled) {
         $html .= '    transcriptUrl: "' . htmlspecialchars($transcriptUrl) . '",';
     }
     if ($posterUrl && $isVideo) {
@@ -178,6 +226,12 @@ function render_media_player($digitalObject, array $options = []): string
     $html .= '    snippetsUrl: "/media/snippets",';
     $html .= '    theme: "' . htmlspecialchars($theme) . '",';
     $html .= '    allowSnippets: ' . ($allowSnippets ? 'true' : 'false') . ',';
+    $html .= '    autoplay: ' . ($autoplay ? 'true' : 'false') . ',';
+    $html .= '    controls: ' . ($showControls ? 'true' : 'false') . ',';
+    $html .= '    loop: ' . ($loop ? 'true' : 'false') . ',';
+    $html .= '    volume: ' . $defaultVolume . ',';
+    $html .= '    showDownload: ' . ($showDownload ? 'true' : 'false') . ',';
+    $html .= '    showWaveform: ' . ($showWaveform ? 'true' : 'false') . ',';
     $html .= '    skipSeconds: 10';
     $html .= '  });';
     $html .= '});';
