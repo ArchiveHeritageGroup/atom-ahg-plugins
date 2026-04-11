@@ -82,3 +82,14 @@ function adjustBrightness($hex, $steps) {
 video.ahg-native-video {
     pointer-events: auto !important;
 }
+
+<?php
+// Custom CSS from AHG Settings > General
+$customCss = $settings['ahg_custom_css'] ?? '';
+if (!empty(trim($customCss))) {
+    // Strip any <style> tags to prevent injection
+    $customCss = preg_replace('/<\/?style[^>]*>/i', '', $customCss);
+    echo "/* --- Admin custom CSS --- */\n";
+    echo $customCss . "\n";
+}
+?>
