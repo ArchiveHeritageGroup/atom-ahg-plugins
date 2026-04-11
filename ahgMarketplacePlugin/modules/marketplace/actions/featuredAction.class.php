@@ -23,5 +23,11 @@ class marketplaceFeaturedAction extends AhgController
 
         $this->featuredListings = $featuredListings;
         $this->featuredCollections = $featuredCollections;
+
+        // Expose featured listing fee for display in templates
+        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Repositories/SettingsRepository.php';
+        $settingsRepo = new \AtomAhgPlugins\ahgMarketplacePlugin\Repositories\SettingsRepository();
+        $this->featuredListingFee = (float) $settingsRepo->get('featured_listing_fee', '0');
+        $this->defaultCurrency = $settingsRepo->get('default_currency', 'ZAR');
     }
 }

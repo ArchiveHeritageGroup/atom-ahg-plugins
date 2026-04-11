@@ -154,7 +154,8 @@ class OpacService
         $total = $query->count();
 
         $page = max(1, (int) ($params['page'] ?? 1));
-        $limit = min(50, max(1, (int) ($params['limit'] ?? 20)));
+        $defaultLimit = (int) $this->getLibrarySetting('opac_results_per_page', '20');
+        $limit = min(50, max(1, (int) ($params['limit'] ?? $defaultLimit)));
 
         // Sort
         $sort = $params['sort'] ?? 'relevance';
@@ -355,8 +356,11 @@ class OpacService
     /**
      * Get recently added items.
      */
-    public function getNewArrivals(int $limit = 10): array
+    public function getNewArrivals(int $limit = 0): array
     {
+        if ($limit <= 0) {
+            $limit = (int) $this->getLibrarySetting('opac_new_arrivals_count', '10');
+        }
         return DB::table('library_item as li')
             ->join('information_object as io', 'li.information_object_id', '=', 'io.id')
             ->join('information_object_i18n as ioi', function ($j) {
@@ -385,8 +389,14 @@ class OpacService
     /**
      * Get most checked out items (popular).
      */
-    public function getPopular(int $limit = 10, int $days = 90): array
+    public function getPopular(int $limit = 0, int $days = 0): array
     {
+        if ($limit <= 0) {
+            $limit = (int) $this->getLibrarySetting('opac_popular_days', '10');
+        }
+        if ($days <= 0) {
+            $days = 90;
+        }
         $since = date('Y-m-d', strtotime('-' . $days . ' days'));
 
         return DB::table('library_checkout as c')
@@ -418,5 +428,15 @@ class OpacService
             ->limit($limit)
             ->get()
             ->all();
+    }
+
+    protected function getLibrarySetting(string $key, string $default = ''): string
+    {
+        try {
+            $val = DB::table('library_settings')->where('setting_key', $key)->value('setting_value');
+            return $val !== null ? $val : $default;
+        } catch (\Exception $e) {
+            return $default;
+        }
     }
 }

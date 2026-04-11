@@ -197,8 +197,9 @@ class CirculationService
 
         DB::connection()->beginTransaction();
         try {
-            // Check for overdue fine
-            if ($checkout->due_date < $today) {
+            // Check for overdue fine (only if auto_fine is enabled)
+            $autoFine = $this->getLibrarySetting('auto_fine', '1');
+            if ($autoFine === '1' && $checkout->due_date < $today) {
                 $fineAmount = $this->calculateOverdueFine($checkout);
                 if ($fineAmount > 0) {
                     DB::table('library_fine')->insert([
@@ -317,7 +318,7 @@ class CirculationService
         $patron = $this->patronService->find($checkout->patron_id);
         $loanRule = $this->getLoanRule($item->material_type, $patron->patron_type);
 
-        $renewalDays = $loanRule ? $loanRule->loan_days : 14;
+        $renewalDays = $loanRule ? $loanRule->loan_days : (int) $this->getLibrarySetting('default_loan_days', '14');
         $newDueDate = date('Y-m-d', strtotime('+' . $renewalDays . ' days'));
 
         DB::table('library_checkout')
@@ -385,8 +386,8 @@ class CirculationService
 
         $loanRule = $this->getLoanRule($item->material_type, $patron->patron_type);
 
-        $finePerDay = $loanRule ? (float) $loanRule->fine_per_day : 1.00;
-        $maxFine = $loanRule ? (float) $loanRule->max_fine : 50.00;
+        $finePerDay = $loanRule ? (float) $loanRule->fine_per_day : (float) $this->getLibrarySetting('fine_per_day_default', '1.00');
+        $maxFine = $loanRule ? (float) $loanRule->max_fine : (float) $this->getLibrarySetting('max_fine_cap', '50.00');
 
         $daysOverdue = max(0, (int) ((strtotime(date('Y-m-d')) - strtotime($checkout->due_date)) / 86400));
 
@@ -445,7 +446,7 @@ class CirculationService
 
         $id = DB::table('library_copy')->insertGetId([
             'library_item_id' => $libraryItemId,
-            'barcode'         => $data['barcode'] ?? $this->generateCopyBarcode(),
+            'barcode'         => $data['barcode'] ?? ($this->getLibrarySetting('barcode_auto_generate', '1') === '1' ? $this->generateCopyBarcode() : null),
             'copy_number'     => $data['copy_number'] ?? $this->getNextCopyNumber($libraryItemId),
             'copy_status'     => $data['copy_status'] ?? 'available',
             'condition_note'  => $data['condition_note'] ?? null,
@@ -597,6 +598,19 @@ class CirculationService
             return $user ? (int) $user : null;
         } catch (\Exception $e) {
             return null;
+        }
+    }
+
+    /**
+     * Get a library setting from library_settings table.
+     */
+    protected function getLibrarySetting(string $key, string $default = ''): string
+    {
+        try {
+            $val = DB::table('library_settings')->where('setting_key', $key)->value('setting_value');
+            return $val !== null ? $val : $default;
+        } catch (\Exception $e) {
+            return $default;
         }
     }
 }

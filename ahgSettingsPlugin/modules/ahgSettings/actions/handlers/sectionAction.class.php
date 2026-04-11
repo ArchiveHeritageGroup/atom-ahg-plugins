@@ -289,6 +289,25 @@ class AhgSettingsSectionAction extends AhgController
             }
         }
 
+        // Sync library settings to library_settings (plugin reads from there)
+        if ($this->currentSection === 'library') {
+            $prefix = 'library_';
+            foreach ($settings as $key => $value) {
+                if (strpos($key, $prefix) === 0) {
+                    $configKey = substr($key, strlen($prefix));
+                    $configValue = ($value === 'true') ? '1' : (($value === 'false') ? '0' : $value);
+                    try {
+                        DB::table('library_settings')->updateOrInsert(
+                            ['setting_key' => $configKey],
+                            ['setting_value' => $configValue, 'updated_at' => DB::raw('NOW()')]
+                        );
+                    } catch (\Exception $e) {
+                        // Table may not exist
+                    }
+                }
+            }
+        }
+
         // Sync IIIF section settings to iiif_viewer_settings (plugin reads from there)
         if ($this->currentSection === 'iiif') {
             // Map ahg_settings keys → iiif_viewer_settings keys

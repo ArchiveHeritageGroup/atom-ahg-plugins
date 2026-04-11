@@ -17,6 +17,18 @@ class opacIndexAction extends AhgController
         // Initialize database
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
 
+        // Check if OPAC is enabled
+        try {
+            $opacEnabled = \Illuminate\Database\Capsule\Manager::table('library_settings')
+                ->where('setting_key', 'opac_enabled')
+                ->value('setting_value');
+            if ($opacEnabled === '0') {
+                $this->forward404();
+            }
+        } catch (\Exception $e) {
+            // Table may not exist — allow by default
+        }
+
         // Load OpacService
         require_once sfConfig::get('sf_root_dir')
             . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OpacService.php';

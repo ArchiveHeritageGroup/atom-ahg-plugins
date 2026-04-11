@@ -113,7 +113,14 @@ class HoldService
         $expiryDate = null;
         if ($item->available_copies > 0) {
             $status = 'ready';
-            $expiryDate = date('Y-m-d', strtotime('+7 days'));
+            $holdDays = (int) $this->getLibrarySetting('hold_expiry_days', '7');
+            $expiryDate = date('Y-m-d', strtotime("+{$holdDays} days"));
+        }
+
+        // Check hold queue limit
+        $maxQueue = (int) $this->getLibrarySetting('hold_max_queue', '50');
+        if ($position > $maxQueue) {
+            return ['success' => false, 'error' => 'Hold queue is full (max ' . $maxQueue . ' positions)'];
         }
 
         $holdId = DB::table('library_hold')->insertGetId([
@@ -280,7 +287,7 @@ class HoldService
                 ->where('id', $nextHold->id)
                 ->update([
                     'hold_status' => 'ready',
-                    'expiry_date' => date('Y-m-d', strtotime('+7 days')),
+                    'expiry_date' => date('Y-m-d', strtotime('+' . (int) $this->getLibrarySetting('hold_expiry_days', '7') . ' days')),
                     'updated_at'  => date('Y-m-d H:i:s'),
                 ]);
 
@@ -307,5 +314,15 @@ class HoldService
             'expired'   => DB::table('library_hold')->where('hold_status', 'expired')->count(),
             'cancelled' => DB::table('library_hold')->where('hold_status', 'cancelled')->count(),
         ];
+    }
+
+    protected function getLibrarySetting(string $key, string $default = ''): string
+    {
+        try {
+            $val = DB::table('library_settings')->where('setting_key', $key)->value('setting_value');
+            return $val !== null ? $val : $default;
+        } catch (\Exception $e) {
+            return $default;
+        }
     }
 }

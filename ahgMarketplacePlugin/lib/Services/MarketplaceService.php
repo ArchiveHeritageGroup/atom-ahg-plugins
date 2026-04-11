@@ -25,6 +25,12 @@ class MarketplaceService
 
     public function createListing(int $sellerId, array $data): array
     {
+        // Validate minimum listing price if set
+        $minPrice = (float) $this->settingsRepo->get('min_listing_price', '0');
+        if ($minPrice > 0 && isset($data['price']) && (float) $data['price'] < $minPrice) {
+            return ['success' => false, 'error' => 'Listing price must be at least ' . number_format($minPrice, 2)];
+        }
+
         $data['seller_id'] = $sellerId;
         $data['listing_number'] = $this->listingRepo->generateListingNumber();
         $data['slug'] = $this->generateSlug($data['title']);

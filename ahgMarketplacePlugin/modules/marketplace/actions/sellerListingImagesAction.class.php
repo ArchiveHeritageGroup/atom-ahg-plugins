@@ -48,7 +48,7 @@ class marketplaceSellerListingImagesAction extends AhgController
         }
 
         $settingsRepo = new SettingsRepository();
-        $this->maxImages = (int) $settingsRepo->get('max_images_per_listing', 10);
+        $this->maxImages = (int) $settingsRepo->get('max_listing_images', $settingsRepo->get('max_images_per_listing', 10));
 
         // Handle POST actions
         if ($request->isMethod('post')) {

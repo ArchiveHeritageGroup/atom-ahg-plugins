@@ -55,16 +55,16 @@ class PatronService
         $now = date('Y-m-d H:i:s');
 
         $id = DB::table('library_patron')->insertGetId([
-            'patron_barcode'     => $data['patron_barcode'] ?? $this->generateBarcode(),
+            'patron_barcode'     => $data['patron_barcode'] ?? ($this->getSetting('barcode_auto_generate', '1') === '1' ? $this->generateBarcode() : null),
             'first_name'         => $data['first_name'],
             'last_name'          => $data['last_name'],
             'email'              => $data['email'] ?? null,
             'phone'              => $data['phone'] ?? null,
-            'patron_type'        => $data['patron_type'] ?? 'general',
+            'patron_type'        => $data['patron_type'] ?? $this->getSetting('patron_default_type', 'general'),
             'borrowing_status'   => 'active',
-            'max_checkouts'      => $data['max_checkouts'] ?? 5,
-            'max_holds'          => $data['max_holds'] ?? 3,
-            'expiry_date'        => $data['expiry_date'] ?? null,
+            'max_checkouts'      => $data['max_checkouts'] ?? (int) $this->getSetting('patron_max_checkouts', '5'),
+            'max_holds'          => $data['max_holds'] ?? (int) $this->getSetting('patron_max_holds', '3'),
+            'expiry_date'        => $data['expiry_date'] ?? $this->calculateExpiryDate(),
             'user_id'            => $data['user_id'] ?? null,
             'notes'              => $data['notes'] ?? null,
             'created_at'         => $now,
@@ -373,6 +373,15 @@ class PatronService
     {
         $row = DB::table('library_settings')->where('setting_key', $key)->first();
         return $row->setting_value ?? $default;
+    }
+
+    /**
+     * Calculate patron expiry date from membership_months setting.
+     */
+    protected function calculateExpiryDate(): ?string
+    {
+        $months = (int) $this->getSetting('patron_membership_months', '0');
+        return $months > 0 ? date('Y-m-d', strtotime("+{$months} months")) : null;
     }
 
     /**

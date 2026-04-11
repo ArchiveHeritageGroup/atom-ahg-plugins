@@ -92,7 +92,7 @@ class FineService
         // Use replacement_value from heritage accounting fields, or default
         $replacementValue = (float) ($item->replacement_value ?? 0);
         if ($replacementValue <= 0) {
-            $replacementValue = (float) ($item->acquisition_cost ?? 25.00);
+            $replacementValue = (float) ($item->acquisition_cost ?? $this->getLibrarySetting('lost_item_replacement_fee', '25.00'));
         }
 
         $now = date('Y-m-d H:i:s');
@@ -360,8 +360,8 @@ class FineService
                         ->first();
                 }
 
-                $finePerDay = $loanRule ? (float) $loanRule->fine_per_day : 1.00;
-                $maxFine = $loanRule ? (float) $loanRule->max_fine : 50.00;
+                $finePerDay = $loanRule ? (float) $loanRule->fine_per_day : (float) $this->getLibrarySetting('fine_per_day_default', '1.00');
+                $maxFine = $loanRule ? (float) $loanRule->max_fine : (float) $this->getLibrarySetting('max_fine_cap', '50.00');
 
                 $daysOverdue = max(0, (int) ((strtotime($today) - strtotime($co->due_date)) / 86400));
                 $newAmount = min($daysOverdue * $finePerDay, $maxFine);
@@ -411,5 +411,15 @@ class FineService
                 ->distinct('patron_id')
                 ->count('patron_id'),
         ];
+    }
+
+    protected function getLibrarySetting(string $key, string $default = ''): string
+    {
+        try {
+            $val = DB::table('library_settings')->where('setting_key', $key)->value('setting_value');
+            return $val !== null ? $val : $default;
+        } catch (\Exception $e) {
+            return $default;
+        }
     }
 }
