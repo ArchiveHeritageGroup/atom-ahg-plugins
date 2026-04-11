@@ -289,6 +289,37 @@ class AhgSettingsSectionAction extends AhgController
             }
         }
 
+        // Sync IIIF section settings to iiif_viewer_settings (plugin reads from there)
+        if ($this->currentSection === 'iiif') {
+            // Map ahg_settings keys → iiif_viewer_settings keys
+            $iiifKeyMap = [
+                'iiif_viewer'            => 'viewer_type',
+                'iiif_server_url'        => 'iiif_server_url',
+                'iiif_show_navigator'    => 'show_navigator',
+                'iiif_show_rotation'     => 'show_rotation',
+                'iiif_show_fullscreen'   => 'enable_fullscreen',
+                'iiif_max_zoom'          => 'max_zoom',
+                'iiif_default_zoom'      => 'default_zoom',
+                'iiif_enable_annotations' => 'enable_annotations',
+                'iiif_enabled'           => 'iiif_enabled',
+            ];
+            foreach ($settings as $key => $value) {
+                $targetKey = $iiifKeyMap[$key] ?? null;
+                if (!$targetKey) {
+                    continue;
+                }
+                $configValue = ($value === 'true') ? '1' : (($value === 'false') ? '0' : $value);
+                try {
+                    DB::table('iiif_viewer_settings')->updateOrInsert(
+                        ['setting_key' => $targetKey],
+                        ['setting_value' => $configValue]
+                    );
+                } catch (\Exception $e) {
+                    // Table may not exist
+                }
+            }
+        }
+
         // Handle library loan rules
         if ($this->currentSection === 'library') {
             $loanRules = $request->getParameter('loan_rule', []);

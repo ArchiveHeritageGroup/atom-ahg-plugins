@@ -114,15 +114,22 @@ function render_openseadragon_viewer($iiifIdentifier, $objId, $cantaloupeUrl)
     $html .= 'document.addEventListener("DOMContentLoaded", function() {';
     $html .= '  if (typeof OpenSeadragon !== "undefined") {';
     $fullscreen = get_iiif_setting('enable_fullscreen', '1') === '1' ? 'true' : 'false';
+    $showNav = get_iiif_setting('show_navigator', '1') === '1' ? 'true' : 'false';
+    $showRotation = get_iiif_setting('show_rotation', '1') === '1' ? 'true' : 'false';
+    $maxZoom = (int) get_iiif_setting('max_zoom', 0);
     $html .= '    OpenSeadragon({';
     $html .= '      id: "' . $viewerId . '",';
     $html .= '      tileSources: "' . $infoUrl . '",';
-    $html .= '      showNavigator: true,';
+    $html .= '      showNavigator: ' . $showNav . ',';
     $html .= '      navigatorPosition: "BOTTOM_RIGHT",';
-    $html .= '      showRotationControl: true,';
+    $html .= '      showRotationControl: ' . $showRotation . ',';
     $html .= '      showFlipControl: true,';
     $html .= '      showZoomControl: ' . ($showZoom ? 'true' : 'false') . ',';
     $html .= '      showFullPageControl: ' . $fullscreen;
+    if ($maxZoom > 0) {
+        $html .= ',';
+        $html .= '      maxZoomLevel: ' . $maxZoom;
+    }
     $html .= '    });';
     $html .= '  }';
     $html .= '});';

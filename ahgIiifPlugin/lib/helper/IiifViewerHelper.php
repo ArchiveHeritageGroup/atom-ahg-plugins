@@ -140,8 +140,10 @@ function is_iiif_available()
     if ($available !== null) {
         return $available;
     }
-    // Check if IIIF is enabled in config
-    if (!sfConfig::get('app_iiif_enabled', false)) {
+    // Check if IIIF is enabled in config or DB settings
+    $dbEnabled = get_iiif_setting('iiif_enabled', null);
+    $configEnabled = sfConfig::get('app_iiif_enabled', false);
+    if ($dbEnabled !== null ? $dbEnabled === '0' : !$configEnabled) {
         $available = false;
         return false;
     }
@@ -270,7 +272,8 @@ function render_iiif_viewer($resource, $options = [])
     $cantaloupeUrl = get_iiif_cantaloupe_url();
     $pluginPath = sfConfig::get('app_iiif_plugin_path', '/plugins/ahgIiifPlugin/web');
     $defaultViewer = get_iiif_setting('viewer_type', 'openseadragon');
-    $enableAnnotations = sfConfig::get('app_iiif_enable_annotations', true);
+    $enableAnnotations = get_iiif_setting('enable_annotations', null);
+    $enableAnnotations = ($enableAnnotations !== null) ? ($enableAnnotations === '1') : sfConfig::get('app_iiif_enable_annotations', true);
     $viewerHeight = $options['height'] ?? get_iiif_setting('viewer_height', '600px');
     $bgColor = get_iiif_setting('background_color', '#1a1a1a');
 
