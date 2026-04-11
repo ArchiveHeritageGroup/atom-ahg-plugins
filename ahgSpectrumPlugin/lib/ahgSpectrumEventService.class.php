@@ -472,7 +472,27 @@ class ahgSpectrumEventService
             'metadata' => $metadata
         ];
 
-        return $this->createEvent($objectId, 'location_movement', self::EVENT_LOCATION_CHANGE, $data);
+        $eventId = $this->createEvent($objectId, 'location_movement', self::EVENT_LOCATION_CHANGE, $data);
+
+        // Auto-create movement record if setting enabled
+        if (self::getSpectrumSetting('spectrum_auto_create_movement', '0') === '1') {
+            try {
+                DB::table('spectrum_movement')->insert([
+                    'object_id' => $objectId,
+                    'from_location' => $metadata['from_location'] ?? null,
+                    'to_location' => $newLocation,
+                    'movement_date' => date('Y-m-d'),
+                    'reason' => $notes ?: 'Auto-created from location change',
+                    'status' => 'completed',
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'updated_at' => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\Exception $e) {
+                // spectrum_movement table may not exist
+            }
+        }
+
+        return $eventId;
     }
 
     /**
@@ -480,6 +500,14 @@ class ahgSpectrumEventService
      */
     public function recordCondition($objectId, $conditionRating, $notes = null, $metadata = [])
     {
+        // Check if photos are required for condition checks
+        if (self::getSpectrumSetting('spectrum_require_photos', '0') === '1') {
+            $hasPhotos = !empty($metadata['photo_ids']) || !empty($metadata['has_photos']);
+            if (!$hasPhotos) {
+                $metadata['photos_warning'] = 'Photos are required for condition checks but none were attached';
+            }
+        }
+
         $metadata['condition_rating'] = $conditionRating;
 
         return $this->createEvent($objectId, 'object_condition', self::EVENT_CONDITION_RECORDED, [
@@ -491,8 +519,13 @@ class ahgSpectrumEventService
     /**
      * Record valuation
      */
-    public function recordValuation($objectId, $value, $currency, $valuerId = null, $notes = null)
+    public function recordValuation($objectId, $value, $currency = null, $valuerId = null, $notes = null)
     {
+        // Use configured default currency if none provided
+        if (empty($currency)) {
+            $currency = self::getSpectrumSetting('spectrum_default_currency', 'ZAR');
+        }
+
         return $this->createEvent($objectId, 'valuation', self::EVENT_VALUATION_RECORDED, [
             'notes' => $notes,
             'metadata' => [
@@ -688,5 +721,36 @@ class ahgSpectrumEventService
             'overdue' => $overdue,
             'percentage' => $total > 0 ? round(($completed / $total) * 100) : 0
         ];
+    }
+
+    /**
+     * Get a Spectrum setting from ahg_settings table.
+     */
+    public static function getSpectrumSetting(string $key, string $default = ''): string
+    {
+        static $cache = null;
+        if ($cache === null) {
+            $cache = [];
+            try {
+                $rows = DB::table('ahg_settings')
+                    ->where('setting_group', 'spectrum')
+                    ->get();
+                foreach ($rows as $row) {
+                    $val = $row->setting_value;
+                    if ($val === 'true') $val = '1';
+                    if ($val === 'false') $val = '0';
+                    $cache[$row->setting_key] = $val;
+                }
+            } catch (\Exception $e) {}
+        }
+        return $cache[$key] ?? $default;
+    }
+
+    /**
+     * Check if Spectrum plugin features are enabled.
+     */
+    public static function isSpectrumEnabled(): bool
+    {
+        return self::getSpectrumSetting('spectrum_enabled', '1') === '1';
     }
 }

@@ -57,7 +57,7 @@ class LoanService
             'conditions' => $data['conditions'] ?? null,
             'request_date' => $data['request_date'] ?? now(),
             'loan_start_date' => $data['loan_start_date'] ?? null,
-            'loan_end_date' => $data['loan_end_date'] ?? null,
+            'loan_end_date' => $data['loan_end_date'] ?? $this->calculateDefaultEndDate($data['loan_start_date'] ?? null),
             'status' => 'requested',
             'insurance_value' => $data['insurance_value'] ?? null,
             'insurance_policy' => $data['insurance_policy'] ?? null,
@@ -442,5 +442,18 @@ class LoanService
         } catch (\Exception $e) {
             return $default;
         }
+    }
+
+    /**
+     * Calculate default loan end date from settings.
+     */
+    protected function calculateDefaultEndDate(?string $startDate): ?string
+    {
+        if (!$startDate) {
+            return null;
+        }
+        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgSpectrumPlugin/lib/ahgSpectrumEventService.class.php';
+        $days = (int) \ahgSpectrumEventService::getSpectrumSetting('spectrum_loan_default_period', '90');
+        return date('Y-m-d', strtotime($startDate . " +{$days} days"));
     }
 }

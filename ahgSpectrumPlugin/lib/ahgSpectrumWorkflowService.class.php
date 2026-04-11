@@ -770,4 +770,67 @@ class ahgSpectrumWorkflowService
             ]);
         }
     }
+
+    /**
+     * Get configured condition check interval in days.
+     */
+    public static function getConditionCheckInterval(): int
+    {
+        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgSpectrumPlugin/lib/ahgSpectrumEventService.class.php';
+        return (int) \ahgSpectrumEventService::getSpectrumSetting('spectrum_condition_check_interval', '365');
+    }
+
+    /**
+     * Get configured valuation reminder days.
+     */
+    public static function getValuationReminderDays(): int
+    {
+        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgSpectrumPlugin/lib/ahgSpectrumEventService.class.php';
+        return (int) \ahgSpectrumEventService::getSpectrumSetting('spectrum_valuation_reminder_days', '30');
+    }
+
+    /**
+     * Get objects due for condition check (last check older than interval).
+     */
+    public static function getConditionChecksDue(int $limit = 50): array
+    {
+        $intervalDays = self::getConditionCheckInterval();
+        $cutoff = date('Y-m-d', strtotime("-{$intervalDays} days"));
+
+        return DB::table('spectrum_condition_check as cc')
+            ->join('information_object_i18n as ioi', function ($j) {
+                $j->on('cc.object_id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->leftJoin('slug', 'cc.object_id', '=', 'slug.object_id')
+            ->where('cc.check_date', '<', $cutoff)
+            ->select('cc.object_id', 'cc.check_date', 'ioi.title', 'slug.slug')
+            ->orderBy('cc.check_date')
+            ->limit($limit)
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Get objects due for valuation (within reminder window).
+     */
+    public static function getValuationsDue(int $limit = 50): array
+    {
+        $reminderDays = self::getValuationReminderDays();
+        $cutoff = date('Y-m-d', strtotime("+{$reminderDays} days"));
+
+        return DB::table('spectrum_valuation as v')
+            ->join('information_object_i18n as ioi', function ($j) {
+                $j->on('v.object_id', '=', 'ioi.id')
+                    ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->leftJoin('slug', 'v.object_id', '=', 'slug.object_id')
+            ->whereNotNull('v.next_valuation_date')
+            ->where('v.next_valuation_date', '<=', $cutoff)
+            ->select('v.object_id', 'v.next_valuation_date', 'ioi.title', 'slug.slug')
+            ->orderBy('v.next_valuation_date')
+            ->limit($limit)
+            ->get()
+            ->all();
+    }
 }
