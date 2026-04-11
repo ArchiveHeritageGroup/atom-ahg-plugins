@@ -68,6 +68,11 @@ class MetadataExtractionHandler
 
             // Get the file path
             $do = DB::table('digital_object')->where('id', $digitalObjectId)->first();
+
+            // Check if file type is enabled for extraction
+            if ($do && !$this->isFileTypeEnabled($do->mime_type ?? '')) {
+                return false;
+            }
             if (!$do || !$do->path || !$do->name) {
                 return false;
             }
@@ -107,10 +112,12 @@ class MetadataExtractionHandler
      */
     protected function applyToInformationObject(array $metadata, int $informationObjectId): void
     {
-        $overwriteTitle = $this->getSetting('overwrite_title', false);
-        $overwriteDescription = $this->getSetting('overwrite_description', false);
-        $autoGenerateKeywords = $this->getSetting('auto_generate_keywords', true);
-        $extractGpsCoordinates = $this->getSetting('extract_gps_coordinates', true);
+        // Read from ahg_settings (meta_overwrite_existing controls both title + description)
+        $overwriteAll = $this->getSetting('overwrite_existing', false);
+        $overwriteTitle = $overwriteAll || $this->getSetting('overwrite_title', false);
+        $overwriteDescription = $overwriteAll || $this->getSetting('overwrite_description', false);
+        $autoGenerateKeywords = $this->getSetting('create_access_points', $this->getSetting('auto_generate_keywords', true));
+        $extractGpsCoordinates = $this->getSetting('extract_gps', $this->getSetting('extract_gps_coordinates', true));
 
         // Get current i18n data
         $i18n = DB::table('information_object_i18n')
@@ -175,7 +182,7 @@ class MetadataExtractionHandler
      */
     protected function appendTechnicalMetadata(array $metadata, int $informationObjectId): void
     {
-        if (!$this->getSetting('add_technical_metadata', true)) {
+        if (!$this->getSetting('extract_technical', $this->getSetting('add_technical_metadata', true))) {
             return;
         }
 
@@ -400,6 +407,7 @@ class MetadataExtractionHandler
      */
     protected function getSetting(string $name, $default = null)
     {
+        // Try legacy setting table first
         $value = DB::table('setting')
             ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
             ->where('setting.name', $name)
@@ -407,17 +415,99 @@ class MetadataExtractionHandler
             ->where('setting_i18n.culture', CultureHelper::getCulture())
             ->value('setting_i18n.value');
 
+        // Fall back to ahg_settings (metadata group)
+        if ($value === null) {
+            $value = $this->getAhgSetting($name, null);
+        }
+
         if ($value === null) {
             return $default;
         }
 
-        if ($value === '1') {
+        if ($value === '1' || $value === 'true') {
             return true;
         }
-        if ($value === '0') {
+        if ($value === '0' || $value === 'false') {
             return false;
         }
 
         return $value;
+    }
+
+    /**
+     * Get a setting from ahg_settings table (metadata group).
+     * Maps meta_* keys to internal names and vice versa.
+     */
+    protected function getAhgSetting(string $name, $default = null)
+    {
+        static $cache = null;
+        if ($cache === null) {
+            $cache = [];
+            try {
+                $rows = DB::table('ahg_settings')
+                    ->where('setting_group', 'metadata')
+                    ->get();
+                foreach ($rows as $row) {
+                    $cache[$row->setting_key] = $row->setting_value;
+                    // Also index without prefix for handler compatibility
+                    if (strpos($row->setting_key, 'meta_') === 0) {
+                        $cache[substr($row->setting_key, 5)] = $row->setting_value;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Table may not exist
+            }
+        }
+
+        // Try exact name, then with meta_ prefix
+        return $cache[$name] ?? $cache['meta_' . $name] ?? $default;
+    }
+
+    /**
+     * Check if extraction is enabled for a given file type.
+     */
+    protected function isFileTypeEnabled(string $mimeType): bool
+    {
+        $typeMap = [
+            'image' => 'meta_images',
+            'application/pdf' => 'meta_pdf',
+            'application/msword' => 'meta_office',
+            'application/vnd' => 'meta_office',
+            'video' => 'meta_video',
+            'audio' => 'meta_audio',
+        ];
+
+        foreach ($typeMap as $mimePrefix => $settingKey) {
+            if (strpos($mimeType, $mimePrefix) !== false) {
+                $val = $this->getAhgSetting($settingKey, '1');
+                return $val === '1' || $val === 'true';
+            }
+        }
+
+        return true; // Unknown types allowed by default
+    }
+
+    /**
+     * Get field mapping for a sector (isad/museum/dam).
+     * Returns [metadataKey => atomField] map.
+     */
+    protected function getFieldMappings(string $sector = 'isad'): array
+    {
+        $fields = ['title', 'creator', 'keywords', 'description', 'date', 'copyright', 'technical', 'gps'];
+        $defaults = [
+            'title' => 'title', 'creator' => 'creator', 'keywords' => 'subject',
+            'description' => 'scope_and_content', 'date' => 'date_created',
+            'copyright' => 'access_conditions', 'technical' => 'physical_characteristics',
+            'gps' => 'gps',
+        ];
+
+        $mappings = [];
+        foreach ($fields as $field) {
+            $key = "map_{$field}_{$sector}";
+            $val = $this->getAhgSetting($key);
+            $mappings[$field] = $val ?: ($defaults[$field] ?? $field);
+        }
+
+        return $mappings;
     }
 }

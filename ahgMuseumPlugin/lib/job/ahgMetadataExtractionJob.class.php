@@ -492,8 +492,21 @@ class ahgMetadataExtractionJob extends arBaseJob
         $keyFields = $extractor->getKeyFields();
         $modified = false;
 
-        // Title (only if empty)
-        if (empty($informationObject->title) && !empty($keyFields['title'])) {
+        // Read settings from ahg_settings (metadata group)
+        $overwrite = false;
+        $autoKeywords = true;
+        $extractGps = true;
+        try {
+            $metaSettings = [];
+            $rows = DB::table('ahg_settings')->where('setting_group', 'metadata')->get();
+            foreach ($rows as $r) { $metaSettings[$r->setting_key] = $r->setting_value; }
+            $overwrite = ($metaSettings['meta_overwrite_existing'] ?? '0') === '1' || ($metaSettings['meta_overwrite_existing'] ?? '') === 'true';
+            $autoKeywords = ($metaSettings['meta_create_access_points'] ?? '1') !== '0' && ($metaSettings['meta_create_access_points'] ?? '1') !== 'false';
+            $extractGps = ($metaSettings['meta_extract_gps'] ?? '1') !== '0' && ($metaSettings['meta_extract_gps'] ?? '1') !== 'false';
+        } catch (\Exception $e) {}
+
+        // Title (only if empty or overwrite enabled)
+        if (($overwrite || empty($informationObject->title)) && !empty($keyFields['title'])) {
             DB::table('information_object_i18n')
                 ->updateOrInsert(
                     ['id' => $informationObjectId, 'culture' => \AtomExtensions\Helpers\CultureHelper::getCulture()],
@@ -567,8 +580,8 @@ class ahgMetadataExtractionJob extends arBaseJob
             }
         }
 
-        // Keywords as subject access points
-        if (!empty($keyFields['keywords'])) {
+        // Keywords as subject access points (gated by meta_create_access_points)
+        if ($autoKeywords && !empty($keyFields['keywords'])) {
             foreach ($keyFields['keywords'] as $keyword) {
                 $keyword = trim($keyword);
                 if (empty($keyword)) {
