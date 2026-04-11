@@ -1883,7 +1883,7 @@
 
                                     <div class="row g-3">
                                         <div class="col-md-6">
-                                            <label class="form-label" for="voice_llm_provider">{{ __('LLM Provider') }}</label>
+                                            <label class="form-label" for="voice_llm_provider">{{ __('LLM Provider') }} <span class="badge bg-secondary ms-1">Future</span></label>
                                             <select class="form-select" id="voice_llm_provider" name="settings[voice_llm_provider]">
                                                 <option value="local" {{ ($settings['voice_llm_provider'] ?? '') === 'local' ? 'selected' : '' }}>{{ __('Local Only') }}</option>
                                                 <option value="cloud" {{ ($settings['voice_llm_provider'] ?? '') === 'cloud' ? 'selected' : '' }}>{{ __('Cloud Only') }}</option>
@@ -1892,7 +1892,7 @@
                                             <div class="form-text">{{ __('Choose where AI image descriptions are processed.') }}</div>
                                         </div>
                                         <div class="col-md-6">
-                                            <label class="form-label" for="voice_daily_cloud_limit">{{ __('Daily Cloud Limit') }}</label>
+                                            <label class="form-label" for="voice_daily_cloud_limit">{{ __('Daily Cloud Limit') }} <span class="badge bg-secondary ms-1">Future</span></label>
                                             <input type="number" class="form-control" id="voice_daily_cloud_limit"
                                                    name="settings[voice_daily_cloud_limit]"
                                                    value="{{ e($settings['voice_daily_cloud_limit'] ?? '50') }}" min="0" max="10000">
@@ -1929,10 +1929,10 @@
                                     </div>
 
                                     <hr>
-                                    <h6 class="mb-3">{{ __('Cloud LLM Settings') }}</h6>
+                                    <h6 class="mb-3">{{ __('Cloud LLM Settings') }} <span class="badge bg-secondary">Future</span></h6>
                                     <div class="row g-3">
                                         <div class="col-md-4">
-                                            <label class="form-label" for="voice_anthropic_api_key">{{ __('Anthropic API Key') }}</label>
+                                            <label class="form-label" for="voice_anthropic_api_key">{{ __('Anthropic API Key') }} <span class="badge bg-secondary ms-1">Future</span></label>
                                             <input type="password" class="form-control" id="voice_anthropic_api_key"
                                                    name="settings[voice_anthropic_api_key]"
                                                    value="{{ e($settings['voice_anthropic_api_key'] ?? '') }}"
@@ -1940,7 +1940,7 @@
                                             <div class="form-text">{{ __('API key for Claude cloud vision. Stored encrypted.') }}</div>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label" for="voice_cloud_model">{{ __('Cloud Model') }}</label>
+                                            <label class="form-label" for="voice_cloud_model">{{ __('Cloud Model') }} <span class="badge bg-secondary ms-1">Future</span></label>
                                             <input type="text" class="form-control" id="voice_cloud_model"
                                                    name="settings[voice_cloud_model]"
                                                    value="{{ e($settings['voice_cloud_model'] ?? 'claude-sonnet-4-20250514') }}"
@@ -1953,7 +1953,7 @@
                                                        name="settings[voice_audit_ai_calls]" value="true"
                                                        {{ ($settings['voice_audit_ai_calls'] ?? 'true') === 'true' ? 'checked' : '' }}>
                                                 <label class="form-check-label" for="voice_audit_ai_calls">
-                                                    <strong>{{ __('Audit AI Calls') }}</strong>
+                                                    <strong>{{ __('Audit AI Calls') }} <span class="badge bg-secondary ms-1">Future</span></strong>
                                                 </label>
                                             </div>
                                             <div class="form-text">{{ __('Log all AI image description requests to the audit trail.') }}</div>
