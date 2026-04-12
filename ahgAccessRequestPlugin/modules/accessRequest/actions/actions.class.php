@@ -404,4 +404,61 @@ class accessRequestActions extends AhgController
             error_log('Access request approver email failed: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Display full audit history of all access request actions.
+     */
+    public function executeHistory($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect(['module' => 'user', 'action' => 'login']);
+            return;
+        }
+        if (!$this->getUser()->hasCredential('administrator')) {
+            $this->forward404();
+            return;
+        }
+
+        require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $perPage = 50;
+        $statusFilter = $request->getParameter('status', '');
+        $actionFilter = $request->getParameter('action_filter', '');
+
+        $query = $db::table('access_request_log as l')
+            ->leftJoin('access_request as r', 'l.request_id', '=', 'r.id')
+            ->leftJoin('user as u', 'l.actor_id', '=', 'u.id')
+            ->orderBy('l.created_at', 'desc');
+
+        if ($actionFilter !== '') {
+            $query->where('l.action', $actionFilter);
+        }
+        if ($statusFilter !== '') {
+            $query->where('r.status', $statusFilter);
+        }
+
+        $this->total = (clone $query)->count();
+        $this->logs = $query
+            ->select('l.*', 'r.status as request_status', 'r.reason', 'r.urgency', 'u.username as actor_username')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get()
+            ->all();
+
+        $this->page = $page;
+        $this->perPage = $perPage;
+        $this->totalPages = max(1, (int) ceil($this->total / $perPage));
+        $this->statusFilter = $statusFilter;
+        $this->actionFilter = $actionFilter;
+
+        // Stats
+        $this->stats = [
+            'total_requests' => $db::table('access_request')->count(),
+            'pending' => $db::table('access_request')->where('status', 'pending')->count(),
+            'approved' => $db::table('access_request')->where('status', 'approved')->count(),
+            'denied' => $db::table('access_request')->where('status', 'denied')->count(),
+        ];
+    }
 }

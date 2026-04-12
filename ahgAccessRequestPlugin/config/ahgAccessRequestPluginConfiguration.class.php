@@ -37,6 +37,9 @@ class ahgAccessRequestPluginConfiguration extends sfPluginConfiguration
         $router->any('access_request_add_approver', '/security/approvers/add', 'addApprover');
         $router->any('access_request_remove_approver', '/security/approvers/:id/remove', 'removeApprover', ['id' => '\d+']);
 
+        // History route — full audit trail of all access request actions
+        $router->any('access_request_history', '/accessRequest/history', 'history');
+
         $router->register($event->getSubject());
     }
 }
