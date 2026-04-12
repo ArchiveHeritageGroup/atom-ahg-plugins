@@ -29,7 +29,7 @@ class ahgReportsPluginConfiguration extends sfPluginConfiguration
 
         // Report type routes
         $router->any('reports_descriptions', '/reports/descriptions', 'descriptions');
-        $router->any('reports_authorities', '/reports/authorities', 'archival');
+        $router->any('reports_authorities', '/reports/authorities', 'authorities');
         $router->any('reports_repositories', '/reports/repositories', 'repositories');
         $router->any('reports_accessions', '/reports/accessions', 'accessions');
         $router->any('reports_storage', '/reports/storage', 'storage');
