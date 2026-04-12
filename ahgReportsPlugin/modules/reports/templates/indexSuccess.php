@@ -647,8 +647,8 @@ $canManage = $isAdmin || $isEditor;
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Forms Dashboard'); ?></a></li>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'browse']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Templates'); ?></a></li>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'create']); ?>"><i class="fas fa-plus me-2 text-muted"></i><?php echo __('Create Template'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'templates']); ?>"><i class="fas fa-list me-2 text-muted"></i><?php echo __('Browse Templates'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'templateCreate']); ?>"><i class="fas fa-plus me-2 text-muted"></i><?php echo __('Create Template'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'forms', 'action' => 'assignments']); ?>"><i class="fas fa-link me-2 text-muted"></i><?php echo __('Assignments'); ?></a></li>
                 </ul>
             </div>
