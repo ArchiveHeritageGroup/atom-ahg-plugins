@@ -53,6 +53,11 @@ class RegistrySearchService
             $allResults = array_merge($allResults, $results);
         }
 
+        // Bubble up parent institutions from matched instances so searching for
+        // "wits", "rari.wits.ac.za" or a specific deployment surfaces the owning
+        // institution too (e.g. RARI instance → University of the Witwatersrand).
+        $allResults = $this->promoteInstanceParents($allResults);
+
         // Sort by relevance (score descending)
         usort($allResults, function ($a, $b) {
             return $b['relevance'] <=> $a['relevance'];
@@ -148,6 +153,65 @@ class RegistrySearchService
         }
 
         return $results;
+    }
+
+    /**
+     * For every matched instance, ensure its parent institution is also in the
+     * result list (inserted just after the instance, deduped). Fixes the case
+     * where searching "wits" finds the RARI instance but not its parent
+     * University of the Witwatersrand.
+     */
+    private function promoteInstanceParents(array $results): array
+    {
+        $seenInstitutionIds = [];
+        foreach ($results as $r) {
+            if (($r['entity_type'] ?? '') === 'institution') {
+                $seenInstitutionIds[(int) ($r['id'] ?? 0)] = true;
+            }
+        }
+
+        $instanceInstitutionIds = [];
+        foreach ($results as $r) {
+            if (($r['entity_type'] ?? '') === 'instance' && !empty($r['meta']['institution_slug'])) {
+                $instId = 0;
+                $slug = $r['meta']['institution_slug'];
+                $inst = DB::table('registry_institution')->where('slug', $slug)->first();
+                if ($inst) {
+                    $instId = (int) $inst->id;
+                }
+                if ($instId > 0 && empty($seenInstitutionIds[$instId])) {
+                    $instanceInstitutionIds[$instId] = $inst;
+                }
+            }
+        }
+
+        if (empty($instanceInstitutionIds)) {
+            return $results;
+        }
+
+        $promoted = [];
+        foreach ($instanceInstitutionIds as $instId => $inst) {
+            $promoted[] = [
+                'entity_type' => 'institution',
+                'id' => (int) $inst->id,
+                'title' => $this->cleanText($inst->name),
+                'excerpt' => $this->cleanText($inst->short_description ?? ''),
+                'url' => '/registry/institutions/' . $inst->slug,
+                'meta' => [
+                    'slug' => $inst->slug,
+                    'type' => $inst->institution_type ?? '',
+                    'country' => $inst->country ?? '',
+                    'logo' => $inst->logo_path ?? '',
+                    'promoted_from_instance' => true,
+                ],
+                // Promoted institutions sit just above the highest-scoring instance
+                // match so they rank as directly-relevant, not fall to the bottom.
+                'relevance' => 600.0,
+            ];
+            $seenInstitutionIds[$instId] = true;
+        }
+
+        return array_merge($results, $promoted);
     }
 
     /**

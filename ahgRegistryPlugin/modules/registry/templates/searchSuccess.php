@@ -61,6 +61,7 @@
 <?php if (!empty($results)): ?>
 <div class="list-group">
   <?php foreach ($results as $item): ?>
+  <?php $item = sfOutputEscaper::unescape($item); ?>
   <div class="list-group-item">
     <div class="d-flex align-items-start">
       <div class="me-3" style="min-width: 40px; text-align: center;">
