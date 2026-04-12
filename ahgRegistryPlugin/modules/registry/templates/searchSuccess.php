@@ -27,7 +27,16 @@
 <!-- Type filter -->
 <div class="text-center mb-4">
   <?php
-    $types = ['' => __('All'), 'institutions' => __('Institutions'), 'vendors' => __('Vendors'), 'software' => __('Software'), 'groups' => __('Groups'), 'discussions' => __('Discussions'), 'blog' => __('Blog')];
+    $types = [
+      '' => __('All'),
+      'institution' => __('Institutions'),
+      'vendor' => __('Vendors'),
+      'software' => __('Software'),
+      'instance' => __('Instances'),
+      'user_group' => __('Groups'),
+      'discussion' => __('Discussions'),
+      'blog_post' => __('Blog'),
+    ];
   ?>
   <div class="btn-group btn-group-sm flex-wrap" role="group">
     <?php foreach ($types as $val => $label): ?>
@@ -61,9 +70,10 @@
             'institution' => 'fas fa-university text-primary',
             'vendor' => 'fas fa-building text-success',
             'software' => 'fas fa-box-open text-info',
-            'group' => 'fas fa-users text-warning',
+            'instance' => 'fas fa-server text-primary',
+            'user_group' => 'fas fa-users text-warning',
             'discussion' => 'fas fa-comments text-secondary',
-            'blog' => 'fas fa-newspaper text-danger',
+            'blog_post' => 'fas fa-newspaper text-danger',
           ];
           $icon = $icons[$entityType] ?? 'fas fa-circle text-muted';
         ?>
@@ -88,6 +98,9 @@
                   case 'software':
                     $itemUrl = url_for(['module' => 'registry', 'action' => 'softwareView', 'slug' => $meta['slug'] ?? $item->id]);
                     break;
+                  case 'instance':
+                    $itemUrl = url_for(['module' => 'registry', 'action' => 'instanceView', 'id' => (int) $item->id]);
+                    break;
                   case 'user_group':
                     $itemUrl = url_for(['module' => 'registry', 'action' => 'groupView', 'slug' => $meta['slug'] ?? $item->id]);
                     break;
@@ -110,9 +123,26 @@
             <?php endif; ?>
           </div>
           <span class="badge bg-<?php
-            $typeColors = ['institution' => 'primary', 'vendor' => 'success', 'software' => 'info', 'group' => 'warning', 'discussion' => 'secondary', 'blog' => 'danger'];
+            $typeColors = [
+              'institution' => 'primary',
+              'vendor' => 'success',
+              'software' => 'info',
+              'instance' => 'dark',
+              'user_group' => 'warning',
+              'discussion' => 'secondary',
+              'blog_post' => 'danger',
+            ];
+            $typeLabels = [
+              'institution' => __('Institution'),
+              'vendor' => __('Vendor'),
+              'software' => __('Software'),
+              'instance' => __('Instance'),
+              'user_group' => __('Group'),
+              'discussion' => __('Discussion'),
+              'blog_post' => __('Blog'),
+            ];
             echo $typeColors[$entityType] ?? 'secondary';
-          ?> ms-2"><?php echo htmlspecialchars(ucfirst($entityType), ENT_QUOTES, 'UTF-8'); ?></span>
+          ?> text-white ms-2"><?php echo htmlspecialchars($typeLabels[$entityType] ?? ucfirst(str_replace('_', ' ', $entityType)), ENT_QUOTES, 'UTF-8'); ?></span>
         </div>
       </div>
     </div>

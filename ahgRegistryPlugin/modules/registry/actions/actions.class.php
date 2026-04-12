@@ -984,6 +984,17 @@ class registryActions extends AhgController
         $slug = $request->getParameter('slug');
 
         $this->post = $svc->view($slug);
+        if (!$this->post && is_numeric($slug)) {
+            // Allow /registry/blog/:id as a shortcut — redirect to canonical slug URL
+            $post = \Illuminate\Database\Capsule\Manager::table('registry_blog_post')
+                ->where('id', (int) $slug)
+                ->first();
+            if ($post && !empty($post->slug)) {
+                $this->redirect(url_for(['module' => 'registry', 'action' => 'blogView', 'slug' => $post->slug]));
+
+                return;
+            }
+        }
         if (!$this->post) {
             $this->forward404();
 

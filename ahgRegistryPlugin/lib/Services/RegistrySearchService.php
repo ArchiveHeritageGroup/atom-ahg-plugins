@@ -37,7 +37,7 @@ class RegistrySearchService
 
         // Determine which entity types to search
         $typeFilter = $params['type'] ?? null;
-        $validTypes = ['institution', 'vendor', 'software', 'user_group', 'discussion', 'blog_post'];
+        $validTypes = ['institution', 'vendor', 'software', 'instance', 'user_group', 'discussion', 'blog_post'];
 
         if ($typeFilter && in_array($typeFilter, $validTypes)) {
             $searchTypes = [$typeFilter];
@@ -88,6 +88,9 @@ class RegistrySearchService
 
             case 'software':
                 return $this->searchSoftware($query);
+
+            case 'instance':
+                return $this->searchInstances($query);
 
             case 'user_group':
                 return $this->searchUserGroups($query);
@@ -290,6 +293,75 @@ class RegistrySearchService
                     'logo' => $item->logo_path,
                 ],
                 'relevance' => $this->scoreName($item->name ?? '', $query),
+            ];
+        }
+
+        return $results;
+    }
+
+    /**
+     * Search system instances.
+     *
+     * Instances are hosted AtoM sites (e.g., "Rock Art Research Institute")
+     * that belong to an institution. Search matches name, URL host, description,
+     * and the software-in-use field so "RARI" and "rari.wits.ac.za" both hit.
+     * registry_instance has no FULLTEXT index — LIKE-only is fine at this scale.
+     */
+    private function searchInstances(string $query): array
+    {
+        $cleanQuery = $this->decodeEntities($query);
+        $likeTerm = '%' . $cleanQuery . '%';
+
+        $items = DB::table('registry_instance as i')
+            ->leftJoin('registry_institution as ri', 'ri.id', '=', 'i.institution_id')
+            ->where('i.is_public', 1)
+            ->where(function ($q) use ($likeTerm) {
+                $q->where('i.name', 'LIKE', $likeTerm)
+                  ->orWhere('i.url', 'LIKE', $likeTerm)
+                  ->orWhere('i.description', 'LIKE', $likeTerm)
+                  ->orWhere('i.software', 'LIKE', $likeTerm);
+            })
+            ->select(
+                'i.id',
+                'i.name',
+                'i.url',
+                'i.description',
+                'i.instance_type',
+                'i.software',
+                'i.software_version',
+                'i.institution_id',
+                'i.status',
+                'ri.name as institution_name',
+                'ri.slug as institution_slug'
+            )
+            ->limit(100)
+            ->get()
+            ->all();
+
+        $results = [];
+        foreach ($items as $item) {
+            $excerpt = $item->description
+                ? $this->cleanText($item->description)
+                : trim(($item->software ? $item->software : '') . ($item->software_version ? ' ' . $item->software_version : '')
+                    . ($item->institution_name ? ' · ' . $this->cleanText($item->institution_name) : ''));
+
+            $results[] = [
+                'entity_type' => 'instance',
+                'id' => $item->id,
+                'title' => $this->cleanText($item->name),
+                'excerpt' => $excerpt,
+                'url' => '/registry/instances/' . (int) $item->id,
+                'meta' => [
+                    'url' => $item->url,
+                    'type' => $item->instance_type,
+                    'software' => $item->software,
+                    'version' => $item->software_version,
+                    'status' => $item->status,
+                    'institution_name' => $item->institution_name,
+                    'institution_slug' => $item->institution_slug,
+                ],
+                'relevance' => $this->scoreName($item->name ?? '', $query)
+                    + ($item->url && false !== stripos($item->url, $cleanQuery) ? 200 : 0),
             ];
         }
 
