@@ -53,6 +53,15 @@
             <i class="fas fa-edit me-1"></i> <?php echo __('Edit'); ?>
           </a>
           <?php endif; ?>
+          <?php if ($sf_user->isAuthenticated()): ?>
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'softwareLinkToInstitution']); ?>" class="d-inline">
+              <input type="hidden" name="software_id" value="<?php echo (int) $detail->id; ?>">
+              <input type="hidden" name="return" value="<?php echo url_for(['module' => 'registry', 'action' => 'softwareView', 'slug' => $detail->slug]); ?>">
+              <button type="submit" class="btn btn-sm btn-outline-primary" title="<?php echo __('Link this software to my institution'); ?>">
+                <i class="fas fa-link me-1"></i> <?php echo __('We use this'); ?>
+              </button>
+            </form>
+          <?php endif; ?>
         </div>
         </div>
         <div class="mb-1">
@@ -65,9 +74,20 @@
               'utility' => 'Utility', 'plugin' => 'Plugin/Extension',
               'theme' => 'Theme', 'integration' => 'Integration', 'other' => 'Other',
             ];
-            $catLabel = $categoryLabels[$detail->category ?? ''] ?? ucfirst($detail->category ?? '');
+            $rawCat = $detail->category ?? '';
+            $catList = [];
+            if ('' !== $rawCat) {
+              $decoded = json_decode((string) $rawCat, true);
+              if (is_array($decoded)) {
+                $catList = $decoded;
+              } else {
+                $catList = [(string) $rawCat];
+              }
+            }
           ?>
-          <span class="badge bg-info text-dark"><?php echo htmlspecialchars($catLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php foreach ($catList as $catVal): $catLabel = $categoryLabels[$catVal] ?? ucfirst((string) $catVal); ?>
+            <span class="badge bg-info text-dark"><?php echo htmlspecialchars($catLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php endforeach; ?>
           <?php if (!empty($detail->license)): ?>
             <span class="badge bg-secondary"><?php echo htmlspecialchars($detail->license, ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>

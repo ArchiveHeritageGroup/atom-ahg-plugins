@@ -105,6 +105,7 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_my_institution_contacts', '/registry/my/institution/contacts', 'myInstitutionContacts');
         $loader->any('registry_my_institution_contact_add', '/registry/my/institution/contacts/add', 'myInstitutionContactAdd');
         $loader->any('registry_my_institution_contact_edit', '/registry/my/institution/contacts/:id/edit', 'myInstitutionContactEdit', ['id' => '\d+']);
+        $loader->post('registry_my_institution_contact_delete', '/registry/my/institution/contacts/:id/delete', 'myInstitutionContactDelete', ['id' => '\d+']);
         $loader->any('registry_my_institution_instances', '/registry/my/institution/instances', 'myInstitutionInstances');
         $loader->any('registry_my_institution_instance_add', '/registry/my/institution/instances/add', 'myInstitutionInstanceAdd');
         $loader->any('registry_my_institution_instance_edit', '/registry/my/institution/instances/:id/edit', 'myInstitutionInstanceEdit', ['id' => '\d+']);
@@ -178,6 +179,8 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_software_guides', '/registry/software/:slug/setup', 'setupGuideBrowse', ['slug' => '[a-z0-9-]+']);
         $loader->any('registry_software_guide_view', '/registry/software/:slug/setup/:guideSlug', 'setupGuideView', ['slug' => '[a-z0-9-]+', 'guideSlug' => '[a-z0-9-]+']);
         $loader->any('registry_standards', '/registry/standards', 'standardBrowse');
+        $loader->post('registry_standard_submit', '/registry/standards/submit', 'standardSubmit');
+        $loader->post('registry_software_link_inst', '/registry/software/link-institution', 'softwareLinkToInstitution');
         $loader->any('registry_instance_view', '/registry/instances/:id', 'instanceView', ['id' => '\d+']);
         $loader->any('registry_search', '/registry/search', 'search');
         $loader->any('registry_map', '/registry/map', 'map');

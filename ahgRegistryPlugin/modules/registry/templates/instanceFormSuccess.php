@@ -99,9 +99,9 @@
               ?>
               <input type="text" class="form-control" id="if-languages" name="languages" value="<?php echo htmlspecialchars($langDisplay, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Comma-separated: English, French, Afrikaans'); ?>">
             </div>
-            <div class="col-md-6">
+            <div class="col-12">
               <label for="if-desc" class="form-label"><?php echo __('Description'); ?></label>
-              <input type="text" class="form-control" id="if-desc-short" name="description" value="<?php echo htmlspecialchars($f->description ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Brief description of this instance'); ?>">
+              <textarea class="form-control" id="if-desc" name="description" rows="3" placeholder="<?php echo __('Brief description of this instance — purpose, audience, notable collections'); ?>"><?php echo htmlspecialchars($f->description ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
             <div class="col-md-4">
               <label for="if-deploy" class="form-label"><?php echo __('Deployment Architecture'); ?></label>
@@ -152,9 +152,9 @@
               </select>
             </div>
             <div class="col-md-4">
-              <label for="if-hosting-vendor" class="form-label"><?php echo __('Hosting Vendor'); ?></label>
+              <label for="if-hosting-vendor" class="form-label"><?php echo __('Host Vendor'); ?></label>
               <select class="form-select" id="if-hosting-vendor" name="hosting_vendor_id">
-                <option value=""><?php echo __('-- None --'); ?></option>
+                <option value=""><?php echo __('-- None / Self --'); ?></option>
                 <?php if (!empty($vendors)):
                   foreach ($vendors as $v): ?>
                     <option value="<?php echo (int) $v->id; ?>"<?php echo (isset($f->hosting_vendor_id) && (int) $f->hosting_vendor_id === (int) $v->id) ? ' selected' : ''; ?>><?php echo htmlspecialchars($v->name, ENT_QUOTES, 'UTF-8'); ?></option>
@@ -162,7 +162,7 @@
               </select>
             </div>
             <div class="col-md-4">
-              <label for="if-maintained" class="form-label"><?php echo __('Maintained by Vendor'); ?></label>
+              <label for="if-maintained" class="form-label"><?php echo __('Maintenance Vendor'); ?></label>
               <select class="form-select" id="if-maintained" name="maintained_by_vendor_id">
                 <option value=""><?php echo __('-- None / Self --'); ?></option>
                 <?php if (!empty($vendors)):
@@ -173,7 +173,7 @@
             </div>
             <div class="col-md-6">
               <label for="if-os" class="form-label"><?php echo __('OS Environment'); ?></label>
-              <input type="text" class="form-control" id="if-os" name="os_environment" value="<?php echo htmlspecialchars($f->os_environment ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., Ubuntu 22.04, RHEL 9, Windows Server 2022'); ?>">
+              <input type="text" class="form-control text-muted-placeholder" id="if-os" name="os_environment" value="<?php echo htmlspecialchars($f->os_environment ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., Ubuntu 22.04, RHEL 9, Windows Server 2022'); ?>">
             </div>
           </div>
         </div>
@@ -234,26 +234,27 @@
       <div class="card mb-4">
         <div class="card-header fw-semibold"><i class="fas fa-puzzle-piece me-2 text-warning"></i><?php echo __('Feature / Module Usage'); ?></div>
         <div class="card-body">
-          <p class="text-muted small mb-3"><?php echo __('Indicate which features and modules are in use on this instance.'); ?></p>
+          <p class="text-muted small mb-3"><?php echo __('Indicate which core AtoM features are in use on this instance. Non-standard extensions (IIIF viewer, AI, preservation, etc.) should be registered separately as Software.'); ?></p>
           <?php
+            // Core AtoM features only — extensions belong under "Software"
             $features = [
               'accession_records' => __('Accession records'),
-              'archival_descriptions' => __('Archival descriptions'),
-              'authority_records' => __('Authority records'),
+              'archival_descriptions' => __('Archival descriptions (ISAD/RAD/DACS/MODS/DC)'),
+              'authority_records' => __('Authority records (ISAAR-CPF)'),
+              'functions' => __('Functions (ISDF)'),
               'digital_objects' => __('Digital objects'),
               'physical_storage' => __('Physical storage'),
-              'rights_management' => __('Rights management'),
-              'taxonomies' => __('Taxonomies'),
-              'finding_aids' => __('Finding aids'),
-              'import_export' => __('Import / Export'),
-              'iiif_viewer' => __('IIIF Viewer'),
-              'preservation' => __('Digital preservation'),
-              'ai_processing' => __('AI Processing (NER, OCR, etc.)'),
-              'multi_language' => __('Multi-language support'),
-              'public_access' => __('Public access interface'),
-              'research_services' => __('Research services'),
-              'audit_trail' => __('Audit trail'),
-              'backup' => __('Backup management'),
+              'rights_management' => __('Rights management (PREMIS)'),
+              'taxonomies' => __('Taxonomies & terms'),
+              'finding_aids' => __('Finding aid generation (EAD/PDF)'),
+              'import_export' => __('Import / Export (CSV, EAD, EAC-CPF)'),
+              'clipboard' => __('Clipboard'),
+              'public_search' => __('Public search & browse'),
+              'multi_language' => __('Multi-language UI'),
+              'user_acl' => __('User & ACL management'),
+              'static_pages' => __('Static pages / menus'),
+              'audit_log' => __('Audit log'),
+              'jobs' => __('Background jobs'),
             ];
             $currentFeatures = [];
             if (!empty($f->feature_usage)) {
@@ -298,6 +299,7 @@
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" id="if-sync" name="sync_enabled" value="1"<?php echo !empty($f->sync_enabled) ? ' checked' : ''; ?>>
                 <label class="form-check-label" for="if-sync"><?php echo __('Enable sync (heartbeat reporting)'); ?></label>
+                <div class="form-text"><?php echo __('Periodically reports instance health (uptime, version, record counts) to the Registry so others can see your instance is active. No sensitive data is sent.'); ?></div>
               </div>
             </div>
             <div class="col-md-6">

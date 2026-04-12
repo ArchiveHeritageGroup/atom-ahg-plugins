@@ -86,12 +86,12 @@
           </div>
         </div>
         <div class="mb-1">
-          <span class="badge bg-primary"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $detail->institution_type ?? '')), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge bg-primary text-white"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $detail->institution_type ?? '')), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php if (!empty($detail->size)): ?>
-            <span class="badge bg-secondary"><?php echo htmlspecialchars(ucfirst($detail->size), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="badge bg-secondary text-white"><?php echo htmlspecialchars(ucfirst($detail->size), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
           <?php if (!empty($detail->governance)): ?>
-            <span class="badge bg-outline-secondary border"><?php echo htmlspecialchars(ucfirst($detail->governance), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="badge bg-dark text-white"><?php echo htmlspecialchars(ucfirst($detail->governance), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
           <?php if (!empty($detail->uses_atom)): ?>
             <span class="badge bg-success"><?php echo __('Uses AtoM'); ?></span>
@@ -117,7 +117,7 @@
     <!-- Collection section -->
     <?php if (!empty($detail->collection_summary) || !empty($detail->total_holdings)): ?>
     <div class="card mb-4">
-      <div class="card-header fw-semibold"><?php echo __('Collection'); ?></div>
+      <div class="card-header fw-semibold"><?php echo __('Collections Mandate'); ?></div>
       <div class="card-body">
         <?php if (!empty($detail->collection_summary)): ?>
         <p><?php echo nl2br(htmlspecialchars($detail->collection_summary, ENT_QUOTES, 'UTF-8')); ?></p>
@@ -278,12 +278,45 @@
     <div class="card mb-4">
       <div class="card-header fw-semibold"><?php echo __('Details'); ?></div>
       <ul class="list-group list-group-flush">
-        <?php if (!empty($detail->website)): ?>
+        <?php
+          $urlIconMap = [
+            'website' => 'fa-globe',
+            'atom_instance' => 'fa-server',
+            'repository' => 'fa-database',
+            'catalogue' => 'fa-book',
+            'blog' => 'fa-blog',
+            'facebook' => 'fa-facebook',
+            'twitter' => 'fa-twitter',
+            'instagram' => 'fa-instagram',
+            'youtube' => 'fa-youtube',
+            'linkedin' => 'fa-linkedin',
+            'github' => 'fa-github',
+            'gitlab' => 'fa-gitlab',
+            'other' => 'fa-link',
+          ];
+          $entityUrlsRaw = isset($entityUrls) ? sfOutputEscaper::unescape($entityUrls) : [];
+          if (empty($entityUrlsRaw) && !empty($detail->website)) {
+            $entityUrlsRaw = [(object) ['link_type' => 'website', 'url' => $detail->website, 'label' => '']];
+          }
+        ?>
+        <?php foreach ($entityUrlsRaw as $u):
+          $uType = $u->link_type ?? 'website';
+          $uUrl = $u->url ?? '';
+          $uLabel = $u->label ?? '';
+          $iconKey = isset($urlIconMap[$uType]) ? $urlIconMap[$uType] : 'fa-link';
+          $iconPrefix = in_array($uType, ['facebook','twitter','instagram','youtube','linkedin','github','gitlab']) ? 'fab' : 'fas';
+          $displayLabel = $uLabel !== '' ? $uLabel : ($entityUrlTypes[$uType] ?? ucfirst($uType));
+        ?>
         <li class="list-group-item">
-          <i class="fas fa-globe me-2 text-muted"></i>
-          <a href="<?php echo htmlspecialchars($detail->website, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(preg_replace('#^https?://#', '', $detail->website), ENT_QUOTES, 'UTF-8'); ?></a>
+          <i class="<?php echo $iconPrefix; ?> <?php echo $iconKey; ?> me-2 text-muted"></i>
+          <a href="<?php echo htmlspecialchars($uUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" title="<?php echo htmlspecialchars(__($displayLabel), ENT_QUOTES, 'UTF-8'); ?>">
+            <?php echo htmlspecialchars(preg_replace('#^https?://#', '', $uUrl), ENT_QUOTES, 'UTF-8'); ?>
+          </a>
+          <?php if ($uType !== 'website' || $uLabel !== ''): ?>
+            <small class="text-muted d-block ms-4"><?php echo htmlspecialchars(__($displayLabel), ENT_QUOTES, 'UTF-8'); ?></small>
+          <?php endif; ?>
         </li>
-        <?php endif; ?>
+        <?php endforeach; ?>
         <?php if (!empty($detail->email)): ?>
         <li class="list-group-item">
           <i class="fas fa-envelope me-2 text-muted"></i>

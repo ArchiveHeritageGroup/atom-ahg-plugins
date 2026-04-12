@@ -1,14 +1,17 @@
 <?php
   $typeBg = [
-    'archive' => 'bg-primary',
-    'library' => 'bg-success',
-    'museum' => 'bg-purple',
-    'gallery' => 'bg-orange',
-    'dam' => 'bg-teal',
+    'archive' => 'bg-primary text-white',
+    'library' => 'bg-success text-white',
+    'museum' => 'bg-purple text-white',
+    'gallery' => 'bg-orange text-white',
+    'dam' => 'bg-teal text-white',
     'heritage_site' => 'bg-warning text-dark',
     'research_centre' => 'bg-info text-dark',
-    'government' => 'bg-secondary',
-    'university' => 'bg-dark',
+    'government' => 'bg-secondary text-white',
+    'university' => 'bg-dark text-white',
+    'academic' => 'bg-danger text-white',
+    'community' => 'bg-success text-white',
+    'private' => 'bg-secondary text-white',
   ];
   $type = $item->institution_type ?? '';
   $typeClass = $typeBg[$type] ?? 'bg-secondary';

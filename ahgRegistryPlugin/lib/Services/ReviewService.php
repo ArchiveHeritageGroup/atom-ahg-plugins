@@ -66,7 +66,8 @@ class ReviewService
         }
 
         $data['rating'] = (int) $data['rating'];
-        $data['is_visible'] = $data['is_visible'] ?? 1;
+        // New reviews are held for moderation — admins approve via adminReviews
+        $data['is_visible'] = $data['is_visible'] ?? 0;
         $data['is_verified'] = $data['is_verified'] ?? 0;
         $data['created_at'] = date('Y-m-d H:i:s');
 

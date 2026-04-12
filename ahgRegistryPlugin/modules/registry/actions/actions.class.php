@@ -519,6 +519,12 @@ class registryActions extends AhgController
         $this->isAdmin = $this->isAdmin();
         $this->currentUserId = $this->getCurrentUserId();
         $this->isFavorited = $this->isFavorited('institution', (int) $this->institution['institution']->id);
+
+        // Load repeatable URLs for public display
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgRegistryPlugin/lib/Services/EntityUrlService.php';
+        $urlSvc = new \AhgRegistry\Services\EntityUrlService();
+        $this->entityUrls = $urlSvc->findByEntity('institution', (int) $this->institution['institution']->id);
+        $this->entityUrlTypes = \AhgRegistry\Services\EntityUrlService::TYPES;
     }
 
     // ================================================================
@@ -564,6 +570,12 @@ class registryActions extends AhgController
         $this->isAdmin = $this->isAdmin();
         $this->currentUserId = $this->getCurrentUserId();
         $this->isFavorited = $this->isFavorited('vendor', (int) $this->vendor['vendor']->id);
+
+        // Load repeatable URLs for public display
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgRegistryPlugin/lib/Services/EntityUrlService.php';
+        $urlSvc = new \AhgRegistry\Services\EntityUrlService();
+        $this->entityUrls = $urlSvc->findByEntity('vendor', (int) $this->vendor['vendor']->id);
+        $this->entityUrlTypes = \AhgRegistry\Services\EntityUrlService::TYPES;
     }
 
     // ================================================================
@@ -1168,17 +1180,41 @@ class registryActions extends AhgController
             return;
         }
 
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgRegistryPlugin/lib/Services/EntityUrlService.php';
+        $urlSvc = new \AhgRegistry\Services\EntityUrlService();
+        $this->entityUrls = [];
+        $this->entityUrlTypes = \AhgRegistry\Services\EntityUrlService::TYPES;
+
         $this->errors = [];
 
         if ($request->isMethod('post')) {
             $svc = $this->loadService('InstitutionService');
+
+            // Collect repeatable URLs
+            $urlList = [];
+            $rawUrls = (array) $request->getParameter('urls', []);
+            $rawTypes = (array) $request->getParameter('url_types', []);
+            $rawLabels = (array) $request->getParameter('url_labels', []);
+            foreach ($rawUrls as $i => $u) {
+                $u = trim((string) $u);
+                if ('' === $u) continue;
+                $urlList[] = [
+                    'url' => $u,
+                    'link_type' => $rawTypes[$i] ?? 'website',
+                    'label' => $rawLabels[$i] ?? '',
+                ];
+            }
+            $firstWebsite = '';
+            foreach ($urlList as $row) {
+                if ('website' === $row['link_type']) { $firstWebsite = $row['url']; break; }
+            }
 
             $data = [
                 'name' => trim($request->getParameter('name', '')),
                 'institution_type' => $request->getParameter('institution_type', 'archive'),
                 'description' => trim($request->getParameter('description', '')),
                 'short_description' => trim($request->getParameter('short_description', '')),
-                'website' => trim($request->getParameter('website', '')),
+                'website' => $firstWebsite,
                 'email' => trim($request->getParameter('email', '')),
                 'phone' => trim($request->getParameter('phone', '')),
                 'street_address' => trim($request->getParameter('street_address', '')),
@@ -1193,7 +1229,7 @@ class registryActions extends AhgController
                 'collection_summary' => trim($request->getParameter('collection_summary', '')) ?: null,
                 'total_holdings' => trim($request->getParameter('total_holdings', '')) ?: null,
                 'management_system' => trim($request->getParameter('management_system', '')) ?: null,
-                'uses_atom' => $request->getParameter('uses_atom', 0) ? 1 : 0,
+                'uses_atom' => in_array(trim($request->getParameter('management_system', '')), ['AtoM', 'Heratio'], true) ? 1 : 0,
                 'created_by' => $this->getCurrentUserId(),
             ];
 
@@ -1203,7 +1239,13 @@ class registryActions extends AhgController
 
             if (empty($this->errors)) {
                 try {
-                    $id = $svc->create($data);
+                    $newId = $svc->create($data);
+                    if (is_array($newId) && isset($newId['id'])) {
+                        $newId = (int) $newId['id'];
+                    }
+                    if ($newId) {
+                        $urlSvc->replaceForEntity('institution', (int) $newId, $urlList);
+                    }
                     $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
 
                     return;
@@ -1258,6 +1300,12 @@ class registryActions extends AhgController
             ->get()
             ->all();
 
+        // Load repeatable URLs
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgRegistryPlugin/lib/Services/EntityUrlService.php';
+        $urlSvc = new \AhgRegistry\Services\EntityUrlService();
+        $this->entityUrls = $urlSvc->findByEntity('institution', $this->institution->id);
+        $this->entityUrlTypes = \AhgRegistry\Services\EntityUrlService::TYPES;
+
         // Load standards from DB for dynamic rendering
         $this->dbStandards = \Illuminate\Database\Capsule\Manager::table('registry_standard')
             ->where('is_active', 1)
@@ -1297,7 +1345,7 @@ class registryActions extends AhgController
                 'total_holdings' => trim($request->getParameter('total_holdings', '')) ?: null,
                 'digitization_percentage' => $request->getParameter('digitization_percentage', '') !== '' ? (int) $request->getParameter('digitization_percentage') : null,
                 'management_system' => trim($request->getParameter('management_system', '')) ?: null,
-                'uses_atom' => $request->getParameter('uses_atom', 0) ? 1 : 0,
+                'uses_atom' => in_array(trim($request->getParameter('management_system', '')), ['AtoM', 'Heratio'], true) ? 1 : 0,
                 'institution_url' => trim($request->getParameter('institution_url', '')) ?: null,
                 'open_to_public' => $request->getParameter('open_to_public', 0) ? 1 : 0,
             ];
@@ -1338,9 +1386,36 @@ class registryActions extends AhgController
                 $this->errors[] = 'Institution name is required.';
             }
 
+            // Collect repeatable URLs from the form
+            $urlList = [];
+            $rawUrls = (array) $request->getParameter('urls', []);
+            $rawTypes = (array) $request->getParameter('url_types', []);
+            $rawLabels = (array) $request->getParameter('url_labels', []);
+            foreach ($rawUrls as $i => $u) {
+                $u = trim((string) $u);
+                if ('' === $u) {
+                    continue;
+                }
+                $urlList[] = [
+                    'url' => $u,
+                    'link_type' => $rawTypes[$i] ?? 'website',
+                    'label' => $rawLabels[$i] ?? '',
+                ];
+            }
+            // Ensure the primary website field stays in sync with the first website entry
+            foreach ($urlList as $row) {
+                if ('website' === $row['link_type']) {
+                    $data['website'] = $row['url'];
+                    break;
+                }
+            }
+
             if (empty($this->errors)) {
                 try {
                     $result = $svc->update($this->institution->id, $data);
+
+                    // Save repeatable URLs
+                    $urlSvc->replaceForEntity('institution', $this->institution->id, $urlList);
 
                     // Save tags
                     $tagsStr = trim($request->getParameter('tags', ''));
@@ -1353,8 +1428,19 @@ class registryActions extends AhgController
                         $sfUser->setFlash('error', $result['error'] ?? __('Failed to save changes.'));
                     }
 
-                    // Admin goes back to admin list; regular user goes to dashboard
-                    if ($editId && $this->isAdmin()) {
+                    // After save, take user to the institution's public view page so they can see their changes
+                    $viewSlug = $this->institution->slug ?? null;
+                    if (empty($viewSlug)) {
+                        $fresh = \Illuminate\Database\Capsule\Manager::table('registry_institution')
+                            ->where('id', $this->institution->id)
+                            ->first();
+                        if ($fresh && !empty($fresh->slug)) {
+                            $viewSlug = $fresh->slug;
+                        }
+                    }
+                    if (!empty($viewSlug)) {
+                        $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionView', 'slug' => $viewSlug]));
+                    } elseif ($editId && $this->isAdmin()) {
                         $this->redirect(url_for(['module' => 'registry', 'action' => 'adminInstitutions']));
                     } else {
                         $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
@@ -1497,6 +1583,57 @@ class registryActions extends AhgController
 
             $this->contact = (object) $data;
         }
+    }
+
+    public function executeMyInstitutionContactDelete($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        if (!$request->isMethod('post')) {
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionContacts']));
+            return;
+        }
+
+        $id = (int) $request->getParameter('id');
+        $contact = \Illuminate\Database\Capsule\Manager::table('registry_contact')
+            ->where('id', $id)->first();
+
+        if (!$contact) {
+            $this->forward404();
+            return;
+        }
+
+        // Authorization: must own the institution this contact belongs to, or be admin
+        if (!$this->isAdmin()) {
+            $myInst = $this->getMyInstitution();
+            if (!$myInst
+                || 'institution' !== $contact->entity_type
+                || (int) $contact->entity_id !== (int) $myInst->id) {
+                $this->forward404();
+                return;
+            }
+        }
+
+        try {
+            $svc = $this->loadService('ContactService');
+            if (method_exists($svc, 'delete')) {
+                $svc->delete($id);
+            } else {
+                \Illuminate\Database\Capsule\Manager::table('registry_contact')
+                    ->where('id', $id)
+                    ->delete();
+            }
+            \sfContext::getInstance()->getUser()->setFlash('success', __('Contact deleted.'));
+        } catch (\Throwable $e) {
+            if ($e instanceof \sfStopException) { throw $e; }
+            $this->logError('Contact delete failed (id=' . $id . '): ' . $e->getMessage(), $e);
+            \sfContext::getInstance()->getUser()->setFlash('error', __('Failed to delete contact.'));
+        }
+
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionContacts']));
     }
 
     public function executeMyInstitutionInstances($request)
@@ -1799,6 +1936,14 @@ class registryActions extends AhgController
                 $softwareId = (int) $request->getParameter('software_id', 0);
                 $versionInUse = trim($request->getParameter('version_in_use', ''));
                 $notes = trim($request->getParameter('notes', ''));
+                $deploymentDate = trim($request->getParameter('deployment_date', ''));
+                $deploymentDateValue = null;
+                if ('' !== $deploymentDate) {
+                    $ts = strtotime($deploymentDate);
+                    if (false !== $ts) {
+                        $deploymentDateValue = date('Y-m-d', $ts);
+                    }
+                }
 
                 if ($softwareId > 0) {
                     $svc->assignSoftware([
@@ -1806,6 +1951,7 @@ class registryActions extends AhgController
                         'software_id' => $softwareId,
                         'version_in_use' => $versionInUse ?: null,
                         'notes' => $notes ?: null,
+                        'deployment_date' => $deploymentDateValue,
                     ]);
                 }
             } elseif ('remove' === $formAction) {
@@ -1976,6 +2122,7 @@ class registryActions extends AhgController
 
             if (empty($this->errors)) {
                 $svc->create($data);
+                \sfContext::getInstance()->getUser()->setFlash('success', __('Thanks! Your review has been submitted and is pending administrator approval before it appears on the public page.'));
                 $slug = $this->entity->slug ?? '';
                 $action = 'vendor' === $type ? 'vendorView' : 'softwareView';
                 $this->redirect(url_for(['module' => 'registry', 'action' => $action, 'slug' => $slug]));
@@ -2020,17 +2167,47 @@ class registryActions extends AhgController
             return;
         }
 
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgRegistryPlugin/lib/Services/EntityUrlService.php';
+        $urlSvc = new \AhgRegistry\Services\EntityUrlService();
+        $this->entityUrls = [];
+        $this->entityUrlTypes = \AhgRegistry\Services\EntityUrlService::TYPES;
+
         $this->errors = [];
 
         if ($request->isMethod('post')) {
             $svc = $this->loadService('VendorService');
+
+            // Collect repeatable URLs from the form
+            $urlList = [];
+            $rawUrls = (array) $request->getParameter('urls', []);
+            $rawTypes = (array) $request->getParameter('url_types', []);
+            $rawLabels = (array) $request->getParameter('url_labels', []);
+            foreach ($rawUrls as $i => $u) {
+                $u = trim((string) $u);
+                if ('' === $u) {
+                    continue;
+                }
+                $urlList[] = [
+                    'url' => $u,
+                    'link_type' => $rawTypes[$i] ?? 'website',
+                    'label' => $rawLabels[$i] ?? '',
+                ];
+            }
+            $pickFirst = function (string $type) use ($urlList): ?string {
+                foreach ($urlList as $row) {
+                    if ($row['link_type'] === $type) {
+                        return $row['url'];
+                    }
+                }
+                return null;
+            };
 
             $data = [
                 'name' => trim($request->getParameter('name', '')),
                 'vendor_type' => json_encode(array_values(array_filter((array) $request->getParameter('vendor_type', [])))),
                 'description' => trim($request->getParameter('description', '')),
                 'short_description' => trim($request->getParameter('short_description', '')),
-                'website' => trim($request->getParameter('website', '')),
+                'website' => $pickFirst('website') ?: '',
                 'email' => trim($request->getParameter('email', '')),
                 'phone' => trim($request->getParameter('phone', '')),
                 'street_address' => trim($request->getParameter('street_address', '')),
@@ -2041,7 +2218,9 @@ class registryActions extends AhgController
                 'company_registration' => trim($request->getParameter('company_registration', '')) ?: null,
                 'established_year' => $request->getParameter('established_year', '') !== '' ? (int) $request->getParameter('established_year') : null,
                 'team_size' => in_array($request->getParameter('team_size', ''), ['solo', '2-5', '6-20', '21-50', '50+']) ? $request->getParameter('team_size') : null,
-                'github_url' => trim($request->getParameter('github_url', '')) ?: null,
+                'github_url' => $pickFirst('github'),
+                'gitlab_url' => $pickFirst('gitlab'),
+                'linkedin_url' => $pickFirst('linkedin'),
                 'created_by' => $this->getCurrentUserId(),
             ];
 
@@ -2051,7 +2230,13 @@ class registryActions extends AhgController
 
             if (empty($this->errors)) {
                 try {
-                    $svc->create($data);
+                    $newId = $svc->create($data);
+                    if (is_array($newId) && isset($newId['id'])) {
+                        $newId = (int) $newId['id'];
+                    }
+                    if ($newId) {
+                        $urlSvc->replaceForEntity('vendor', (int) $newId, $urlList);
+                    }
                     $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorDashboard']));
 
                     return;
@@ -2101,17 +2286,50 @@ class registryActions extends AhgController
             ->get()
             ->all();
 
+        // Load repeatable URLs
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgRegistryPlugin/lib/Services/EntityUrlService.php';
+        $urlSvc = new \AhgRegistry\Services\EntityUrlService();
+        $this->entityUrls = $urlSvc->findByEntity('vendor', (int) $this->vendor->id);
+        $this->entityUrlTypes = \AhgRegistry\Services\EntityUrlService::TYPES;
+
         $this->errors = [];
 
         if ($request->isMethod('post')) {
             $svc = $this->loadService('VendorService');
+
+            // Collect repeatable URLs from the form (with back-compat columns)
+            $urlList = [];
+            $rawUrls = (array) $request->getParameter('urls', []);
+            $rawTypes = (array) $request->getParameter('url_types', []);
+            $rawLabels = (array) $request->getParameter('url_labels', []);
+            foreach ($rawUrls as $i => $u) {
+                $u = trim((string) $u);
+                if ('' === $u) {
+                    continue;
+                }
+                $urlList[] = [
+                    'url' => $u,
+                    'link_type' => $rawTypes[$i] ?? 'website',
+                    'label' => $rawLabels[$i] ?? '',
+                ];
+            }
+
+            // Back-compat: mirror first match of each type into the legacy single-column fields
+            $pickFirst = function (string $type) use ($urlList): ?string {
+                foreach ($urlList as $row) {
+                    if ($row['link_type'] === $type) {
+                        return $row['url'];
+                    }
+                }
+                return null;
+            };
 
             $data = [
                 'name' => trim($request->getParameter('name', '')),
                 'vendor_type' => json_encode(array_values(array_filter((array) $request->getParameter('vendor_type', [])))),
                 'description' => trim($request->getParameter('description', '')),
                 'short_description' => trim($request->getParameter('short_description', '')),
-                'website' => trim($request->getParameter('website', '')),
+                'website' => $pickFirst('website') ?: '',
                 'email' => trim($request->getParameter('email', '')),
                 'phone' => trim($request->getParameter('phone', '')),
                 'street_address' => trim($request->getParameter('street_address', '')),
@@ -2125,9 +2343,9 @@ class registryActions extends AhgController
                 'vat_number' => trim($request->getParameter('vat_number', '')) ?: null,
                 'established_year' => $request->getParameter('established_year', '') !== '' ? (int) $request->getParameter('established_year') : null,
                 'team_size' => in_array($request->getParameter('team_size', ''), ['solo', '2-5', '6-20', '21-50', '50+']) ? $request->getParameter('team_size') : null,
-                'github_url' => trim($request->getParameter('github_url', '')) ?: null,
-                'gitlab_url' => trim($request->getParameter('gitlab_url', '')) ?: null,
-                'linkedin_url' => trim($request->getParameter('linkedin_url', '')) ?: null,
+                'github_url' => $pickFirst('github'),
+                'gitlab_url' => $pickFirst('gitlab'),
+                'linkedin_url' => $pickFirst('linkedin'),
             ];
 
             // Handle logo upload
@@ -2154,11 +2372,18 @@ class registryActions extends AhgController
                 try {
                     $svc->update($this->vendor->id, $data);
 
+                    // Save repeatable URLs
+                    $urlSvc->replaceForEntity('vendor', (int) $this->vendor->id, $urlList);
+
                     // Save tags
                     $tagsStr = trim($request->getParameter('tags', ''));
                     $this->saveTags('vendor', $this->vendor->id, $tagsStr);
 
-                    if ($editId && $this->isAdmin()) {
+                    $freshVendor = \Illuminate\Database\Capsule\Manager::table('registry_vendor')
+                        ->where('id', $this->vendor->id)->first();
+                    if ($freshVendor && !empty($freshVendor->slug)) {
+                        $this->redirect(url_for(['module' => 'registry', 'action' => 'vendorView', 'slug' => $freshVendor->slug]));
+                    } elseif ($editId && $this->isAdmin()) {
                         $this->redirect(url_for(['module' => 'registry', 'action' => 'adminVendors']));
                     } else {
                         $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorDashboard']));
@@ -2409,10 +2634,16 @@ class registryActions extends AhgController
         if ($request->isMethod('post')) {
             $svc = $this->loadService('SoftwareService');
 
+            $catsIn = (array) $request->getParameter('category', []);
+            $catsIn = array_values(array_filter(array_map('strval', $catsIn)));
+            if (empty($catsIn)) {
+                $catsIn = ['other'];
+            }
+
             $data = [
                 'name' => trim($request->getParameter('name', '')),
                 'vendor_id' => $vendor->id,
-                'category' => $request->getParameter('category', 'other'),
+                'category' => json_encode($catsIn),
                 'description' => trim($request->getParameter('description', '')),
                 'short_description' => trim($request->getParameter('short_description', '')),
                 'website' => trim($request->getParameter('website', '')),
@@ -2476,9 +2707,15 @@ class registryActions extends AhgController
         if ($request->isMethod('post')) {
             $svc = $this->loadService('SoftwareService');
 
+            $catsIn = (array) $request->getParameter('category', []);
+            $catsIn = array_values(array_filter(array_map('strval', $catsIn)));
+            if (empty($catsIn)) {
+                $catsIn = ['other'];
+            }
+
             $data = [
                 'name' => trim($request->getParameter('name', '')),
-                'category' => $request->getParameter('category', 'other'),
+                'category' => json_encode($catsIn),
                 'description' => trim($request->getParameter('description', '')),
                 'short_description' => trim($request->getParameter('short_description', '')),
                 'website' => trim($request->getParameter('website', '')),
@@ -3913,11 +4150,21 @@ class registryActions extends AhgController
         $limit = 50;
         $offset = ($page - 1) * $limit;
 
-        $this->total = \Illuminate\Database\Capsule\Manager::table('registry_review')->count();
-        $this->reviews = \Illuminate\Database\Capsule\Manager::table('registry_review')
-            ->orderByDesc('created_at')
+        $this->filter = $request->getParameter('filter', 'pending');
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        $query = $db::table('registry_review');
+        if ('pending' === $this->filter) {
+            $query->where('is_visible', 0);
+        } elseif ('approved' === $this->filter) {
+            $query->where('is_visible', 1);
+        }
+
+        $this->total = (clone $query)->count();
+        $this->reviews = $query->orderByDesc('created_at')
             ->offset($offset)->limit($limit)->get();
         $this->page = $page;
+        $this->pendingCount = $db::table('registry_review')->where('is_visible', 0)->count();
 
         if ($request->isMethod('post')) {
             $reviewId = (int) $request->getParameter('review_id');
@@ -3926,11 +4173,13 @@ class registryActions extends AhgController
 
             if ('toggle_visibility' === $action) {
                 $svc->toggleVisibility($reviewId);
+            } elseif ('approve' === $action) {
+                $svc->update($reviewId, ['is_visible' => 1]);
             } elseif ('delete' === $action) {
                 $svc->delete($reviewId);
             }
 
-            $this->redirect(url_for(['module' => 'registry', 'action' => 'adminReviews']));
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => $this->filter]));
 
             return;
         }
@@ -6202,6 +6451,123 @@ class registryActions extends AhgController
     // =========================================================================
     // Admin: Standards Management
     // =========================================================================
+
+    /**
+     * One-click "we use this" — links the current authenticated user's institution
+     * to a software record. Handles the software-view page CTA so users don't have
+     * to hunt for the My Institution > Software page just to add one entry.
+     */
+    public function executeSoftwareLinkToInstitution($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        if (!$request->isMethod('post')) {
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'softwareBrowse']));
+            return;
+        }
+
+        $softwareId = (int) $request->getParameter('software_id', 0);
+        $returnUrl = $request->getParameter('return', url_for(['module' => 'registry', 'action' => 'softwareBrowse']));
+
+        $institution = $this->getMyInstitution();
+        if (!$institution) {
+            \sfContext::getInstance()->getUser()->setFlash('error', __('You must register an institution before linking software.'));
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'institutionRegister']));
+            return;
+        }
+
+        if ($softwareId <= 0) {
+            \sfContext::getInstance()->getUser()->setFlash('error', __('Invalid software.'));
+            $this->redirect($returnUrl);
+            return;
+        }
+
+        try {
+            $svc = $this->loadService('RelationshipService');
+            $result = $svc->assignSoftware([
+                'institution_id' => (int) $institution->id,
+                'software_id' => $softwareId,
+            ]);
+            if (!empty($result['success'])) {
+                \sfContext::getInstance()->getUser()->setFlash('success', __('Software linked to your institution.'));
+            } else {
+                \sfContext::getInstance()->getUser()->setFlash('info', $result['error'] ?? __('Software already linked.'));
+            }
+        } catch (\Throwable $e) {
+            if ($e instanceof \sfStopException) { throw $e; }
+            $this->logError('Software link failed: ' . $e->getMessage(), $e);
+            \sfContext::getInstance()->getUser()->setFlash('error', __('Failed to link software.'));
+        }
+
+        $this->redirect($returnUrl);
+    }
+
+    /**
+     * User-facing submission: logged-in users can suggest a new standard from
+     * the institution edit page (e.g., regional legislation not yet in the list).
+     * Non-admin submissions are saved but redirected back to the edit form.
+     */
+    public function executeStandardSubmit($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        if (!$request->isMethod('post')) {
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
+            return;
+        }
+
+        $name = trim($request->getParameter('name', ''));
+        $acronym = trim($request->getParameter('acronym', ''));
+        $category = $request->getParameter('category', 'descriptive');
+        $validCats = ['descriptive','metadata','interchange','preservation','rights','sector','compliance','accounting'];
+        if (!in_array($category, $validCats, true)) {
+            $category = 'compliance';
+        }
+        $description = trim($request->getParameter('short_description', ''));
+        $websiteUrl = trim($request->getParameter('website_url', ''));
+        $issuingBody = trim($request->getParameter('issuing_body', ''));
+        $returnUrl = $request->getParameter('return', url_for(['module' => 'registry', 'action' => 'institutionEdit']));
+
+        if ('' === $name) {
+            \sfContext::getInstance()->getUser()->setFlash('error', __('Standard name is required.'));
+            $this->redirect($returnUrl);
+            return;
+        }
+
+        try {
+            $svc = $this->loadService('StandardService');
+            $slugSource = $acronym !== '' ? $acronym : $name;
+            $slug = $svc->generateSlug($slugSource, 'registry_standard');
+            $data = [
+                'name' => $name,
+                'acronym' => $acronym ?: null,
+                'category' => $category,
+                'short_description' => $description ?: null,
+                'description' => null,
+                'website_url' => $websiteUrl ?: null,
+                'issuing_body' => $issuingBody ?: null,
+                'sector_applicability' => json_encode([]),
+                'is_featured' => 0,
+                'is_active' => 1,
+                'sort_order' => 900,
+                'slug' => $slug,
+            ];
+            $svc->saveStandard($data);
+            \sfContext::getInstance()->getUser()->setFlash('success', __('Standard added. It is now available in the list below.'));
+        } catch (\Throwable $e) {
+            if ($e instanceof \sfStopException) { throw $e; }
+            $this->logError('User standard submit failed: ' . $e->getMessage(), $e);
+            \sfContext::getInstance()->getUser()->setFlash('error', __('Failed to create standard.'));
+        }
+
+        $this->redirect($returnUrl);
+    }
 
     public function executeAdminStandards($request)
     {

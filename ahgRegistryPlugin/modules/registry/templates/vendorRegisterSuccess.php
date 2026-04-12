@@ -79,18 +79,14 @@
 
       <!-- Contact -->
       <div class="card mb-4">
-        <div class="card-header fw-semibold"><i class="fas fa-globe me-2 text-info"></i><?php echo __('Contact & Online Presence'); ?></div>
+        <div class="card-header fw-semibold"><i class="fas fa-envelope me-2 text-info"></i><?php echo __('Contact'); ?></div>
         <div class="card-body">
           <div class="row g-3">
-            <div class="col-md-4">
-              <label for="vr-website" class="form-label"><?php echo __('Website'); ?></label>
-              <input type="url" class="form-control" id="vr-website" name="website" value="<?php echo htmlspecialchars($f->website ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://www.example.com">
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label for="vr-email" class="form-label"><?php echo __('Email'); ?></label>
               <input type="email" class="form-control" id="vr-email" name="email" value="<?php echo htmlspecialchars($f->email ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label for="vr-phone" class="form-label"><?php echo __('Phone'); ?></label>
               <input type="tel" class="form-control" id="vr-phone" name="phone" value="<?php echo htmlspecialchars($f->phone ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             </div>
@@ -172,26 +168,79 @@
         </div>
       </div>
 
-      <!-- Social / Git links -->
+      <!-- Online presence (repeatable URLs) -->
       <div class="card mb-4">
-        <div class="card-header fw-semibold"><i class="fab fa-github me-2 text-dark"></i><?php echo __('Online Profiles'); ?></div>
+        <div class="card-header fw-semibold"><i class="fas fa-globe me-2 text-info"></i><?php echo __('Online Presence'); ?></div>
         <div class="card-body">
-          <div class="row g-3">
-            <div class="col-md-4">
-              <label for="vr-github" class="form-label"><i class="fab fa-github me-1"></i> <?php echo __('GitHub URL'); ?></label>
-              <input type="url" class="form-control" id="vr-github" name="github_url" value="<?php echo htmlspecialchars($f->github_url ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://github.com/org">
-            </div>
-            <div class="col-md-4">
-              <label for="vr-gitlab" class="form-label"><i class="fab fa-gitlab me-1"></i> <?php echo __('GitLab URL'); ?></label>
-              <input type="url" class="form-control" id="vr-gitlab" name="gitlab_url" value="<?php echo htmlspecialchars($f->gitlab_url ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
-            <div class="col-md-4">
-              <label for="vr-linkedin" class="form-label"><i class="fab fa-linkedin me-1"></i> <?php echo __('LinkedIn URL'); ?></label>
-              <input type="url" class="form-control" id="vr-linkedin" name="linkedin_url" value="<?php echo htmlspecialchars($f->linkedin_url ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
+          <p class="text-muted small mb-3"><?php echo __('Add all URLs relevant to this vendor — website, GitHub / GitLab, LinkedIn, blog, social profiles. Use the type selector to classify each link.'); ?></p>
+          <?php
+            $urlTypes = $entityUrlTypes ?? [];
+            $existing = isset($entityUrls) && is_array($entityUrls) ? $entityUrls : [];
+            if (empty($existing)) {
+              $existing = [(object) ['link_type' => 'website', 'url' => $f->website ?? '', 'label' => '']];
+            }
+          ?>
+          <div id="url-list">
+            <?php foreach ($existing as $i => $row):
+              $rowType = is_object($row) ? ($row->link_type ?? 'website') : ($row['link_type'] ?? 'website');
+              $rowUrl = is_object($row) ? ($row->url ?? '') : ($row['url'] ?? '');
+              $rowLabel = is_object($row) ? ($row->label ?? '') : ($row['label'] ?? '');
+            ?>
+              <div class="row g-2 mb-2 url-row">
+                <div class="col-md-3">
+                  <select class="form-select" name="url_types[]">
+                    <?php foreach ($urlTypes as $tVal => $tLabel): ?>
+                      <option value="<?php echo htmlspecialchars($tVal, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $rowType === $tVal ? ' selected' : ''; ?>><?php echo htmlspecialchars(__($tLabel), ENT_QUOTES, 'UTF-8'); ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <input type="url" class="form-control" name="urls[]" value="<?php echo htmlspecialchars($rowUrl, ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://">
+                </div>
+                <div class="col-md-2">
+                  <input type="text" class="form-control" name="url_labels[]" value="<?php echo htmlspecialchars($rowLabel, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Label (optional)'); ?>">
+                </div>
+                <div class="col-md-1 d-grid">
+                  <button type="button" class="btn btn-outline-danger btn-sm url-remove" title="<?php echo __('Remove'); ?>"><i class="fas fa-times"></i></button>
+                </div>
+              </div>
+            <?php endforeach; ?>
           </div>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="url-add"><i class="fas fa-plus me-1"></i><?php echo __('Add URL'); ?></button>
         </div>
       </div>
+
+      <?php $n = sfConfig::get('csp_nonce', ''); $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+      <script <?php echo $na; ?>>
+      document.addEventListener('DOMContentLoaded', function() {
+        var list = document.getElementById('url-list');
+        var addBtn = document.getElementById('url-add');
+        if (!list || !addBtn) return;
+        function bindRemove(row) {
+          var btn = row.querySelector('.url-remove');
+          if (btn) {
+            btn.addEventListener('click', function() {
+              if (list.querySelectorAll('.url-row').length > 1) {
+                row.remove();
+              } else {
+                row.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+              }
+            });
+          }
+        }
+        list.querySelectorAll('.url-row').forEach(bindRemove);
+        addBtn.addEventListener('click', function() {
+          var first = list.querySelector('.url-row');
+          if (!first) return;
+          var clone = first.cloneNode(true);
+          clone.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+          var sel = clone.querySelector('select');
+          if (sel) sel.selectedIndex = 0;
+          list.appendChild(clone);
+          bindRemove(clone);
+        });
+      });
+      </script>
 
       <div class="d-flex justify-content-between">
         <a href="<?php echo url_for(['module' => 'registry', 'action' => 'index']); ?>" class="btn btn-outline-secondary"><?php echo __('Cancel'); ?></a>

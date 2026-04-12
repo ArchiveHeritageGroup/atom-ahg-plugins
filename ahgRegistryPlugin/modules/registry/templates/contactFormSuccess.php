@@ -71,7 +71,25 @@
         <div class="card-body">
           <p class="text-muted small mb-3"><?php echo __('Select all roles that apply to this contact.'); ?></p>
           <?php
-            $allRoles = ['management' => __('Management'), 'atom_admin' => __('AtoM Administrator'), 'office_admin' => __('Office Administrator (Billing)'), 'it_support' => __('IT / Technical Support'), 'records_professional' => __('Archivist / Librarian / Curator'), 'collections' => __('Collections')];
+            $allRoles = [
+              'management' => __('Management / Director'),
+              'atom_admin' => __('AtoM Administrator'),
+              'office_admin' => __('Office Administrator (Billing)'),
+              'it_support' => __('IT / Technical Support'),
+              'archivist' => __('Archivist'),
+              'librarian' => __('Librarian'),
+              'curator' => __('Curator'),
+              'cataloguer' => __('Cataloguer / Metadata Specialist'),
+              'preservation' => __('Digital Preservation Specialist'),
+              'conservator' => __('Conservator'),
+              'collections_manager' => __('Collections Manager'),
+              'reference' => __('Reference / Research Services'),
+              'registrar' => __('Registrar'),
+              'education' => __('Education / Outreach'),
+              'digitization' => __('Digitization Technician'),
+              'volunteer' => __('Volunteer'),
+              'other' => __('Other'),
+            ];
             $currentRoles = [];
             if (!empty($c->roles)) {
               $rawRoles = sfOutputEscaper::unescape($c->roles);
@@ -112,22 +130,33 @@
             </div>
             <div class="col-12">
               <label for="cf-notes" class="form-label"><?php echo __('Notes'); ?></label>
-              <textarea class="form-control" id="cf-notes" name="notes" rows="3"><?php echo htmlspecialchars($c->notes ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <textarea class="form-control" id="cf-notes" name="notes" rows="3" placeholder="<?php echo __('e.g., Best time to reach, preferred language, areas of expertise'); ?>"><?php echo htmlspecialchars($c->notes ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <div class="form-text"><?php echo __('Internal notes about this contact — availability, preferences, responsibilities. Visible only to administrators unless the contact itself is publicly visible.'); ?></div>
             </div>
           </div>
         </div>
       </div>
 
       <div class="d-flex justify-content-between">
-        <?php if (!empty($backUrl)): ?>
-          <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><?php echo __('Cancel'); ?></a>
-        <?php else: ?>
-          <span></span>
-        <?php endif; ?>
+        <div>
+          <?php if (!empty($backUrl)): ?>
+            <a href="<?php echo $backUrl; ?>" class="btn btn-outline-secondary"><?php echo __('Cancel'); ?></a>
+          <?php endif; ?>
+          <?php if ($contact && !empty($c->id)): ?>
+            <button type="button" class="btn btn-outline-danger ms-2" onclick="if(confirm('<?php echo __('Are you sure you want to delete this contact?'); ?>')) { document.getElementById('delete-contact-form').submit(); }">
+              <i class="fas fa-trash me-1"></i> <?php echo __('Delete'); ?>
+            </button>
+          <?php endif; ?>
+        </div>
         <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> <?php echo $contact ? __('Save Changes') : __('Add Contact'); ?></button>
       </div>
 
     </form>
+
+    <?php if ($contact && !empty($c->id)): ?>
+    <form id="delete-contact-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContactDelete', 'id' => (int) $c->id]); ?>" style="display: none;">
+    </form>
+    <?php endif; ?>
 
   </div>
 </div>

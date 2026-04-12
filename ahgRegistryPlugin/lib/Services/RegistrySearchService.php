@@ -105,45 +105,34 @@ class RegistrySearchService
 
     /**
      * Search institutions.
+     *
+     * Ranking prioritises (in order): exact name match, prefix name match,
+     * substring name match, FULLTEXT name match, FULLTEXT body match.
+     * This fixes the case where "northern bc archives" used to return 61
+     * fuzzy-matched results before the target institution's page.
      */
     private function searchInstitutions(string $query): array
     {
+        $likeTerm = '%' . $this->decodeEntities($query) . '%';
+
         $items = DB::table('registry_institution')
             ->where('is_active', 1)
-            ->whereRaw("MATCH(name, description, collection_summary) AGAINST(? IN BOOLEAN MODE)", [$query])
-            ->selectRaw("id, name, slug, short_description, institution_type, country, logo_path, MATCH(name, description, collection_summary) AGAINST(? IN BOOLEAN MODE) as score", [$query])
-            ->orderBy('score', 'desc')
-            ->limit(50)
+            ->where(function ($q) use ($query, $likeTerm) {
+                $q->whereRaw("MATCH(name, description, collection_summary) AGAINST(? IN BOOLEAN MODE)", [$query])
+                  ->orWhere('name', 'LIKE', $likeTerm);
+            })
+            ->select('id', 'name', 'slug', 'short_description', 'institution_type', 'country', 'logo_path')
+            ->limit(100)
             ->get()
             ->all();
-
-        // LIKE fallback when FULLTEXT returns no results
-        $useLikeFallback = empty($items);
-        if ($useLikeFallback) {
-            $likeTerm = '%' . $query . '%';
-            $items = DB::table('registry_institution')
-                ->where('is_active', 1)
-                ->where(function ($q) use ($likeTerm) {
-                    $q->where('name', 'LIKE', $likeTerm)
-                      ->orWhere('description', 'LIKE', $likeTerm)
-                      ->orWhere('collection_summary', 'LIKE', $likeTerm)
-                      ->orWhere('city', 'LIKE', $likeTerm)
-                      ->orWhere('country', 'LIKE', $likeTerm);
-                })
-                ->select('id', 'name', 'slug', 'short_description', 'institution_type', 'country', 'logo_path')
-                ->orderBy('name', 'asc')
-                ->limit(50)
-                ->get()
-                ->all();
-        }
 
         $results = [];
         foreach ($items as $item) {
             $results[] = [
                 'entity_type' => 'institution',
                 'id' => $item->id,
-                'title' => $item->name,
-                'excerpt' => $item->short_description,
+                'title' => $this->cleanText($item->name),
+                'excerpt' => $this->cleanText($item->short_description),
                 'url' => '/registry/institutions/' . $item->slug,
                 'meta' => [
                     'slug' => $item->slug,
@@ -151,7 +140,7 @@ class RegistrySearchService
                     'country' => $item->country,
                     'logo' => $item->logo_path,
                 ],
-                'relevance' => $useLikeFallback ? 1.0 : (float) $item->score,
+                'relevance' => $this->scoreName($item->name ?? '', $query),
             ];
         }
 
@@ -159,45 +148,100 @@ class RegistrySearchService
     }
 
     /**
+     * Decode HTML entities and strip tags from user-visible search values.
+     * Guards against double-encoded names ("Archives &amp; Special Collections")
+     * leaking through from the data import stage.
+     */
+    private function cleanText(?string $text): string
+    {
+        if (null === $text || '' === $text) {
+            return '';
+        }
+        $decoded = html_entity_decode((string) $text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return strip_tags($decoded);
+    }
+
+    private function decodeEntities(string $text): string
+    {
+        return html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    }
+
+    /**
+     * Score a candidate name against a query. Higher is more relevant.
+     *
+     * Priority order:
+     *   1. Exact match (case-insensitive)        → 1000
+     *   2. Name starts with query                → 500
+     *   3. Query is a whole-word match in name   → 300
+     *   4. Query is a substring of name          → 150
+     *   5. At least one query word matches name  → 30 per word
+     *   6. Shorter names win ties                → +(100 - len(name))
+     */
+    private function scoreName(string $name, string $query): float
+    {
+        $cleanName = mb_strtolower($this->cleanText($name));
+        $cleanQuery = mb_strtolower($this->decodeEntities(trim($query)));
+
+        if ('' === $cleanName || '' === $cleanQuery) {
+            return 0.0;
+        }
+
+        $score = 0.0;
+
+        if ($cleanName === $cleanQuery) {
+            $score += 1000;
+        } elseif (0 === mb_strpos($cleanName, $cleanQuery)) {
+            $score += 500;
+        } elseif (preg_match('/\b' . preg_quote($cleanQuery, '/') . '\b/u', $cleanName)) {
+            $score += 300;
+        } elseif (false !== mb_strpos($cleanName, $cleanQuery)) {
+            $score += 150;
+        }
+
+        // Per-word boost (helps multi-word queries where no single contiguous match exists)
+        $words = preg_split('/\s+/u', $cleanQuery, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        foreach ($words as $word) {
+            if (mb_strlen($word) < 2) {
+                continue;
+            }
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/u', $cleanName)) {
+                $score += 30;
+            }
+        }
+
+        // Tiebreaker: prefer shorter names so "Northern BC Archives" beats
+        // "Museum of Anthropology, Audrey and Harry Hawthorn Library and Archives..."
+        $score += max(0, 120 - mb_strlen($cleanName)) / 10;
+
+        return $score;
+    }
+
+    /**
      * Search vendors.
      */
     private function searchVendors(string $query): array
     {
+        $likeTerm = '%' . $this->decodeEntities($query) . '%';
+
         $items = DB::table('registry_vendor')
             ->where('is_active', 1)
-            ->whereRaw("MATCH(name, description) AGAINST(? IN BOOLEAN MODE)", [$query])
-            ->selectRaw("id, name, slug, short_description, vendor_type, country, logo_path, MATCH(name, description) AGAINST(? IN BOOLEAN MODE) as score", [$query])
-            ->orderBy('score', 'desc')
-            ->limit(50)
+            ->where(function ($q) use ($query, $likeTerm) {
+                $q->whereRaw("MATCH(name, description) AGAINST(? IN BOOLEAN MODE)", [$query])
+                  ->orWhere('name', 'LIKE', $likeTerm);
+            })
+            ->select('id', 'name', 'slug', 'short_description', 'vendor_type', 'country', 'logo_path')
+            ->limit(100)
             ->get()
             ->all();
-
-        // LIKE fallback when FULLTEXT returns no results
-        $useLikeFallback = empty($items);
-        if ($useLikeFallback) {
-            $likeTerm = '%' . $query . '%';
-            $items = DB::table('registry_vendor')
-                ->where('is_active', 1)
-                ->where(function ($q) use ($likeTerm) {
-                    $q->where('name', 'LIKE', $likeTerm)
-                      ->orWhere('description', 'LIKE', $likeTerm)
-                      ->orWhere('short_description', 'LIKE', $likeTerm)
-                      ->orWhere('country', 'LIKE', $likeTerm);
-                })
-                ->select('id', 'name', 'slug', 'short_description', 'vendor_type', 'country', 'logo_path')
-                ->orderBy('name', 'asc')
-                ->limit(50)
-                ->get()
-                ->all();
-        }
 
         $results = [];
         foreach ($items as $item) {
             $results[] = [
                 'entity_type' => 'vendor',
                 'id' => $item->id,
-                'title' => $item->name,
-                'excerpt' => $item->short_description,
+                'title' => $this->cleanText($item->name),
+                'excerpt' => $this->cleanText($item->short_description),
                 'url' => '/registry/vendors/' . $item->slug,
                 'meta' => [
                     'slug' => $item->slug,
@@ -205,7 +249,7 @@ class RegistrySearchService
                     'country' => $item->country,
                     'logo' => $item->logo_path,
                 ],
-                'relevance' => $useLikeFallback ? 1.0 : (float) $item->score,
+                'relevance' => $this->scoreName($item->name ?? '', $query),
             ];
         }
 
@@ -217,41 +261,26 @@ class RegistrySearchService
      */
     private function searchSoftware(string $query): array
     {
+        $likeTerm = '%' . $this->decodeEntities($query) . '%';
+
         $items = DB::table('registry_software')
             ->where('is_active', 1)
-            ->whereRaw("MATCH(name, description) AGAINST(? IN BOOLEAN MODE)", [$query])
-            ->selectRaw("id, name, slug, short_description, category, logo_path, latest_version, pricing_model, MATCH(name, description) AGAINST(? IN BOOLEAN MODE) as score", [$query])
-            ->orderBy('score', 'desc')
-            ->limit(50)
+            ->where(function ($q) use ($query, $likeTerm) {
+                $q->whereRaw("MATCH(name, description) AGAINST(? IN BOOLEAN MODE)", [$query])
+                  ->orWhere('name', 'LIKE', $likeTerm);
+            })
+            ->select('id', 'name', 'slug', 'short_description', 'category', 'logo_path', 'latest_version', 'pricing_model')
+            ->limit(100)
             ->get()
             ->all();
-
-        // LIKE fallback when FULLTEXT returns no results
-        $useLikeFallback = empty($items);
-        if ($useLikeFallback) {
-            $likeTerm = '%' . $query . '%';
-            $items = DB::table('registry_software')
-                ->where('is_active', 1)
-                ->where(function ($q) use ($likeTerm) {
-                    $q->where('name', 'LIKE', $likeTerm)
-                      ->orWhere('description', 'LIKE', $likeTerm)
-                      ->orWhere('short_description', 'LIKE', $likeTerm)
-                      ->orWhere('category', 'LIKE', $likeTerm);
-                })
-                ->select('id', 'name', 'slug', 'short_description', 'category', 'logo_path', 'latest_version', 'pricing_model')
-                ->orderBy('name', 'asc')
-                ->limit(50)
-                ->get()
-                ->all();
-        }
 
         $results = [];
         foreach ($items as $item) {
             $results[] = [
                 'entity_type' => 'software',
                 'id' => $item->id,
-                'title' => $item->name,
-                'excerpt' => $item->short_description,
+                'title' => $this->cleanText($item->name),
+                'excerpt' => $this->cleanText($item->short_description),
                 'url' => '/registry/software/' . $item->slug,
                 'meta' => [
                     'slug' => $item->slug,
@@ -260,7 +289,7 @@ class RegistrySearchService
                     'pricing' => $item->pricing_model,
                     'logo' => $item->logo_path,
                 ],
-                'relevance' => $useLikeFallback ? 1.0 : (float) $item->score,
+                'relevance' => $this->scoreName($item->name ?? '', $query),
             ];
         }
 

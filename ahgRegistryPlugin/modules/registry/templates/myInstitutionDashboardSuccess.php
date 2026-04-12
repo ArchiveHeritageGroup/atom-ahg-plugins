@@ -321,39 +321,37 @@ document.addEventListener('DOMContentLoaded', function() {
   </div>
 </div>
 
-<!-- Quick links -->
+<!-- Quick links (order + colors mirror the Stats row above) -->
 <div class="row g-3 mb-4">
-  <div class="col-md-6 col-lg-3">
-    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContacts']) . $instParam; ?>" class="card h-100 text-decoration-none">
-      <div class="card-body text-center">
-        <i class="fas fa-address-book fa-2x text-primary mb-2"></i>
-        <h6 class="card-title mb-0"><?php echo __('Manage Contacts'); ?></h6>
-      </div>
-    </a>
-  </div>
-  <div class="col-md-6 col-lg-3">
+  <div class="col-6 col-md-3">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstances']) . $instParam; ?>" class="card h-100 text-decoration-none">
       <div class="card-body text-center">
-        <i class="fas fa-server fa-2x text-success mb-2"></i>
+        <i class="fas fa-server fa-2x text-primary mb-2"></i>
         <h6 class="card-title mb-0"><?php echo __('Manage Instances'); ?></h6>
       </div>
     </a>
   </div>
-  <div class="col-md-6 col-lg-3">
-    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']) . $instParam; ?>" class="card h-100 text-decoration-none">
+  <div class="col-6 col-md-3">
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContacts']) . $instParam; ?>" class="card h-100 text-decoration-none">
       <div class="card-body text-center">
-        <i class="fas fa-laptop-code fa-2x text-info mb-2"></i>
-        <h6 class="card-title mb-0"><?php echo __('Software Used'); ?></h6>
-        <small class="text-muted"><?php echo __('Add / Remove'); ?></small>
+        <i class="fas fa-address-book fa-2x text-success mb-2"></i>
+        <h6 class="card-title mb-0"><?php echo __('Manage Contacts'); ?></h6>
       </div>
     </a>
   </div>
-  <div class="col-md-6 col-lg-3">
+  <div class="col-6 col-md-3">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionVendors']) . $instParam; ?>" class="card h-100 text-decoration-none">
       <div class="card-body text-center">
-        <i class="fas fa-handshake fa-2x text-warning mb-2"></i>
+        <i class="fas fa-handshake fa-2x text-info mb-2"></i>
         <h6 class="card-title mb-0"><?php echo __('Vendor Relationships'); ?></h6>
-        <small class="text-muted"><?php echo __('Link / Remove'); ?></small>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-3">
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']) . $instParam; ?>" class="card h-100 text-decoration-none">
+      <div class="card-body text-center">
+        <i class="fas fa-laptop-code fa-2x text-warning mb-2"></i>
+        <h6 class="card-title mb-0"><?php echo __('Software Used'); ?></h6>
       </div>
     </a>
   </div>

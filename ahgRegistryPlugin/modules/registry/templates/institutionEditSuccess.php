@@ -61,6 +61,13 @@
               <textarea class="form-control" id="edit-desc" name="description" rows="4"><?php echo htmlspecialchars($f->description ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
             <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="edit-open-public" name="open_to_public" value="1"<?php echo !empty($f->open_to_public) ? ' checked' : ''; ?>>
+                <label class="form-check-label" for="edit-open-public"><?php echo __('Open to the public'); ?></label>
+                <div class="form-text"><?php echo __('Collections are accessible to researchers and the general public, whether online or in-person.'); ?></div>
+              </div>
+            </div>
+            <div class="col-12">
               <label for="edit-logo" class="form-label"><?php echo __('Logo'); ?></label>
               <?php if (!empty($f->logo_path)): ?>
                 <div class="mb-2">
@@ -122,21 +129,75 @@
       <div class="card mb-4">
         <div class="card-header fw-semibold"><i class="fas fa-globe me-2 text-info"></i><?php echo __('Online Presence'); ?></div>
         <div class="card-body">
-          <div class="row g-3">
-            <div class="col-md-8">
-              <label for="edit-website" class="form-label"><?php echo __('Institution Website URL'); ?></label>
-              <input type="url" class="form-control" id="edit-website" name="website" value="<?php echo htmlspecialchars($f->website ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://www.example.org">
-            </div>
-            <div class="col-md-4">
-              <div class="form-check mt-4">
-                <input class="form-check-input" type="checkbox" id="edit-open-public" name="open_to_public" value="1"<?php echo !empty($f->open_to_public) ? ' checked' : ''; ?>>
-                <label class="form-check-label" for="edit-open-public"><?php echo __('Open to the public'); ?></label>
+          <p class="text-muted small mb-3"><?php echo __('Add every URL relevant to this institution — main website, AtoM instance, digital repository, online catalogue, social profiles, etc. Contact details (email, phone) belong in the Contacts section.'); ?></p>
+          <?php
+            $urlTypes = $entityUrlTypes ?? [];
+            $existing = isset($entityUrls) && is_array($entityUrls) ? $entityUrls : [];
+            // Always render at least one empty row for new entries
+            if (empty($existing)) {
+              $existing = [(object) ['link_type' => 'website', 'url' => $f->website ?? '', 'label' => '']];
+            }
+          ?>
+          <div id="url-list">
+            <?php foreach ($existing as $i => $row):
+              $rowType = is_object($row) ? ($row->link_type ?? 'website') : ($row['link_type'] ?? 'website');
+              $rowUrl = is_object($row) ? ($row->url ?? '') : ($row['url'] ?? '');
+              $rowLabel = is_object($row) ? ($row->label ?? '') : ($row['label'] ?? '');
+            ?>
+              <div class="row g-2 mb-2 url-row">
+                <div class="col-md-3">
+                  <select class="form-select" name="url_types[]">
+                    <?php foreach ($urlTypes as $tVal => $tLabel): ?>
+                      <option value="<?php echo htmlspecialchars($tVal, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $rowType === $tVal ? ' selected' : ''; ?>><?php echo htmlspecialchars(__($tLabel), ENT_QUOTES, 'UTF-8'); ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <input type="url" class="form-control" name="urls[]" value="<?php echo htmlspecialchars($rowUrl, ENT_QUOTES, 'UTF-8'); ?>" placeholder="https://">
+                </div>
+                <div class="col-md-2">
+                  <input type="text" class="form-control" name="url_labels[]" value="<?php echo htmlspecialchars($rowLabel, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Label (optional)'); ?>">
+                </div>
+                <div class="col-md-1 d-grid">
+                  <button type="button" class="btn btn-outline-danger btn-sm url-remove" title="<?php echo __('Remove'); ?>"><i class="fas fa-times"></i></button>
+                </div>
               </div>
-            </div>
+            <?php endforeach; ?>
           </div>
-          <div class="form-text text-muted mt-2"><?php echo __('Contact details (email, phone) should be added in the Contacts section for specific people.'); ?></div>
+          <button type="button" class="btn btn-sm btn-outline-primary" id="url-add"><i class="fas fa-plus me-1"></i><?php echo __('Add URL'); ?></button>
         </div>
       </div>
+
+      <script <?php echo $na; ?>>
+      document.addEventListener('DOMContentLoaded', function() {
+        var list = document.getElementById('url-list');
+        var addBtn = document.getElementById('url-add');
+        if (!list || !addBtn) return;
+        function bindRemove(row) {
+          var btn = row.querySelector('.url-remove');
+          if (btn) {
+            btn.addEventListener('click', function() {
+              if (list.querySelectorAll('.url-row').length > 1) {
+                row.remove();
+              } else {
+                row.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+              }
+            });
+          }
+        }
+        list.querySelectorAll('.url-row').forEach(bindRemove);
+        addBtn.addEventListener('click', function() {
+          var first = list.querySelector('.url-row');
+          if (!first) return;
+          var clone = first.cloneNode(true);
+          clone.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+          var sel = clone.querySelector('select');
+          if (sel) sel.selectedIndex = 0;
+          list.appendChild(clone);
+          bindRemove(clone);
+        });
+      });
+      </script>
 
       <!-- Section 4: Organization -->
       <div class="card mb-4">
@@ -185,8 +246,9 @@
         <div class="card-body">
           <div class="row g-3">
             <div class="col-12">
-              <label for="edit-coll-summary" class="form-label"><?php echo __('Collection Summary'); ?></label>
-              <textarea class="form-control" id="edit-coll-summary" name="collection_summary" rows="3"><?php echo htmlspecialchars($f->collection_summary ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <label for="edit-coll-summary" class="form-label"><?php echo __('Collections Mandate'); ?></label>
+              <textarea class="form-control" id="edit-coll-summary" name="collection_summary" rows="3" placeholder="<?php echo __('What this institution collects, why, and for whom — scope, geographic focus, time periods, donor relationships.'); ?>"><?php echo htmlspecialchars($f->collection_summary ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <div class="form-text"><?php echo __('A short statement of collection scope and purpose. Shown on your public profile.'); ?></div>
             </div>
             <div class="col-md-6">
               <label for="edit-strengths" class="form-label"><?php echo __('Collection Strengths'); ?></label>
@@ -198,12 +260,13 @@
                   $strengthsVal = is_array($decoded) ? implode(', ', $decoded) : ($rawStr ?? '');
                 }
               ?>
-              <input type="text" class="form-control" id="edit-strengths" name="collection_strengths" value="<?php echo htmlspecialchars($strengthsVal, ENT_QUOTES, 'UTF-8'); ?>">
-              <div class="form-text"><?php echo __('Comma-separated tags.'); ?></div>
+              <input type="text" class="form-control" id="edit-strengths" name="collection_strengths" value="<?php echo htmlspecialchars($strengthsVal, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., photographs, oral history, indigenous heritage, maps'); ?>">
+              <div class="form-text"><?php echo __('Comma-separated keywords describing subject areas, formats, or themes your collection is known for. Used for discovery and helping researchers find relevant repositories.'); ?></div>
             </div>
             <div class="col-md-3">
               <label for="edit-holdings" class="form-label"><?php echo __('Total Holdings'); ?></label>
-              <input type="text" class="form-control" id="edit-holdings" name="total_holdings" value="<?php echo htmlspecialchars($f->total_holdings ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+              <input type="text" class="form-control" id="edit-holdings" name="total_holdings" value="<?php echo htmlspecialchars($f->total_holdings ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., 500 m analogue / 2 TB digital'); ?>">
+              <div class="form-text"><?php echo __('Approximate size. Free-form — use any units you prefer (linear metres, cubic feet, items, TB).'); ?></div>
             </div>
             <div class="col-md-3">
               <label for="edit-digitization" class="form-label"><?php echo __('Digitization %'); ?></label>
@@ -211,16 +274,38 @@
                 <input type="number" class="form-control" id="edit-digitization" name="digitization_percentage" value="<?php echo htmlspecialchars($f->digitization_percentage ?? '', ENT_QUOTES, 'UTF-8'); ?>" min="0" max="100">
                 <span class="input-group-text">%</span>
               </div>
+              <div class="form-text"><?php echo __('Rough estimate. Leave blank if unknown.'); ?></div>
             </div>
             <div class="col-md-6">
               <label for="edit-mgmt-system" class="form-label"><?php echo __('Collection Management System'); ?></label>
-              <input type="text" class="form-control" id="edit-mgmt-system" name="management_system" value="<?php echo htmlspecialchars($f->management_system ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
-            <div class="col-md-6">
-              <div class="form-check mt-4">
-                <input class="form-check-input" type="checkbox" id="edit-heratio" name="uses_atom" value="1"<?php echo !empty($f->uses_atom) ? ' checked' : ''; ?>>
-                <label class="form-check-label" for="edit-heratio"><?php echo __('Uses AtoM'); ?></label>
-              </div>
+              <?php
+                $cmsOptions = [
+                  '' => __('-- Select --'),
+                  'AtoM' => 'AtoM',
+                  'Heratio' => 'Heratio',
+                  'ArchivesSpace' => 'ArchivesSpace',
+                  'Archivists Toolkit' => "Archivists' Toolkit",
+                  'CollectiveAccess' => 'CollectiveAccess',
+                  'Collections Online' => 'Collections Online',
+                  'PastPerfect' => 'PastPerfect',
+                  'Adlib' => 'Adlib / Axiell',
+                  'EMu' => 'EMu',
+                  'TMS' => 'TMS (Gallery Systems)',
+                  'Mimsy' => 'Mimsy XG',
+                  'Argus' => 'Argus (Lucidea)',
+                  'Eloquent' => 'Eloquent',
+                  'Spreadsheet' => 'Spreadsheet / Ad-hoc',
+                  'None' => __('None'),
+                  'Other' => __('Other'),
+                ];
+                $selCms = $f->management_system ?? '';
+              ?>
+              <select class="form-select" id="edit-mgmt-system" name="management_system">
+                <?php foreach ($cmsOptions as $val => $label): ?>
+                  <option value="<?php echo htmlspecialchars($val, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selCms === $val ? ' selected' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
+                <?php endforeach; ?>
+              </select>
+              <div class="form-text"><?php echo __('The software used to manage collections. If you use AtoM or Heratio, select it here — the "Uses AtoM" badge will appear on your profile automatically.'); ?></div>
             </div>
           </div>
         </div>
@@ -230,7 +315,10 @@
       <div class="card mb-4">
         <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
           <span><i class="fas fa-list-check me-2 text-secondary"></i><?php echo __('Standards & Systems'); ?></span>
-          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardBrowse']); ?>" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="fas fa-external-link-alt me-1"></i><?php echo __('Browse Standards'); ?></a>
+          <div>
+            <button type="button" class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#newStandardModal"><i class="fas fa-plus me-1"></i><?php echo __('Create new'); ?></button>
+            <a href="<?php echo url_for(['module' => 'registry', 'action' => 'standardBrowse']); ?>" class="btn btn-sm btn-outline-secondary" target="_blank"><i class="fas fa-external-link-alt me-1"></i><?php echo __('Browse Standards'); ?></a>
+          </div>
         </div>
         <div class="card-body">
           <p class="text-muted small mb-3"><?php echo __('Select all standards used by your institution. Click a standard name to view its details.'); ?></p>
@@ -319,7 +407,7 @@
             }
           ?>
           <input type="text" class="form-control" id="ie-tags" name="tags" value="<?php echo htmlspecialchars(implode(', ', $currentTags), ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., archive, heritage, photographs, manuscripts'); ?>">
-          <small class="form-text text-muted"><?php echo __('Enter tags separated by commas. Used for discoverability.'); ?></small>
+          <small class="form-text text-muted"><?php echo __('Free-form keywords that help users find your institution in the registry directory. Tags appear as clickable filters on the browse page — use broad terms (region, era, theme, collection type) that users might search for.'); ?></small>
         </div>
       </div>
 
@@ -329,6 +417,65 @@
       </div>
 
     </form>
+
+    <!-- New Standard modal (submits outside the main form) -->
+    <div class="modal fade" id="newStandardModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'standardSubmit']); ?>">
+          <input type="hidden" name="return" value="<?php echo url_for(array_merge(['module' => 'registry', 'action' => 'institutionEdit'], isset($sf_request) && $sf_request->getParameter('id') ? ['id' => (int) $sf_request->getParameter('id')] : [])); ?>">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title"><?php echo __('Add a New Standard'); ?></h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p class="text-muted small"><?php echo __('Add a standard or compliance instrument not yet listed — e.g., regional legislation, niche sector standards. Once saved, it will appear in the list above and be available to all institutions.'); ?></p>
+              <div class="mb-3">
+                <label class="form-label"><?php echo __('Name'); ?> <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" required placeholder="<?php echo __('e.g., BC Freedom of Information and Protection of Privacy Act'); ?>">
+              </div>
+              <div class="row g-2">
+                <div class="col-md-4">
+                  <label class="form-label"><?php echo __('Acronym'); ?></label>
+                  <input type="text" class="form-control" name="acronym" placeholder="FIPPA">
+                </div>
+                <div class="col-md-8">
+                  <label class="form-label"><?php echo __('Category'); ?></label>
+                  <select class="form-select" name="category">
+                    <option value="descriptive"><?php echo __('Descriptive'); ?></option>
+                    <option value="metadata"><?php echo __('Metadata'); ?></option>
+                    <option value="interchange"><?php echo __('Interchange'); ?></option>
+                    <option value="preservation"><?php echo __('Preservation'); ?></option>
+                    <option value="rights"><?php echo __('Rights & Licensing'); ?></option>
+                    <option value="sector"><?php echo __('Sector'); ?></option>
+                    <option value="compliance" selected><?php echo __('Compliance & Regulatory'); ?></option>
+                    <option value="accounting"><?php echo __('Heritage Accounting'); ?></option>
+                  </select>
+                </div>
+              </div>
+              <div class="mb-3 mt-3">
+                <label class="form-label"><?php echo __('Short Description'); ?></label>
+                <textarea class="form-control" name="short_description" rows="2" placeholder="<?php echo __('One-line summary of the standard or instrument'); ?>"></textarea>
+              </div>
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <label class="form-label"><?php echo __('Issuing Body'); ?></label>
+                  <input type="text" class="form-control" name="issuing_body" placeholder="<?php echo __('e.g., Province of British Columbia'); ?>">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label"><?php echo __('Website URL'); ?></label>
+                  <input type="url" class="form-control" name="website_url" placeholder="https://">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i><?php echo __('Save Standard'); ?></button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
 
   </div>
 </div>

@@ -831,3 +831,10 @@
         font-size: 1.5rem;
     }
 }
+
+/* Lighter placeholder for hint-style inputs (Instance OS Environment, etc.) */
+.text-muted-placeholder::placeholder {
+    color: #b0b7c3 !important;
+    opacity: 1;
+    font-style: italic;
+}

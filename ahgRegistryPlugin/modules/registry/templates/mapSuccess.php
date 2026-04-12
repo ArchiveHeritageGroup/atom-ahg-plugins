@@ -65,7 +65,15 @@ document.addEventListener('DOMContentLoaded', function() {
     maxZoom: 18
   }).addTo(map);
 
-  var institutions = <?php echo json_encode($institutions, JSON_UNESCAPED_UNICODE); ?>;
+  <?php
+    // Unwrap Symfony output escapers so json_encode treats the list as an array, not an object.
+    $institutionsRaw = sfOutputEscaper::unescape($institutions);
+    $vendorsRaw = sfOutputEscaper::unescape($vendors);
+    // Stringify stdClass rows into plain arrays for safe json encoding
+    $institutionsList = array_values(array_map(function ($i) { return (array) $i; }, (array) $institutionsRaw));
+    $vendorsList = array_values(array_map(function ($v) { return (array) $v; }, (array) $vendorsRaw));
+  ?>
+  var institutions = <?php echo json_encode($institutionsList, JSON_UNESCAPED_UNICODE); ?>;
   var markers = [];
   var listContainer = document.getElementById('institution-list');
   var countBadge = document.getElementById('map-count');
@@ -144,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // ---- Vendor markers ----
-  var vendors = <?php echo json_encode($vendors ?? [], JSON_UNESCAPED_UNICODE); ?>;
+  var vendors = <?php echo json_encode($vendorsList, JSON_UNESCAPED_UNICODE); ?>;
 
   vendors.forEach(function(v) {
     if (!v.latitude || !v.longitude) return;

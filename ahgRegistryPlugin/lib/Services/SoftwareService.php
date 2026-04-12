@@ -27,7 +27,13 @@ class SoftwareService
         $query = DB::table($this->table)->where('is_active', 1);
 
         if (!empty($params['category'])) {
-            $query->where('category', $params['category']);
+            // category is stored as JSON array (multi-select) but also back-compat with
+            // legacy single-value strings — match either shape.
+            $catParam = $params['category'];
+            $query->where(function ($q) use ($catParam) {
+                $q->whereRaw("JSON_CONTAINS(category, ?)", ['"' . $catParam . '"'])
+                  ->orWhere('category', $catParam);
+            });
         }
         if (!empty($params['vendor'])) {
             $query->where('vendor_id', (int) $params['vendor']);

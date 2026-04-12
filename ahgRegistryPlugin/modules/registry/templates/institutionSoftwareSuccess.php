@@ -25,7 +25,7 @@
     <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionSoftware']); ?><?php echo $sf_request->getParameter('inst') ? '?inst=' . (int) $sf_request->getParameter('inst') : ''; ?>">
       <input type="hidden" name="form_action" value="add">
       <div class="row g-3 align-items-end">
-        <div class="col-md-5">
+        <div class="col-md-4">
           <label for="sw-select" class="form-label"><?php echo __('Software'); ?></label>
           <select class="form-select" id="sw-select" name="software_id" required>
             <option value=""><?php echo __('-- Select software --'); ?></option>
@@ -35,13 +35,17 @@
             <?php endforeach; endif; ?>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label for="sw-version" class="form-label"><?php echo __('Version in Use'); ?></label>
           <input type="text" class="form-control" id="sw-version" name="version_in_use" placeholder="<?php echo __('e.g., 2.8.2'); ?>">
         </div>
+        <div class="col-md-2">
+          <label for="sw-deploy-date" class="form-label"><?php echo __('Deployment Date'); ?></label>
+          <input type="date" class="form-control" id="sw-deploy-date" name="deployment_date">
+        </div>
         <div class="col-md-3">
           <label for="sw-notes" class="form-label"><?php echo __('Notes'); ?></label>
-          <input type="text" class="form-control" id="sw-notes" name="notes" placeholder="<?php echo __('Optional'); ?>">
+          <input type="text" class="form-control" id="sw-notes" name="notes" placeholder="<?php echo __('e.g., Upgrade in progress, customisations, hosting notes'); ?>">
         </div>
         <div class="col-md-1">
           <button type="submit" class="btn btn-success w-100" title="<?php echo __('Add'); ?>">

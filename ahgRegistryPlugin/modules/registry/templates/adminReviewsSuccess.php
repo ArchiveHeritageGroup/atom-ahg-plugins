@@ -11,10 +11,30 @@
   ['label' => __('Reviews')],
 ]]); ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h3 mb-0"><?php echo __('Manage Reviews'); ?></h1>
-  <span class="badge bg-secondary fs-6"><?php echo number_format($total ?? 0); ?> <?php echo __('total'); ?></span>
+  <span class="badge bg-secondary fs-6"><?php echo number_format($total ?? 0); ?> <?php echo __('shown'); ?></span>
 </div>
+
+<ul class="nav nav-pills mb-4">
+  <?php $cur = $filter ?? 'pending'; ?>
+  <li class="nav-item">
+    <a class="nav-link <?php echo 'pending' === $cur ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => 'pending']); ?>">
+      <i class="fas fa-clock me-1"></i> <?php echo __('Pending'); ?>
+      <?php if (!empty($pendingCount)): ?><span class="badge bg-warning text-dark ms-1"><?php echo (int) $pendingCount; ?></span><?php endif; ?>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link <?php echo 'approved' === $cur ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => 'approved']); ?>">
+      <i class="fas fa-check me-1"></i> <?php echo __('Approved'); ?>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link <?php echo 'all' === $cur ? 'active' : ''; ?>" href="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => 'all']); ?>">
+      <?php echo __('All'); ?>
+    </a>
+  </li>
+</ul>
 
 <?php if (!empty($reviews) && count($reviews) > 0): ?>
 <div class="table-responsive">
@@ -69,18 +89,28 @@
         </td>
         <td class="text-end">
           <div class="btn-group btn-group-sm">
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews']); ?>" class="d-inline">
-              <input type="hidden" name="form_action" value="toggle_visibility">
-              <input type="hidden" name="review_id" value="<?php echo (int) $item->id; ?>">
-              <button type="submit" class="btn btn-sm btn-outline-secondary" title="<?php echo (!isset($item->is_visible) || $item->is_visible) ? __('Hide') : __('Show'); ?>">
-                <i class="fas fa-<?php echo (!isset($item->is_visible) || $item->is_visible) ? 'eye-slash' : 'eye'; ?>"></i>
-              </button>
-            </form>
+            <?php if (empty($item->is_visible)): ?>
+              <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => $filter ?? 'pending']); ?>" class="d-inline">
+                <input type="hidden" name="form_action" value="approve">
+                <input type="hidden" name="review_id" value="<?php echo (int) $item->id; ?>">
+                <button type="submit" class="btn btn-sm btn-success" title="<?php echo __('Approve and publish'); ?>">
+                  <i class="fas fa-check me-1"></i><?php echo __('Approve'); ?>
+                </button>
+              </form>
+            <?php else: ?>
+              <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => $filter ?? 'pending']); ?>" class="d-inline">
+                <input type="hidden" name="form_action" value="toggle_visibility">
+                <input type="hidden" name="review_id" value="<?php echo (int) $item->id; ?>">
+                <button type="submit" class="btn btn-sm btn-outline-secondary" title="<?php echo __('Unpublish'); ?>">
+                  <i class="fas fa-eye-slash"></i>
+                </button>
+              </form>
+            <?php endif; ?>
 
-            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this review?'); ?>');">
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'adminReviews', 'filter' => $filter ?? 'pending']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Are you sure you want to delete this review?'); ?>');">
               <input type="hidden" name="form_action" value="delete">
               <input type="hidden" name="review_id" value="<?php echo (int) $item->id; ?>">
-              <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Delete'); ?>">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Reject and delete'); ?>">
                 <i class="fas fa-trash"></i>
               </button>
             </form>

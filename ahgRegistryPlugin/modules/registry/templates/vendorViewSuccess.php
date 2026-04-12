@@ -224,12 +224,44 @@
     <div class="card mb-4">
       <div class="card-header fw-semibold"><?php echo __('Details'); ?></div>
       <ul class="list-group list-group-flush">
-        <?php if (!empty($detail->website)): ?>
+        <?php
+          $urlIconMap = [
+            'website' => ['fas','fa-globe'],
+            'atom_instance' => ['fas','fa-server'],
+            'repository' => ['fas','fa-database'],
+            'catalogue' => ['fas','fa-book'],
+            'blog' => ['fas','fa-blog'],
+            'facebook' => ['fab','fa-facebook'],
+            'twitter' => ['fab','fa-twitter'],
+            'instagram' => ['fab','fa-instagram'],
+            'youtube' => ['fab','fa-youtube'],
+            'linkedin' => ['fab','fa-linkedin'],
+            'github' => ['fab','fa-github'],
+            'gitlab' => ['fab','fa-gitlab'],
+            'other' => ['fas','fa-link'],
+          ];
+          $entityUrlsRaw = isset($entityUrls) ? sfOutputEscaper::unescape($entityUrls) : [];
+          if (empty($entityUrlsRaw) && !empty($detail->website)) {
+            $entityUrlsRaw = [(object) ['link_type' => 'website', 'url' => $detail->website, 'label' => '']];
+          }
+        ?>
+        <?php foreach ($entityUrlsRaw as $u):
+          $uType = $u->link_type ?? 'website';
+          $uUrl = $u->url ?? '';
+          $uLabel = $u->label ?? '';
+          $icon = $urlIconMap[$uType] ?? ['fas','fa-link'];
+          $displayLabel = $uLabel !== '' ? $uLabel : ($entityUrlTypes[$uType] ?? ucfirst($uType));
+        ?>
         <li class="list-group-item">
-          <i class="fas fa-globe me-2 text-muted"></i>
-          <a href="<?php echo htmlspecialchars($detail->website, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(preg_replace('#^https?://#', '', $detail->website), ENT_QUOTES, 'UTF-8'); ?></a>
+          <i class="<?php echo $icon[0]; ?> <?php echo $icon[1]; ?> me-2 text-muted"></i>
+          <a href="<?php echo htmlspecialchars($uUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
+            <?php echo htmlspecialchars(preg_replace('#^https?://#', '', $uUrl), ENT_QUOTES, 'UTF-8'); ?>
+          </a>
+          <?php if ($uType !== 'website' || $uLabel !== ''): ?>
+            <small class="text-muted d-block ms-4"><?php echo htmlspecialchars(__($displayLabel), ENT_QUOTES, 'UTF-8'); ?></small>
+          <?php endif; ?>
         </li>
-        <?php endif; ?>
+        <?php endforeach; ?>
         <?php if (!empty($detail->email)): ?>
         <li class="list-group-item">
           <i class="fas fa-envelope me-2 text-muted"></i>
@@ -257,32 +289,6 @@
       </ul>
     </div>
 
-    <!-- Links -->
-    <?php if (!empty($detail->github_url) || !empty($detail->gitlab_url) || !empty($detail->linkedin_url)): ?>
-    <div class="card mb-4">
-      <div class="card-header fw-semibold"><?php echo __('Links'); ?></div>
-      <ul class="list-group list-group-flush">
-        <?php if (!empty($detail->github_url)): ?>
-        <li class="list-group-item">
-          <i class="fab fa-github me-2"></i>
-          <a href="<?php echo htmlspecialchars($detail->github_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo __('GitHub'); ?></a>
-        </li>
-        <?php endif; ?>
-        <?php if (!empty($detail->gitlab_url)): ?>
-        <li class="list-group-item">
-          <i class="fab fa-gitlab me-2"></i>
-          <a href="<?php echo htmlspecialchars($detail->gitlab_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo __('GitLab'); ?></a>
-        </li>
-        <?php endif; ?>
-        <?php if (!empty($detail->linkedin_url)): ?>
-        <li class="list-group-item">
-          <i class="fab fa-linkedin me-2"></i>
-          <a href="<?php echo htmlspecialchars($detail->linkedin_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo __('LinkedIn'); ?></a>
-        </li>
-        <?php endif; ?>
-      </ul>
-    </div>
-    <?php endif; ?>
 
     <!-- Tags -->
     <?php if (!empty($vendor['tags'])): ?>
