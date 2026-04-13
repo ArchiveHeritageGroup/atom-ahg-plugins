@@ -74,8 +74,14 @@
                 <i class="fas fa-exchange-alt me-1"></i><?php echo __('Switch'); ?>
               </a>
             <?php else: ?>
-              <span class="badge bg-info"><?php echo __('Current'); ?></span>
+              <span class="badge bg-info me-1"><?php echo __('Current'); ?></span>
             <?php endif; ?>
+            <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionUnlink']); ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Unlink yourself from this institution?'); ?>');">
+              <input type="hidden" name="institution_id" value="<?php echo (int) $mi->id; ?>">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="<?php echo __('Unlink'); ?>">
+                <i class="fas fa-unlink"></i>
+              </button>
+            </form>
           </td>
         </tr>
         <?php endforeach; ?>
@@ -213,35 +219,47 @@ document.addEventListener('DOMContentLoaded', function() {
 ?>
 
 <?php if (!$isLinked): ?>
-<div class="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+<div class="alert alert-warning d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <div>
     <i class="fas fa-exclamation-triangle me-2"></i>
     <strong><?php echo __('You are not linked to this institution.'); ?></strong>
-    <?php echo __('Claim it to add it to your account.'); ?>
+    <?php echo __('Claim it to add it to your account, or link it to another user.'); ?>
   </div>
-  <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionClaim']); ?>" class="d-flex gap-2">
-    <input type="hidden" name="institution_id" value="<?php echo (int) $institution->id; ?>">
+  <div class="d-flex gap-2 flex-wrap">
+    <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionClaim']); ?>" class="d-flex gap-2">
+      <input type="hidden" name="institution_id" value="<?php echo (int) $institution->id; ?>">
+      <?php if ($isAdmin): ?>
+      <select name="role" class="form-select form-select-sm" style="width: auto;">
+        <option value="owner"><?php echo __('as Owner'); ?></option>
+        <option value="manager"><?php echo __('as Manager'); ?></option>
+      </select>
+      <?php else: ?>
+      <input type="hidden" name="role" value="manager">
+      <?php endif; ?>
+      <button type="submit" class="btn btn-sm btn-warning">
+        <i class="fas fa-hand-paper me-1"></i><?php echo __('Claim for myself'); ?>
+      </button>
+    </form>
     <?php if ($isAdmin): ?>
-    <select name="role" class="form-select form-select-sm" style="width: auto;">
-      <option value="owner"><?php echo __('as Owner'); ?></option>
-      <option value="manager"><?php echo __('as Manager'); ?></option>
-    </select>
-    <?php else: ?>
-    <input type="hidden" name="role" value="manager">
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminInstitutionUsers', 'id' => (int) $institution->id]); ?>" class="btn btn-sm btn-outline-primary">
+      <i class="fas fa-user-plus me-1"></i><?php echo __('Link another person'); ?>
+    </a>
     <?php endif; ?>
-    <button type="submit" class="btn btn-sm btn-warning">
-      <i class="fas fa-hand-paper me-1"></i><?php echo __('Claim'); ?>
-    </button>
-  </form>
+  </div>
 </div>
 <?php endif; ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
   <h1 class="h3 mb-0"><?php echo htmlspecialchars($institution->name ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
-  <div>
-    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionView', 'slug' => $institution->slug ?? $institution->id]); ?>" class="btn btn-outline-secondary btn-sm me-1">
+  <div class="d-flex gap-1 flex-wrap">
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionView', 'slug' => $institution->slug ?? $institution->id]); ?>" class="btn btn-outline-secondary btn-sm">
       <i class="fas fa-eye me-1"></i> <?php echo __('View Public Profile'); ?>
     </a>
+    <?php if ($isAdmin || ($isLinked && in_array($myRole, ['owner', 'manager'], true))): ?>
+    <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminInstitutionUsers', 'id' => (int) $institution->id]); ?>" class="btn btn-outline-primary btn-sm">
+      <i class="fas fa-users me-1"></i> <?php echo __('Manage Linked Users'); ?>
+    </a>
+    <?php endif; ?>
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionEdit', 'id' => (int) $institution->id]); ?>" class="btn btn-primary btn-sm">
       <i class="fas fa-edit me-1"></i> <?php echo __('Edit Profile'); ?>
     </a>

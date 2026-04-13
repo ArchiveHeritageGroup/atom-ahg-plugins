@@ -1189,6 +1189,52 @@ class registryActions extends AhgController
         $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']) . '?inst=' . $instId);
     }
 
+    /**
+     * Unlink the current user (or, if admin, any user) from an institution.
+     */
+    public function executeMyInstitutionUnlink($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $instId = (int) $request->getParameter('institution_id', 0);
+        $targetUserId = (int) $request->getParameter('user_id', 0);
+        $currentUserId = $this->getCurrentUserId();
+
+        // Default: unlink self
+        if ($targetUserId <= 0) {
+            $targetUserId = $currentUserId;
+        }
+
+        // Only admins can unlink other users
+        if ($targetUserId !== (int) $currentUserId && !$this->isAdmin()) {
+            $this->getUser()->setFlash('error', 'You can only unlink yourself from an institution.');
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']) . '?inst=' . $instId);
+            return;
+        }
+
+        $deleted = $db::table('registry_user_institution')
+            ->where('user_id', $targetUserId)
+            ->where('institution_id', $instId)
+            ->delete();
+
+        if ($deleted > 0) {
+            $this->getUser()->setFlash('success', 'Unlinked from institution.');
+        } else {
+            $this->getUser()->setFlash('error', 'No link found to remove.');
+        }
+
+        // After unlinking self, send back to dashboard root (no inst context)
+        if ($targetUserId === (int) $currentUserId) {
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
+        } else {
+            $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']) . '?inst=' . $instId);
+        }
+    }
+
     public function executeInstitutionRegister($request)
     {
         $user = $this->requireLogin();
