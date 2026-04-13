@@ -1,15 +1,38 @@
 <?php
   $catBg = [
     'ams' => 'bg-primary',
+    'ims' => 'bg-primary',
+    'dam' => 'bg-success',
     'dams' => 'bg-success',
     'cms' => 'bg-info text-dark',
+    'glam' => 'bg-info text-dark',
     'ils' => 'bg-warning text-dark',
     'preservation' => 'bg-dark',
     'digitization' => 'bg-secondary',
     'discovery' => 'bg-danger',
+    'utility' => 'bg-secondary',
+    'plugin' => 'bg-secondary',
+    'theme' => 'bg-secondary',
+    'integration' => 'bg-secondary',
+    'other' => 'bg-info text-dark',
   ];
-  $cat = $item->category ?? '';
-  $catClass = $catBg[strtolower($cat)] ?? 'bg-info text-dark';
+  $catLabels = [
+    'ams' => 'AMS', 'ims' => 'IMS', 'dam' => 'DAM', 'dams' => 'DAMS',
+    'cms' => 'CMS', 'glam' => 'GLAM', 'preservation' => 'Preservation',
+    'digitization' => 'Digitization', 'discovery' => 'Discovery',
+    'utility' => 'Utility', 'plugin' => 'Plugin', 'theme' => 'Theme',
+    'integration' => 'Integration', 'other' => 'Other',
+  ];
+  $rawCat = isset($item->category) ? \sfOutputEscaper::unescape($item->category) : '';
+  $catList = [];
+  if ('' !== (string) $rawCat) {
+    $decoded = json_decode((string) $rawCat, true);
+    if (is_array($decoded)) {
+      $catList = $decoded;
+    } else {
+      $catList = [(string) $rawCat];
+    }
+  }
 
   $licenseBg = [
     'open_source' => 'bg-success',
@@ -57,7 +80,10 @@
             <?php endif; ?>
           </h6>
           <div>
-            <span class="badge <?php echo $catClass; ?>"><?php echo htmlspecialchars(strtoupper($cat), ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php foreach ($catList as $catVal): ?>
+              <?php $catKey = strtolower((string) $catVal); $catClass = $catBg[$catKey] ?? 'bg-info text-dark'; $catLabel = $catLabels[$catKey] ?? ucfirst((string) $catVal); ?>
+              <span class="badge <?php echo $catClass; ?>"><?php echo htmlspecialchars($catLabel, ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php endforeach; ?>
             <?php if (!empty($lic)): ?>
               <span class="badge <?php echo $licClass; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $lic)), ENT_QUOTES, 'UTF-8'); ?></span>
             <?php endif; ?>
