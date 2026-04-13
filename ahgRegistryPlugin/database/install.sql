@@ -770,3 +770,23 @@ CREATE TABLE IF NOT EXISTS `registry_dropdown` (
   UNIQUE KEY `uq_group_value` (`dropdown_group`, `value`),
   KEY `idx_group_active` (`dropdown_group`, `is_active`, `sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Seed: contact_role dropdown group (used by institution contact form)
+INSERT IGNORE INTO `registry_dropdown` (`dropdown_group`, `value`, `label`, `sort_order`, `is_active`) VALUES
+('contact_role','management','Management / Director',10,1),
+('contact_role','atom_admin','AtoM Administrator',20,1),
+('contact_role','office_admin','Office Administrator (Billing)',30,1),
+('contact_role','it_support','IT / Technical Support',40,1),
+('contact_role','archivist','Archivist',50,1),
+('contact_role','librarian','Librarian',60,1),
+('contact_role','curator','Curator',70,1),
+('contact_role','cataloguer','Cataloguer / Metadata Specialist',80,1),
+('contact_role','preservation','Digital Preservation Specialist',90,1),
+('contact_role','conservator','Conservator',100,1),
+('contact_role','collections_manager','Collections Manager',110,1),
+('contact_role','reference','Reference / Research Services',120,1),
+('contact_role','registrar','Registrar',130,1),
+('contact_role','education','Education / Outreach',140,1),
+('contact_role','digitization','Digitization Technician',150,1),
+('contact_role','volunteer','Volunteer',160,1),
+('contact_role','other','Other',999,1);

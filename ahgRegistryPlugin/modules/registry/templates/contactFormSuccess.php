@@ -69,27 +69,14 @@
       <div class="card mb-4">
         <div class="card-header fw-semibold"><?php echo __('Roles'); ?></div>
         <div class="card-body">
-          <p class="text-muted small mb-3"><?php echo __('Select all roles that apply to this contact.'); ?></p>
+          <p class="text-muted small mb-3"><?php echo __('Select all roles that apply to this contact. Roles are managed in Admin → Dropdowns → contact_role.'); ?></p>
           <?php
-            $allRoles = [
-              'management' => __('Management / Director'),
-              'atom_admin' => __('AtoM Administrator'),
-              'office_admin' => __('Office Administrator (Billing)'),
-              'it_support' => __('IT / Technical Support'),
-              'archivist' => __('Archivist'),
-              'librarian' => __('Librarian'),
-              'curator' => __('Curator'),
-              'cataloguer' => __('Cataloguer / Metadata Specialist'),
-              'preservation' => __('Digital Preservation Specialist'),
-              'conservator' => __('Conservator'),
-              'collections_manager' => __('Collections Manager'),
-              'reference' => __('Reference / Research Services'),
-              'registrar' => __('Registrar'),
-              'education' => __('Education / Outreach'),
-              'digitization' => __('Digitization Technician'),
-              'volunteer' => __('Volunteer'),
-              'other' => __('Other'),
-            ];
+            $allRoles = \Illuminate\Database\Capsule\Manager::table('registry_dropdown')
+              ->where('dropdown_group', 'contact_role')
+              ->where('is_active', 1)
+              ->orderBy('sort_order')
+              ->orderBy('label')
+              ->get()->all();
             $currentRoles = [];
             if (!empty($c->roles)) {
               $rawRoles = sfOutputEscaper::unescape($c->roles);
@@ -97,16 +84,11 @@
               if (!is_array($currentRoles)) { $currentRoles = []; }
             }
           ?>
-          <div class="row">
-            <?php foreach ($allRoles as $val => $label): ?>
-            <div class="col-md-4">
-              <div class="form-check mb-2">
-                <input class="form-check-input" type="checkbox" id="cf-role-<?php echo $val; ?>" name="roles[]" value="<?php echo $val; ?>"<?php echo in_array($val, $currentRoles) ? ' checked' : ''; ?>>
-                <label class="form-check-label" for="cf-role-<?php echo $val; ?>"><?php echo $label; ?></label>
-              </div>
-            </div>
+          <select id="cf-roles" name="roles[]" multiple class="form-select" data-choices placeholder="<?php echo __('Select roles...'); ?>">
+            <?php foreach ($allRoles as $r): ?>
+              <option value="<?php echo htmlspecialchars($r->value, ENT_QUOTES, 'UTF-8'); ?>"<?php echo in_array($r->value, $currentRoles) ? ' selected' : ''; ?>><?php echo htmlspecialchars($r->label, ENT_QUOTES, 'UTF-8'); ?></option>
             <?php endforeach; ?>
-          </div>
+          </select>
         </div>
       </div>
 
@@ -160,5 +142,23 @@
 
   </div>
 </div>
+
+<?php $n = sfConfig::get('csp_nonce', ''); $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
+<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js" <?php echo $na; ?>></script>
+<script <?php echo $na; ?>>
+document.addEventListener('DOMContentLoaded', function () {
+  var el = document.getElementById('cf-roles');
+  if (el && typeof Choices !== 'undefined') {
+    new Choices(el, {
+      removeItemButton: true,
+      shouldSort: false,
+      placeholder: true,
+      placeholderValue: el.getAttribute('placeholder') || '',
+      searchPlaceholderValue: 'Search roles...'
+    });
+  }
+});
+</script>
 
 <?php end_slot(); ?>
