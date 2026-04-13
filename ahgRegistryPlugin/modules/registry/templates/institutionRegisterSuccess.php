@@ -207,9 +207,15 @@
               <input type="text" class="form-control" id="reg-strengths" name="collection_strengths" value="<?php echo htmlspecialchars($f->collection_strengths ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Comma-separated tags: photographs, maps, government records...'); ?>">
               <div class="form-text"><?php echo __('Enter comma-separated values.'); ?></div>
             </div>
-            <div class="col-md-3">
-              <label for="reg-holdings" class="form-label"><?php echo __('Total Holdings'); ?></label>
-              <input type="text" class="form-control" id="reg-holdings" name="total_holdings" value="<?php echo htmlspecialchars($f->total_holdings ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., 500,000 items'); ?>">
+            <div class="col-md-6">
+              <label for="reg-holdings-analog" class="form-label"><?php echo __('Analog Holdings'); ?></label>
+              <textarea class="form-control" id="reg-holdings-analog" name="holdings_analog" rows="4" placeholder="<?php echo __('e.g., 500 linear metres of records, 12,000 photographs, 8,000 books, 200 maps'); ?>"><?php echo htmlspecialchars($f->holdings_analog ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <div class="form-text"><?php echo __('Physical holdings — free-form. Use any units.'); ?></div>
+            </div>
+            <div class="col-md-6">
+              <label for="reg-holdings-digital" class="form-label"><?php echo __('Digital Holdings'); ?></label>
+              <textarea class="form-control" id="reg-holdings-digital" name="holdings_digital" rows="4" placeholder="<?php echo __('e.g., 2 TB images, 500 GB audio/video, 80,000 digital files'); ?>"><?php echo htmlspecialchars($f->holdings_digital ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <div class="form-text"><?php echo __('Born-digital and digitised holdings — free-form.'); ?></div>
             </div>
             <div class="col-md-3">
               <label for="reg-digitization" class="form-label"><?php echo __('Digitization %'); ?></label>

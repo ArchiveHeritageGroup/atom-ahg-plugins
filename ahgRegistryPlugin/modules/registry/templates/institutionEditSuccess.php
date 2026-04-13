@@ -263,10 +263,15 @@
               <input type="text" class="form-control" id="edit-strengths" name="collection_strengths" value="<?php echo htmlspecialchars($strengthsVal, ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., photographs, oral history, indigenous heritage, maps'); ?>">
               <div class="form-text"><?php echo __('Comma-separated keywords describing subject areas, formats, or themes your collection is known for. Used for discovery and helping researchers find relevant repositories.'); ?></div>
             </div>
-            <div class="col-md-3">
-              <label for="edit-holdings" class="form-label"><?php echo __('Total Holdings'); ?></label>
-              <input type="text" class="form-control" id="edit-holdings" name="total_holdings" value="<?php echo htmlspecialchars($f->total_holdings ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., 500 m analogue / 2 TB digital'); ?>">
-              <div class="form-text"><?php echo __('Approximate size. Free-form — use any units you prefer (linear metres, cubic feet, items, TB).'); ?></div>
+            <div class="col-md-6">
+              <label for="edit-holdings-analog" class="form-label"><?php echo __('Analog Holdings'); ?></label>
+              <textarea class="form-control" id="edit-holdings-analog" name="holdings_analog" rows="4" placeholder="<?php echo __('e.g., 500 linear metres of records, 12,000 photographs, 8,000 books, 200 maps'); ?>"><?php echo htmlspecialchars($f->holdings_analog ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <div class="form-text"><?php echo __('Physical holdings — free-form. Use any units (linear metres, cubic feet, items, boxes, volumes).'); ?></div>
+            </div>
+            <div class="col-md-6">
+              <label for="edit-holdings-digital" class="form-label"><?php echo __('Digital Holdings'); ?></label>
+              <textarea class="form-control" id="edit-holdings-digital" name="holdings_digital" rows="4" placeholder="<?php echo __('e.g., 2 TB images, 500 GB audio/video, 80,000 digital files, 1.2 million records'); ?>"><?php echo htmlspecialchars($f->holdings_digital ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+              <div class="form-text"><?php echo __('Born-digital and digitised holdings — free-form. Use any units (TB, GB, files, records).'); ?></div>
             </div>
             <div class="col-md-3">
               <label for="edit-digitization" class="form-label"><?php echo __('Digitization %'); ?></label>

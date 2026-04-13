@@ -195,7 +195,7 @@ class SyncService
         // Update institution fields
         if (!empty($payload['institution'])) {
             $instData = [];
-            foreach (['name', 'description', 'website', 'email', 'phone', 'street_address', 'city', 'province_state', 'postal_code', 'country', 'collection_summary', 'total_holdings', 'digitization_percentage'] as $field) {
+            foreach (['name', 'description', 'website', 'email', 'phone', 'street_address', 'city', 'province_state', 'postal_code', 'country', 'collection_summary', 'total_holdings', 'holdings_analog', 'holdings_digital', 'digitization_percentage'] as $field) {
                 if (isset($payload['institution'][$field])) {
                     $instData[$field] = $payload['institution'][$field];
                 }

@@ -115,7 +115,7 @@
     <?php endif; ?>
 
     <!-- Collection section -->
-    <?php if (!empty($detail->collection_summary) || !empty($detail->total_holdings)): ?>
+    <?php if (!empty($detail->collection_summary) || !empty($detail->holdings_analog) || !empty($detail->holdings_digital) || !empty($detail->total_holdings)): ?>
     <div class="card mb-4">
       <div class="card-header fw-semibold"><?php echo __('Collections Mandate'); ?></div>
       <div class="card-body">
@@ -123,10 +123,22 @@
         <p><?php echo nl2br(htmlspecialchars($detail->collection_summary, ENT_QUOTES, 'UTF-8')); ?></p>
         <?php endif; ?>
         <div class="row g-3">
-          <?php if (!empty($detail->total_holdings)): ?>
-          <div class="col-sm-4">
+          <?php if (!empty($detail->holdings_analog)): ?>
+          <div class="col-sm-6">
+            <strong><?php echo __('Analog Holdings'); ?></strong><br>
+            <?php echo nl2br(htmlspecialchars($detail->holdings_analog, ENT_QUOTES, 'UTF-8')); ?>
+          </div>
+          <?php endif; ?>
+          <?php if (!empty($detail->holdings_digital)): ?>
+          <div class="col-sm-6">
+            <strong><?php echo __('Digital Holdings'); ?></strong><br>
+            <?php echo nl2br(htmlspecialchars($detail->holdings_digital, ENT_QUOTES, 'UTF-8')); ?>
+          </div>
+          <?php endif; ?>
+          <?php if (empty($detail->holdings_analog) && empty($detail->holdings_digital) && !empty($detail->total_holdings)): ?>
+          <div class="col-sm-12">
             <strong><?php echo __('Total Holdings'); ?></strong><br>
-            <?php echo htmlspecialchars($detail->total_holdings, ENT_QUOTES, 'UTF-8'); ?>
+            <?php echo nl2br(htmlspecialchars($detail->total_holdings, ENT_QUOTES, 'UTF-8')); ?>
           </div>
           <?php endif; ?>
           <?php if (isset($detail->digitization_percentage) && $detail->digitization_percentage !== null): ?>
