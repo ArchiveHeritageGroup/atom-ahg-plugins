@@ -1245,8 +1245,8 @@ class registryActions extends AhgController
                 'collection_summary' => trim($request->getParameter('collection_summary', '')) ?: null,
                 'holdings_analog' => trim($request->getParameter('holdings_analog', '')) ?: null,
                 'holdings_digital' => trim($request->getParameter('holdings_digital', '')) ?: null,
-                'management_system' => trim($request->getParameter('management_system', '')) ?: null,
-                'uses_atom' => in_array(trim($request->getParameter('management_system', '')), ['AtoM', 'Heratio'], true) ? 1 : 0,
+                'management_system' => 'AtoM',
+                'uses_atom' => 1,
                 'created_by' => $this->getCurrentUserId(),
             ];
 
@@ -1362,8 +1362,8 @@ class registryActions extends AhgController
                 'holdings_analog' => trim($request->getParameter('holdings_analog', '')) ?: null,
                 'holdings_digital' => trim($request->getParameter('holdings_digital', '')) ?: null,
                 'digitization_percentage' => $request->getParameter('digitization_percentage', '') !== '' ? (int) $request->getParameter('digitization_percentage') : null,
-                'management_system' => trim($request->getParameter('management_system', '')) ?: null,
-                'uses_atom' => in_array(trim($request->getParameter('management_system', '')), ['AtoM', 'Heratio'], true) ? 1 : 0,
+                'management_system' => 'AtoM',
+                'uses_atom' => 1,
                 'institution_url' => trim($request->getParameter('institution_url', '')) ?: null,
                 'open_to_public' => $request->getParameter('open_to_public', 0) ? 1 : 0,
             ];

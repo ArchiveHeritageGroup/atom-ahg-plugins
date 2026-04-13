@@ -202,7 +202,7 @@
               <label for="reg-coll-summary" class="form-label"><?php echo __('Collection Summary'); ?></label>
               <textarea class="form-control" id="reg-coll-summary" name="collection_summary" rows="3" placeholder="<?php echo __('Brief summary of your collections, scope, and focus areas...'); ?>"><?php echo htmlspecialchars($f->collection_summary ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
             </div>
-            <div class="col-md-6">
+            <div class="col-12">
               <label for="reg-strengths" class="form-label"><?php echo __('Collection Strengths'); ?></label>
               <input type="text" class="form-control" id="reg-strengths" name="collection_strengths" value="<?php echo htmlspecialchars($f->collection_strengths ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('Comma-separated tags: photographs, maps, government records...'); ?>">
               <div class="form-text"><?php echo __('Enter comma-separated values.'); ?></div>
@@ -222,16 +222,6 @@
               <div class="input-group">
                 <input type="number" class="form-control" id="reg-digitization" name="digitization_percentage" value="<?php echo htmlspecialchars($f->digitization_percentage ?? '', ENT_QUOTES, 'UTF-8'); ?>" min="0" max="100">
                 <span class="input-group-text">%</span>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <label for="reg-mgmt-system" class="form-label"><?php echo __('Collection Management System'); ?></label>
-              <input type="text" class="form-control" id="reg-mgmt-system" name="management_system" value="<?php echo htmlspecialchars($f->management_system ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="<?php echo __('e.g., AtoM, ArchivesSpace, Koha'); ?>">
-            </div>
-            <div class="col-md-6">
-              <div class="form-check mt-4">
-                <input class="form-check-input" type="checkbox" id="reg-heratio" name="uses_atom" value="1"<?php echo !empty($f->uses_atom) ? ' checked' : ''; ?>>
-                <label class="form-check-label" for="reg-heratio"><?php echo __('Uses AtoM'); ?></label>
               </div>
             </div>
           </div>

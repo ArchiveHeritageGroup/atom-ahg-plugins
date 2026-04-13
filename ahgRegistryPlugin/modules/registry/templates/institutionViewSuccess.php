@@ -177,7 +177,7 @@
       }
       $hasStandards = !empty($selectedStdNames);
     ?>
-    <?php if ($hasStandards || !empty($detail->management_system)): ?>
+    <?php if ($hasStandards): ?>
     <div class="card mb-4">
       <div class="card-header fw-semibold"><?php echo __('Standards & Systems'); ?></div>
       <div class="card-body">
@@ -226,12 +226,6 @@
             <?php endforeach; ?>
           </div>
           <?php endif; ?>
-        <?php endif; ?>
-        <?php if (!empty($detail->management_system)): ?>
-        <div class="mt-2">
-          <strong class="small text-muted"><?php echo __('Management System'); ?></strong><br>
-          <?php echo htmlspecialchars($detail->management_system, ENT_QUOTES, 'UTF-8'); ?>
-        </div>
         <?php endif; ?>
       </div>
     </div>

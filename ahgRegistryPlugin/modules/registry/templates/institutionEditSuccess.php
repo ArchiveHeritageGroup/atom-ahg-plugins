@@ -250,7 +250,7 @@
               <textarea class="form-control" id="edit-coll-summary" name="collection_summary" rows="3" placeholder="<?php echo __('What this institution collects, why, and for whom — scope, geographic focus, time periods, donor relationships.'); ?>"><?php echo htmlspecialchars($f->collection_summary ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
               <div class="form-text"><?php echo __('A short statement of collection scope and purpose. Shown on your public profile.'); ?></div>
             </div>
-            <div class="col-md-6">
+            <div class="col-12">
               <label for="edit-strengths" class="form-label"><?php echo __('Collection Strengths'); ?></label>
               <?php
                 $strengthsVal = '';
@@ -280,37 +280,6 @@
                 <span class="input-group-text">%</span>
               </div>
               <div class="form-text"><?php echo __('Rough estimate. Leave blank if unknown.'); ?></div>
-            </div>
-            <div class="col-md-6">
-              <label for="edit-mgmt-system" class="form-label"><?php echo __('Collection Management System'); ?></label>
-              <?php
-                $cmsOptions = [
-                  '' => __('-- Select --'),
-                  'AtoM' => 'AtoM',
-                  'Heratio' => 'Heratio',
-                  'ArchivesSpace' => 'ArchivesSpace',
-                  'Archivists Toolkit' => "Archivists' Toolkit",
-                  'CollectiveAccess' => 'CollectiveAccess',
-                  'Collections Online' => 'Collections Online',
-                  'PastPerfect' => 'PastPerfect',
-                  'Adlib' => 'Adlib / Axiell',
-                  'EMu' => 'EMu',
-                  'TMS' => 'TMS (Gallery Systems)',
-                  'Mimsy' => 'Mimsy XG',
-                  'Argus' => 'Argus (Lucidea)',
-                  'Eloquent' => 'Eloquent',
-                  'Spreadsheet' => 'Spreadsheet / Ad-hoc',
-                  'None' => __('None'),
-                  'Other' => __('Other'),
-                ];
-                $selCms = $f->management_system ?? '';
-              ?>
-              <select class="form-select" id="edit-mgmt-system" name="management_system">
-                <?php foreach ($cmsOptions as $val => $label): ?>
-                  <option value="<?php echo htmlspecialchars($val, ENT_QUOTES, 'UTF-8'); ?>"<?php echo $selCms === $val ? ' selected' : ''; ?>><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></option>
-                <?php endforeach; ?>
-              </select>
-              <div class="form-text"><?php echo __('The software used to manage collections. If you use AtoM or Heratio, select it here — the "Uses AtoM" badge will appear on your profile automatically.'); ?></div>
             </div>
           </div>
         </div>
