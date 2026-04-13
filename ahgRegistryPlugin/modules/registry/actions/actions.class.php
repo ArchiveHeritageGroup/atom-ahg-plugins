@@ -14,6 +14,11 @@ class registryActions extends AhgController
         }
 
         $this->pluginDir = $this->config('sf_plugins_dir') . '/ahgRegistryPlugin';
+
+        // Disable Symfony auto-escaper for this module: registry templates use
+        // explicit htmlspecialchars() everywhere, so the default sfOutputEscaper
+        // wrapping causes double-escaping (e.g. "&" → "&amp;amp;").
+        \sfConfig::set('sf_escaping_strategy', false);
     }
 
     protected function loadService(string $name): object
