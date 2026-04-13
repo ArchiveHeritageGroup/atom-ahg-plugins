@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS `registry_software` (
   `name` varchar(255) NOT NULL,
   `slug` varchar(255) NOT NULL,
   `vendor_id` bigint unsigned DEFAULT NULL,
-  `category` VARCHAR(125) COMMENT 'ams, ims, dam, dams, cms, glam, preservation, digitization, discovery, utility, plugin, integration, theme, other' NOT NULL,
+  `category` VARCHAR(500) COMMENT 'JSON array of: ams, ims, dam, dams, cms, glam, preservation, digitization, discovery, utility, plugin, integration, theme, other' NOT NULL,
   `description` text,
   `short_description` varchar(500) DEFAULT NULL,
   `logo_path` varchar(500) DEFAULT NULL,
