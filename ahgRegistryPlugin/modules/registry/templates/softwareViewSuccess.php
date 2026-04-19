@@ -371,6 +371,41 @@
     </div>
     <?php endif; ?>
 
+    <!-- Schema / ERDs -->
+    <?php if (!empty($erds)): ?>
+    <div class="card mb-4">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>
+          <i class="fas fa-project-diagram me-2"></i><?php echo __('Schema & ERDs'); ?>
+          <span class="badge bg-secondary ms-1"><?php echo count($erds); ?></span>
+        </span>
+      </div>
+      <ul class="list-group list-group-flush">
+        <?php foreach ($erds as $erd): ?>
+        <li class="list-group-item">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="me-2">
+              <a href="<?php echo url_for(['module' => 'registry', 'action' => 'erdView', 'slug' => $erd->slug]); ?>" class="fw-semibold">
+                <i class="<?php echo htmlspecialchars($erd->icon ?? 'fas fa-database', ENT_QUOTES, 'UTF-8'); ?> me-1 text-<?php echo htmlspecialchars($erd->color ?? 'primary', ENT_QUOTES, 'UTF-8'); ?>"></i>
+                <?php echo htmlspecialchars($erd->display_name, ENT_QUOTES, 'UTF-8'); ?>
+              </a>
+              <?php if (!empty($erd->description)): ?>
+                <div class="small text-muted mt-1"><?php echo htmlspecialchars($erd->description, ENT_QUOTES, 'UTF-8'); ?></div>
+              <?php endif; ?>
+              <?php if (!empty($erd->plugin_name)): ?>
+                <div class="small text-muted mt-1"><code><?php echo htmlspecialchars($erd->plugin_name, ENT_QUOTES, 'UTF-8'); ?></code></div>
+              <?php endif; ?>
+            </div>
+            <?php if (!empty($erd->category)): ?>
+              <span class="badge bg-light text-dark"><?php echo htmlspecialchars($erd->category, ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php endif; ?>
+          </div>
+        </li>
+        <?php endforeach; ?>
+      </ul>
+    </div>
+    <?php endif; ?>
+
     <!-- Institutions using this -->
     <?php if (!empty($software['institutions'])): ?>
     <div class="card mb-4">

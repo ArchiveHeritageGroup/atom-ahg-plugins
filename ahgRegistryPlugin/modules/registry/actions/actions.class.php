@@ -662,6 +662,21 @@ class registryActions extends AhgController
         } catch (\Exception $e) {
             $this->setupGuideCount = 0;
         }
+
+        // Linked ERDs (Schema section)
+        try {
+            $this->erds = $db::table('registry_erd_software as es')
+                ->join('registry_erd as e', 'e.id', '=', 'es.erd_id')
+                ->where('es.software_id', $swId)
+                ->where('e.is_active', 1)
+                ->select('e.id', 'e.slug', 'e.display_name', 'e.category', 'e.description', 'e.icon', 'e.color', 'e.plugin_name')
+                ->orderBy('es.sort_order')
+                ->orderBy('e.sort_order')
+                ->orderBy('e.display_name')
+                ->get()->all();
+        } catch (\Exception $e) {
+            $this->erds = [];
+        }
     }
 
     public function executeSoftwareReleases($request)
@@ -6264,13 +6279,17 @@ class registryActions extends AhgController
     {
         $db = \Illuminate\Database\Capsule\Manager::class;
 
-        $query = $db::table('registry_erd')->where('is_active', 1);
+        $query = $db::table('registry_erd as e')->where('e.is_active', 1);
 
         if (!empty($request->getParameter('category'))) {
-            $query->where('category', $request->getParameter('category'));
+            $query->where('e.category', $request->getParameter('category'));
         }
         if (!empty($request->getParameter('vendor'))) {
-            $query->where('vendor_id', (int) $request->getParameter('vendor'));
+            $query->where('e.vendor_id', (int) $request->getParameter('vendor'));
+        }
+        if (!empty($request->getParameter('software'))) {
+            $query->join('registry_erd_software as es', 'es.erd_id', '=', 'e.id')
+                  ->where('es.software_id', (int) $request->getParameter('software'));
         }
 
         $this->categories = $db::table('registry_erd')
@@ -6291,9 +6310,39 @@ class registryActions extends AhgController
             ->get()
             ->all();
 
-        $this->items = $query->orderBy('sort_order')->get()->all();
+        // Software that has ERD entries
+        $this->softwareFilter = $db::table('registry_erd_software as es')
+            ->join('registry_software as s', 's.id', '=', 'es.software_id')
+            ->join('registry_erd as e', 'e.id', '=', 'es.erd_id')
+            ->where('s.is_active', 1)
+            ->where('e.is_active', 1)
+            ->select('s.id', 's.name', 's.slug', $db::raw('COUNT(DISTINCT e.id) as erd_count'))
+            ->groupBy('s.id', 's.name', 's.slug')
+            ->orderBy('s.name')
+            ->get()
+            ->all();
+
+        $this->items = $query->select('e.*')->orderBy('e.sort_order')->get()->all();
+
+        // Map ERD id -> software list for badges
+        $erdIds = array_map(function ($x) { return (int) $x->id; }, $this->items);
+        $this->erdSoftware = [];
+        if (!empty($erdIds)) {
+            $rows = $db::table('registry_erd_software as es')
+                ->join('registry_software as s', 's.id', '=', 'es.software_id')
+                ->whereIn('es.erd_id', $erdIds)
+                ->where('s.is_active', 1)
+                ->select('es.erd_id', 's.name', 's.slug')
+                ->orderBy('s.name')
+                ->get()->all();
+            foreach ($rows as $r) {
+                $this->erdSoftware[(int) $r->erd_id][] = $r;
+            }
+        }
+
         $this->selectedCategory = $request->getParameter('category', '');
         $this->selectedVendor = $request->getParameter('vendor', '');
+        $this->selectedSoftware = $request->getParameter('software', '');
         $this->isAdmin = $this->isAdmin();
     }
 
@@ -6348,6 +6397,15 @@ class registryActions extends AhgController
                 $tableList
             );
         }
+
+        // Software this ERD applies to
+        $this->linkedSoftware = $db::table('registry_erd_software as es')
+            ->join('registry_software as s', 's.id', '=', 'es.software_id')
+            ->where('es.erd_id', (int) $this->erd->id)
+            ->where('s.is_active', 1)
+            ->select('s.name', 's.slug')
+            ->orderBy('s.name')
+            ->get()->all();
 
         $this->isAdmin = $this->isAdmin();
     }
@@ -6442,6 +6500,18 @@ class registryActions extends AhgController
                 $id = $db::table('registry_erd')->insertGetId($data);
             }
 
+            // Sync software linkage
+            $softwareIds = (array) $request->getParameter('software_ids', []);
+            $softwareIds = array_values(array_filter(array_map('intval', $softwareIds)));
+            $db::table('registry_erd_software')->where('erd_id', $id)->delete();
+            if (!empty($softwareIds)) {
+                $rows = [];
+                foreach ($softwareIds as $swId) {
+                    $rows[] = ['erd_id' => $id, 'software_id' => $swId];
+                }
+                $db::table('registry_erd_software')->insert($rows);
+            }
+
             $this->redirect(url_for(['module' => 'registry', 'action' => 'adminErd']));
             return;
         }
@@ -6449,6 +6519,16 @@ class registryActions extends AhgController
         $this->erd = $id > 0
             ? $db::table('registry_erd')->where('id', $id)->first()
             : null;
+
+        $this->allSoftware = $db::table('registry_software')
+            ->where('is_active', 1)
+            ->select('id', 'name', 'slug')
+            ->orderBy('name')
+            ->get()->all();
+
+        $this->linkedSoftwareIds = $id > 0
+            ? $db::table('registry_erd_software')->where('erd_id', $id)->pluck('software_id')->all()
+            : [];
     }
 
     // =========================================================================

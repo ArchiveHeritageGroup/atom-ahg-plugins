@@ -64,24 +64,62 @@
 <?php
   $rawVendors = sfOutputEscaper::unescape($vendors);
   if (!is_array($rawVendors)) { $rawVendors = []; }
+  $rawSoftware = isset($softwareFilter) ? sfOutputEscaper::unescape($softwareFilter) : [];
+  if (!is_array($rawSoftware)) { $rawSoftware = []; }
+  $rawErdSoftware = isset($erdSoftware) ? sfOutputEscaper::unescape($erdSoftware) : [];
+  if (!is_array($rawErdSoftware)) { $rawErdSoftware = []; }
   $_selVendor = sfOutputEscaper::unescape($selectedVendor);
   $_selCat = sfOutputEscaper::unescape($selectedCategory);
+  $_selSw = isset($selectedSoftware) ? sfOutputEscaper::unescape($selectedSoftware) : '';
   $_baseUrl = url_for(['module' => 'registry', 'action' => 'erdBrowse']);
+
+  $_carry = function ($except) use ($_selVendor, $_selCat, $_selSw) {
+      $parts = [];
+      if ($except !== 'vendor' && !empty($_selVendor)) { $parts[] = 'vendor=' . urlencode($_selVendor); }
+      if ($except !== 'category' && !empty($_selCat)) { $parts[] = 'category=' . urlencode($_selCat); }
+      if ($except !== 'software' && !empty($_selSw)) { $parts[] = 'software=' . urlencode($_selSw); }
+      return empty($parts) ? '' : '?' . implode('&', $parts);
+  };
 ?>
 <div class="card bg-light border-0 mb-4">
   <div class="card-body py-3">
 
+    <!-- Software filter -->
+    <?php if (!empty($rawSoftware)): ?>
+    <div class="mb-2">
+      <span class="small text-muted me-2"><i class="fas fa-cube me-1"></i><?php echo __('Software'); ?>:</span>
+      <a href="<?php echo $_baseUrl . $_carry('software'); ?>"
+         class="btn btn-sm <?php echo empty($_selSw) ? 'btn-dark' : 'btn-outline-dark'; ?> me-1 mb-1">
+        <?php echo __('All'); ?>
+      </a>
+      <?php foreach ($rawSoftware as $sw): ?>
+        <?php
+          $carry = $_carry('software');
+          $sep = empty($carry) ? '?' : '&';
+          $swUrl = $_baseUrl . $carry . $sep . 'software=' . (int) $sw->id;
+          $isActive = ((int) $_selSw === (int) $sw->id);
+        ?>
+        <a href="<?php echo $swUrl; ?>"
+           class="btn btn-sm <?php echo $isActive ? 'btn-primary' : 'btn-outline-primary'; ?> me-1 mb-1">
+          <?php echo htmlspecialchars($sw->name, ENT_QUOTES, 'UTF-8'); ?>
+          <span class="badge bg-light text-dark ms-1"><?php echo (int) $sw->erd_count; ?></span>
+        </a>
+      <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- Vendor filter -->
     <div class="mb-2">
       <span class="small text-muted me-2"><i class="fas fa-building me-1"></i><?php echo __('Vendor'); ?>:</span>
-      <a href="<?php echo $_baseUrl; ?><?php echo !empty($_selCat) ? '?category=' . urlencode($_selCat) : ''; ?>"
+      <a href="<?php echo $_baseUrl . $_carry('vendor'); ?>"
          class="btn btn-sm <?php echo empty($_selVendor) ? 'btn-dark' : 'btn-outline-dark'; ?> me-1 mb-1">
         <?php echo __('All'); ?>
       </a>
       <?php foreach ($rawVendors as $v): ?>
         <?php
-          $vUrl = $_baseUrl . '?vendor=' . (int) $v->id;
-          if (!empty($_selCat)) { $vUrl .= '&category=' . urlencode($_selCat); }
+          $carry = $_carry('vendor');
+          $sep = empty($carry) ? '?' : '&';
+          $vUrl = $_baseUrl . $carry . $sep . 'vendor=' . (int) $v->id;
           $isActive = ((int) $_selVendor === (int) $v->id);
         ?>
         <a href="<?php echo $vUrl; ?>"
@@ -95,7 +133,7 @@
     <!-- Category filter -->
     <div>
       <span class="small text-muted me-2"><i class="fas fa-tag me-1"></i><?php echo __('Category'); ?>:</span>
-      <a href="<?php echo $_baseUrl; ?><?php echo !empty($_selVendor) ? '?vendor=' . urlencode($_selVendor) : ''; ?>"
+      <a href="<?php echo $_baseUrl . $_carry('category'); ?>"
          class="btn btn-sm <?php echo empty($_selCat) ? 'btn-dark' : 'btn-outline-dark'; ?> me-1 mb-1">
         <?php echo __('All'); ?> <span class="badge bg-light text-dark ms-1"><?php echo count($rawItems); ?></span>
       </a>
@@ -103,8 +141,9 @@
         <?php
           $cl = $catLabels[$cat] ?? [$cat, 'secondary', 'fas fa-folder'];
           $catCount = count($grouped[$cat] ?? []);
-          $cUrl = $_baseUrl . '?category=' . urlencode($cat);
-          if (!empty($_selVendor)) { $cUrl .= '&vendor=' . urlencode($_selVendor); }
+          $carry = $_carry('category');
+          $sep = empty($carry) ? '?' : '&';
+          $cUrl = $_baseUrl . $carry . $sep . 'category=' . urlencode($cat);
         ?>
         <a href="<?php echo $cUrl; ?>"
            class="btn btn-sm <?php echo ($_selCat === $cat) ? 'btn-' . $cl[1] : 'btn-outline-' . $cl[1]; ?> me-1 mb-1">
@@ -149,6 +188,13 @@
             <h6 class="card-title mb-1"><?php echo $erd->display_name; ?></h6>
             <p class="card-text small text-muted mb-2"><?php echo htmlspecialchars(mb_strimwidth($erd->description ?? '', 0, 120, '...'), ENT_QUOTES, 'UTF-8'); ?></p>
             <code class="small text-muted"><?php echo $erd->plugin_name; ?></code>
+            <?php if (!empty($rawErdSoftware[(int) $erd->id])): ?>
+              <div class="mt-2">
+                <?php foreach ($rawErdSoftware[(int) $erd->id] as $sw): ?>
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle small me-1"><i class="fas fa-cube me-1"></i><?php echo htmlspecialchars($sw->name, ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
           </div>
         </a>
       </div>

@@ -29,6 +29,16 @@
     </h1>
     <p class="text-muted mb-1"><?php echo $erd->description; ?></p>
     <span class="badge bg-light text-dark border"><code><?php echo $erd->plugin_name; ?></code></span>
+    <?php if (!empty($linkedSoftware)): ?>
+      <div class="mt-2 small">
+        <span class="text-muted me-1"><?php echo __('Available in:'); ?></span>
+        <?php foreach ($linkedSoftware as $sw): ?>
+          <a href="<?php echo url_for(['module' => 'registry', 'action' => 'softwareView', 'slug' => $sw->slug]); ?>" class="badge bg-primary text-decoration-none me-1">
+            <i class="fas fa-cube me-1"></i><?php echo htmlspecialchars($sw->name, ENT_QUOTES, 'UTF-8'); ?>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
   </div>
   <div class="d-flex gap-2">
     <?php if (!empty($isAdmin)): ?>

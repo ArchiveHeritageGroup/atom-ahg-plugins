@@ -217,6 +217,21 @@
       </div>
 
       <div class="card mb-4">
+        <div class="card-header"><h5 class="mb-0"><?php echo __('Linked Software'); ?></h5></div>
+        <div class="card-body">
+          <?php $linkedIds = array_map('intval', (array) (isset($linkedSoftwareIds) ? $linkedSoftwareIds : [])); ?>
+          <select class="form-select" name="software_ids[]" multiple size="8">
+            <?php foreach ((isset($allSoftware) ? $allSoftware : []) as $sw): ?>
+              <option value="<?php echo (int) $sw->id; ?>" <?php echo in_array((int) $sw->id, $linkedIds, true) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($sw->name, ENT_QUOTES, 'UTF-8'); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <div class="form-text"><?php echo __('Hold Ctrl (Windows) or Cmd (Mac) to select multiple. ERD appears in the Schema section of each linked software.'); ?></div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
         <div class="card-header"><h5 class="mb-0"><?php echo __('Tables (JSON Array)'); ?></h5></div>
         <div class="card-body">
           <textarea class="form-control font-monospace" name="tables_json" rows="4" placeholder='["table_one","table_two"]'><?php echo htmlspecialchars($e->tables_json ?? '[]', ENT_QUOTES, 'UTF-8'); ?></textarea>
