@@ -185,9 +185,17 @@
     <li class="list-group-item d-flex justify-content-between align-items-center">
       <div>
         <strong><?php echo htmlspecialchars($sw->name ?? '', ENT_QUOTES, 'UTF-8'); ?></strong>
-        <?php if (!empty($sw->category)): ?>
-          <span class="badge bg-secondary ms-1"><?php echo htmlspecialchars(ucfirst($sw->category), ENT_QUOTES, 'UTF-8'); ?></span>
-        <?php endif; ?>
+        <?php
+          $rawCat = isset($sw->category) ? sfOutputEscaper::unescape($sw->category) : '';
+          $catList = [];
+          if ('' !== (string) $rawCat) {
+            $decoded = json_decode((string) $rawCat, true);
+            $catList = is_array($decoded) ? $decoded : [(string) $rawCat];
+          }
+          foreach ($catList as $_cv):
+        ?>
+          <span class="badge bg-secondary ms-1"><?php echo htmlspecialchars(strtoupper((string) $_cv), ENT_QUOTES, 'UTF-8'); ?></span>
+        <?php endforeach; ?>
       </div>
       <?php if (!empty($sw->latest_version)): ?>
         <span class="badge bg-primary">v<?php echo htmlspecialchars($sw->latest_version, ENT_QUOTES, 'UTF-8'); ?></span>

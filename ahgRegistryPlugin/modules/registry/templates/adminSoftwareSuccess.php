@@ -53,7 +53,17 @@
           </a>
         </td>
         <td>
-          <span class="badge bg-info text-dark"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $item->category ?? '')), ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php
+            $rawCat = isset($item->category) ? sfOutputEscaper::unescape($item->category) : '';
+            $catList = [];
+            if ('' !== (string) $rawCat) {
+              $decoded = json_decode((string) $rawCat, true);
+              $catList = is_array($decoded) ? $decoded : [(string) $rawCat];
+            }
+            foreach ($catList as $_cv):
+          ?>
+            <span class="badge bg-info text-dark"><?php echo htmlspecialchars(strtoupper((string) $_cv), ENT_QUOTES, 'UTF-8'); ?></span>
+          <?php endforeach; ?>
         </td>
         <td><?php echo htmlspecialchars($item->vendor_name ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
         <td>

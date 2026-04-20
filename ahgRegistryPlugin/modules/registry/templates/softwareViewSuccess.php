@@ -74,9 +74,9 @@
               'utility' => 'Utility', 'plugin' => 'Plugin/Extension',
               'theme' => 'Theme', 'integration' => 'Integration', 'other' => 'Other',
             ];
-            $rawCat = $detail->category ?? '';
+            $rawCat = isset($detail->category) ? sfOutputEscaper::unescape($detail->category) : '';
             $catList = [];
-            if ('' !== $rawCat) {
+            if ('' !== (string) $rawCat) {
               $decoded = json_decode((string) $rawCat, true);
               if (is_array($decoded)) {
                 $catList = $decoded;

@@ -39,9 +39,17 @@
           <?php endif; ?>
           <div>
             <h5 class="card-title mb-0"><?php echo htmlspecialchars($sw->name ?? '', ENT_QUOTES, 'UTF-8'); ?></h5>
-            <?php if (!empty($sw->category)): ?>
-              <span class="badge bg-secondary"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $sw->category)), ENT_QUOTES, 'UTF-8'); ?></span>
-            <?php endif; ?>
+            <?php
+              $rawCat = isset($sw->category) ? sfOutputEscaper::unescape($sw->category) : '';
+              $catList = [];
+              if ('' !== (string) $rawCat) {
+                $decoded = json_decode((string) $rawCat, true);
+                $catList = is_array($decoded) ? $decoded : [(string) $rawCat];
+              }
+              foreach ($catList as $_cv):
+            ?>
+              <span class="badge bg-secondary"><?php echo htmlspecialchars(strtoupper((string) $_cv), ENT_QUOTES, 'UTF-8'); ?></span>
+            <?php endforeach; ?>
           </div>
         </div>
         <?php if (!empty($sw->short_description)): ?>

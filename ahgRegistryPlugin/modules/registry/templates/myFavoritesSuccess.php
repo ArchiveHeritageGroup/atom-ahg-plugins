@@ -97,7 +97,15 @@
           <?php endif; ?>
           <div class="flex-grow-1">
             <strong><?php echo htmlspecialchars($sw->name, ENT_QUOTES, 'UTF-8'); ?></strong>
-            <div class="small text-muted"><?php echo htmlspecialchars($sw->category ?? '', ENT_QUOTES, 'UTF-8'); ?></div>
+            <?php
+              $rawCat = isset($sw->category) ? sfOutputEscaper::unescape($sw->category) : '';
+              $catList = [];
+              if ('' !== (string) $rawCat) {
+                $decoded = json_decode((string) $rawCat, true);
+                $catList = is_array($decoded) ? $decoded : [(string) $rawCat];
+              }
+            ?>
+            <div class="small text-muted"><?php echo htmlspecialchars(implode(', ', array_map('strtoupper', $catList)), ENT_QUOTES, 'UTF-8'); ?></div>
           </div>
           <i class="fas fa-star text-warning"></i>
         </div>
