@@ -2386,7 +2386,7 @@ class registryActions extends AhgController
                             'vendor_registered',
                             'New vendor registered: ' . $data['name'],
                             $actorName . ' registered a new vendor "' . $data['name'] . '". Please verify.',
-                            '/registry/admin/vendors/' . (int) $newId . '/edit',
+                            '/registry/admin/vendors',
                             'vendor',
                             (int) $newId,
                             $this->getCurrentUserId(),
