@@ -1198,6 +1198,26 @@ class registryActions extends AhgController
                 'is_primary' => 0,
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
+
+            // Notify admins of the claim (in-app + email)
+            try {
+                $actorName = (string) ($user->getAttribute('user_name', '') ?: $this->getCurrentUserEmail() ?: 'A user');
+                $instName = $inst->name ?? ('Institution #' . $instId);
+                $notifSvc = $this->loadService('NotificationService');
+                $notifSvc->notifyAdmins(
+                    'institution_claimed',
+                    'Institution claim: ' . $instName,
+                    $actorName . ' claimed "' . $instName . '" as ' . $role . '.',
+                    '/registry/admin/institutions',
+                    'institution',
+                    $instId,
+                    $userId,
+                    $actorName
+                );
+            } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
+                $this->logError('Admin notification on institution claim failed: ' . $e->getMessage(), $e);
+            }
         }
 
         $this->getUser()->setFlash('success', 'Institution claimed successfully as ' . $role . '.');
@@ -1324,6 +1344,26 @@ class registryActions extends AhgController
                     if ($newId) {
                         $urlSvc->replaceForEntity('institution', (int) $newId, $urlList);
                     }
+
+                    // Notify admins of the new institution (in-app + email)
+                    try {
+                        $actorName = (string) ($user->getAttribute('user_name', '') ?: $this->getCurrentUserEmail() ?: 'A user');
+                        $notifSvc = $this->loadService('NotificationService');
+                        $notifSvc->notifyAdmins(
+                            'institution_registered',
+                            'New institution registered: ' . $data['name'],
+                            $actorName . ' registered a new institution "' . $data['name'] . '". Please verify.',
+                            '/registry/admin/institutions/' . (int) $newId . '/edit',
+                            'institution',
+                            (int) $newId,
+                            $this->getCurrentUserId(),
+                            $actorName
+                        );
+                    } catch (\Throwable $e) {
+                        if ($e instanceof \sfStopException) { throw $e; }
+                        $this->logError('Admin notification on institution register failed: ' . $e->getMessage(), $e);
+                    }
+
                     $this->redirect(url_for(['module' => 'registry', 'action' => 'myInstitutionDashboard']));
 
                     return;
@@ -2201,6 +2241,27 @@ class registryActions extends AhgController
 
             if (empty($this->errors)) {
                 $svc->create($data);
+
+                // Notify admins of the new review (in-app + email)
+                try {
+                    $entityName = $this->entity->name ?? (ucfirst($type) . ' #' . $entityId);
+                    $reviewerName = $data['reviewer_name'] ?: $data['reviewer_email'] ?: 'A user';
+                    $notifSvc = $this->loadService('NotificationService');
+                    $notifSvc->notifyAdmins(
+                        'review_submitted',
+                        'New review awaiting approval: ' . $entityName,
+                        $reviewerName . ' submitted a ' . $data['rating'] . '/5 review for ' . $type . ' "' . $entityName . '". Pending approval.',
+                        '/registry/admin/reviews',
+                        $type,
+                        $entityId,
+                        $this->getCurrentUserId(),
+                        $reviewerName
+                    );
+                } catch (\Throwable $e) {
+                    if ($e instanceof \sfStopException) { throw $e; }
+                    $this->logError('Admin notification on review submit failed: ' . $e->getMessage(), $e);
+                }
+
                 \sfContext::getInstance()->getUser()->setFlash('success', __('Thanks! Your review has been submitted and is pending administrator approval before it appears on the public page.'));
                 $slug = $this->entity->slug ?? '';
                 $action = 'vendor' === $type ? 'vendorView' : 'softwareView';
@@ -2316,6 +2377,26 @@ class registryActions extends AhgController
                     if ($newId) {
                         $urlSvc->replaceForEntity('vendor', (int) $newId, $urlList);
                     }
+
+                    // Notify admins of the new vendor (in-app + email)
+                    try {
+                        $actorName = (string) ($user->getAttribute('user_name', '') ?: $this->getCurrentUserEmail() ?: 'A user');
+                        $notifSvc = $this->loadService('NotificationService');
+                        $notifSvc->notifyAdmins(
+                            'vendor_registered',
+                            'New vendor registered: ' . $data['name'],
+                            $actorName . ' registered a new vendor "' . $data['name'] . '". Please verify.',
+                            '/registry/admin/vendors/' . (int) $newId . '/edit',
+                            'vendor',
+                            (int) $newId,
+                            $this->getCurrentUserId(),
+                            $actorName
+                        );
+                    } catch (\Throwable $e) {
+                        if ($e instanceof \sfStopException) { throw $e; }
+                        $this->logError('Admin notification on vendor register failed: ' . $e->getMessage(), $e);
+                    }
+
                     $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorDashboard']));
 
                     return;
@@ -2749,6 +2830,29 @@ class registryActions extends AhgController
             if (empty($this->errors)) {
                 try {
                     $id = $svc->create($data);
+
+                    // Notify admins of the new software (in-app + email)
+                    if ($id) {
+                        try {
+                            $actorName = (string) ($user->getAttribute('user_name', '') ?: $this->getCurrentUserEmail() ?: 'A user');
+                            $vendorName = $vendor->name ?? ('Vendor #' . (int) $vendor->id);
+                            $notifSvc = $this->loadService('NotificationService');
+                            $notifSvc->notifyAdmins(
+                                'software_added',
+                                'New software submitted: ' . $data['name'],
+                                $actorName . ' (vendor: ' . $vendorName . ') submitted "' . $data['name'] . '". Please verify.',
+                                '/registry/admin/software/' . (int) $id . '/edit',
+                                'software',
+                                (int) $id,
+                                $this->getCurrentUserId(),
+                                $actorName
+                            );
+                        } catch (\Throwable $e2) {
+                            if ($e2 instanceof \sfStopException) { throw $e2; }
+                            $this->logError('Admin notification on software add failed: ' . $e2->getMessage(), $e2);
+                        }
+                    }
+
                     $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorSoftware']));
 
                     return;
@@ -5726,6 +5830,24 @@ class registryActions extends AhgController
                 }
             }
 
+            // 8. Notify all admins (in-app + email) of pending account.
+            try {
+                $notifSvc = $this->loadService('NotificationService');
+                $notifSvc->notifyAdmins(
+                    'user_registered',
+                    'New account pending approval: ' . $name,
+                    $name . ' <' . $email . '> just registered and is awaiting administrator activation.',
+                    '/registry/admin/users/' . (int) $objectId . '/edit',
+                    'user',
+                    (int) $objectId,
+                    null,
+                    $name
+                );
+            } catch (\Throwable $e) {
+                if ($e instanceof \sfStopException) { throw $e; }
+                $this->logError('Admin notification on register failed: ' . $e->getMessage(), $e);
+            }
+
             $this->success = 'Account created! An administrator will review and activate your account.';
             $this->redirect('/registry/login?registered=pending');
         }
@@ -6921,5 +7043,128 @@ class registryActions extends AhgController
             return max($min, min($max, $float));
         }
         return $float;
+    }
+
+    // ================================================================
+    // NOTIFICATIONS
+    // ================================================================
+
+    /** Full-page list of notifications for the current user. */
+    public function executeNotifications($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $userId = $this->getCurrentUserId();
+        $svc = $this->loadService('NotificationService');
+
+        $page = max(1, (int) $request->getParameter('page', 1));
+        $result = $svc->browse($userId, $page, 25);
+
+        $this->items = $result['items'];
+        $this->total = $result['total'];
+        $this->page = $page;
+        $this->totalPages = max(1, (int) ceil($result['total'] / $result['perPage']));
+        $this->unreadCount = $svc->unreadCount($userId);
+    }
+
+    /** JSON: recent notifications + unread count (for the bell dropdown). */
+    public function executeApiNotifications($request)
+    {
+        $userId = $this->getCurrentUserId();
+        if (!$userId) {
+            return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $svc = $this->loadService('NotificationService');
+        $items = $svc->recent($userId, 10);
+        $unread = $svc->unreadCount($userId);
+
+        $out = [];
+        foreach ($items as $n) {
+            $out[] = [
+                'id' => (int) $n->id,
+                'type' => $n->type,
+                'title' => $n->title,
+                'message' => $n->message,
+                'link' => $n->link,
+                'is_read' => (int) $n->is_read,
+                'created_at' => $n->created_at,
+                'created_at_human' => $this->humanTimeAgo($n->created_at),
+            ];
+        }
+
+        return $this->jsonResponse(['unread' => $unread, 'items' => $out]);
+    }
+
+    /** Mark a single notification as read. */
+    public function executeApiNotificationRead($request)
+    {
+        $userId = $this->getCurrentUserId();
+        if (!$userId) {
+            return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $id = (int) $request->getParameter('id');
+        if ($id <= 0) {
+            return $this->jsonResponse(['error' => 'Invalid id'], 400);
+        }
+
+        $svc = $this->loadService('NotificationService');
+        $svc->markRead($id, $userId);
+
+        return $this->jsonResponse(['unread' => $svc->unreadCount($userId)]);
+    }
+
+    /** Mark all notifications as read. */
+    public function executeApiNotificationsReadAll($request)
+    {
+        $userId = $this->getCurrentUserId();
+        if (!$userId) {
+            return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $svc = $this->loadService('NotificationService');
+        $marked = $svc->markAllRead($userId);
+
+        return $this->jsonResponse(['marked' => $marked, 'unread' => 0]);
+    }
+
+    /** Dismiss a notification from the top bar (does not mark as read). */
+    public function executeApiNotificationDismissBar($request)
+    {
+        $userId = $this->getCurrentUserId();
+        if (!$userId) {
+            return $this->jsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $id = (int) $request->getParameter('id');
+        if ($id <= 0) {
+            return $this->jsonResponse(['error' => 'Invalid id'], 400);
+        }
+
+        $svc = $this->loadService('NotificationService');
+        $svc->dismissBar($id, $userId);
+
+        return $this->jsonResponse(['ok' => true]);
+    }
+
+    protected function humanTimeAgo(?string $datetime): string
+    {
+        if (!$datetime) {
+            return '';
+        }
+        $ts = strtotime($datetime);
+        if (!$ts) {
+            return $datetime;
+        }
+        $diff = time() - $ts;
+        if ($diff < 60) return 'just now';
+        if ($diff < 3600) return floor($diff / 60) . 'm ago';
+        if ($diff < 86400) return floor($diff / 3600) . 'h ago';
+        if ($diff < 604800) return floor($diff / 86400) . 'd ago';
+        return date('M j, Y', $ts);
     }
 }

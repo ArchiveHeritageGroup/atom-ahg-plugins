@@ -4,6 +4,30 @@
   $user = sfContext::getInstance()->getUser();
   $isLoggedIn = $user && $user->isAuthenticated();
   $currentUrl = sfContext::getInstance()->getRequest()->getUri();
+
+  // Notifications: unread count + top-bar item for the current user
+  $_notifUnread = 0;
+  $_notifBar = null;
+  if ($isLoggedIn) {
+      try {
+          $_notifUserId = (int) $user->getAttribute('user_id');
+          if ($_notifUserId > 0) {
+              $_notifUnread = (int) \Illuminate\Database\Capsule\Manager::table('registry_notification')
+                  ->where('user_id', $_notifUserId)
+                  ->where('is_read', 0)
+                  ->count();
+
+              $_notifBar = \Illuminate\Database\Capsule\Manager::table('registry_notification')
+                  ->where('user_id', $_notifUserId)
+                  ->where('is_read', 0)
+                  ->where('is_dismissed', 0)
+                  ->orderBy('created_at', 'desc')
+                  ->first();
+          }
+      } catch (\Throwable $_e) {
+          // Notifications table not present or query failed — render layout without bar
+      }
+  }
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo sfConfig::get('sf_default_culture', 'en'); ?>">
@@ -169,6 +193,51 @@
     /* Pagination */
     .page-link { color: var(--atm-primary); }
     .page-item.active .page-link { background: var(--atm-primary); border-color: var(--atm-primary); }
+
+    /* Notification bell + dropdown */
+    .reg-notif-bell .nav-link i { margin-right: 0; font-size: 1rem; }
+    .reg-notif-badge {
+      position: absolute;
+      top: 0;
+      right: 0;
+      transform: translate(25%, -10%);
+      font-size: 0.62rem;
+      padding: 0.18em 0.4em;
+      border-radius: 999px;
+      line-height: 1;
+    }
+    .reg-notif-menu { width: 360px; max-width: 95vw; padding: 0; }
+    .reg-notif-list { max-height: 400px; overflow-y: auto; }
+    .reg-notif-item {
+      display: block;
+      padding: 0.6rem 0.9rem;
+      border-bottom: 1px solid #f0eeea;
+      color: #333 !important;
+      text-decoration: none !important;
+      transition: background 0.1s;
+    }
+    .reg-notif-item:hover { background: #f8f9fa; }
+    .reg-notif-item.unread { background: #f5fbff; border-left: 3px solid var(--atm-primary); }
+    .reg-notif-item .reg-notif-title { font-weight: 600; font-size: 0.85rem; line-height: 1.3; }
+    .reg-notif-item .reg-notif-msg { font-size: 0.78rem; color: #6c757d; margin-top: 2px; line-height: 1.3; }
+    .reg-notif-item .reg-notif-time { font-size: 0.72rem; color: #999; margin-top: 2px; }
+    .reg-notif-empty { text-align: center; padding: 2rem 1rem; color: #999; font-size: 0.85rem; }
+
+    /* Top notification bar */
+    .reg-notif-bar {
+      background: linear-gradient(135deg, #fff8e1 0%, #fff3cd 100%);
+      border-bottom: 1px solid #f0d97a;
+      padding: 0.55rem 0;
+      font-size: 0.88rem;
+      color: #715a16;
+    }
+    .reg-notif-bar a { color: #715a16; text-decoration: underline; font-weight: 600; }
+    .reg-notif-bar a:hover { color: #4a3a0a; }
+    .reg-notif-bar .reg-notif-bar-close {
+      background: transparent; border: 0; color: #715a16; opacity: 0.7;
+      font-size: 1rem; padding: 0 0.5rem; cursor: pointer;
+    }
+    .reg-notif-bar .reg-notif-bar-close:hover { opacity: 1; }
   </style>
   <?php include_slot('head'); ?>
 </head>
@@ -263,11 +332,41 @@
 
       <ul class="navbar-nav">
         <?php if ($isLoggedIn): ?>
+          <!-- Notifications bell -->
+          <li class="nav-item dropdown reg-notif-bell">
+            <a class="nav-link position-relative" href="#" id="regNotifBellToggle" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+              <i class="fas fa-bell"></i>
+              <span class="badge bg-danger reg-notif-badge<?php echo $_notifUnread > 0 ? '' : ' d-none'; ?>" id="regNotifBadge">
+                <?php echo $_notifUnread > 99 ? '99+' : (int) $_notifUnread; ?>
+              </span>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end reg-notif-menu" aria-labelledby="regNotifBellToggle">
+              <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
+                <strong>Notifications</strong>
+                <button type="button" class="btn btn-link btn-sm p-0" id="regNotifMarkAllRead" style="text-decoration:none;">Mark all read</button>
+              </div>
+              <div id="regNotifList" class="reg-notif-list">
+                <div class="text-muted small text-center p-3">Loading&hellip;</div>
+              </div>
+              <div class="border-top text-center py-2">
+                <a href="/registry/notifications" class="small">View all notifications</a>
+              </div>
+            </div>
+          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
               <i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($user->getAttribute('username', 'Account'), ENT_QUOTES, 'UTF-8'); ?>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
+              <li>
+                <a class="dropdown-item d-flex justify-content-between align-items-center" href="/registry/notifications">
+                  <span><i class="fas fa-bell me-2"></i>Notifications</span>
+                  <?php if ($_notifUnread > 0): ?>
+                    <span class="badge bg-danger"><?php echo $_notifUnread > 99 ? '99+' : (int) $_notifUnread; ?></span>
+                  <?php endif; ?>
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="/registry/my/institution"><i class="fas fa-university me-2"></i>My Institution</a></li>
               <li><a class="dropdown-item" href="/registry/my/vendor"><i class="fas fa-building me-2"></i>My Vendor</a></li>
               <li><a class="dropdown-item" href="/registry/my/groups"><i class="fas fa-user-friends me-2"></i>My Groups</a></li>
@@ -292,6 +391,27 @@
     </div>
   </div>
 </nav>
+
+<?php if ($isLoggedIn && $_notifBar): ?>
+<!-- Top notification bar (latest unread, undismissed) -->
+<div class="reg-notif-bar" id="regNotifBar" data-id="<?php echo (int) $_notifBar->id; ?>">
+  <div class="container d-flex align-items-center">
+    <i class="fas fa-bell me-2"></i>
+    <div class="flex-grow-1">
+      <strong><?php echo htmlspecialchars($_notifBar->title, ENT_QUOTES, 'UTF-8'); ?></strong>
+      <?php if (!empty($_notifBar->message)): ?>
+        <span class="ms-2"><?php echo htmlspecialchars(mb_substr($_notifBar->message, 0, 200), ENT_QUOTES, 'UTF-8'); ?></span>
+      <?php endif; ?>
+      <?php if (!empty($_notifBar->link)): ?>
+        <a href="<?php echo htmlspecialchars($_notifBar->link, ENT_QUOTES, 'UTF-8'); ?>" class="ms-2">View</a>
+      <?php endif; ?>
+    </div>
+    <button type="button" class="reg-notif-bar-close" id="regNotifBarClose" aria-label="Dismiss">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+</div>
+<?php endif; ?>
 
 <!-- Main content -->
 <main class="reg-main">
@@ -392,6 +512,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" <?php echo $na; ?>></script>
 <!-- Registry JS -->
 <script src="/plugins/ahgRegistryPlugin/js/registry-discussions.js" <?php echo $na; ?>></script>
+<?php if ($isLoggedIn): ?>
+<script src="/plugins/ahgRegistryPlugin/js/registry-notifications.js" <?php echo $na; ?>></script>
+<?php endif; ?>
 <?php include_slot('scripts'); ?>
 
 </body>

@@ -231,6 +231,13 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_oauth_start', '/registry/oauth/:provider', 'oauthStart', ['provider' => '[a-z]+']);
         $loader->any('registry_oauth_callback', '/registry/oauth/:provider/callback', 'oauthCallback', ['provider' => '[a-z]+']);
 
+        // Notifications (in-app)
+        $loader->any('registry_notifications', '/registry/notifications', 'notifications');
+        $loader->get('registry_api_notifications', '/registry/api/notifications', 'apiNotifications');
+        $loader->post('registry_api_notification_read', '/registry/api/notifications/:id/read', 'apiNotificationRead', ['id' => '\d+']);
+        $loader->post('registry_api_notifications_read_all', '/registry/api/notifications/read-all', 'apiNotificationsReadAll');
+        $loader->post('registry_api_notification_dismiss_bar', '/registry/api/notifications/:id/dismiss-bar', 'apiNotificationDismissBar', ['id' => '\d+']);
+
         // Registry home (catch-all for /registry)
         $loader->any('registry_home', '/registry', 'index');
 
