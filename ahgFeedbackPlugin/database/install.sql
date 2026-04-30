@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `feedback_i18n` (
   `completed_at` DATETIME DEFAULT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `status_id` INT NOT NULL DEFAULT 1030,
+  `status` VARCHAR(50) DEFAULT 'pending' COMMENT 'pending, completed',
   PRIMARY KEY (`id`, `culture`),
   INDEX `idx_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
