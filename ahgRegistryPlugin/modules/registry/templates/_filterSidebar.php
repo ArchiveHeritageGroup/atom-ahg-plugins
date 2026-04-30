@@ -10,6 +10,12 @@
     <input type="hidden" name="q" value="<?php echo htmlspecialchars($sf_request->getParameter('q', ''), ENT_QUOTES, 'UTF-8'); ?>">
   <?php endif; ?>
 
+  <?php foreach (['view', 'sort', 'dir'] as $_passThru): ?>
+    <?php $_v = $sf_request->getParameter($_passThru, ''); if ('' !== (string) $_v): ?>
+      <input type="hidden" name="<?php echo $_passThru; ?>" value="<?php echo htmlspecialchars((string) $_v, ENT_QUOTES, 'UTF-8'); ?>">
+    <?php endif; ?>
+  <?php endforeach; ?>
+
   <?php if (!empty($filters)): ?>
     <?php foreach ($filters as $filter): ?>
       <?php
