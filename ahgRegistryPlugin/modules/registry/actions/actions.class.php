@@ -2932,6 +2932,42 @@ class registryActions extends AhgController
         }
     }
 
+    public function executeMyVendorSoftwareUnlink($request)
+    {
+        $user = $this->requireLogin();
+        if (!$user) {
+            return;
+        }
+
+        $id = (int) $request->getParameter('id');
+        $db = \Illuminate\Database\Capsule\Manager::class;
+
+        $software = $db::table('registry_software')->where('id', $id)->first();
+        if (!$software) {
+            $this->forward404();
+
+            return;
+        }
+
+        $myVendor = $this->getMyVendor();
+        $isOwner = $myVendor && (int) $software->vendor_id === (int) $myVendor->id;
+        if (!$isOwner && !$this->isAdmin()) {
+            $this->forward404();
+
+            return;
+        }
+
+        $db::table('registry_software')
+            ->where('id', $id)
+            ->update([
+                'vendor_id' => null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        $this->getUser()->setFlash('notice', __('Software unlinked from vendor.'));
+        $this->redirect(url_for(['module' => 'registry', 'action' => 'myVendorSoftware']));
+    }
+
     public function executeMyVendorSoftwareReleases($request)
     {
         $user = $this->requireLogin();
@@ -6354,6 +6390,8 @@ class registryActions extends AhgController
             'search' => $request->getParameter('q', ''),
             'category' => $request->getParameter('category', ''),
             'sector' => $request->getParameter('sector', ''),
+            'sort' => $request->getParameter('sort', 'sort_order'),
+            'direction' => $request->getParameter('dir', 'asc'),
             'page' => (int) $request->getParameter('page', 1),
             'limit' => 24,
         ]);

@@ -132,6 +132,7 @@ class ahgRegistryPluginConfiguration extends sfPluginConfiguration
         $loader->any('registry_my_vendor_software', '/registry/my/vendor/software', 'myVendorSoftware');
         $loader->any('registry_my_vendor_software_add', '/registry/my/vendor/software/add', 'myVendorSoftwareAdd');
         $loader->any('registry_my_vendor_software_edit', '/registry/my/vendor/software/:id/edit', 'myVendorSoftwareEdit', ['id' => '\d+']);
+        $loader->post('registry_my_vendor_software_unlink', '/registry/my/vendor/software/:id/unlink', 'myVendorSoftwareUnlink', ['id' => '\d+']);
         $loader->any('registry_my_vendor_software_releases', '/registry/my/vendor/software/:id/releases', 'myVendorSoftwareReleases', ['id' => '\d+']);
         $loader->any('registry_my_vendor_software_release_add', '/registry/my/vendor/software/:id/releases/add', 'myVendorSoftwareReleaseAdd', ['id' => '\d+']);
         $loader->any('registry_my_vendor_software_upload', '/registry/my/vendor/software/:id/upload', 'myVendorSoftwareUpload', ['id' => '\d+']);

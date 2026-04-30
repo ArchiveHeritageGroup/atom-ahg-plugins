@@ -239,6 +239,33 @@
 
     </form>
 
+    <?php if ($software && !empty($f->vendor_id)): ?>
+      <?php
+        $linkedVendor = \Illuminate\Database\Capsule\Manager::table('registry_vendor')
+          ->where('id', (int) $f->vendor_id)->first();
+      ?>
+      <div class="card mt-4 border-warning">
+        <div class="card-header fw-semibold bg-warning bg-opacity-25">
+          <i class="fas fa-unlink me-2 text-warning"></i><?php echo __('Vendor Link'); ?>
+        </div>
+        <div class="card-body">
+          <p class="mb-3 small">
+            <?php echo __('Currently linked to vendor:'); ?>
+            <strong><?php echo $linkedVendor ? htmlspecialchars($linkedVendor->name, ENT_QUOTES, 'UTF-8') : __('(unknown vendor)'); ?></strong>
+          </p>
+          <p class="text-muted small mb-3">
+            <?php echo __('Unlinking removes the vendor association — this software will no longer appear under any vendor and cannot be managed via the vendor dashboard until a new vendor is set.'); ?>
+          </p>
+          <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myVendorSoftwareUnlink', 'id' => (int) $f->id]); ?>"
+                onsubmit="return confirm('<?php echo __('Unlink this software from the vendor? It will become unowned.'); ?>');">
+            <button type="submit" class="btn btn-outline-warning btn-sm">
+              <i class="fas fa-unlink me-1"></i> <?php echo __('Unlink from Vendor'); ?>
+            </button>
+          </form>
+        </div>
+      </div>
+    <?php endif; ?>
+
   </div>
 </div>
 
