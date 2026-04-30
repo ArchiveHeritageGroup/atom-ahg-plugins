@@ -234,6 +234,24 @@ class SoftwareService
         return ['success' => true];
     }
 
+    public function verify(int $id, int $userId, ?string $notes = null): array
+    {
+        $software = DB::table($this->table)->where('id', $id)->first();
+        if (!$software) {
+            return ['success' => false, 'error' => 'Software not found'];
+        }
+
+        DB::table($this->table)->where('id', $id)->update([
+            'is_verified' => 1,
+            'verified_at' => date('Y-m-d H:i:s'),
+            'verified_by' => $userId,
+            'verification_notes' => $notes,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return ['success' => true];
+    }
+
     /**
      * Delete software and cascade to related records.
      */
