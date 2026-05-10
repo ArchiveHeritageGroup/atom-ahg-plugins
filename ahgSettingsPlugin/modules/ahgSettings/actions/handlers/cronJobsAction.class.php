@@ -2533,6 +2533,29 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Short to Medium',
                 'category' => 'security',
             ],
+            [
+                'name' => 'SharePoint subscription renewal',
+                'command' => 'php symfony sharepoint:renew-subscriptions',
+                'description' => 'Renews Microsoft Graph webhook subscriptions for SharePoint drives that are within 12 hours of expiry. Each ingest-enabled drive holds two subscriptions (driveItem + list). Without this cron, subscriptions silently expire and inbound notifications stop.',
+                'options' => [],
+                'schedule' => 'Hourly',
+                'example' => '5 * * * * cd {root} && php symfony sharepoint:renew-subscriptions >> /var/log/atom/sharepoint-renew.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'integration',
+            ],
+            [
+                'name' => 'SharePoint delta sync (fallback)',
+                'command' => 'php symfony sharepoint:sync',
+                'description' => 'Polls Microsoft Graph for driveItem changes since the last delta cursor on each ingest-enabled drive. Catches items missed by webhooks (transient delivery failures, expired subscriptions). Hourly is the recommended cadence; raise frequency only if webhooks are unreliable.',
+                'options' => [
+                    '--drive=ID' => 'Restrict to one drive',
+                    '--full' => 'Discard delta cursor and resync from scratch',
+                ],
+                'schedule' => 'Hourly',
+                'example' => '15 * * * * cd {root} && php symfony sharepoint:sync >> /var/log/atom/sharepoint-sync.log 2>&1',
+                'duration' => 'Short to Medium',
+                'category' => 'integration',
+            ],
         ];
     }
 
@@ -2556,6 +2579,7 @@ class SettingsCronJobsAction extends AhgController
             'ric' => ['title' => 'RiC Triplestore', 'icon' => 'bi-diagram-3', 'jobs' => []],
             'queue' => ['title' => 'Queue Engine', 'icon' => 'bi-stack', 'jobs' => []],
             'security' => ['title' => 'Security & Compliance', 'icon' => 'bi-shield-lock', 'jobs' => []],
+            'integration' => ['title' => 'External Integrations', 'icon' => 'bi-cloud-arrow-down', 'jobs' => []],
         ];
 
         foreach ($jobs as $job) {

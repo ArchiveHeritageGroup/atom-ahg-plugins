@@ -37,6 +37,34 @@ class GraphClientService
     }
 
     /**
+     * On-Behalf-Of flow — exchange a user's bearer token for a Graph token
+     * impersonating that user. Used by the manual-push file fetch path so
+     * AtoM never bypasses the user's SharePoint permissions.
+     *
+     * Requires the AAD app to have the requested delegated permission and
+     * the user (or admin) to have consented.
+     *
+     * @param int    $tenantId
+     * @param string $userToken      The bearer token AtoM received in Authorization header.
+     * @param string $graphScope     e.g. "https://graph.microsoft.com/Files.Read.All"
+     * @return string Graph access token impersonating the user.
+     */
+    public function acquireOboToken(int $tenantId, string $userToken, string $graphScope): string
+    {
+        // TODO (Phase 2.B):
+        //   1. POST to https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token
+        //      grant_type   = urn:ietf:params:oauth:grant-type:jwt-bearer
+        //      client_id    = <AtoM API app id>
+        //      client_secret= decrypted from tenant
+        //      assertion    = $userToken
+        //      requested_token_use = on_behalf_of
+        //      scope        = $graphScope
+        //   2. Cache result keyed on (tenantId, oid claim, scope, hash($userToken)) — short TTL.
+        //   3. Return the returned access_token.
+        throw new \RuntimeException('GraphClientService::acquireOboToken not implemented yet');
+    }
+
+    /**
      * GET request against the Graph endpoint with bearer auth.
      *
      * @param int                  $tenantId

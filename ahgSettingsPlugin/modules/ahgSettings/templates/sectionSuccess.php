@@ -2670,6 +2670,49 @@ slot('title', $title);
                             </div>
                             <?php break; ?>
 
+                            <?php case 'sharepoint': ?>
+                                <h4 class="mb-3"><i class="fa fa-cloud me-2"></i><?php echo __('SharePoint Integration'); ?></h4>
+                                <p class="text-muted"><?php echo __('Microsoft 365 SharePoint: tenant, drives, webhook URL, retention map, push.'); ?></p>
+
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_enabled" name="settings[sharepoint_enabled]" value="true" <?php echo (($settings['sharepoint_enabled'] ?? 'false') === 'true') ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="sharepoint_enabled"><?php echo __('SharePoint integration enabled'); ?></label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_records_handoff_enabled" name="settings[sharepoint_records_handoff_enabled]" value="true" <?php echo (($settings['sharepoint_records_handoff_enabled'] ?? 'false') === 'true') ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="sharepoint_records_handoff_enabled"><?php echo __('Records handoff (auto/declare) — Phase 2.A'); ?></label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_push_user_create_enabled" name="settings[sharepoint_push_user_create_enabled]" value="true" <?php echo (($settings['sharepoint_push_user_create_enabled'] ?? 'true') === 'true') ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="sharepoint_push_user_create_enabled"><?php echo __('Auto-create AtoM user on first manual push (Phase 2.B)'); ?></label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_federated_search_enabled" name="settings[sharepoint_federated_search_enabled]" value="true" <?php echo (($settings['sharepoint_federated_search_enabled'] ?? 'false') === 'true') ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="sharepoint_federated_search_enabled"><?php echo __('Federated search tab in AtoM (Phase 3)'); ?></label>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_m365_search_enabled" name="settings[sharepoint_m365_search_enabled]" value="true" <?php echo (($settings['sharepoint_m365_search_enabled'] ?? 'false') === 'true') ? 'checked' : ''; ?>>
+                                    <label class="form-check-label" for="sharepoint_m365_search_enabled"><?php echo __('Microsoft Search connector feed (Phase 3)'); ?></label>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="webhook_public_url"><?php echo __('Public webhook URL (for Graph subscriptions)'); ?></label>
+                                    <input type="url" class="form-control" id="webhook_public_url" name="settings[webhook_public_url]" value="<?php echo htmlspecialchars($settings['webhook_public_url'] ?? '', ENT_QUOTES); ?>" placeholder="https://psis.theahg.co.za/sharepoint/webhook">
+                                    <small class="form-text text-muted"><?php echo __('Must be HTTPS, publicly reachable. Graph posts notifications here.'); ?></small>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="retention_label_map"><?php echo __('Retention label → AtoM disposition map (JSON)'); ?></label>
+                                    <textarea class="form-control font-monospace" id="retention_label_map" name="settings[retention_label_map]" rows="6" placeholder='{"Archive-Permanent":{"level_of_description_id":12,"parent_id":345}}'><?php echo htmlspecialchars($settings['retention_label_map'] ?? '', ENT_QUOTES); ?></textarea>
+                                    <small class="form-text text-muted"><?php echo __('Per-tenant JSON object keyed by Purview compliance tag.'); ?></small>
+                                </div>
+
+                                <div class="alert alert-info mb-3">
+                                    <i class="fa fa-info-circle me-2"></i><?php echo __('Tenant credentials and per-drive auto-ingest label allowlists are managed at'); ?>
+                                    <a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'tenants']); ?>"><?php echo __('SharePoint admin'); ?></a>.
+                                </div>
+                            <?php break; ?>
+
                         <?php endswitch; ?>
 
                         <!-- Submit Button -->

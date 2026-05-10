@@ -48,6 +48,11 @@ class AhgSettingsSectionAction extends AhgController
             'icon' => 'fa-upload',
             'description' => 'FTP/SFTP upload settings for CSV import digital objects',
         ],
+        'sharepoint' => [
+            'label' => 'SharePoint Integration',
+            'icon' => 'fa-cloud',
+            'description' => 'Microsoft 365 SharePoint: tenant, drives, webhook URL, retention-label map, push controls',
+        ],
     ];
 
     protected $checkboxFields = [
@@ -134,6 +139,14 @@ class AhgSettingsSectionAction extends AhgController
         'ftp' => [
             'ftp_passive_mode',
         ],
+        'sharepoint' => [
+            'sharepoint_enabled',
+            'sharepoint_records_handoff_enabled',
+            'sharepoint_federated_search_enabled',
+            'sharepoint_m365_search_enabled',
+            'sharepoint_inherit_ai_defaults',
+            'sharepoint_push_user_create_enabled',
+        ],
     ];
 
     
@@ -153,6 +166,7 @@ class AhgSettingsSectionAction extends AhgController
         'authority' => 'ahgAuthorityPlugin',
         'library' => 'ahgLibraryPlugin',
         'ftp' => 'ahgFtpPlugin',
+        'sharepoint' => 'ahgSharePointPlugin',
     ];
 
     // Check if a plugin is enabled

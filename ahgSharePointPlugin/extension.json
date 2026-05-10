@@ -22,7 +22,8 @@
         "sharepoint_mapping",
         "sharepoint_sync_state",
         "sharepoint_subscription",
-        "sharepoint_event"
+        "sharepoint_event",
+        "sharepoint_user_mapping"
     ],
     "category": "integration",
     "features": [

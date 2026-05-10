@@ -3052,6 +3052,49 @@
                                 </script>
                             @break
 
+                            @case('sharepoint')
+                                <h4 class="mb-3"><i class="fa fa-cloud me-2"></i>{{ __('SharePoint Integration') }}</h4>
+                                <p class="text-muted">{{ __('Microsoft 365 SharePoint: tenant, drives, webhook URL, retention map, push.') }}</p>
+
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_enabled" name="settings[sharepoint_enabled]" value="true" {{ ($settings['sharepoint_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sharepoint_enabled">{{ __('SharePoint integration enabled') }}</label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_records_handoff_enabled" name="settings[sharepoint_records_handoff_enabled]" value="true" {{ ($settings['sharepoint_records_handoff_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sharepoint_records_handoff_enabled">{{ __('Records handoff (auto/declare) — Phase 2.A') }}</label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_push_user_create_enabled" name="settings[sharepoint_push_user_create_enabled]" value="true" {{ ($settings['sharepoint_push_user_create_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sharepoint_push_user_create_enabled">{{ __('Auto-create AtoM user on first manual push (Phase 2.B)') }}</label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_federated_search_enabled" name="settings[sharepoint_federated_search_enabled]" value="true" {{ ($settings['sharepoint_federated_search_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sharepoint_federated_search_enabled">{{ __('Federated search tab in AtoM (Phase 3)') }}</label>
+                                </div>
+                                <div class="form-check form-switch mb-3">
+                                    <input type="checkbox" class="form-check-input" id="sharepoint_m365_search_enabled" name="settings[sharepoint_m365_search_enabled]" value="true" {{ ($settings['sharepoint_m365_search_enabled'] ?? 'false') === 'true' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="sharepoint_m365_search_enabled">{{ __('Microsoft Search connector feed (Phase 3)') }}</label>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="webhook_public_url">{{ __('Public webhook URL (for Graph subscriptions)') }}</label>
+                                    <input type="url" class="form-control" id="webhook_public_url" name="settings[webhook_public_url]" value="{{ $settings['webhook_public_url'] ?? '' }}" placeholder="https://psis.theahg.co.za/sharepoint/webhook">
+                                    <small class="form-text text-muted">{{ __('Must be HTTPS, publicly reachable. Graph posts notifications here.') }}</small>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label for="retention_label_map">{{ __('Retention label → AtoM disposition map (JSON)') }}</label>
+                                    <textarea class="form-control font-monospace" id="retention_label_map" name="settings[retention_label_map]" rows="6" placeholder='{"Archive-Permanent":{"level_of_description_id":12,"parent_id":345}}'>{{ $settings['retention_label_map'] ?? '' }}</textarea>
+                                    <small class="form-text text-muted">{{ __('Per-tenant JSON object keyed by Purview compliance tag.') }}</small>
+                                </div>
+
+                                <div class="alert alert-info mb-3">
+                                    <i class="fa fa-info-circle me-2"></i>{{ __('Tenant credentials and per-drive auto-ingest label allowlists are managed at') }}
+                                    <a href="{{ url_for(['module' => 'sharepoint', 'action' => 'tenants']) }}">{{ __('SharePoint admin') }}</a>.
+                                </div>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->

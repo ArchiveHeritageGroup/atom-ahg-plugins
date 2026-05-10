@@ -70,6 +70,13 @@ class ahgSharePointPluginConfiguration extends sfPluginConfiguration
         $r->any('sharepoint_event_detail',  '/sharepoint/events/:id',                   'eventDetail',    ['id' => '\d+']);
         $r->any('sharepoint_webhook',       '/sharepoint/webhook',                      'webhook'); // PUBLIC, NO CSRF
 
+        // Phase 2.B — manual push (SPFx → AtoM)
+        $r->any('sharepoint_user_mappings', '/sharepoint/user-mappings',                'userMappings');
+        $r->any('sharepoint_user_mapping_edit', '/sharepoint/user-mappings/:id',        'userMappingEdit', ['id' => '\d+']);
+        $r->any('sharepoint_push_projection', '/api/v2/sharepoint/push/projection',     'pushProjection');
+        $r->any('sharepoint_push',          '/api/v2/sharepoint/push',                  'push');
+        $r->any('sharepoint_push_job',      '/api/v2/sharepoint/push/jobs/:id',         'pushJob', ['id' => '\d+']);
+
         // Phase 3 — discovery
         $r->any('sharepoint_federated',     '/sharepoint/federated-search',             'federatedSearch');
     }
