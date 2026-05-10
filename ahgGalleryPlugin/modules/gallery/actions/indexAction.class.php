@@ -14,8 +14,15 @@ class galleryIndexAction extends AhgController
         }
 
         $slug = $request->getParameter('slug');
-        
+
         if (!$slug) {
+            $this->forward404();
+        }
+
+        // Sector module has no XML/EAD/DC templates — bail on non-HTML format requests
+        // (typically bot crawls of legacy AtoM-style ?sf_format=xml URLs)
+        $format = $request->getParameter('sf_format');
+        if (null !== $format && '' !== $format && 'html' !== $format) {
             $this->forward404();
         }
 
