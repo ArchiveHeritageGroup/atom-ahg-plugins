@@ -29,16 +29,37 @@ class sharepointTestConnectionTask extends sfBaseTask
         if (empty($options['tenant'])) {
             throw new \InvalidArgumentException('--tenant=<id> required');
         }
-
         $tenantId = (int) $options['tenant'];
 
-        // TODO (Phase 1):
-        //   1. Resolve tenant via SharePointTenantRepository.
-        //   2. GraphClientService::acquireToken().
-        //   3. GET /sites?search=* (list 5).
-        //   4. Print: tenant name, token expiry, sites returned.
-        //   5. On failure: print Graph error code + message + suggestion.
+        require_once __DIR__ . '/../Services/GraphTokenCache.php';
+        require_once __DIR__ . '/../Services/GraphClientService.php';
+        require_once __DIR__ . '/../Repositories/SharePointTenantRepository.php';
 
-        throw new \RuntimeException('sharepoint:test-connection not implemented yet');
+        $tenants = new \AtomExtensions\SharePoint\Repositories\SharePointTenantRepository();
+        $tenant = $tenants->find($tenantId);
+        if ($tenant === null) {
+            throw new \RuntimeException("Tenant {$tenantId} not found");
+        }
+        $this->logSection('sharepoint', "testing tenant: {$tenant->name} ({$tenant->tenant_id})");
+
+        $graph = new \AtomExtensions\SharePoint\Services\GraphClientService();
+
+        // Step 1 — token
+        $token = $graph->acquireToken($tenantId);
+        $this->logSection('sharepoint', 'token acquired (length ' . strlen($token) . ')');
+
+        // Step 2 — list a few sites
+        try {
+            $sites = $graph->get($tenantId, '/sites?search=*&$top=5');
+            $count = count($sites['value'] ?? []);
+            $this->logSection('sharepoint', "GET /sites returned {$count} site(s)");
+            foreach (($sites['value'] ?? []) as $site) {
+                $this->log(sprintf('  - %s (%s)', $site['displayName'] ?? '?', $site['webUrl'] ?? '?'));
+            }
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('GET /sites failed: ' . $e->getMessage(), 0, $e);
+        }
+
+        $this->logSection('sharepoint', 'connection OK');
     }
 }

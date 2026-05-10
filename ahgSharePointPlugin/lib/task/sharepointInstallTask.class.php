@@ -3,7 +3,9 @@
 /**
  * sharepoint:install — create plugin tables + ingest_session migration.
  *
- * Idempotent. Safe to re-run. Reports tables touched and any errors.
+ * Idempotent. Safe to re-run. The framework rule forbids ADD COLUMN IF NOT
+ * EXISTS, so this task introspects information_schema before applying ALTER
+ * statements.
  *
  * @phase 1
  */
@@ -21,28 +23,116 @@ class sharepointInstallTask extends sfBaseTask
         $this->namespace = 'sharepoint';
         $this->name = 'install';
         $this->briefDescription = 'Install ahgSharePointPlugin schema (idempotent)';
-        $this->detailedDescription = <<<EOF
-Creates SharePoint integration tables and runs the ingest_session.source migration.
-
-Tables:
-  sharepoint_tenant, sharepoint_drive, sharepoint_mapping, sharepoint_sync_state,
-  sharepoint_subscription, sharepoint_event
-
-Re-running is safe; CREATE TABLE IF NOT EXISTS guards every statement.
-EOF;
     }
 
     protected function execute($arguments = [], $options = [])
     {
         $this->logSection('sharepoint', 'install starting');
+        $dryRun = !empty($options['dry-run']);
 
-        // TODO (Phase 1):
-        //   1. Read database/install.sql relative to plugin dir (sfConfig::get('sf_plugins_dir') is unreliable; use __DIR__).
-        //   2. Read database/migrations/20260510_add_source_to_ingest_session.sql.
-        //   3. Execute each via Capsule connection (DB::statement).
-        //   4. Honor --dry-run.
-        //   5. Report rows affected per statement.
+        $pluginDir = realpath(__DIR__ . '/../../');
+        $installSql = $pluginDir . '/database/install.sql';
+        $migrationsDir = $pluginDir . '/database/migrations';
+        $viewsDir = $pluginDir . '/database/views';
 
-        throw new \RuntimeException('sharepoint:install not implemented yet');
+        if (!file_exists($installSql)) {
+            throw new \RuntimeException("install.sql missing at {$installSql}");
+        }
+
+        // Phase 1+2 base tables (CREATE TABLE IF NOT EXISTS — safe to re-run)
+        $this->runSqlFile($installSql, $dryRun);
+
+        // ingest_session.source migration — guarded by information_schema check
+        $this->ensureIngestSessionSourceColumns($dryRun);
+
+        // sharepoint_drive.auto_ingest_labels migration — same pattern
+        $this->ensureColumnExists('sharepoint_drive', 'auto_ingest_labels', "TEXT DEFAULT NULL COMMENT 'JSON array of compliance tag names that trigger auto-ingest in mode B'", $dryRun);
+
+        // Reporting views
+        if (is_dir($viewsDir)) {
+            foreach (glob($viewsDir . '/*.sql') as $viewFile) {
+                $this->runSqlFile($viewFile, $dryRun);
+            }
+        }
+
+        $this->logSection('sharepoint', 'install complete');
+    }
+
+    private function runSqlFile(string $path, bool $dryRun): void
+    {
+        $sql = file_get_contents($path);
+        if ($sql === false) {
+            throw new \RuntimeException("Cannot read {$path}");
+        }
+        if ($dryRun) {
+            $this->log('--- ' . basename($path) . ' ---');
+            $this->log($sql);
+            return;
+        }
+        // Naive split on semicolon-newline boundaries.
+        $statements = preg_split('/;\s*\n/', $sql);
+        foreach ($statements as $stmt) {
+            $stmt = trim($stmt);
+            if ($stmt === '' || str_starts_with($stmt, '--')) {
+                continue;
+            }
+            \Illuminate\Database\Capsule\Manager::statement($stmt);
+        }
+        $this->logSection('sharepoint', 'applied ' . basename($path));
+    }
+
+    private function ensureIngestSessionSourceColumns(bool $dryRun): void
+    {
+        if (!$this->tableExists('ingest_session')) {
+            $this->logSection('sharepoint', 'skip ingest_session migration — table absent (ahgIngestPlugin not installed?)');
+            return;
+        }
+        $this->ensureColumnExists(
+            'ingest_session',
+            'source',
+            "VARCHAR(20) NOT NULL DEFAULT 'wizard' COMMENT 'wizard, sharepoint_auto, sharepoint_push, api'",
+            $dryRun,
+        );
+        $this->ensureColumnExists(
+            'ingest_session',
+            'source_id',
+            "INT DEFAULT NULL COMMENT 'Origin record id (e.g., sharepoint_event.id)'",
+            $dryRun,
+        );
+    }
+
+    private function ensureColumnExists(string $table, string $column, string $definition, bool $dryRun): void
+    {
+        if (!$this->tableExists($table)) {
+            return;
+        }
+        if ($this->columnExists($table, $column)) {
+            return;
+        }
+        $sql = "ALTER TABLE {$table} ADD COLUMN {$column} {$definition}";
+        if ($dryRun) {
+            $this->log($sql);
+            return;
+        }
+        \Illuminate\Database\Capsule\Manager::statement($sql);
+        $this->logSection('sharepoint', "added column {$table}.{$column}");
+    }
+
+    private function tableExists(string $table): bool
+    {
+        $row = \Illuminate\Database\Capsule\Manager::selectOne(
+            'SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?',
+            [$table],
+        );
+        return $row !== null;
+    }
+
+    private function columnExists(string $table, string $column): bool
+    {
+        $row = \Illuminate\Database\Capsule\Manager::selectOne(
+            'SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+            [$table, $column],
+        );
+        return $row !== null;
     }
 }
