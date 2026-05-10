@@ -70,30 +70,112 @@ class sharepointActions extends sfActions
 
     public function executeSubscriptions(sfWebRequest $request)
     {
-        return $this->phaseUnavailable(2);
+        $this->checkAdmin();
+        require_once __DIR__ . '/../../../lib/Repositories/SharePointSubscriptionRepository.php';
+        $repo = new \AtomExtensions\SharePoint\Repositories\SharePointSubscriptionRepository();
+        // TODO render: list subs grouped by drive with countdown to expiry.
+        $this->subscriptions = \Illuminate\Database\Capsule\Manager::table('sharepoint_subscription')
+            ->orderBy('expires_at')
+            ->get();
+        return sfView::SUCCESS;
     }
 
     public function executeEvents(sfWebRequest $request)
     {
-        return $this->phaseUnavailable(2);
+        $this->checkAdmin();
+        $status = $request->getParameter('status');
+        $query = \Illuminate\Database\Capsule\Manager::table('sharepoint_event')
+            ->orderByDesc('received_at')
+            ->limit(200);
+        if ($status) {
+            $query->where('status', $status);
+        }
+        $this->events = $query->get();
+        $this->statusFilter = $status;
+        return sfView::SUCCESS;
     }
 
     public function executeEventDetail(sfWebRequest $request)
     {
-        return $this->phaseUnavailable(2);
+        $this->checkAdmin();
+        $id = (int) $request->getParameter('id');
+        $this->event = \Illuminate\Database\Capsule\Manager::table('sharepoint_event')
+            ->where('id', $id)
+            ->first();
+        if ($this->event === null) {
+            $this->forward404();
+        }
+        // POST = retry: re-dispatch the queue job for this event.
+        if ($request->isMethod(sfRequest::POST) && $request->getParameter('form_action') === 'retry') {
+            if (class_exists('\\AtomFramework\\Services\\QueueService')) {
+                \AtomFramework\Services\QueueService::dispatch(
+                    'sharepoint:ingest-event',
+                    ['event_id' => $id],
+                    'integrations',
+                );
+                \Illuminate\Database\Capsule\Manager::table('sharepoint_event')
+                    ->where('id', $id)
+                    ->update(['status' => 'queued', 'last_error' => null]);
+            }
+            $this->redirect(['module' => 'sharepoint', 'action' => 'eventDetail', 'id' => $id]);
+        }
+        return sfView::SUCCESS;
     }
 
     /**
      * PUBLIC, NO CSRF, NO AUTH. Graph webhook receiver.
-     * In Phase 1 this returns 503 so a misconfigured Graph subscription
-     * fails loudly rather than silently dropping.
+     *
+     * Two flows handled (Phase 2.A):
+     *   1. Subscription validation handshake — Graph GETs ?validationToken=...
+     *      We MUST echo it as text/plain 200 within 10s.
+     *   2. Notification delivery — Graph POSTs JSON {value:[{...},{...}]}
+     *      We validate clientState, INSERT sharepoint_event rows, enqueue
+     *      sharepoint:ingest-event jobs, return 202.
      */
     public function executeWebhook(sfWebRequest $request)
     {
-        // Phase 1: subscriptions don't exist yet. Return 503 with explanatory body.
-        $this->getResponse()->setStatusCode(503);
         $this->getResponse()->setContentType('text/plain');
-        $this->renderText('SharePoint webhook receiver not enabled (Phase 2). See ahgSharePointPlugin docs.');
+
+        // Validation handshake — Graph echoes a token to confirm the URL works.
+        $validationToken = $request->getParameter('validationToken');
+        if ($validationToken !== null && $validationToken !== '') {
+            $this->getResponse()->setStatusCode(200);
+            $this->renderText($validationToken);
+            return sfView::NONE;
+        }
+
+        // Reject anything that isn't POST.
+        if (!$request->isMethod(sfRequest::POST)) {
+            $this->getResponse()->setStatusCode(405);
+            $this->renderText('Method not allowed');
+            return sfView::NONE;
+        }
+
+        $rawBody = file_get_contents('php://input');
+        $payload = json_decode($rawBody ?: '{}', true);
+        if (!is_array($payload)) {
+            $this->getResponse()->setStatusCode(400);
+            $this->renderText('Invalid JSON');
+            return sfView::NONE;
+        }
+
+        require_once __DIR__ . '/../../../lib/Services/SharePointWebhookHandler.php';
+        require_once __DIR__ . '/../../../lib/Repositories/SharePointSubscriptionRepository.php';
+        require_once __DIR__ . '/../../../lib/Repositories/SharePointEventRepository.php';
+
+        $handler = new \AtomExtensions\SharePoint\Services\SharePointWebhookHandler(
+            new \AtomExtensions\SharePoint\Repositories\SharePointSubscriptionRepository(),
+            new \AtomExtensions\SharePoint\Repositories\SharePointEventRepository(),
+        );
+
+        $result = $handler->handleNotifications($payload);
+
+        $this->getResponse()->setStatusCode(202);
+        $this->getResponse()->setContentType('application/json');
+        $this->renderText(json_encode([
+            'accepted' => $result['accepted'],
+            'dropped' => $result['dropped'],
+        ]));
         return sfView::NONE;
     }
 

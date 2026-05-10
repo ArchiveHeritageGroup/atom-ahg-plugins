@@ -64,10 +64,36 @@ class GraphClientService
     }
 
     /**
+     * PATCH request against the Graph endpoint. Used for subscription renewal.
+     */
+    public function patch(int $tenantId, string $path, array $body, array $headers = []): array
+    {
+        throw new \RuntimeException('GraphClientService::patch not implemented yet');
+    }
+
+    /**
+     * DELETE request against the Graph endpoint. Used for subscription teardown.
+     */
+    public function delete(int $tenantId, string $path, array $headers = []): void
+    {
+        throw new \RuntimeException('GraphClientService::delete not implemented yet');
+    }
+
+    /**
      * Stream a driveItem content URL to a local path.
      */
     public function downloadDriveItem(int $tenantId, string $siteId, string $driveId, string $itemId, string $destinationPath): void
     {
         throw new \RuntimeException('GraphClientService::downloadDriveItem not implemented yet');
+    }
+
+    /**
+     * Read listItem.fields for a driveItem. Phase 2 reads _ComplianceTag from here.
+     *
+     * @return array<string, mixed> Decoded listItem.fields object.
+     */
+    public function getListItemFields(int $tenantId, string $siteId, string $driveId, string $itemId): array
+    {
+        throw new \RuntimeException('GraphClientService::getListItemFields not implemented yet');
     }
 }
