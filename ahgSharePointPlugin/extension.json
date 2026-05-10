@@ -1,0 +1,53 @@
+{
+    "name": "SharePoint Integration",
+    "machine_name": "ahgSharePointPlugin",
+    "version": "0.1.0",
+    "description": "Microsoft 365 SharePoint integration: tenant config, drive registration, manual delta sync (Phase 1); webhook records handoff (Phase 2); federated search + M365 connector feed (Phase 3). One-way: SharePoint -> AtoM ingest.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0",
+    "requires": {
+        "atom_framework": ">=2.8.2",
+        "atom": ">=2.8",
+        "php": ">=8.2"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgSettingsPlugin",
+        "ahgIngestPlugin",
+        "ahgAuditTrailPlugin"
+    ],
+    "tables": [
+        "sharepoint_tenant",
+        "sharepoint_drive",
+        "sharepoint_mapping",
+        "sharepoint_sync_state",
+        "sharepoint_subscription",
+        "sharepoint_event"
+    ],
+    "category": "integration",
+    "features": [
+        "Azure AD app-registration auth (client-credentials flow)",
+        "Tenant + drive registration UI",
+        "Per-drive column mapping editor",
+        "Microsoft Graph delta query sync (manual + scheduled)",
+        "Webhook subscription lifecycle (Phase 2)",
+        "Records handoff via existing IngestCommitService pipeline (Phase 2)",
+        "Purview retention label -> AtoM disposition mapping (Phase 2)",
+        "AtoM-side federated search tab (staff-only, Phase 3)",
+        "M365-side Microsoft Search connector feed (Phase 3)",
+        "Encrypted client_secret storage via framework EncryptionService"
+    ],
+    "phases": {
+        "1": "Foundation - auth, drive registration, manual sync",
+        "2": "Webhooks - records handoff, retention mapping (gated on Purview spike)",
+        "3": "Discovery - federated search + M365 connector feed"
+    },
+    "changelog": {
+        "0.1.0": "Initial Phase 1 scaffold - schema, configuration, service stubs"
+    },
+    "portability": {
+        "heratio_package": "heratio/packages/ahg-sharepoint",
+        "parity_required": true,
+        "note": "Schema and feature set must mirror the Heratio Laravel package exactly. See atom-extensions-catalog/docs/technical/ahgSharePointPlugin_Implementation_Plan.md section 19."
+    }
+}
