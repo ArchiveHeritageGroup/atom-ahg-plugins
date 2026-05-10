@@ -31,7 +31,7 @@ class helpImportTask extends arBaseTask
         'Public Access' => ['access-request', 'cart-', 'favorites-', 'feedback-', 'request-to-publish-', 'heritage-site'],
         'Exhibitions' => ['exhibition-', 'landing-page-'],
         'Marketplace' => ['marketplace-'],
-        'Integration' => ['api-', 'graphql-', 'doi-', 'federation-', 'ric-'],
+        'Integration' => ['api-', 'graphql-', 'doi-', 'federation-', 'ric-', 'sharepoint-'],
         'Labels & Forms' => ['label-', 'forms-', 'barcode-'],
         'Heritage Accounting' => ['heritage-accounting-', 'grap-', 'ipsas-'],
     ];
@@ -104,6 +104,7 @@ class helpImportTask extends arBaseTask
         'rights-management' => 'ahgRightsPlugin',
         'security-' => 'ahgSecurityClearancePlugin',
         'semantic-search' => 'ahgSemanticSearchPlugin',
+        'sharepoint-' => 'ahgSharePointPlugin',
         'spectrum-' => 'ahgSpectrumPlugin',
         'statistics-' => 'ahgStatisticsPlugin',
         'term-taxonomy' => 'ahgTermTaxonomyPlugin',
