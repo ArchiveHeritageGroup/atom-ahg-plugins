@@ -2713,6 +2713,71 @@ slot('title', $title);
                                 </div>
                             <?php break; ?>
 
+                            <?php case 'share_link': ?>
+                                <h4 class="mb-3"><i class="fas fa-share-alt me-2"></i><?php echo __('Share Links'); ?></h4>
+                                <p class="text-muted"><?php echo __('Time-limited share links let editors send a private URL to a record. Tokens are HMAC-derived, audited end-to-end, and expire automatically.'); ?></p>
+
+                                <div class="card mb-4">
+                                    <div class="card-header"><h5 class="mb-0"><?php echo __('Expiry defaults'); ?></h5></div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_default_expiry_days"><?php echo __('Default expiry (days)'); ?></label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_default_expiry_days"
+                                                       name="settings[share_link.default_expiry_days]"
+                                                       value="<?php echo htmlspecialchars($settings['share_link.default_expiry_days'] ?? '14', ENT_QUOTES); ?>">
+                                                <small class="form-text text-muted"><?php echo __('Pre-filled in the Share modal. Default: 14 days.'); ?></small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_max_expiry_days"><?php echo __('Maximum expiry (days)'); ?></label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_max_expiry_days"
+                                                       name="settings[share_link.max_expiry_days]"
+                                                       value="<?php echo htmlspecialchars($settings['share_link.max_expiry_days'] ?? '90', ENT_QUOTES); ?>">
+                                                <small class="form-text text-muted"><?php echo __('Capped here unless the user has share_link.create_unlimited_expiry. Default: 90 days.'); ?></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header"><h5 class="mb-0"><?php echo __('Retention sweeps'); ?></h5></div>
+                                    <div class="card-body">
+                                        <p class="text-muted small"><?php echo __('Run via the share-link:prune cron. Configure in System > Cron Jobs.'); ?></p>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_token_retain_days"><?php echo __('Token retention (days)'); ?></label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_token_retain_days"
+                                                       name="settings[share_link.token_retain_days]"
+                                                       value="<?php echo htmlspecialchars($settings['share_link.token_retain_days'] ?? '365', ENT_QUOTES); ?>">
+                                                <small class="form-text text-muted"><?php echo __('Delete tokens whose expires_at OR revoked_at is older. Default: 365 days.'); ?></small>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_access_log_retain_days"><?php echo __('Access-log retention (days)'); ?></label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_access_log_retain_days"
+                                                       name="settings[share_link.access_log_retain_days]"
+                                                       value="<?php echo htmlspecialchars($settings['share_link.access_log_retain_days'] ?? '180', ENT_QUOTES); ?>">
+                                                <small class="form-text text-muted"><?php echo __('Trim access-log rows older than this. Default: 180 days.'); ?></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header"><h5 class="mb-0"><?php echo __('HMAC secret'); ?></h5></div>
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-2"><?php echo __('Auto-generated on first use; rotation invalidates every existing token.'); ?></p>
+                                        <div class="alert alert-warning small mb-3">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            <?php echo __('Rotation runbook: php symfony share-link:rotate-secret (future enhancement).'); ?>
+                                        </div>
+                                        <code style="word-break: break-all;">
+                                            <?php $hs = $settings['share_link.hmac_secret'] ?? ''; ?>
+                                            <?php echo $hs ? htmlspecialchars(substr($hs, 0, 12) . '…', ENT_QUOTES) : __('(auto-generated on first share-link issue)'); ?>
+                                        </code>
+                                    </div>
+                                </div>
+                            <?php break; ?>
+
                         <?php endswitch; ?>
 
                         <!-- Submit Button -->

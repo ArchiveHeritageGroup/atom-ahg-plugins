@@ -1,0 +1,39 @@
+{
+    "name": "Time-Limited Share Link",
+    "machine_name": "ahgTimeLimitedShareLinkPlugin",
+    "version": "0.1.0",
+    "description": "Time-limited, auditable share links for information_object records. Anonymous bearer-token access with HMAC-derived URL-safe tokens, optional max-access count, expiry caps, classified-record gating, and admin revocation. Integrates with ahgAuditTrailPlugin and ahgSecurityClearancePlugin.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "email": "johan@theahg.co.za",
+    "license": "proprietary",
+    "category": "records-management",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "suggests": {
+        "ahgAuditTrailPlugin": "Dual-write of share-link events into the central audit feed",
+        "ahgSecurityClearancePlugin": "Clearance gating on issuance for classified records",
+        "ahgVersionControlPlugin": "Reuses ClearanceCheck helper for classified-record gating"
+    },
+    "provides": {
+        "services": [
+            "AhgShareLink\\Services\\TokenService",
+            "AhgShareLink\\Services\\IssueService",
+            "AhgShareLink\\Services\\AccessService",
+            "AhgShareLink\\Services\\RevokeService"
+        ]
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "information_object_share_token",
+        "information_object_share_access"
+    ],
+    "is_core": false,
+    "is_locked": false,
+    "load_order": 55
+}

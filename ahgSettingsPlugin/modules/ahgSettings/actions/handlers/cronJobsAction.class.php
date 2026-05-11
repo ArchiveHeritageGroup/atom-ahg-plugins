@@ -816,6 +816,18 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Medium',
                 'category' => 'audit',
             ],
+            [
+                'name' => 'Share-Link Prune',
+                'command' => 'php symfony share-link:prune',
+                'description' => 'Retention sweep for time-limited share links. Deletes expired/revoked tokens past their retention window (share_link.token_retain_days, default 365d) and trims access-log rows older than share_link.access_log_retain_days (default 180d). Idempotent; safe to run daily.',
+                'options' => [
+                    '--dry-run' => 'Report what would be pruned without deleting',
+                ],
+                'schedule' => 'Daily',
+                'example' => '15 3 * * * cd {root} && php symfony share-link:prune >> /var/log/atom/share-link-prune.log 2>&1',
+                'duration' => 'Short',
+                'category' => 'audit',
+            ],
 
             // ============================================
             // AHG SPECIFIC

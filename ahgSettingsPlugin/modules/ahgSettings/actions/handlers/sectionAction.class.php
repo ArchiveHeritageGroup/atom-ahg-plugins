@@ -53,6 +53,11 @@ class AhgSettingsSectionAction extends AhgController
             'icon' => 'fa-cloud',
             'description' => 'Microsoft 365 SharePoint: tenant, drives, webhook URL, retention-label map, push controls',
         ],
+        'share_link' => [
+            'label' => 'Share Links',
+            'icon' => 'fa-share-alt',
+            'description' => 'Time-limited share links: default/max expiry, retention sweeps, HMAC secret rotation',
+        ],
     ];
 
     protected $checkboxFields = [
@@ -167,6 +172,7 @@ class AhgSettingsSectionAction extends AhgController
         'library' => 'ahgLibraryPlugin',
         'ftp' => 'ahgFtpPlugin',
         'sharepoint' => 'ahgSharePointPlugin',
+        'share_link' => 'ahgTimeLimitedShareLinkPlugin',
     ];
 
     // Check if a plugin is enabled

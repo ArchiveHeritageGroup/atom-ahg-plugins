@@ -3095,6 +3095,72 @@
                                 </div>
                             @break
 
+                            @case('share_link')
+                                <h4 class="mb-3"><i class="fas fa-share-alt me-2"></i>{{ __('Share Links') }}</h4>
+                                <p class="text-muted">{{ __('Time-limited share links let editors send a private URL to a record. Tokens are HMAC-derived, audited end-to-end, and expire automatically.') }}</p>
+
+                                <div class="card mb-4">
+                                    <div class="card-header"><h5 class="mb-0">{{ __('Expiry defaults') }}</h5></div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_default_expiry_days">{{ __('Default expiry (days)') }}</label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_default_expiry_days"
+                                                       name="settings[share_link.default_expiry_days]"
+                                                       value="{{ $settings['share_link.default_expiry_days'] ?? '14' }}">
+                                                <div class="form-text">{{ __('Pre-filled in the Share modal when no expiry is supplied. Default: 14 days.') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_max_expiry_days">{{ __('Maximum expiry (days)') }}</label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_max_expiry_days"
+                                                       name="settings[share_link.max_expiry_days]"
+                                                       value="{{ $settings['share_link.max_expiry_days'] ?? '90' }}">
+                                                <div class="form-text">{{ __('Issuers without the share_link.create_unlimited_expiry permission are capped at this value. Default: 90 days.') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header"><h5 class="mb-0">{{ __('Retention sweeps') }}</h5></div>
+                                    <div class="card-body">
+                                        <p class="text-muted small">{{ __('Run via the share-link:prune cron (daily by default). Set the AtoM cron in System > Cron Jobs.') }}</p>
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_token_retain_days">{{ __('Token retention (days)') }}</label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_token_retain_days"
+                                                       name="settings[share_link.token_retain_days]"
+                                                       value="{{ $settings['share_link.token_retain_days'] ?? '365' }}">
+                                                <div class="form-text">{{ __('Delete tokens whose expires_at OR revoked_at is older than this. CASCADE removes their access logs. Default: 365 days.') }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label" for="share_link_access_log_retain_days">{{ __('Access-log retention (days)') }}</label>
+                                                <input type="number" min="1" max="3650" class="form-control" id="share_link_access_log_retain_days"
+                                                       name="settings[share_link.access_log_retain_days]"
+                                                       value="{{ $settings['share_link.access_log_retain_days'] ?? '180' }}">
+                                                <div class="form-text">{{ __('Trim access-log rows older than this regardless of parent token state. Default: 180 days.') }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header"><h5 class="mb-0">{{ __('HMAC secret') }}</h5></div>
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-2">
+                                            {{ __('Tokens are derived from this per-install secret. Auto-generated on first use; rotation invalidates EVERY existing token.') }}
+                                        </p>
+                                        <div class="alert alert-warning small mb-3">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            {{ __('Rotation is not exposed here for safety. Run the rotation runbook via php symfony share-link:rotate-secret (future enhancement).') }}
+                                        </div>
+                                        <code style="word-break: break-all;">
+                                            {{ isset($settings['share_link.hmac_secret']) && $settings['share_link.hmac_secret'] !== '' ? substr($settings['share_link.hmac_secret'], 0, 12) . '…' : __('(auto-generated on first share-link issue)') }}
+                                        </code>
+                                    </div>
+                                </div>
+                            @break
+
                         @endswitch
 
                         <!-- Submit Button -->
