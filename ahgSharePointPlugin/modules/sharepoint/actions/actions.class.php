@@ -46,16 +46,150 @@ class sharepointActions extends sfActions
     public function executeDrives(sfWebRequest $request)
     {
         $this->checkAdmin();
-        // TODO: list registered drives across all tenants.
+        $this->drives = \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+            ->leftJoin('sharepoint_tenant', 'sharepoint_tenant.id', '=', 'sharepoint_drive.tenant_id')
+            ->select(
+                'sharepoint_drive.*',
+                'sharepoint_tenant.name AS tenant_name',
+            )
+            ->orderBy('sharepoint_drive.site_title')
+            ->get();
+        $this->tenants = \Illuminate\Database\Capsule\Manager::table('sharepoint_tenant')
+            ->where('status', '!=', 'disabled')
+            ->orderBy('name')
+            ->get();
         return sfView::SUCCESS;
     }
 
     public function executeDriveBrowse(sfWebRequest $request)
     {
         $this->checkAdmin();
-        // TODO: AJAX — given tenantId, GET /sites + drives via Graph; return JSON for picker UI.
-        $this->renderText(json_encode(['status' => 'not_implemented']));
+        $this->loadSharePointBrowser();
+        $tenantId = (int) $request->getParameter('tenant_id');
+        $op = (string) $request->getParameter('op');
+        $browser = new \AtomExtensions\SharePoint\Services\SharePointBrowserService();
+        $payload = ['op' => $op];
+        try {
+            if ($op === 'sites') {
+                $payload['sites'] = $browser->listSites($tenantId, $request->getParameter('search'));
+            } elseif ($op === 'drives') {
+                $payload['drives'] = $browser->listDrives($tenantId, (string) $request->getParameter('site_id'));
+            } else {
+                throw new \InvalidArgumentException('unknown op: ' . $op);
+            }
+        } catch (\Throwable $e) {
+            $payload['error'] = $e->getMessage();
+            $this->getResponse()->setStatusCode(500);
+        }
+        $this->getResponse()->setContentType('application/json');
+        $this->renderText(json_encode($payload));
         return sfView::NONE;
+    }
+
+    public function executeDriveRegister(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        $this->tenants = \Illuminate\Database\Capsule\Manager::table('sharepoint_tenant')
+            ->where('status', '!=', 'disabled')
+            ->orderBy('name')
+            ->get();
+        return sfView::SUCCESS;
+    }
+
+    public function executeDriveSave(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect(['module' => 'sharepoint', 'action' => 'drives']);
+        }
+        $attrs = [
+            'tenant_id' => (int) $request->getParameter('tenant_id'),
+            'site_id' => (string) $request->getParameter('site_id'),
+            'site_url' => (string) $request->getParameter('site_url'),
+            'site_title' => $request->getParameter('site_title') ?: null,
+            'drive_id' => (string) $request->getParameter('drive_id'),
+            'drive_name' => $request->getParameter('drive_name') ?: null,
+            'sector' => $request->getParameter('sector') ?: 'archive',
+            'default_parent_placement' => $request->getParameter('default_parent_placement') ?: 'top_level',
+            'ingest_enabled' => $request->getParameter('ingest_enabled') ? 1 : 0,
+            'ai_processing_inherit' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+        // Dedupe by (tenant_id, drive_id)
+        $existing = \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+            ->where('tenant_id', $attrs['tenant_id'])
+            ->where('drive_id', $attrs['drive_id'])
+            ->first();
+        if ($existing) {
+            \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+                ->where('id', $existing->id)
+                ->update([
+                    'site_id' => $attrs['site_id'],
+                    'site_url' => $attrs['site_url'],
+                    'site_title' => $attrs['site_title'],
+                    'drive_name' => $attrs['drive_name'],
+                    'sector' => $attrs['sector'],
+                    'default_parent_placement' => $attrs['default_parent_placement'],
+                    'ingest_enabled' => $attrs['ingest_enabled'],
+                    'updated_at' => $attrs['updated_at'],
+                ]);
+            $this->getUser()->setFlash('notice', 'Drive updated.');
+        } else {
+            \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')->insert($attrs);
+            $this->getUser()->setFlash('notice', 'Drive registered.');
+        }
+        $this->redirect(['module' => 'sharepoint', 'action' => 'drives']);
+    }
+
+    public function executeDriveDelete(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        $id = (int) $request->getParameter('id');
+        // Block delete when rules still reference it.
+        $ruleCount = \Illuminate\Database\Capsule\Manager::table('sharepoint_ingest_rule')->where('drive_id', $id)->count();
+        if ($ruleCount > 0) {
+            $this->getUser()->setFlash('error', "Cannot delete drive: {$ruleCount} rule(s) still reference it.");
+            $this->redirect(['module' => 'sharepoint', 'action' => 'drives']);
+        }
+        \Illuminate\Database\Capsule\Manager::table('sharepoint_mapping')->where('drive_id', $id)->delete();
+        \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')->where('id', $id)->delete();
+        $this->getUser()->setFlash('notice', 'Drive deleted.');
+        $this->redirect(['module' => 'sharepoint', 'action' => 'drives']);
+    }
+
+    public function executeColumns(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        $this->loadSharePointBrowser();
+        $driveId = (int) $request->getParameter('drive_id');
+        $drive = \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')->where('id', $driveId)->first();
+        if (!$drive) {
+            $this->getResponse()->setStatusCode(404);
+            $this->renderText(json_encode(['error' => 'drive not found']));
+            return sfView::NONE;
+        }
+        try {
+            $browser = new \AtomExtensions\SharePoint\Services\SharePointBrowserService();
+            $columns = $browser->listColumns((int) $drive->tenant_id, $drive->drive_id);
+        } catch (\Throwable $e) {
+            $this->getResponse()->setStatusCode(500);
+            $this->renderText(json_encode(['error' => $e->getMessage()]));
+            return sfView::NONE;
+        }
+        $this->getResponse()->setContentType('application/json');
+        $this->renderText(json_encode(['columns' => $columns]));
+        return sfView::NONE;
+    }
+
+    private function loadSharePointBrowser(): void
+    {
+        $base = __DIR__ . '/../../../lib/Services';
+        require_once $base . '/GraphTokenCache.php';
+        require_once $base . '/GraphClientService.php';
+        require_once $base . '/SharePointBrowserService.php';
+        require_once dirname($base) . '/Repositories/SharePointTenantRepository.php';
+        require_once dirname($base) . '/Repositories/SharePointDriveRepository.php';
     }
 
     public function executeMapping(sfWebRequest $request)
@@ -389,6 +523,265 @@ class sharepointActions extends sfActions
         if (!\sfContext::getInstance()->getUser()->hasGroup(\QubitAclGroup::ADMINISTRATOR_ID)) {
             $this->forward('admin', 'secure');
         }
+    }
+
+    // ─── Phase 2 (v2 ingest plan) — rules + mapping templates admin ─────
+
+    public function executeRules(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        $this->rules = \Illuminate\Database\Capsule\Manager::table('sharepoint_ingest_rule')
+            ->leftJoin('sharepoint_drive', 'sharepoint_ingest_rule.drive_id', '=', 'sharepoint_drive.id')
+            ->select(
+                'sharepoint_ingest_rule.*',
+                'sharepoint_drive.drive_name as drive_name',
+                'sharepoint_drive.site_title as site_title',
+            )
+            ->orderBy('sharepoint_ingest_rule.name')
+            ->get();
+        $this->drives = \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+            ->orderBy('site_title')
+            ->get();
+        return sfView::SUCCESS;
+    }
+
+    public function executeRuleEdit(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        $id = (int) $request->getParameter('id');
+        $this->rule = $id > 0
+            ? \Illuminate\Database\Capsule\Manager::table('sharepoint_ingest_rule')->where('id', $id)->first()
+            : null;
+        $this->drives = \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+            ->orderBy('site_title')
+            ->get();
+        $this->repositories = \Illuminate\Database\Capsule\Manager::table('repository')
+            ->join('actor_i18n', function ($j) {
+                $j->on('actor_i18n.id', '=', 'repository.id')
+                  ->where('actor_i18n.culture', '=', 'en');
+            })
+            ->select('repository.id', 'repository.identifier', 'actor_i18n.authorized_form_of_name AS name')
+            ->orderBy('actor_i18n.authorized_form_of_name')
+            ->get();
+        $this->parentLabel = null;
+        if ($this->rule && !empty($this->rule->parent_id)) {
+            $this->parentLabel = \Illuminate\Database\Capsule\Manager::table('information_object')
+                ->join('information_object_i18n', 'information_object.id', '=', 'information_object_i18n.id')
+                ->where('information_object.id', (int) $this->rule->parent_id)
+                ->select('information_object.id', 'information_object.identifier', 'information_object_i18n.title')
+                ->first();
+        }
+        $this->templatesByDrive = \Illuminate\Database\Capsule\Manager::table('sharepoint_mapping_template')
+            ->orderBy('drive_id')
+            ->orderByDesc('is_default')
+            ->orderBy('name')
+            ->get()
+            ->groupBy('drive_id');
+        return sfView::SUCCESS;
+    }
+
+    public function executeRuleSave(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect(['module' => 'sharepoint', 'action' => 'rules']);
+        }
+        $id = (int) $request->getParameter('id');
+        $processFlags = [];
+        foreach (['virus_scan', 'ocr', 'ner', 'summarize', 'spellcheck', 'translate', 'format_id', 'face_detect'] as $f) {
+            $processFlags[$f] = $request->getParameter('process_' . $f) ? 1 : 0;
+        }
+        $attrs = [
+            'drive_id' => (int) $request->getParameter('drive_id'),
+            'template_id' => $request->getParameter('template_id') ? (int) $request->getParameter('template_id') : null,
+            'name' => (string) $request->getParameter('name'),
+            'folder_path' => $request->getParameter('folder_path') ?: null,
+            'file_pattern' => $request->getParameter('file_pattern') ?: null,
+            'retention_label' => ($request->getParameter('retention_mode') === 'on')
+                ? ($request->getParameter('retention_label') ?: null)
+                : null,
+            'sector' => $request->getParameter('sector') ?: 'archive',
+            'standard' => $request->getParameter('standard') ?: 'isadg',
+            'repository_id' => $request->getParameter('repository_id') ? (int) $request->getParameter('repository_id') : null,
+            'parent_id' => $request->getParameter('parent_id') ? (int) $request->getParameter('parent_id') : null,
+            'parent_placement' => $request->getParameter('parent_placement') ?: 'top_level',
+            'process_flags' => json_encode($processFlags),
+            'schedule_cron' => $request->getParameter('schedule_cron') ?: '*/15 * * * *',
+            'is_enabled' => $request->getParameter('is_enabled') ? 1 : 0,
+        ];
+        if ($id > 0) {
+            \Illuminate\Database\Capsule\Manager::table('sharepoint_ingest_rule')->where('id', $id)->update($attrs);
+        } else {
+            \Illuminate\Database\Capsule\Manager::table('sharepoint_ingest_rule')->insert($attrs);
+        }
+        $this->getUser()->setFlash('notice', 'Rule saved.');
+        $this->redirect(['module' => 'sharepoint', 'action' => 'rules']);
+    }
+
+    public function executeRuleDelete(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        $id = (int) $request->getParameter('id');
+        \Illuminate\Database\Capsule\Manager::table('sharepoint_ingest_rule')->where('id', $id)->delete();
+        $this->getUser()->setFlash('notice', 'Rule deleted.');
+        $this->redirect(['module' => 'sharepoint', 'action' => 'rules']);
+    }
+
+    public function executeRuleRun(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        $id = (int) $request->getParameter('id');
+        // Fire the CLI task in the background so the request returns immediately.
+        $atomRoot = sfConfig::get('sf_root_dir');
+        $cmd = "cd " . escapeshellarg($atomRoot)
+            . " && nohup php symfony sharepoint:auto-ingest --rule=" . (int) $id . " --force"
+            . " >> /var/log/atom/sp-autoingest.log 2>&1 &";
+        @exec($cmd);
+        $this->getUser()->setFlash('notice', "Rule #{$id} scheduled to run in background.");
+        $this->redirect(['module' => 'sharepoint', 'action' => 'rules']);
+    }
+
+    public function executeMappings(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        // Load IngestService so the template can call getTargetFields()
+        $svcPath = sfConfig::get('sf_plugins_dir') . '/ahgIngestPlugin/lib/Services/IngestService.php';
+        if (file_exists($svcPath) && !class_exists('\AhgIngestPlugin\Services\IngestService')) {
+            require_once $svcPath;
+        }
+        $driveId = (int) $request->getParameter('drive_id');
+        $templateRaw = (string) $request->getParameter('template_id', '');
+        $isNew = ($templateRaw === 'new');
+        $templateId = $isNew ? 0 : (int) $templateRaw;
+        $this->drives = \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+            ->orderBy('site_title')
+            ->get();
+        $this->selectedDriveId = $driveId;
+        $this->templates = collect();
+        $this->selectedTemplate = null;
+        $this->mappings = collect();
+        if ($driveId > 0) {
+            $this->templates = \Illuminate\Database\Capsule\Manager::table('sharepoint_mapping_template')
+                ->where('drive_id', $driveId)
+                ->orderByDesc('is_default')
+                ->orderBy('name')
+                ->get();
+            if (!$isNew) {
+                if ($templateId > 0) {
+                    $this->selectedTemplate = $this->templates->firstWhere('id', $templateId);
+                }
+                if (!$this->selectedTemplate) {
+                    $this->selectedTemplate = $this->templates->firstWhere('is_default', 1) ?: $this->templates->first();
+                }
+                if ($this->selectedTemplate) {
+                    $this->mappings = \Illuminate\Database\Capsule\Manager::table('sharepoint_mapping')
+                        ->where('template_id', $this->selectedTemplate->id)
+                        ->orderBy('sort_order')
+                        ->get();
+                }
+            }
+        }
+        return sfView::SUCCESS;
+    }
+
+    public function executeMappingsSave(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect(['module' => 'sharepoint', 'action' => 'mappings']);
+        }
+        $driveId = (int) $request->getParameter('drive_id');
+        $templateId = (int) $request->getParameter('template_id');
+        $name = trim((string) $request->getParameter('template_name', ''));
+        $sector = (string) $request->getParameter('sector', 'archive');
+        $standard = (string) $request->getParameter('standard', 'isadg');
+        $isDefault = $request->getParameter('is_default') ? 1 : 0;
+
+        if ($driveId <= 0) {
+            $this->getUser()->setFlash('error', 'Drive id required.');
+            $this->redirect(['module' => 'sharepoint', 'action' => 'mappings']);
+        }
+        if ($name === '') {
+            $this->getUser()->setFlash('error', 'Template name is required.');
+            $this->redirect(['module' => 'sharepoint', 'action' => 'mappings', 'drive_id' => $driveId, 'template_id' => $templateId]);
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::connection();
+        $db->transaction(function () use ($db, &$templateId, $driveId, $name, $sector, $standard, $isDefault, $request) {
+            $now = date('Y-m-d H:i:s');
+            if ($templateId > 0) {
+                $db->table('sharepoint_mapping_template')
+                    ->where('id', $templateId)
+                    ->where('drive_id', $driveId)
+                    ->update([
+                        'name' => $name,
+                        'sector' => $sector,
+                        'standard' => $standard,
+                        'is_default' => $isDefault,
+                        'updated_at' => $now,
+                    ]);
+            } else {
+                $templateId = (int) $db->table('sharepoint_mapping_template')->insertGetId([
+                    'drive_id' => $driveId,
+                    'name' => $name,
+                    'sector' => $sector,
+                    'standard' => $standard,
+                    'is_default' => $isDefault,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+            if ($isDefault) {
+                $db->table('sharepoint_mapping_template')
+                    ->where('drive_id', $driveId)
+                    ->where('id', '!=', $templateId)
+                    ->update(['is_default' => 0, 'updated_at' => $now]);
+            }
+            $db->table('sharepoint_mapping')->where('template_id', $templateId)->delete();
+            $sourceFields = (array) $request->getParameter('source_field', []);
+            $targetFields = (array) $request->getParameter('target_field', []);
+            $transforms = (array) $request->getParameter('transform', []);
+            $defaults = (array) $request->getParameter('default_value', []);
+            foreach ($sourceFields as $i => $src) {
+                if (trim((string) $src) === '' || trim((string) ($targetFields[$i] ?? '')) === '') {
+                    continue;
+                }
+                $db->table('sharepoint_mapping')->insert([
+                    'drive_id' => $driveId,
+                    'template_id' => $templateId,
+                    'source_field' => $src,
+                    'target_field' => $targetFields[$i],
+                    'target_standard' => $standard,
+                    'transform' => $transforms[$i] ?? null,
+                    'default_value' => $defaults[$i] ?? null,
+                    'sort_order' => $i,
+                    'is_required' => 0,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+        });
+
+        $this->getUser()->setFlash('notice', 'Mapping template saved.');
+        $this->redirect(['module' => 'sharepoint', 'action' => 'mappings', 'drive_id' => $driveId, 'template_id' => $templateId]);
+    }
+
+    public function executeMappingTemplateDelete(sfWebRequest $request)
+    {
+        $this->checkAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect(['module' => 'sharepoint', 'action' => 'mappings']);
+        }
+        $driveId = (int) $request->getParameter('drive_id');
+        $templateId = (int) $request->getParameter('template_id');
+        if ($templateId > 0 && $driveId > 0) {
+            \Illuminate\Database\Capsule\Manager::table('sharepoint_mapping_template')
+                ->where('id', $templateId)
+                ->where('drive_id', $driveId)
+                ->delete(); // FK cascade removes mapping rows
+            $this->getUser()->setFlash('notice', 'Template deleted.');
+        }
+        $this->redirect(['module' => 'sharepoint', 'action' => 'mappings', 'drive_id' => $driveId]);
     }
 
     private function phaseUnavailable(int $phase): string

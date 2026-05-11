@@ -72,7 +72,12 @@ class SharePointTenantRepository
         }
 
         try {
-            return \AtomFramework\Core\Security\EncryptionService::decrypt((string) $row->setting_value);
+            // ahg_settings.setting_value is utf8mb4 TEXT — secrets are base64 wrapped at rest
+            $blob = base64_decode((string) $row->setting_value, true);
+            if ($blob === false) {
+                throw new \RuntimeException('client_secret blob is not valid base64');
+            }
+            return \AtomFramework\Core\Security\EncryptionService::decrypt($blob);
         } catch (\Throwable $e) {
             throw new \RuntimeException('Failed to decrypt client_secret: ' . $e->getMessage(), 0, $e);
         }
@@ -87,7 +92,8 @@ class SharePointTenantRepository
         if (!class_exists('\\AtomFramework\\Core\\Security\\EncryptionService')) {
             throw new \RuntimeException('EncryptionService not available — cannot encrypt client_secret');
         }
-        $ciphertext = \AtomFramework\Core\Security\EncryptionService::encrypt($plaintextSecret);
+        // EncryptionService returns raw binary; base64 wrap so it survives utf8mb4 TEXT column
+        $ciphertext = base64_encode(\AtomFramework\Core\Security\EncryptionService::encrypt($plaintextSecret));
         $ref = "client_secret_{$tenantId}";
 
         DB::table('ahg_settings')->updateOrInsert(

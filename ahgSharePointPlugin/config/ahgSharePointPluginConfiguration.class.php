@@ -79,5 +79,21 @@ class ahgSharePointPluginConfiguration extends sfPluginConfiguration
 
         // Phase 3 — discovery
         $r->any('sharepoint_federated',     '/sharepoint/federated-search',             'federatedSearch');
+
+        // Phase 2 — v2 ingest plan: auto-ingest rules + per-drive mapping templates
+        $r->any('sharepoint_rules',         '/sharepoint/rules',                        'rules');
+        $r->any('sharepoint_rule_edit',     '/sharepoint/rules/edit',                   'ruleEdit');
+        $r->any('sharepoint_rule_save',     '/sharepoint/rules/save',                   'ruleSave');
+        $r->any('sharepoint_rule_delete',   '/sharepoint/rules/:id/delete',             'ruleDelete', ['id' => '\d+']);
+        $r->any('sharepoint_rule_run',      '/sharepoint/rules/:id/run',                'ruleRun',    ['id' => '\d+']);
+        $r->any('sharepoint_mappings',      '/sharepoint/mappings',                     'mappings');
+        $r->any('sharepoint_mappings_save', '/sharepoint/mappings/save',                'mappingsSave');
+        $r->any('sharepoint_mapping_template_delete', '/sharepoint/mappings/template/delete', 'mappingTemplateDelete');
+        $r->any('sharepoint_columns',       '/sharepoint/columns',                      'columns');
+
+        // Drives admin (replaces the Phase 1 stub)
+        $r->any('sharepoint_drive_register', '/sharepoint/drives/register',             'driveRegister');
+        $r->any('sharepoint_drive_save',     '/sharepoint/drives/save',                 'driveSave');
+        $r->any('sharepoint_drive_delete',   '/sharepoint/drives/:id/delete',           'driveDelete', ['id' => '\d+']);
     }
 }

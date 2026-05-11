@@ -198,6 +198,44 @@ class GraphClientService
     }
 
     /**
+     * Stream a driveItem to a local path using the drive-scoped URL
+     * (no siteId required). Used by SharePointBrowserService — the v2 ingest
+     * flow keys on drive_id only (sites are resolved upfront when drives are
+     * registered in sharepoint_drive).
+     */
+    public function downloadDriveItemByDriveId(int $tenantId, string $driveId, string $itemId, string $destinationPath): void
+    {
+        $token = $this->acquireToken($tenantId);
+        $url = $this->resolveBase($tenantId)
+            . "/drives/{$driveId}/items/{$itemId}/content";
+
+        $resp = HttpClientService::get(
+            $url,
+            ['Authorization' => 'Bearer ' . $token],
+            [
+                'timeout' => 60,
+                'maxSize' => self::DOWNLOAD_MAX_BYTES,
+                'followRedirects' => true,
+            ],
+        );
+
+        if ($resp['status'] < 200 || $resp['status'] >= 300) {
+            throw new \RuntimeException(
+                "downloadDriveItemByDriveId failed: HTTP {$resp['status']} for {$url}",
+            );
+        }
+
+        $dir = dirname($destinationPath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0775, true);
+        }
+        $written = file_put_contents($destinationPath, $resp['body']);
+        if ($written === false) {
+            throw new \RuntimeException("Cannot write driveItem to {$destinationPath}");
+        }
+    }
+
+    /**
      * Read listItem.fields for a driveItem. Phase 2 reads _ComplianceTag from here.
      *
      * @return array<string, mixed> Decoded listItem.fields object.

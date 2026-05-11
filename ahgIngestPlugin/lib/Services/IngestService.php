@@ -1066,7 +1066,65 @@ class IngestService
             return $this->parseRowsFromDirectory($sessionId, $dirFile);
         }
 
+        // SharePoint: one row per file_type='sharepoint' ingest_file
+        $spCount = DB::table('ingest_file')
+            ->where('session_id', $sessionId)
+            ->where('file_type', 'sharepoint')
+            ->count();
+        if ($spCount > 0) {
+            return $this->parseRowsFromSharePoint($sessionId);
+        }
+
         return 0;
+    }
+
+    /**
+     * Build ingest_row entries from file_type='sharepoint' ingest_file rows.
+     *
+     * Each ingest_file.sidecar_json carries the SP listItem fields under
+     * sp_list_item_fields. We merge those with Name/Title fallbacks into the
+     * row's data column so the standard mapping pipeline can pick it up.
+     *
+     * @phase 2 (v2 ingest plan, step 5 — shared by wizard manual + cron auto)
+     */
+    public function parseRowsFromSharePoint(int $sessionId): int
+    {
+        DB::table('ingest_row')->where('session_id', $sessionId)->delete();
+
+        $files = DB::table('ingest_file')
+            ->where('session_id', $sessionId)
+            ->where('file_type', 'sharepoint')
+            ->orderBy('id')
+            ->get();
+
+        $rowNum = 0;
+        foreach ($files as $f) {
+            ++$rowNum;
+            $sidecar = json_decode((string) ($f->sidecar_json ?? '{}'), true) ?: [];
+            $listFields = is_array($sidecar['sp_list_item_fields'] ?? null) ? $sidecar['sp_list_item_fields'] : [];
+
+            $merged = array_merge(
+                [
+                    'Name' => $f->original_name,
+                    'Title' => $listFields['Title'] ?? pathinfo((string) $f->original_name, PATHINFO_FILENAME),
+                ],
+                $listFields,
+            );
+
+            DB::table('ingest_row')->insert([
+                'session_id' => $sessionId,
+                'row_number' => $rowNum,
+                'level_of_description' => 'Item',
+                'title' => $merged['Title'] ?? $f->original_name,
+                'data' => json_encode($merged),
+                'enriched_data' => json_encode($merged),
+                'digital_object_path' => $f->stored_path,
+                'digital_object_matched' => 1,
+                'checksum_sha256' => $f->source_hash,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+        return $rowNum;
     }
 
     /**

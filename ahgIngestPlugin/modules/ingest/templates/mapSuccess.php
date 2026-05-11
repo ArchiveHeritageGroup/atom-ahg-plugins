@@ -334,6 +334,28 @@ $requiredFields = isset($requiredFields) ? $sf_data->getRaw('requiredFields') : 
         </div>
     </div>
 
+    <?php
+    $isSpManual = isset($session->source) && $session->source === 'sharepoint_manual';
+    $spDriveName = '';
+    if ($isSpManual) {
+        $spMeta = isset($session->source_metadata) ? @json_decode((string) $session->source_metadata, true) : [];
+        $spDriveName = is_array($spMeta) ? ($spMeta['sp_drive_name'] ?? '') : '';
+    }
+    ?>
+
+    <?php if ($isSpManual): ?>
+    <div class="form-check mt-3 mb-3 border-top pt-3">
+        <input class="form-check-input" type="checkbox" id="save_as_template" name="save_as_template" value="1">
+        <label class="form-check-label" for="save_as_template">
+            <?php echo __('Save this mapping as the default for SharePoint drive') ?>
+            <code><?php echo htmlspecialchars($spDriveName ?: '?') ?></code>
+        </label>
+        <small class="d-block text-muted">
+            <?php echo __('Future ingests from this drive will pre-fill these mappings, including cron-driven auto-ingest.') ?>
+        </small>
+    </div>
+    <?php endif ?>
+
     <div class="d-flex justify-content-between">
         <a href="<?php echo url_for(['module' => 'ingest', 'action' => 'upload', 'id' => $session->id]) ?>" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back') ?>

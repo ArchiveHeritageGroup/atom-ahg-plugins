@@ -223,6 +223,246 @@ class ingestActions extends sfActions
         }
 
         $this->files = $svc->getFiles($id);
+
+        // SharePoint picker — populate tenants + drives if plugin is enabled
+        $this->sp_tenants = [];
+        $this->sp_drives = [];
+        if (file_exists(sfConfig::get('sf_plugins_dir') . '/ahgSharePointPlugin')) {
+            try {
+                $this->sp_tenants = \Illuminate\Database\Capsule\Manager::table('sharepoint_tenant')
+                    ->where('status', '!=', 'disabled')
+                    ->orderBy('name')
+                    ->get()
+                    ->all();
+                $this->sp_drives = \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+                    ->orderBy('site_title')
+                    ->get()
+                    ->all();
+            } catch (\Throwable $e) {
+                // Plugin not installed yet — leave empty
+            }
+        }
+    }
+
+    // ─── SharePoint browse + import (v2 ingest plan, step D) ────────────
+
+    public function executeBrowseSharePoint(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $this->loadSharePointServices();
+
+        $tenantId = (int) $request->getParameter('tenant_id');
+        $op = (string) $request->getParameter('op');
+
+        $browser = new \AtomExtensions\SharePoint\Services\SharePointBrowserService();
+        $payload = ['op' => $op];
+
+        try {
+            if ($op === 'sites') {
+                $payload['sites'] = $browser->listSites($tenantId, $request->getParameter('search'));
+            } elseif ($op === 'drives') {
+                $payload['drives'] = $browser->listDrives($tenantId, (string) $request->getParameter('site_id'));
+            } elseif ($op === 'children') {
+                $payload['items'] = $browser->listChildren(
+                    $tenantId,
+                    (string) $request->getParameter('drive_id'),
+                    (string) ($request->getParameter('item_id') ?: 'root'),
+                );
+            } else {
+                throw new \InvalidArgumentException('unknown op: ' . $op);
+            }
+        } catch (\Throwable $e) {
+            $payload['error'] = $e->getMessage();
+            $this->getResponse()->setStatusCode(500);
+        }
+
+        $this->getResponse()->setContentType('application/json');
+        $this->renderText(json_encode($payload));
+        return sfView::NONE;
+    }
+
+    public function executeImportFromSharePoint(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $this->loadSharePointServices();
+        $svc = $this->getIngestService();
+
+        $id = (int) $request->getParameter('id');
+        $session = $svc->getSession($id);
+        if (!$session) {
+            $this->forward404();
+        }
+        $this->requireSessionOwner($session);
+
+        if (!$request->isMethod('post')) {
+            $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+        }
+
+        $tenantId = (int) $request->getParameter('sp_tenant_id');
+        $driveGraphId = (string) $request->getParameter('sp_drive_id');
+        $driveName = (string) $request->getParameter('sp_drive_name');
+        $siteId = (string) $request->getParameter('sp_site_id');
+        $itemIds = (array) ($request->getParameter('sp_item_ids') ?: []);
+
+        if ($tenantId <= 0 || $driveGraphId === '' || empty($itemIds)) {
+            $this->getUser()->setFlash('error', 'SharePoint import requires tenant, drive, and at least one item.');
+            $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+        }
+
+        // Resolve sharepoint_drive PK; register the drive on the fly if it isn't tracked yet.
+        $drivePk = (int) \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+            ->where('drive_id', $driveGraphId)
+            ->value('id');
+        if (!$drivePk) {
+            $drivePk = (int) \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')->insertGetId([
+                'tenant_id' => $tenantId,
+                'site_id' => $siteId,
+                'site_url' => '',
+                'site_title' => null,
+                'drive_id' => $driveGraphId,
+                'drive_name' => $driveName,
+                'ingest_enabled' => 0,
+                'sector' => $session->sector ?? 'archive',
+                'default_parent_placement' => 'top_level',
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $browser = new \AtomExtensions\SharePoint\Services\SharePointBrowserService();
+        $uploadDir = sfConfig::get('sf_upload_dir') . '/ingest/' . $id;
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
+
+        $imported = 0;
+        $errors = [];
+        foreach ($itemIds as $itemId) {
+            try {
+                $meta = $browser->getMetadata($tenantId, $driveGraphId, $itemId, true);
+                $name = $meta['name'] ?: $itemId;
+                $itemDir = $uploadDir . '/' . $itemId;
+                if (!is_dir($itemDir)) {
+                    mkdir($itemDir, 0775, true);
+                }
+                $safeName = preg_replace('#[^A-Za-z0-9._ \-]#', '_', $name);
+                $destPath = $itemDir . '/' . $safeName;
+                $browser->downloadItem($tenantId, $driveGraphId, $itemId, $destPath);
+
+                $checksum = is_file($destPath) ? hash_file('sha256', $destPath) : null;
+                $listFields = $meta['_raw']['listItem']['fields'] ?? [];
+
+                \Illuminate\Database\Capsule\Manager::table('ingest_file')->insert([
+                    'session_id' => $id,
+                    'file_type' => 'sharepoint',
+                    'original_name' => $name,
+                    'stored_path' => $destPath,
+                    'file_size' => $meta['size'] ?? (filesize($destPath) ?: 0),
+                    'mime_type' => $meta['mimeType'] ?? null,
+                    'status' => 'pending',
+                    'source_hash' => $checksum,
+                    'sidecar_json' => json_encode([
+                        'sp_drive_id' => $drivePk,
+                        'sp_drive_graph_id' => $driveGraphId,
+                        'sp_item_id' => $itemId,
+                        'sp_etag' => $meta['etag'] ?? null,
+                        'sp_web_url' => $meta['webUrl'] ?? null,
+                        'sp_list_item_fields' => $listFields,
+                        'sp_last_modified' => $meta['lastModifiedDateTime'] ?? null,
+                        'sp_created' => $meta['createdDateTime'] ?? null,
+                    ]),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+                ++$imported;
+            } catch (\Throwable $e) {
+                $errors[] = "{$itemId}: " . $e->getMessage();
+            }
+        }
+
+        // Mark session as sourced from SharePoint manual flow
+        $svc->updateSession($id, [
+            'source' => 'sharepoint_manual',
+            'source_id' => $drivePk,
+            'source_metadata' => json_encode([
+                'sp_drive_id' => $driveGraphId,
+                'sp_drive_pk' => $drivePk,
+                'sp_drive_name' => $driveName,
+                'sp_site_id' => $siteId,
+                'sp_item_ids' => $itemIds,
+                'imported_at' => date('c'),
+            ]),
+        ]);
+
+        if ($imported === 0) {
+            $msg = 'No SharePoint items could be imported.';
+            if (!empty($errors)) {
+                $msg .= ' ' . implode('; ', array_slice($errors, 0, 3));
+            }
+            $this->getUser()->setFlash('error', $msg);
+            $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+        }
+
+        $svc->parseRows($id);
+        $svc->updateSessionStatus($id, 'map');
+        if (!empty($errors)) {
+            $this->getUser()->setFlash('notice', sprintf('Imported %d of %d items (%d errors).', $imported, count($itemIds), count($errors)));
+        }
+        $this->redirect(['module' => 'ingest', 'action' => 'map', 'id' => $id]);
+    }
+
+    /**
+     * Persist current session's ingest_mapping rows as the default
+     * sharepoint_mapping template for the session's source drive.
+     * Truncates existing template rows for the drive.
+     */
+    private function saveSharePointMappingTemplate(int $sessionId, object $session): void
+    {
+        $meta = $session->source_metadata ? @json_decode((string) $session->source_metadata, true) : [];
+        $drivePk = (int) ($meta['sp_drive_pk'] ?? 0);
+        if ($drivePk <= 0 && !empty($meta['sp_drive_id'])) {
+            $drivePk = (int) \Illuminate\Database\Capsule\Manager::table('sharepoint_drive')
+                ->where('drive_id', $meta['sp_drive_id'])
+                ->value('id');
+        }
+        if ($drivePk <= 0) {
+            $this->getUser()->setFlash('error', 'Could not resolve SharePoint drive; mapping template NOT saved.');
+            return;
+        }
+        \Illuminate\Database\Capsule\Manager::table('sharepoint_mapping')
+            ->where('drive_id', $drivePk)
+            ->delete();
+        $rows = \Illuminate\Database\Capsule\Manager::table('ingest_mapping')
+            ->where('session_id', $sessionId)
+            ->where('is_ignored', 0)
+            ->get();
+        foreach ($rows as $i => $r) {
+            \Illuminate\Database\Capsule\Manager::table('sharepoint_mapping')->insert([
+                'drive_id' => $drivePk,
+                'content_type_id' => null,
+                'source_field' => $r->source_column,
+                'target_field' => $r->target_field,
+                'target_standard' => $session->standard ?? 'isadg',
+                'transform' => $r->transform,
+                'default_value' => $r->default_value,
+                'is_required' => 0,
+                'sort_order' => (int) ($r->sort_order ?? $i),
+                'created_at' => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+    }
+
+    private function loadSharePointServices(): void
+    {
+        $base = sfConfig::get('sf_plugins_dir') . '/ahgSharePointPlugin/lib/Services';
+        if (!is_dir($base)) {
+            throw new sfException('ahgSharePointPlugin is not installed.');
+        }
+        require_once $base . '/GraphTokenCache.php';
+        require_once $base . '/GraphClientService.php';
+        require_once $base . '/SharePointBrowserService.php';
+        require_once dirname($base) . '/Repositories/SharePointTenantRepository.php';
+        require_once dirname($base) . '/Repositories/SharePointDriveRepository.php';
     }
 
     // ─── Step 3: Map & Enrich ───────────────────────────────────────────
@@ -310,6 +550,12 @@ class ingestActions extends sfActions
                 ];
             }
             $svc->saveMappings($id, $mappings);
+
+            // If user opted in, persist this mapping as the default for the SP drive
+            // it came from (sharepoint_manual sessions only).
+            if ($request->getParameter('save_as_template') && $this->session->source === 'sharepoint_manual') {
+                $this->saveSharePointMappingTemplate($id, $this->session);
+            }
 
             // Enrich rows with new mappings
             $svc->enrichRows($id);

@@ -718,6 +718,10 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Ingest Dashboard'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ingest', 'action' => 'configure']); ?>"><i class="fas fa-plus-circle me-2 text-muted"></i><?php echo __('New Ingest'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'ingest', 'action' => 'downloadTemplate', 'sector' => 'archive']); ?>"><i class="fas fa-download me-2 text-muted"></i><?php echo __('CSV Template'); ?></a></li>
+                    <?php if (file_exists(sfConfig::get('sf_plugins_dir') . '/ahgSharePointPlugin')): ?>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'rules']); ?>"><i class="fas fa-clock me-2 text-muted"></i><?php echo __('SharePoint Rules'); ?></a></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'mappings']); ?>"><i class="fas fa-exchange-alt me-2 text-muted"></i><?php echo __('SharePoint Mappings'); ?></a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
