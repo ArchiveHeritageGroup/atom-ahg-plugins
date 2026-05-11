@@ -1,0 +1,57 @@
+{
+    "name": "Version Control",
+    "machine_name": "ahgVersionControlPlugin",
+    "version": "0.1.0",
+    "description": "Version history with diff and restore for information_object and actor. Mirrors the AHG version-snapshot pattern used by reports, landing pages and heritage contributions. Integrates with ahgAuditTrailPlugin and ahgSecurityClearancePlugin.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "email": "johan@theahg.co.za",
+    "license": "proprietary",
+    "category": "records-management",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "suggests": {
+        "ahgAuditTrailPlugin": "Dual-write of version events into the central audit feed",
+        "ahgSecurityClearancePlugin": "Clearance gating on restore of classified records",
+        "ahgMultiTenantPlugin": "Tenant-scoped version queries when multi-tenancy is active"
+    },
+    "provides": {
+        "services": [
+            "AhgVersionControl\\Services\\SnapshotBuilder",
+            "AhgVersionControl\\Services\\VersionWriter",
+            "AhgVersionControl\\Services\\DiffComputer",
+            "AhgVersionControl\\Services\\RestoreService"
+        ]
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "information_object_version",
+        "actor_version"
+    ],
+    "is_core": false,
+    "is_locked": false,
+    "load_order": 50,
+    "display_panels": [
+        {
+            "id": "versions_io",
+            "label": "Versions",
+            "template": "ahgVersionControlPlugin/templates/display/_versions_panel.php",
+            "contexts": ["informationobject"],
+            "position": "below-content",
+            "weight": 90
+        },
+        {
+            "id": "versions_actor",
+            "label": "Versions",
+            "template": "ahgVersionControlPlugin/templates/display/_versions_panel.php",
+            "contexts": ["actor"],
+            "position": "below-content",
+            "weight": 90
+        }
+    ]
+}
