@@ -602,7 +602,16 @@ function getItemUrl($obj) {
     <a href="<?php echo buildUrl($fp, ['view' => 'grid']) ?>" class="btn btn-sm <?php echo $viewMode === 'grid' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Grid view'); ?>" aria-label="<?php echo __('Grid view'); ?>"><i class="fas fa-th"></i></a>
     <a href="<?php echo buildUrl($fp, ['view' => 'table']) ?>" class="btn btn-sm <?php echo $viewMode === 'table' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Table view'); ?>" aria-label="<?php echo __('Table view'); ?>"><i class="fas fa-list"></i></a>
     <a href="<?php echo buildUrl($fp, ['view' => 'full']) ?>" class="btn btn-sm <?php echo $viewMode === 'full' ? 'btn-success' : 'btn-outline-success' ?>" title="<?php echo __('Full width'); ?>" aria-label="<?php echo __('Full width'); ?>"><i class="fas fa-bars"></i></a>
-    
+
+    <!-- Top-level grouping toggle: when active, the result set is limited to
+         IOs whose parent_id = 1 (root collections / fonds / record groups),
+         so the browse reads as a top-level summary instead of every leaf. -->
+    <a href="<?php echo buildUrl($fp, ['topLevel' => $topLevelOnly === '1' ? '0' : '1']) ?>"
+       class="btn btn-sm <?php echo $topLevelOnly === '1' ? 'btn-success' : 'btn-outline-success' ?>"
+       title="<?php echo __('Group by top level only'); ?>"
+       aria-label="<?php echo __('Group by top level only'); ?>"
+       aria-pressed="<?php echo $topLevelOnly === '1' ? 'true' : 'false' ?>"><i class="fas fa-layer-group"></i></a>
+
     <div class="dropdown">
       <button class="btn btn-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown"><?php echo $limit ?>/<?php echo __('page'); ?></button>
       <ul class="dropdown-menu">
