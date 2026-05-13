@@ -42,6 +42,12 @@ class DynamicFacetService
     private ?string $endDateFilter;
     private string $rangeTypeFilter;
 
+    // Library-only facets (only meaningful when result set includes library_item rows).
+    private ?string $materialTypeFilter = null;
+    private ?string $conditionGradeFilter = null;
+    private ?string $acquisitionMethodFilter = null;
+    private ?string $circulationStatusFilter = null;
+
     /** @var bool|null Cached fulltext availability */
     private static ?bool $fulltextAvailable = null;
 
@@ -75,10 +81,15 @@ class DynamicFacetService
         $this->startDateFilter = $filters['startDateFilter'] ?? null;
         $this->endDateFilter = $filters['endDateFilter'] ?? null;
         $this->rangeTypeFilter = $filters['rangeTypeFilter'] ?? 'inclusive';
+
+        $this->materialTypeFilter = $filters['materialTypeFilter'] ?? null;
+        $this->conditionGradeFilter = $filters['conditionGradeFilter'] ?? null;
+        $this->acquisitionMethodFilter = $filters['acquisitionMethodFilter'] ?? null;
+        $this->circulationStatusFilter = $filters['circulationStatusFilter'] ?? null;
     }
 
     /**
-     * Returns true if any of the 8 facet ID filters are active.
+     * Returns true if any of the facet ID filters are active.
      */
     public function hasActiveFacetFilters(): bool
     {
@@ -89,7 +100,11 @@ class DynamicFacetService
             || $this->levelFilter
             || $this->mediaFilter
             || $this->repoFilter
-            || $this->typeFilter;
+            || $this->typeFilter
+            || $this->materialTypeFilter
+            || $this->conditionGradeFilter
+            || $this->acquisitionMethodFilter
+            || $this->circulationStatusFilter;
     }
 
     /**
@@ -118,6 +133,11 @@ class DynamicFacetService
                 return $this->getGlamTypeCounts();
             case 'media_type':
                 return $this->getMediaTypeCounts();
+            case 'material_type':
+            case 'condition_grade':
+            case 'acquisition_method':
+            case 'circulation_status':
+                return $this->getLibraryColumnCounts($facetType);
             default:
                 return [];
         }
@@ -161,8 +181,14 @@ class DynamicFacetService
             });
         }
 
-        // Facet ID filters — skip the excluded one
-        if ($excludeFacet !== 'glam_type' && $this->typeFilter) {
+        // Facet ID filters — skip the excluded one. The type filter is also
+        // skipped when computing a library-only dimension so the per-library
+        // facet doesn't vanish if default_sector is non-library: clicking a
+        // library facet must always be allowed to pivot the user into the
+        // library sector.
+        $libraryDimensions = ['material_type', 'condition_grade', 'acquisition_method', 'circulation_status'];
+        $isLibraryFacet = in_array($excludeFacet, $libraryDimensions, true);
+        if ($excludeFacet !== 'glam_type' && !$isLibraryFacet && $this->typeFilter) {
             $query->where('doc.object_type', $this->typeFilter);
         }
 
@@ -218,6 +244,27 @@ class DynamicFacetService
 
         if ($excludeFacet !== 'repository' && $this->repoFilter) {
             $query->where('io.repository_id', $this->repoFilter);
+        }
+
+        // Library-only ID filters. Each scopes the result set to IOs whose
+        // paired library_item row matches the value (and thus excludes
+        // non-library records entirely when any of these is set).
+        $libFilterCols = [
+            'material_type'      => $this->materialTypeFilter,
+            'condition_grade'    => $this->conditionGradeFilter,
+            'acquisition_method' => $this->acquisitionMethodFilter,
+            'circulation_status' => $this->circulationStatusFilter,
+        ];
+        foreach ($libFilterCols as $col => $val) {
+            if ($excludeFacet === $col || $val === null || $val === '') {
+                continue;
+            }
+            $query->whereExists(function ($q) use ($col, $val) {
+                $q->select(DB::raw(1))
+                    ->from('library_item as li_w')
+                    ->whereRaw('li_w.information_object_id = io.id')
+                    ->where("li_w.{$col}", $val);
+            });
         }
 
         // Text search filters (always applied — never excluded)
@@ -494,6 +541,47 @@ class DynamicFacetService
                     });
             });
         }
+
+        // Library: search ISBN, call_number, series_title, summary, contents_note
+        // on the per-IO library_item row.
+        if (in_array('library_item', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('library_item as li')
+                    ->whereRaw('li.information_object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('li.isbn', 'like', $likePattern)
+                          ->orWhere('li.call_number', 'like', $likePattern)
+                          ->orWhere('li.series_title', 'like', $likePattern)
+                          ->orWhere('li.summary', 'like', $likePattern)
+                          ->orWhere('li.contents_note', 'like', $likePattern);
+                    });
+            });
+        }
+
+        // Library creators: search the raw author name (covers rows where
+        // resolveOrCreateActor has not run yet so actor_id is still NULL).
+        if (in_array('library_item_creator', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('library_item_creator as lic')
+                    ->join('library_item as li2', 'li2.id', '=', 'lic.library_item_id')
+                    ->whereRaw('li2.information_object_id = io.id')
+                    ->where('lic.name', 'like', $likePattern);
+            });
+        }
+
+        // Authority records: search actor_i18n.authorized_form_of_name for any
+        // IO whose event row links to a matching actor. Catches author/creator
+        // searches across all sectors (not just library), so "Nelson Mandela"
+        // finds the autobiography even though no library_item.title contains it.
+        $qb->orWhereExists(function ($sub) use ($likePattern) {
+            $sub->select(DB::raw(1))
+                ->from('event as ev_act')
+                ->join('actor_i18n as ai_act', 'ai_act.id', '=', 'ev_act.actor_id')
+                ->whereRaw('ev_act.object_id = io.id')
+                ->where('ai_act.authorized_form_of_name', 'like', $likePattern);
+        });
     }
 
     /**
@@ -509,7 +597,7 @@ class DynamicFacetService
         }
 
         self::$sectorSearchTables = [];
-        $candidates = ['dam_iptc_metadata', 'museum_metadata', 'gallery_artist'];
+        $candidates = ['dam_iptc_metadata', 'museum_metadata', 'gallery_artist', 'library_item', 'library_item_creator'];
 
         foreach ($candidates as $table) {
             try {
@@ -646,5 +734,36 @@ class DynamicFacetService
             ->limit(10)
             ->get()
             ->toArray();
+    }
+
+    /**
+     * Library-only facet counts (material_type, condition_grade,
+     * acquisition_method, circulation_status). The column on library_item
+     * doubles as both the bucket id and the bucket name since these are free-
+     * text columns rather than FK-to-term.
+     */
+    private function getLibraryColumnCounts(string $libCol): array
+    {
+        try {
+            $query = $this->buildBaseQuery($libCol);
+
+            return $query
+                ->join('library_item as li_f', 'li_f.information_object_id', '=', 'io.id')
+                ->whereNotNull("li_f.{$libCol}")
+                ->where("li_f.{$libCol}", '!=', '')
+                ->select(
+                    DB::raw("li_f.{$libCol} as id"),
+                    DB::raw("li_f.{$libCol} as name"),
+                    DB::raw('COUNT(DISTINCT io.id) as count')
+                )
+                ->groupBy("li_f.{$libCol}")
+                ->orderByDesc('count')
+                ->limit(30)
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            // library_item table only exists when ahgLibraryPlugin is installed.
+            return [];
+        }
     }
 }

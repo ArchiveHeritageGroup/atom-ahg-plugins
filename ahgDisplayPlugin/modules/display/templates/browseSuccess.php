@@ -35,6 +35,14 @@ $genres = $sf_data->getRaw('genres') ?: [];
 $levels = $sf_data->getRaw('levels') ?: [];
 $mediaTypes = $sf_data->getRaw('mediaTypes') ?: [];
 $repositories = $sf_data->getRaw('repositories') ?: [];
+$materialTypes = $sf_data->getRaw('materialTypes') ?: [];
+$conditionGrades = $sf_data->getRaw('conditionGrades') ?: [];
+$acquisitionMethods = $sf_data->getRaw('acquisitionMethods') ?: [];
+$circulationStatuses = $sf_data->getRaw('circulationStatuses') ?: [];
+$materialTypeFilter = $sf_request->getParameter('materialType');
+$conditionGradeFilter = $sf_request->getParameter('conditionGrade');
+$acquisitionMethodFilter = $sf_request->getParameter('acquisitionMethod');
+$circulationStatusFilter = $sf_request->getParameter('circulationStatus');
 
 // Fuzzy search data from action
 $didYouMean = $sf_data->getRaw('didYouMean');
@@ -78,6 +86,10 @@ $fp = [
     'limit' => $limit,
     'sort' => $sort,
     'dir' => $sortDir,
+    'materialType' => $materialTypeFilter,
+    'conditionGrade' => $conditionGradeFilter,
+    'acquisitionMethod' => $acquisitionMethodFilter,
+    'circulationStatus' => $circulationStatusFilter,
 ];
 
 $typeConfig = [
@@ -364,6 +376,44 @@ function getItemUrl($obj) {
     </div>
   </div>
   <?php endif ?>
+
+  <!-- Library Facets — auto-hide when empty (non-library browses) -->
+  <?php
+  $libraryFacets = [
+      ['var' => $materialTypes,       'label' => __('Material type'),      'param' => 'materialType',      'selected' => $materialTypeFilter,      'id' => 'facetMaterial'],
+      ['var' => $conditionGrades,     'label' => __('Condition'),          'param' => 'conditionGrade',    'selected' => $conditionGradeFilter,    'id' => 'facetCondition'],
+      ['var' => $acquisitionMethods,  'label' => __('Acquisition method'), 'param' => 'acquisitionMethod', 'selected' => $acquisitionMethodFilter, 'id' => 'facetAcquisition'],
+      ['var' => $circulationStatuses, 'label' => __('Circulation status'), 'param' => 'circulationStatus', 'selected' => $circulationStatusFilter, 'id' => 'facetCirculation'],
+  ];
+  foreach ($libraryFacets as $lf):
+      if (empty($lf['var'])) continue;
+  ?>
+  <div class="card mb-2">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="<?php echo $lf['id'] ?>" data-bs-toggle="collapse" data-bs-target="#<?php echo $lf['id'] ?>">
+      <strong><?php echo esc_entities($lf['label']) ?></strong> <i class="fas fa-chevron-down float-end"></i>
+    </div>
+    <div class="collapse" id="<?php echo $lf['id'] ?>">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo empty($lf['selected']) ? 'active' : '' ?>">
+          <a href="<?php echo buildUrl($fp, [], [$lf['param']]) ?>" class="text-decoration-none small <?php echo empty($lf['selected']) ? 'text-white' : '' ?>">
+            <?php echo __('All'); ?>
+          </a>
+        </li>
+        <?php foreach ($lf['var'] as $row): ?>
+          <?php $isActive = ($lf['selected'] ?? '') === $row->id; ?>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
+            <a href="<?php echo $isActive ? buildUrl($fp, [], [$lf['param']]) : buildUrl($fp, [$lf['param'] => $row->id]) ?>" class="text-decoration-none small <?php echo $isActive ? 'text-white' : '' ?>">
+              <span class="facet-link text-truncate" title="<?php echo esc_entities(ucfirst(str_replace('_', ' ', $row->name))) ?>">
+                <?php echo esc_entities(ucfirst(str_replace('_', ' ', $row->name))) ?>
+              </span>
+            </a>
+            <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $row->count ?></span>
+          </li>
+        <?php endforeach ?>
+      </ul>
+    </div>
+  </div>
+  <?php endforeach ?>
 
   <!-- Repository Facet - CLOSED by default -->
   <?php if (!empty($repositories)): ?>

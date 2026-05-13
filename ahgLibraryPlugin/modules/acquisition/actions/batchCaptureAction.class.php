@@ -219,14 +219,25 @@ class acquisitionBatchCaptureAction extends AhgController
                     'acquisition_date'   => date('Y-m-d'),
                 ]);
 
-                // 7. Create library_item_creator rows
+                // 7. Create library_item_creator rows. Resolve each author
+                // name to an authority record (actor) so cross-sector searches
+                // for "Nelson Mandela" surface library items even when the
+                // title doesn't contain the name.
                 $authors = trim($item['author'] ?? '');
                 if (!empty($authors)) {
                     $authorList = array_filter(array_map('trim', preg_split('/[;,]/', $authors)));
+                    $libService = LibraryService::getInstance();
                     foreach ($authorList as $idx => $authorName) {
+                        $actorId = null;
+                        try {
+                            $actorId = $libService->resolveOrCreateActor(mb_substr($authorName, 0, 500));
+                        } catch (\Throwable $e) {
+                            // Authority upsert is best-effort; fall back to name-only.
+                        }
                         DB::table('library_item_creator')->insert([
                             'library_item_id' => $libraryItemId,
                             'name'            => mb_substr($authorName, 0, 500),
+                            'actor_id'        => $actorId,
                             'role'            => 'author',
                             'sort_order'      => $idx,
                         ]);

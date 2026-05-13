@@ -561,6 +561,94 @@ class LibraryService
     }
 
     /**
+     * Lookup an existing actor by authorized_form_of_name (case-insensitive,
+     * trimmed) in the current culture, falling back to the configured fallback
+     * locale. If no match, create a minimal new actor row + actor_i18n entry.
+     * Returns the actor.id so library_item_creator.actor_id can be populated.
+     *
+     * Mirrors the AtoM authority-record pattern: every QubitActor needs an
+     * object row (class_name='QubitActor') plus a culture-specific
+     * authorized_form_of_name. parent_id stays NULL since these aren't part
+     * of an organisational hierarchy.
+     */
+    public function resolveOrCreateActor(string $name, ?string $culture = null, string $fallback = 'en'): ?int
+    {
+        $needle = trim($name);
+        if ($needle === '') {
+            return null;
+        }
+
+        $culture = $culture ?? $this->culture;
+
+        $existing = DB::table('actor_i18n')
+            ->whereIn('culture', array_unique([$culture, $fallback]))
+            ->whereRaw('LOWER(TRIM(authorized_form_of_name)) = ?', [mb_strtolower($needle)])
+            ->orderByRaw('FIELD(culture, ?, ?)', [$culture, $fallback])
+            ->value('id');
+
+        if ($existing) {
+            return (int) $existing;
+        }
+
+        return DB::connection()->transaction(function () use ($needle, $culture) {
+            $now = date('Y-m-d H:i:s');
+
+            $objectId = DB::table('object')->insertGetId([
+                'class_name' => 'QubitActor',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+
+            // parent_id must point at QubitActor::ROOT_ID (3); the base
+            // AtoM ActorIndexAction forwards to 404 when parent is unset,
+            // and AtoM's QubitActor::save() normally auto-fills this.
+            DB::table('actor')->insert([
+                'id'             => $objectId,
+                'parent_id'      => QubitActor::ROOT_ID,
+                'source_culture' => $culture,
+            ]);
+
+            DB::table('actor_i18n')->insert([
+                'id'                       => $objectId,
+                'culture'                  => $culture,
+                'authorized_form_of_name'  => $needle,
+            ]);
+
+            // Base AtoM requires every object to have a slug. Without it the
+            // arElasticSearchPlugin populator throws "Couldn't find actor".
+            DB::table('slug')->insert([
+                'object_id' => $objectId,
+                'slug'      => $this->buildUniqueSlug($needle),
+            ]);
+
+            return (int) $objectId;
+        });
+    }
+
+    /**
+     * Generate a unique slug for the given name, suffixing -2, -3, … on
+     * collision against the `slug` table. Mirrors QubitSlug::slugify but
+     * keeps this service self-contained.
+     */
+    private function buildUniqueSlug(string $name): string
+    {
+        // kebab-case: lowercase, strip non-alnum, collapse to single hyphens.
+        $base = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $name), '-'));
+        if ($base === '') {
+            $base = 'actor';
+        }
+        $base = mb_substr($base, 0, 250);
+
+        $slug = $base;
+        $i = 2;
+        while (DB::table('slug')->where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $i;
+            $i++;
+        }
+        return $slug;
+    }
+
+    /**
      * Generate citation
      */
     public function generateCitation(LibraryItem $item, string $title, string $style = 'apa'): string

@@ -430,6 +430,11 @@ class SearchService
 
     /**
      * Get IO search fields for query_string.
+     *
+     * The library_* fields are upserted onto IO docs by
+     * LibraryService::updateSearchIndex (see ahgLibraryPlugin). When a doc
+     * lacks them they're ignored — query_string is forgiving of missing
+     * fields per-doc, so this is safe across non-library tenants.
      */
     protected function getIoSearchFields(): array
     {
@@ -442,6 +447,13 @@ class SearchService
             sprintf('i18n.%s.extentAndMedium', $this->culture),
             sprintf('i18n.%s.locationOfOriginals', $this->culture),
             sprintf('i18n.%s.accessConditions', $this->culture),
+            'library_isbn^3',
+            'library_call_number^2',
+            'library_series_title',
+            'library_publisher',
+            'library_creators^2',
+            'library_primary_creator^2',
+            'library_subjects',
         ];
     }
 

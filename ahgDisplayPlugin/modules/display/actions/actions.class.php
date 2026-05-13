@@ -87,6 +87,12 @@ class displayActions extends AhgController
         $this->genreFilter = $request->getParameter('genre');
         $this->levelFilter = $request->getParameter('level');
         $this->mediaFilter = $request->getParameter('media');
+        // Library-only facet filters (only meaningful when the result set
+        // includes library_item rows).
+        $this->materialTypeFilter = $request->getParameter('materialType');
+        $this->conditionGradeFilter = $request->getParameter('conditionGrade');
+        $this->acquisitionMethodFilter = $request->getParameter('acquisitionMethod');
+        $this->circulationStatusFilter = $request->getParameter('circulationStatus');
         // Text search filters
         $this->queryFilter = $request->getParameter("query");
         $this->semanticEnabled = $request->getParameter("semantic") == "1";
@@ -172,6 +178,10 @@ class displayActions extends AhgController
             'startDateFilter' => $this->startDateFilter,
             'endDateFilter' => $this->endDateFilter,
             'rangeTypeFilter' => $this->rangeTypeFilter,
+            'materialTypeFilter' => $this->materialTypeFilter,
+            'conditionGradeFilter' => $this->conditionGradeFilter,
+            'acquisitionMethodFilter' => $this->acquisitionMethodFilter,
+            'circulationStatusFilter' => $this->circulationStatusFilter,
         ]);
 
         if ($facetService->hasActiveFacetFilters()) {
@@ -195,6 +205,14 @@ class displayActions extends AhgController
             $this->genres = $this->getCachedFacet('genre' . $sfx);
             $this->mediaTypes = $this->getCachedFacet('media_type' . $sfx, 'media_type');
         }
+
+        // Library-only facets: always computed live (no cached version).
+        // getLibraryColumnCounts swallows the exception when library_item
+        // doesn't exist (plugin not installed) so non-library sites are safe.
+        $this->materialTypes      = $facetService->getFacetCounts('material_type');
+        $this->conditionGrades    = $facetService->getFacetCounts('condition_grade');
+        $this->acquisitionMethods = $facetService->getFacetCounts('acquisition_method');
+        $this->circulationStatuses = $facetService->getFacetCounts('circulation_status');
 
         // ── Discovery integration ──────────────────────────────────────
         // When a text query is present and ahgDiscoveryPlugin is enabled,
@@ -483,6 +501,10 @@ class displayActions extends AhgController
             'limit' => $this->limit,
             'sort' => $this->sort,
             'dir' => $this->sortDir,
+            'materialType' => $this->materialTypeFilter,
+            'conditionGrade' => $this->conditionGradeFilter,
+            'acquisitionMethod' => $this->acquisitionMethodFilter,
+            'circulationStatus' => $this->circulationStatusFilter,
         ];
     }
 
@@ -578,6 +600,25 @@ class displayActions extends AhgController
 
         if ($this->repoFilter) {
             $query->where('io.repository_id', $this->repoFilter);
+        }
+
+        // Library-only filters. Each scopes the result set to IOs whose paired
+        // library_item row matches the value (and therefore excludes non-
+        // library records entirely when any of these is set).
+        $libFilters = [
+            'material_type'      => $this->materialTypeFilter,
+            'condition_grade'    => $this->conditionGradeFilter,
+            'acquisition_method' => $this->acquisitionMethodFilter,
+            'circulation_status' => $this->circulationStatusFilter,
+        ];
+        foreach ($libFilters as $col => $val) {
+            if ($val === null || $val === '') continue;
+            $query->whereExists(function ($q) use ($col, $val) {
+                $q->select(DB::raw(1))
+                    ->from('library_item as li_w')
+                    ->whereRaw('li_w.information_object_id = io.id')
+                    ->where("li_w.{$col}", $val);
+            });
         }
 
         // Text search filters - use OR logic for semantic search
@@ -1203,6 +1244,47 @@ class displayActions extends AhgController
                     });
             });
         }
+
+        // Library: search ISBN, call_number, series_title, summary, contents_note
+        // on the per-IO library_item row.
+        if (in_array('library_item', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('library_item as li')
+                    ->whereRaw('li.information_object_id = io.id')
+                    ->where(function ($w) use ($likePattern) {
+                        $w->where('li.isbn', 'like', $likePattern)
+                          ->orWhere('li.call_number', 'like', $likePattern)
+                          ->orWhere('li.series_title', 'like', $likePattern)
+                          ->orWhere('li.summary', 'like', $likePattern)
+                          ->orWhere('li.contents_note', 'like', $likePattern);
+                    });
+            });
+        }
+
+        // Library creators: search the raw author name (covers rows where
+        // resolveOrCreateActor has not run yet so actor_id is still NULL).
+        if (in_array('library_item_creator', $sectorTables)) {
+            $qb->orWhereExists(function ($sub) use ($likePattern) {
+                $sub->select(DB::raw(1))
+                    ->from('library_item_creator as lic')
+                    ->join('library_item as li2', 'li2.id', '=', 'lic.library_item_id')
+                    ->whereRaw('li2.information_object_id = io.id')
+                    ->where('lic.name', 'like', $likePattern);
+            });
+        }
+
+        // Authority records: search actor_i18n.authorized_form_of_name for any
+        // IO whose event row links to a matching actor. Catches author/creator
+        // searches across all sectors so "Nelson Mandela" finds the
+        // autobiography even when no library_item.title contains the name.
+        $qb->orWhereExists(function ($sub) use ($likePattern) {
+            $sub->select(DB::raw(1))
+                ->from('event as ev_act')
+                ->join('actor_i18n as ai_act', 'ai_act.id', '=', 'ev_act.actor_id')
+                ->whereRaw('ev_act.object_id = io.id')
+                ->where('ai_act.authorized_form_of_name', 'like', $likePattern);
+        });
     }
 
     /**
@@ -1218,7 +1300,7 @@ class displayActions extends AhgController
         }
 
         self::$sectorSearchTables = [];
-        $candidates = ['dam_iptc_metadata', 'museum_metadata', 'gallery_artist'];
+        $candidates = ['dam_iptc_metadata', 'museum_metadata', 'gallery_artist', 'library_item', 'library_item_creator'];
 
         foreach ($candidates as $table) {
             try {
