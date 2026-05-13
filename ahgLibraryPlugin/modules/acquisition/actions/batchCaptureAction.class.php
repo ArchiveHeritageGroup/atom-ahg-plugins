@@ -244,14 +244,29 @@ class acquisitionBatchCaptureAction extends AhgController
                     }
                 }
 
-                // 8. Create library_item_subject rows
+                // 8. Create library_item_subject rows AND mirror the same
+                // subjects into the AtoM Subject taxonomy (object_term_relation
+                // → term taxonomy_id=35) so the standard browse Subject facets
+                // pick them up. Without this, ISBN-captured subjects live only
+                // in the sidecar table and never appear in AtoM's facets.
                 $subjects = trim($item['subjects'] ?? '');
                 if (!empty($subjects)) {
                     $subjectList = array_filter(array_map('trim', preg_split('/[;]/', $subjects)));
+                    $libService = isset($libService) ? $libService : LibraryService::getInstance();
                     foreach ($subjectList as $subjectHeading) {
+                        $heading = mb_substr($subjectHeading, 0, 500);
+                        try {
+                            $termId = $libService->resolveOrCreateSubjectTerm($heading);
+                            if ($termId) {
+                                $libService->linkIoToTerm((int) $objectId, (int) $termId);
+                            }
+                        } catch (\Throwable $e) {
+                            // Subject taxonomy linkage is best-effort; the
+                            // sidecar row below still records the heading.
+                        }
                         DB::table('library_item_subject')->insert([
                             'library_item_id' => $libraryItemId,
-                            'heading'         => mb_substr($subjectHeading, 0, 500),
+                            'heading'         => $heading,
                             'subject_type'    => 'topic',
                         ]);
                     }

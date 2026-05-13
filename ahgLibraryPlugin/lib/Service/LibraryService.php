@@ -626,6 +626,105 @@ class LibraryService
     }
 
     /**
+     * Lookup an existing `term` row by name (case-insensitive, trimmed) under
+     * the AtoM Subject taxonomy (taxonomy_id=35), falling back to fallback
+     * culture. On miss, insert object+term+term_i18n+slug. Returns the
+     * term.id so object_term_relation can link the IO. Mirrors
+     * resolveOrCreateActor() pattern.
+     *
+     * The Subject taxonomy root is term 110 in AtoM, so newly-created terms
+     * are reparented there to integrate with the existing tree.
+     */
+    public function resolveOrCreateSubjectTerm(string $name, ?string $culture = null, string $fallback = 'en'): ?int
+    {
+        $needle = trim($name);
+        if ($needle === '') {
+            return null;
+        }
+
+        $culture = $culture ?? $this->culture;
+        $taxonomyId = QubitTaxonomy::SUBJECT_ID;
+        $rootTermId = 110;
+
+        $existing = DB::table('term_i18n')
+            ->join('term', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', $taxonomyId)
+            ->whereIn('term_i18n.culture', array_unique([$culture, $fallback]))
+            ->whereRaw('LOWER(TRIM(term_i18n.name)) = ?', [mb_strtolower($needle)])
+            ->orderByRaw('FIELD(term_i18n.culture, ?, ?)', [$culture, $fallback])
+            ->value('term.id');
+
+        if ($existing) {
+            return (int) $existing;
+        }
+
+        return DB::connection()->transaction(function () use ($needle, $culture, $taxonomyId, $rootTermId) {
+            $now = date('Y-m-d H:i:s');
+
+            $objectId = DB::table('object')->insertGetId([
+                'class_name' => 'QubitTerm',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+
+            DB::table('term')->insert([
+                'id'             => $objectId,
+                'taxonomy_id'    => $taxonomyId,
+                'parent_id'      => $rootTermId,
+                'source_culture' => $culture,
+            ]);
+
+            DB::table('term_i18n')->insert([
+                'id'      => $objectId,
+                'culture' => $culture,
+                'name'    => $needle,
+            ]);
+
+            DB::table('slug')->insert([
+                'object_id' => $objectId,
+                'slug'      => $this->buildUniqueSlug($needle),
+            ]);
+
+            return (int) $objectId;
+        });
+    }
+
+    /**
+     * Link an information_object to a term via object_term_relation, no-op if
+     * the link already exists. Used by ISBN capture to attach Subject terms
+     * so the standard AtoM Subject facets pick them up.
+     */
+    public function linkIoToTerm(int $informationObjectId, int $termId): void
+    {
+        // Guard against stale FKs: an object_term_relation insert with a
+        // missing information_object will violate object_term_relation_FK_2.
+        $ioExists = DB::table('object')->where('id', $informationObjectId)->exists();
+        if (!$ioExists) {
+            return;
+        }
+
+        $exists = DB::table('object_term_relation')
+            ->where('object_id', $informationObjectId)
+            ->where('term_id', $termId)
+            ->exists();
+        if ($exists) {
+            return;
+        }
+
+        $objectId = DB::table('object')->insertGetId([
+            'class_name' => 'QubitObjectTermRelation',
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        DB::table('object_term_relation')->insert([
+            'id'        => $objectId,
+            'object_id' => $informationObjectId,
+            'term_id'   => $termId,
+        ]);
+    }
+
+    /**
      * Generate a unique slug for the given name, suffixing -2, -3, … on
      * collision against the `slug` table. Mirrors QubitSlug::slugify but
      * keeps this service self-contained.
