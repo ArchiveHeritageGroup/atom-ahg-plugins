@@ -225,6 +225,7 @@ class displayActions extends AhgController
 
         $useDiscovery = $this->queryFilter
             && $request->getParameter('discovery', '1') !== '0'
+            && !$this->looksLikeIdentifier($this->queryFilter)
             && file_exists(\sfConfig::get('sf_plugins_dir') . '/ahgDiscoveryPlugin/lib/Services/QueryExpander.php');
 
         if ($useDiscovery) {
@@ -1111,6 +1112,34 @@ class displayActions extends AhgController
             // If thesaurus fails, return original terms
             return preg_split('/\s+/', $query, -1, PREG_SPLIT_NO_EMPTY);
         }
+    }
+
+    /**
+     * Return true when the query looks like an exact identifier — ISBN-10/13,
+     * ISSN, plain numeric call-number — rather than free-text. Used to bypass
+     * the Discovery semantic pipeline for queries it can't reason about so
+     * the SQL applySectorSearchClauses path matches library_item directly.
+     */
+    protected function looksLikeIdentifier(string $query): bool
+    {
+        $stripped = preg_replace('/[\s\-]/', '', $query);
+        if ($stripped === '' || $stripped === null) {
+            return false;
+        }
+        // ISBN-10 / ISBN-13: 10 or 13 chars, last may be X.
+        if (preg_match('/^[0-9]{9}[0-9X]$|^[0-9]{12}[0-9X]$/i', $stripped)) {
+            return true;
+        }
+        // ISSN: 8 chars, last may be X.
+        if (preg_match('/^[0-9]{7}[0-9X]$/i', $stripped)) {
+            return true;
+        }
+        // Pure numeric query at least 6 digits long (OCLC, LCCN, long call
+        // numbers). Short numerics like "1980" still go through Discovery.
+        if (preg_match('/^[0-9]{6,}$/', $stripped)) {
+            return true;
+        }
+        return false;
     }
 
     /**
