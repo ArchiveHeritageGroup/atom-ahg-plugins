@@ -57,7 +57,10 @@ class displayActions extends AhgController
         // Get all filter parameters
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
-        $this->topLevelOnly = $request->getParameter('topLevel', '0');
+        // Default to top-level only — matches base AtoM /informationobject/browse
+        // convention (descendants are reachable via the parent's view page).
+        // Users who want every level pass ?topLevel=0 explicitly.
+        $this->topLevelOnly = $request->getParameter('topLevel', '1');
         $this->page = max(1, (int) $request->getParameter('page', 1));
         // Read limit from raw GET: QubitLimitResults filter caps $request->limit
         // to app_hits_per_page, but display browse has its own 10-100 range control.
@@ -780,7 +783,8 @@ class displayActions extends AhgController
     {
         $this->typeFilter = $request->getParameter('type');
         $this->parentId = $request->getParameter('parent');
-        $this->topLevelOnly = $request->getParameter('topLevel', '0');
+        // Same default as executeBrowse — top-level only unless explicit ?topLevel=0
+        $this->topLevelOnly = $request->getParameter('topLevel', '1');
         $this->sort = $request->getParameter('sort', 'date');
         $this->sortDir = $request->getParameter('dir', 'desc');
 
@@ -851,7 +855,8 @@ class displayActions extends AhgController
     {
         $typeFilter = $request->getParameter('type');
         $parentId = $request->getParameter('parent');
-        $topLevelOnly = $request->getParameter('topLevel', '0');
+        // Same default as executeBrowse — top-level only unless explicit ?topLevel=0
+        $topLevelOnly = $request->getParameter('topLevel', '1');
         $sort = $request->getParameter('sort', 'date');
         $sortDir = $request->getParameter('dir', 'desc');
 
