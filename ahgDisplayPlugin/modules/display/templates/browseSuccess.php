@@ -43,6 +43,14 @@ $materialTypeFilter = $sf_request->getParameter('materialType');
 $conditionGradeFilter = $sf_request->getParameter('conditionGrade');
 $acquisitionMethodFilter = $sf_request->getParameter('acquisitionMethod');
 $circulationStatusFilter = $sf_request->getParameter('circulationStatus');
+$workTypes = $sf_data->getRaw('workTypes') ?: [];
+$materialsList = $sf_data->getRaw('materialsList') ?: [];
+$creationPlaces = $sf_data->getRaw('creationPlaces') ?: [];
+$museumRepositories = $sf_data->getRaw('museumRepositories') ?: [];
+$workTypeFilter = $sf_request->getParameter('workType');
+$materialsFilter = $sf_request->getParameter('materials');
+$creationPlaceFilter = $sf_request->getParameter('creationPlace');
+$museumRepositoryFilter = $sf_request->getParameter('museumRepository');
 
 // Fuzzy search data from action
 $didYouMean = $sf_data->getRaw('didYouMean');
@@ -90,6 +98,10 @@ $fp = [
     'conditionGrade' => $conditionGradeFilter,
     'acquisitionMethod' => $acquisitionMethodFilter,
     'circulationStatus' => $circulationStatusFilter,
+    'workType' => $workTypeFilter,
+    'materials' => $materialsFilter,
+    'creationPlace' => $creationPlaceFilter,
+    'museumRepository' => $museumRepositoryFilter,
 ];
 
 $typeConfig = [
@@ -377,13 +389,17 @@ function getItemUrl($obj) {
   </div>
   <?php endif ?>
 
-  <!-- Library Facets — auto-hide when empty (non-library browses) -->
+  <!-- Library + Museum Facets — auto-hide when empty (irrelevant sectors) -->
   <?php
   $libraryFacets = [
       ['var' => $materialTypes,       'label' => __('Material type'),      'param' => 'materialType',      'selected' => $materialTypeFilter,      'id' => 'facetMaterial'],
       ['var' => $conditionGrades,     'label' => __('Condition'),          'param' => 'conditionGrade',    'selected' => $conditionGradeFilter,    'id' => 'facetCondition'],
       ['var' => $acquisitionMethods,  'label' => __('Acquisition method'), 'param' => 'acquisitionMethod', 'selected' => $acquisitionMethodFilter, 'id' => 'facetAcquisition'],
       ['var' => $circulationStatuses, 'label' => __('Circulation status'), 'param' => 'circulationStatus', 'selected' => $circulationStatusFilter, 'id' => 'facetCirculation'],
+      ['var' => $workTypes,           'label' => __('Work type'),          'param' => 'workType',          'selected' => $workTypeFilter,          'id' => 'facetWorkType'],
+      ['var' => $materialsList,       'label' => __('Materials'),          'param' => 'materials',         'selected' => $materialsFilter,         'id' => 'facetMaterials'],
+      ['var' => $creationPlaces,      'label' => __('Place of creation'),  'param' => 'creationPlace',     'selected' => $creationPlaceFilter,     'id' => 'facetCreationPlace'],
+      ['var' => $museumRepositories,  'label' => __('Museum repository'),  'param' => 'museumRepository',  'selected' => $museumRepositoryFilter,  'id' => 'facetMuseumRepository'],
   ];
   foreach ($libraryFacets as $lf):
       if (empty($lf['var'])) continue;

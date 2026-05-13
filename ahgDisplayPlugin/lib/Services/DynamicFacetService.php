@@ -48,6 +48,14 @@ class DynamicFacetService
     private ?string $acquisitionMethodFilter = null;
     private ?string $circulationStatusFilter = null;
 
+    // Museum-only facets. Data lives in property rows where name='ccoData'
+    // (a JSON blob authored by the CCO template), NOT in museum_metadata which
+    // is currently dormant on Heratio sites. We JSON_EXTRACT into the value.
+    private ?string $workTypeFilter = null;        // ccoData.work_type
+    private ?string $materialsFilter = null;       // ccoData.materials_display
+    private ?string $creationPlaceFilter = null;   // ccoData.creation_place
+    private ?string $museumRepositoryFilter = null; // ccoData.repository
+
     /** @var bool|null Cached fulltext availability */
     private static ?bool $fulltextAvailable = null;
 
@@ -86,6 +94,11 @@ class DynamicFacetService
         $this->conditionGradeFilter = $filters['conditionGradeFilter'] ?? null;
         $this->acquisitionMethodFilter = $filters['acquisitionMethodFilter'] ?? null;
         $this->circulationStatusFilter = $filters['circulationStatusFilter'] ?? null;
+
+        $this->workTypeFilter = $filters['workTypeFilter'] ?? null;
+        $this->materialsFilter = $filters['materialsFilter'] ?? null;
+        $this->creationPlaceFilter = $filters['creationPlaceFilter'] ?? null;
+        $this->museumRepositoryFilter = $filters['museumRepositoryFilter'] ?? null;
     }
 
     /**
@@ -104,7 +117,11 @@ class DynamicFacetService
             || $this->materialTypeFilter
             || $this->conditionGradeFilter
             || $this->acquisitionMethodFilter
-            || $this->circulationStatusFilter;
+            || $this->circulationStatusFilter
+            || $this->workTypeFilter
+            || $this->materialsFilter
+            || $this->creationPlaceFilter
+            || $this->museumRepositoryFilter;
     }
 
     /**
@@ -138,6 +155,11 @@ class DynamicFacetService
             case 'acquisition_method':
             case 'circulation_status':
                 return $this->getLibraryColumnCounts($facetType);
+            case 'work_type':
+            case 'materials':
+            case 'creation_place':
+            case 'museum_repository':
+                return $this->getMuseumCcoCounts($facetType);
             default:
                 return [];
         }
@@ -187,8 +209,10 @@ class DynamicFacetService
         // library facet must always be allowed to pivot the user into the
         // library sector.
         $libraryDimensions = ['material_type', 'condition_grade', 'acquisition_method', 'circulation_status'];
+        $museumDimensions = ['work_type', 'materials', 'creation_place', 'museum_repository'];
         $isLibraryFacet = in_array($excludeFacet, $libraryDimensions, true);
-        if ($excludeFacet !== 'glam_type' && !$isLibraryFacet && $this->typeFilter) {
+        $isMuseumFacet = in_array($excludeFacet, $museumDimensions, true);
+        if ($excludeFacet !== 'glam_type' && !$isLibraryFacet && !$isMuseumFacet && $this->typeFilter) {
             $query->where('doc.object_type', $this->typeFilter);
         }
 
@@ -264,6 +288,43 @@ class DynamicFacetService
                     ->from('library_item as li_w')
                     ->whereRaw('li_w.information_object_id = io.id')
                     ->where("li_w.{$col}", $val);
+            });
+        }
+
+        // Museum-only ID filters. Data lives in property rows where name='ccoData'
+        // with the museum-specific values inside a JSON blob; JSON_EXTRACT
+        // pulls out a single key. Keys are the four CCO fields actually
+        // populated on Heratio sites (work_type, materials_display,
+        // creation_place, repository) — see getMuseumCcoCounts for source.
+        $museumFilterMap = [
+            'work_type'         => $this->workTypeFilter,
+            'materials_display' => $this->materialsFilter,
+            'creation_place'    => $this->creationPlaceFilter,
+            'repository'        => $this->museumRepositoryFilter,
+        ];
+        // Map facet name → CCO JSON key (so $excludeFacet='materials' excludes the
+        // materials_display filter from its own facet count).
+        $facetToCcoKey = [
+            'work_type'         => 'work_type',
+            'materials'         => 'materials_display',
+            'creation_place'    => 'creation_place',
+            'museum_repository' => 'repository',
+        ];
+        $excludeCcoKey = $facetToCcoKey[$excludeFacet] ?? null;
+        foreach ($museumFilterMap as $jsonKey => $val) {
+            if ($jsonKey === $excludeCcoKey || $val === null || $val === '') {
+                continue;
+            }
+            $query->whereExists(function ($q) use ($jsonKey, $val) {
+                $q->select(DB::raw(1))
+                    ->from('property as p_mw')
+                    ->join('property_i18n as pi_mw', function ($j) {
+                        $j->on('pi_mw.id', '=', 'p_mw.id')
+                          ->where('pi_mw.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+                    })
+                    ->whereRaw('p_mw.object_id = io.id')
+                    ->where('p_mw.name', '=', 'ccoData')
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pi_mw.value, ?)) = ?", ['$.' . $jsonKey, $val]);
             });
         }
 
@@ -528,6 +589,23 @@ class DynamicFacetService
             });
         }
 
+        // Museum CCO JSON: object_number, work_type, materials_display,
+        // creator_display, creation_place, condition_summary, subject_display,
+        // inscription_transcription, etc — all live as keys inside a single JSON
+        // blob in property_i18n.value where property.name='ccoData'. A LIKE on
+        // the raw JSON catches any of them without parsing.
+        $qb->orWhereExists(function ($sub) use ($likePattern) {
+            $sub->select(DB::raw(1))
+                ->from('property as p_cco')
+                ->join('property_i18n as pi_cco', function ($j) {
+                    $j->on('pi_cco.id', '=', 'p_cco.id')
+                      ->where('pi_cco.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+                })
+                ->whereRaw('p_cco.object_id = io.id')
+                ->where('p_cco.name', '=', 'ccoData')
+                ->where('pi_cco.value', 'like', $likePattern);
+        });
+
         if (in_array('gallery_artist', $sectorTables)) {
             $qb->orWhereExists(function ($sub) use ($likePattern) {
                 $sub->select(DB::raw(1))
@@ -763,6 +841,54 @@ class DynamicFacetService
                 ->toArray();
         } catch (\Exception $e) {
             // library_item table only exists when ahgLibraryPlugin is installed.
+            return [];
+        }
+    }
+
+    /**
+     * Museum-only facet counts (work_type, materials, creation_place,
+     * museum_repository). Reads CCO data from property.name='ccoData' rows
+     * where the value is a JSON blob; JSON_EXTRACT pulls out one key.
+     */
+    private function getMuseumCcoCounts(string $facetName): array
+    {
+        $facetToCcoKey = [
+            'work_type'         => 'work_type',
+            'materials'         => 'materials_display',
+            'creation_place'    => 'creation_place',
+            'museum_repository' => 'repository',
+        ];
+        $jsonKey = $facetToCcoKey[$facetName] ?? null;
+        if ($jsonKey === null) {
+            return [];
+        }
+        $jsonPath = '$.' . $jsonKey;
+
+        try {
+            $query = $this->buildBaseQuery($facetName);
+
+            return $query
+                ->join('property as p_mf', 'p_mf.object_id', '=', 'io.id')
+                ->join('property_i18n as pi_mf', function ($j) {
+                    $j->on('pi_mf.id', '=', 'p_mf.id')
+                      ->where('pi_mf.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+                })
+                ->where('p_mf.name', '=', 'ccoData')
+                ->whereRaw("JSON_EXTRACT(pi_mf.value, ?) IS NOT NULL", [$jsonPath])
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pi_mf.value, ?)) != ''", [$jsonPath])
+                ->select(
+                    DB::raw("JSON_UNQUOTE(JSON_EXTRACT(pi_mf.value, " . DB::connection()->getPdo()->quote($jsonPath) . ")) as id"),
+                    DB::raw("JSON_UNQUOTE(JSON_EXTRACT(pi_mf.value, " . DB::connection()->getPdo()->quote($jsonPath) . ")) as name"),
+                    DB::raw('COUNT(DISTINCT io.id) as count')
+                )
+                ->groupBy(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(pi_mf.value, " . DB::connection()->getPdo()->quote($jsonPath) . "))"))
+                ->orderByDesc('count')
+                ->limit(30)
+                ->get()
+                ->toArray();
+        } catch (\Exception $e) {
+            // property/property_i18n always exist in base AtoM but ccoData may
+            // not be populated; return empty so the template hides the card.
             return [];
         }
     }

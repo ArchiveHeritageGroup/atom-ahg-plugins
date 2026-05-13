@@ -96,6 +96,13 @@ class displayActions extends AhgController
         $this->conditionGradeFilter = $request->getParameter('conditionGrade');
         $this->acquisitionMethodFilter = $request->getParameter('acquisitionMethod');
         $this->circulationStatusFilter = $request->getParameter('circulationStatus');
+
+        // Museum-only facet filters. Backed by JSON keys inside property rows
+        // where name='ccoData' (the CCO template's JSON blob).
+        $this->workTypeFilter = $request->getParameter('workType');
+        $this->materialsFilter = $request->getParameter('materials');
+        $this->creationPlaceFilter = $request->getParameter('creationPlace');
+        $this->museumRepositoryFilter = $request->getParameter('museumRepository');
         // Text search filters
         $this->queryFilter = $request->getParameter("query");
         $this->semanticEnabled = $request->getParameter("semantic") == "1";
@@ -185,6 +192,10 @@ class displayActions extends AhgController
             'conditionGradeFilter' => $this->conditionGradeFilter,
             'acquisitionMethodFilter' => $this->acquisitionMethodFilter,
             'circulationStatusFilter' => $this->circulationStatusFilter,
+            'workTypeFilter' => $this->workTypeFilter,
+            'materialsFilter' => $this->materialsFilter,
+            'creationPlaceFilter' => $this->creationPlaceFilter,
+            'museumRepositoryFilter' => $this->museumRepositoryFilter,
         ]);
 
         if ($facetService->hasActiveFacetFilters()) {
@@ -216,6 +227,13 @@ class displayActions extends AhgController
         $this->conditionGrades    = $facetService->getFacetCounts('condition_grade');
         $this->acquisitionMethods = $facetService->getFacetCounts('acquisition_method');
         $this->circulationStatuses = $facetService->getFacetCounts('circulation_status');
+
+        // Museum-only facets: live too. Auto-hide when CCO data isn't authored
+        // on the IOs in the result set.
+        $this->workTypes         = $facetService->getFacetCounts('work_type');
+        $this->materialsList     = $facetService->getFacetCounts('materials');
+        $this->creationPlaces    = $facetService->getFacetCounts('creation_place');
+        $this->museumRepositories = $facetService->getFacetCounts('museum_repository');
 
         // ── Discovery integration ──────────────────────────────────────
         // When a text query is present and ahgDiscoveryPlugin is enabled,
@@ -509,6 +527,10 @@ class displayActions extends AhgController
             'conditionGrade' => $this->conditionGradeFilter,
             'acquisitionMethod' => $this->acquisitionMethodFilter,
             'circulationStatus' => $this->circulationStatusFilter,
+            'workType' => $this->workTypeFilter,
+            'materials' => $this->materialsFilter,
+            'creationPlace' => $this->creationPlaceFilter,
+            'museumRepository' => $this->museumRepositoryFilter,
         ];
     }
 
@@ -622,6 +644,28 @@ class displayActions extends AhgController
                     ->from('library_item as li_w')
                     ->whereRaw('li_w.information_object_id = io.id')
                     ->where("li_w.{$col}", $val);
+            });
+        }
+
+        // Museum-only filters. Each scopes the result set to IOs whose paired
+        // property row (name='ccoData') has the JSON key set to the value.
+        $museumFilters = [
+            'work_type'         => $this->workTypeFilter,
+            'materials_display' => $this->materialsFilter,
+            'creation_place'    => $this->creationPlaceFilter,
+            'repository'        => $this->museumRepositoryFilter,
+        ];
+        foreach ($museumFilters as $jsonKey => $val) {
+            if ($val === null || $val === '') continue;
+            $query->whereExists(function ($q) use ($jsonKey, $val) {
+                $q->select(DB::raw(1))
+                    ->from('property as p_mw')
+                    ->join('property_i18n as pi_mw', function ($j) {
+                        $j->on('pi_mw.id', '=', 'p_mw.id')->where('pi_mw.culture', '=', 'en');
+                    })
+                    ->whereRaw('p_mw.object_id = io.id')
+                    ->where('p_mw.name', '=', 'ccoData')
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pi_mw.value, ?)) = ?", ['$.' . $jsonKey, $val]);
             });
         }
 
@@ -1263,6 +1307,22 @@ class displayActions extends AhgController
                     });
             });
         }
+
+        // Museum CCO JSON: object_number, work_type, materials_display,
+        // creator_display, creation_place, condition_summary, subject_display,
+        // inscription_transcription, etc — all keys inside a single JSON blob
+        // stored in property_i18n.value where property.name='ccoData'. A LIKE
+        // on the raw JSON catches any of them without parsing.
+        $qb->orWhereExists(function ($sub) use ($likePattern) {
+            $sub->select(DB::raw(1))
+                ->from('property as p_cco')
+                ->join('property_i18n as pi_cco', function ($j) {
+                    $j->on('pi_cco.id', '=', 'p_cco.id')->where('pi_cco.culture', '=', 'en');
+                })
+                ->whereRaw('p_cco.object_id = io.id')
+                ->where('p_cco.name', '=', 'ccoData')
+                ->where('pi_cco.value', 'like', $likePattern);
+        });
 
         // Gallery: search artist display_name, medium_specialty, movement_style via event→actor
         if (in_array('gallery_artist', $sectorTables)) {
