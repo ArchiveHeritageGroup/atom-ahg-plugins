@@ -31,6 +31,42 @@ $styleNames = [
     <h1 class="h2 mb-0"><i class="fas fa-quote-right text-primary me-2"></i>Citation Generator</h1>
     <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
 </div>
+
+<?php
+// §2.1 Per-record citation manager export picker.
+$slugForExport = sfContext::getInstance()->getRequest()->getParameter('slug');
+$exportFormats = [
+    'ris'     => ['label' => 'RIS',       'desc' => 'Zotero, Mendeley, EndNote',  'icon' => 'file-export'],
+    'bibtex'  => ['label' => 'BibTeX',    'desc' => 'LaTeX, JabRef',              'icon' => 'file-code'],
+    'endnote' => ['label' => 'EndNote',   'desc' => 'EndNote XML',                'icon' => 'file-alt'],
+    'apa'     => ['label' => 'APA 7',     'desc' => 'Plain-text APA citation',    'icon' => 'paragraph'],
+    'mla'     => ['label' => 'MLA 9',     'desc' => 'Plain-text MLA citation',    'icon' => 'paragraph'],
+    'chicago' => ['label' => 'Chicago',   'desc' => 'Notes-Bibliography 17',      'icon' => 'paragraph'],
+];
+?>
+<div class="card mb-4 border-primary">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-file-download me-2"></i>Copy in citation manager format</h5>
+    </div>
+    <div class="card-body">
+        <p class="small text-muted mb-3">Download a file in your citation manager's native format. Import into Zotero / Mendeley / EndNote / JabRef / LaTeX in one click.</p>
+        <div class="row g-2">
+            <?php foreach ($exportFormats as $fmt => $info): ?>
+                <div class="col-md-4 col-sm-6">
+                    <a href="<?php echo url_for(['module' => 'research', 'action' => 'citeExport', 'slug' => $slugForExport, 'format' => $fmt]); ?>"
+                       class="btn btn-outline-primary w-100 text-start d-flex align-items-center">
+                        <i class="fas fa-<?php echo htmlspecialchars($info['icon']); ?> me-2"></i>
+                        <span>
+                            <strong><?php echo htmlspecialchars($info['label']); ?></strong><br>
+                            <small class="text-muted"><?php echo htmlspecialchars($info['desc']); ?></small>
+                        </span>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <?php foreach ($citations as $style => $data): ?>
         <?php if (!isset($data['error'])): ?>

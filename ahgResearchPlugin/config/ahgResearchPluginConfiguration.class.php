@@ -11,7 +11,7 @@
 class ahgResearchPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Professional research support platform with ORCID integration, collaboration, and API access';
-    public static $version = '2.1.0';
+    public static $version = '3.1.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
@@ -154,7 +154,47 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_researchers', '/research/researchers', 'researchers');
 
         // Workspace & Collections
+        // §2.1 Per-record citation manager export (more specific route MUST be added first)
+        $research->any('research_cite_export', '/research/cite/:slug/export/:format', 'citeExport', ['format' => 'ris|bibtex|endnote|apa|mla|chicago']);
         $research->any('research_cite', '/research/cite/:slug', 'cite');
+
+        // §1.1 - §1.3 Studio (grounded AI artefact generator) - specific routes BEFORE the list catch
+        $research->any('research_studio_download', '/research/studio/:projectId/artefact/:artefactId/download', 'studioDownload', ['projectId' => '\\d+', 'artefactId' => '\\d+']);
+        $research->any('research_studio_delete',   '/research/studio/:projectId/artefact/:artefactId/delete',   'studioDelete',   ['projectId' => '\\d+', 'artefactId' => '\\d+']);
+        $research->any('research_studio_show',     '/research/studio/:projectId/artefact/:artefactId',           'studioShow',     ['projectId' => '\\d+', 'artefactId' => '\\d+']);
+        $research->any('research_studio_generate', '/research/studio/:projectId/generate',                       'studioGenerate', ['projectId' => '\\d+']);
+        $research->any('research_studio',          '/research/studio/:projectId',                                'studio',         ['projectId' => '\\d+']);
+
+        // §1.5 Notebooks
+        $research->any('research_notebook_promote', '/research/notebooks/:id/promote', 'notebookPromote', ['id' => '\\d+']);
+        $research->any('research_notebook_delete',  '/research/notebooks/:id/delete',  'notebookDelete',  ['id' => '\\d+']);
+        $research->any('research_notebook_show',    '/research/notebooks/:id',          'notebookShow',    ['id' => '\\d+']);
+        $research->any('research_notebooks',        '/research/notebooks',              'notebooks');
+
+        // §1.6 Cross-fonds queries
+        $research->any('research_cross_fonds_query', '/research/cross-fonds-query', 'crossFondsQuery');
+
+        // §2.2 Analytics dashboard
+        $research->any('research_analytics', '/research/analytics', 'analytics');
+
+        // §2.3 Real-time collaboration (polling)
+        $research->any('research_collab_comment_resolve', '/research/projects/:projectId/realtime/comment/:commentId/resolve', 'collabCommentResolve', ['projectId' => '\\d+', 'commentId' => '\\d+']);
+        $research->any('research_collab_comment', '/research/projects/:projectId/realtime/comment', 'collabComment', ['projectId' => '\\d+']);
+        $research->any('research_collab_poll',    '/research/projects/:projectId/realtime/poll',    'collabPoll',    ['projectId' => '\\d+']);
+        $research->any('research_collab_join',    '/research/projects/:projectId/realtime/join',    'collabJoin',    ['projectId' => '\\d+']);
+        $research->any('research_collab_panel',   '/research/projects/:projectId/realtime/panel',   'collabPanel',   ['projectId' => '\\d+']);
+
+        // §2.4 ORCID Works push/pull
+        $research->any('research_orcid_works', '/research/orcid/works', 'orcidWorks');
+
+        // §2.5 ResearcherView JSON endpoint (lightweight GraphQL substitute)
+        $research->any('research_researcher_view', '/research/researcher-view/:researcherId', 'researcherView', ['researcherId' => '\\d+']);
+
+        // §2.6 Mobile / PWA shell
+        $research->any('research_mobile_home', '/research/mobile', 'mobileHome');
+
+        // §2.7 Offline sync endpoint
+        $research->any('research_offline_sync', '/research/sync/offline', 'offlineSync');
         $research->any('research_annotations', '/research/annotations', 'annotations');
         $research->any('research_view_collection', '/research/collection/:id', 'viewCollection', ['id' => '\d+']);
         $research->any('research_collections', '/research/collections', 'collections');

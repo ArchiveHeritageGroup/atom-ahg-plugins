@@ -4,3 +4,11 @@ all:
   orcid_client_secret: '7c5ba99c-b683-4500-a12b-57927f61074e'
   orcid_redirect_uri: 'https://psis.theahg.co.za/index.php/research/orcid/callback'
   orcid_sandbox: false
+  orcid_base: 'https://orcid.org'
+  orcid_api_base: 'https://api.orcid.org'
+
+  # Studio audio (TTS) - §1.3 audio output type. When unset, the script is
+  # persisted to research_studio_artefact.audio_transcript and the artefact
+  # lands in status='error' so the operator can hand it to TTS manually.
+  ahg_tts_endpoint: ~
+  ahg_tts_key: ~

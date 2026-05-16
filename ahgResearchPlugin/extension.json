@@ -1,7 +1,7 @@
 {
     "name": "Research Portal",
     "machine_name": "ahgResearchPlugin",
-    "version": "3.0.0",
+    "version": "3.1.0",
     "description": "Research knowledge platform with evidence graphs, source criticism, cross-collection synthesis, W3C annotations, AI extraction orchestration, validation queues, snapshots, assertions, hypotheses, ORCID integration, collaboration, bibliography, reproduction requests, workspaces, journal, reports, notifications, RO-Crate packaging, ODRL rights, reproducibility packs, DOI minting, and REST API access",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

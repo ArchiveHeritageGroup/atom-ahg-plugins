@@ -575,4 +575,273 @@ class OrcidService
     {
         return $this->getBaseUrl() . '/' . $orcidId;
     }
+
+    // =========================================================================
+    // §2.4 Works push/pull (extension - 2026-05-16)
+    //
+    // Tokens persisted in the new research_orcid_link table; the existing
+    // OAuth flow above lands tokens on research_researcher columns. We keep
+    // both: the older columns remain authoritative for the connect/disconnect
+    // page; this method mirrors any successful exchange onto the new table so
+    // pull/push has a stable home with token-encryption fields.
+    // =========================================================================
+
+    /**
+     * Persist tokens onto research_orcid_link (upsert).
+     */
+    public function linkResearcher(int $researcherId, array $tokenResponse): void
+    {
+        $orcidId = $tokenResponse['orcid']           ?? null;
+        $access  = $tokenResponse['access_token']    ?? null;
+        $refresh = $tokenResponse['refresh_token']   ?? null;
+        $scope   = $tokenResponse['scope']           ?? null;
+        $expires = isset($tokenResponse['expires_in']) ? date('Y-m-d H:i:s', time() + (int) $tokenResponse['expires_in']) : null;
+
+        if (!$orcidId || !$access) {
+            return;
+        }
+
+        $row = \Illuminate\Database\Capsule\Manager::table('research_orcid_link')
+            ->where('researcher_id', $researcherId)
+            ->first();
+
+        $payload = [
+            'orcid_id'                 => $orcidId,
+            'access_token_encrypted'   => $this->encryptToken((string) $access),
+            'refresh_token_encrypted'  => $refresh ? $this->encryptToken((string) $refresh) : null,
+            'scope'                    => $scope,
+            'expires_at'               => $expires,
+            'updated_at'               => date('Y-m-d H:i:s'),
+        ];
+
+        if ($row) {
+            \Illuminate\Database\Capsule\Manager::table('research_orcid_link')
+                ->where('id', $row->id)
+                ->update($payload);
+        } else {
+            $payload['researcher_id'] = $researcherId;
+            $payload['created_at']    = date('Y-m-d H:i:s');
+            \Illuminate\Database\Capsule\Manager::table('research_orcid_link')->insert($payload);
+        }
+    }
+
+    public function unlink(int $researcherId): void
+    {
+        \Illuminate\Database\Capsule\Manager::table('research_orcid_link')
+            ->where('researcher_id', $researcherId)
+            ->delete();
+    }
+
+    public function getLink(int $researcherId): ?object
+    {
+        return \Illuminate\Database\Capsule\Manager::table('research_orcid_link')
+            ->where('researcher_id', $researcherId)
+            ->first();
+    }
+
+    /**
+     * Pull works from the researcher's ORCID record.
+     *
+     * @return array list of {put-code, title, year, journal, doi}
+     */
+    public function pullWorks(int $researcherId): array
+    {
+        $link = $this->getLink($researcherId);
+        if (!$link) {
+            throw new \RuntimeException('Researcher is not linked to ORCID');
+        }
+        $token = $this->decryptToken($link->access_token_encrypted);
+        $url   = $this->memberApiBase() . '/' . $link->orcid_id . '/works';
+
+        $resp = $this->orcidApiGet($url, $token);
+        if (empty($resp['group'])) {
+            $this->markSynced($link->id, 0);
+            return [];
+        }
+
+        $works = [];
+        foreach ($resp['group'] as $g) {
+            foreach (($g['work-summary'] ?? []) as $w) {
+                $works[] = [
+                    'put_code' => $w['put-code']                                    ?? null,
+                    'title'    => $w['title']['title']['value']                    ?? null,
+                    'year'     => $w['publication-date']['year']['value']          ?? null,
+                    'journal'  => $w['journal-title']['value']                     ?? null,
+                    'doi'      => $this->findExternalId($w['external-ids'] ?? null, 'doi'),
+                    'type'     => $w['type']                                       ?? null,
+                ];
+            }
+        }
+        $this->markSynced($link->id, count($works));
+        return $works;
+    }
+
+    /**
+     * Push a citation as an ORCID Work record. Returns the new put-code.
+     *
+     * @param array $citation Required keys: title. Optional: year, journal, doi, type
+     */
+    public function pushWork(int $researcherId, array $citation): ?string
+    {
+        $link = $this->getLink($researcherId);
+        if (!$link) {
+            throw new \RuntimeException('Researcher is not linked to ORCID');
+        }
+        $token = $this->decryptToken($link->access_token_encrypted);
+        $url   = $this->memberApiBase() . '/' . $link->orcid_id . '/work';
+        $xml   = $this->buildWorkXml($citation);
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $xml,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'Content-Type: application/vnd.orcid+xml',
+                'Accept: application/vnd.orcid+xml',
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_HEADER         => true,
+        ]);
+        $resp = curl_exec($ch);
+        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http < 200 || $http >= 300) {
+            throw new \RuntimeException("ORCID push failed: HTTP {$http}");
+        }
+        // The put-code is in the Location header
+        if (is_string($resp) && preg_match('/Location:\s*.*\/work\/(\d+)/i', $resp, $m)) {
+            return $m[1];
+        }
+        return null;
+    }
+
+    protected function memberApiBase(): string
+    {
+        // For pull, the public Pub API is sufficient. Push needs the Member
+        // API. We default to the same host pattern but allow override via
+        // app_orcid_api_base config.
+        $override = sfConfig::get('app_orcid_api_base');
+        if ($override) {
+            return rtrim($override, '/') . '/v3.0';
+        }
+        return $this->useSandbox ? 'https://api.sandbox.orcid.org/v3.0' : 'https://api.orcid.org/v3.0';
+    }
+
+    protected function buildWorkXml(array $citation): string
+    {
+        $title   = htmlspecialchars((string) ($citation['title'] ?? 'Untitled'), ENT_XML1);
+        $year    = isset($citation['year']) ? '<common:year>' . htmlspecialchars((string) $citation['year'], ENT_XML1) . '</common:year>' : '';
+        $type    = htmlspecialchars((string) ($citation['type'] ?? 'other'), ENT_XML1);
+        $journal = !empty($citation['journal'])
+            ? '<work:journal-title>' . htmlspecialchars((string) $citation['journal'], ENT_XML1) . '</work:journal-title>'
+            : '';
+        $doiBlock = '';
+        if (!empty($citation['doi'])) {
+            $doi = htmlspecialchars((string) $citation['doi'], ENT_XML1);
+            $doiBlock = <<<XML
+  <common:external-ids>
+    <common:external-id>
+      <common:external-id-type>doi</common:external-id-type>
+      <common:external-id-value>{$doi}</common:external-id-value>
+      <common:external-id-relationship>self</common:external-id-relationship>
+    </common:external-id>
+  </common:external-ids>
+XML;
+        }
+        $datePart = $year ? "<common:publication-date>{$year}</common:publication-date>" : '';
+
+        return <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<work:work xmlns:common="http://www.orcid.org/ns/common" xmlns:work="http://www.orcid.org/ns/work">
+  <work:title>
+    <common:title>{$title}</common:title>
+  </work:title>
+  {$journal}
+  <work:type>{$type}</work:type>
+  {$datePart}
+  {$doiBlock}
+</work:work>
+XML;
+    }
+
+    protected function orcidApiGet(string $url, string $token): array
+    {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $token,
+                'Accept: application/vnd.orcid+json',
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 20,
+        ]);
+        $resp = curl_exec($ch);
+        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($http < 200 || $http >= 300 || !$resp) {
+            throw new \RuntimeException("ORCID GET {$url} failed: HTTP {$http}");
+        }
+        $data = json_decode((string) $resp, true);
+        return is_array($data) ? $data : [];
+    }
+
+    protected function findExternalId($externalIds, string $type): ?string
+    {
+        if (!is_array($externalIds) || empty($externalIds['external-id'])) {
+            return null;
+        }
+        foreach ($externalIds['external-id'] as $id) {
+            if (($id['external-id-type'] ?? null) === $type) {
+                return $id['external-id-value']['value'] ?? ($id['external-id-value'] ?? null);
+            }
+        }
+        return null;
+    }
+
+    protected function markSynced(int $linkId, int $count): void
+    {
+        \Illuminate\Database\Capsule\Manager::table('research_orcid_link')
+            ->where('id', $linkId)
+            ->update([
+                'last_synced_at'   => date('Y-m-d H:i:s'),
+                'last_works_count' => $count,
+                'last_error'       => null,
+            ]);
+    }
+
+    /**
+     * AES-256-CBC token encryption keyed off sf_app_secret.
+     */
+    protected function encryptToken(string $plain): string
+    {
+        $key = $this->encryptionKey();
+        $iv  = random_bytes(16);
+        $enc = openssl_encrypt($plain, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+        return base64_encode($iv . $enc);
+    }
+
+    protected function decryptToken(?string $encoded): string
+    {
+        if (!$encoded) {
+            return '';
+        }
+        $raw = base64_decode($encoded, true);
+        if ($raw === false || strlen($raw) < 17) {
+            return '';
+        }
+        $iv  = substr($raw, 0, 16);
+        $enc = substr($raw, 16);
+        $key = $this->encryptionKey();
+        $plain = openssl_decrypt($enc, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+        return $plain === false ? '' : (string) $plain;
+    }
+
+    protected function encryptionKey(): string
+    {
+        $secret = sfConfig::get('sf_app_secret') ?: sfConfig::get('sf_secret_key') ?: 'fallback-not-secure';
+        return hash('sha256', (string) $secret, true);
+    }
 }

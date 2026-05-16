@@ -459,6 +459,9 @@
         <div class="card mb-4">
             <div class="card-header bg-success text-white"><h6 class="mb-0"><i class="fas fa-file-export me-2"></i><?php echo __('Research Output'); ?></h6></div>
             <div class="list-group list-group-flush">
+                <a href="/index.php/research/studio/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
+                    <i class="fas fa-flask me-2 text-primary"></i><?php echo __('Studio (AI artefacts)'); ?>
+                </a>
                 <a href="/index.php/research/ro-crate/<?php echo $project->id; ?>" class="list-group-item list-group-item-action">
                     <i class="fas fa-box me-2 text-primary"></i><?php echo __('RO-Crate Package'); ?>
                 </a>

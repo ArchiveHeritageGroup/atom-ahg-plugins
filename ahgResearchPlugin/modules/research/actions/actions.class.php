@@ -863,6 +863,64 @@ class researchActions extends AhgController
 	}
 
     // =========================================================================
+    // §2.1 - Per-record citation manager export (RIS / BibTeX / EndNote / APA / MLA / Chicago)
+    // =========================================================================
+
+    public function executeCiteExport($request)
+    {
+        $slug = $request->getParameter('slug');
+        $format = strtolower($request->getParameter('format'));
+
+        if (!in_array($format, array_keys(CitationService::FORMATS), true)) {
+            $this->forward404("Unknown citation format: {$format}");
+        }
+
+        $object = DB::table('slug')->where('slug', $slug)->first();
+        if (!$object) {
+            $this->forward404('Record not found');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CitationService.php';
+        $service = new CitationService();
+
+        try {
+            $export = $service->export((int) $object->object_id, $format);
+        } catch (\Throwable $e) {
+            $this->forward404('Citation export failed: ' . $e->getMessage());
+        }
+
+        // Log the export for analytics (§2.2)
+        $researcherId = null;
+        if ($this->getUser()->isAuthenticated()) {
+            $userId = $this->getUser()->getAttribute('user_id');
+            $r = $this->service->getResearcherByUserId($userId);
+            if ($r) {
+                $researcherId = $r->id;
+            }
+        }
+        if ($researcherId) {
+            try {
+                DB::table('research_activity_log')->insert([
+                    'researcher_id' => $researcherId,
+                    'activity_type' => 'cite_export',
+                    'entity_type'   => 'information_object',
+                    'entity_id'     => (int) $object->object_id,
+                    'entity_title'  => $slug,
+                    'details'       => json_encode(['format' => $format]),
+                    'created_at'    => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\Throwable $e) {
+                // non-fatal
+            }
+        }
+
+        $this->getResponse()->setContentType($export['mime']);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $export['filename'] . '"');
+        $this->getResponse()->setContent($export['body']);
+        return sfView::NONE;
+    }
+
+    // =========================================================================
     // PUBLIC REGISTRATION (No login required)
     // =========================================================================
 
@@ -8118,6 +8176,614 @@ class researchActions extends AhgController
             ->toArray();
 
         $this->setTemplate('batchReturn');
+    }
+
+    // =========================================================================
+    // §1.1 - §1.3 STUDIO (grounded AI artefact generator)
+    // =========================================================================
+
+    /**
+     * GET /research/studio/:projectId - list artefacts + show generator form.
+     */
+    public function executeStudio($request)
+    {
+        $this->requireLogin();
+        $projectId = (int) $request->getParameter('projectId');
+        $this->project = $this->loadProjectForUser($projectId);
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchStudioService.php';
+        $svc = new ResearchStudioService();
+
+        $this->artefacts   = $svc->listForProject($projectId);
+        $this->sourcePool  = $svc->sourcePool($projectId);
+        $this->outputTypes = ResearchStudioService::OUTPUT_TYPES;
+    }
+
+    /**
+     * POST /research/studio/:projectId/generate
+     */
+    public function executeStudioGenerate($request)
+    {
+        $this->requireLogin();
+        $projectId = (int) $request->getParameter('projectId');
+        $project = $this->loadProjectForUser($projectId);
+
+        if (!$request->isMethod('post')) {
+            $this->redirect(url_for(['module' => 'research', 'action' => 'studio', 'projectId' => $projectId]));
+        }
+
+        $sources    = array_filter(array_map('intval', (array) $request->getParameter('source_ids', [])));
+        $outputType = (string) $request->getParameter('output_type');
+
+        if (empty($sources)) {
+            $this->getUser()->setFlash('error', 'Please select at least one source.');
+            $this->redirect(url_for(['module' => 'research', 'action' => 'studio', 'projectId' => $projectId]));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchStudioService.php';
+        $svc = new ResearchStudioService();
+
+        $researcherId = null;
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if ($r) {
+            $researcherId = $r->id;
+        }
+
+        try {
+            $artefactId = $svc->generate($projectId, $sources, $outputType, [], $researcherId);
+            $this->getUser()->setFlash('success', 'Artefact generated successfully.');
+            $this->redirect(url_for(['module' => 'research', 'action' => 'studioShow', 'projectId' => $projectId, 'artefactId' => $artefactId]));
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', 'Generation failed: ' . $e->getMessage());
+            $this->redirect(url_for(['module' => 'research', 'action' => 'studio', 'projectId' => $projectId]));
+        }
+    }
+
+    /**
+     * GET /research/studio/:projectId/artefact/:artefactId
+     */
+    public function executeStudioShow($request)
+    {
+        $this->requireLogin();
+        $projectId  = (int) $request->getParameter('projectId');
+        $artefactId = (int) $request->getParameter('artefactId');
+        $this->project = $this->loadProjectForUser($projectId);
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchStudioService.php';
+        $svc = new ResearchStudioService();
+        $this->artefact = $svc->get($artefactId);
+
+        if (!$this->artefact || (int) $this->artefact->project_id !== $projectId) {
+            $this->forward404('Artefact not found');
+        }
+
+        $this->citations = $this->artefact->citations ? (json_decode($this->artefact->citations, true) ?: []) : [];
+    }
+
+    /**
+     * GET /research/studio/:projectId/artefact/:artefactId/download - .xlsx for spreadsheet artefacts
+     */
+    public function executeStudioDownload($request)
+    {
+        $this->requireLogin();
+        $projectId  = (int) $request->getParameter('projectId');
+        $artefactId = (int) $request->getParameter('artefactId');
+        $this->loadProjectForUser($projectId);
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchStudioService.php';
+        $svc = new ResearchStudioService();
+        $artefact = $svc->get($artefactId);
+
+        if (!$artefact || (int) $artefact->project_id !== $projectId) {
+            $this->forward404('Artefact not found');
+        }
+
+        if ($artefact->output_type === 'spreadsheet' && $artefact->xlsx_path && is_file($artefact->xlsx_path)) {
+            $filename = 'studio-' . $artefactId . '.xlsx';
+            $this->getResponse()->setContentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            $this->getResponse()->setContent(file_get_contents($artefact->xlsx_path));
+            return sfView::NONE;
+        }
+
+        if ($artefact->output_type === 'audio' && $artefact->audio_url) {
+            $this->redirect($artefact->audio_url);
+        }
+
+        $this->forward404('No downloadable file for this artefact');
+    }
+
+    /**
+     * POST /research/studio/:projectId/artefact/:artefactId/delete
+     */
+    public function executeStudioDelete($request)
+    {
+        $this->requireLogin();
+        if (!$request->isMethod('post')) {
+            $this->forward404('POST required');
+        }
+        $projectId  = (int) $request->getParameter('projectId');
+        $artefactId = (int) $request->getParameter('artefactId');
+        $this->loadProjectForUser($projectId);
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchStudioService.php';
+        $svc = new ResearchStudioService();
+        $artefact = $svc->get($artefactId);
+        if ($artefact && (int) $artefact->project_id === $projectId) {
+            $svc->delete($artefactId);
+            $this->getUser()->setFlash('success', 'Artefact deleted.');
+        }
+        $this->redirect(url_for(['module' => 'research', 'action' => 'studio', 'projectId' => $projectId]));
+    }
+
+    /**
+     * Helper: load a project the current user can access (owner or collaborator).
+     */
+    protected function loadProjectForUser(int $projectId): object
+    {
+        $project = DB::table('research_project')->where('id', $projectId)->first();
+        if (!$project) {
+            $this->forward404('Project not found');
+        }
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        $ownerId = $r ? $r->id : null;
+        if ($project->owner_id == $ownerId) {
+            return $project;
+        }
+        // Check collaborator membership
+        $collab = DB::table('research_project_collaborator')
+            ->where('project_id', $projectId)
+            ->where('researcher_id', $ownerId ?? 0)
+            ->where('status', 'accepted')
+            ->first();
+        if (!$collab && $project->visibility !== 'public') {
+            $this->forward404('You do not have access to this project');
+        }
+        return $project;
+    }
+
+    protected function requireLogin(): void
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('@research_register');
+        }
+    }
+
+    // =========================================================================
+    // §1.5 NOTEBOOKS
+    // =========================================================================
+
+    public function executeNotebooks($request)
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->forward404('Researcher profile required');
+        }
+        $this->researcher = $r;
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/NotebookService.php';
+        $svc = new NotebookService();
+
+        if ($request->isMethod('post')) {
+            $title = trim((string) $request->getParameter('title'));
+            if ($title !== '') {
+                $svc->create((int) $r->id, [
+                    'title'   => $title,
+                    'summary' => trim((string) $request->getParameter('summary')),
+                ]);
+                $this->getUser()->setFlash('success', 'Notebook created.');
+                $this->redirect(url_for(['module' => 'research', 'action' => 'notebooks']));
+            }
+            $this->getUser()->setFlash('error', 'Title is required.');
+        }
+
+        $this->notebooks = $svc->listForResearcher((int) $r->id);
+    }
+
+    public function executeNotebookShow($request)
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->forward404('Researcher profile required');
+        }
+        $id = (int) $request->getParameter('id');
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/NotebookService.php';
+        $svc = new NotebookService();
+
+        $notebook = $svc->get($id);
+        if (!$notebook || $notebook->researcher_id != $r->id) {
+            $this->forward404('Notebook not found');
+        }
+
+        if ($request->isMethod('post')) {
+            $action = (string) $request->getParameter('form_action');
+            if ($action === 'add_item') {
+                $svc->addItem($id, [
+                    'item_type'        => $request->getParameter('item_type', 'note'),
+                    'title'            => trim((string) $request->getParameter('item_title')),
+                    'body'             => trim((string) $request->getParameter('item_body')),
+                    'source_object_id' => $request->getParameter('source_object_id') ?: null,
+                    'pinned'           => $request->getParameter('pinned') ? 1 : 0,
+                ]);
+                // Activity log
+                try {
+                    DB::table('research_activity_log')->insert([
+                        'researcher_id' => (int) $r->id,
+                        'activity_type' => 'notebook_item_added',
+                        'entity_type'   => 'research_notebook',
+                        'entity_id'     => $id,
+                        'created_at'    => date('Y-m-d H:i:s'),
+                    ]);
+                } catch (\Throwable $e) { /* non-fatal */ }
+                $this->getUser()->setFlash('success', 'Item added.');
+            } elseif ($action === 'remove_item') {
+                $svc->removeItem((int) $request->getParameter('item_id'));
+                $this->getUser()->setFlash('success', 'Item removed.');
+            } elseif ($action === 'update_meta') {
+                $svc->update($id, [
+                    'title'   => trim((string) $request->getParameter('title')) ?: $notebook->title,
+                    'summary' => trim((string) $request->getParameter('summary')),
+                ]);
+                $this->getUser()->setFlash('success', 'Notebook updated.');
+            }
+            $this->redirect(url_for(['module' => 'research', 'action' => 'notebookShow', 'id' => $id]));
+        }
+
+        $this->notebook = $notebook;
+        $this->items    = $svc->getItems($id);
+    }
+
+    public function executeNotebookDelete($request)
+    {
+        $this->requireLogin();
+        if (!$request->isMethod('post')) {
+            $this->forward404('POST required');
+        }
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        $id = (int) $request->getParameter('id');
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/NotebookService.php';
+        $svc = new NotebookService();
+        $notebook = $svc->get($id);
+        if ($notebook && $r && $notebook->researcher_id == $r->id) {
+            $svc->delete($id);
+            $this->getUser()->setFlash('success', 'Notebook deleted.');
+        }
+        $this->redirect(url_for(['module' => 'research', 'action' => 'notebooks']));
+    }
+
+    public function executeNotebookPromote($request)
+    {
+        $this->requireLogin();
+        if (!$request->isMethod('post')) {
+            $this->forward404('POST required');
+        }
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->forward404('Researcher required');
+        }
+        $id = (int) $request->getParameter('id');
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/NotebookService.php';
+        $svc = new NotebookService();
+        try {
+            $projectId = $svc->promoteToProject($id, (int) $r->id);
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', 'Promote failed: ' . $e->getMessage());
+            $this->redirect(url_for(['module' => 'research', 'action' => 'notebookShow', 'id' => $id]));
+        }
+        if ($projectId) {
+            $this->getUser()->setFlash('success', 'Notebook promoted to project.');
+            $this->redirect(url_for(['module' => 'research', 'action' => 'viewProject', 'id' => $projectId]));
+        }
+        $this->getUser()->setFlash('error', 'Could not promote this notebook.');
+        $this->redirect(url_for(['module' => 'research', 'action' => 'notebookShow', 'id' => $id]));
+    }
+
+    // =========================================================================
+    // §1.6 CROSS-FONDS REASONING QUERY
+    // =========================================================================
+
+    public function executeCrossFondsQuery($request)
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CrossFondsQueryService.php';
+        $svc = new CrossFondsQueryService();
+
+        $this->fonds = $svc->availableFonds();
+        $this->q     = trim((string) $request->getParameter('q'));
+        $this->selectedFondsIds = array_filter(array_map('intval', (array) $request->getParameter('fonds', [])));
+        $this->expand = (bool) $request->getParameter('expand', false);
+        $this->results = null;
+
+        if ($this->q !== '' && !empty($this->selectedFondsIds)) {
+            $this->results = $svc->query(
+                $this->q,
+                $this->selectedFondsIds,
+                $r ? (int) $r->id : null,
+                ['expand' => $this->expand]
+            );
+        }
+    }
+
+    // =========================================================================
+    // §2.2 RESEARCH ANALYTICS DASHBOARD
+    // =========================================================================
+
+    public function executeAnalytics($request)
+    {
+        $this->requireLogin();
+        $from = (string) $request->getParameter('from');
+        $to   = (string) $request->getParameter('to');
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $from)) $from = null;
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $to))   $to   = null;
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchAnalyticsService.php';
+        $svc = new ResearchAnalyticsService();
+        $this->dashboard = $svc->dashboard($from, $to);
+    }
+
+    // =========================================================================
+    // §2.3 REAL-TIME COLLABORATION (polling)
+    // =========================================================================
+
+    /** Helper: load CollaborationRealtimeService + the researcher id. */
+    protected function collabSetup(): array
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->forward404('Researcher profile required');
+        }
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/CollaborationRealtimeService.php';
+        return [new CollaborationRealtimeService(), (int) $r->id];
+    }
+
+    protected function jsonResponse(array $payload): string
+    {
+        $this->getResponse()->setContentType('application/json');
+        return $this->renderText(json_encode($payload));
+    }
+
+    public function executeCollabPanel($request)
+    {
+        $this->requireLogin();
+        $projectId = (int) $request->getParameter('projectId');
+        $this->project = $this->loadProjectForUser($projectId);
+    }
+
+    public function executeCollabJoin($request)
+    {
+        [$svc, $researcherId] = $this->collabSetup();
+        $projectId = (int) $request->getParameter('projectId');
+        $this->loadProjectForUser($projectId);
+        $payload = json_decode((string) $request->getContent(), true) ?: [];
+        $result = $svc->join($projectId, $researcherId, $payload['cursor_target'] ?? null);
+        return $this->jsonResponse(['ok' => true, 'presence' => $result]);
+    }
+
+    public function executeCollabPoll($request)
+    {
+        [$svc, $researcherId] = $this->collabSetup();
+        $projectId = (int) $request->getParameter('projectId');
+        $this->loadProjectForUser($projectId);
+        $payload = json_decode((string) $request->getContent(), true) ?: [];
+        $since   = (int) ($payload['since'] ?? $request->getParameter('since', 0));
+        $cursor  = $payload['cursor_target'] ?? null;
+        // Heartbeat as a side-effect of polling
+        $svc->join($projectId, $researcherId, $cursor);
+        $data = $svc->poll($projectId, $since);
+        $data['ok'] = true;
+        return $this->jsonResponse($data);
+    }
+
+    public function executeCollabComment($request)
+    {
+        [$svc, $researcherId] = $this->collabSetup();
+        $projectId = (int) $request->getParameter('projectId');
+        $this->loadProjectForUser($projectId);
+        $payload = json_decode((string) $request->getContent(), true) ?: [];
+        $body = (string) ($payload['body'] ?? '');
+        if (trim($body) === '') {
+            return $this->jsonResponse(['ok' => false, 'error' => 'Body required']);
+        }
+        $parentId = isset($payload['parent_id']) ? (int) $payload['parent_id'] : null;
+        $id = $svc->comment($projectId, $researcherId, $body, $parentId);
+        return $this->jsonResponse(['ok' => true, 'id' => $id]);
+    }
+
+    public function executeCollabCommentResolve($request)
+    {
+        [$svc, $researcherId] = $this->collabSetup();
+        $projectId  = (int) $request->getParameter('projectId');
+        $commentId  = (int) $request->getParameter('commentId');
+        $this->loadProjectForUser($projectId);
+        $svc->resolveComment($commentId, $researcherId);
+        return $this->jsonResponse(['ok' => true]);
+    }
+
+    // =========================================================================
+    // §2.4 ORCID Works push / pull (extends existing OrcidService)
+    // =========================================================================
+
+    public function executeOrcidWorks($request)
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->forward404('Researcher required');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $svc = new OrcidService();
+
+        $this->link    = $svc->getLink((int) $r->id);
+        $this->config_ok = $svc->isConfigured();
+        $this->works   = [];
+        $this->error   = null;
+
+        if ($request->isMethod('post')) {
+            $action = (string) $request->getParameter('form_action');
+            if ($action === 'pull') {
+                try {
+                    $this->works = $svc->pullWorks((int) $r->id);
+                    $this->getUser()->setFlash('success', 'Pulled ' . count($this->works) . ' works from ORCID.');
+                } catch (\Throwable $e) {
+                    $this->error = $e->getMessage();
+                }
+            } elseif ($action === 'unlink') {
+                $svc->unlink((int) $r->id);
+                $this->getUser()->setFlash('success', 'ORCID link removed.');
+                $this->redirect(url_for(['module' => 'research', 'action' => 'orcidWorks']));
+            }
+        } elseif ($this->link) {
+            // Auto-pull on GET if we have a link (cached behavior - small list)
+            try {
+                $this->works = $svc->pullWorks((int) $r->id);
+            } catch (\Throwable $e) {
+                $this->error = $e->getMessage();
+            }
+        }
+    }
+
+    // =========================================================================
+    // §2.5 ResearcherView - lightweight JSON endpoint for external tools.
+    //
+    // The spec called for 5 new GraphQL queries. The existing ahgGraphQLPlugin
+    // is a heavyweight webonyx-based schema; per spec ("keep it simple - the
+    // Laravel side is a hand-rolled regex matcher") we ship a single JSON
+    // endpoint that returns the consolidated researcher view in one round trip.
+    // External tools (Zotero, Tropy, LMS) can poll this in lieu of GraphQL.
+    // =========================================================================
+
+    // =========================================================================
+    // §2.6 MOBILE / PWA SHELL
+    // =========================================================================
+
+    public function executeMobileHome($request)
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->forward404('Researcher profile required');
+        }
+        $this->researcher = $r;
+
+        $this->recentItems = DB::table('research_collection_item as rci')
+            ->join('research_collection as rc', 'rci.collection_id', '=', 'rc.id')
+            ->leftJoin('information_object_i18n as ioi', function ($join) {
+                $join->on('rci.object_id', '=', 'ioi.id')
+                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->leftJoin('slug', 'rci.object_id', '=', 'slug.object_id')
+            ->where('rc.researcher_id', $r->id)
+            ->select('rci.object_id', 'ioi.title', 'slug.slug', 'rc.name as collection_name', 'rci.created_at')
+            ->orderBy('rci.created_at', 'desc')
+            ->limit(50)
+            ->get()
+            ->all();
+
+        if ($request->isMethod('post') && $request->getParameter('quick_journal')) {
+            $body = trim((string) $request->getParameter('content'));
+            if ($body !== '') {
+                DB::table('research_journal_entry')->insert([
+                    'researcher_id'  => $r->id,
+                    'entry_date'     => date('Y-m-d'),
+                    'content'        => $body,
+                    'content_format' => 'text',
+                    'entry_type'     => 'manual',
+                    'created_at'     => date('Y-m-d H:i:s'),
+                    'updated_at'     => date('Y-m-d H:i:s'),
+                ]);
+                $this->getUser()->setFlash('success', 'Journal entry saved.');
+                $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
+            }
+        }
+    }
+
+    // =========================================================================
+    // §2.7 OFFLINE SYNC ENDPOINT
+    // =========================================================================
+
+    public function executeOfflineSync($request)
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->getResponse()->setStatusCode(403);
+            return $this->jsonResponse(['ok' => false, 'error' => 'Researcher profile required']);
+        }
+        if (!$request->isMethod('post')) {
+            $this->getResponse()->setStatusCode(405);
+            return $this->jsonResponse(['ok' => false, 'error' => 'POST required']);
+        }
+        $payload = json_decode((string) $request->getContent(), true);
+        if (!is_array($payload) || empty($payload['queue']) || !is_array($payload['queue'])) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'queue array required']);
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OfflineSyncService.php';
+        $svc = new OfflineSyncService();
+        $result = $svc->applyQueue((int) $r->id, $payload['queue']);
+        $result['ok'] = true;
+        return $this->jsonResponse($result);
+    }
+
+    public function executeResearcherView($request)
+    {
+        $researcherId = (int) $request->getParameter('researcherId');
+        $researcher = DB::table('research_researcher')->where('id', $researcherId)->first();
+        if (!$researcher) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->jsonResponse(['error' => 'Researcher not found']);
+        }
+
+        $projects = DB::table('research_project')
+            ->where('owner_id', $researcherId)
+            ->where('visibility', '!=', 'private')
+            ->select('id', 'title', 'description', 'project_type', 'status', 'visibility', 'created_at')
+            ->orderBy('id', 'desc')
+            ->limit(50)
+            ->get()
+            ->all();
+
+        $recentAnnotations = DB::table('research_annotation')
+            ->where('researcher_id', $researcherId)
+            ->whereIn('visibility', ['shared', 'public'])
+            ->select('id', 'project_id', 'object_id', 'annotation_type', 'title', 'content', 'visibility', 'created_at')
+            ->orderBy('id', 'desc')
+            ->limit(50)
+            ->get()
+            ->all();
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $orcid = new OrcidService();
+        $link  = $orcid->getLink($researcherId);
+        $orcidSummary = $link ? [
+            'orcid_id'         => $link->orcid_id,
+            'scope'            => $link->scope,
+            'expires_at'       => $link->expires_at,
+            'last_synced_at'   => $link->last_synced_at,
+            'last_works_count' => $link->last_works_count,
+        ] : null;
+
+        return $this->jsonResponse([
+            'researcher' => [
+                'id'         => (int) $researcher->id,
+                'first_name' => $researcher->first_name,
+                'last_name'  => $researcher->last_name,
+                'email'      => $researcher->email,
+            ],
+            'projects'           => $projects,
+            'recent_annotations' => $recentAnnotations,
+            'orcid_link'         => $orcidSummary,
+            'generated_at'       => date('c'),
+        ]);
     }
 
 }
