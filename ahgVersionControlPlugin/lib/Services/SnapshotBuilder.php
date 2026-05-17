@@ -107,8 +107,24 @@ class SnapshotBuilder
         $rows = DB::table('event')
             ->where('object_id', $objectId)
             ->orderBy('id')
-            ->get(['type_id', 'actor_id', 'start_date', 'end_date', 'start_time', 'end_time', 'source_culture']);
-        return array_map(fn ($row) => $this->normaliseRow((array) $row), $rows->all());
+            ->get(['id', 'type_id', 'actor_id', 'start_date', 'end_date', 'start_time', 'end_time', 'source_culture']);
+
+        $events = [];
+        foreach ($rows as $r) {
+            $eventId = (int) $r->id;
+            $i18n = DB::table('event_i18n')
+                ->where('id', $eventId)
+                ->orderBy('culture')
+                ->get(['culture', 'name', 'description', 'date'])
+                ->all();
+            $event = $this->normaliseRow((array) $r);
+            // Drop the surrogate id from the snapshot — event ids are re-issued on
+            // restore. Keep relative ordering via the array index.
+            unset($event['id']);
+            $event['i18n'] = array_map(fn ($x) => $this->normaliseRow((array) $x), $i18n);
+            $events[] = $event;
+        }
+        return $events;
     }
 
     /**
