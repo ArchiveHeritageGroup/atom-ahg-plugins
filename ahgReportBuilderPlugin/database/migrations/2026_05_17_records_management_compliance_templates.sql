@@ -1,11 +1,11 @@
--- ahgReportBuilderPlugin — GCIS RFB-001 compliance dashboard templates
+-- ahgReportBuilderPlugin — applicable records-management frameworks compliance dashboard templates
 -- Closes gap 4.1.1.14.e–h: audit reports, access logs, metadata integrity, retention/lifecycle compliance.
 -- 2026-05-17
 
 INSERT IGNORE INTO report_template (name, description, category, scope, structure, is_active) VALUES
-('GCIS Compliance: Audit Summary',
- 'Audit-trail summary mapping every action to user + timestamp + entity. GCIS clause 4.1.1.14.e (audit reports).',
- 'gcis_compliance',
+('Records Management Compliance: Audit Summary',
+ 'Audit-trail summary mapping every action to user + timestamp + entity. clause 4.1.1.14.e (audit reports).',
+ 'records_management_compliance',
  'system',
  JSON_OBJECT(
    'sections', JSON_ARRAY(
@@ -48,9 +48,9 @@ INSERT IGNORE INTO report_template (name, description, category, scope, structur
  ),
  1),
 
-('GCIS Compliance: Access Logs & User Activity',
+('Records Management Compliance: Access Logs & User Activity',
  'Detailed user activity tracking for clause 4.1.1.14.f. Combines share-link access, login events, view events.',
- 'gcis_compliance',
+ 'records_management_compliance',
  'system',
  JSON_OBJECT(
    'sections', JSON_ARRAY(
@@ -91,9 +91,9 @@ INSERT IGNORE INTO report_template (name, description, category, scope, structur
  ),
  1),
 
-('GCIS Compliance: Metadata Integrity',
+('Records Management Compliance: Metadata Integrity',
  'Metadata integrity verification per clause 4.1.1.14.g. Surfaces records with version history, missing-field counts, and version-restore activity.',
- 'gcis_compliance',
+ 'records_management_compliance',
  'system',
  JSON_OBJECT(
    'sections', JSON_ARRAY(
@@ -138,9 +138,9 @@ INSERT IGNORE INTO report_template (name, description, category, scope, structur
  ),
  1),
 
-('GCIS Compliance: Retention Status & Lifecycle',
+('Records Management Compliance: Retention Status & Lifecycle',
  'Retention status and lifecycle compliance per clause 4.1.1.14.h. Records with their schedules, time-until-disposal, and pending disposal-workflow stages.',
- 'gcis_compliance',
+ 'records_management_compliance',
  'system',
  JSON_OBJECT(
    'sections', JSON_ARRAY(
@@ -192,16 +192,16 @@ INSERT IGNORE INTO report_template (name, description, category, scope, structur
  ),
  1),
 
-('GCIS Compliance: Consolidated Quarterly Dashboard',
+('Records Management Compliance: Consolidated Quarterly Dashboard',
  'Single-page executive snapshot covering 4.1.1.14.e–h plus POPIA/MISS posture indicators. Run quarterly for the records management committee.',
- 'gcis_compliance',
+ 'records_management_compliance',
  'system',
  JSON_OBJECT(
    'sections', JSON_ARRAY(
      JSON_OBJECT(
        'title', 'Executive Summary',
        'section_type', 'narrative',
-       'content', '<p>This consolidated quarterly dashboard surfaces the four GCIS RFB-001 compliance pillars in one view: audit posture (4.1.1.14.e), user activity (4.1.1.14.f), metadata integrity (4.1.1.14.g), and lifecycle compliance (4.1.1.14.h). Designed for the records management committee, not the SOC.</p>',
+       'content', '<p>This consolidated quarterly dashboard surfaces the four applicable records-management frameworks compliance pillars in one view: audit posture (4.1.1.14.e), user activity (4.1.1.14.f), metadata integrity (4.1.1.14.g), and lifecycle compliance (4.1.1.14.h). Designed for the records management committee, not the SOC.</p>',
        'position', 0
      ),
      JSON_OBJECT(

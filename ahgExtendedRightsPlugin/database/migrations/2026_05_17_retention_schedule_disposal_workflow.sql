@@ -1,7 +1,9 @@
 -- ahgExtendedRightsPlugin — retention schedule + disposal workflow (2026-05-17)
 --
--- Closes GCIS RFB-001 gaps 4.1.1.8 (configure per File Plan) and 4.1.1.13.b
--- (controlled disposal workflows with audit logs).
+-- Records-management framework support: File-Plan-driven retention schedules
+-- with multi-stage disposal workflow (records officer → legal → executive)
+-- and full audit dual-write. Suitable for NARSSA, NARA, PRO Act (UK), ISO
+-- 15489, and equivalent national archival frameworks.
 --
 -- BASE ATOM IS NOT MODIFIED. All new tables use FKs to base AtoM tables
 -- for read-only referential integrity only.
@@ -10,11 +12,11 @@
 
 -- ------------------------------------------------------------------
 -- 1. retention_schedule — one row per File Plan record-series category.
---    GCIS supplies the File Plan; this table is the configurable form.
+--    Operators supply their organisation's File Plan codes via this table.
 -- ------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS retention_schedule (
     id                       INT NOT NULL AUTO_INCREMENT,
-    code                     VARCHAR(50)  NOT NULL COMMENT 'Operator-friendly identifier, e.g. GCIS-COMM-007',
+    code                     VARCHAR(50)  NOT NULL COMMENT 'Operator-friendly identifier from the organisation File Plan',
     title                    VARCHAR(255) NOT NULL COMMENT 'Human-readable label, e.g. Communications: Press Releases',
     description              TEXT         NULL,
     active_period_years      INT NOT NULL DEFAULT 5  COMMENT 'Years the record is operationally active',
@@ -100,9 +102,9 @@ CREATE TABLE IF NOT EXISTS disposal_action (
 -- 4. Seed example schedules so demo PSIS has something visible.
 -- ------------------------------------------------------------------
 INSERT IGNORE INTO retention_schedule (code, title, description, active_period_years, dormant_period_years, trigger_event, disposal_action, legal_basis, requires_legal_signoff, requires_executive_signoff, is_active) VALUES
-  ('GCIS-COMM-001', 'Press releases (general)',           'Routine media releases', 2, 3, 'creation_date', 'destroy',         'NARSSA Act 1996 §13(2)(a)', 0, 0, 1),
-  ('GCIS-COMM-002', 'Cabinet briefings',                  'Briefings prepared for Cabinet',   5, 25, 'creation_date', 'transfer_narssa', 'NARSSA Act 1996 §13(2)(d)', 1, 1, 1),
-  ('GCIS-CORP-001', 'Annual reports',                     'GCIS annual reports — permanent',  5,  0, 'creation_date', 'permanent',       'NARSSA Act 1996 §13(2)(c)', 0, 1, 1),
-  ('GCIS-CORP-002', 'Procurement records',                'Section 217 audit trail',          5,  7, 'fiscal_year_end', 'destroy',       'PFMA + NARSSA',             1, 0, 1),
-  ('GCIS-HR-001',   'Employee personnel files',           'Employee records',                 7, 30, 'employment_end',  'destroy',       'BCEA + POPIA',              1, 0, 1),
-  ('GCIS-LEG-001',  'Legal opinions / counsel records',   'Legal advice retained 25y',        5, 20, 'creation_date',   'review',        'NARSSA + Attorney-Client',   1, 1, 1);
+  ('COMM-001', 'Press releases (general)',           'Routine media releases', 2, 3, 'creation_date', 'destroy',         'NARSSA Act 1996 §13(2)(a)', 0, 0, 1),
+  ('COMM-002', 'Cabinet briefings',                  'Briefings prepared for Cabinet',   5, 25, 'creation_date', 'transfer_narssa', 'NARSSA Act 1996 §13(2)(d)', 1, 1, 1),
+  ('CORP-001', 'Annual reports',                     'Annual reports — permanent retention', 5,  0, 'creation_date', 'permanent',       'NARSSA Act 1996 §13(2)(c)', 0, 1, 1),
+  ('CORP-002', 'Procurement records',                'Section 217 audit trail',          5,  7, 'fiscal_year_end', 'destroy',       'PFMA + NARSSA',             1, 0, 1),
+  ('HR-001',   'Employee personnel files',           'Employee records',                 7, 30, 'employment_end',  'destroy',       'BCEA + POPIA',              1, 0, 1),
+  ('LEG-001',  'Legal opinions / counsel records',   'Legal advice retained 25y',        5, 20, 'creation_date',   'review',        'NARSSA + Attorney-Client',   1, 1, 1);
