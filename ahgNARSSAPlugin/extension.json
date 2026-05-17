@@ -1,0 +1,31 @@
+{
+    "name": "NARSSA Transfer (South Africa)",
+    "machine_name": "ahgNARSSAPlugin",
+    "version": "0.1.0",
+    "description": "South African National Archives and Records Service Act 1996 compliance — generates NARSSA-compliant transfer manifests (METS-EAD2002 XML + digital files + manifest.csv) for records reaching disposal-due via the ahgExtendedRightsPlugin disposal workflow.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "email": "johan@theahg.co.za",
+    "license": "proprietary",
+    "category": "compliance",
+    "keywords": ["south-africa", "narssa", "national-archives", "transfer", "compliance", "ead2002", "mets"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgExtendedRightsPlugin"
+    ],
+    "suggests": {
+        "ahgAuditTrailPlugin": "Dual-write of transfer events into the central audit feed",
+        "ahgSecurityClearancePlugin": "Mark transferred records as restricted-access at the receiving archive"
+    },
+    "tables": [
+        "narssa_transfer",
+        "narssa_transfer_item"
+    ],
+    "is_core": false,
+    "is_locked": false,
+    "load_order": 60
+}

@@ -36,28 +36,57 @@ class shareLinkActions extends sfActions
      */
     public function executeIssue(sfWebRequest $request): void
     {
-        $this->getResponse()->setContentType('application/json; charset=utf-8');
+        // Decide response format up-front: explicit Accept header wins; otherwise
+        // we look at the X-Requested-With header (XHR/fetch). Anything else is
+        // treated as a browser navigation and rendered as HTML.
+        $accept = (string) ($request->getHttpHeader('Accept') ?? '');
+        $xhr    = strtolower((string) ($request->getHttpHeader('X-Requested-With') ?? ''));
+        $wantsJson = (str_contains($accept, 'application/json') || $xhr === 'xmlhttprequest');
 
+        // ---------------------------------------------------------------------
+        // GET → render the issue form (browser path).  JSON callers don't GET.
+        // ---------------------------------------------------------------------
         if (!$request->isMethod('POST')) {
-            $this->renderJsonError('method_not_allowed', 'POST required', 405);
+            if ($wantsJson) {
+                $this->renderJsonError('method_not_allowed', 'POST required', 405);
+                return;
+            }
+            $this->renderIssueForm($request);
             return;
+        }
+
+        // ---------------------------------------------------------------------
+        // POST → perform the issue. Branch JSON vs HTML on the response.
+        // ---------------------------------------------------------------------
+        if ($wantsJson) {
+            $this->getResponse()->setContentType('application/json; charset=utf-8');
         }
 
         $user = $this->getUser();
         if (!$user || !$user->isAuthenticated()) {
-            $this->renderJsonError('not_authenticated', 'Authentication required', 401);
-            return;
+            if ($wantsJson) {
+                $this->renderJsonError('not_authenticated', 'Authentication required', 401);
+                return;
+            }
+            $this->redirect('@homepage');
         }
         $userId = (int) $user->getUserID();
         if ($userId <= 0) {
-            $this->renderJsonError('not_authenticated', 'No user id on session', 401);
-            return;
+            if ($wantsJson) {
+                $this->renderJsonError('not_authenticated', 'No user id on session', 401);
+                return;
+            }
+            $this->redirect('@homepage');
         }
 
         $ioId = (int) $request->getParameter('information_object_id');
         if ($ioId <= 0) {
-            $this->renderJsonError('invalid_request', 'information_object_id is required', 422);
-            return;
+            if ($wantsJson) {
+                $this->renderJsonError('invalid_request', 'information_object_id is required', 422);
+                return;
+            }
+            $this->getUser()->setFlash('share_link_error', 'information_object_id is required');
+            $this->redirect('@homepage');
         }
 
         $expiresAtParam = trim((string) $request->getParameter('expires_at'));
@@ -66,14 +95,22 @@ class shareLinkActions extends sfActions
             try {
                 $expiresAt = new \DateTimeImmutable($expiresAtParam);
             } catch (\Throwable $e) {
-                $this->renderJsonError('invalid_request', 'expires_at could not be parsed', 422);
+                if ($wantsJson) {
+                    $this->renderJsonError('invalid_request', 'expires_at could not be parsed', 422);
+                    return;
+                }
+                $this->renderIssueForm($request, 'Could not parse expires_at — please pick a valid date.');
                 return;
             }
         }
 
         $recipientEmail = trim((string) $request->getParameter('recipient_email')) ?: null;
         if ($recipientEmail !== null && !filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
-            $this->renderJsonError('invalid_request', 'recipient_email is not a valid email address', 422);
+            if ($wantsJson) {
+                $this->renderJsonError('invalid_request', 'recipient_email is not a valid email address', 422);
+                return;
+            }
+            $this->renderIssueForm($request, 'Recipient email is not a valid email address.');
             return;
         }
         $recipientNote = trim((string) $request->getParameter('recipient_note')) ?: null;
@@ -81,7 +118,11 @@ class shareLinkActions extends sfActions
         $maxAccess = null;
         if ($maxAccessRaw !== null && $maxAccessRaw !== '') {
             if (!is_numeric($maxAccessRaw) || (int) $maxAccessRaw < 1) {
-                $this->renderJsonError('invalid_request', 'max_access must be a positive integer', 422);
+                if ($wantsJson) {
+                    $this->renderJsonError('invalid_request', 'max_access must be a positive integer', 422);
+                    return;
+                }
+                $this->renderIssueForm($request, 'Max views must be a positive integer.');
                 return;
             }
             $maxAccess = (int) $maxAccessRaw;
@@ -119,27 +160,128 @@ class shareLinkActions extends sfActions
                 $absolute = $request->getUriPrefix() . '/share/' . $result['token'];
             }
 
-            $this->renderJson([
-                'ok'         => true,
-                'token'      => $result['token'],
-                'token_id'   => $result['token_id'],
-                'expires_at' => $result['expires_at'],
-                'public_url' => $absolute,
-            ], 201);
+            if ($wantsJson) {
+                $this->renderJson([
+                    'ok'         => true,
+                    'token'      => $result['token'],
+                    'token_id'   => $result['token_id'],
+                    'expires_at' => $result['expires_at'],
+                    'public_url' => $absolute,
+                ], 201);
+                return;
+            }
+
+            // Browser path: render the success template with the new token.
+            [$recordTitle, $recordSlug] = $this->resolveRecordTitle($ioId);
+            $this->publicUrl           = $absolute;
+            $this->token               = $result['token'];
+            $this->tokenId             = (int) $result['token_id'];
+            $this->expiresAt           = $result['expires_at'];
+            $this->informationObjectId = $ioId;
+            $this->recordTitle         = $recordTitle;
+            $this->recordSlug          = $recordSlug;
+            $this->recipientEmail      = $recipientEmail;
+            $this->maxAccess           = $maxAccess;
+            $this->setTemplate('issue');
             return;
         } catch (\AhgShareLink\Services\NotAuthenticatedException $e) {
-            $this->renderJsonError('not_authenticated', $e->getMessage(), 401);
+            if ($wantsJson) { $this->renderJsonError('not_authenticated', $e->getMessage(), 401); return; }
+            $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\PermissionDeniedException $e) {
-            $this->renderJsonError('permission_denied', $e->getMessage(), 403);
+            if ($wantsJson) { $this->renderJsonError('permission_denied', $e->getMessage(), 403); return; }
+            $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\InsufficientClearanceException $e) {
-            $this->renderJsonError('insufficient_clearance', $e->getMessage(), 403);
+            if ($wantsJson) { $this->renderJsonError('insufficient_clearance', $e->getMessage(), 403); return; }
+            $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\ExpiryCapExceededException $e) {
-            $this->renderJsonError('expiry_cap_exceeded', $e->getMessage(), 422);
+            if ($wantsJson) { $this->renderJsonError('expiry_cap_exceeded', $e->getMessage(), 422); return; }
+            $this->renderIssueForm($request, $e->getMessage());
         } catch (\AhgShareLink\Services\InvalidRequestException $e) {
-            $this->renderJsonError('invalid_request', $e->getMessage(), 422);
+            if ($wantsJson) { $this->renderJsonError('invalid_request', $e->getMessage(), 422); return; }
+            $this->renderIssueForm($request, $e->getMessage());
         } catch (\Throwable $e) {
             error_log('shareLink/issue unexpected: ' . $e->getMessage());
-            $this->renderJsonError('server_error', 'An unexpected error occurred', 500);
+            if ($wantsJson) { $this->renderJsonError('server_error', 'An unexpected error occurred', 500); return; }
+            $this->renderIssueForm($request, 'An unexpected error occurred. Please try again.');
+        }
+    }
+
+    /**
+     * Render the issue form (newSuccess.php) with optional error message.
+     * Used for GET (initial render) and for POST validation/exception failures
+     * in the HTML response path.
+     */
+    private function renderIssueForm(sfWebRequest $request, ?string $errorMessage = null): void
+    {
+        $ioId = (int) $request->getParameter('information_object_id');
+        if ($ioId <= 0) {
+            $this->forward404('information_object_id is required');
+        }
+
+        $libDir = realpath(__DIR__ . '/../../../lib/Services');
+        require_once $libDir . '/IssueService.php';
+
+        // Settings — read with the same defaults the IssueService uses.
+        $defaultExpiry = $this->readShareLinkSetting('share_link.default_expiry_days', \AhgShareLink\Services\IssueService::DEFAULT_EXPIRY_DAYS);
+        $maxExpiry     = $this->readShareLinkSetting('share_link.max_expiry_days',     \AhgShareLink\Services\IssueService::DEFAULT_MAX_EXPIRY_DAYS);
+
+        // Classification snapshot (display-only — real gating in IssueService).
+        $classificationLevel = null;
+        try {
+            require_once $libDir . '/ClearanceCheck.php';
+            $classificationLevel = (new \AhgShareLink\Services\ClearanceCheck())->resolveEntityClassificationLevel($ioId);
+        } catch (\Throwable $e) {
+            // Clearance plugin not installed — ignore.
+        }
+
+        [$recordTitle, $recordSlug] = $this->resolveRecordTitle($ioId);
+
+        $this->informationObjectId = $ioId;
+        $this->recordTitle         = $recordTitle ?: 'Record #' . $ioId;
+        $this->recordSlug          = $recordSlug;
+        $this->defaultExpiryDays   = (int) $defaultExpiry;
+        $this->maxExpiryDays       = (int) $maxExpiry;
+        $this->classificationLevel = $classificationLevel;
+        $this->errorMessage        = $errorMessage;
+        $this->setTemplate('new');
+    }
+
+    /**
+     * Resolve a record's display title + slug for breadcrumbs and back-links.
+     *
+     * @return array{0: string, 1: ?string} [title, slug]
+     */
+    private function resolveRecordTitle(int $ioId): array
+    {
+        $culture = class_exists('\\AtomExtensions\\Helpers\\CultureHelper')
+            ? \AtomExtensions\Helpers\CultureHelper::getCulture()
+            : 'en';
+        $row = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->leftJoin('information_object_i18n as ioi', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+            })
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->where('io.id', $ioId)
+            ->select('ioi.title', 'slug.slug')
+            ->first();
+        return [
+            $row->title ?? 'Untitled record',
+            $row->slug  ?? null,
+        ];
+    }
+
+    /**
+     * Read an ahg_settings value with a default fallback (matches IssueService).
+     */
+    private function readShareLinkSetting(string $key, int $fallback): int
+    {
+        try {
+            $row = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                ->where('setting_key', $key)
+                ->first();
+            return $row && is_numeric($row->setting_value) ? (int) $row->setting_value : $fallback;
+        } catch (\Throwable $e) {
+            return $fallback;
         }
     }
 
