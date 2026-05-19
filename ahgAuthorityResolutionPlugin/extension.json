@@ -1,0 +1,50 @@
+{
+    "name": "AHG Authority Resolution Engine",
+    "machine_name": "ahgAuthorityResolutionPlugin",
+    "version": "0.1.0",
+    "description": "Evidence-based authority resolution for persons, places, and organisations. Replaces name-only matching with an archivist-driven workflow that surfaces neighbourhood-context evidence, ranked candidates, and provenance-tracked decisions. Provenance writes to Fuseki as RDF-Star.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "authority",
+    "keywords": [
+        "authority",
+        "resolution",
+        "ner",
+        "entity-linking",
+        "disambiguation",
+        "provenance",
+        "fuseki",
+        "rdf-star",
+        "isaar-cpf",
+        "rico",
+        "viaf",
+        "wikidata",
+        "geonames"
+    ],
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgActorManagePlugin",
+        "ahgAIPlugin"
+    ],
+    "optional": {
+        "extensions": [
+            "ahgAuthorityPlugin",
+            "ahgRicExplorerPlugin",
+            "ahgTermTaxonomyPlugin"
+        ]
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "ahg_mention",
+        "ahg_mention_context",
+        "ahg_mention_candidate",
+        "ahg_mention_decision",
+        "ahg_mention_park",
+        "ahg_authority_lookup_cache"
+    ]
+}

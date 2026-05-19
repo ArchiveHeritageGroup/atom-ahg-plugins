@@ -185,7 +185,7 @@ class ProcessPendingCommand extends BaseCommand
             return ['success' => false, 'error' => 'Invalid API response'];
         }
 
-        $this->storeEntities($io->id, $data['entities']);
+        $this->storeEntities($io->id, $data['entities'], $text);
 
         $entityCount = 0;
         foreach ($data['entities'] as $values) {
@@ -292,7 +292,7 @@ class ProcessPendingCommand extends BaseCommand
         return $settings;
     }
 
-    private function storeEntities(int $objectId, array $entities): void
+    private function storeEntities(int $objectId, array $entities, ?string $sourceText = null): void
     {
         $totalCount = 0;
         foreach ($entities as $values) {
@@ -314,7 +314,7 @@ class ProcessPendingCommand extends BaseCommand
                 continue;
             }
             foreach ($values as $value) {
-                DB::table('ahg_ner_entity')->insert([
+                $nerEntityId = (int) DB::table('ahg_ner_entity')->insertGetId([
                     'extraction_id' => $extractionId,
                     'object_id' => $objectId,
                     'entity_type' => $type,
@@ -323,7 +323,32 @@ class ProcessPendingCommand extends BaseCommand
                     'status' => 'pending',
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
+
+                $this->maybePromoteToMention($nerEntityId, $sourceText);
             }
+        }
+    }
+
+    /**
+     * Hook: forward newly-inserted ner_entity rows to the authority-resolution
+     * engine for promotion to a workflow mention with neighbourhood context.
+     * Safe no-op when ahgAuthorityResolutionPlugin isn't installed.
+     */
+    private function maybePromoteToMention(int $nerEntityId, ?string $sourceText): void
+    {
+        if ($nerEntityId <= 0) {
+            return;
+        }
+        if (!class_exists(\AtomFramework\Services\AuthorityResolution\PromoteToMentionService::class)) {
+            return;
+        }
+        try {
+            $promoter = new \AtomFramework\Services\AuthorityResolution\PromoteToMentionService(
+                new \AtomFramework\Services\AuthorityResolution\ContextDerivationService()
+            );
+            $promoter->promote($nerEntityId, $sourceText);
+        } catch (\Throwable $e) {
+            error_log('ProcessPendingCommand::maybePromoteToMention failed (ner_entity_id=' . $nerEntityId . '): ' . $e->getMessage());
         }
     }
 }
