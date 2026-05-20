@@ -1,3 +1,9 @@
+<?php
+  // When the Authority Resolution Engine is installed, the per-object "Review"
+  // button feeds into the evidence-based authority-resolution queue (matching
+  // Heratio). Without it, fall back to the legacy in-page entity modal.
+  $arEnabled = in_array('authorityResolution', sfConfig::get('sf_enabled_modules', []), true);
+?>
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1><i class="fas fa-brain me-2"></i>NER Review Dashboard</h1>
@@ -70,9 +76,16 @@
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
+                                    <?php if ($arEnabled): ?>
+                                    <a href="<?php echo url_for('@ar_auth_res_index?object_id=' . (int) $obj->id); ?>"
+                                       class="btn btn-primary" title="Review pending entities (authority resolution)">
+                                        <i class="fas fa-eye me-1"></i>Review
+                                    </a>
+                                    <?php else: ?>
                                     <button class="btn btn-primary" onclick="reviewObject(<?php echo $obj->id; ?>)" title="Review pending entities">
                                         <i class="fas fa-eye me-1"></i>Review
                                     </button>
+                                    <?php endif; ?>
                                     <?php if ($hasPdf && $approvedCount > 0): ?>
                                         <a href="<?php echo url_for(['module' => 'ai', 'action' => 'pdfOverlay', 'id' => $obj->id]); ?>"
                                            class="btn btn-outline-info" title="View PDF with entity highlights">

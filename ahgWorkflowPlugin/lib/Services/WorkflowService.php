@@ -387,6 +387,14 @@ class WorkflowService
                     ->where('io.id', $task->object_id)
                     ->select('io.id', 'io.identifier', 'ioi.title', 'slug.slug')
                     ->first();
+            } elseif ($task->object_type === 'ahg_mention') {
+                // Authority-resolution mention: resolve the entity value as the
+                // title. No slug - viewTaskSuccess links to the review screen.
+                $task->object = DB::table('ahg_mention as m')
+                    ->join('ahg_ner_entity as n', 'n.id', '=', 'm.ner_entity_id')
+                    ->where('m.id', $task->object_id)
+                    ->select('m.id', 'm.entity_type', 'n.entity_value as title')
+                    ->first();
             }
 
             // Get user info
@@ -438,7 +446,7 @@ class WorkflowService
               ->orWhere('s.required_clearance_level', '<=', $userInfo['clearance_level']);
         });
 
-        return $query->select(
+        $tasks = $query->select(
             't.*',
             'w.name as workflow_name',
             's.name as step_name',
@@ -449,6 +457,8 @@ class WorkflowService
             ->orderBy('t.created_at')
             ->get()
             ->toArray();
+
+        return $this->decorateMentionTitles($tasks);
     }
 
     /**
@@ -470,7 +480,7 @@ class WorkflowService
             $query->whereNotIn('t.status', ['approved', 'rejected', 'cancelled']);
         }
 
-        return $query->select(
+        $tasks = $query->select(
             't.*',
             'w.name as workflow_name',
             's.name as step_name',
@@ -482,6 +492,8 @@ class WorkflowService
             ->orderBy('t.created_at')
             ->get()
             ->toArray();
+
+        return $this->decorateMentionTitles($tasks);
     }
 
     /**
@@ -823,16 +835,7 @@ class WorkflowService
      */
     protected function sendCompletionNotification(int $userId, int $objectId, string $objectType): void
     {
-        $objectTitle = "Object #{$objectId}";
-        if ($objectType === 'information_object') {
-            $obj = DB::table('information_object_i18n')
-                ->where('id', $objectId)
-                ->where('culture', \AtomExtensions\Helpers\CultureHelper::getCulture())
-                ->value('title');
-            if ($obj) {
-                $objectTitle = $obj;
-            }
-        }
+        $objectTitle = $this->getObjectTitle($objectId, $objectType);
 
         $this->queueNotification(
             $userId,
@@ -959,7 +962,7 @@ class WorkflowService
      */
     public function getRecentActivity(int $limit = 20): array
     {
-        return DB::table('ahg_workflow_history as h')
+        $rows = DB::table('ahg_workflow_history as h')
             ->leftJoin('user as u', 'h.performed_by', '=', 'u.id')
             ->leftJoin('ahg_workflow as w', 'h.workflow_id', '=', 'w.id')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
@@ -970,6 +973,8 @@ class WorkflowService
             ->limit($limit)
             ->get()
             ->toArray();
+
+        return $this->decorateMentionTitles($rows);
     }
 
     // =========================================================================
@@ -1179,8 +1184,38 @@ class WorkflowService
             if ($title) {
                 return $title;
             }
+        } elseif ($objectType === 'ahg_mention') {
+            // Authority-resolution mention: the task title is the NER entity value.
+            $value = DB::table('ahg_mention as m')
+                ->join('ahg_ner_entity as n', 'n.id', '=', 'm.ner_entity_id')
+                ->where('m.id', $objectId)
+                ->value('n.entity_value');
+            if ($value) {
+                return $value;
+            }
         }
         return "Object #{$objectId}";
+    }
+
+    /**
+     * Backfill object_title on a task / history list for authority-resolution
+     * mention rows. The list queries leftJoin information_object_i18n on
+     * object_id, which is the wrong table for object_type = 'ahg_mention'
+     * (and the id spaces can collide), so the title is recomputed here.
+     *
+     * @param array $rows array of task/history stdClass rows (each carrying
+     *                    object_type + object_id)
+     * @return array the same rows, mutated in place
+     */
+    protected function decorateMentionTitles(array $rows): array
+    {
+        foreach ($rows as $row) {
+            if (($row->object_type ?? '') === 'ahg_mention') {
+                $row->object_title = $this->getObjectTitle((int) $row->object_id, 'ahg_mention');
+            }
+        }
+
+        return $rows;
     }
 
     // =========================================================================
@@ -1435,6 +1470,8 @@ class WorkflowService
             ->get()
             ->toArray();
 
+        $tasks = $this->decorateMentionTitles($tasks);
+
         // Attach SLA data
         require_once __DIR__ . '/WorkflowSlaService.php';
         $slaService = new WorkflowSlaService();
@@ -1492,6 +1529,8 @@ class WorkflowService
             ->orderBy('t.due_date')
             ->get()
             ->toArray();
+
+        $tasks = $this->decorateMentionTitles($tasks);
 
         require_once __DIR__ . '/WorkflowSlaService.php';
         $slaService = new WorkflowSlaService();

@@ -166,10 +166,30 @@ class FederatedSearchService
     protected function executeParallelSearches(Collection $peers, string $query, array $options): array
     {
         $results = [];
+
+        // F3 connector dispatch (LOCAL only — per SP NO-PUSH policy).
+        // Peers with peer_type in CONNECTOR_TYPES are dispatched via PeerConnector
+        // classes synchronously. All other peers use the legacy cURL-multi path
+        // (HTTP API peers — search_url-based). This split preserves backwards
+        // compatibility with existing peers while enabling local-ES + SharePoint.
+        [$connectorPeers, $httpPeers] = $this->partitionPeersByDispatch($peers);
+
+        foreach ($connectorPeers as $peer) {
+            $startTime = microtime(true);
+            $peerResult = $this->runConnector($peer, $query, $options);
+            $duration = (microtime(true) - $startTime) * 1000;
+            $peerResult['duration'] = $duration;
+            $results[$peer->peer_id] = $peerResult;
+        }
+
+        if (empty($httpPeers)) {
+            return $results;
+        }
+
         $multiHandle = curl_multi_init();
         $handles = [];
 
-        foreach ($peers as $peer) {
+        foreach ($httpPeers as $peer) {
             $handle = $this->createSearchRequest($peer, $query, $options);
             curl_multi_add_handle($multiHandle, $handle);
             $handles[$peer->peer_id] = [
@@ -626,6 +646,136 @@ class FederatedSearchService
     {
         $service = new AhgTaxonomyService();
         return $service->getFederationSearchStatusesWithColors();
+    }
+
+    // =========================================================================
+    // F3 peer_type dispatch (LOCAL ONLY — never commit, per SP NO-PUSH policy)
+    // =========================================================================
+
+    /** peer_type values that use PeerConnector classes, not HTTP-cURL. */
+    private const CONNECTOR_TYPES = [
+        'atom_local'              => 'AhgFederation\\Connectors\\AtomElasticsearchConnector',
+        'sharepoint_graph_search' => 'AhgFederation\\Connectors\\SharePointGraphConnector',
+    ];
+
+    /**
+     * Split peers into (connector-dispatched, http-dispatched) based on peer_type.
+     *
+     * @return array{0: array, 1: array}
+     */
+    protected function partitionPeersByDispatch(Collection $peers): array
+    {
+        $connector = [];
+        $http = [];
+        foreach ($peers as $peer) {
+            $type = (string) ($peer->peer_type ?? 'oai_pmh');
+            if (isset(self::CONNECTOR_TYPES[$type])) {
+                $connector[] = $peer;
+            } else {
+                $http[] = $peer;
+            }
+        }
+        return [$connector, $http];
+    }
+
+    /**
+     * Dispatch a single peer through its PeerConnector class.
+     *
+     * @return array  Result shape compatible with processPeerResponse() output.
+     */
+    protected function runConnector(object $peer, string $query, array $options): array
+    {
+        $type = (string) ($peer->peer_type ?? '');
+        $connectorClass = self::CONNECTOR_TYPES[$type] ?? null;
+        if (!$connectorClass) {
+            return ['success' => false, 'error' => "Unknown connector type: {$type}", 'results' => []];
+        }
+
+        // Ensure connector classes are loaded — they live OUTSIDE Symfony's
+        // autoload chain (no namespaced autoloader registered for them).
+        $this->loadConnectorClasses();
+
+        if (!class_exists($connectorClass)) {
+            return ['success' => false, 'error' => "Connector class missing: {$connectorClass}", 'results' => []];
+        }
+
+        try {
+            /** @var \AhgFederation\Connectors\PeerConnector $connector */
+            $connector = new $connectorClass();
+            $connector->bind($peer);
+
+            $limit = (int) ($peer->max_results ?? 50);
+            $filters = [];
+            if (!empty($options['dateFrom']) || !empty($options['dateTo'])) {
+                $filters['date_range'] = [
+                    'from' => $options['dateFrom'] ?? null,
+                    'to'   => $options['dateTo']   ?? null,
+                ];
+            }
+            if (!empty($options['culture'])) {
+                $filters['culture'] = $options['culture'];
+            }
+
+            /** @var \AhgFederation\Connectors\PeerSearchResult[] $hits */
+            $hits = $connector->search($query, $filters, $limit);
+
+            $rows = [];
+            foreach ($hits as $hit) {
+                $rows[] = [
+                    'source_id'   => $hit->sourceId,
+                    'title'       => $hit->title,
+                    'snippet'     => $hit->snippet,
+                    'url'         => $hit->url,
+                    'peer_type'   => $hit->peerType,
+                    'source_badge'=> $hit->sourceBadge,
+                    'score'       => $hit->score,
+                    'dedupe_key'  => $hit->dedupeKey,
+                    'date'        => $hit->date,
+                    'extras'      => $hit->extras,
+                    'peer_id'     => $peer->peer_id ?? null,
+                    'peer_name'   => $peer->name    ?? null,
+                ];
+            }
+
+            return [
+                'success'    => true,
+                'peer_id'    => $peer->peer_id ?? null,
+                'peer_name'  => $peer->name    ?? null,
+                'peer_type'  => $type,
+                'results'    => $rows,
+                'result_count' => count($rows),
+            ];
+        } catch (\Throwable $e) {
+            error_log('FederatedSearchService::runConnector failed: ' . $e->getMessage());
+            return [
+                'success'   => false,
+                'peer_id'   => $peer->peer_id ?? null,
+                'peer_name' => $peer->name    ?? null,
+                'peer_type' => $type,
+                'error'     => $e->getMessage(),
+                'results'   => [],
+            ];
+        }
+    }
+
+    /**
+     * Load PeerConnector classes from the plugin's lib/Connectors directory.
+     * These files don't follow Symfony 1.4's autoloader convention.
+     */
+    protected function loadConnectorClasses(): void
+    {
+        static $loaded = false;
+        if ($loaded) {
+            return;
+        }
+        $dir = \sfConfig::get('sf_plugins_dir') . '/ahgFederationPlugin/lib/Connectors';
+        foreach (['PeerConnector', 'PeerSearchResult', 'AtomElasticsearchConnector', 'SharePointGraphConnector'] as $cls) {
+            $path = $dir . '/' . $cls . '.php';
+            if (is_file($path)) {
+                require_once $path;
+            }
+        }
+        $loaded = true;
     }
 }
 

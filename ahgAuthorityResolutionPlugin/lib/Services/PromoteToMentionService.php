@@ -154,7 +154,15 @@ class PromoteToMentionService
         return $newCount;
     }
 
-    private function fetchSourceText(int $objectId): string
+    /**
+     * Concatenate the descriptive i18n fields of an information object into a
+     * single source-text string (the text the NER pass ran against).
+     *
+     * Public so the authorityResolution review UI ("View full context") can
+     * reconstruct exactly the same string the mention's character offsets
+     * (ahg_mention_context.character_offset_*) index into.
+     */
+    public function fetchSourceText(int $objectId): string
     {
         $rows = DB::table('information_object_i18n')->where('id', $objectId)->get();
         $parts = [];

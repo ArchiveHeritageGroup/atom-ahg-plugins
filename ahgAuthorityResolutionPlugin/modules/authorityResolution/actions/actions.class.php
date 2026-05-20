@@ -50,6 +50,33 @@ class authorityResolutionActions extends sfActions
         return new \AtomFramework\Services\AuthorityResolution\NerFeedbackService();
     }
 
+    /**
+     * Task 12: Assign / Workflow. AssignmentService internally require_once's
+     * ahgWorkflowPlugin's WorkflowService (root namespace, no PSR-4) and
+     * degrades gracefully if that plugin is absent.
+     */
+    protected function assignmentService(): \AtomFramework\Services\AuthorityResolution\AssignmentService
+    {
+        require_once dirname(__FILE__) . '/../../../lib/Services/AssignmentService.php';
+
+        return new \AtomFramework\Services\AuthorityResolution\AssignmentService();
+    }
+
+    /**
+     * "View full context" modal: PromoteToMentionService::fetchSourceText()
+     * reconstructs the concatenated IO i18n source string the mention offsets
+     * index into. ContextDerivationService is a constructor dependency.
+     */
+    protected function promoteToMentionService(): \AtomFramework\Services\AuthorityResolution\PromoteToMentionService
+    {
+        require_once dirname(__FILE__) . '/../../../lib/Services/ContextDerivationService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/PromoteToMentionService.php';
+
+        return new \AtomFramework\Services\AuthorityResolution\PromoteToMentionService(
+            new \AtomFramework\Services\AuthorityResolution\ContextDerivationService()
+        );
+    }
+
     protected function actorAdapter(): \AtomFramework\Services\AuthorityResolution\Adapters\MysqlActorAdapter
     {
         require_once dirname(__FILE__) . '/../../../lib/Services/Adapters/CandidateAdapterInterface.php';
@@ -160,6 +187,16 @@ class authorityResolutionActions extends sfActions
                 $j->on('ioi.id', '=', 'm.object_id')->where('ioi.culture', '=', 'en');
             })
             ->leftJoin('slug as s', 's.object_id', '=', 'm.object_id')
+            ->leftJoin('user as au', 'au.id', '=', 'm.assigned_to_user_id')
+            // The source IO's master digital object (parent_id IS NULL skips
+            // derivatives such as thumbnails / reference copies). Used to show
+            // a pdf / image / generic file indicator next to the Source link.
+            // No IO carries more than one master DO so this LEFT JOIN cannot
+            // multiply queue rows.
+            ->leftJoin('digital_object as dobj', function ($j) {
+                $j->on('dobj.object_id', '=', 'm.object_id')
+                  ->whereNull('dobj.parent_id');
+            })
             ->leftJoin(DB::raw('(SELECT mention_id, COUNT(*) as c FROM ahg_mention_candidate GROUP BY mention_id) as cc'),
                 'cc.mention_id', '=', 'm.id')
             ->select(
@@ -168,9 +205,15 @@ class authorityResolutionActions extends sfActions
                 'm.entity_type',
                 'm.state',
                 'm.promoted_at',
+                'm.assigned_to_user_id',
+                'm.workflow_task_id',
                 'n.entity_value',
                 'ioi.title as io_title',
                 's.slug as io_slug',
+                'au.username as assigned_to_username',
+                'dobj.mime_type as do_mime_type',
+                'dobj.media_type_id as do_media_type_id',
+                'dobj.name as do_name',
                 DB::raw('COALESCE(cc.c, 0) as candidate_count')
             );
 
@@ -190,10 +233,16 @@ class authorityResolutionActions extends sfActions
             ->limit($filters['limit'])
             ->get();
 
+        // Task 12: every mention id matching the current filter (across all
+        // pages) - powers the "select all matching filter" batch-assign link.
+        $this->allMatchingIds = (clone $q)->pluck('m.id')->map('intval')->all();
+
         $this->rows = $rows;
         $this->total = $total;
         $this->filters = $filters;
         $this->lastPage = max(1, (int) ceil($total / max(1, $filters['limit'])));
+        // Task 12: archivist picker for the batch-assign bar.
+        $this->archivists = $this->assignmentService()->archivists();
         $this->stateCounts = DB::table('ahg_mention')
             ->select('state', DB::raw('COUNT(*) as c'))
             ->groupBy('state')
@@ -221,9 +270,35 @@ class authorityResolutionActions extends sfActions
 
         $this->mention = $mention;
 
+        // Task 12: current assignment — powers the Assign modal's "currently
+        // assigned to" banner and pre-selects the archivist in the picker.
+        $this->assignment = DB::table('ahg_mention as m')
+            ->leftJoin('user as u', 'u.id', '=', 'm.assigned_to_user_id')
+            ->where('m.id', $mentionId)
+            ->select(
+                'm.assigned_to_user_id',
+                'm.assigned_by_user_id',
+                'm.assigned_at',
+                'm.workflow_task_id',
+                'u.username as assigned_to_username'
+            )
+            ->first();
+
         $this->context_row = DB::table('ahg_mention_context')
             ->where('mention_id', $mentionId)
             ->first();
+
+        // Full source-document text for the "view full document" modal — the
+        // archival scope_and_content the NER pass ran on. Prefer the 'en'
+        // culture row but accept any culture that actually carries text. Lets
+        // an archivist read the whole document when the context packet is
+        // empty (e.g. pre-Task-2 backfilled mentions) or too narrow.
+        $this->source_doc = DB::table('information_object_i18n')
+            ->where('id', (int) $mention->object_id)
+            ->whereNotNull('scope_and_content')
+            ->where('scope_and_content', '!=', '')
+            ->orderByRaw("culture = 'en' DESC")
+            ->first(['culture', 'title', 'scope_and_content']);
 
         $this->candidates = DB::table('ahg_mention_candidate as c')
             ->leftJoin('slug as s', function ($j) {
@@ -279,6 +354,108 @@ class authorityResolutionActions extends sfActions
                 }
             }
         }
+
+        // Task 12: current assignment (assignee + assigner usernames) and the
+        // archivist picker list for the Assign modal.
+        $this->assignment = null;
+        if ($mention->assigned_to_user_id) {
+            $assignee = DB::table('user')
+                ->where('id', (int) $mention->assigned_to_user_id)
+                ->value('username');
+            $assigner = $mention->assigned_by_user_id
+                ? DB::table('user')->where('id', (int) $mention->assigned_by_user_id)->value('username')
+                : null;
+            $this->assignment = (object) [
+                'assigned_to_user_id' => (int) $mention->assigned_to_user_id,
+                'assigned_to_username' => $assignee,
+                'assigned_by_username' => $assigner,
+                'assigned_at' => $mention->assigned_at,
+                'workflow_task_id' => $mention->workflow_task_id,
+            ];
+        }
+        $this->archivists = $this->assignmentService()->archivists();
+    }
+
+    /**
+     * GET /admin/authorityResolution/:id/context
+     *
+     * JSON payload for the "View full context" modal. Returns the entire
+     * source text of the mention's information object (the concatenated i18n
+     * fields the NER pass ran against, via PromoteToMentionService::
+     * fetchSourceText) plus the mention's character + paragraph offsets from
+     * ahg_mention_context. Offsets may be NULL (on-demand backfill that found
+     * no match) - the caller renders the full text and a "position not
+     * recorded" note in that case.
+     *
+     * ahg_mention_context stores BYTE offsets (ContextDerivationService uses
+     * strlen/stripos/substr). The browser slices source_text with JS
+     * String.slice, which counts UTF-16 code units, so the byte offsets are
+     * converted here to code-unit offsets (mb_strlen of the byte-prefix). For
+     * archival descriptions, which are virtually always BMP text, code points
+     * equal UTF-16 units, so the converted offsets index source_text exactly.
+     *
+     * Response: { ok, source_text, offset_start, offset_end,
+     *             paragraph_start, paragraph_end, entity_value }
+     */
+    public function executeContext(sfWebRequest $request)
+    {
+        $this->requireAuth();
+
+        $mentionId = (int) $request->getParameter('id', 0);
+        if ($mentionId <= 0) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'invalid mention id']);
+        }
+
+        $mention = DB::table('ahg_mention')->where('id', $mentionId)->first();
+        if (!$mention) {
+            return $this->jsonResponse(['ok' => false, 'error' => "mention #{$mentionId} not found"]);
+        }
+
+        // Entity value: prefer the ahg_ner_entity value (what the modal marks).
+        $entityValue = DB::table('ahg_ner_entity')
+            ->where('id', (int) $mention->ner_entity_id)
+            ->value('entity_value');
+
+        // Full source text - identical reconstruction the offsets index into.
+        $sourceText = '';
+        try {
+            $sourceText = $this->promoteToMentionService()
+                ->fetchSourceText((int) $mention->object_id);
+        } catch (\Throwable $e) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'source-text fetch failed: ' . $e->getMessage()]);
+        }
+
+        // Offsets from the context packet. Any of these may be NULL when the
+        // on-demand backfill could not locate the mention in the source text.
+        $ctx = DB::table('ahg_mention_context')
+            ->where('mention_id', $mentionId)
+            ->first();
+
+        $offStart = $ctx && $ctx->character_offset_start !== null ? (int) $ctx->character_offset_start : null;
+        $offEnd   = $ctx && $ctx->character_offset_end !== null ? (int) $ctx->character_offset_end : null;
+        $paraStart = $ctx && $ctx->paragraph_offset_start !== null ? (int) $ctx->paragraph_offset_start : null;
+        $paraEnd   = $ctx && $ctx->paragraph_offset_end !== null ? (int) $ctx->paragraph_offset_end : null;
+
+        // Convert stored byte offsets to JS String code-unit offsets so the
+        // browser's String.slice() splices source_text at the right boundary.
+        $toCharOffset = static function ($byteOffset) use ($sourceText) {
+            if ($byteOffset === null) {
+                return null;
+            }
+            $byteOffset = max(0, min((int) $byteOffset, strlen($sourceText)));
+
+            return mb_strlen(substr($sourceText, 0, $byteOffset), 'UTF-8');
+        };
+
+        return $this->jsonResponse([
+            'ok' => true,
+            'source_text' => (string) $sourceText,
+            'offset_start' => $toCharOffset($offStart),
+            'offset_end' => $toCharOffset($offEnd),
+            'paragraph_start' => $toCharOffset($paraStart),
+            'paragraph_end' => $toCharOffset($paraEnd),
+            'entity_value' => (string) ($entityValue ?? ''),
+        ]);
     }
 
     // =========================================================================
@@ -722,6 +899,115 @@ class authorityResolutionActions extends sfActions
     }
 
     // =========================================================================
+    // TASK 12 — ASSIGN / WORKFLOW
+    // =========================================================================
+
+    /**
+     * POST /admin/authorityResolution/:id/assign
+     * Body: archivist_user_id. Assigns one mention to an archivist and routes
+     * it through ahgWorkflowPlugin.
+     */
+    public function executeAssign(sfWebRequest $request)
+    {
+        $userId = $this->requireEditor();
+        $mentionId = (int) $request->getParameter('id', 0);
+
+        if (!$request->isMethod('post')) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'POST required']);
+        }
+
+        $archivistUserId = (int) $request->getParameter('archivist_user_id', 0);
+        if ($archivistUserId <= 0) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'archivist_user_id required']);
+        }
+
+        // Optional reason / message - stored as the workflow task's assignment
+        // comment (an ahg_workflow_history row). Empty string normalises to null.
+        $reason = trim((string) $request->getParameter('reason', ''));
+        $reason = $reason !== '' ? $reason : null;
+
+        $result = $this->assignmentService()->assign($mentionId, $archivistUserId, $userId, $reason);
+
+        if ($request->isXmlHttpRequest() || $request->getParameter('format') === 'json') {
+            return $this->jsonResponse($result);
+        }
+
+        if (!empty($result['ok'])) {
+            $this->getUser()->setFlash('notice', sprintf(
+                'Mention #%d assigned (workflow task #%s).',
+                $mentionId,
+                $result['workflow_task_id'] !== null ? (string) $result['workflow_task_id'] : 'n/a'
+            ));
+        } else {
+            $this->getUser()->setFlash('error', 'Assignment failed: ' . ($result['error'] ?? 'unknown'));
+        }
+
+        $this->redirect('@ar_auth_res_review?id=' . $mentionId);
+    }
+
+    /**
+     * POST /admin/authorityResolution/assign-batch
+     * Body: mention_ids[] + archivist_user_id. Batch-assigns the selected (or
+     * whole-filter) set of mentions to one archivist.
+     */
+    public function executeBatchAssign(sfWebRequest $request)
+    {
+        $userId = $this->requireEditor();
+
+        if (!$request->isMethod('post')) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'POST required']);
+        }
+
+        $archivistUserId = (int) $request->getParameter('archivist_user_id', 0);
+        if ($archivistUserId <= 0) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'archivist_user_id required']);
+        }
+
+        $mentionIds = $request->getParameter('mention_ids', []);
+        if (!is_array($mentionIds)) {
+            $mentionIds = array_filter(array_map('trim', explode(',', (string) $mentionIds)));
+        }
+        $mentionIds = array_values(array_filter(array_map('intval', $mentionIds)));
+
+        if (empty($mentionIds)) {
+            return $this->jsonResponse(['ok' => false, 'error' => 'mention_ids required']);
+        }
+
+        // Optional reason / message - one reason applied to every mention.
+        $reason = trim((string) $request->getParameter('reason', ''));
+        $reason = $reason !== '' ? $reason : null;
+
+        $result = $this->assignmentService()->assignBatch($mentionIds, $archivistUserId, $userId, $reason);
+        $result['ok'] = true;
+
+        if ($request->isXmlHttpRequest() || $request->getParameter('format') === 'json') {
+            // Drop the per-mention detail map for the wire response - keep it light.
+            unset($result['results']);
+            return $this->jsonResponse($result);
+        }
+
+        $this->getUser()->setFlash('notice', sprintf(
+            'Batch assign complete: %d assigned, %d failed.',
+            (int) $result['assigned'],
+            (int) $result['failed']
+        ));
+        $this->redirect('@ar_auth_res_index');
+    }
+
+    /**
+     * GET /admin/authorityResolution/archivists.json
+     * JSON list of eligible assignees for the assign pickers.
+     */
+    public function executeArchivistsJson(sfWebRequest $request)
+    {
+        $this->requireAuth();
+
+        return $this->jsonResponse([
+            'archivists' => $this->assignmentService()->archivists(),
+        ]);
+    }
+
+    // =========================================================================
     // HELPERS
     // =========================================================================
 
@@ -743,6 +1029,10 @@ class authorityResolutionActions extends sfActions
                 'm.state',
                 'm.promoted_at',
                 'm.updated_at',
+                'm.assigned_to_user_id',
+                'm.assigned_by_user_id',
+                'm.assigned_at',
+                'm.workflow_task_id',
                 'n.entity_value',
                 'n.original_value',
                 'n.confidence',
@@ -913,11 +1203,21 @@ class authorityResolutionActions extends sfActions
      */
     private function resolvePlaceCoord(int $termId): ?array
     {
-        // Probe term_i18n.description for a "lat,lng" pattern or JSON fragment.
-        $row = DB::table('term_i18n')
-            ->where('id', $termId)
-            ->where('culture', 'en')
-            ->first(['description']);
+        // Probe term_i18n free text for a "lat,lng" pattern. The column that
+        // carries it varies across AtoM schema revisions and is absent on
+        // lean installs (term_i18n there is just id/culture/name), so guard
+        // the lookup and degrade to null rather than fatalling the review page.
+        try {
+            if (!DB::schema()->hasColumn('term_i18n', 'description')) {
+                return null;
+            }
+            $row = DB::table('term_i18n')
+                ->where('id', $termId)
+                ->where('culture', 'en')
+                ->first(['description']);
+        } catch (\Throwable $e) {
+            return null;
+        }
 
         if (!$row || empty($row->description)) {
             return null;

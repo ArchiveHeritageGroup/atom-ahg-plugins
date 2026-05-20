@@ -40,6 +40,8 @@ class ahgAuthorityResolutionPluginConfiguration extends sfPluginConfiguration
 
         // Review screen + decision actions
         $r->any('ar_auth_res_review', '/admin/authorityResolution/:id/review', 'review', ['id' => '\d+']);
+        // "View full context" modal: full source text + mention offsets (JSON).
+        $r->get('ar_auth_res_context', '/admin/authorityResolution/:id/context', 'context', ['id' => '\d+']);
         $r->post('ar_auth_res_link', '/admin/authorityResolution/:id/link', 'link', ['id' => '\d+']);
         $r->post('ar_auth_res_link_different', '/admin/authorityResolution/:id/link-different', 'linkDifferent', ['id' => '\d+']);
         // Task 6: create-new sub-workflow (GET form + POST submit)
@@ -52,6 +54,13 @@ class ahgAuthorityResolutionPluginConfiguration extends sfPluginConfiguration
         $r->any('ar_auth_res_park_list', '/admin/authorityResolution/park', 'parkList');
         $r->post('ar_auth_res_unpark', '/admin/authorityResolution/park/:id/unpark', 'unpark', ['id' => '\d+']);
         $r->any('ar_auth_res_park_dashboard_json', '/admin/authorityResolution/park/dashboard.json', 'parkDashboardJson');
+
+        // Task 12: Assign / Workflow. Routes a mention through ahgWorkflowPlugin.
+        // archivists.json + assign-batch sit on distinct static paths so they
+        // are not shadowed by the :id/... patterns above.
+        $r->any('ar_auth_res_archivists_json', '/admin/authorityResolution/archivists.json', 'archivistsJson');
+        $r->post('ar_auth_res_batch_assign', '/admin/authorityResolution/assign-batch', 'batchAssign');
+        $r->post('ar_auth_res_assign', '/admin/authorityResolution/:id/assign', 'assign', ['id' => '\d+']);
 
         // JSON typeahead for "link different"
         $r->any('ar_auth_res_lookup', '/admin/authorityResolution/lookup', 'lookup');

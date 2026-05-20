@@ -53,7 +53,18 @@ $compositeScore = $candidate->composite_score !== null ? (float) $candidate->com
       <span>
         <?php if ($candidate->candidate_authority_id !== null): ?>
           <i class="fas fa-id-badge text-muted me-1"></i>
-          authority #<?php echo (int) $candidate->candidate_authority_id; ?>
+          <?php
+            $authName = trim((string) $candidate->candidate_display_name);
+            if ($authName === '') {
+                $authName = 'authority #' . (int) $candidate->candidate_authority_id;
+            }
+          ?>
+          <?php if (!empty($candidate->authority_slug)): ?>
+            <a href="/<?php echo htmlspecialchars((string) $candidate->authority_slug); ?>"
+               target="_blank" rel="noopener"><?php echo htmlspecialchars($authName); ?></a>
+          <?php else: ?>
+            <?php echo htmlspecialchars($authName); ?>
+          <?php endif; ?>
         <?php elseif ($candidate->candidate_fuseki_uri): ?>
           <i class="fas fa-link text-muted me-1"></i>
           <code class="small"><?php echo htmlspecialchars((string) $candidate->candidate_fuseki_uri); ?></code>
@@ -101,7 +112,15 @@ $compositeScore = $candidate->composite_score !== null ? (float) $candidate->com
       </a>
     <?php elseif ($candidate->candidate_authority_id !== null): ?>
       <span class="text-muted small">
-        <i class="fas fa-id-badge me-1"></i><?php echo __('authority #'); ?><?php echo (int) $candidate->candidate_authority_id; ?>
+        <i class="fas fa-id-badge me-1"></i>
+        <?php
+          $authNameFallback = trim((string) $candidate->candidate_display_name);
+          if ($authNameFallback !== '') {
+              echo htmlspecialchars($authNameFallback);
+          } else {
+              echo __('authority #') . (int) $candidate->candidate_authority_id;
+          }
+        ?>
       </span>
     <?php endif; ?>
 
@@ -109,7 +128,7 @@ $compositeScore = $candidate->composite_score !== null ? (float) $candidate->com
       <div class="mt-2 ar-map" id="ar-map-cand-<?php echo (int) $candidate->id; ?>"
            data-lat="<?php echo (float) $coord['lat']; ?>"
            data-lng="<?php echo (float) $coord['lng']; ?>"
-           style="height: 160px; border: 1px solid #dee2e6; border-radius: 4px;"></div>
+           style="height: 160px; max-width: 100%; overflow: hidden; position: relative; border: 1px solid #dee2e6; border-radius: 4px;"></div>
     <?php endif; ?>
   </div>
 

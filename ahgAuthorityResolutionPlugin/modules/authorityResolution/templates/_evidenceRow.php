@@ -18,6 +18,17 @@ $signalConfig = [
   'absent'   => ['cls' => 'light',   'icon' => 'fa-circle-notch',  'label' => 'Absent'],
 ];
 $cfg = $signalConfig[$signal] ?? $signalConfig['absent'];
+
+/**
+ * Humanize a bare snake_case evidence token into sentence-case text.
+ * Only touches values that are pure lowercase snake_case (no spaces,
+ * braces or quotes) — JSON blobs and already-readable text pass through
+ * untouched. Display-only: stored evidence data is never modified.
+ */
+$detailDisplay = (string) ($detail ?? '');
+if ($detailDisplay !== '' && preg_match('/^[a-z][a-z0-9_]*$/', $detailDisplay)) {
+    $detailDisplay = ucfirst(str_replace('_', ' ', $detailDisplay));
+}
 ?>
 <tr>
   <td class="text-capitalize" style="width: 28%;">
@@ -29,6 +40,6 @@ $cfg = $signalConfig[$signal] ?? $signalConfig['absent'];
     </span>
   </td>
   <td class="text-muted small">
-    <?php echo htmlspecialchars((string) ($detail ?? '')); ?>
+    <?php echo htmlspecialchars($detailDisplay); ?>
   </td>
 </tr>

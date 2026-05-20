@@ -20,6 +20,9 @@
   $parkRow         = $sf_data->getRaw('park_row');
   $latestDecision  = $sf_data->getRaw('latest_decision');
   $placeCoords     = $sf_data->getRaw('place_coords');
+  $sourceDoc       = $sf_data->getRaw('source_doc');
+  $assignment      = $sf_data->getRaw('assignment');
+  $archivists      = $sf_data->getRaw('archivists');
 
   $typeBadges = [
     'PERSON'      => 'primary',
@@ -139,6 +142,18 @@
             </div>
           </div>
         <?php endif; ?>
+        <div class="mt-2 text-end d-flex flex-wrap justify-content-end gap-2">
+          <button type="button" class="btn btn-sm btn-outline-primary"
+                  data-bs-toggle="modal" data-bs-target="#ar-context-modal">
+            <i class="fas fa-search-plus me-1"></i><?php echo __('View full context'); ?>
+          </button>
+          <?php if ($sourceDoc): ?>
+            <button type="button" class="btn btn-sm btn-outline-secondary"
+                    data-bs-toggle="modal" data-bs-target="#ar-full-text-modal">
+              <i class="fas fa-expand-alt me-1"></i><?php echo __('View full document text'); ?>
+            </button>
+          <?php endif; ?>
+        </div>
       </div>
     </div>
 
@@ -281,6 +296,15 @@
             <i class="fas fa-times me-1"></i><?php echo __('Reject'); ?>
           </button>
 
+          <hr>
+          <button type="button" class="btn btn-primary w-100"
+                  data-bs-toggle="modal" data-bs-target="#ar-assign-modal">
+            <i class="fas fa-user-plus me-1"></i><?php echo __('Assign'); ?>
+            <?php if (!empty($assignment) && !empty($assignment->assigned_to_username)): ?>
+              <br><small><?php echo __('to'); ?> <?php echo htmlspecialchars((string) $assignment->assigned_to_username); ?></small>
+            <?php endif; ?>
+          </button>
+
         <?php else: ?>
 
           <div class="alert alert-info mb-0">
@@ -297,6 +321,14 @@
               <?php endif; ?>
             <?php endif; ?>
           </div>
+
+          <button type="button" class="btn btn-primary w-100 mt-2"
+                  data-bs-toggle="modal" data-bs-target="#ar-assign-modal">
+            <i class="fas fa-user-plus me-1"></i><?php echo __('Assign'); ?>
+            <?php if (!empty($assignment) && !empty($assignment->assigned_to_username)): ?>
+              <br><small><?php echo __('to'); ?> <?php echo htmlspecialchars((string) $assignment->assigned_to_username); ?></small>
+            <?php endif; ?>
+          </button>
 
         <?php endif; ?>
 
@@ -335,6 +367,52 @@
 <?php include_partial('authorityResolution/linkDifferentModal', ['mention' => $mention]); ?>
 <?php include_partial('authorityResolution/parkModal',          ['mention' => $mention]); ?>
 <?php include_partial('authorityResolution/rejectModal',        ['mention' => $mention]); ?>
+<?php include_partial('authorityResolution/assignModal', ['mention' => $mention, 'archivists' => $archivists, 'assignment' => $assignment]); ?>
+<?php include_partial('authorityResolution/contextModal', ['mention' => $mention]); ?>
+
+<?php if ($sourceDoc): ?>
+<!-- Full source-document text modal — "view full document" from the context window -->
+<div class="modal fade" id="ar-full-text-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-file-alt me-2"></i><?php echo __('Full document text'); ?>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php echo __('Close'); ?>"></button>
+      </div>
+      <div class="modal-body">
+        <?php if (!empty($sourceDoc->title)): ?>
+          <h6 class="text-muted mb-3"><?php echo htmlspecialchars((string) $sourceDoc->title); ?></h6>
+        <?php endif; ?>
+        <?php
+          // HTML-escape first, then wrap occurrences of the mention value in
+          // <mark> so the archivist can spot the entity in the running text.
+          $fullText = htmlspecialchars((string) $sourceDoc->scope_and_content);
+          $term = (string) $mention->entity_value;
+          if ($term !== '') {
+              $fullText = preg_replace(
+                  '/(' . preg_quote(htmlspecialchars($term), '/') . ')/i',
+                  '<mark class="bg-warning">$1</mark>',
+                  $fullText
+              );
+          }
+        ?>
+        <div class="border rounded p-3 bg-light" style="white-space: pre-wrap; line-height: 1.6;"><?php echo $fullText; ?></div>
+      </div>
+      <div class="modal-footer">
+        <?php if ($mention->io_slug): ?>
+          <a href="/<?php echo htmlspecialchars((string) $mention->io_slug); ?>" target="_blank" rel="noopener"
+             class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-external-link-alt me-1"></i><?php echo __('Open full record'); ?>
+          </a>
+        <?php endif; ?>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal"><?php echo __('Close'); ?></button>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
 
 <?php $n = sfConfig::get('csp_nonce', ''); $nonceAttr = $n ? ' nonce="' . preg_replace('/^nonce=/', '', $n) . '"' : ''; ?>
 
@@ -418,6 +496,96 @@ document.addEventListener('DOMContentLoaded', function() {
       debounceTimer = setTimeout(doSearch, 250);
     });
   }
+
+  // ---- "View full context" modal ----
+  // Fetches the full source text + mention offsets, then builds the highlight
+  // by slicing the RAW string at the character offsets, HTML-escaping each
+  // slice, and concatenating with the wrapper tags (escape-then-splice - never
+  // splice tags into already-escaped text).
+  (function () {
+    var ctxModalEl = document.getElementById('ar-context-modal');
+    if (!ctxModalEl) { return; }
+
+    var contextUrl = <?php echo json_encode(url_for('@ar_auth_res_context?id=' . (int) $mention->id)); ?>;
+    var loadingEl  = document.getElementById('ar-context-loading');
+    var errorEl    = document.getElementById('ar-context-error');
+    var noteEl     = document.getElementById('ar-context-note');
+    var bodyEl     = document.getElementById('ar-context-body');
+    var loaded     = false;
+
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+      });
+    }
+
+    function render(data) {
+      var text = String(data.source_text || '');
+      var oStart = data.offset_start, oEnd = data.offset_end;
+      var pStart = data.paragraph_start, pEnd = data.paragraph_end;
+
+      // Valid character offsets present and in range -> precise highlight.
+      var haveOffsets = (oStart !== null && oStart !== undefined &&
+                         oEnd !== null && oEnd !== undefined &&
+                         oStart >= 0 && oEnd <= text.length && oStart < oEnd);
+      // Paragraph offsets are character positions of the enclosing paragraph.
+      var haveParas = (pStart !== null && pStart !== undefined &&
+                       pEnd !== null && pEnd !== undefined &&
+                       pStart >= 0 && pEnd <= text.length && pStart <= oStart &&
+                       pEnd >= oEnd);
+
+      var html;
+      if (haveOffsets) {
+        if (haveParas) {
+          // [0,pStart) + <para>[pStart,oStart) + <mark>[oStart,oEnd)</mark> + [oEnd,pEnd)</para> + [pEnd,end)
+          html = esc(text.slice(0, pStart))
+               + '<span style="background-color: rgba(255,193,7,0.18);">'
+               + esc(text.slice(pStart, oStart))
+               + '<mark class="bg-warning">' + esc(text.slice(oStart, oEnd)) + '</mark>'
+               + esc(text.slice(oEnd, pEnd))
+               + '</span>'
+               + esc(text.slice(pEnd));
+        } else {
+          html = esc(text.slice(0, oStart))
+               + '<mark class="bg-warning">' + esc(text.slice(oStart, oEnd)) + '</mark>'
+               + esc(text.slice(oEnd));
+          noteEl.classList.remove('d-none');
+        }
+      } else {
+        // No usable offsets - show the full text plus a note.
+        html = esc(text);
+        noteEl.classList.remove('d-none');
+      }
+
+      loadingEl.classList.add('d-none');
+      bodyEl.innerHTML = html || '<span class="text-muted"><?php echo __('No source text available.'); ?></span>';
+      bodyEl.classList.remove('d-none');
+    }
+
+    function load() {
+      if (loaded) { return; }
+      loaded = true;
+      fetch(contextUrl, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data || !data.ok) {
+            loadingEl.classList.add('d-none');
+            errorEl.textContent = (data && data.error) ? data.error : '<?php echo __('Could not load context.'); ?>';
+            errorEl.classList.remove('d-none');
+            return;
+          }
+          render(data);
+        })
+        .catch(function () {
+          loaded = false;
+          loadingEl.classList.add('d-none');
+          errorEl.textContent = '<?php echo __('Network error loading context.'); ?>';
+          errorEl.classList.remove('d-none');
+        });
+    }
+
+    ctxModalEl.addEventListener('show.bs.modal', load);
+  })();
 
 });
 </script>

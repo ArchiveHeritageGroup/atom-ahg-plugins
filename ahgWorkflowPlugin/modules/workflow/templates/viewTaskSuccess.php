@@ -78,9 +78,15 @@
 
                     <?php if ($task->object): ?>
                         <div class="mb-3">
-                            <a href="<?php echo url_for(['slug' => $task->object->slug, 'module' => 'informationobject']) ?>" target="_blank" class="btn btn-outline-primary">
-                                <i class="fas fa-external-link-alt me-1" aria-hidden="true"></i>View Record
-                            </a>
+                            <?php if ($task->object_type === 'ahg_mention'): ?>
+                                <a href="/admin/authorityResolution/<?php echo (int) $task->object_id ?>/review" target="_blank" class="btn btn-outline-primary">
+                                    <i class="fas fa-balance-scale me-1" aria-hidden="true"></i>Open mention review
+                                </a>
+                            <?php else: ?>
+                                <a href="<?php echo url_for(['slug' => $task->object->slug, 'module' => 'informationobject']) ?>" target="_blank" class="btn btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-1" aria-hidden="true"></i>View Record
+                                </a>
+                            <?php endif ?>
                         </div>
                     <?php endif ?>
 
