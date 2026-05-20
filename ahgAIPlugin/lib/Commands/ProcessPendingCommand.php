@@ -185,7 +185,12 @@ class ProcessPendingCommand extends BaseCommand
             return ['success' => false, 'error' => 'Invalid API response'];
         }
 
-        $this->storeEntities($io->id, $data['entities'], $text);
+        // New flat per-entity payload with real offsets + score. Absent on
+        // pre-deploy API versions — storeEntities() falls back to the legacy
+        // dict in that case.
+        $entitiesV2 = $data['entities_v2'] ?? null;
+
+        $this->storeEntities($io->id, $data['entities'], $text, $entitiesV2);
 
         $entityCount = 0;
         foreach ($data['entities'] as $values) {
@@ -292,12 +297,33 @@ class ProcessPendingCommand extends BaseCommand
         return $settings;
     }
 
-    private function storeEntities(int $objectId, array $entities, ?string $sourceText = null): void
+    /**
+     * Store NER entities.
+     *
+     * When $entitiesV2 (the flat per-entity list from the new API response)
+     * is a non-empty array, it is iterated instead of the legacy dict: each
+     * record carries a real per-entity offset and score, and confidence is
+     * written from that score (real float or null — never a fabricated 0.95).
+     * When $entitiesV2 is null/empty (pre-deploy API), the legacy dict is
+     * iterated and confidence is written as null (no score available).
+     *
+     * @param int        $objectId
+     * @param array      $entities    legacy {TYPE: [values]} dict
+     * @param string|null $sourceText exact text NER ran against
+     * @param array|null $entitiesV2  flat list of {value,type,offset_start,offset_end,score}
+     */
+    private function storeEntities(int $objectId, array $entities, ?string $sourceText = null, ?array $entitiesV2 = null): void
     {
-        $totalCount = 0;
-        foreach ($entities as $values) {
-            if (is_array($values)) {
-                $totalCount += count($values);
+        $useV2 = is_array($entitiesV2) && !empty($entitiesV2);
+
+        if ($useV2) {
+            $totalCount = count($entitiesV2);
+        } else {
+            $totalCount = 0;
+            foreach ($entities as $values) {
+                if (is_array($values)) {
+                    $totalCount += count($values);
+                }
             }
         }
 
@@ -309,6 +335,34 @@ class ProcessPendingCommand extends BaseCommand
             'extracted_at' => date('Y-m-d H:i:s'),
         ]);
 
+        if ($useV2) {
+            foreach ($entitiesV2 as $rec) {
+                if (!is_array($rec) || !isset($rec['value'], $rec['type'])) {
+                    continue;
+                }
+                $score = isset($rec['score']) && $rec['score'] !== null
+                    ? (float) $rec['score']
+                    : null;
+
+                $nerEntityId = (int) DB::table('ahg_ner_entity')->insertGetId([
+                    'extraction_id' => $extractionId,
+                    'object_id' => $objectId,
+                    'entity_type' => $rec['type'],
+                    'entity_value' => $rec['value'],
+                    'confidence' => $score,
+                    'status' => 'pending',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+
+                $knownOffset = (isset($rec['offset_start'], $rec['offset_end']))
+                    ? ['start' => (int) $rec['offset_start'], 'end' => (int) $rec['offset_end']]
+                    : null;
+
+                $this->maybePromoteToMention($nerEntityId, $sourceText, $knownOffset, $score);
+            }
+            return;
+        }
+
         foreach ($entities as $type => $values) {
             if (!is_array($values)) {
                 continue;
@@ -319,7 +373,7 @@ class ProcessPendingCommand extends BaseCommand
                     'object_id' => $objectId,
                     'entity_type' => $type,
                     'entity_value' => $value,
-                    'confidence' => 0.95,
+                    'confidence' => null,
                     'status' => 'pending',
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);
@@ -333,8 +387,13 @@ class ProcessPendingCommand extends BaseCommand
      * Hook: forward newly-inserted ner_entity rows to the authority-resolution
      * engine for promotion to a workflow mention with neighbourhood context.
      * Safe no-op when ahgAuthorityResolutionPlugin isn't installed.
+     *
+     * @param int        $nerEntityId
+     * @param string|null $sourceText
+     * @param array|null $knownOffset    {start,end} per-entity offset from entities_v2
+     * @param float|null $realConfidence per-entity score from entities_v2
      */
-    private function maybePromoteToMention(int $nerEntityId, ?string $sourceText): void
+    private function maybePromoteToMention(int $nerEntityId, ?string $sourceText, ?array $knownOffset = null, ?float $realConfidence = null): void
     {
         if ($nerEntityId <= 0) {
             return;
@@ -346,7 +405,7 @@ class ProcessPendingCommand extends BaseCommand
             $promoter = new \AtomFramework\Services\AuthorityResolution\PromoteToMentionService(
                 new \AtomFramework\Services\AuthorityResolution\ContextDerivationService()
             );
-            $promoter->promote($nerEntityId, $sourceText);
+            $promoter->promote($nerEntityId, $sourceText, $knownOffset, $realConfidence);
         } catch (\Throwable $e) {
             error_log('ProcessPendingCommand::maybePromoteToMention failed (ner_entity_id=' . $nerEntityId . '): ' . $e->getMessage());
         }

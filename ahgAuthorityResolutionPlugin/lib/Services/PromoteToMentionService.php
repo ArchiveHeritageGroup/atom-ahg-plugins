@@ -51,13 +51,25 @@ class PromoteToMentionService
      * Promote a single ner_entity row to ahg_mention + ahg_mention_context.
      *
      * @param int         $nerEntityId
-     * @param string|null $sourceText  Exact text NER ran against (full match rate);
-     *                                 null falls back to IO i18n concat (lossy when
-     *                                 NER ran against digital-object content).
+     * @param string|null $sourceText     Exact text NER ran against (full match rate);
+     *                                    null falls back to IO i18n concat (lossy when
+     *                                    NER ran against digital-object content).
+     * @param array|null  $knownOffset    {start:int,end:int} per-entity offset from
+     *                                    the API entities_v2 payload. Forwarded to
+     *                                    ContextDerivationService::derive() to skip
+     *                                    the lossy stripos scan.
+     * @param float|null  $realConfidence Per-entity score from entities_v2 (real
+     *                                    float or null — spaCy standard NER emits
+     *                                    no per-entity confidence). Written to
+     *                                    ahg_mention_context.real_confidence.
      * @return int|null  ahg_mention.id (existing or new), or null if entity missing.
      */
-    public function promote(int $nerEntityId, ?string $sourceText = null): ?int
-    {
+    public function promote(
+        int $nerEntityId,
+        ?string $sourceText = null,
+        ?array $knownOffset = null,
+        ?float $realConfidence = null
+    ): ?int {
         $entity = DB::table('ahg_ner_entity')->where('id', $nerEntityId)->first();
         if (!$entity) {
             return null;
@@ -79,10 +91,11 @@ class PromoteToMentionService
             (string) $entity->entity_value,
             (string) $entity->entity_type,
             $others,
-            $roleTokens
+            $roleTokens,
+            $knownOffset
         );
 
-        return DB::transaction(function () use ($entity, $context) {
+        return DB::transaction(function () use ($entity, $context, $realConfidence) {
             $now = date('Y-m-d H:i:s');
             $mentionId = DB::table('ahg_mention')->insertGetId([
                 'ner_entity_id' => $entity->id,
@@ -102,7 +115,7 @@ class PromoteToMentionService
                 'surrounding_text_before' => $context['surrounding_text_before'],
                 'surrounding_text_after' => $context['surrounding_text_after'],
                 'ner_model_version' => null,
-                'real_confidence' => null,
+                'real_confidence' => $realConfidence,
                 'co_occurring_entities' => json_encode($context['co_occurring_entities'], JSON_UNESCAPED_UNICODE),
                 'nearby_dates' => json_encode($context['nearby_dates'], JSON_UNESCAPED_UNICODE),
                 'nearby_places' => json_encode($context['nearby_places'], JSON_UNESCAPED_UNICODE),

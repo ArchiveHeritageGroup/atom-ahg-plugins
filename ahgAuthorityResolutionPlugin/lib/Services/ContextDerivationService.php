@@ -35,20 +35,30 @@ class ContextDerivationService
     /**
      * Derive the full context packet for a mention.
      *
-     * @param string $sourceText
-     * @param string $mentionValue
-     * @param string $mentionType
-     * @param array  $otherEntities  list of {ner_entity_id,value,type}
-     * @param array  $roleLanguageTokens  map of kind => list of token strings
+     * @param string     $sourceText
+     * @param string     $mentionValue
+     * @param string     $mentionType
+     * @param array      $otherEntities  list of {ner_entity_id,value,type}
+     * @param array      $roleLanguageTokens  map of kind => list of token strings
+     * @param array|null $knownOffset    {start:int,end:int} from entities_v2.
+     *                                   When provided the lossy stripos scan is
+     *                                   skipped and the API offset is used as
+     *                                   the sole occurrence (occurrence_count=1).
      */
     public function derive(
         string $sourceText,
         string $mentionValue,
         string $mentionType,
         array $otherEntities,
-        array $roleLanguageTokens
+        array $roleLanguageTokens,
+        ?array $knownOffset = null
     ): array {
-        $occurrences = $this->findAllOccurrences($sourceText, $mentionValue);
+        if ($knownOffset !== null
+            && isset($knownOffset['start'], $knownOffset['end'])) {
+            $occurrences = [[(int) $knownOffset['start'], (int) $knownOffset['end']]];
+        } else {
+            $occurrences = $this->findAllOccurrences($sourceText, $mentionValue);
+        }
 
         if (empty($occurrences)) {
             return $this->emptyContext(0);
