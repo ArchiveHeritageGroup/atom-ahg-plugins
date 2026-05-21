@@ -82,3 +82,31 @@ INSERT INTO numbering_scheme (name, sector, pattern, description, is_default, is
 ('DAM Media Type', 'dam', '{TYPE}-{SEQ:6}', 'Media type prefixed numbering', 0, 1),
 ('DAM Project', 'dam', '{PROJECT}-{SEQ:4}', 'Project-based numbering', 0, 1)
 ON DUPLICATE KEY UPDATE name = VALUES(name);
+
+-- Error log table backing the ahgSettings/errorLog action
+CREATE TABLE IF NOT EXISTS `ahg_error_log` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `level` varchar(20) NOT NULL DEFAULT 'error',
+  `status_code` int DEFAULT NULL,
+  `message` text NOT NULL,
+  `file` varchar(500) DEFAULT NULL,
+  `line` int DEFAULT NULL,
+  `exception_class` varchar(255) DEFAULT NULL,
+  `request_id` varchar(128) DEFAULT NULL,
+  `url` varchar(2000) DEFAULT NULL,
+  `http_method` varchar(10) DEFAULT NULL,
+  `client_ip` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(500) DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `hostname` varchar(255) DEFAULT NULL,
+  `trace` text,
+  `is_read` tinyint(1) NOT NULL DEFAULT '0',
+  `resolved_at` datetime DEFAULT NULL,
+  `resolved_by` int DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_error_log_created` (`created_at`),
+  KEY `idx_error_log_read` (`is_read`),
+  KEY `idx_error_log_level` (`level`),
+  KEY `idx_error_log_resolved` (`resolved_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

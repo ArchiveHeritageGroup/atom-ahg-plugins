@@ -125,23 +125,23 @@ class damActions extends AhgController
                 return sfView::SUCCESS;
             }
 
-            // Auto-numbering: consume the sequence to advance the counter
+            // Auto-numbering: SectorIdentifierService bumps the same
+            // sector_<code>_identifier_counter setting the sectorNumbering admin
+            // page shows, keeping that counter in sync with actual creates.
             try {
-                $numberingService = \AtomExtensions\Services\NumberingService::getInstance();
-                $info = $numberingService->getNumberingInfo('dam');
-                if (!empty($info['enabled']) && !empty($info['auto_generate'])) {
-                    $consumed = $numberingService->getNextReference('dam');
-                    if (empty($identifier)) {
-                        $identifier = $consumed;
-                    }
+                // Sector mask enabled -> next() is authoritative; it overrides
+                // the form's pre-filled preview so every create gets the next number.
+                $generated = \AtomExtensions\Services\SectorIdentifierService::next('dam');
+                if ($generated !== null && $generated !== '') {
+                    $identifier = $generated;
                 }
             } catch (\Exception $e) {
-                // Numbering service unavailable, continue with form value
+                // Numbering unavailable - continue with the form value.
             }
 
             // Use Propel ORM to create the information object properly (handles nested set)
             if (class_exists('\\AtomFramework\\Services\\Write\\WriteServiceFactory')) {
-                $informationObject = \AtomFramework\Services\Write\WriteServiceFactory::informationObject()->newInformationObject();
+                $informationObject = new QubitInformationObject();
             } else {
                 $informationObject = new QubitInformationObject();
             }
@@ -166,6 +166,14 @@ class damActions extends AhgController
                 $informationObject->save(); // PropelBridge; Phase 4 replaces
             } else {
                 $informationObject->save();
+            }
+
+                        // dam/create deadlock fix: Propel save() leaves its transaction open;
+            // the inserts below run on a separate connection and FK-reference this
+            // information_object, so the Propel transaction must be committed first.
+            $damFixConn = Propel::getConnection();
+            while (method_exists($damFixConn, 'getNestedTransactionDepth') && $damFixConn->getNestedTransactionDepth() > 0) {
+                $damFixConn->commit();
             }
 
             $objectId = $informationObject->id;
@@ -238,13 +246,19 @@ class damActions extends AhgController
                 'created_at' => date('Y-m-d H:i:s'),
             ];
 
-            DB::table('dam_iptc_metadata')->insert($iptcData);
+            // dam/create fix: run IPTC + display_object_config inserts on the Propel
+            // connection so they share the request transaction (QubitTransactionFilter)
+            // and see the just-saved information_object - a separate connection
+            // deadlocks on the uncommitted FK-referenced row.
+            $damConn = Propel::getConnection();
+            $damCols = '`' . implode('`, `', array_keys($iptcData)) . '`';
+            $damPh = implode(', ', array_fill(0, count($iptcData), '?'));
+            $damStmt = $damConn->prepare('INSERT INTO dam_iptc_metadata (' . $damCols . ') VALUES (' . $damPh . ')');
+            $damStmt->execute(array_values($iptcData));
 
             // Register as DAM type in display_object_config
-            DB::table('display_object_config')->updateOrInsert(
-                ['object_id' => $objectId],
-                ['object_type' => 'dam', 'updated_at' => date('Y-m-d H:i:s')]
-            );
+            $damDocStmt = $damConn->prepare("INSERT INTO display_object_config (object_id, object_type, updated_at) VALUES (?, 'dam', ?) ON DUPLICATE KEY UPDATE object_type = 'dam', updated_at = VALUES(updated_at)");
+            $damDocStmt->execute([$objectId, date('Y-m-d H:i:s')]);
 
             $this->getUser()->setFlash('success', 'DAM asset created successfully');
             $this->redirect('@slug?slug=' . $informationObject->slug);

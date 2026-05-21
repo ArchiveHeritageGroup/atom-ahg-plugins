@@ -2554,4 +2554,104 @@ class aiActions extends AhgController
         $this->entityCounts = $entityCounts;
         $this->totalEntities = array_sum($entityCounts);
     }
+
+    /* ====================================================================
+     * heratio#137 - AI Inventory & Governance dashboard.
+     * Operator visibility into configured LLMs (ahg_llm_config) and recent
+     * AI inference activity (ahg_ai_inference). Mirrors the Heratio Laravel
+     * GovernanceController in the ahg-provenance-ai package.
+     * ==================================================================== */
+
+    /** GET /ai/governance - the dashboard page. */
+    public function executeGovernance($request)
+    {
+        $this->stats      = $this->governanceStats();
+        $this->models     = $this->governanceModelRows();
+        $this->inferences = $this->governanceInferenceRows(50);
+    }
+
+    /** GET /ai/governance/models - LLM configs as JSON. */
+    public function executeGovernanceModels($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        return $this->renderText(json_encode(array('data' => $this->governanceModelRows())));
+    }
+
+    /** GET /ai/governance/inferences - recent inferences as JSON. */
+    public function executeGovernanceInferences($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        return $this->renderText(json_encode(array('data' => $this->governanceInferenceRows(50))));
+    }
+
+    /**
+     * Configured LLMs. api_key_encrypted is deliberately never selected -
+     * the dashboard must not surface secrets. last_used is best-effort:
+     * ahg_ai_inference has no FK to ahg_llm_config, so it is matched on
+     * model name.
+     */
+    private function governanceModelRows()
+    {
+        $rows = Illuminate\Database\Capsule\Manager::table('ahg_llm_config')
+            ->orderBy('is_default', 'desc')
+            ->orderBy('provider')
+            ->orderBy('name')
+            ->get(array(
+                'id', 'provider', 'name', 'model', 'is_active', 'is_default',
+                'endpoint_url', 'max_tokens', 'temperature', 'timeout_seconds',
+                'created_at', 'updated_at',
+            ));
+
+        $out = array();
+        foreach ($rows as $row) {
+            $row->last_used = Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')
+                ->where('model_name', $row->model)
+                ->max('occurred_at');
+            $row->inference_count = Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')
+                ->where('model_name', $row->model)
+                ->count();
+            $row->model_manifest = null; // heratio#135 - column does not exist yet
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    /** Most-recent inference records. */
+    private function governanceInferenceRows($limit)
+    {
+        $rows = Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')
+            ->orderBy('occurred_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->limit($limit)
+            ->get(array(
+                'id', 'uuid', 'service_name', 'model_name', 'model_version',
+                'confidence', 'standard', 'target_entity_type', 'target_entity_id',
+                'target_field', 'elapsed_ms', 'occurred_at',
+            ));
+
+        $out = array();
+        foreach ($rows as $row) {
+            $row->signed = false; // heratio#136 - Ed25519 signing not yet wired
+            $out[] = $row;
+        }
+
+        return $out;
+    }
+
+    /** Headline counts for the dashboard stat cards. */
+    private function governanceStats()
+    {
+        $cutoff = date('Y-m-d H:i:s', strtotime('-7 days'));
+
+        return array(
+            'models_total'     => (int) Illuminate\Database\Capsule\Manager::table('ahg_llm_config')->count(),
+            'models_active'    => (int) Illuminate\Database\Capsule\Manager::table('ahg_llm_config')->where('is_active', 1)->count(),
+            'inferences_total' => (int) Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')->count(),
+            'inferences_7d'    => (int) Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')->where('occurred_at', '>=', $cutoff)->count(),
+            'avg_confidence'   => Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')->whereNotNull('confidence')->avg('confidence'),
+        );
+    }
 }

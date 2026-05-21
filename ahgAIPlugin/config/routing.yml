@@ -181,3 +181,19 @@ ahg_ai_ner_approved_entities:
   url: /ai/ner/approved-entities/:id
   param: { module: ai, action: getApprovedEntities }
   requirements: { id: \d+ }
+
+# ============================================================================
+# AI Inventory & Governance dashboard (heratio#137)
+# ============================================================================
+
+ahg_ai_governance:
+  url: /ai/governance
+  param: { module: ai, action: governance }
+
+ahg_ai_governance_models:
+  url: /ai/governance/models
+  param: { module: ai, action: governanceModels }
+
+ahg_ai_governance_inferences:
+  url: /ai/governance/inferences
+  param: { module: ai, action: governanceInferences }
