@@ -2601,7 +2601,7 @@ class aiActions extends AhgController
             ->get(array(
                 'id', 'provider', 'name', 'model', 'is_active', 'is_default',
                 'endpoint_url', 'max_tokens', 'temperature', 'timeout_seconds',
-                'created_at', 'updated_at',
+                'model_manifest', 'created_at', 'updated_at',
             ));
 
         $out = array();
@@ -2612,7 +2612,8 @@ class aiActions extends AhgController
             $row->inference_count = Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')
                 ->where('model_name', $row->model)
                 ->count();
-            $row->model_manifest = null; // heratio#135 - column does not exist yet
+            $row->model_manifest = is_string($row->model_manifest ?? null) // heratio#135
+                ? json_decode($row->model_manifest, true) : null;
             $out[] = $row;
         }
 
@@ -2629,12 +2630,12 @@ class aiActions extends AhgController
             ->get(array(
                 'id', 'uuid', 'service_name', 'model_name', 'model_version',
                 'confidence', 'standard', 'target_entity_type', 'target_entity_id',
-                'target_field', 'elapsed_ms', 'occurred_at',
+                'target_field', 'elapsed_ms', 'occurred_at', 'signer_key_id',
             ));
 
         $out = array();
         foreach ($rows as $row) {
-            $row->signed = false; // heratio#136 - Ed25519 signing not yet wired
+            $row->signed = !empty($row->signer_key_id); // heratio#136
             $out[] = $row;
         }
 

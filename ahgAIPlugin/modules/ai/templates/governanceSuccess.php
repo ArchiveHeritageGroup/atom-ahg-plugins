@@ -70,7 +70,7 @@ if (!function_exists('ahg_gov_dt')) {
             <td class="text-end"><?php echo htmlspecialchars((string) $m->temperature); ?></td>
             <td class="text-end"><?php echo (int) $m->inference_count; ?></td>
             <td class="small"><?php echo ahg_gov_dt($m->last_used); ?></td>
-            <td class="small text-muted" title="Pending heratio#135"><?php echo $m->model_manifest !== null ? htmlspecialchars((string) $m->model_manifest) : '—'; ?></td>
+            <td class="small"><?php if (is_array($m->model_manifest) && $m->model_manifest): ?><span class="badge bg-success" title="<?php echo htmlspecialchars(implode(', ', array_keys($m->model_manifest))); ?>"><?php echo count($m->model_manifest); ?> keys</span><?php else: ?><span class="text-muted">—</span><?php endif; ?></td>
           </tr>
         <?php endforeach; endif; ?>
         </tbody>
