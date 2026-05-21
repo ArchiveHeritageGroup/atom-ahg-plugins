@@ -1552,11 +1552,10 @@ class aiActions extends AhgController
             ]));
         }
 
-        // Call the Python HTR API
-        $apiUrl = $this->config('app_ai_api_url', 'http://192.168.0.112:5004');
+        // Call the HTR service through the AI gateway (heratio#131).
+        // app_htr_url is the full gateway HTR endpoint - not suffixed.
+        $url    = $this->config('app_htr_url', 'https://ai.theahg.co.za/ai/v1/htr');
         $apiKey = $this->config('app_ai_api_key', 'ahg_ai_demo_internal_2026');
-
-        $url = $apiUrl . '/ai/v1/htr';
 
         $payload = json_encode([
             'image_path' => $imagePath,
@@ -1570,7 +1569,7 @@ class aiActions extends AhgController
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'X-API-Key: ' . $apiKey
+            'Authorization: Bearer ' . $apiKey
         ]);
         curl_setopt($ch, CURLOPT_TIMEOUT, 120);
 
