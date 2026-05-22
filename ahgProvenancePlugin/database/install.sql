@@ -233,8 +233,8 @@ DEALLOCATE PREPARE fk_stmt;
 --                     summarization pass, ...) recorded by the AHG
 --                     InferenceService. Carries the heratio#135 model_manifest
 --                     and the heratio#136 Ed25519 signature.
--- ahg_ai_override   - one row per human reviewer correction of an AI inference
---                     (Phase 4 - schema provisioned now, recording deferred).
+-- ahg_ai_override   - one row per human reviewer correction of an AI inference,
+--                     recorded by OverrideService (issue #140 Phase 4).
 -- Idempotent: CREATE TABLE IF NOT EXISTS, safe to re-run on a live install.
 -- ============================================================================
 

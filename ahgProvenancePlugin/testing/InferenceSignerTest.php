@@ -124,6 +124,37 @@ $tamperedRow->output_hash = str_repeat('c', 64);
 check('round trip: a changed output_hash fails verification',
     $signer->verify($rtSig, $svc->manifestFromRow($tamperedRow), $signer->publicKey()) === false);
 
+// ── 10. buildInferenceSparql() emits a well-formed RDF-Star INSERT ──────────
+$sparqlRow = (object) [
+    'uuid' => 'uuid-sparql-1', 'occurred_at' => '2026-05-22 09:30:00',
+    'service_name' => 'NER', 'model_name' => 'spaCy en_core_web_sm', 'model_version' => '3.8.0',
+    'input_hash' => str_repeat('a', 64), 'output_hash' => str_repeat('b', 64),
+    'confidence' => null, 'standard' => 'ICIP-name-access-points', 'endpoint' => null,
+    'target_entity_type' => 'information_object', 'target_entity_id' => 99, 'target_field' => 'access_points',
+];
+$built = $svc->buildInferenceSparql($sparqlRow);
+check('buildInferenceSparql: graph URI uses the inference uuid',
+    $built['graph'] === 'urn:ahg:provenance-ai:inference:uuid-sparql-1');
+check('buildInferenceSparql: emits INSERT DATA + GRAPH',
+    strpos($built['sparql'], 'INSERT DATA {') !== false
+    && strpos($built['sparql'], 'GRAPH <urn:ahg:provenance-ai:inference:uuid-sparql-1>') !== false);
+check('buildInferenceSparql: emits the RDF-Star meta-assertion',
+    strpos($built['sparql'], '<< <urn:ahg:entity:information_object:99:access_points> ex:hasGenerated') !== false
+    && strpos($built['sparql'], 'prov:wasGeneratedBy') !== false);
+check('buildInferenceSparql: omits ex:confidence when null',
+    strpos($built['sparql'], 'ex:confidence') === false);
+check('buildInferenceSparql: declares the three PREFIXes',
+    substr_count($built['sparql'], 'PREFIX ') === 3);
+
+$sparqlRow2 = clone $sparqlRow;
+$sparqlRow2->confidence = 0.91;
+$sparqlRow2->model_name = 'quote"model';
+$built2 = $svc->buildInferenceSparql($sparqlRow2);
+check('buildInferenceSparql: emits ex:confidence as xsd:decimal when set',
+    strpos($built2['sparql'], 'ex:confidence "0.91"^^xsd:decimal') !== false);
+check('buildInferenceSparql: escapes double-quotes in string literals',
+    strpos($built2['sparql'], 'quote\\"model') !== false);
+
 // ── cleanup ─────────────────────────────────────────────────────────────────
 foreach (glob($tmpDir . '/*') ?: [] as $f) {
     @unlink($f);
