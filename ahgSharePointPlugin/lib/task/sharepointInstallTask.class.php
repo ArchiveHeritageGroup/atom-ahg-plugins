@@ -69,15 +69,12 @@ class sharepointInstallTask extends sfBaseTask
             $this->log($sql);
             return;
         }
-        // Naive split on semicolon-newline boundaries.
-        $statements = preg_split('/;\s*\n/', $sql);
-        foreach ($statements as $stmt) {
-            $stmt = trim($stmt);
-            if ($stmt === '' || str_starts_with($stmt, '--')) {
-                continue;
-            }
-            \Illuminate\Database\Capsule\Manager::statement($stmt);
-        }
+        // heratio#130: run the whole file as one batch. The previous naive
+        // preg_split('/;\s*\n/') + skip-if-starts-with-'--' dropped every
+        // statement whose chunk began with a comment header, silently skipping
+        // most CREATE TABLEs. unprepared() executes the file verbatim and
+        // throws on any SQL error rather than skipping it.
+        \Illuminate\Database\Capsule\Manager::unprepared($sql);
         $this->logSection('sharepoint', 'applied ' . basename($path));
     }
 
