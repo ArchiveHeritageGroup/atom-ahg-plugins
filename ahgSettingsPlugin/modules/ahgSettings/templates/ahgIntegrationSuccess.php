@@ -75,6 +75,14 @@
                 <?php echo $form['ahg_central_site_id']->render(['class' => 'form-control']); ?>
                 <div class="form-text"><?php echo $settings['ahg_central_site_id']['help']; ?></div>
             </div>
+
+            <div class="mb-3">
+                <label for="ahg_central_error_sync" class="form-label"><?php echo __('Sync Error Logs to AHG Central'); ?></label>
+                <div>
+                    <?php echo $form['ahg_central_error_sync']->render(['class' => 'form-check-input']); ?>
+                </div>
+                <div class="form-text"><?php echo $settings['ahg_central_error_sync']['help']; ?></div>
+            </div>
         </div>
     </div>
 

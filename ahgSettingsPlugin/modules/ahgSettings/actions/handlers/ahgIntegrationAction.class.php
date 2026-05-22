@@ -24,25 +24,31 @@ class settingsAhgIntegrationAction extends AhgController
         $settings = [
             'ahg_central_api_url' => [
                 'label' => 'AHG Central API URL',
-                'help' => 'The base URL for AHG Central cloud services (e.g., https://train.theahg.co.za/api)',
-                'default' => 'https://train.theahg.co.za/api',
+                'help' => 'The base URL for the AHG Central API (default: https://central.theahg.co.za/api/v1).',
+                'default' => 'https://central.theahg.co.za/api/v1',
                 'type' => 'url',
             ],
             'ahg_central_api_key' => [
                 'label' => 'API Key',
-                'help' => 'Your AHG Central API key for authentication. Contact support@theahg.co.za to request one.',
+                'help' => 'The AHG Central fleet enrolment key (Bearer token). Contact support@theahg.co.za to request one.',
                 'default' => '',
                 'type' => 'password',
             ],
             'ahg_central_site_id' => [
                 'label' => 'Site ID',
-                'help' => 'Unique identifier for this AtoM instance. Used for NER training contributions.',
+                'help' => 'Unique identifier for this install in the AHG Central fleet. Leave blank to auto-derive it from the hostname.',
                 'default' => $this->generateDefaultSiteId(),
                 'type' => 'text',
             ],
             'ahg_central_enabled' => [
                 'label' => 'Enable AHG Central Integration',
-                'help' => 'When enabled, NER training data and other features will sync with AHG Central.',
+                'help' => 'When enabled, this install sends a daily heartbeat (alive + version) to AHG Central for fleet monitoring.',
+                'default' => '0',
+                'type' => 'boolean',
+            ],
+            'ahg_central_error_sync' => [
+                'label' => 'Sync Error Logs to AHG Central',
+                'help' => 'When enabled, open error-log entries are pushed to AHG Central, redacted (emails and long numbers masked, URL query strings stripped). Off by default.',
                 'default' => '0',
                 'type' => 'boolean',
             ],
@@ -141,8 +147,8 @@ class settingsAhgIntegrationAction extends AhgController
             return ['success' => false, 'message' => 'API URL is required'];
         }
 
-        // Test the connection
-        $testUrl = rtrim($url, '/') . '/health';
+        // Test the connection - the public /ping liveness endpoint.
+        $testUrl = rtrim($url, '/') . '/ping';
 
         $ch = curl_init($testUrl);
         curl_setopt_array($ch, [
@@ -150,7 +156,7 @@ class settingsAhgIntegrationAction extends AhgController
             CURLOPT_TIMEOUT => 10,
             CURLOPT_HTTPHEADER => [
                 'Accept: application/json',
-                'X-API-Key: ' . $apiKey,
+                'Authorization: Bearer ' . $apiKey,
             ],
         ]);
 
