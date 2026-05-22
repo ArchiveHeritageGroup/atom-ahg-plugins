@@ -6,6 +6,7 @@ require_once dirname(__FILE__) . '/LlmProviderInterface.php';
 require_once dirname(__FILE__) . '/providers/OllamaProvider.php';
 require_once dirname(__FILE__) . '/providers/OpenAIProvider.php';
 require_once dirname(__FILE__) . '/providers/AnthropicProvider.php';
+require_once dirname(__FILE__) . '/GuardrailService.php';
 
 /**
  * LLM Service
@@ -79,7 +80,58 @@ class LlmService
         try {
             $provider = $this->getProvider($configId);
 
-            return $provider->complete($systemPrompt, $userPrompt, $options);
+            // #141 - apply RAG guardrails before the prompt leaves the building.
+            // Fail-open on an unexpected guardrail error: a bug in the policy
+            // layer must never deny the AI service (deliberate `block`
+            // decisions still block).
+            $guard = null;
+            $inspect = null;
+            try {
+                $config = $configId ? $this->getConfiguration($configId) : $this->getDefaultConfig();
+                $guard = new GuardrailService();
+                $inspect = $guard->inspect([
+                    'provider'      => ($config && isset($config->provider)) ? (string) $config->provider : '',
+                    'system_prompt' => $systemPrompt,
+                    'user_prompt'   => $userPrompt,
+                    'data_scope'    => $options['data_scope'] ?? null,
+                    'purpose'       => $options['purpose'] ?? null,
+                ]);
+                if (($inspect['action'] ?? 'allow') === 'block') {
+                    return [
+                        'success'   => false,
+                        'error'     => $inspect['reason'] ?? 'Blocked by AI guardrail policy',
+                        'text'      => null,
+                        'tokens_used' => 0,
+                        'model'     => null,
+                        'blocked'   => true,
+                        'guardrail' => $guard->summarize($inspect, null),
+                    ];
+                }
+                $systemPrompt = $inspect['system_prompt'];
+                $userPrompt   = $inspect['user_prompt'];
+            } catch (\Throwable $e) {
+                error_log('[ahgAIPlugin] guardrail inspect failed, proceeding unguarded: ' . $e->getMessage());
+                $guard = null;
+                $inspect = null;
+            }
+
+            $result = $provider->complete($systemPrompt, $userPrompt, $options);
+
+            // #141 - grounding check on the RAG output + attach the verdict.
+            if ($guard !== null && $inspect !== null) {
+                try {
+                    $grounding = null;
+                    if (!empty($result['success']) && !empty($result['text'])
+                        && !empty($options['context_sources']) && is_array($options['context_sources'])) {
+                        $grounding = $guard->checkGrounding((string) $result['text'], $options['context_sources']);
+                    }
+                    $result['guardrail'] = $guard->summarize($inspect, $grounding);
+                } catch (\Throwable $e) {
+                    error_log('[ahgAIPlugin] guardrail post-check failed: ' . $e->getMessage());
+                }
+            }
+
+            return $result;
         } catch (Exception $e) {
             return [
                 'success' => false,

@@ -78,11 +78,26 @@ class DescriptionService
         // Build prompts
         $prompts = $this->promptService->buildPrompt($template, $context['data']);
 
+        // #141 - assemble the RAG provenance bundle (the retrieved source
+        // fields) and declare the purpose, so the guardrails can scope-check,
+        // purpose-check and ground-check this dispatch.
+        $contextSources = [];
+        foreach (($context['data'] ?? []) as $value) {
+            if (is_string($value) && trim($value) !== '') {
+                $contextSources[] = $value;
+            }
+        }
+
         // Generate with LLM
         $result = $this->llmService->complete(
             $prompts['system'],
             $prompts['user'],
-            $llmConfigId
+            $llmConfigId,
+            [
+                'purpose'         => 'description_generation',
+                'data_scope'      => 'internal',
+                'context_sources' => $contextSources,
+            ]
         );
 
         if (!$result['success']) {
@@ -109,6 +124,7 @@ class DescriptionService
             'generation_time_ms' => $result['generation_time_ms'] ?? 0,
             'template_name' => $template->name,
             'has_ocr' => !empty($context['data']['ocr_text']),
+            'guardrail' => $result['guardrail'] ?? null,
         ];
     }
 
