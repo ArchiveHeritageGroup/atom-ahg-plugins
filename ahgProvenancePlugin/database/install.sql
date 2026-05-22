@@ -225,3 +225,73 @@ SET @fk_sql = IF(@fk_exists = 0,
 PREPARE fk_stmt FROM @fk_sql;
 EXECUTE fk_stmt;
 DEALLOCATE PREPARE fk_stmt;
+
+-- ============================================================================
+-- AI inference provenance (issue #140 - port of heratio#61 / #135 / #136)
+-- ----------------------------------------------------------------------------
+-- ahg_ai_inference  - one row per AI inference (NER entity batch, HTR page,
+--                     summarization pass, ...) recorded by the AHG
+--                     InferenceService. Carries the heratio#135 model_manifest
+--                     and the heratio#136 Ed25519 signature.
+-- ahg_ai_override   - one row per human reviewer correction of an AI inference
+--                     (Phase 4 - schema provisioned now, recording deferred).
+-- Idempotent: CREATE TABLE IF NOT EXISTS, safe to re-run on a live install.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS `ahg_ai_inference` (
+    `id`                  bigint unsigned NOT NULL AUTO_INCREMENT,
+    `uuid`                char(36) COLLATE utf8mb4_unicode_ci NOT NULL                              COMMENT 'External-facing identifier; used as the activity URI in Fuseki',
+    `service_name`        varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL                            COMMENT 'NER, HTR, SUMMARIZE, TRANSLATION, LLM, ... (uppercase)',
+    `model_name`          varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL                           COMMENT 'Free-text identifier as reported by the model',
+    `model_version`       varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unknown'          COMMENT 'Version string when retrievable; literal "unknown" otherwise',
+    `endpoint`            varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL                       COMMENT 'URL the inference was performed against, for forensics',
+    `input_hash`          char(64) COLLATE utf8mb4_unicode_ci NOT NULL                              COMMENT 'sha256 of canonical input bytes',
+    `input_excerpt`       varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL                       COMMENT 'First 500 chars of input, truncated; for human inspection only',
+    `output_hash`         char(64) COLLATE utf8mb4_unicode_ci NOT NULL                              COMMENT 'sha256 of canonical output (json_encode for structured)',
+    `output_excerpt`      varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL                       COMMENT 'First 500 chars of output',
+    `confidence`          decimal(6,5) DEFAULT NULL                                                  COMMENT 'Normalised 0.0-1.0; NULL when model does not expose a score',
+    `standard`            varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL                        COMMENT 'ICIP, ISAD(G), Spectrum-5.1, RiC-O, etc.',
+    `target_entity_type`  varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL                            COMMENT 'information_object, actor, term, ...',
+    `target_entity_id`    bigint NOT NULL                                                            COMMENT 'PK in the entity table',
+    `target_field`        varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL                            COMMENT 'Column / RDF predicate touched by the inference',
+    `elapsed_ms`          int DEFAULT NULL                                                           COMMENT 'Service call latency for ops dashboards',
+    `fuseki_graph_uri`    varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL                       COMMENT 'NULL until the RDF-Star annotation has been written to Fuseki',
+    `signature`           text COLLATE utf8mb4_unicode_ci DEFAULT NULL                               COMMENT 'heratio#136 - base64 Ed25519 detached signature over the canonical inference manifest',
+    `signer_key_id`       varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL                        COMMENT 'heratio#136 - reference to the signing key (the key itself is never stored in the DB)',
+    `model_manifest`      json DEFAULT NULL                                                          COMMENT 'heratio#135 - structured model-provenance manifest snapshot for this inference',
+    `user_id`             int DEFAULT NULL                                                           COMMENT 'Triggering user when known (NULL for batch / cron paths)',
+    `occurred_at`         datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `created_at`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_ai_inference_uuid` (`uuid`),
+    KEY `idx_ai_inference_target` (`target_entity_type`, `target_entity_id`),
+    KEY `idx_ai_inference_field` (`target_entity_type`, `target_entity_id`, `target_field`),
+    KEY `idx_ai_inference_service_time` (`service_name`, `occurred_at`),
+    KEY `idx_ai_inference_input_hash` (`input_hash`),
+    KEY `idx_ai_inference_output_hash` (`output_hash`),
+    KEY `idx_ai_inference_fuseki_pending` (`fuseki_graph_uri`(1), `created_at`),
+    KEY `idx_ai_inference_user` (`user_id`, `occurred_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `ahg_ai_override` (
+    `id`                  bigint unsigned NOT NULL AUTO_INCREMENT,
+    `uuid`                char(36) COLLATE utf8mb4_unicode_ci NOT NULL                              COMMENT 'External-facing identifier; used as the override activity URI in Fuseki',
+    `inference_id`        bigint unsigned NOT NULL                                                   COMMENT 'FK to ahg_ai_inference - the inference being corrected',
+    `reviewer_user_id`    int NOT NULL                                                               COMMENT 'User who issued the correction',
+    `reason`              varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL                       COMMENT 'Free-text rationale; nullable but encouraged',
+    `original_value`      text COLLATE utf8mb4_unicode_ci NOT NULL                                   COMMENT 'Snapshot of what the AI produced',
+    `override_value`      text COLLATE utf8mb4_unicode_ci NOT NULL                                   COMMENT 'What the reviewer set the field to',
+    `status`              varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'applied'          COMMENT 'applied, rejected, superseded',
+    `fuseki_override_uri` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL                       COMMENT 'NULL until the prov:Activity has been written to Fuseki',
+    `occurred_at`         datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `created_at`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`          datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_ai_override_uuid` (`uuid`),
+    KEY `idx_ai_override_inference` (`inference_id`),
+    KEY `idx_ai_override_reviewer` (`reviewer_user_id`, `occurred_at`),
+    KEY `idx_ai_override_status` (`status`, `occurred_at`),
+    KEY `idx_ai_override_fuseki_pending` (`fuseki_override_uri`(1), `created_at`),
+    CONSTRAINT `fk_ai_override_inference` FOREIGN KEY (`inference_id`) REFERENCES `ahg_ai_inference` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

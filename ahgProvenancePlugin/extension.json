@@ -1,8 +1,8 @@
 {
     "name": "Provenance Tracking",
     "machine_name": "ahgProvenancePlugin",
-    "version": "1.0.3",
-    "description": "Chain of custody and provenance tracking for archival records, museum objects, and library materials",
+    "version": "1.1.0",
+    "description": "Chain of custody and provenance tracking for archival records, museum objects, and library materials, plus AI inference provenance recording and Ed25519 manifest signing",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
     "requires": {
@@ -26,7 +26,9 @@
         "provenance_event_i18n",
         "provenance_agent",
         "provenance_agent_i18n",
-        "provenance_document"
+        "provenance_document",
+        "ahg_ai_inference",
+        "ahg_ai_override"
     ],
     "shared_tables": [],
     "helpers": [],

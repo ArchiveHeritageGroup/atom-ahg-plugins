@@ -26,6 +26,54 @@ class aiActions extends AhgController
         }
     }
 
+    /**
+     * Record one AI inference into ahg_ai_inference (issue #140).
+     *
+     * Best-effort: delegates to the ahgProvenancePlugin InferenceService, which
+     * writes the row, composes the model manifest (heratio#135) and Ed25519-
+     * signs the canonical manifest (heratio#136). A provenance failure - or the
+     * ahgProvenancePlugin being absent - is logged and swallowed so the
+     * user-facing AI action is never broken by a governance concern.
+     *
+     * @param array $f keyed inference fields (see InferenceRecord)
+     */
+    private function recordAiInference(array $f): void
+    {
+        try {
+            if (!class_exists('AhgProvenancePlugin\\Service\\InferenceService')) {
+                return; // ahgProvenancePlugin not installed - nothing to record into.
+            }
+            $record = new \AhgProvenancePlugin\Service\InferenceRecord(
+                serviceName:      $f['serviceName'],
+                modelName:        (string) ($f['modelName'] ?? 'unknown'),
+                modelVersion:     (string) ($f['modelVersion'] ?? 'unknown'),
+                inputHash:        $f['inputHash'],
+                outputHash:       $f['outputHash'],
+                targetEntityType: $f['targetEntityType'] ?? 'information_object',
+                targetEntityId:   (int) $f['targetEntityId'],
+                targetField:      $f['targetField'],
+                confidence:       $f['confidence'] ?? null,
+                standard:         $f['standard'] ?? null,
+                endpoint:         $f['endpoint'] ?? null,
+                inputExcerpt:     $f['inputExcerpt'] ?? null,
+                outputExcerpt:    $f['outputExcerpt'] ?? null,
+                elapsedMs:        isset($f['elapsedMs']) && $f['elapsedMs'] !== null ? (int) $f['elapsedMs'] : null,
+                userId:           isset($f['userId']) && $f['userId'] !== null ? (int) $f['userId'] : null,
+            );
+            (new \AhgProvenancePlugin\Service\InferenceService())->record($record);
+        } catch (\Throwable $e) {
+            error_log('[ahgAIPlugin] AI inference provenance write failed: ' . $e->getMessage());
+        }
+    }
+
+    /** sha256 hex + 500-char excerpt of a string, for an inference record (issue #140). */
+    private function aiHashExcerpt(string $text): array
+    {
+        $excerpt = mb_strlen($text) > 500 ? mb_substr($text, 0, 500) : $text;
+
+        return [hash('sha256', $text), $excerpt];
+    }
+
     public function executeExtract($request)
     {
         $this->getResponse()->setContentType('application/json');
@@ -71,6 +119,31 @@ class aiActions extends AhgController
         }
 
         $this->saveExtraction($objectId, $result['entities']);
+
+        // issue #140 - record the NER inference into ahg_ai_inference.
+        $entitiesJson = (string) json_encode($result['entities'], JSON_UNESCAPED_UNICODE);
+        if ($pdfPath && file_exists($pdfPath)) {
+            $pdfBytes  = @file_get_contents($pdfPath);
+            $inHash    = is_string($pdfBytes) ? hash('sha256', $pdfBytes) : str_repeat('0', 64);
+            $inExcerpt = 'pdf:' . basename($pdfPath);
+        } else {
+            [$inHash, $inExcerpt] = $this->aiHashExcerpt($text);
+        }
+        [$outHash, $outExcerpt] = $this->aiHashExcerpt($entitiesJson);
+        $this->recordAiInference([
+            'serviceName'    => 'NER',
+            'modelName'      => $result['model'] ?? 'unknown',
+            'modelVersion'   => $result['model_version'] ?? 'unknown',
+            'inputHash'      => $inHash,
+            'inputExcerpt'   => $inExcerpt,
+            'outputHash'     => $outHash,
+            'outputExcerpt'  => $outExcerpt,
+            'targetEntityId' => $objectId,
+            'targetField'    => 'access_points',
+            'standard'       => 'ICIP-name-access-points',
+            'elapsedMs'      => $result['processing_time_ms'] ?? null,
+            'userId'         => $this->userId(),
+        ]);
 
         return $this->renderText(json_encode([
             'success' => true,
@@ -1246,6 +1319,30 @@ class aiActions extends AhgController
         // Save summary to Scope & Content field
         $saved = $this->saveScopeAndContent($objectId, $summary);
 
+        // issue #140 - record the summarization inference into ahg_ai_inference.
+        if ($pdfPath && file_exists($pdfPath)) {
+            $pdfBytes  = @file_get_contents($pdfPath);
+            $inHash    = is_string($pdfBytes) ? hash('sha256', $pdfBytes) : str_repeat('0', 64);
+            $inExcerpt = 'pdf:' . basename($pdfPath);
+        } else {
+            [$inHash, $inExcerpt] = $this->aiHashExcerpt($text ?? '');
+        }
+        [$outHash, $outExcerpt] = $this->aiHashExcerpt((string) $summary);
+        $this->recordAiInference([
+            'serviceName'    => 'SUMMARIZE',
+            'modelName'      => $result['model'] ?? 'unknown',
+            'modelVersion'   => $result['model_version'] ?? 'unknown',
+            'inputHash'      => $inHash,
+            'inputExcerpt'   => $inExcerpt,
+            'outputHash'     => $outHash,
+            'outputExcerpt'  => $outExcerpt,
+            'targetEntityId' => $objectId,
+            'targetField'    => 'scope_and_content',
+            'standard'       => 'ISAD(G)-scope_and_content',
+            'elapsedMs'      => $result['processing_time_ms'] ?? null,
+            'userId'         => $this->userId(),
+        ]);
+
         return $this->renderText(json_encode([
             'success' => true,
             'summary' => $summary,
@@ -1621,6 +1718,34 @@ class aiActions extends AhgController
             $response['zones'] = $result['zones'];
             $response['zones_detected'] = $result['zones_detected'] ?? count($result['zones']);
         }
+
+        // issue #140 - record the HTR inference into ahg_ai_inference.
+        $imageBytes = @file_get_contents($imagePath);
+        $inHash     = is_string($imageBytes) ? hash('sha256', $imageBytes) : str_repeat('0', 64);
+        $htrConfidence = null;
+        if (isset($result['cer']) && is_numeric($result['cer'])) {
+            // CER is an error rate - flip to "higher is better" confidence.
+            $htrConfidence = max(0.0, min(1.0, 1.0 - (float) $result['cer']));
+        } elseif (isset($result['confidence']) && is_numeric($result['confidence'])) {
+            $htrConfidence = max(0.0, min(1.0, (float) $result['confidence']));
+        }
+        [$outHash, $outExcerpt] = $this->aiHashExcerpt((string) json_encode($result, JSON_UNESCAPED_UNICODE));
+        $this->recordAiInference([
+            'serviceName'    => 'HTR',
+            'modelName'      => $result['model'] ?? 'trocr-base-handwritten',
+            'modelVersion'   => $result['model_version'] ?? 'unknown',
+            'inputHash'      => $inHash,
+            'inputExcerpt'   => 'image:' . basename($imagePath),
+            'outputHash'     => $outHash,
+            'outputExcerpt'  => $outExcerpt,
+            'targetEntityId' => $objectId,
+            'targetField'    => 'transcript',
+            'standard'       => 'ISAD(G)',
+            'confidence'     => $htrConfidence,
+            'endpoint'       => $url,
+            'elapsedMs'      => $processingTime,
+            'userId'         => $this->userId(),
+        ]);
 
         return $this->renderText(json_encode($response));
     }

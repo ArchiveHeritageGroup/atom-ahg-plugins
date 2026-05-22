@@ -1,7 +1,7 @@
 {
     "name": "AI Tools",
     "machine_name": "ahgAIPlugin",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "AI-powered tools for archival management: Named Entity Recognition (NER), Translation, Summarization, Spellcheck, and LLM Description Suggestions",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
@@ -14,6 +14,11 @@
     "dependencies": [
         "ahgCorePlugin"
     ],
+    "optional": {
+        "extensions": [
+            "ahgProvenancePlugin"
+        ]
+    },
     "tables": [
         "ahg_ai_settings",
         "ahg_ai_usage",
