@@ -43,6 +43,13 @@ try {
     $hasStrongroom = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_strongroom');
 } catch (Exception $e) {}
 
+// heratio#143 Phase 1 — Workflow visual diagram + designer surface
+// (gated by ahg_workflow table existence).
+$hasWorkflow = false;
+try {
+    $hasWorkflow = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_workflow');
+} catch (Exception $e) {}
+
 // Get pending counts for badges
 $pendingBookings = 0;
 $pendingResearchers = 0;
@@ -192,6 +199,13 @@ if ($isAdmin && $hasResearcher) {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Storage'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'strongroom', 'action' => 'browse']); ?>"><i class="fas fa-warehouse fa-fw me-1"></i><?php echo __('Strongrooms'); ?></a></li>
+    <?php endif; ?>
+
+    <?php if ($hasWorkflow): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Workflow'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('Workflows & diagrams'); ?></a></li>
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>

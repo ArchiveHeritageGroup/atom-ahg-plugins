@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `ahg_workflow` (
     `allow_parallel` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Allow parallel step execution',
     `auto_archive_days` INT DEFAULT NULL COMMENT 'Auto-archive completed tasks after N days',
     `notification_enabled` TINYINT(1) NOT NULL DEFAULT 1,
+    `spectrum_procedure` VARCHAR(64) DEFAULT NULL COMMENT 'Spectrum 5.1 procedure code (object_entry, acquisition, inventory, location_movement, cataloguing, object_exit, loans_in, loans_out, insurance, damage_loss, conservation, audit, condition_check, valuation, risk_management, emergency_planning, use_of_collections, rights_management, reproduction, deaccessioning, retrospective_doc), or NULL',
     `created_by` INT DEFAULT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -37,7 +38,8 @@ CREATE TABLE IF NOT EXISTS `ahg_workflow` (
     KEY `idx_scope` (`scope_type`, `scope_id`),
     KEY `idx_trigger` (`trigger_event`),
     KEY `idx_active` (`is_active`),
-    KEY `idx_default` (`is_default`, `scope_type`, `scope_id`)
+    KEY `idx_default` (`is_default`, `scope_type`, `scope_id`),
+    KEY `ix_spectrum_procedure` (`spectrum_procedure`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -310,6 +312,29 @@ INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`
 ('workflow_escalation_action', 'Workflow Escalation Action', 'notify_lead', 'Notify Team Lead', '#ffc107', 'fa-bell', 1, 1, 'workflow'),
 ('workflow_escalation_action', 'Workflow Escalation Action', 'notify_admin', 'Notify Administrator', '#fd7e14', 'fa-user-shield', 2, 1, 'workflow'),
 ('workflow_escalation_action', 'Workflow Escalation Action', 'auto_reassign', 'Auto-Reassign', '#dc3545', 'fa-exchange-alt', 3, 1, 'workflow');
+
+-- ============================================================
+-- heratio#143 Phase 3 — workflow graph edges (drag-drop designer support).
+-- Optional; when present, the diagram renderer uses these edges to model
+-- branching/parallel flow. When absent, the renderer falls back to
+-- ahg_workflow_step.step_order (linear).
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `ahg_workflow_edge` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `workflow_id` INT NOT NULL,
+    `from_step_id` INT NOT NULL,
+    `to_step_id` INT NOT NULL,
+    `condition_expr` VARCHAR(500) NULL COMMENT 'optional gating expression — free text for now, structure later',
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL,
+    UNIQUE KEY `uq_workflow_edge` (`workflow_id`, `from_step_id`, `to_step_id`),
+    INDEX `ix_workflow` (`workflow_id`),
+    INDEX `ix_from_step` (`from_step_id`),
+    INDEX `ix_to_step` (`to_step_id`),
+    CONSTRAINT `fk_wfedge_workflow` FOREIGN KEY (`workflow_id`) REFERENCES `ahg_workflow`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_wfedge_from` FOREIGN KEY (`from_step_id`) REFERENCES `ahg_workflow_step`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `fk_wfedge_to` FOREIGN KEY (`to_step_id`) REFERENCES `ahg_workflow_step`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -230,7 +230,17 @@ class workflowActions extends AhgController
         $this->requireAdmin();
         $this->showInactive = (bool) $request->getParameter('show_inactive', 0);
         $filters = $this->showInactive ? [] : ['is_active' => 1];
+
+        // Spectrum#A — optional filter
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
+        $spectrumFilter = SpectrumProcedureCatalog::normalize($request->getParameter('spectrum'));
+        if ($spectrumFilter !== null) {
+            $filters['spectrum_procedure'] = $spectrumFilter;
+        }
+
         $this->workflows = $this->getService()->getWorkflows($filters);
+        $this->spectrumProcedures = SpectrumProcedureCatalog::all();
+        $this->spectrumFilter = $spectrumFilter;
     }
 
     public function executeCreateWorkflow($request)
@@ -248,6 +258,7 @@ class workflowActions extends AhgController
                 'is_active' => $request->getParameter('is_active', 1),
                 'is_default' => $request->getParameter('is_default', 0),
                 'notification_enabled' => $request->getParameter('notification_enabled', 1),
+                'spectrum_procedure' => $request->getParameter('spectrum_procedure'),
                 'created_by' => $this->getCurrentUserId(),
             ];
 
@@ -256,8 +267,10 @@ class workflowActions extends AhgController
             $this->redirect("workflow/admin/edit/{$workflowId}");
         }
 
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
         $this->repositories = $this->getRepositories();
         $this->collections = $this->getCollections();
+        $this->spectrumProcedures = SpectrumProcedureCatalog::all();
     }
 
     public function executeEditWorkflow($request)
@@ -280,6 +293,7 @@ class workflowActions extends AhgController
                 'is_active' => $request->getParameter('is_active', 0),
                 'is_default' => $request->getParameter('is_default', 0),
                 'notification_enabled' => $request->getParameter('notification_enabled', 0),
+                'spectrum_procedure' => $request->getParameter('spectrum_procedure'),
             ];
 
             $this->getService()->updateWorkflow($workflowId, $data);
@@ -287,10 +301,12 @@ class workflowActions extends AhgController
             $this->redirect("workflow/admin/edit/{$workflowId}");
         }
 
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
         $this->repositories = $this->getRepositories();
         $this->collections = $this->getCollections();
         $this->roles = $this->getRoles();
         $this->clearanceLevels = $this->getClearanceLevels();
+        $this->spectrumProcedures = SpectrumProcedureCatalog::all();
     }
 
     public function executeDeleteWorkflow($request)
@@ -963,5 +979,166 @@ class workflowActions extends AhgController
             ->orderByRaw('COALESCE(ai.authorized_form_of_name, user.username)')
             ->get()
             ->toArray();
+    }
+
+    // =========================================================================
+    // heratio#143 Phase 1 — read-only diagram
+    // =========================================================================
+
+    public function executeDiagram($request)
+    {
+        $this->requireAdmin();
+        $id = (int) $request->getParameter('id', 0);
+        if ($id <= 0) {
+            $this->forward404('Workflow id required');
+        }
+        $workflow = $this->getService()->getWorkflow($id);
+        if (!$workflow) {
+            $this->forward404('Workflow not found');
+        }
+
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/WorkflowEdgeService.php';
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/WorkflowDiagramService.php';
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
+
+        $svc = new WorkflowDiagramService();
+        $this->workflow = $workflow;
+        $this->svg = $svc->render($id);
+        $this->fallback = $svc->textFallback($id);
+        $this->spectrumLabel = SpectrumProcedureCatalog::label($workflow->spectrum_procedure ?? null);
+    }
+
+    // =========================================================================
+    // heratio#143 Phase 2 — task progress overlay
+    // =========================================================================
+
+    public function executeTaskDiagram($request)
+    {
+        $this->requireAuth();
+        $taskId = (int) $request->getParameter('id', 0);
+        if ($taskId <= 0) {
+            $this->forward404('Task id required');
+        }
+        $task = $this->getService()->getTask($taskId);
+        if (!$task) {
+            $this->forward404('Task not found');
+        }
+
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/WorkflowEdgeService.php';
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/WorkflowDiagramService.php';
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
+
+        $svc = new WorkflowDiagramService();
+        $payload = $svc->renderForTask($taskId);
+        $workflow = $this->getService()->getWorkflow((int) $task->workflow_id);
+
+        $this->task = $task;
+        $this->workflow = $workflow;
+        $this->svg = $payload['svg'];
+        $this->statusMap = $payload['statusMap'];
+        $this->fallback = $svc->textFallback((int) $task->workflow_id);
+        $this->spectrumLabel = SpectrumProcedureCatalog::label($workflow->spectrum_procedure ?? null);
+    }
+
+    // =========================================================================
+    // heratio#143 Phase 3 — drag-drop designer
+    // =========================================================================
+
+    public function executeDesigner($request)
+    {
+        $this->requireAdmin();
+        $id = (int) $request->getParameter('id', 0);
+        $workflow = $this->getService()->getWorkflow($id);
+        if (!$workflow) {
+            $this->forward404('Workflow not found');
+        }
+
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/WorkflowEdgeService.php';
+
+        $this->workflow = $workflow;
+        $this->steps = \Illuminate\Database\Capsule\Manager::table('ahg_workflow_step')
+            ->where('workflow_id', $id)
+            ->orderBy('step_order')
+            ->orderBy('id')
+            ->get(['id', 'name', 'step_order', 'step_type', 'is_optional']);
+        $this->edges = (new WorkflowEdgeService())->getEdges($id);
+    }
+
+    /**
+     * POST /workflow/designerSave?id=N — AJAX save endpoint.
+     * Request body: { "edges": [{"from_step_id":1, "to_step_id":2}, ...] }
+     */
+    public function executeDesignerSave($request)
+    {
+        $this->requireAdmin();
+        if (!$request->isMethod('post')) {
+            return $this->renderJson(['ok' => false, 'errors' => ['POST required']], 405);
+        }
+        $id = (int) $request->getParameter('id', 0);
+        $workflow = $this->getService()->getWorkflow($id);
+        if (!$workflow) {
+            return $this->renderJson(['ok' => false, 'errors' => ['Workflow not found']], 404);
+        }
+
+        // Accept JSON body OR form-encoded `edges` field
+        $body = $request->getContent();
+        $payload = null;
+        if (!empty($body)) {
+            $payload = json_decode($body, true);
+        }
+        $raw = is_array($payload['edges'] ?? null) ? $payload['edges'] : (array) $request->getParameter('edges', []);
+
+        $edges = [];
+        foreach ($raw as $e) {
+            if (!is_array($e)) continue;
+            $edges[] = [
+                'from_step_id'   => (int) ($e['from_step_id'] ?? 0),
+                'to_step_id'     => (int) ($e['to_step_id'] ?? 0),
+                'condition_expr' => isset($e['condition_expr']) ? (string) $e['condition_expr'] : null,
+            ];
+        }
+
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/WorkflowEdgeService.php';
+        $result = (new WorkflowEdgeService())->replaceEdges($id, $edges);
+
+        return $this->renderJson($result, $result['ok'] ? 200 : 422);
+    }
+
+    protected function renderJson(array $body, int $status = 200)
+    {
+        $this->getResponse()->setStatusCode($status);
+        $this->getResponse()->setContentType('application/json');
+        return $this->renderText(json_encode($body));
+    }
+
+    // =========================================================================
+    // Spectrum#B — install seed pack
+    // =========================================================================
+
+    public function executeInstallSpectrumPack($request)
+    {
+        $this->requireAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect('workflow/admin');
+        }
+
+        $overwrite = (bool) $request->getParameter('overwrite');
+        $cmd = sprintf(
+            'cd %s && %s symfony workflow:seed-spectrum %s 2>&1',
+            escapeshellarg(sfConfig::get('sf_root_dir')),
+            escapeshellcmd(PHP_BINARY),
+            $overwrite ? '--overwrite' : ''
+        );
+        $output = [];
+        $returnCode = 0;
+        exec($cmd, $output, $returnCode);
+
+        $tail = trim(implode("\n", array_slice($output, -3)));
+        if ($returnCode === 0) {
+            $this->getUser()->setFlash('notice', 'Spectrum procedure pack installed. '.$tail);
+        } else {
+            $this->getUser()->setFlash('error', 'Install failed (exit '.$returnCode.'): '.$tail);
+        }
+        $this->redirect('workflow/admin');
     }
 }

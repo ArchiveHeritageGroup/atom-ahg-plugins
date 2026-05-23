@@ -11,6 +11,12 @@
         </ol>
     </nav>
 
+    <?php /* heratio#143 — diagram + designer buttons */ ?>
+    <div class="d-flex gap-2 flex-wrap mb-3">
+        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'diagram', 'id' => $workflow->id]) ?>" class="btn btn-outline-info"><i class="fas fa-project-diagram me-1"></i><?php echo __('View diagram') ?></a>
+        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'designer', 'id' => $workflow->id]) ?>" class="btn btn-outline-primary"><i class="fas fa-pencil-ruler me-1"></i><?php echo __('Designer') ?></a>
+    </div>
+
     <?php if ($sf_user->hasFlash('notice')): ?>
         <div class="alert alert-success alert-dismissible fade show">
             <?php echo $sf_user->getFlash('notice') ?>
@@ -98,6 +104,21 @@
                                     <label class="form-check-label" for="notification_enabled">Send Notifications</label>
                                 </div>
                             </div>
+                        </div>
+
+                        <?php /* Spectrum#A — procedure dropdown */ ?>
+                        <div class="mb-3">
+                            <label for="spectrum_procedure" class="form-label">
+                                <i class="fas fa-university me-1"></i><?php echo __('Spectrum procedure') ?>
+                                <span class="badge bg-secondary ms-1"><?php echo __('Optional') ?></span>
+                            </label>
+                            <select class="form-select" id="spectrum_procedure" name="spectrum_procedure">
+                                <option value=""><?php echo __('— Not a Spectrum procedure —') ?></option>
+                                <?php foreach (($spectrumProcedures ?? []) as $code => $label): ?>
+                                    <option value="<?php echo esc_entities($code) ?>" <?php echo (($workflow->spectrum_procedure ?? '') === $code) ? 'selected' : '' ?>><?php echo esc_entities(__($label)) ?></option>
+                                <?php endforeach ?>
+                            </select>
+                            <small class="text-muted"><?php echo __('Tag this workflow if it implements one of the 21 Spectrum 5.1 procedures.') ?></small>
                         </div>
 
                         <button type="submit" class="btn btn-primary">

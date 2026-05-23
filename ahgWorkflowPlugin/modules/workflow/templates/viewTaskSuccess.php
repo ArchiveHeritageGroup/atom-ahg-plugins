@@ -12,6 +12,11 @@
         </ol>
     </nav>
 
+    <?php /* heratio#143 Phase 2 — task progress diagram link */ ?>
+    <div class="mb-3">
+        <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'taskDiagram', 'id' => $task->id]) ?>" class="btn btn-outline-info"><i class="fas fa-project-diagram me-1"></i><?php echo __('Progress diagram') ?></a>
+    </div>
+
     <?php if ($sf_user->hasFlash('notice')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <?php echo $sf_user->getFlash('notice') ?>

@@ -39,6 +39,10 @@ class WorkflowService
         if (!empty($filters['scope_id'])) {
             $query->where('scope_id', $filters['scope_id']);
         }
+        // Spectrum#A filter
+        if (!empty($filters['spectrum_procedure'])) {
+            $query->where('spectrum_procedure', $filters['spectrum_procedure']);
+        }
 
         return $query->orderBy('name')->get()->toArray();
     }
@@ -128,6 +132,7 @@ class WorkflowService
      */
     public function createWorkflow(array $data): int
     {
+        require_once __DIR__.'/SpectrumProcedureCatalog.php';
         $workflowId = DB::table('ahg_workflow')->insertGetId([
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
@@ -141,6 +146,7 @@ class WorkflowService
             'allow_parallel' => $data['allow_parallel'] ?? 0,
             'auto_archive_days' => $data['auto_archive_days'] ?? null,
             'notification_enabled' => $data['notification_enabled'] ?? 1,
+            'spectrum_procedure' => SpectrumProcedureCatalog::normalize($data['spectrum_procedure'] ?? null),
             'created_by' => $data['created_by'] ?? null,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
@@ -154,6 +160,10 @@ class WorkflowService
      */
     public function updateWorkflow(int $id, array $data): bool
     {
+        require_once __DIR__.'/SpectrumProcedureCatalog.php';
+        if (array_key_exists('spectrum_procedure', $data)) {
+            $data['spectrum_procedure'] = SpectrumProcedureCatalog::normalize($data['spectrum_procedure']);
+        }
         $oldValues = (array) (DB::table('ahg_workflow')->where('id', $id)->first() ?? []);
         $data['updated_at'] = date('Y-m-d H:i:s');
         $result = DB::table('ahg_workflow')->where('id', $id)->update($data) > 0;
