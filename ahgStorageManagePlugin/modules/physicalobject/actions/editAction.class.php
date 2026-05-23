@@ -36,6 +36,9 @@ class PhysicalObjectEditAction extends AhgEditController
     {
         parent::execute($request);
 
+        // heratio#145 follow-up — load strongroom data for the edit form.
+        $this->loadStrongroomViewData();
+
         if ($request->isMethod('post')) {
             $this->form->bind($request->getPostParameters());
             if ($this->form->isValid()) {
@@ -47,11 +50,71 @@ class PhysicalObjectEditAction extends AhgEditController
                     $this->resource->save();
                 }
 
+                // heratio#145 follow-up — apply strongroom assignment if requested.
+                $this->applyStrongroomAssignment($request);
+
                 if (null !== $next = $this->form->getValue('next')) {
                     $this->redirect($next);
                 }
 
                 $this->redirect([$this->resource, 'module' => 'physicalobject']);
+            }
+        }
+    }
+
+    /**
+     * Populate $this->strongroomChoices + $this->currentAssignment for the view.
+     * No-op if the strongroom feature is not yet installed.
+     */
+    private function loadStrongroomViewData()
+    {
+        $this->strongroomChoices = [];
+        $this->currentAssignment = null;
+
+        try {
+            if (!\Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_strongroom')) {
+                return;
+            }
+        } catch (Exception $e) {
+            return;
+        }
+
+        if (!class_exists('\\AhgStorageManage\\Services\\StrongroomService')) {
+            return;
+        }
+
+        $svc = new \AhgStorageManage\Services\StrongroomService();
+        $this->strongroomChoices = $svc->dropdownChoices();
+        if (isset($this->resource->id) && $this->resource->id > 0) {
+            $this->currentAssignment = $svc->getAssignment((int) $this->resource->id);
+        }
+    }
+
+    /**
+     * Handle strongroom_action POST values: 'assign' / 'unassign' / '' (no-op).
+     */
+    private function applyStrongroomAssignment($request)
+    {
+        if (!class_exists('\\AhgStorageManage\\Services\\StrongroomService')) {
+            return;
+        }
+        if (!isset($this->resource->id) || $this->resource->id <= 0) {
+            return;
+        }
+
+        $action = (string) $request->getParameter('strongroom_action', '');
+        $svc = new \AhgStorageManage\Services\StrongroomService();
+        $physicalObjectId = (int) $this->resource->id;
+
+        if ('unassign' === $action) {
+            $svc->unassign($physicalObjectId);
+            return;
+        }
+        if ('assign' === $action) {
+            $roomId = (int) $request->getParameter('strongroom_id', 0);
+            $size = (float) $request->getParameter('size_units_used', 0);
+            if ($roomId > 0) {
+                $svc->assign($physicalObjectId, $roomId, $size);
             }
         }
     }

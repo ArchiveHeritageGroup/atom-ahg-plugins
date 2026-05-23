@@ -36,6 +36,13 @@ $hasDedupePlugin = ahgIsPluginEnabled('ahgDedupePlugin');
 $hasHeritage = ahgIsPluginEnabled('ahgHeritagePlugin');
 $hasResearcher = ahgIsPluginEnabled('ahgResearcherPlugin');
 
+// Strongroom feature — present when ahg_strongroom table exists
+// (ships with ahgStorageManagePlugin v3.40.0+).
+$hasStrongroom = false;
+try {
+    $hasStrongroom = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_strongroom');
+} catch (Exception $e) {}
+
 // Get pending counts for badges
 $pendingBookings = 0;
 $pendingResearchers = 0;
@@ -179,6 +186,12 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminDashboard']); ?>"><i class="fas fa-landmark fa-fw me-1"></i><?php echo __('Admin'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'analyticsDashboard']); ?>"><i class="fas fa-chart-line fa-fw me-1"></i><?php echo __('Analytics'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'heritage', 'action' => 'custodianDashboard']); ?>"><i class="fas fa-user-shield fa-fw me-1"></i><?php echo __('Custodian'); ?></a></li>
+    <?php endif; ?>
+
+    <?php if ($hasStrongroom): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Storage'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'strongroom', 'action' => 'browse']); ?>"><i class="fas fa-warehouse fa-fw me-1"></i><?php echo __('Strongrooms'); ?></a></li>
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>

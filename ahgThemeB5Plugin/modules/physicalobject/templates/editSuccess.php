@@ -350,6 +350,62 @@
         </div>
       </div>
 
+      <?php /* heratio#145 follow-up — Strongroom assignment, only when feature installed. */ ?>
+      <?php if (!empty($strongroomChoices ?? []) || !empty($currentAssignment ?? null)): ?>
+      <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0"><i class="fas fa-warehouse me-2"></i><?php echo __('Strongroom assignment'); ?></h5>
+        </div>
+        <div class="card-body">
+          <?php if (!empty($currentAssignment)): ?>
+            <div class="alert alert-secondary py-2 mb-3">
+              <?php echo __('Currently in:'); ?>
+              <strong><?php echo esc_entities($currentAssignment->strongroom_name); ?></strong>
+              — <?php echo (float) $currentAssignment->size_units_used; ?>
+              <?php echo esc_entities(__($currentAssignment->capacity_unit)); ?>
+            </div>
+          <?php endif; ?>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold"><?php echo __('Action'); ?></label>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="strongroom_action" id="sra_none" value="" checked>
+              <label class="form-check-label" for="sra_none"><?php echo __('No change'); ?></label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="strongroom_action" id="sra_assign" value="assign">
+              <label class="form-check-label" for="sra_assign"><?php echo !empty($currentAssignment) ? __('Move to another strongroom (or update units)') : __('Assign to a strongroom'); ?></label>
+            </div>
+            <?php if (!empty($currentAssignment)): ?>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="strongroom_action" id="sra_unassign" value="unassign">
+              <label class="form-check-label" for="sra_unassign"><?php echo __('Remove from current strongroom'); ?></label>
+            </div>
+            <?php endif; ?>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label"><?php echo __('Strongroom'); ?></label>
+              <select name="strongroom_id" class="form-select">
+                <option value=""><?php echo __('-- Select a strongroom --'); ?></option>
+                <?php foreach (($strongroomChoices ?? []) as $rid => $label): ?>
+                  <option value="<?php echo (int) $rid; ?>" <?php echo (!empty($currentAssignment) && (int) $currentAssignment->strongroom_id === (int) $rid) ? 'selected' : ''; ?>><?php echo esc_entities($label); ?></option>
+                <?php endforeach; ?>
+              </select>
+              <small class="text-muted"><?php echo __('Used only when "Assign" or "Move" is selected above.'); ?></small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label"><?php echo __('Units used'); ?></label>
+              <input type="number" name="size_units_used" class="form-control" min="0" step="0.01"
+                     value="<?php echo !empty($currentAssignment) ? (float) $currentAssignment->size_units_used : ''; ?>">
+              <small class="text-muted"><?php echo __('Matched to the room\'s unit (linear-metres, boxes, etc).'); ?></small>
+            </div>
+          </div>
+        </div>
+      </div>
+      <?php endif; ?>
+
     </div>
   </div>
 
