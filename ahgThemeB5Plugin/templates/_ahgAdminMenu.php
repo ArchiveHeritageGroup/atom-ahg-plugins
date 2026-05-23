@@ -46,8 +46,10 @@ try {
 // heratio#143 Phase 1 — Workflow visual diagram + designer surface
 // (gated by ahg_workflow table existence).
 $hasWorkflow = false;
+$hasSpectrumCompliance = false;
 try {
     $hasWorkflow = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_workflow');
+    $hasSpectrumCompliance = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_spectrum_object_compliance');
 } catch (Exception $e) {}
 
 // Get pending counts for badges
@@ -206,6 +208,10 @@ if ($isAdmin && $hasResearcher) {
     <li><h6 class="dropdown-header"><?php echo __('Workflow'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('Workflows & diagrams'); ?></a></li>
+    <?php if ($hasSpectrumCompliance): ?>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']); ?>"><i class="fas fa-university fa-fw me-1"></i><?php echo __('Spectrum compliance'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumChain']); ?>"><i class="fas fa-link fa-fw me-1"></i><?php echo __('Spectrum chain rules'); ?></a></li>
+    <?php endif; ?>
     <?php endif; ?>
 
     <li><hr class="dropdown-divider"></li>

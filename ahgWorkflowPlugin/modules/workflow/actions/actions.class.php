@@ -135,7 +135,18 @@ class workflowActions extends AhgController
 
             try {
                 $this->getService()->approveTask($taskId, $this->getCurrentUserId(), $comment, $checklist);
-                $this->getUser()->setFlash('notice', 'Task approved');
+                // Spectrum Phase C2 — fire chain rules (best-effort, doesn't block approval)
+                try {
+                    require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumComplianceService.php';
+                    $chain = (new SpectrumComplianceService())->applyChainOnTaskApproved($taskId);
+                    $msg = 'Task approved';
+                    if (($chain['spawned'] ?? 0) > 0) {
+                        $msg .= sprintf(' (Spectrum chain spawned %d downstream task(s))', $chain['spawned']);
+                    }
+                    $this->getUser()->setFlash('notice', $msg);
+                } catch (\Throwable $chainErr) {
+                    $this->getUser()->setFlash('notice', 'Task approved');
+                }
                 $this->redirect('workflow/my-tasks');
             } catch (Exception $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
@@ -1114,6 +1125,96 @@ class workflowActions extends AhgController
     // =========================================================================
     // Spectrum#B — install seed pack
     // =========================================================================
+
+    // =========================================================================
+    // Spectrum Phase C — compliance dashboard, chain rules, CSV export
+    // =========================================================================
+
+    public function executeSpectrumDashboard($request)
+    {
+        $this->requireAdmin();
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumComplianceService.php';
+        $overdueDays = (int) $request->getParameter('overdue_days', 30);
+        $svc = new SpectrumComplianceService();
+        $this->heatmap = $svc->heatmap('information_object', $overdueDays);
+        $this->overdueDays = $overdueDays;
+        $this->statuses = SpectrumComplianceService::STATUSES;
+    }
+
+    public function executeSpectrumExportCsv($request)
+    {
+        $this->requireAdmin();
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumComplianceService.php';
+        $overdueDays = (int) $request->getParameter('overdue_days', 30);
+        $svc = new SpectrumComplianceService();
+        $heatmap = $svc->heatmap('information_object', $overdueDays);
+
+        $filename = 'spectrum_compliance_'.date('Y-m-d').'.csv';
+        $this->getResponse()->setContentType('text/csv');
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="'.$filename.'"');
+
+        $body = '';
+        $body .= "procedure_code,procedure,total_objects,not_started,in_progress,completed,overdue,rejected,percent_completed\n";
+        foreach ($heatmap as $code => $row) {
+            $body .= sprintf("%s,\"%s\",%d,%d,%d,%d,%d,%d,%.1f\n",
+                $code, str_replace('"', '""', $row['label']),
+                $row['total_objects'],
+                $row['totals']['not_started'], $row['totals']['in_progress'], $row['totals']['completed'],
+                $row['totals']['overdue'], $row['totals']['rejected'],
+                $row['percent_completed']
+            );
+        }
+        return $this->renderText($body);
+    }
+
+    public function executeSpectrumChain($request)
+    {
+        $this->requireAdmin();
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumComplianceService.php';
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumProcedureCatalog.php';
+        $svc = new SpectrumComplianceService();
+        $this->rules = $svc->getChainRules();
+        $this->procedures = SpectrumProcedureCatalog::all();
+    }
+
+    public function executeSpectrumChainSave($request)
+    {
+        $this->requireAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect('workflow/spectrumChain');
+        }
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumComplianceService.php';
+        $svc = new SpectrumComplianceService();
+        try {
+            $svc->saveChainRule([
+                'id'             => $request->getParameter('id'),
+                'from_procedure' => $request->getParameter('from_procedure'),
+                'to_procedure'   => $request->getParameter('to_procedure'),
+                'trigger_event'  => $request->getParameter('trigger_event', 'on_complete'),
+                'is_active'      => $request->getParameter('is_active'),
+                'notes'          => $request->getParameter('notes'),
+            ]);
+            $this->getUser()->setFlash('notice', 'Chain rule saved');
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', $e->getMessage());
+        }
+        $this->redirect('workflow/spectrumChain');
+    }
+
+    public function executeSpectrumChainDelete($request)
+    {
+        $this->requireAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect('workflow/spectrumChain');
+        }
+        require_once dirname(dirname(dirname(dirname(__FILE__)))).'/lib/Services/SpectrumComplianceService.php';
+        $id = (int) $request->getParameter('id', 0);
+        if ($id > 0) {
+            (new SpectrumComplianceService())->deleteChainRule($id);
+            $this->getUser()->setFlash('notice', 'Chain rule deleted');
+        }
+        $this->redirect('workflow/spectrumChain');
+    }
 
     public function executeInstallSpectrumPack($request)
     {
