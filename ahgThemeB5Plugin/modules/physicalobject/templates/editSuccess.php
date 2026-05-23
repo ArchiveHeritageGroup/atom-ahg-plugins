@@ -29,7 +29,7 @@
               <div class="mb-3">
                 <label class="form-label"><?php echo __('Name'); ?> <span class="text-danger">*</span></label>
                 <input type="text" name="name" class="form-control" required
-                       value="<?php echo esc_entities($resource->getName(['cultureFallback' => true])); ?>">
+                       value="<?php echo esc_entities($resource->id ? $resource->getName(['cultureFallback' => true]) : ''); ?>">
               </div>
             </div>
             <div class="col-md-6">
@@ -49,7 +49,7 @@
           <div class="mb-3">
             <label class="form-label"><?php echo __('Location (legacy)'); ?></label>
             <input type="text" name="location" class="form-control"
-                   value="<?php echo esc_entities($resource->getLocation(['cultureFallback' => true])); ?>"
+                   value="<?php echo esc_entities($resource->id ? $resource->getLocation(['cultureFallback' => true]) : ''); ?>"
                    placeholder="<?php echo __('Use extended location fields below instead'); ?>">
             <small class="text-muted"><?php echo __('For backwards compatibility. Use the detailed fields below.'); ?></small>
           </div>
