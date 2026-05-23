@@ -47,9 +47,11 @@ try {
 // (gated by ahg_workflow table existence).
 $hasWorkflow = false;
 $hasSpectrumCompliance = false;
+$hasExhibitionSpace = false;
 try {
     $hasWorkflow = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_workflow');
     $hasSpectrumCompliance = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_spectrum_object_compliance');
+    $hasExhibitionSpace = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_exhibition_space');
 } catch (Exception $e) {}
 
 // Get pending counts for badges
@@ -201,6 +203,12 @@ if ($isAdmin && $hasResearcher) {
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('Storage'); ?></h6></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'strongroom', 'action' => 'browse']); ?>"><i class="fas fa-warehouse fa-fw me-1"></i><?php echo __('Strongrooms'); ?></a></li>
+    <?php endif; ?>
+
+    <?php if ($hasExhibitionSpace): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Exhibition spaces'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'browse']); ?>"><i class="fas fa-palette fa-fw me-1"></i><?php echo __('Exhibition spaces'); ?></a></li>
     <?php endif; ?>
 
     <?php if ($hasWorkflow): ?>
