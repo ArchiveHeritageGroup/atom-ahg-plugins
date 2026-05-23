@@ -13,3 +13,43 @@ physicalobject_boxlist_override:
 physicalobject_holdings_export_override:
   url: /physicalobject/holdingsReportExport
   param: { module: storageManage, action: holdingsReportExport }
+
+# ---------------------------------------------------------------------------
+# heratio#145 — Strongroom space allocation. Specific paths (browse, add) MUST
+# come before /strongroom/:slug or the slug pattern swallows them.
+# ---------------------------------------------------------------------------
+strongroom_browse:
+  url: /strongroom/browse
+  param: { module: strongroom, action: browse }
+
+strongroom_create:
+  url: /strongroom/add
+  param: { module: strongroom, action: create }
+
+strongroom_edit:
+  url: /strongroom/:slug/edit
+  param: { module: strongroom, action: edit }
+  requirements:
+    slug: '[a-z0-9][a-z0-9-]*'
+
+strongroom_delete:
+  url: /strongroom/:slug/delete
+  param: { module: strongroom, action: delete }
+  requirements:
+    slug: '[a-z0-9][a-z0-9-]*'
+
+strongroom_assign:
+  url: /strongroom/:slug/assign
+  param: { module: strongroom, action: assign }
+  requirements:
+    slug: '[a-z0-9][a-z0-9-]*'
+
+strongroom_unassign:
+  url: /strongroom/unassign
+  param: { module: strongroom, action: unassign }
+
+strongroom_show:
+  url: /strongroom/:slug
+  param: { module: strongroom, action: show }
+  requirements:
+    slug: '(?!browse|add|unassign)[a-z0-9][a-z0-9-]*'

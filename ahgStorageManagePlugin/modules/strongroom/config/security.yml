@@ -1,0 +1,30 @@
+# heratio#145 — Strongroom space allocation. Read-only actions (browse / show)
+# are public; CRUD requires administrator. Mirrors the Heratio-Laravel ACL.
+all:
+  is_secure: false
+
+browse:
+  is_secure: false
+
+show:
+  is_secure: false
+
+create:
+  is_secure: true
+  credentials: administrator
+
+edit:
+  is_secure: true
+  credentials: administrator
+
+delete:
+  is_secure: true
+  credentials: administrator
+
+assign:
+  is_secure: true
+  credentials: administrator
+
+unassign:
+  is_secure: true
+  credentials: administrator
