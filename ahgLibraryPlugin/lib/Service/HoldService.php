@@ -204,7 +204,7 @@ class HoldService
             ->whereIn('h.hold_status', ['pending', 'ready'])
             ->select([
                 'h.*',
-                'p.first_name', 'p.last_name', 'p.patron_barcode', 'p.email',
+                'p.first_name', 'p.last_name', 'p.card_number as patron_barcode', 'p.email',
             ])
             ->orderBy('h.queue_position')
             ->get()

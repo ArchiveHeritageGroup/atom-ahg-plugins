@@ -109,13 +109,13 @@
             <?php foreach ($rawResults as $row): ?>
               <?php
                 $statusBadge = 'bg-secondary';
-                if (($row->subscription_status ?? '') === 'active') {
+                if (($row->status ?? '') === 'active') {
                     $statusBadge = 'bg-success';
-                } elseif (($row->subscription_status ?? '') === 'suspended') {
+                } elseif (($row->status ?? '') === 'suspended') {
                     $statusBadge = 'bg-warning text-dark';
-                } elseif (($row->subscription_status ?? '') === 'cancelled') {
+                } elseif (($row->status ?? '') === 'cancelled') {
                     $statusBadge = 'bg-danger';
-                } elseif (($row->subscription_status ?? '') === 'expired') {
+                } elseif (($row->status ?? '') === 'expired') {
                     $statusBadge = 'bg-dark';
                 }
               ?>
@@ -130,7 +130,7 @@
                 <td><?php echo esc_entities(ucfirst($row->frequency ?? '-')); ?></td>
                 <td>
                   <span class="badge <?php echo $statusBadge; ?>">
-                    <?php echo esc_entities(ucfirst($row->subscription_status ?? 'unknown')); ?>
+                    <?php echo esc_entities(ucfirst($row->status ?? 'unknown')); ?>
                   </span>
                 </td>
                 <td><?php echo esc_entities($row->renewal_date ?? '-'); ?></td>

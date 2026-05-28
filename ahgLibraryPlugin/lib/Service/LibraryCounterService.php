@@ -55,7 +55,7 @@ class LibraryCounterService
         $this->reportEnd   = $reportEnd   ?: date('Y-m-d');
         $this->institutionName = $institutionName;
         $this->institutionId   = $institutionId;
-        $this->platform       = $platform ?? sfConfig::get('app_library_name', 'AHG Library');
+        $this->platform       = $platform ?? \sfConfig::get('app_library_name', 'AHG Library');
     }
 
     // ── Public API ─────────────────────────────────────────────────────────────
@@ -145,7 +145,7 @@ class LibraryCounterService
             }
         }
 
-        $now = (new DateTime())->format('Y-m-d\TH:i:s\Z');
+        $now = (new \DateTime())->format('Y-m-d\TH:i:s\Z');
 
         return [[
             'Report_ID'                        => self::REPORT_PR,
@@ -186,7 +186,7 @@ class LibraryCounterService
             ->get()
             ->toArray();
 
-        $now = (new DateTime())->format('Y-m-d\TH:i:s\Z');
+        $now = (new \DateTime())->format('Y-m-d\TH:i:s\Z');
         $records = [];
 
         foreach ($rows as $row) {
@@ -255,7 +255,7 @@ class LibraryCounterService
             'Institution'      => $this->institutionName,
             'Institution_ID'   => $this->institutionId,
             'Platform'         => $this->platform,
-            'Created'          => (new DateTime())->format('Y-m-d\TH:i:s\Z'),
+            'Created'          => (new \DateTime())->format('Y-m-d\TH:i:s\Z'),
             'Reporting_Period' => [
                 'Begin' => $this->reportStart,
                 'End'   => $this->reportEnd,
@@ -306,7 +306,7 @@ class LibraryCounterService
     ): int {
         $validTypes = ['opac_view','link_click','ir_access','search','export'];
         if (!in_array($eventType, $validTypes, true)) {
-            throw new Exception("Invalid event_type: $eventType");
+            throw new \Exception("Invalid event_type: $eventType");
         }
 
         // Guard: only log authenticated/anonymous patrons with valid item references
@@ -360,7 +360,7 @@ class LibraryCounterService
     protected function pivotToCounterFormat(array $rows, string $reportId): array
     {
         $records = [];
-        $now = (new DateTime())->format('Y-m-d\TH:i:s\Z');
+        $now = (new \DateTime())->format('Y-m-d\TH:i:s\Z');
 
         // Group by item
         $grouped = [];

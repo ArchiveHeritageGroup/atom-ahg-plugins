@@ -55,7 +55,7 @@ class PatronService
         $now = date('Y-m-d H:i:s');
 
         $id = DB::table('library_patron')->insertGetId([
-            'patron_barcode'     => $data['patron_barcode'] ?? ($this->getSetting('barcode_auto_generate', '1') === '1' ? $this->generateBarcode() : null),
+            'card_number'        => $data['card_number'] ?? $data['patron_barcode'] ?? ($this->getSetting('barcode_auto_generate', '1') === '1' ? $this->generateBarcode() : null),
             'first_name'         => $data['first_name'],
             'last_name'          => $data['last_name'],
             'email'              => $data['email'] ?? null,
@@ -114,7 +114,7 @@ class PatronService
      */
     public function findByBarcode(string $barcode): ?object
     {
-        return DB::table('library_patron')->where('patron_barcode', $barcode)->first();
+        return DB::table('library_patron')->where('card_number', $barcode)->first();
     }
 
     /**
@@ -138,7 +138,7 @@ class PatronService
                 $qb->where('first_name', 'LIKE', $q)
                     ->orWhere('last_name', 'LIKE', $q)
                     ->orWhere('email', 'LIKE', $q)
-                    ->orWhere('patron_barcode', 'LIKE', $q);
+                    ->orWhere('card_number', 'LIKE', $q);
             });
         }
 
@@ -361,7 +361,7 @@ class PatronService
     {
         do {
             $barcode = 'P' . str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-        } while (DB::table('library_patron')->where('patron_barcode', $barcode)->exists());
+        } while (DB::table('library_patron')->where('card_number', $barcode)->exists());
 
         return $barcode;
     }

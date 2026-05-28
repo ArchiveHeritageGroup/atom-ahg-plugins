@@ -13,7 +13,6 @@ declare(strict_types=1);
  */
 
 use AtomFramework\Http\Controllers\AhgController;
-use AtomExtensions\Services\FrbrService;
 
 class libraryBrowseAction extends AhgController
 {
@@ -49,6 +48,7 @@ class libraryBrowseAction extends AhgController
             })
             ->where('io.source_standard', 'library')
             ->select([
+                'li.id as id',
                 'li.id as library_item_id',
                 'io.id as io_id',
                 'ioi.title',
@@ -87,6 +87,7 @@ class libraryBrowseAction extends AhgController
                 ->limit(5000)
                 ->orderBy('ioi.title')
                 ->get()
+                ->map(fn($r) => (array) $r)
                 ->all();
 
             // Cluster using FrbrService
@@ -146,7 +147,8 @@ class libraryBrowseAction extends AhgController
                 })
                 ->where('io.source_standard', 'library')
                 ->select([
-                    'li.id as library_item_id',
+                    'li.id as id',
+                'li.id as library_item_id',
                     'io.id as io_id',
                     'ioi.title',
                     's.slug',

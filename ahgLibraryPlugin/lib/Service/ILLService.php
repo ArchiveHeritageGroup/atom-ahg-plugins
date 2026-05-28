@@ -146,7 +146,7 @@ class ILLService
             ->where('ill.id', $id)
             ->select([
                 'ill.*',
-                'p.first_name', 'p.last_name', 'p.patron_barcode', 'p.email',
+                'p.first_name', 'p.last_name', 'p.card_number as patron_barcode', 'p.email',
             ])
             ->first();
     }
@@ -184,7 +184,7 @@ class ILLService
 
         $rows = $query->select([
                 'ill.*',
-                'p.first_name', 'p.last_name', 'p.patron_barcode',
+                'p.first_name', 'p.last_name', 'p.card_number as patron_barcode',
             ])
             ->orderBy('ill.request_date', 'desc')
             ->offset(($page - 1) * $limit)

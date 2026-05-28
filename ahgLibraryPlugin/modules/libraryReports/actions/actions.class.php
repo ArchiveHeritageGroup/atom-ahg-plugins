@@ -6,6 +6,10 @@ use AtomExtensions\Services\SushiService;
 
 use Illuminate\Database\Capsule\Manager as DB;
 
+// Symfony 1.x does not autoload namespaced plugin classes; load the services explicitly.
+require_once sfConfig::get('sf_plugins_dir').'/ahgLibraryPlugin/lib/Service/LibraryCounterService.php';
+require_once sfConfig::get('sf_plugins_dir').'/ahgLibraryPlugin/lib/Service/SushiService.php';
+
 /**
  * Library Reports Module
  * Reports for library items, creators, subjects, circulation
@@ -465,7 +469,7 @@ class libraryReportsActions extends AhgController
 
         $itemId  = $request->getParameter('item_id');
         $action  = $request->getParameter('action', 'list');
-        $frbrSvc = \AtomExtensions\Services\FrbrService::getInstance();
+        $frbrSvc = \FrbrService::getInstance();
         $userId  = $this->getUser()->id ?? null;
 
         if ($request->getMethod() === 'POST') {

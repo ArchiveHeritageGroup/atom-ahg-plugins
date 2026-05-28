@@ -9,12 +9,15 @@ declare(strict_types=1);
  * @subpackage z3950
  */
 
-namespace AtomExtensions\Modules\Z3950;
-
 use AtomFramework\Http\Controllers\AhgController;
 use AtomExtensions\Services\Z3950Service;
 use AtomExtensions\Services\SruService;
 use Illuminate\Database\Capsule\Manager as DB;
+
+// Symfony 1.x dispatches the actions class in the global namespace and does not
+// autoload namespaced plugin classes; keep this class global and load services.
+require_once sfConfig::get('sf_plugins_dir').'/ahgLibraryPlugin/lib/Service/Z3950Service.class.php';
+require_once sfConfig::get('sf_plugins_dir').'/ahgLibraryPlugin/lib/Service/SruService.class.php';
 
 class Z3950Actions extends AhgController
 {

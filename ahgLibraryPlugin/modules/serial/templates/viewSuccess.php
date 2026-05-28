@@ -63,7 +63,7 @@
               <td>
                 <?php
                   $statusBadge = 'bg-secondary';
-                  $st = $rawSub->subscription_status ?? '';
+                  $st = $rawSub->status ?? '';
                   if ($st === 'active') { $statusBadge = 'bg-success'; }
                   elseif ($st === 'suspended') { $statusBadge = 'bg-warning text-dark'; }
                   elseif ($st === 'cancelled') { $statusBadge = 'bg-danger'; }

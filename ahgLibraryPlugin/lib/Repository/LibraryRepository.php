@@ -25,7 +25,7 @@ class LibraryRepository
     protected const TABLE_SUBJECT = 'library_item_subject';
     protected const TABLE_COPY = 'library_copy';
     protected const TABLE_SERIAL = 'library_serial_holding';
-    protected const TABLE_CIRCULATION = 'library_circulation';
+    protected const TABLE_CIRCULATION = 'library_checkout';
     protected const TABLE_IO = 'information_object';
     protected const TABLE_IO_I18N = 'information_object_i18n';
 

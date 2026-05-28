@@ -287,7 +287,7 @@ class FineService
 
         $rows = $query->select([
                 'f.*',
-                'p.first_name', 'p.last_name', 'p.patron_barcode',
+                'p.first_name', 'p.last_name', 'p.card_number as patron_barcode',
             ])
             ->orderBy('f.created_at', 'desc')
             ->offset(($page - 1) * $limit)

@@ -105,6 +105,265 @@ class MarcService
      *
      * @return array{imported: int, skipped: int, errors: array}
      */
+
+    // ========================================================================
+    // CSV IMPORT
+    // ========================================================================
+
+    /**
+     * Bulk import library items from a CSV file.
+     *
+     * Supported columns (header row required):
+     *   title, author, isbn, issn, doi, lccn, oclc_number,
+     *   publisher, publication_date, publication_place, edition_statement,
+     *   material_type, language, call_number, dewey_decimal, classification_number,
+     *   pagination, physical_details, description, subjects,
+     *   barcode, copy_count, location
+     *
+     * If 'isbn' is present and matches an existing item, the item is updated.
+     * Otherwise a new library item is created.
+     *
+     * @param string $filePath  Path to the CSV file
+     * @param int|null $repositoryId  AtoM repository ID
+     * @param array $options    Options: dry_run (bool), delimiter (string), enclosure (string)
+     * @return array{imported: int, skipped: int, errors: string[], results: array}
+     */
+    public function importCsv(string $filePath, ?int $repositoryId = null, array $options = []): array
+    {
+        $dry_run = !empty($options['dry_run']);
+        $delimiter = $options['delimiter'] ?? ';';
+        $enclosure = $options['enclosure'] ?? '"';
+
+        if (!file_exists($filePath)) {
+            return [
+                'imported' => 0,
+                'skipped'  => 0,
+                'errors'   => ['File not found: ' . $filePath],
+                'results'  => [],
+            ];
+        }
+
+        $handle = fopen($filePath, 'r');
+        if ($handle === false) {
+            return [
+                'imported' => 0,
+                'skipped'  => 0,
+                'errors'   => ['Could not open file: ' . $filePath],
+                'results'  => [],
+            ];
+        }
+
+        // Read header row
+        $headers = fgetcsv($handle, 0, $delimiter, $enclosure);
+        if ($headers === false || empty($headers)) {
+            fclose($handle);
+            return [
+                'imported' => 0,
+                'skipped'  => 0,
+                'errors'   => ['CSV file has no header row or is empty'],
+                'results'  => [],
+            ];
+        }
+
+        // Normalize headers: trim, lowercase, map aliases
+        $normalizedHeaders = [];
+        $aliasMap = [
+            'title'              => ['title', 'main_title', 'bib_title'],
+            'author'             => ['author', 'authors', 'creator', 'creators', 'name'],
+            'isbn'              => ['isbn', 'isbn_13', 'isbn10'],
+            'issn'              => ['issn'],
+            'doi'               => ['doi'],
+            'lccn'              => ['lccn'],
+            'oclc_number'       => ['oclc', 'oclc_number'],
+            'publisher'         => ['publisher', 'publishers'],
+            'publication_date'  => ['publication_date', 'pub_date', 'year', 'date', 'date_of_publication'],
+            'publication_place' => ['publication_place', 'pub_place', 'place', 'place_of_publication'],
+            'edition_statement' => ['edition', 'edition_statement', 'edition_info'],
+            'material_type'     => ['material_type', 'type', 'format', 'mat_type'],
+            'language'          => ['language', 'lang'],
+            'call_number'       => ['call_number', 'callnumber', 'shelfmark'],
+            'dewey_decimal'     => ['dewey_decimal', 'ddc', 'dewey'],
+            'classification_number' => ['classification_number', 'classification'],
+            'pagination'        => ['pagination', 'pages', 'page_count', 'extent'],
+            'physical_details'  => ['physical_details', 'physical_description', 'physical_form'],
+            'description'       => ['description', 'abstract', 'summary', 'notes'],
+            'subjects'          => ['subjects', 'subject', 'keywords', 'keyword'],
+            'barcode'           => ['barcode', 'item_barcode'],
+            'copy_count'        => ['copy_count', 'copies', 'number_of_copies'],
+            'location'          => ['location', 'shelf_location', 'holding_location'],
+        ];
+
+        foreach ($headers as $col) {
+            $colNorm = strtolower(trim($col));
+            $found = false;
+            foreach ($aliasMap as $target => $aliases) {
+                if (in_array($colNorm, $aliases, true)) {
+                    $normalizedHeaders[$target] = array_search($col, $headers, true);
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $normalizedHeaders[$colNorm] = array_search($col, $headers, true);
+            }
+        }
+
+        $imported = 0;
+        $skipped = 0;
+        $errors = [];
+        $results = [];
+        $rowNum = 1; // header is row 1
+
+        while (($row = fgetcsv($handle, 0, $delimiter, $enclosure)) !== false) {
+            $rowNum++;
+            $lineErrors = [];
+
+            // Map row values by normalized header index
+            $values = function (string $key) use ($row, $normalizedHeaders): ?string {
+                if (!isset($normalizedHeaders[$key])) {
+                    return null;
+                }
+                $idx = $normalizedHeaders[$key];
+                if (!isset($row[$idx]) || trim($row[$idx]) === '') {
+                    return null;
+                }
+                return trim($row[$idx]);
+            };
+
+            $title = $values('title');
+            if (empty($title)) {
+                $lineErrors[] = "Row $rowNum: Missing title";
+                $skipped++;
+                $errors = array_merge($errors, $lineErrors);
+                continue;
+            }
+
+            // Build parsed record
+            $parsed = [
+                'title'              => $title,
+                'isbn'              => $values('isbn') ?? $values('isbn_13'),
+                'issn'              => $values('issn'),
+                'lccn'              => $values('lccn'),
+                'oclc_number'       => $values('oclc_number'),
+                'publisher'         => $values('publisher'),
+                'publication_date'  => $values('publication_date'),
+                'publication_place' => $values('publication_place'),
+                'edition_statement' => $values('edition_statement'),
+                'material_type'     => $values('material_type') ?: 'book',
+                'pagination'        => $values('pagination'),
+                'physical_details'  => $values('physical_details'),
+                'description'       => $values('description'),
+                'call_number'       => $values('call_number'),
+                'dewey_decimal'     => $values('dewey_decimal'),
+                'classification_number' => $values('classification_number'),
+            ];
+
+            // Authors / creators
+            $authorRaw = $values('author');
+            if ($authorRaw) {
+                $authors = array_filter(array_map('trim', explode(';', $authorRaw)));
+                $parsed['creators'] = [];
+                foreach ($authors as $i => $name) {
+                    $parsed['creators'][] = [
+                        'name'      => $name,
+                        'role'      => 'aut',
+                        'is_primary' => ($i === 0),
+                    ];
+                }
+            }
+
+            // Subjects (semicolon-separated)
+            $subjectsRaw = $values('subjects');
+            if ($subjectsRaw) {
+                $subjectNames = array_filter(array_map('trim', explode(';', $subjectsRaw)));
+                $parsed['subjects'] = [];
+                foreach ($subjectNames as $i => $name) {
+                    $parsed['subjects'][] = [
+                        'heading'      => $name,
+                        'heading_type' => 'topical',
+                        'source'       => 'lcsh',
+                    ];
+                }
+            }
+
+            // DOI
+            $doiRaw = $values('doi');
+            if ($doiRaw) {
+                $parsed['doi'] = preg_replace('#^https?://(?:dx\.)?doi\.org/#i', '', $doiRaw);
+            }
+
+            if ($dry_run) {
+                $results[] = [
+                    'row'     => $rowNum,
+                    'action'  => 'create_or_update',
+                    'title'   => $title,
+                    'isbn'    => $parsed['isbn'] ?? null,
+                    'errors'  => [],
+                ];
+                $imported++;
+                continue;
+            }
+
+            try {
+                $itemId = $this->importParsedRecord($parsed, $repositoryId);
+
+                // Create copies if specified
+                $copyCount = (int) ($values('copy_count') ?? 1);
+                $barcode = $values('barcode');
+                $location = $values('location');
+
+                for ($c = 0; $c < $copyCount; $c++) {
+                    $copyBarcode = $barcode
+                        ? $barcode . ($copyCount > 1 ? '-' . ($c + 1) : '')
+                        : null;
+
+                    DB::table('library_copy')->insert([
+                        'library_item_id'    => $itemId,
+                        'barcode'            => $copyBarcode,
+                        'copy_status'        => 'available',
+                        'home_location'      => $location,
+                        'created_at'         => date('Y-m-d H:i:s'),
+                        'updated_at'         => date('Y-m-d H:i:s'),
+                    ]);
+                }
+
+                $results[] = [
+                    'row'     => $rowNum,
+                    'action'  => 'imported',
+                    'item_id' => $itemId,
+                    'title'   => $title,
+                ];
+                $imported++;
+
+            } catch (\Exception $e) {
+                $skipped++;
+                $errors[] = "Row $rowNum: " . $e->getMessage();
+                $results[] = [
+                    'row'    => $rowNum,
+                    'action' => 'error',
+                    'title'  => $title,
+                    'error'  => $e->getMessage(),
+                ];
+            }
+        }
+
+        fclose($handle);
+
+        $this->logger->info('CSV import complete', [
+            'file'     => basename($filePath),
+            'imported' => $imported,
+            'skipped'  => $skipped,
+            'dry_run'  => $dry_run,
+        ]);
+
+        return [
+            'imported' => $imported,
+            'skipped'  => $skipped,
+            'errors'   => $errors,
+            'results'  => $results,
+        ];
+    }
+
     public function importMarcXml(string $filePath, ?int $repositoryId = null): array
     {
         if (!file_exists($filePath)) {

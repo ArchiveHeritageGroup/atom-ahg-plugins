@@ -113,8 +113,9 @@
                 <?php
                 // Build a simple CSS bar chart from daily event counts
                 // Fetched in the action and passed as $sparklineData
+                $sparklineData = sfOutputEscaper::unescape($sparklineData ?? []);
                 if (!empty($sparklineData)):
-                    $maxVal = max(array_column($sparklineData, 'count', 1));
+                    $maxVal = max(array_column($sparklineData, 'count') ?: [1]);
                     if ($maxVal <= 0) $maxVal = 1;
                 ?>
                 <div class="d-flex align-items-end gap-1" style="height: 60px;">
@@ -151,6 +152,7 @@
                 <p class="text-muted small mb-3"><?php echo $reportDescription; ?></p>
                 <?php endif; ?>
 
+                <?php $reportData = sfOutputEscaper::unescape($reportData ?? []); ?>
                 <?php if (!empty($reportData) && is_array($reportData)): ?>
                 <!-- Data Table -->
                 <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">

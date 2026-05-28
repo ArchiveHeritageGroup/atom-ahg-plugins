@@ -23,29 +23,26 @@ class circulationIndexAction extends AhgController
 
         // Load recent transactions (last 50)
         try {
-            $this->recentTransactions = DB::table('library_circulation as lc')
-                ->leftJoin('library_item as li', 'lc.library_item_id', '=', 'li.id')
+            $this->recentTransactions = DB::table('library_checkout as c')
+                ->leftJoin('library_copy as cp', 'c.copy_id', '=', 'cp.id')
+                ->leftJoin('library_item as li', 'cp.library_item_id', '=', 'li.id')
                 ->leftJoin('information_object_i18n as ioi', function ($join) {
                     $join->on('li.information_object_id', '=', 'ioi.id')
                          ->where('ioi.culture', '=', 'en');
                 })
-                ->leftJoin('actor_i18n as ai', function ($join) {
-                    $join->on('lc.patron_id', '=', 'ai.id')
-                         ->where('ai.culture', '=', 'en');
-                })
+                ->leftJoin('library_patron as lp', 'c.patron_id', '=', 'lp.id')
                 ->select([
-                    'lc.id',
-                    'lc.action_type',
-                    'lc.checkout_date',
-                    'lc.due_date',
-                    'lc.return_date',
-                    'lc.renewals',
-                    'li.barcode as item_barcode',
-                    'li.call_number',
+                    'c.id',
+                    DB::raw("CASE WHEN c.return_date IS NULL THEN 'checkout' ELSE 'checkin' END as action_type"),
+                    'c.checkout_date',
+                    'c.due_date',
+                    'c.return_date',
+                    'c.renewed_count as renewals',
+                    'cp.barcode as item_barcode',
                     'ioi.title as item_title',
-                    'ai.authorized_form_of_name as patron_name',
+                    DB::raw("TRIM(CONCAT(COALESCE(lp.first_name, ''), ' ', COALESCE(lp.last_name, ''))) as patron_name"),
                 ])
-                ->orderBy('lc.created_at', 'desc')
+                ->orderBy('c.created_at', 'desc')
                 ->limit(50)
                 ->get()
                 ->toArray();
@@ -65,16 +62,14 @@ class circulationIndexAction extends AhgController
         // Circulation stats
         try {
             $this->stats = [
-                'checkedOut' => DB::table('library_circulation')
-                    ->where('action_type', 'checkout')
+                'checkedOut' => DB::table('library_checkout')
                     ->whereNull('return_date')
                     ->count(),
-                'overdueCount' => DB::table('library_circulation')
-                    ->where('action_type', 'checkout')
+                'overdueCount' => DB::table('library_checkout')
                     ->whereNull('return_date')
                     ->where('due_date', '<', date('Y-m-d'))
                     ->count(),
-                'todayTransactions' => DB::table('library_circulation')
+                'todayTransactions' => DB::table('library_checkout')
                     ->whereDate('created_at', date('Y-m-d'))
                     ->count(),
             ];
@@ -95,40 +90,34 @@ class circulationIndexAction extends AhgController
         try {
             // Look up patron by barcode in library_patron table
             $patron = DB::table('library_patron as lp')
-                ->leftJoin('actor_i18n as ai', function ($join) {
-                    $join->on('lp.actor_id', '=', 'ai.id')
-                         ->where('ai.culture', '=', 'en');
-                })
-                ->where('lp.barcode', $barcode)
+                ->where('lp.card_number', $barcode)
                 ->select([
                     'lp.id',
                     'lp.actor_id',
-                    'lp.barcode',
+                    'lp.card_number as barcode',
                     'lp.patron_type',
-                    'lp.status as patron_status',
-                    'ai.authorized_form_of_name as name',
+                    'lp.borrowing_status as patron_status',
+                    DB::raw("TRIM(CONCAT(COALESCE(lp.first_name, ''), ' ', COALESCE(lp.last_name, ''))) as name"),
                 ])
                 ->first();
 
             if ($patron) {
                 // Count active checkouts
-                $activeCheckouts = DB::table('library_circulation')
-                    ->where('patron_id', $patron->actor_id)
-                    ->where('action_type', 'checkout')
+                $activeCheckouts = DB::table('library_checkout')
+                    ->where('patron_id', $patron->id)
                     ->whereNull('return_date')
                     ->count();
 
                 // Count overdue items
-                $overdueItems = DB::table('library_circulation')
-                    ->where('patron_id', $patron->actor_id)
-                    ->where('action_type', 'checkout')
+                $overdueItems = DB::table('library_checkout')
+                    ->where('patron_id', $patron->id)
                     ->whereNull('return_date')
                     ->where('due_date', '<', date('Y-m-d'))
                     ->count();
 
                 // Get outstanding fines
                 $fines = DB::table('library_fine')
-                    ->where('patron_id', $patron->actor_id)
+                    ->where('patron_id', $patron->id)
                     ->where('status', 'outstanding')
                     ->sum('amount');
 

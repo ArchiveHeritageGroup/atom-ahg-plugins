@@ -58,7 +58,7 @@ class SerialService
             'library_item_id'       => $data['library_item_id'],
             'vendor_name'           => $data['vendor_name'] ?? null,
             'subscription_number'   => $data['subscription_number'] ?? null,
-            'subscription_status'   => 'active',
+            'status'                => 'active',
             'start_date'            => $data['start_date'] ?? date('Y-m-d'),
             'end_date'              => $data['end_date'] ?? null,
             'renewal_date'          => $data['renewal_date'] ?? null,
@@ -83,7 +83,7 @@ class SerialService
     public function updateSubscription(int $id, array $data): bool
     {
         $allowed = [
-            'vendor_name', 'subscription_number', 'subscription_status',
+            'vendor_name', 'subscription_number', 'status',
             'start_date', 'end_date', 'renewal_date', 'frequency',
             'expected_issues_year', 'cost_per_year', 'currency', 'budget_id', 'notes',
         ];
@@ -136,7 +136,7 @@ class SerialService
             });
 
         if (!empty($params['subscription_status'])) {
-            $query->where('s.subscription_status', $params['subscription_status']);
+            $query->where('s.status', $params['subscription_status']);
         }
 
         if (!empty($params['q'])) {
@@ -287,7 +287,7 @@ class SerialService
             ->leftJoin('information_object_i18n as ioi', function ($j) {
                 $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
             })
-            ->where('s.subscription_status', 'active')
+            ->where('s.status', 'active')
             ->where('s.renewal_date', '<=', $cutoff)
             ->select(['s.*', 'ioi.title', 'li.issn'])
             ->orderBy('s.renewal_date')
@@ -325,14 +325,14 @@ class SerialService
     public function getStatistics(): array
     {
         return [
-            'active_subscriptions' => DB::table('library_subscription')->where('subscription_status', 'active')->count(),
+            'active_subscriptions' => DB::table('library_subscription')->where('status', 'active')->count(),
             'issues_received'      => DB::table('library_serial_issue')->where('issue_status', 'received')->count(),
             'issues_expected'      => DB::table('library_serial_issue')->where('issue_status', 'expected')
                 ->where('expected_date', '<=', date('Y-m-d'))
                 ->count(),
             'claimed'              => DB::table('library_serial_issue')->where('issue_status', 'claimed')->count(),
             'renewals_due'         => DB::table('library_subscription')
-                ->where('subscription_status', 'active')
+                ->where('status', 'active')
                 ->where('renewal_date', '<=', date('Y-m-d', strtotime('+30 days')))
                 ->count(),
         ];

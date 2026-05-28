@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_target (
   name            VARCHAR(255)     NOT NULL  COMMENT 'Human-readable target name',
   host            VARCHAR(255)     NOT NULL  COMMENT 'Z39.50 host or SRU base URL',
   port            INT UNSIGNED     NOT NULL  DEFAULT 210  COMMENT 'Z39.50 port (default 210)',
-  database        VARCHAR(255)     NOT NULL  COMMENT 'Target database / collection name',
+  `database`      VARCHAR(255)     NOT NULL  COMMENT 'Target database / collection name',
   syntax          VARCHAR(50)      DEFAULT 'marc21'  COMMENT 'marc21 | usmarc | xml',
   username        VARCHAR(255)     NULL,
   password_hash   VARCHAR(64)      NULL  COMMENT 'SHA-256 of the password',

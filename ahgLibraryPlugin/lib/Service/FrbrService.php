@@ -292,6 +292,21 @@ class FrbrService
      * Returns a work-ordered array of clusters.
      * Each cluster: ['primary' => first item, 'manifestations' => [...], 'count' => int]
      */
+    /**
+     * Read a field from an item row that may be an array or a stdClass,
+     * without fataling when the value is null or the other access type is used.
+     */
+    private static function itemField($item, string $key, $default = null)
+    {
+        if (is_array($item)) {
+            return $item[$key] ?? $default;
+        }
+        if (is_object($item)) {
+            return $item->{$key} ?? $default;
+        }
+        return $default;
+    }
+
     public function clusterSearchResults(array $items): array
     {
         // Build override map: library_item_id => [type, target_work_key or null]
@@ -301,8 +316,8 @@ class FrbrService
         $works = [];
 
         foreach ($items as $item) {
-            $id    = (int) ($item->id ?? $item['id'] ?? 0);
-            $title = $item->title ?? $item['title'] ?? '';
+            $id    = (int) self::itemField($item, 'id', 0);
+            $title = self::itemField($item, 'title', '');
             $override = $overrideMap[$id] ?? ['type' => 'none', 'target' => null];
 
             if ($override['type'] === 'force_split') {
@@ -311,7 +326,7 @@ class FrbrService
             } elseif ($override['type'] === 'force_group' && !empty($override['target'])) {
                 $workKey = $override['target'];
             } else {
-                $workKey = $item->frbr_work_key ?? $item['frbr_work_key'] ?? null;
+                $workKey = self::itemField($item, 'frbr_work_key');
                 if (empty($workKey)) {
                     // No work key: singleton based on item id
                     $workKey = 'solo_' . $id;
@@ -346,8 +361,8 @@ class FrbrService
 
         // Sort clusters: by primary title (alphabetical), then by work_key for singletons
         usort($clusters, function ($a, $b) {
-            $ta = mb_strtolower($a['primary']['title'] ?? '');
-            $tb = mb_strtolower($b['primary']['title'] ?? '');
+            $ta = mb_strtolower((string) self::itemField($a['primary'], 'title', ''));
+            $tb = mb_strtolower((string) self::itemField($b['primary'], 'title', ''));
             if ($ta !== $tb) {
                 return $ta <=> $tb;
             }
@@ -366,7 +381,7 @@ class FrbrService
      */
     protected function buildOverrideMap(array $items): array
     {
-        $itemIds = array_map(fn($item) => (int) ($item->id ?? $item['id'] ?? 0), $items);
+        $itemIds = array_map(fn($item) => (int) self::itemField($item, 'id', 0), $items);
         $itemIds = array_filter($itemIds);
 
         if (empty($itemIds)) {

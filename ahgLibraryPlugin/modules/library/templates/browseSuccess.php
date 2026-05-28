@@ -33,6 +33,21 @@
     <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'index']); ?>" class="btn btn-outline-info ms-2">
       <i class="fas fa-chart-bar me-2"></i><?php echo __('Library Reports'); ?>
     </a>
+
+    <?php /* Export dropdown */ ?>
+    <div class="dropdown d-inline-block ms-2">
+      <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-download me-1"></i><?php echo __('Export'); ?>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'library', 'action' => 'export', 'format' => 'csv']); ?>">
+          <i class="fas fa-file-csv me-2 text-success"></i><?php echo __('CSV (Spreadsheet)'); ?></a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'library', 'action' => 'export', 'format' => 'bibtex']); ?>">
+          <i class="fas fa-file-alt me-2 text-primary"></i><?php echo __('BibTeX'); ?></a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'library', 'action' => 'export', 'format' => 'ris']); ?>">
+          <i class="fas fa-file-code me-2 text-info"></i><?php echo __('RIS (Reference Manager)'); ?></a></li>
+      </ul>
+    </div>
   </div>
 </div>
 

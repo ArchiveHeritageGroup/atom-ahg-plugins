@@ -186,7 +186,7 @@ class Z3950Service
         );
 
         if ($id === false) {
-            throw new Exception("yaz_connect failed for {$target->host}:{$target->port}");
+            throw new \Exception("yaz_connect failed for {$target->host}:{$target->port}");
         }
 
         return $id;
@@ -336,7 +336,7 @@ class Z3950Service
             ]));
 
             if ($xml === false) {
-                throw new Exception("HTTP GET failed for SRU URL: {$url}");
+                throw new \Exception("HTTP GET failed for SRU URL: {$url}");
             }
 
             $dom = new \DOMDocument();
@@ -471,16 +471,16 @@ class Z3950Service
                 ->where('isbn', $isbn)
                 ->value('id');
             if ($existing) {
-                throw new Exception("Duplicate ISBN/ISSN: {$isbn} — skipping");
+                throw new \Exception("Duplicate ISBN/ISSN: {$isbn} — skipping");
             }
         }
 
         // Create the information_object primary record
         $ioData = [
             'type'             => 'library',
-            'level_of_description_id' => QubitTerm::getId(QubitTerm::ITEM_ID),
+            'level_of_description_id' => \QubitTerm::getId(\QubitTerm::ITEM_ID),
             'source_standard'   => 'library',
-            'publication_status_id' => QubitTerm::getId(QubitTerm::PUBLICATION_STATUS_DRAFT_ID),
+            'publication_status_id' => \QubitTerm::getId(\QubitTerm::PUBLICATION_STATUS_DRAFT_ID),
             'created_by'       => $userId,
         ];
 

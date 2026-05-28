@@ -1,73 +1,140 @@
 <?php
 
+declare(strict_types=1);
+
 use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * Overdue items list.
+ * circulationOverdueAction — overdue items list and notice dispatch.
  *
- * Shows all items past their due date that have not been returned.
+ * GET  /circulation/overdue   → show overdue list
+ * POST /circulation/overdue   → send batch overdue notices (param: send_notices=1)
+ *
+ * The overdue list is loaded via OverdueNoticeService so that the same
+ * query logic is shared between the UI and the notice-sending pipeline.
+ *
+ * @package ahgLibraryPlugin
  */
 class circulationOverdueAction extends AhgController
 {
+    /** @var array */
+    public $overduePatrons = [];
+
+    /** @var int */
+    public $totalItems = 0;
+
+    /** @var int */
+    public $totalPatrons = 0;
+
+    /** @var int */
+    public $limit = 25;
+
+    /** @var int */
+    public $page = 1;
+
+    /** @var int */
+    public $totalPages = 1;
+
+    /** @var string|null */
+    public $sendResult;
+
+    /** @var bool */
+    public $sendSuccess = false;
+
     public function execute($request)
     {
-        
         // Load framework
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
 
-        // Pagination
-        $this->limit = 25;
+        // Handle POST — send batch notices
+        if ($request->isMethod('post') && $request->getParameter('send_notices')) {
+            return $this->handleSendNotices($request);
+        }
+
         $this->page = max(1, (int) $request->getParameter('page', 1));
         $offset = ($this->page - 1) * $this->limit;
 
-        $today = date('Y-m-d');
-
         try {
-            // Total overdue count
-            $this->total = DB::table('library_circulation')
-                ->where('action_type', 'checkout')
-                ->whereNull('return_date')
-                ->where('due_date', '<', $today)
-                ->count();
+            require_once sfConfig::get('sf_root_dir')
+                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OverdueNoticeService.php';
 
-            // Overdue items with details
-            $this->overdueItems = DB::table('library_circulation as lc')
-                ->join('library_item as li', 'lc.library_item_id', '=', 'li.id')
-                ->leftJoin('information_object_i18n as ioi', function ($join) {
-                    $join->on('li.information_object_id', '=', 'ioi.id')
-                         ->where('ioi.culture', '=', 'en');
-                })
-                ->leftJoin('actor_i18n as ai', function ($join) {
-                    $join->on('lc.patron_id', '=', 'ai.id')
-                         ->where('ai.culture', '=', 'en');
-                })
-                ->leftJoin('library_patron as lp', 'lc.patron_id', '=', 'lp.actor_id')
-                ->where('lc.action_type', 'checkout')
-                ->whereNull('lc.return_date')
-                ->where('lc.due_date', '<', $today)
-                ->select([
-                    'lc.id',
-                    'lc.checkout_date',
-                    'lc.due_date',
-                    'lc.renewals',
-                    'li.barcode as item_barcode',
-                    'li.call_number',
-                    'ioi.title as item_title',
-                    'ai.authorized_form_of_name as patron_name',
-                    'lp.barcode as patron_barcode',
-                    DB::raw("DATEDIFF('{$today}', lc.due_date) as days_overdue"),
-                ])
-                ->orderBy('lc.due_date', 'asc')
-                ->offset($offset)
-                ->limit($this->limit)
-                ->get()
-                ->toArray();
+            $svc = \ahgLibraryPlugin\Service\OverdueNoticeService::getInstance();
+            $result = $svc->getOverdueItems($this->limit, $offset, 1);
+
+            $this->overduePatrons = $result['patrons'];
+            $this->totalItems = $result['total'];
+            $this->totalPatrons = count($this->overduePatrons);
+            $this->totalPages = $this->totalItems > 0
+                ? (int) ceil($this->totalItems / $this->limit)
+                : 1;
+
         } catch (\Exception $e) {
-            $this->total = 0;
-            $this->overdueItems = [];
+            $this->overduePatrons = [];
+            $this->totalItems = 0;
+            $this->totalPatrons = 0;
         }
 
-        $this->totalPages = $this->total > 0 ? (int) ceil($this->total / $this->limit) : 1;
+        return sfView::SUCCESS;
+    }
+
+    /**
+     * Handle POST — dispatch batch overdue notices.
+     */
+    protected function handleSendNotices($request): string
+    {
+        $dryRun = (bool) $request->getParameter('dry_run', false);
+        $minDays = (int) $request->getParameter('min_days', 1);
+
+        try {
+            require_once sfConfig::get('sf_root_dir')
+                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OverdueNoticeService.php';
+
+            $svc = \ahgLibraryPlugin\Service\OverdueNoticeService::getInstance();
+            $result = $svc->sendBatchNotices([
+                'dry_run'  => $dryRun,
+                'min_days' => $minDays,
+                'max_recipients' => 500,
+            ]);
+
+            if ($dryRun) {
+                $this->sendResult = json_encode($result, JSON_PRETTY_PRINT);
+            } else {
+                $this->sendResult = sprintf(
+                    'Sent: %d &bull; Skipped: %d &bull; Total patrons: %d',
+                    $result['sent'],
+                    $result['skipped'],
+                    $result['total_patrons']
+                );
+            }
+            $this->sendSuccess = ($result['sent'] > 0) || $dryRun;
+
+        } catch (\Exception $e) {
+            $this->sendResult = 'Error: ' . $e->getMessage();
+            $this->sendSuccess = false;
+        }
+
+        // Reload list after send
+        $this->page = 1;
+        $this->offset = 0;
+
+        try {
+            require_once sfConfig::get('sf_root_dir')
+                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OverdueNoticeService.php';
+
+            $svc = \ahgLibraryPlugin\Service\OverdueNoticeService::getInstance();
+            $result = $svc->getOverdueItems($this->limit, 0, 1);
+            $this->overduePatrons = $result['patrons'];
+            $this->totalItems = $result['total'];
+            $this->totalPatrons = count($this->overduePatrons);
+            $this->totalPages = $this->totalItems > 0
+                ? (int) ceil($this->totalItems / $this->limit)
+                : 1;
+
+        } catch (\Exception $e) {
+            $this->overduePatrons = [];
+        }
+
+        return sfView::SUCCESS;
     }
 }

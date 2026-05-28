@@ -364,7 +364,7 @@ class CirculationService
             ->where('c.due_date', '<', date('Y-m-d'))
             ->select([
                 'c.*',
-                'p.first_name', 'p.last_name', 'p.email', 'p.patron_barcode',
+                'p.first_name', 'p.last_name', 'p.email', 'p.card_number as patron_barcode',
                 'cp.barcode as copy_barcode',
                 'li.call_number', 'li.isbn',
                 'ioi.title',
