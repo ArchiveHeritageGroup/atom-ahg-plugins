@@ -103,6 +103,7 @@ class displayActions extends AhgController
         $this->materialsFilter = $request->getParameter('materials');
         $this->creationPlaceFilter = $request->getParameter('creationPlace');
         $this->museumRepositoryFilter = $request->getParameter('museumRepository');
+        $this->languageFilter = $request->getParameter('language');
         // Text search filters
         $this->queryFilter = $request->getParameter("query");
         $this->semanticEnabled = $request->getParameter("semantic") == "1";
@@ -196,6 +197,7 @@ class displayActions extends AhgController
             'materialsFilter' => $this->materialsFilter,
             'creationPlaceFilter' => $this->creationPlaceFilter,
             'museumRepositoryFilter' => $this->museumRepositoryFilter,
+            'languageFilter' => $this->languageFilter,
         ]);
 
         if ($facetService->hasActiveFacetFilters()) {
@@ -208,6 +210,7 @@ class displayActions extends AhgController
             $this->places = $facetService->getFacetCounts('place');
             $this->genres = $facetService->getFacetCounts('genre');
             $this->mediaTypes = $facetService->getFacetCounts('media_type');
+            $this->languages = $facetService->getFacetCounts('language');
         } else {
             // No facet filters active: use pre-computed cached counts (zero overhead)
             $this->types = $this->getCachedFacet('glam_type' . $sfx, 'object_type');
@@ -531,6 +534,7 @@ class displayActions extends AhgController
             'materials' => $this->materialsFilter,
             'creationPlace' => $this->creationPlaceFilter,
             'museumRepository' => $this->museumRepositoryFilter,
+            'language'  => $this->languageFilter,
         ];
     }
 
@@ -626,6 +630,22 @@ class displayActions extends AhgController
 
         if ($this->repoFilter) {
             $query->where('io.repository_id', $this->repoFilter);
+        }
+
+        // Language filter. Matches ISO 639-1 codes stored as a JSON array of
+        // objects in information_object_i18n.languages (e.g. [{"code":"en"}]).
+        // Uses REGEXP word-boundary matching so "en" does not match "afr".
+        if ($this->languageFilter !== null && $this->languageFilter !== '') {
+            $code = $this->languageFilter;
+            $query->whereExists(function ($sub) use ($code) {
+                $sub->select(DB::raw(1))
+                    ->from('information_object_i18n as io_lf')
+                    ->whereRaw('io_lf.id = io.id')
+                    ->where('io_lf.culture', '=', 'en')
+                    ->whereNotNull('io_lf.languages')
+                    ->where('io_lf.languages', '!=', '')
+                    ->whereRaw("io_lf.languages REGEXP ?", ['\"' . preg_quote($code, '/') . '\"']);
+            });
         }
 
         // Library-only filters. Each scopes the result set to IOs whose paired

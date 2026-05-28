@@ -51,6 +51,8 @@ $workTypeFilter = $sf_request->getParameter('workType');
 $materialsFilter = $sf_request->getParameter('materials');
 $creationPlaceFilter = $sf_request->getParameter('creationPlace');
 $museumRepositoryFilter = $sf_request->getParameter('museumRepository');
+  $languages = $sf_data->getRaw('languages') ?: [];
+  $languageFilter = $sf_request->getParameter('language');
 
 // Fuzzy search data from action
 $didYouMean = $sf_data->getRaw('didYouMean');
@@ -102,6 +104,7 @@ $fp = [
     'materials' => $materialsFilter,
     'creationPlace' => $creationPlaceFilter,
     'museumRepository' => $museumRepositoryFilter,
+    'language' => $languageFilter,
 ];
 
 $typeConfig = [
@@ -457,6 +460,33 @@ function getItemUrl($obj) {
     </div>
   </div>
   <?php endif ?>
+
+  <!-- Language Facet - CLOSED by default (typically few distinct languages) -->
+  <?php if (!empty($languages)): ?>
+  <div class="card mb-2">
+    <div class="card-header bg-light py-2 cursor-pointer" role="button" tabindex="0" aria-expanded="false" aria-controls="facetLang" data-bs-toggle="collapse" data-bs-target="#facetLang">
+      <strong><?php echo __('Language'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
+    </div>
+    <div class="collapse" id="facetLang">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo !$languageFilter ? 'active' : '' ?>">
+          <a href="<?php echo buildUrl($fp, [], ['language']) ?>" class="text-decoration-none small <?php echo !$languageFilter ? 'text-white' : '' ?>">
+            <?php echo __('All'); ?>
+          </a>
+        </li>
+        <?php foreach ($languages as $lang): ?>
+          <?php $isActive = $languageFilter === $lang->id; ?>
+          <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
+            <a href="<?php echo $isActive ? buildUrl($fp, [], ['language']) : buildUrl($fp, ['language' => $lang->id]) ?>" class="text-decoration-none small <?php echo $isActive ? 'text-white' : '' ?>">
+              <?php $lang_labels = ['en' => 'English', 'af' => 'Afrikaans', 'afr' => 'Afrikaans', 'zu' => 'Zulu', 'xho' => 'Xhosa', 'nso' => 'Northern Sotho', 'sot' => 'Sotho', 'tsn' => 'Tswana', 'ven' => 'Venda', 'tso' => 'Tsonga', 'ssw' => 'Swazi', 'nto' => 'Ndebele', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'pt' => 'Portuguese', 'nl' => 'Dutch', 'it' => 'Italian', 'ru' => 'Russian', 'zh' => 'Chinese', 'ja' => 'Japanese', 'ko' => 'Korean', 'ar' => 'Arabic', 'he' => 'Hebrew', 'hi' => 'Hindi', 'la' => 'Latin', 'el' => 'Greek', 'fa' => 'Persian']; echo esc_entities($lang_labels[$lang->name] ?? strtoupper($lang->name)); ?>
+            </a>
+            <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $lang->count ?></span>
+          </li>
+        <?php endforeach ?>
+      </ul>
+    </div>
+  </div>
+  <?php endif ?>
   </nav>
 <?php end_slot(); ?>
 
@@ -520,6 +550,12 @@ function getItemUrl($obj) {
     <?php if ($parent): ?>
       <a href="<?php echo buildUrl($fp, [], ['parent']) ?>" class="badge bg-dark p-2 text-decoration-none text-white">
         <i class="fas fa-folder"></i> <?php echo esc_entities($parent->title ?: '[Untitled]') ?> <i class="fas fa-times ms-1"></i>
+      </a>
+    <?php endif ?>
+    <?php if ($languageFilter): ?>
+      <?php $lang_labels = ['en' => 'English', 'af' => 'Afrikaans', 'afr' => 'Afrikaans', 'zu' => 'Zulu', 'xho' => 'Xhosa', 'nso' => 'Northern Sotho', 'sot' => 'Sotho', 'tsn' => 'Tswana', 'ven' => 'Venda', 'tso' => 'Tsonga', 'ssw' => 'Swazi', 'nto' => 'Ndebele', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'pt' => 'Portuguese', 'nl' => 'Dutch', 'it' => 'Italian', 'ru' => 'Russian', 'zh' => 'Chinese', 'ja' => 'Japanese', 'ko' => 'Korean', 'ar' => 'Arabic', 'he' => 'Hebrew', 'hi' => 'Hindi', 'la' => 'Latin', 'el' => 'Greek', 'fa' => 'Persian']; $langName = $lang_labels[$languageFilter] ?? strtoupper($languageFilter); ?>
+      <a href="<?php echo buildUrl($fp, [], ['language']) ?>" class="badge bg-info p-2 text-decoration-none text-white">
+        <?php echo __('Language'); ?>: <?php echo esc_entities($langName) ?> <i class="fas fa-times ms-1"></i>
       </a>
     <?php endif ?>
   </div>

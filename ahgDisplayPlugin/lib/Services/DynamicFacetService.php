@@ -99,6 +99,7 @@ class DynamicFacetService
         $this->materialsFilter = $filters['materialsFilter'] ?? null;
         $this->creationPlaceFilter = $filters['creationPlaceFilter'] ?? null;
         $this->museumRepositoryFilter = $filters['museumRepositoryFilter'] ?? null;
+        $this->languageFilter = $filters['languageFilter'] ?? null;
     }
 
     /**
@@ -121,7 +122,8 @@ class DynamicFacetService
             || $this->workTypeFilter
             || $this->materialsFilter
             || $this->creationPlaceFilter
-            || $this->museumRepositoryFilter;
+            || $this->museumRepositoryFilter
+            || ($this->languageFilter !== null && $this->languageFilter !== '');
     }
 
     /**
@@ -150,6 +152,8 @@ class DynamicFacetService
                 return $this->getGlamTypeCounts();
             case 'media_type':
                 return $this->getMediaTypeCounts();
+            case 'language':
+                return $this->getLanguageCounts();
             case 'material_type':
             case 'condition_grade':
             case 'acquisition_method':
@@ -268,6 +272,10 @@ class DynamicFacetService
 
         if ($excludeFacet !== 'repository' && $this->repoFilter) {
             $query->where('io.repository_id', $this->repoFilter);
+        }
+
+        if ($excludeFacet !== 'language' && $this->languageFilter !== null && $this->languageFilter !== '') {
+            $this->applyLanguageFilter($query);
         }
 
         // Library-only ID filters. Each scopes the result set to IOs whose
@@ -892,4 +900,57 @@ class DynamicFacetService
             return [];
         }
     }
+
+    /**
+     * Language facet counts from information_object_i18n.languages (JSON array).
+     * Each distinct ISO 639-1 code in the result set gets its own bucket.
+     */
+    private function getLanguageCounts(): array
+    {
+        try {
+            $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+            $pdo = DB::connection()->getPdo();
+            $jsonPath = $pdo->quote('$.*');
+            $query = $this->buildBaseQuery('language');
+            $query->leftJoin('information_object_i18n as io_l18n', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'io_l18n.id')->where('io_l18n.culture', '=', $culture);
+            })
+            ->whereNotNull('io_l18n.languages')
+            ->where('io_l18n.languages', '!=', '')
+            ->select(
+                DB::raw("lang_codes.code as id"),
+                DB::raw("lang_codes.code as name"),
+                DB::raw('COUNT(DISTINCT io.id) as count')
+            )
+            ->crossJoin(DB::raw("JSON_TABLE(io_l18n.languages, " . $pdo->quote('$[*]') . ", " . $pdo->quote("$.code") . " columns (code varchar(5) path " . $pdo->quote('$') . ")) as lang_codes"))
+            ->groupBy('lang_codes.code')
+            ->orderByDesc('count')
+            ->limit(30);
+            return $query->get()->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    /**
+     * Apply a language filter to a query.
+     * Uses REGEXP pattern-matching on the raw JSON array to avoid JSON_TABLE
+     * version requirements in the fallback path.
+     */
+    private function applyLanguageFilter($query): void
+    {
+        $code = $this->languageFilter;
+        $query->whereExists(function ($sub) use ($code) {
+            $sub->select(DB::raw(1))
+                ->from('information_object_i18n as io_lf')
+                ->whereRaw('io_lf.id = io.id')
+                ->where('io_lf.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture())
+                ->whereNotNull('io_lf.languages')
+                ->where('io_lf.languages', '!=', '')
+                // REGEXP with $ bound — matches "en" as a word within the JSON array
+                // but not as a substring of another code like "afr" or "ben".
+                ->whereRaw("io_lf.languages REGEXP ?", ['"(^|[^a-zA-Z])' . preg_quote($code, '/') . '($|[^a-zA-Z])']);
+        });
+    }
+
 }

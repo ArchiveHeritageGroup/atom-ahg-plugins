@@ -40,6 +40,8 @@ $levels = $sf_data->getRaw('levels') ?: [];
 $mediaTypes = $sf_data->getRaw('mediaTypes') ?: [];
 $repositories = $sf_data->getRaw('repositories') ?: [];
 $showSidebar = $sf_data->getRaw('showSidebar') !== false;
+$languages = $sf_data->getRaw('languages') ?: [];
+$languageFilter = $sf_request->getParameter('language');
 
 // Build filter params for URLs
 $fp = [
@@ -53,6 +55,7 @@ $fp = [
     'media' => $mediaFilter,
     'repo' => $repoFilter,
     'hasDigital' => $hasDigital,
+    'language' => $languageFilter,
     'view' => $viewMode,
     'limit' => $limit,
     'sort' => $sort,
@@ -297,6 +300,34 @@ function getEmbeddedItemUrl($obj) {
       </div>
       <?php endif ?>
 
+      <!-- Language Facet - CLOSED by default -->
+      <?php if (!empty($languages)): ?>
+      <div class="card mb-2">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetLang" style="cursor:pointer">
+          <strong><?php echo __('Language'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
+        </div>
+        <div class="collapse" id="embFacetLang">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo !$languageFilter ? 'active' : '' ?>">
+              <a href="<?php echo buildEmbeddedUrl($fp, [], ['language']) ?>" class="text-decoration-none small <?php echo !$languageFilter ? 'text-white' : '' ?>">
+                <?php echo __('All'); ?>
+              </a>
+            </li>
+            <?php foreach ($languages as $lang): ?>
+              <?php $isActive = $languageFilter === $lang->id; ?>
+              <?php $lang_labels = ['en' => 'English', 'af' => 'Afrikaans', 'afr' => 'Afrikaans', 'zu' => 'Zulu', 'xho' => 'Xhosa', 'nso' => 'Northern Sotho', 'sot' => 'Sotho', 'tsn' => 'Tswana', 'ven' => 'Venda', 'tso' => 'Tsonga', 'ssw' => 'Swazi', 'nto' => 'Ndebele', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'pt' => 'Portuguese', 'nl' => 'Dutch', 'it' => 'Italian', 'ru' => 'Russian', 'zh' => 'Chinese', 'ja' => 'Japanese', 'ko' => 'Korean', 'ar' => 'Arabic', 'he' => 'Hebrew', 'hi' => 'Hindi', 'la' => 'Latin', 'el' => 'Greek', 'fa' => 'Persian']; ?>
+              <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
+                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['language']) : buildEmbeddedUrl($fp, ['language' => $lang->id]) ?>" class="text-decoration-none small <?php echo $isActive ? 'text-white' : '' ?>">
+                  <?php echo esc_entities($lang_labels[$lang->name] ?? strtoupper($lang->name)); ?>
+                </a>
+                <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $lang->count ?></span>
+              </li>
+            <?php endforeach ?>
+          </ul>
+        </div>
+      </div>
+      <?php endif ?>
+
       <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse']) ?>" class="btn btn-outline-success btn-sm w-100 mt-2">
         <i class="fas fa-expand-arrows-alt me-1"></i> <?php echo __('Full Browse Page'); ?>
       </a>
@@ -317,7 +348,7 @@ function getEmbeddedItemUrl($obj) {
       </div>
 
       <!-- Active Filters -->
-      <?php if ($typeFilter || $repoFilter || $levelFilter || $creatorFilter || $subjectFilter || $hasDigital): ?>
+      <?php if ($typeFilter || $repoFilter || $levelFilter || $creatorFilter || $subjectFilter || $hasDigital || $languageFilter): ?>
       <div class="d-flex flex-wrap gap-2 mb-3">
         <?php if ($typeFilter): $cfg = $typeConfig[$typeFilter] ?? ['icon' => 'fa-tag', 'color' => 'secondary', 'label' => ucfirst($typeFilter)]; ?>
           <a href="<?php echo buildEmbeddedUrl($fp, [], ['type']) ?>" class="badge bg-<?php echo $cfg['color'] ?> p-2 text-decoration-none text-white">
@@ -337,6 +368,12 @@ function getEmbeddedItemUrl($obj) {
         <?php if ($hasDigital): ?>
           <a href="<?php echo buildEmbeddedUrl($fp, [], ['hasDigital']) ?>" class="badge bg-info p-2 text-decoration-none text-white">
             <?php echo __('With digital objects'); ?> <i class="fas fa-times ms-1"></i>
+          </a>
+        <?php endif ?>
+        <?php if ($languageFilter): ?>
+          <?php $lang_labels = ['en' => 'English', 'af' => 'Afrikaans', 'afr' => 'Afrikaans', 'zu' => 'Zulu', 'xho' => 'Xhosa', 'nso' => 'Northern Sotho', 'sot' => 'Sotho', 'tsn' => 'Tswana', 'ven' => 'Venda', 'tso' => 'Tsonga', 'ssw' => 'Swazi', 'nto' => 'Ndebele', 'de' => 'German', 'fr' => 'French', 'es' => 'Spanish', 'pt' => 'Portuguese', 'nl' => 'Dutch', 'it' => 'Italian', 'ru' => 'Russian', 'zh' => 'Chinese', 'ja' => 'Japanese', 'ko' => 'Korean', 'ar' => 'Arabic', 'he' => 'Hebrew', 'hi' => 'Hindi', 'la' => 'Latin', 'el' => 'Greek', 'fa' => 'Persian']; $langName = $lang_labels[$languageFilter] ?? strtoupper($languageFilter); ?>
+          <a href="<?php echo buildEmbeddedUrl($fp, [], ['language']) ?>" class="badge bg-info p-2 text-decoration-none text-white">
+            <?php echo __('Language'); ?>: <?php echo esc_entities($langName) ?> <i class="fas fa-times ms-1"></i>
           </a>
         <?php endif ?>
       </div>
