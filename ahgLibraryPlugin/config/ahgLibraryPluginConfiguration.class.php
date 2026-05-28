@@ -21,6 +21,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'serial';
         $enabledModules[] = 'ill';
         $enabledModules[] = 'kbartVendor';
+        $enabledModules[] = 'z3950';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -149,5 +150,15 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $reports->any('library_reports_creators', '/admin/library/creators', 'creators');
         $reports->any('library_reports_subjects', '/admin/library/subjects', 'subjects');
         $reports->register($routing);
+
+        // Z39.50 client + SRU server control panel
+        $z3950 = new \AtomFramework\Routing\RouteLoader('z3950');
+        $z3950->any('z3950_index', '/library/z3950', 'index');
+        $z3950->any('z3950_edit', '/library/z3950/edit', 'edit');
+        $z3950->any('z3950_edit_id', '/library/z3950/edit/:id', 'edit', ['id' => '\d*']);
+        $z3950->any('z3950_test', '/library/z3950/test', 'test');
+        $z3950->any('z3950_delete', '/library/z3950/delete/:id', 'delete', ['id' => '\d+']);
+        $z3950->any('z3950_sru', '/api/sru', 'sru');
+        $z3950->register($routing);
     }
 }
