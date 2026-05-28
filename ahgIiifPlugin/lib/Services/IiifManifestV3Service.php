@@ -116,7 +116,8 @@ class IiifManifestV3Service
         }
 
         // Required statement (#184): Institution attribution (multi-language)
-        $attribution = $this->resolveRequiredStatement($object['id'] ?? 0, $culture);
+        // Now enriched with IPTC/XMP creator/copyright from first image digital object
+        $attribution = $this->resolveRequiredStatement((int) ($object['id'] ?? 0), $culture);
         if ($attribution) {
             $manifest['requiredStatement'] = [
                 'label' => ['none' => ['Attribution']],
@@ -125,7 +126,7 @@ class IiifManifestV3Service
         }
 
         // Provider (#184): Institution details
-        $provider = $this->resolveProvider($object['id'] ?? 0, $culture);
+        $provider = $this->resolveProvider((int) ($object['id'] ?? 0), $culture);
         if ($provider) {
             $manifest['provider'] = [$provider];
         }
@@ -180,7 +181,217 @@ class IiifManifestV3Service
             $manifest['service'] = [$authService];
         }
 
+        // Content Search 2.0 service block — Mirador needs this to offer a search box
+        $this->appendSearchService($manifest, $object['slug'] ?? '');
+
+        // ====================================================================
+        // Enrich manifest metadata from IPTC/XMP embedded metadata (#91)
+        // ====================================================================
+        $this->enrichManifestWithEmbeddedMetadata($manifest, $digitalObjects, $culture);
+
         return $manifest;
+    }
+
+    /**
+     * Enrich the manifest "metadata" array and "requiredStatement" with
+     * IPTC/XMP fields (creator, copyright, keywords, location) extracted
+     * from the first image-type digital object via ahgUniversalMetadataExtractor.
+     *
+     * @param array &$manifest Manifest array passed by reference
+     * @param array $digitalObjects Digital object rows associated with this manifest
+     * @param string $culture Current culture code
+     * @return void
+     */
+    private function enrichManifestWithEmbeddedMetadata(array &$manifest, array $digitalObjects, string $culture): void
+    {
+        $extractorPath = null;
+        foreach ([sfConfig::get('sf_plugins_dir'), dirname(__DIR__, 3) . '/plugins'] as $pluginsDir) {
+            $candidate = $pluginsDir . '/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php';
+            if (file_exists($candidate)) {
+                $extractorPath = $candidate;
+                break;
+            }
+        }
+
+        $extractorClass = '\ahgUniversalMetadataExtractor';
+        if ($extractorPath && !class_exists($extractorClass)) {
+            require_once $extractorPath;
+        }
+
+        $webDir = defined('sfConfig::get(\'sf_web_dir\')')
+            ? sfConfig::get('sf_web_dir')
+            : (\defined('SF_WEB_DIR') ? SF_WEB_DIR : dirname(__DIR__, 5) . '/web');
+
+        $consolidated = null;
+        $gpsData = null;
+
+        foreach ($digitalObjects as $do) {
+            $mimeType = strtolower($do['mime_type'] ?? '');
+            if (strpos($mimeType, 'image/') !== 0) {
+                continue;
+            }
+
+            $masterUrl = $do['path'] ? '/uploads/' . ltrim($do['path'], '/') : null;
+            if (!$masterUrl) {
+                continue;
+            }
+
+            $filePath = $webDir . '/' . ltrim(parse_url($masterUrl, PHP_URL_PATH), '/');
+            if (!file_exists($filePath)) {
+                continue;
+            }
+
+            if (!class_exists($extractorClass)) {
+                break;
+            }
+
+            try {
+                $extractor = new $extractorClass($filePath, $mimeType);
+                $metadata = $extractor->extractAll();
+                $consolidated = $metadata['consolidated'] ?? null;
+                $gpsData = $metadata['gps'] ?? null;
+            } catch (\Exception $e) {
+                // Non-fatal; continue silently
+            }
+            break; // Use first valid image object
+        }
+
+        if (!$consolidated) {
+            return;
+        }
+
+        // Enrich metadata entries
+        if (!empty($consolidated['creators'])) {
+            foreach ((array)$consolidated['creators'] as $creator) {
+                $manifest['metadata'][] = [
+                    'label' => [$culture => ['Creator']],
+                    'value' => [$culture => [$creator]],
+                ];
+            }
+        }
+
+        if (!empty($consolidated['copyright'])) {
+            $manifest['metadata'][] = [
+                'label' => [$culture => ['Copyright']],
+                'value' => [$culture => [$consolidated['copyright']]],
+            ];
+        }
+
+        if (!empty($consolidated['keywords'])) {
+            $keywords = array_slice((array)$consolidated['keywords'], 0, 20);
+            $manifest['metadata'][] = [
+                'label' => [$culture => ['Keywords']],
+                'value' => [$culture => $keywords],
+            ];
+        }
+
+        if (!empty($consolidated['location'])) {
+            $loc = $consolidated['location'];
+            $locParts = array_filter([
+                $loc['city'] ?? null,
+                $loc['state'] ?? null,
+                $loc['country'] ?? null,
+            ]);
+            if (!empty($locParts)) {
+                $manifest['metadata'][] = [
+                    'label' => [$culture => ['Location']],
+                    'value' => [$culture => [implode(', ', $locParts)]],
+                ];
+            }
+        }
+
+        if (!empty($consolidated['date_created'])) {
+            $manifest['metadata'][] = [
+                'label' => [$culture => ['Date Created']],
+                'value' => [$culture => [$consolidated['date_created']]],
+            ];
+        }
+
+        if (!empty($consolidated['camera'])) {
+            $cam = $consolidated['camera'];
+            $cameraStr = trim(($cam['make'] ?? '') . ' ' . ($cam['model'] ?? ''));
+            if ($cameraStr) {
+                $manifest['metadata'][] = [
+                    'label' => [$culture => ['Camera']],
+                    'value' => [$culture => [$cameraStr]],
+                ];
+            }
+        }
+
+        if (!empty($gpsData)) {
+            $coords = sprintf('%.6f, %.6f', $gpsData['latitude'] ?? 0, $gpsData['longitude'] ?? 0);
+            $manifest['metadata'][] = [
+                'label' => [$culture => ['GPS Coordinates']],
+                'value' => [$culture => [$coords]],
+            ];
+        }
+
+        // Enrich requiredStatement with IPTC/XMP creator and copyright
+        // as supplemental contribution when institution attribution exists
+        $creator = !empty($consolidated['creators']) ? implode('; ', (array)$consolidated['creators']) : null;
+        $copyright = $consolidated['copyright'] ?? null;
+
+        if ($creator || $copyright) {
+            $contributionParts = array_filter([$creator, $copyright]);
+            if (!empty($contributionParts)) {
+                $contribution = implode(' — ', $contributionParts);
+
+                // Append to existing requiredStatement value, or create one
+                if (isset($manifest['requiredStatement']['value'][$culture])) {
+                    $existing = $manifest['requiredStatement']['value'][$culture];
+                    $manifest['requiredStatement']['value'][$culture] = array_merge($existing, [$contribution]);
+                } else {
+                    $manifest['requiredStatement'] = [
+                        'label' => ['none' => ['Attribution']],
+                        'value' => [$culture => [$contribution]],
+                    ];
+                }
+            }
+        }
+    }
+
+    /**
+     * Attach the IIIF Content Search 2.0 service block (and its nested
+     * AutoCompleteService2) to the manifest in-place.
+     *
+     * Pres 3 format: id + type. Pres 2 compat: @id + @type also included.
+     * Ref: https://iiif.io/api/search/2.0/
+     *
+     * @param array<string,mixed> $manifest passed by reference
+     * @param string $slug Object slug used to build the search/autoload URLs
+     */
+    private function appendSearchService(array &$manifest, string $slug): void
+    {
+        if (empty($slug)) {
+            return;
+        }
+
+        $baseUrl = $this->baseUrl;
+        $manifestRoot = "{$baseUrl}/iiif/v3/manifest/{$slug}";
+        $searchUrl = "{$manifestRoot}/search";
+        $autoUrl = "{$manifestRoot}/autocomplete";
+
+        $searchService = [
+            '@id' => $searchUrl,
+            'id' => $searchUrl,
+            '@type' => 'SearchService2',
+            'type' => 'SearchService2',
+            'profile' => 'http://iiif.io/api/search/2/search',
+            'service' => [
+                [
+                    '@id' => $autoUrl,
+                    'id' => $autoUrl,
+                    '@type' => 'AutoCompleteService2',
+                    'type' => 'AutoCompleteService2',
+                    'profile' => 'http://iiif.io/api/search/2/autocomplete',
+                ],
+            ],
+        ];
+
+        if (!isset($manifest['service']) || !is_array($manifest['service'])) {
+            $manifest['service'] = [];
+        }
+        $manifest['service'][] = $searchService;
     }
 
     /**
@@ -306,10 +517,6 @@ class IiifManifestV3Service
     /**
      * Resolve rights URI from the rights table for this object.
      * Maps to Creative Commons or RightsStatements.org URIs.
-     */
-    /**
-     * Resolve rights URI from the rights table for this object.
-     * In AtoM, rights are linked to objects via the `relation` table.
      */
     private function resolveRightsUri(int $objectId, string $culture = 'en'): ?string
     {

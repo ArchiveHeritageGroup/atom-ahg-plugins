@@ -907,4 +907,309 @@ class iiifActions extends AhgController
             'warnings' => count(array_filter($results, fn($r) => $r['status'] === 'warning')),
         ]));
     }
+
+    // =====================================================================
+    // IIIF CONTENT SEARCH 2.0  (#84)
+    // Search + autocomplete endpoints wired into the Pres 3 service block.
+    // =====================================================================
+
+    /**
+     * GET /iiif/v3/manifest/:slug/search?q=<term>
+     *
+     * IIIF Content Search 2.0 — mirrors IiifContentSearchService from heratio.
+     * Searches OCR text stored in iiif_ocr_text for the matching object.
+     * Returns a W3C AnnotationPage with highlighted matches.
+     *
+     * @see https://iiif.io/api/search/2.0/
+     */
+    public function executeSearch($request)
+    {
+        $slug = $request->getParameter('slug');
+        $query = (string) $request->getParameter('q', '');
+        $motivation = $request->getParameter('motivation');
+
+        $page = $this->runContentSearch($slug, $query, $motivation);
+
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/ld+json;profile="http://iiif.io/api/search/2/context.json"');
+        $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'no-cache, must-revalidate');
+
+        return $this->renderText(json_encode($page, JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * GET /iiif/v3/manifest/:slug/autocomplete?q=<prefix>
+     *
+     * IIIF Content Search 2.0 autocomplete — returns terms from stored OCR
+     * block text that prefix-match the supplied query.
+     *
+     * @see https://iiif.io/api/search/2.0/
+     */
+    public function executeAutocomplete($request)
+    {
+        $slug = $request->getParameter('slug');
+        $query = (string) $request->getParameter('q', '');
+
+        $page = $this->runAutocomplete($slug, $query);
+
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/ld+json;profile="http://iiif.io/api/search/2/context.json"');
+        $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'no-cache, must-revalidate');
+
+        return $this->renderText(json_encode($page, JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * Shared content search logic — identical to IiifContentSearchService::search().
+     */
+    private function runContentSearch(string $slug, string $query, ?string $motivation): array
+    {
+        $baseUrl = rtrim($this->config('app_iiif_base_url', 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
+        $manifestRoot = "{$baseUrl}/iiif/v3/manifest/{$slug}";
+        $searchPageId = "{$manifestRoot}/search?q=" . urlencode($query);
+
+        $envelope = [
+            '@context' => [
+                'http://iiif.io/api/search/2/context.json',
+                'http://iiif.io/api/presentation/3/context.json',
+            ],
+            'id' => $searchPageId,
+            'type' => 'AnnotationPage',
+            'label' => ['en' => ["Content Search results for \"{$query}\""]],
+            'items' => [],
+        ];
+
+        if (trim($query) === '') {
+            return $envelope;
+        }
+
+        // Resolve slug to object
+        $object = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->join('slug as s', 'io.id', '=', 's.object_id')
+            ->where('s.slug', $slug)
+            ->select('io.id')
+            ->first();
+
+        if (!$object) {
+            $envelope['type'] = 'Error';
+            $envelope['error'] = 'Manifest not found';
+            return $envelope;
+        }
+
+        $objectId = (int) $object->id;
+
+        // Build canvas map
+        $canvasMap = $this->buildCanvasMap($objectId, $manifestRoot);
+        if (empty($canvasMap)) {
+            return $envelope;
+        }
+
+        // FULLTEXT search across iiif_ocr_text
+        $term = trim($query);
+        $ocrRows = \Illuminate\Database\Capsule\Manager::table('iiif_ocr_text')
+            ->where('object_id', $objectId)
+            ->whereRaw('MATCH(full_text) AGAINST (? IN NATURAL LANGUAGE MODE)', [$term])
+            ->select('id', 'digital_object_id', 'language')
+            ->get();
+
+        if ($ocrRows->isEmpty()) {
+            $like = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $term) . '%';
+            $ocrRows = \Illuminate\Database\Capsule\Manager::table('iiif_ocr_text')
+                ->where('object_id', $objectId)
+                ->where('full_text', 'LIKE', $like)
+                ->select('id', 'digital_object_id', 'language')
+                ->get();
+        }
+
+        if ($ocrRows->isEmpty()) {
+            return $envelope;
+        }
+
+        $ocrIds = $ocrRows->pluck('id')->all();
+        $ocrToDo = [];
+        foreach ($ocrRows as $row) {
+            $ocrToDo[(int) $row->id] = (int) $row->digital_object_id;
+        }
+
+        // Block-level LIKE search for highlighting
+        $likeTerm = '%' . str_replace(['%', '_'], ['\\%', '\\_'], $term) . '%';
+        $blocks = \Illuminate\Database\Capsule\Manager::table('iiif_ocr_block')
+            ->whereIn('ocr_id', $ocrIds)
+            ->where('text', 'LIKE', $likeTerm)
+            ->orderBy('ocr_id')
+            ->orderBy('page_number')
+            ->orderBy('block_order')
+            ->orderBy('id')
+            ->limit(200)
+            ->select('id', 'ocr_id', 'page_number', 'text', 'x', 'y', 'width', 'height')
+            ->get();
+
+        $items = [];
+        $hitIndex = 0;
+
+        foreach ($blocks as $block) {
+            $doId = $ocrToDo[(int) $block->ocr_id] ?? null;
+            if ($doId === null || !isset($canvasMap[$doId])) {
+                continue;
+            }
+            $canvasInfo = $canvasMap[$doId];
+            $pageNum = (int) ($block->page_number ?: 1);
+            $canvasIri = $canvasInfo['pages'][$pageNum] ?? $canvasInfo['base'];
+
+            $hitIndex++;
+            $items[] = [
+                'id' => "{$manifestRoot}/search/annotation/{$hitIndex}",
+                'type' => 'Annotation',
+                'motivation' => $motivation ?: 'highlighting',
+                'body' => [
+                    'type' => 'TextualBody',
+                    'value' => (string) $block->text,
+                    'format' => 'text/plain',
+                    'language' => 'en',
+                ],
+                'target' => [
+                    'type' => 'SpecificResource',
+                    'source' => [
+                        'id' => $canvasIri,
+                        'type' => 'Canvas',
+                        'partOf' => [
+                            'id' => $manifestRoot,
+                            'type' => 'Manifest',
+                        ],
+                    ],
+                    'selector' => [
+                        'type' => 'FragmentSelector',
+                        'conformsTo' => 'http://www.w3.org/TR/media-frags/',
+                        'value' => sprintf('xywh=%d,%d,%d,%d', 0, 0, 1000, 1000),
+                    ],
+                ],
+            ];
+
+            if ($hitIndex >= 200) {
+                break;
+            }
+        }
+
+        $envelope['items'] = $items;
+        $envelope['partOf'] = [
+            'id' => $manifestRoot,
+            'type' => 'Manifest',
+        ];
+
+        return $envelope;
+    }
+
+    /**
+     * Shared autocomplete logic — mirrors IiifContentSearchService::autocomplete().
+     */
+    private function runAutocomplete(string $slug, string $query): array
+    {
+        $baseUrl = rtrim($this->config('app_iiif_base_url', 'https://' . ($_SERVER['HTTP_HOST'] ?? 'localhost')), '/');
+        $id = "{$baseUrl}/iiif/v3/manifest/{$slug}/autocomplete?q=" . urlencode($query);
+
+        $items = [];
+        $term = trim($query);
+
+        if ($term !== '') {
+            $object = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+                ->join('slug as s', 'io.id', '=', 's.object_id')
+                ->where('s.slug', $slug)
+                ->select('io.id')
+                ->first();
+
+            if ($object) {
+                $ocrIds = \Illuminate\Database\Capsule\Manager::table('iiif_ocr_text')
+                    ->where('object_id', (int) $object->id)
+                    ->pluck('id')
+                    ->all();
+
+                if (!empty($ocrIds)) {
+                    $like = str_replace(['%', '_'], ['\\%', '\\_'], $term) . '%';
+                    $rows = \Illuminate\Database\Capsule\Manager::table('iiif_ocr_block')
+                        ->whereIn('ocr_id', $ocrIds)
+                        ->where('text', 'LIKE', $like)
+                        ->groupBy('text')
+                        ->orderByRaw('COUNT(*) DESC')
+                        ->limit(20)
+                        ->select('text', \Illuminate\Database\Capsule\Manager::raw('COUNT(*) as hit_count'))
+                        ->get();
+
+                    foreach ($rows as $row) {
+                        $items[] = [
+                            'type' => 'TextualBody',
+                            'value' => (string) $row->text,
+                            'format' => 'text/plain',
+                        ];
+                    }
+                }
+            }
+        }
+
+        return [
+            '@context' => 'http://iiif.io/api/search/2/context.json',
+            'id' => $id,
+            'type' => 'AnnotationCollection',
+            'label' => ['en' => ["Autocomplete terms for \"{$term}\""]],
+            'items' => $items,
+        ];
+    }
+
+    /**
+     * Build canvas index map matching IiifManifestV3Service::generateV3Manifest() ordering.
+     */
+    private function buildCanvasMap(int $objectId, string $manifestRoot): array
+    {
+        $digitalObjects = \Illuminate\Database\Capsule\Manager::table('digital_object')
+            ->where('object_id', $objectId)
+            ->orderBy('id')
+            ->select('id', 'name', 'path', 'mime_type')
+            ->get();
+
+        if ($digitalObjects->isEmpty()) {
+            return [];
+        }
+
+        $map = [];
+        $canvasIndex = 1;
+        $cantaloupeBase = 'http://127.0.0.1:8182';
+        $maxProbe = 25;
+
+        foreach ($digitalObjects as $do) {
+            $imagePath = ltrim((string) $do->path, '/');
+            $cantaloupeId = str_replace('/', '_SL_', $imagePath) . $do->name;
+            $mimeType = strtolower($do->mime_type ?? '');
+            $fileName = strtolower($do->name ?? '');
+            $isMultiPage = ($mimeType === 'image/tiff' || preg_match('/\\.tiff?$/i', $fileName));
+            $pageCount = 1;
+
+            if ($isMultiPage) {
+                $ctx = stream_context_create(['http' => ['timeout' => 1]]);
+                $page2 = @file_get_contents("{$cantaloupeBase}/iiif/2/{$cantaloupeId};2/info.json", false, $ctx);
+                if ($page2 !== false) {
+                    $pageCount = 2;
+                    for ($i = 3; $i <= $maxProbe; $i++) {
+                        $probe = @file_get_contents("{$cantaloupeBase}/iiif/2/{$cantaloupeId};{$i}/info.json", false, $ctx);
+                        if ($probe === false) {
+                            break;
+                        }
+                        $pageCount = $i;
+                    }
+                }
+            }
+
+            $info = ['base' => null, 'pages' => []];
+            for ($p = 1; $p <= $pageCount; $p++) {
+                $iri = "{$manifestRoot}/canvas/{$canvasIndex}";
+                if ($p === 1) {
+                    $info['base'] = $iri;
+                }
+                $info['pages'][$p] = $iri;
+                $canvasIndex++;
+            }
+            $map[(int) $do->id] = $info;
+        }
+
+        return $map;
+    }
+
 }

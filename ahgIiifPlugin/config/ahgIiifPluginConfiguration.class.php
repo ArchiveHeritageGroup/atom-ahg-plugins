@@ -104,6 +104,10 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // IIIF Validation (#184)
         $iiif->any('iiif_validation', '/admin/iiif-validation', 'validationDashboard');
         $iiif->any('iiif_validation_run', '/admin/iiif-validation/run/:object_id', 'validationRun', ['object_id' => '\d+']);
+        // IIIF Content Search 2.0 search + autocomplete endpoints
+        // Mounted under /iiif/v3/manifest/ to match what the Pres 3 manifest advertises
+        $iiif->get('iiif_search', '/iiif/v3/manifest/:slug/search', 'search');
+        $iiif->get('iiif_autocomplete', '/iiif/v3/manifest/:slug/autocomplete', 'autocomplete');
         $iiif->register($routing);
 
         // ===================

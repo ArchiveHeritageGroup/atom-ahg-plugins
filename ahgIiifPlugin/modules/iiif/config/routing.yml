@@ -1,0 +1,15 @@
+# IIIF Content Search 2.0 endpoints
+# Issue #84 — Mirador needs these to offer a search box
+# Ref: https://iiif.io/api/search/2.0/
+
+iiif_search_v3:
+  url:   /iiif/v3/manifest/:slug/search
+  param: { module: iiif, action: search }
+  requirements:
+    slug: "[a-z0-9\-]+"
+
+iiif_autocomplete_v3:
+  url:   /iiif/v3/manifest/:slug/autocomplete
+  param: { module: iiif, action: autocomplete }
+  requirements:
+    slug: "[a-z0-9\-]+"

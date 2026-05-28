@@ -1,5 +1,5 @@
 <?php use_helper('Date'); ?>
-
+<?php // For truncate_text helper used in embedded metadata section ?>
 <?php
 /**
  * AHG Display Plugin - Digital Object Metadata Override
@@ -15,6 +15,10 @@ $canAccessMasterFileFinal = $canAccessMasterFile;
 if ($isPdf && !$sf_user->isAuthenticated()) {
     $canAccessMasterFileFinal = false;
 }
+
+// Determine if this is an image digital object (for embedded metadata display)
+$isImageObject = isset($resource) && $resource->mimeType
+    && (strpos($resource->mimeType, 'image/') === 0);
 ?>
 
 <section>
@@ -267,5 +271,152 @@ if ($isPdf && !$sf_user->isAuthenticated()) {
     </fieldset>
 
   <?php } ?>
+
+  <?php
+    // ========================================================================
+    // Embedded Metadata Section (EXIF/IPTC/XMP) — #91 parity fix
+    // Only shown for authenticated users viewing image/* digital objects
+    // ========================================================================
+    if ($isImageObject && $sf_user->isAuthenticated()) {
+      $embeddedMetadata = null;
+      $embeddedGpsData = null;
+      $embeddedError = null;
+
+      if ($resource && $resource->path && $resource->name) {
+        $masterFilePath = sfConfig::get('sf_web_dir') . '/uploads/' . ltrim($resource->path, '/') . '/' . $resource->name;
+        if (file_exists($masterFilePath)) {
+          try {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php';
+            $extractor = new ahgUniversalMetadataExtractor($masterFilePath, $resource->mimeType);
+            $embeddedMetadata = $extractor->extractAll();
+            if (!empty($embeddedMetadata['gps'])) {
+              $embeddedGpsData = $embeddedMetadata['gps'];
+            }
+          } catch (Exception $e) {
+            $embeddedError = $e->getMessage();
+          }
+        }
+      }
+
+      $hasEmbeddedData = !empty($embeddedMetadata)
+        && (
+          isset($embeddedMetadata['exif'])
+          || isset($embeddedMetadata['iptc'])
+          || isset($embeddedMetadata['xmp'])
+        );
+
+      if ($hasEmbeddedData || $embeddedError) { ?>
+      <fieldset class="collapsible digital-object-metadata single">
+        <legend><?php echo __('Embedded Metadata'); ?></legend>
+
+        <?php if ($embeddedError) { ?>
+          <div class="alert alert-warning small mb-3">
+            <i class="fa fa-exclamation-triangle me-1"></i>
+            <?php echo __('Unable to extract embedded metadata: %1%', ['%1%' => $embeddedError]); ?>
+          </div>
+        <?php } ?>
+
+        <?php if (!empty($embeddedMetadata['consolidated'])) { ?>
+          <?php $cons = $embeddedMetadata['consolidated']; ?>
+
+          <?php if (!empty($cons['title']) || !empty($cons['description']) || !empty($cons['creators']) || !empty($cons['copyright']) || !empty($cons['date_created'])) { ?>
+            <div class="digital-object-metadata-body">
+              <h4 class="mb-2 mt-2 text-muted"><?php echo __('Descriptive'); ?></h4>
+              <?php if (!empty($cons['title'])) { ?>
+                <?php echo render_show(__('Title'), render_value($cons['title']), ['fieldLabel' => 'embedded_title']); ?>
+              <?php } ?>
+              <?php if (!empty($cons['description'])) { ?>
+                <?php echo render_show(__('Description'), render_value(\Text::limit($cons['description'], 300)), ['fieldLabel' => 'embedded_description']); ?>
+              <?php } ?>
+              <?php if (!empty($cons['creators'])) { ?>
+                <?php foreach ((array)$cons['creators'] as $creator) { ?>
+                  <?php echo render_show(__('Creator'), render_value($creator), ['fieldLabel' => 'embedded_creator']); ?>
+                <?php } ?>
+              <?php } ?>
+              <?php if (!empty($cons['copyright'])) { ?>
+                <?php echo render_show(__('Copyright'), render_value($cons['copyright']), ['fieldLabel' => 'embedded_copyright']); ?>
+              <?php } ?>
+              <?php if (!empty($cons['date_created'])) { ?>
+                <?php echo render_show(__('Date Created'), render_value($cons['date_created']), ['fieldLabel' => 'embedded_date_created']); ?>
+              <?php } ?>
+              <?php if (!empty($cons['keywords'])) { ?>
+                <div class="field" id="embedded_keywords">
+                  <div class="field-label"><?php echo __('Keywords'); ?></div>
+                  <div class="field-value">
+                    <?php foreach ((array)$cons['keywords'] as $keyword) { ?>
+                      <span class="badge bg-secondary me-1 mb-1"><?php echo esc_entities($keyword); ?></span>
+                    <?php } ?>
+                  </div>
+                </div>
+              <?php } ?>
+              <?php
+                $loc = $cons['location'] ?? [];
+                $locParts = array_filter([
+                  $loc['city'] ?? null,
+                  $loc['state'] ?? null,
+                  $loc['country'] ?? null,
+                ]);
+              ?>
+              <?php if (!empty($locParts)) { ?>
+                <div class="field" id="embedded_location">
+                  <div class="field-label"><?php echo __('Location'); ?></div>
+                  <div class="field-value"><?php echo esc_entities(implode(', ', $locParts)); ?></div>
+                </div>
+              <?php } ?>
+            </div>
+          <?php } ?>
+
+          <?php if (!empty($cons['camera']) || !empty($cons['technical'])) { ?>
+            <div class="digital-object-metadata-body">
+              <h4 class="mb-2 mt-2 text-muted"><?php echo __('Technical'); ?></h4>
+              <?php $cam = $cons['camera'] ?? []; ?>
+              <?php if (!empty($cam['make']) || !empty($cam['model'])) { ?>
+                <?php
+                  $cameraStr = trim(($cam['make'] ?? '') . ' ' . ($cam['model'] ?? ''));
+                ?>
+                <?php echo render_show(__('Camera'), render_value($cameraStr), ['fieldLabel' => 'embedded_camera']); ?>
+              <?php } ?>
+              <?php if (!empty($cons['technical'])) { ?>
+                <?php $tech = $cons['technical']; ?>
+                <?php if (!empty($tech['exposure_time'])) { ?>
+                  <?php echo render_show(__('Exposure'), render_value($tech['exposure_time']), ['fieldLabel' => 'embedded_exposure']); ?>
+                <?php } ?>
+                <?php if (!empty($tech['f_number'])) { ?>
+                  <?php echo render_show(__('Aperture'), render_value('f/' . $tech['f_number']), ['fieldLabel' => 'embedded_aperture']); ?>
+                <?php } ?>
+                <?php if (!empty($tech['iso'])) { ?>
+                  <?php echo render_show(__('ISO'), render_value($tech['iso']), ['fieldLabel' => 'embedded_iso']); ?>
+                <?php } ?>
+                <?php if (!empty($tech['focal_length'])) { ?>
+                  <?php echo render_show(__('Focal Length'), render_value($tech['focal_length']), ['fieldLabel' => 'embedded_focal_length']); ?>
+                <?php } ?>
+              <?php } ?>
+            </div>
+          <?php } ?>
+
+          <?php if (!empty($embeddedGpsData)) { ?>
+            <div class="digital-object-metadata-body">
+              <h4 class="mb-2 mt-2 text-muted"><?php echo __('GPS Coordinates'); ?></h4>
+              <?php if (isset($embeddedGpsData['latitude'])) { ?>
+                <?php echo render_show(__('Latitude'), render_value(sprintf('%.6f', $embeddedGpsData['latitude'])), ['fieldLabel' => 'embedded_latitude']); ?>
+              <?php } ?>
+              <?php if (isset($embeddedGpsData['longitude'])) { ?>
+                <?php echo render_show(__('Longitude'), render_value(sprintf('%.6f', $embeddedGpsData['longitude'])), ['fieldLabel' => 'embedded_longitude']); ?>
+              <?php } ?>
+              <?php if (isset($embeddedGpsData['altitude'])) { ?>
+                <?php echo render_show(__('Altitude'), render_value(sprintf('%.1f m', $embeddedGpsData['altitude'])), ['fieldLabel' => 'embedded_altitude']); ?>
+              <?php } ?>
+            </div>
+          <?php } ?>
+
+        <?php } elseif (!empty($embeddedMetadata)) { ?>
+          <div class="digital-object-metadata-body">
+            <p class="text-muted small"><?php echo __('Basic file metadata extracted.'); ?></p>
+          </div>
+        <?php } ?>
+      </fieldset>
+  <?php }
+    }
+  ?>
 
 </section>

@@ -1234,4 +1234,68 @@ public function getAuthorities(array $params = []): array
 
         return $id;
     }
+
+    /**
+     * Get a single digital object by ID with optional embedded metadata.
+     *
+     * @param int $id Digital object primary key
+     * @return array|null
+     */
+    public function getDigitalObjectById(int $id): ?array
+    {
+        $row = DB::table("digital_object as do")
+            ->leftJoin("information_object as io", "io.id", "=", "do.object_id")
+            ->leftJoin("slug", "io.id", "=", "slug.object_id")
+            ->leftJoin("information_object_i18n as ioi", function ($join) {
+                $join->on("ioi.id", "=", "io.id")
+                     ->where("ioi.culture", "=", $this->culture);
+            })
+            ->where("do.id", $id)
+            ->select([
+                "do.id",
+                "do.object_id",
+                "do.name",
+                "do.path",
+                "do.mime_type",
+                "do.byte_size",
+                "do.checksum",
+                "do.usage_id",
+                "do.created_at",
+                "do.updated_at",
+                "slug.slug as object_slug",
+                "ioi.title as object_title",
+            ])
+            ->first();
+
+        if (!$row) {
+            return null;
+        }
+
+        $thumbnailPath = null;
+        $masterUrl = null;
+        if ($row->path) {
+            $pathInfo = pathinfo($row->path);
+            $thumbnailPath = "/uploads/" . $pathInfo["dirname"] . "/" . $pathInfo["filename"] . "_142." . ($pathInfo["extension"] ?? "jpg");
+            $masterUrl = "/uploads/" . ltrim($row->path, "/");
+        }
+
+        return [
+            "id" => $row->id,
+            "object_id" => $row->object_id,
+            "object_slug" => $row->object_slug,
+            "object_title" => $row->object_title,
+            "name" => $row->name,
+            "path" => $row->path,
+            "mime_type" => $row->mime_type,
+            "byte_size" => $row->byte_size,
+            "checksum" => $row->checksum,
+            "usage_id" => $row->usage_id,
+            "created_at" => $row->created_at,
+            "updated_at" => $row->updated_at,
+            "thumbnail_url" => $thumbnailPath,
+            "master_url" => $masterUrl,
+            // Flag for image types (used by API action to decide embedded metadata extraction)
+            "is_image" => $row->mime_type ? strpos($row->mime_type, "image/") === 0 : false,
+        ];
+    }
 }
