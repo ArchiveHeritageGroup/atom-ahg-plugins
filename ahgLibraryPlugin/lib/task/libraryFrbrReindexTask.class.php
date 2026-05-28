@@ -36,7 +36,7 @@ EOT;
         $this->addOption('batch', null, sfCommandOption::PARAMETER_REQUIRED, 'Rows per MySQL batch', 500);
     }
 
-    protected function execute($context = []): int
+    protected function execute($arguments = [], $options = [])
     {
         $this->logSection('frbr-reindex', 'Starting full FRBR work-key re-index');
 
