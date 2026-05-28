@@ -228,3 +228,36 @@ SET @sql = IF(@col_exists = 0,
 PREPARE stmt FROM @sql;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
+-- =====================================================
+-- KBART Vendor Management (atom-ahg-plugins#97)
+-- =====================================================
+
+-- KBART Vendor configuration table
+CREATE TABLE IF NOT EXISTS library_kbart_vendor (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL COMMENT 'Human-readable vendor name',
+    feed_url VARCHAR(1000) NOT NULL COMMENT 'URL to the KBART TSV feed',
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    last_fetch_at DATETIME NULL,
+    last_row_count INT UNSIGNED NULL,
+    last_error TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY uk_feed_url (feed_url),
+    INDEX idx_active (active)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- KBART import log (per-fetch audit trail)
+CREATE TABLE IF NOT EXISTS library_kbart_import_log (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    vendor_id INT UNSIGNED NOT NULL,
+    fetched_at DATETIME NOT NULL,
+    row_count INT UNSIGNED DEFAULT 0,
+    new_count INT UNSIGNED DEFAULT 0,
+    removed_count INT UNSIGNED DEFAULT 0,
+    error TEXT NULL,
+    INDEX idx_vendor (vendor_id),
+    INDEX idx_fetched (fetched_at DESC),
+    FOREIGN KEY (vendor_id) REFERENCES library_kbart_vendor(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

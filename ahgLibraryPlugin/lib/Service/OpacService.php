@@ -51,10 +51,23 @@ class OpacService
      * Search the library catalog (public-safe).
      *
      * Supports keyword, title, author, subject, ISBN, call number searches.
-     * Returns results with availability info.
+     * When $params['frbr_cluster'] is true, results are grouped by FRBR
+     * work to show one representative card per work with all manifestations.
+     *
+     * @param array $params
+     *   q, search_type, material_type, publication_year, sort, page, limit,
+     *   frbr_cluster (bool, default true)
+     * @return array
+     *   items        : flat list of items (frbr_cluster=false)
+     *   clusters     : work-clustered list (frbr_cluster=true)
+     *   total        : result count
+     *   total_works  : number of distinct works (frbr_cluster=true)
+     *   page, pages  : pagination info
      */
     public function search(array $params = []): array
     {
+        $useFrbr = ($params['frbr_cluster'] ?? true);
+
         $query = DB::table('library_item as li')
             ->join('information_object as io', 'li.information_object_id', '=', 'io.id')
             ->join('information_object_i18n as ioi', function ($j) {
@@ -181,6 +194,7 @@ class OpacService
                 'li.id',
                 'li.information_object_id',
                 'li.material_type',
+                'li.frbr_work_key',
                 'li.call_number',
                 'li.isbn',
                 'li.issn',
@@ -207,6 +221,24 @@ class OpacService
                 ->where('is_primary', 1)
                 ->value('name');
             $row->primary_creator = $creator;
+        }
+
+        // FRBR clustering
+        if ($useFrbr) {
+            require_once sfConfig::get('sf_root_dir')
+                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/FrbrService.php';
+
+            $frbrSvc = FrbrService::getInstance();
+            $clusters = $frbrSvc->clusterSearchResults($rows);
+
+            return [
+                'clusters'    => $clusters,
+                'items'       => $rows, // Keep for non-FRBR callers
+                'total'       => $total,
+                'total_works' => count($clusters),
+                'page'        => $page,
+                'pages'       => (int) ceil($total / $limit),
+            ];
         }
 
         return [

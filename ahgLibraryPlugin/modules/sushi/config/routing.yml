@@ -1,0 +1,3 @@
+sushi_counter5:
+  url:   /sushi/counter5
+  param: { module: sushi, action: counter5 }

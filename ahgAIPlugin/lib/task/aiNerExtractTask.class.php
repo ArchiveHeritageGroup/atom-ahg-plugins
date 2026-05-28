@@ -154,7 +154,7 @@ EOD;
         $text = $this->extractText($io, $withPdf);
         if (empty($text) || strlen($text) < 10) {
             // Still create extraction record but with 0 entities
-            $this->storeEntities($objectId, []);
+            $this->storeEntities($objectId, [], null);
             return;
         }
 
@@ -254,17 +254,37 @@ EOD;
             throw new Exception("Invalid response");
         }
 
-        $this->storeEntities($objectId, $data['entities']);
+        // entities_v2 is the flat per-entity list from the new API response.
+        // Absent on pre-deploy versions — storeEntities() falls back to null scores.
+        $entitiesV2 = $data['entities_v2'] ?? null;
+        $this->storeEntities($objectId, $data['entities'], $entitiesV2);
     }
 
-    protected function storeEntities($objectId, $entities)
+    /**
+     * Store NER entities.
+     *
+     * When $entitiesV2 is a non-empty array, each entry carries a real
+     * per-entity score and confidence is written from that (real float or null).
+     * When $entitiesV2 is null/empty, the legacy dict is iterated and
+     * confidence is written as null — no fabricated 0.95.
+     *
+     * @param int        $objectId
+     * @param array      $entities    legacy {TYPE: [values]} dict
+     * @param array|null $entitiesV2  flat list of {value,type,offset_start,offset_end,score}
+     */
+    protected function storeEntities($objectId, $entities, ?array $entitiesV2 = null)
     {
         $db = \Illuminate\Database\Capsule\Manager::connection();
+        $useV2 = is_array($entitiesV2) && !empty($entitiesV2);
 
-        $totalCount = 0;
-        foreach ($entities as $type => $values) {
-            if (is_array($values)) {
-                $totalCount += count($values);
+        if ($useV2) {
+            $totalCount = count($entitiesV2);
+        } else {
+            $totalCount = 0;
+            foreach ($entities as $type => $values) {
+                if (is_array($values)) {
+                    $totalCount += count($values);
+                }
             }
         }
 
@@ -276,6 +296,28 @@ EOD;
             'extracted_at' => date('Y-m-d H:i:s')
         ]);
 
+        if ($useV2) {
+            foreach ($entitiesV2 as $rec) {
+                if (!is_array($rec) || !isset($rec['value'], $rec['type'])) {
+                    continue;
+                }
+                $score = isset($rec['score']) && $rec['score'] !== null
+                    ? (float) $rec['score']
+                    : null;
+
+                $db->table('ahg_ner_entity')->insert([
+                    'extraction_id' => $extractionId,
+                    'object_id' => $objectId,
+                    'entity_type' => $rec['type'],
+                    'entity_value' => $rec['value'],
+                    'confidence' => $score,
+                    'status' => 'pending',
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+            return;
+        }
+
         foreach ($entities as $type => $values) {
             if (!is_array($values)) {
                 continue;
@@ -286,7 +328,7 @@ EOD;
                     'object_id' => $objectId,
                     'entity_type' => $type,
                     'entity_value' => $value,
-                    'confidence' => 0.95,
+                    'confidence' => null,  // no fabricated score
                     'status' => 'pending',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);

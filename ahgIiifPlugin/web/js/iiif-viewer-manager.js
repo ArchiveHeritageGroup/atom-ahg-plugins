@@ -39,6 +39,9 @@ export class IiifViewerManager {
         this.pdfScale = 1.5;
         this.annotorious = null;
         this.annotations = [];
+        this.contentState = null;
+        this.currentCanvasIndex = 0;
+        this.pendingContentState = null;  // Holds content state until viewer ready
 
         this.loaded = {
             osd: false,
@@ -77,6 +80,31 @@ export class IiifViewerManager {
             localStorage.removeItem('iiif_viewer_pref');
             if (this.currentViewer !== 'openseadragon') {
                 await this.showViewer('openseadragon');
+            }
+        }
+
+        // ================================================================
+        // IIIF Content State API — apply state from URL if present (#70)
+        // ================================================================
+        const csParams = new URLSearchParams(window.location.search);
+        const csToken = csParams.get('state') || csParams.get('cs');
+        if (csToken) {
+            // Remove from URL to keep clean
+            const cleanUrl = window.location.pathname + window.location.hash;
+            window.history.replaceState({}, '', cleanUrl);
+
+            try {
+                const decodeRes = await fetch(
+                    `${this.options.baseUrl}/iiif/content-state/decode?token=${encodeURIComponent(csToken)}`
+                );
+                if (decodeRes.ok) {
+                    const { contentState } = await decodeRes.json();
+                    this.pendingContentState = contentState;
+                    // Apply after viewer is ready
+                    this.applyContentStateWhenReady = true;
+                }
+            } catch (e) {
+                console.warn('Failed to load content state:', e);
             }
         }
 
@@ -320,6 +348,14 @@ export class IiifViewerManager {
             });
 
             this.loaded.osd = true;
+
+            // Add Share button to OSD toolbar
+            this.addShareButton();
+
+            // Apply any pending content state
+            if (this.applyContentStateWhenReady && this.pendingContentState) {
+                setTimeout(() => this.applyContentState(this.pendingContentState), 500);
+            }
         } catch (error) {
             console.error('OpenSeadragon initialization failed:', error);
             this.showError(containerId, 'Failed to initialize image viewer');

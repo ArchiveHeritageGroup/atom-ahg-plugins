@@ -48,7 +48,16 @@ class ahgNerService
     }
 
     /**
-     * Extract named entities from text
+     * Extract named entities from text.
+     *
+     * Returns the full API response including the flat per-entity list
+     * (entities_v2) when the API supports it. Callers should check for
+     * $result['entities_v2'] and pass it to storeEntities() so real
+     * per-entity confidence scores are written instead of fabricated 0.95.
+     *
+     * @param string $text
+     * @param bool   $clean
+     * @return array{success: bool, entities: array, entities_v2: array|null, entity_count: int, error: string|null}
      */
     public function extract($text, $clean = true)
     {
@@ -57,10 +66,32 @@ class ahgNerService
             'clean' => $clean
         ]);
 
-        return $response ?? [
-            'success' => false,
-            'error' => 'API request failed',
-            'entities' => ['PERSON' => [], 'ORG' => [], 'GPE' => [], 'DATE' => []]
+        if ($response === null) {
+            return [
+                'success' => false,
+                'error' => 'API request failed',
+                'entities' => ['PERSON' => [], 'ORG' => [], 'GPE' => [], 'DATE' => []],
+                'entities_v2' => null,
+                'entity_count' => 0,
+            ];
+        }
+
+        $entities = $response['entities'] ?? ['PERSON' => [], 'ORG' => [], 'GPE' => [], 'DATE' => []];
+        $entityCount = 0;
+        foreach ($entities as $values) {
+            if (is_array($values)) {
+                $entityCount += count($values);
+            }
+        }
+
+        // entities_v2 is the flat per-entity list from the new API response,
+        // or null on pre-deploy API versions.
+        return [
+            'success' => true,
+            'entities' => $entities,
+            'entities_v2' => $response['entities_v2'] ?? null,
+            'entity_count' => $entityCount,
+            'error' => null,
         ];
     }
 

@@ -9,6 +9,14 @@
         <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'subjects']); ?>"><i class="fas fa-tags me-2"></i><?php echo __('Subjects'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'publishers']); ?>"><i class="fas fa-building me-2"></i><?php echo __('Publishers'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'callNumbers']); ?>"><i class="fas fa-sort-alpha-down me-2"></i><?php echo __('Call Numbers'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'index']); ?>"><i class="fas fa-cloud-download-alt me-2"></i><?php echo __('KBART Vendors'); ?></a></li>
+    </ul>
+    <hr>
+    <h5 class="text-primary"><i class="fas fa-table me-2"></i><?php echo __('COUNTER / SUSHI'); ?></h5>
+    <ul class="list-unstyled">
+        <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'counter']); ?>"><i class="fas fa-chart-line me-2"></i><?php echo __('COUNTER Reports'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'sushiSettings']); ?>"><i class="fas fa-cloud me-2"></i><?php echo __('SUSHI Settings'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'frbrOverride']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('FRBR Overrides'); ?></a></li>
     </ul>
     <hr>
     <a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
@@ -97,6 +105,62 @@
                 </ul>
                 <div class="card-footer">
                     <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'catalogue']); ?>" class="btn btn-primary btn-sm w-100"><?php echo __('View Full Catalogue'); ?></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- COUNTER Reports -->
+        <div class="col-md-4">
+            <div class="card h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i><?php echo __('COUNTER Reports'); ?></h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                    <p class="text-muted small"><?php echo __('Generate SUSHI-compliant usage reports (TR_J1, TR_J3, DR, PR, IR) for COUNTER R5 compliance.'); ?></p>
+                </div>
+                <div class="card-footer">
+                    <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'counter']); ?>" class="btn btn-primary btn-sm w-100">
+                        <i class="fas fa-cog me-1"></i><?php echo __('Run Reports'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUSHI Settings -->
+        <div class="col-md-4">
+            <div class="card h-100 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-cloud me-2"></i><?php echo __('SUSHI Endpoint'); ?></h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-server fa-3x text-info mb-3"></i>
+                    <p class="text-muted small"><?php echo __('Configure SUSHI 5.0 harvest credentials and view access log for automated COUNTER report retrieval.'); ?></p>
+                </div>
+                <div class="card-footer">
+                    <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'sushiSettings']); ?>" class="btn btn-info btn-sm w-100">
+                        <i class="fas fa-cog me-1"></i><?php echo __('Configure'); ?>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- FRBR Overrides -->
+        <div class="col-md-4">
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i><?php echo __('FRBR Overrides'); ?></h5>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-sitemap fa-3x text-warning mb-3"></i>
+                    <p class="text-muted small"><?php echo __('Manage FRBR work-key force-group and force-split overrides. View work-key coverage statistics.'); ?></p>
+                </div>
+                <div class="card-footer">
+                    <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'frbrOverride']); ?>" class="btn btn-warning btn-sm w-100">
+                        <i class="fas fa-cog me-1"></i><?php echo __('Manage Overrides'); ?>
+                    </a>
                 </div>
             </div>
         </div>

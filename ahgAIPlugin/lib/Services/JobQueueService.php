@@ -392,11 +392,11 @@ class JobQueueService
             throw new \Exception($result['error'] ?? 'NER extraction failed');
         }
 
-        // Store entities
-        $this->storeNerEntities($job->object_id, $result['entities']);
+        // entities_v2 enables real per-entity confidence scores; null falls back to null.
+        $this->storeNerEntities($job->object_id, $result['entities'], $result['entities_v2'] ?? null);
 
         return [
-            'entity_count' => $result['entity_count'] ?? count($result['entities'] ?? []),
+            'entity_count' => $result['entity_count'] ?? 0,
             'entities' => $result['entities'],
         ];
     }
@@ -639,13 +639,28 @@ class JobQueueService
 
     /**
      * Store NER entities.
+     *
+     * When $entitiesV2 is a non-empty array, each entry carries a real
+     * per-entity score and confidence is written from that (real float or null).
+     * When $entitiesV2 is null/empty, the legacy dict is iterated and
+     * confidence is written as null — no fabricated 0.95.
+     *
+     * @param int        $objectId
+     * @param array      $entities    legacy {TYPE: [values]} dict
+     * @param array|null $entitiesV2  flat list of {value,type,offset_start,offset_end,score}
      */
-    private function storeNerEntities(int $objectId, array $entities): void
+    private function storeNerEntities(int $objectId, array $entities, ?array $entitiesV2 = null): void
     {
-        $totalCount = 0;
-        foreach ($entities as $type => $values) {
-            if (is_array($values)) {
-                $totalCount += count($values);
+        $useV2 = is_array($entitiesV2) && !empty($entitiesV2);
+
+        if ($useV2) {
+            $totalCount = count($entitiesV2);
+        } else {
+            $totalCount = 0;
+            foreach ($entities as $type => $values) {
+                if (is_array($values)) {
+                    $totalCount += count($values);
+                }
             }
         }
 
@@ -657,6 +672,28 @@ class JobQueueService
             'extracted_at' => date('Y-m-d H:i:s'),
         ]);
 
+        if ($useV2) {
+            foreach ($entitiesV2 as $rec) {
+                if (!is_array($rec) || !isset($rec['value'], $rec['type'])) {
+                    continue;
+                }
+                $score = isset($rec['score']) && $rec['score'] !== null
+                    ? (float) $rec['score']
+                    : null;
+
+                DB::table('ahg_ner_entity')->insert([
+                    'extraction_id' => $extractionId,
+                    'object_id' => $objectId,
+                    'entity_type' => $rec['type'],
+                    'entity_value' => $rec['value'],
+                    'confidence' => $score,
+                    'status' => 'pending',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+            return;
+        }
+
         foreach ($entities as $type => $values) {
             if (!is_array($values)) {
                 continue;
@@ -667,7 +704,7 @@ class JobQueueService
                     'object_id' => $objectId,
                     'entity_type' => $type,
                     'entity_value' => $value,
-                    'confidence' => 0.95,
+                    'confidence' => null,  // no fabricated score
                     'status' => 'pending',
                     'created_at' => date('Y-m-d H:i:s'),
                 ]);

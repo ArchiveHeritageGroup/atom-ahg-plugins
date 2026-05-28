@@ -85,6 +85,18 @@ class arNerExtractJob extends arBaseJob
         return trim($text);
     }
 
+    /**
+     * Run NER extraction against the API.
+     *
+     * Handles both the new API response (entities_v2 + entities) and the
+     * legacy response (entities dict only). Real per-entity scores are stored
+     * when entities_v2 is available; otherwise confidence is null.
+     *
+     * @param int    $objectId
+     * @param string $text
+     * @param array  $settings
+     * @return bool
+     */
     protected function runNer($objectId, $text, $settings)
     {
         $apiUrl = rtrim($settings['api_url'], '/') . '/ner/extract';
@@ -117,20 +129,39 @@ class arNerExtractJob extends arBaseJob
             return false;
         }
 
-        $this->storeEntities($objectId, $data['entities']);
-        $this->info("Extracted " . count($data['entities']) . " entities");
+        // entities_v2 is the flat per-entity list from the new API response.
+        // Absent on pre-deploy versions — storeEntities() falls back to null.
+        $entitiesV2 = $data['entities_v2'] ?? null;
+        $this->storeEntities($objectId, $data['entities'], $entitiesV2);
+        $this->info("Extracted " . count($data['entities']) . " entity groups");
         return true;
     }
 
-    protected function storeEntities($objectId, $entities)
+    /**
+     * Store NER entities.
+     *
+     * When $entitiesV2 is a non-empty array, each entry carries a real
+     * per-entity score and confidence is written from that (real float or null).
+     * When $entitiesV2 is null/empty, the legacy dict is iterated and
+     * confidence is written as null — no fabricated 0.95.
+     *
+     * @param int        $objectId
+     * @param array      $entities    legacy {TYPE: [values]} dict
+     * @param array|null $entitiesV2  flat list of {value,type,offset_start,offset_end,score}
+     */
+    protected function storeEntities($objectId, $entities, ?array $entitiesV2 = null)
     {
         $db = \Illuminate\Database\Capsule\Manager::connection();
-        
-        // Count total entities (API returns grouped by type)
-        $totalCount = 0;
-        foreach ($entities as $type => $values) {
-            if (is_array($values)) {
-                $totalCount += count($values);
+        $useV2 = is_array($entitiesV2) && !empty($entitiesV2);
+
+        if ($useV2) {
+            $totalCount = count($entitiesV2);
+        } else {
+            $totalCount = 0;
+            foreach ($entities as $type => $values) {
+                if (is_array($values)) {
+                    $totalCount += count($values);
+                }
             }
         }
         
@@ -153,7 +184,32 @@ class arNerExtractJob extends arBaseJob
             }
         }
 
-        // API returns: {"PERSON": ["Name1", "Name2"], "ORG": ["Org1"], ...}
+        if ($useV2) {
+            foreach ($entitiesV2 as $rec) {
+                if (!is_array($rec) || !isset($rec['value'], $rec['type'])) {
+                    continue;
+                }
+                if ($allowedTypes !== null && !in_array(strtoupper($rec['type']), $allowedTypes)) {
+                    continue;
+                }
+                $score = isset($rec['score']) && $rec['score'] !== null
+                    ? (float) $rec['score']
+                    : null;
+
+                $db->table('ahg_ner_entity')->insert([
+                    'extraction_id' => $extractionId,
+                    'object_id' => $objectId,
+                    'entity_type' => $rec['type'],
+                    'entity_value' => $rec['value'],
+                    'confidence' => $score,
+                    'status' => 'pending',
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
+            }
+            return;
+        }
+
+        // Legacy dict path — no real scores available
         foreach ($entities as $type => $values) {
             if (!is_array($values)) continue;
             if ($allowedTypes !== null && !in_array(strtoupper($type), $allowedTypes)) continue;
@@ -163,7 +219,7 @@ class arNerExtractJob extends arBaseJob
                     'object_id' => $objectId,
                     'entity_type' => $type,
                     'entity_value' => $value,
-                    'confidence' => 0.95,
+                    'confidence' => null,  // no fabricated score
                     'status' => 'pending',
                     'created_at' => date('Y-m-d H:i:s')
                 ]);

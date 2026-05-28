@@ -20,6 +20,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'acquisition';
         $enabledModules[] = 'serial';
         $enabledModules[] = 'ill';
+        $enabledModules[] = 'kbartVendor';
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -127,5 +128,26 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $ill->any('ill_status', '/ill/status', 'status');
         $ill->any('ill_index', '/ill', 'index');
         $ill->register($routing);
+
+        // KBart Vendor management routes
+        $kbart = new \AtomFramework\Routing\RouteLoader('kbartVendor');
+        $kbart->any('kbart_vendor_index', '/library/kbart/vendors', 'index');
+        $kbart->any('kbart_vendor_add', '/library/kbart/vendor/add', 'add');
+        $kbart->any('kbart_vendor_edit', '/library/kbart/vendor/edit/:id', 'edit', ['id' => '\d+']);
+        $kbart->any('kbart_vendor_toggle', '/library/kbart/vendor/toggle/:id', 'toggle', ['id' => '\d+']);
+        $kbart->any('kbart_vendor_delete', '/library/kbart/vendor/delete/:id', 'delete', ['id' => '\d+']);
+        $kbart->any('kbart_vendor_fetch', '/library/kbart/vendor/fetch/:id', 'fetch', ['id' => '\d+']);
+        $kbart->any('kbart_vendor_log', '/library/kbart/vendor/log/:id', 'importLog', ['id' => '\d+']);
+        $kbart->register($routing);
+
+        // Library Reports — COUNTER / SUSHI / FRBR (admin-only)
+        $reports = new \AtomFramework\Routing\RouteLoader('libraryReports');
+        $reports->any('library_reports_counter', '/admin/library/counter', 'counter');
+        $reports->any('library_reports_sushi', '/admin/library/sushi', 'sushiSettings');
+        $reports->any('library_reports_frbr', '/admin/library/frbr', 'frbrOverride');
+        $reports->any('library_reports_catalogue', '/admin/library/catalogue', 'catalogue');
+        $reports->any('library_reports_creators', '/admin/library/creators', 'creators');
+        $reports->any('library_reports_subjects', '/admin/library/subjects', 'subjects');
+        $reports->register($routing);
     }
 }

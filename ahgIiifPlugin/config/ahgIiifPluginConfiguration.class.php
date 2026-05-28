@@ -41,6 +41,7 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'iiif';
         $enabledModules[] = 'iiifCollection';
         $enabledModules[] = 'iiifAuth';
+        $enabledModules[] = 'iiifContent';
         $enabledModules[] = 'threeDReports';
         $enabledModules[] = 'media';
         $enabledModules[] = 'mediaSettings';
@@ -86,6 +87,16 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
     public function addRoutes(sfEvent $event)
     {
         $routing = $event->getSubject();
+
+        // ===================
+        // IIIF CONTENT STATE ROUTES (#70)
+        // ===================
+        $contentState = new \AtomFramework\Routing\RouteLoader('iiifContent');
+        $contentState->post('iiif_cs_encode', '/iiif/content-state/encode', 'encode');
+        $contentState->any('iiif_cs_decode', '/iiif/content-state/decode', 'decode');
+        $contentState->any('iiif_cs_state', '/iiif/content-state/state', 'state');
+        $contentState->any('iiif_cs_index', '/admin/iiif-content-state', 'index');
+        $contentState->register($routing);
 
         // ===================
         // IIIF MODULE ROUTES (manifests, annotations, settings)
