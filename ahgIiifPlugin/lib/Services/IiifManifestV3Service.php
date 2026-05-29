@@ -205,7 +205,7 @@ class IiifManifestV3Service
     private function enrichManifestWithEmbeddedMetadata(array &$manifest, array $digitalObjects, string $culture): void
     {
         $extractorPath = null;
-        foreach ([sfConfig::get('sf_plugins_dir'), dirname(__DIR__, 3) . '/plugins'] as $pluginsDir) {
+        foreach ([\sfConfig::get('sf_plugins_dir'), dirname(__DIR__, 3) . '/plugins'] as $pluginsDir) {
             $candidate = $pluginsDir . '/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php';
             if (file_exists($candidate)) {
                 $extractorPath = $candidate;
@@ -218,8 +218,8 @@ class IiifManifestV3Service
             require_once $extractorPath;
         }
 
-        $webDir = defined('sfConfig::get(\'sf_web_dir\')')
-            ? sfConfig::get('sf_web_dir')
+        $webDir = class_exists('\sfConfig')
+            ? \sfConfig::get('sf_web_dir')
             : (\defined('SF_WEB_DIR') ? SF_WEB_DIR : dirname(__DIR__, 5) . '/web');
 
         $consolidated = null;
