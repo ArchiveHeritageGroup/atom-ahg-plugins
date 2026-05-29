@@ -267,6 +267,20 @@ class libraryReportsActions extends AhgController
                 default => [],
             };
 
+            if ($format === 'xlsx') {
+                // Binary output — write to a temp file and stream it (#109).
+                $filename = "counter_{$reportType}_" . date('Ymd') . '.xlsx';
+                $tmp = tempnam(sys_get_temp_dir(), 'counter_') . '.xlsx';
+                $svc->toXlsxFile($reportType, $records, $tmp);
+                $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+                $this->getResponse()->setContentType('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                $this->getResponse()->setHttpHeader('Content-Length', (string) filesize($tmp));
+                readfile($tmp);
+                @unlink($tmp);
+
+                return sfView::NONE;
+            }
+
             if ($format === 'tsv') {
                 $content  = $svc->toTsv($reportType, $records);
                 $filename = "counter_{$reportType}_" . date('Ymd') . '.tsv';
@@ -306,7 +320,7 @@ class libraryReportsActions extends AhgController
         $this->selectedReport  = $reportType;
         $this->beginDate       = $begin;
         $this->endDate         = $end;
-        $this->formats         = ['json' => 'JSON', 'tsv' => 'TSV'];
+        $this->formats         = ['json' => 'JSON', 'tsv' => 'TSV', 'xlsx' => 'Excel'];
         $this->selectedFormat  = $format;
 
         // Preview count
@@ -351,6 +365,15 @@ class libraryReportsActions extends AhgController
         } catch (Exception $e) {
             return [];
         }
+    }
+
+    /**
+     * ODI metadata-quality scorecard (#110).
+     */
+    public function executeOdi($request)
+    {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgLibraryPlugin/lib/Service/OdiScorecardService.php';
+        $this->scorecard = (new OdiScorecardService())->score();
     }
 
     public function executeSushiSettings($request)

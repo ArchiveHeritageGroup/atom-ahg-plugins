@@ -110,7 +110,13 @@
                     
                     <div class="mb-3">
                         <label class="form-label">ORCID ID</label>
-                        <input type="text" name="orcid_id" class="form-control" placeholder="0000-0000-0000-0000">
+                        <div class="input-group">
+                            <input type="text" name="orcid_id" id="orcid_id_input" class="form-control" placeholder="0000-0000-0000-0000">
+                            <button type="button" id="orcid_fetch_btn" class="btn btn-outline-success">
+                                <i class="fab fa-orcid me-1"></i>Fetch
+                            </button>
+                        </div>
+                        <div id="orcid_fetch_msg" class="form-text"></div>
                     </div>
                     
                     <h5 class="mb-3 mt-4"><i class="fas fa-flask me-2"></i>Research</h5>
@@ -151,6 +157,32 @@ document.addEventListener('DOMContentLoaded', function() {
     if (affiliationType) {
         affiliationType.addEventListener('change', toggleStudentId);
         toggleStudentId(); // Initial state
+    }
+
+    // Fetch-from-ORCID (#102): tokenless public-record auto-populate.
+    var orcidBtn = document.getElementById('orcid_fetch_btn');
+    if (orcidBtn) {
+        orcidBtn.addEventListener('click', function () {
+            var idEl = document.getElementById('orcid_id_input');
+            var msg = document.getElementById('orcid_fetch_msg');
+            var orcid = (idEl.value || '').trim();
+            if (!orcid) { msg.textContent = 'Enter an ORCID iD first.'; return; }
+            msg.textContent = 'Fetching from ORCID…';
+            var url = '<?php echo url_for(['module' => 'research', 'action' => 'orcidFetchPublic']); ?>?orcid_id=' + encodeURIComponent(orcid);
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (!d.ok) { msg.textContent = d.error || 'No public ORCID record found.'; return; }
+                    var p = d.profile || {};
+                    var map = { first_name: p.first_name, last_name: p.last_name, institution: p.institution, department: p.department, position: p.position, research_interests: p.research_interests };
+                    Object.keys(map).forEach(function (k) {
+                        var el = document.querySelector('[name="' + k + '"]');
+                        if (el && map[k] && !el.value) { el.value = map[k]; }
+                    });
+                    msg.textContent = 'Populated from ORCID record ' + (p.orcid_id || orcid) + '.';
+                })
+                .catch(function () { msg.textContent = 'ORCID fetch failed.'; });
+        });
     }
 });
 </script>

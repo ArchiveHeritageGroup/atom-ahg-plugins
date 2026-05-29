@@ -177,4 +177,53 @@ class Marc21DecoderService
     {
         return $field['subfields'][$code] ?? null;
     }
+
+    /**
+     * Validate a decoded record (#111). Checks leader length, indicator values,
+     * the mandatory 245, and required subfields for common tags. Returns a list
+     * of human-readable issues (empty = valid). Pure — no DB.
+     *
+     * @return string[]
+     */
+    public function validate(array $decoded): array
+    {
+        $issues = [];
+
+        $leader = (string) ($decoded['leader'] ?? '');
+        if (strlen($leader) !== 24) {
+            $issues[] = 'Leader must be exactly 24 characters (got ' . strlen($leader) . ').';
+        }
+
+        // Mandatory subfield $a for these data fields.
+        $requiredA = ['020', '022', '100', '110', '111', '130', '245', '650', '651'];
+        $has245 = false;
+
+        foreach (($decoded['data'] ?? []) as $f) {
+            $tag = (string) ($f['tag'] ?? '');
+            if ($tag === '') {
+                continue;
+            }
+
+            // Indicators must each be a single char in [0-9a-z ].
+            foreach (['ind1' => $f['ind1'] ?? ' ', 'ind2' => $f['ind2'] ?? ' '] as $name => $v) {
+                $v = (string) $v;
+                if (strlen($v) !== 1 || !preg_match('/^[0-9a-z ]$/', $v)) {
+                    $issues[] = "Field {$tag}: invalid {$name} indicator '" . $v . "'.";
+                }
+            }
+
+            if ($tag === '245') {
+                $has245 = true;
+            }
+            if (in_array($tag, $requiredA, true) && empty($f['subfields']['a'])) {
+                $issues[] = "Field {$tag}: missing required subfield \$a.";
+            }
+        }
+
+        if (!$has245) {
+            $issues[] = 'Missing mandatory field 245 (Title Statement).';
+        }
+
+        return $issues;
+    }
 }

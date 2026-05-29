@@ -303,6 +303,62 @@ class KbartRemoteService
     /**
      * Get vendor by ID.
      */
+    /**
+     * Export the library's holdings as a NISO KBART title list (TSV) — the
+     * inverse of the import path, using the same REQUIRED_COLUMNS (#110).
+     *
+     * @param array $filters serials_only(bool)
+     */
+    public function exportKbart(array $filters = []): string
+    {
+        $baseUrl = rtrim((string) (\sfConfig::get('app_siteBaseUrl', '') ?: ''), '/');
+
+        $q = DB::table('library_item as li')
+            ->join('information_object as io', 'li.information_object_id', '=', 'io.id')
+            ->leftJoin('information_object_i18n as ioi', function ($j) {
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            })
+            ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
+            ->join('status as pub_st', function ($j) {
+                $j->on('io.id', '=', 'pub_st.object_id')->where('pub_st.type_id', '=', 158);
+            })
+            ->where('pub_st.status_id', 160); // published only
+
+        if (!empty($filters['serials_only'])) {
+            $q->whereNotNull('li.issn')->where('li.issn', '!=', '');
+        }
+
+        $rows = $q->orderBy('ioi.title')
+            ->get(['li.id', 'li.isbn', 'li.issn', 'li.series_issn', 'li.publisher', 'li.publication_start_date', 'li.publication_end_date', 'ioi.title', 'slug.slug']);
+
+        $lines = [implode("\t", self::REQUIRED_COLUMNS)];
+        foreach ($rows as $r) {
+            $isSerial = !empty($r->issn);
+            $line = [
+                'publication_title'       => (string) ($r->title ?? ''),
+                'print_identifier'        => (string) ($r->issn ?: $r->isbn ?: ''),
+                'online_identifier'       => (string) ($r->series_issn ?? ''),
+                'date_first_issue_online' => (string) ($r->publication_start_date ?? ''),
+                'num_first_vol_online'    => '',
+                'num_first_issue_online'  => '',
+                'date_last_issue_online'  => (string) ($r->publication_end_date ?? ''),
+                'num_last_vol_online'     => '',
+                'num_last_issue_online'   => '',
+                'title_url'               => $r->slug ? ($baseUrl . '/' . $r->slug) : '',
+                'first_author'            => '',
+                'title_id'                => (string) $r->id,
+                'embargo_info'            => '',
+                'coverage_depth'          => 'fulltext',
+                'coverage_notes'          => $isSerial ? 'serial' : 'monograph',
+                'publisher_name'          => (string) ($r->publisher ?? ''),
+            ];
+            // Sanitise tabs/newlines out of values.
+            $lines[] = implode("\t", array_map(fn ($v) => str_replace(["\t", "\r", "\n"], ' ', (string) $v), array_values($line)));
+        }
+
+        return implode("\n", $lines) . "\n";
+    }
+
     public function getVendor(int $id): ?object
     {
         return DB::table('library_kbart_vendor')->where('id', $id)->first();

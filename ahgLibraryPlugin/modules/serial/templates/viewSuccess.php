@@ -143,12 +143,12 @@
                   <td><?php echo esc_entities($gap->volume ?? '-'); ?></td>
                   <td><?php echo esc_entities($gap->expected_date ?? '-'); ?></td>
                   <td>
-                    <span class="badge <?php echo ($gap->issue_status ?? '') === 'claimed' ? 'bg-info' : 'bg-warning text-dark'; ?>">
-                      <?php echo esc_entities(ucfirst($gap->issue_status ?? 'expected')); ?>
+                    <span class="badge <?php echo ($gap->status ?? '') === 'claimed' ? 'bg-info' : 'bg-warning text-dark'; ?>">
+                      <?php echo esc_entities(ucfirst($gap->status ?? 'expected')); ?>
                     </span>
                   </td>
                   <td>
-                    <?php if (($gap->issue_status ?? '') === 'expected'): ?>
+                    <?php if (($gap->status ?? '') === 'expected'): ?>
                       <form method="post" action="<?php echo url_for(['module' => 'serial', 'action' => 'claim']); ?>" class="d-inline">
                         <input type="hidden" name="issue_id" value="<?php echo (int) $gap->id; ?>">
                         <input type="hidden" name="subscription_id" value="<?php echo (int) $rawSub->id; ?>">
@@ -244,7 +244,7 @@
               <?php foreach ($rawIssues as $issue): ?>
                 <?php
                   $issueBadge = 'bg-secondary';
-                  $ist = $issue->issue_status ?? '';
+                  $ist = $issue->status ?? '';
                   if ($ist === 'received') { $issueBadge = 'bg-success'; }
                   elseif ($ist === 'expected') { $issueBadge = 'bg-primary'; }
                   elseif ($ist === 'claimed') { $issueBadge = 'bg-info'; }

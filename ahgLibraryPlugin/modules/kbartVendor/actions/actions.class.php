@@ -22,6 +22,22 @@ class kbartVendorActions extends AhgController
     }
 
     /**
+     * Export the library's holdings as a NISO KBART title list (TSV download) — #110.
+     */
+    public function executeExport($request)
+    {
+        $tsv = $this->kbartService->exportKbart([
+            'serials_only' => (bool) $request->getParameter('serials_only'),
+        ]);
+        $filename = 'kbart_export_' . date('Ymd') . '.txt';
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $this->getResponse()->setContentType('text/tab-separated-values');
+        echo $tsv;
+
+        return sfView::NONE;
+    }
+
+    /**
      * List all vendors with stats.
      */
     public function executeIndex($request)

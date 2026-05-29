@@ -119,6 +119,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $serial->any('serial_edit', '/serial/edit/:id', 'edit', ['id' => '\d*']);
         $serial->any('serial_checkin', '/serial/checkin', 'checkin');
         $serial->any('serial_claim', '/serial/claim', 'claim');
+        $serial->any('serial_bindery', '/serial/bindery', 'bindery');
         $serial->any('serial_index', '/serial', 'index');
         $serial->register($routing);
 
@@ -132,6 +133,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
 
         // KBart Vendor management routes
         $kbart = new \AtomFramework\Routing\RouteLoader('kbartVendor');
+        $kbart->any('kbart_export', '/library/kbart/export', 'export');
         $kbart->any('kbart_vendor_index', '/library/kbart/vendors', 'index');
         $kbart->any('kbart_vendor_add', '/library/kbart/vendor/add', 'add');
         $kbart->any('kbart_vendor_edit', '/library/kbart/vendor/edit/:id', 'edit', ['id' => '\d+']);
@@ -141,9 +143,15 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $kbart->any('kbart_vendor_log', '/library/kbart/vendor/log/:id', 'importLog', ['id' => '\d+']);
         $kbart->register($routing);
 
+        // OpenURL link resolver (#110)
+        $openurl = new \AtomFramework\Routing\RouteLoader('openurl');
+        $openurl->any('openurl_resolve', '/openurl', 'index');
+        $openurl->register($routing);
+
         // Library Reports — COUNTER / SUSHI / FRBR (admin-only)
         $reports = new \AtomFramework\Routing\RouteLoader('libraryReports');
         $reports->any('library_reports_counter', '/admin/library/counter', 'counter');
+        $reports->any('library_reports_odi', '/admin/library/odi', 'odi');
         $reports->any('library_reports_sushi', '/admin/library/sushi', 'sushiSettings');
         $reports->any('library_reports_frbr', '/admin/library/frbr', 'frbrOverride');
         $reports->any('library_reports_catalogue', '/admin/library/catalogue', 'catalogue');

@@ -55,19 +55,19 @@ class AcquisitionService
         $now = date('Y-m-d H:i:s');
 
         $id = DB::table('library_order')->insertGetId([
-            'order_number'   => $data['order_number'] ?? $this->generateOrderNumber(),
-            'vendor_name'    => $data['vendor_name'],
-            'vendor_account' => $data['vendor_account'] ?? null,
-            'order_date'     => $data['order_date'] ?? date('Y-m-d'),
-            'order_type'     => $data['order_type'] ?? 'purchase',
-            'order_status'   => 'pending',
-            'budget_id'      => $data['budget_id'] ?? null,
-            'currency'       => $data['currency'] ?? 'USD',
-            'total_amount'   => 0,
-            'notes'          => $data['notes'] ?? null,
-            'created_by'     => $this->getCurrentUserId(),
-            'created_at'     => $now,
-            'updated_at'     => $now,
+            'order_number' => $data['order_number'] ?? $this->generateOrderNumber(),
+            'vendor_id'    => $data['vendor_id'] ?? null,
+            'vendor_name'  => $data['vendor_name'] ?? null,
+            'order_date'   => $data['order_date'] ?? date('Y-m-d'),
+            'order_type'   => $data['order_type'] ?? 'purchase',
+            'status'       => 'pending',
+            'budget_code'  => $data['budget_code'] ?? null,
+            'currency'     => $data['currency'] ?? 'USD',
+            'total'        => 0,
+            'notes'        => $data['notes'] ?? null,
+            'created_by'   => $this->getCurrentUserId(),
+            'created_at'   => $now,
+            'updated_at'   => $now,
         ]);
 
         $this->logger->info('Order created', ['id' => $id, 'number' => $data['order_number'] ?? '']);
@@ -85,20 +85,36 @@ class AcquisitionService
         $unitPrice = (float) ($data['unit_price'] ?? 0);
 
         $id = DB::table('library_order_line')->insertGetId([
-            'order_id'           => $orderId,
-            'library_item_id'    => $data['library_item_id'] ?? null,
-            'title'              => $data['title'],
-            'isbn'               => $data['isbn'] ?? null,
-            'quantity'           => $quantity,
-            'unit_price'         => $unitPrice,
-            'line_total'         => $quantity * $unitPrice,
-            'quantity_received'  => 0,
-            'line_status'        => 'pending',
-            'fund_code'          => $data['fund_code'] ?? null,
-            'notes'              => $data['notes'] ?? null,
-            'created_at'         => $now,
-            'updated_at'         => $now,
+            'order_id'          => $orderId,
+            'library_item_id'   => $data['library_item_id'] ?? null,
+            'title'             => $data['title'],
+            'isbn'              => $data['isbn'] ?? null,
+            'quantity'          => $quantity,
+            'unit_price'        => $unitPrice,
+            'line_total'        => $quantity * $unitPrice,
+            'quantity_received' => 0,
+            'status'            => 'pending',
+            'budget_code'       => $data['budget_code'] ?? null,
+            'fund_code'         => $data['fund_code'] ?? null,
+            'notes'             => $data['notes'] ?? null,
+            'created_at'        => $now,
         ]);
+
+        // Fund-split: optional allocation of the line across multiple funds (#104).
+        if (!empty($data['funds']) && is_array($data['funds'])) {
+            foreach ($data['funds'] as $f) {
+                $code = trim((string) ($f['fund_code'] ?? ''));
+                if ($code === '') {
+                    continue;
+                }
+                DB::table('library_order_line_fund')->insert([
+                    'order_line_id' => $id,
+                    'fund_code'     => $code,
+                    'amount'        => (float) ($f['amount'] ?? 0),
+                    'created_at'    => $now,
+                ]);
+            }
+        }
 
         // Recalculate order total
         $this->recalculateOrderTotal($orderId);
@@ -125,9 +141,8 @@ class AcquisitionService
             ->where('id', $orderLineId)
             ->update([
                 'quantity_received' => $newReceived,
-                'line_status'       => $status,
+                'status'            => $status,
                 'received_date'     => $now,
-                'updated_at'        => $now,
             ]);
 
         // Check if all lines are received → update order status
@@ -152,8 +167,8 @@ class AcquisitionService
             return;
         }
 
-        $allReceived = $lines->every(fn($l) => $l->line_status === 'received');
-        $anyReceived = $lines->contains(fn($l) => in_array($l->line_status, ['received', 'partial']));
+        $allReceived = $lines->every(fn($l) => $l->status === 'received');
+        $anyReceived = $lines->contains(fn($l) => in_array($l->status, ['received', 'partial']));
 
         $status = 'pending';
         if ($allReceived) {
@@ -164,7 +179,7 @@ class AcquisitionService
 
         DB::table('library_order')
             ->where('id', $orderId)
-            ->update(['order_status' => $status, 'updated_at' => date('Y-m-d H:i:s')]);
+            ->update(['status' => $status, 'updated_at' => date('Y-m-d H:i:s')]);
     }
 
     /**
@@ -178,7 +193,7 @@ class AcquisitionService
 
         DB::table('library_order')
             ->where('id', $orderId)
-            ->update(['total_amount' => $total, 'updated_at' => date('Y-m-d H:i:s')]);
+            ->update(['total' => $total, 'updated_at' => date('Y-m-d H:i:s')]);
     }
 
     /**
@@ -220,8 +235,8 @@ class AcquisitionService
             });
         }
 
-        if (!empty($params['order_status'])) {
-            $query->where('order_status', $params['order_status']);
+        if (!empty($params['status'])) {
+            $query->where('status', $params['status']);
         }
 
         if (!empty($params['order_type'])) {
@@ -253,12 +268,12 @@ class AcquisitionService
         $now = date('Y-m-d H:i:s');
 
         return DB::table('library_budget')->insertGetId([
-            'budget_name'    => $data['budget_name'],
+            'fund_name'      => $data['fund_name'] ?? $data['budget_name'] ?? null,
             'budget_code'    => $data['budget_code'],
             'fiscal_year'    => $data['fiscal_year'] ?? date('Y'),
             'allocated_amount' => (float) ($data['allocated_amount'] ?? 0),
             'spent_amount'   => 0,
-            'encumbered_amount' => 0,
+            'committed_amount' => 0,
             'currency'       => $data['currency'] ?? 'USD',
             'category'       => $data['category'] ?? 'general',
             'notes'          => $data['notes'] ?? null,
@@ -274,7 +289,7 @@ class AcquisitionService
     {
         return DB::table('library_budget')
             ->where('id', $budgetId)
-            ->selectRaw('*, (allocated_amount - spent_amount - encumbered_amount) as available_amount')
+            ->selectRaw('*, (allocated_amount - spent_amount - committed_amount) as available_amount')
             ->first();
     }
 
@@ -290,8 +305,8 @@ class AcquisitionService
         }
 
         return $query
-            ->selectRaw('*, (allocated_amount - spent_amount - encumbered_amount) as available_amount')
-            ->orderBy('budget_name')
+            ->selectRaw('*, (allocated_amount - spent_amount - committed_amount) as available_amount')
+            ->orderBy('fund_name')
             ->get()
             ->all();
     }
@@ -345,13 +360,75 @@ class AcquisitionService
     /**
      * Get acquisition statistics.
      */
+    /**
+     * Active vendor options for the acquisition vendor picker (#104) —
+     * reuses ahgVendorPlugin's ahg_vendors rather than a separate store.
+     *
+     * @return array list of {id, name, vendor_code}
+     */
+    public function getVendorOptions(): array
+    {
+        if (!DB::schema()->hasTable('ahg_vendors')) {
+            return [];
+        }
+
+        return DB::table('ahg_vendors')
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name', 'vendor_code'])
+            ->all();
+    }
+
+    /**
+     * Encumber (commit) funds against a budget by budget_code (#104).
+     */
+    public function encumberByCode(string $budgetCode, float $amount): void
+    {
+        if ($budgetCode === '' || $amount == 0.0) {
+            return;
+        }
+        DB::table('library_budget')->where('budget_code', $budgetCode)
+            ->update(['committed_amount' => DB::raw('committed_amount + ' . (float) $amount), 'updated_at' => date('Y-m-d H:i:s')]);
+    }
+
+    /**
+     * Release committed funds (e.g. on cancellation or conversion to spend).
+     */
+    public function releaseByCode(string $budgetCode, float $amount): void
+    {
+        if ($budgetCode === '' || $amount == 0.0) {
+            return;
+        }
+        DB::table('library_budget')->where('budget_code', $budgetCode)
+            ->update(['committed_amount' => DB::raw('GREATEST(0, committed_amount - ' . (float) $amount . ')'), 'updated_at' => date('Y-m-d H:i:s')]);
+    }
+
+    /**
+     * Send an order to the vendor: mark sent and encumber its total against
+     * the order's budget_code.
+     */
+    public function sendOrder(int $orderId): bool
+    {
+        $order = DB::table('library_order')->where('id', $orderId)->first();
+        if (!$order) {
+            return false;
+        }
+        DB::table('library_order')->where('id', $orderId)
+            ->update(['status' => 'sent', 'updated_at' => date('Y-m-d H:i:s')]);
+        if (!empty($order->budget_code)) {
+            $this->encumberByCode($order->budget_code, (float) $order->total);
+        }
+
+        return true;
+    }
+
     public function getStatistics(): array
     {
         $year = date('Y');
 
         return [
             'orders_this_year'   => DB::table('library_order')->where('fiscal_year', $year)->count(),
-            'pending_orders'     => DB::table('library_order')->where('order_status', 'pending')->count(),
+            'pending_orders'     => DB::table('library_order')->where('status', 'pending')->count(),
             'total_spent'        => (float) DB::table('library_budget')->where('fiscal_year', $year)->sum('spent_amount'),
             'total_allocated'    => (float) DB::table('library_budget')->where('fiscal_year', $year)->sum('allocated_amount'),
         ];

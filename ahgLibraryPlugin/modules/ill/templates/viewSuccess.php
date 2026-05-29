@@ -133,7 +133,7 @@
               <th class="text-muted" style="width:40%"><?php echo __('Status'); ?></th>
               <td>
                 <?php
-                  $st = $req->ill_status ?? '';
+                  $st = $req->status ?? '';
                   $stBadge = 'bg-secondary';
                   if ($st === 'submitted') { $stBadge = 'bg-warning text-dark'; }
                   elseif ($st === 'approved') { $stBadge = 'bg-info'; }
@@ -198,7 +198,7 @@
   </div>
 
   <!-- Status update form -->
-  <?php if (!in_array($req->ill_status ?? '', ['returned', 'cancelled'])): ?>
+  <?php if (!in_array($req->status ?? '', ['returned', 'cancelled'])): ?>
     <div class="card shadow-sm">
       <div class="card-header">
         <i class="fas fa-edit me-2"></i><?php echo __('Update Status'); ?>
@@ -214,7 +214,7 @@
                 <?php
                   $availableStatuses = ['submitted', 'approved', 'sent', 'received', 'returned', 'cancelled'];
                   foreach ($availableStatuses as $s):
-                    if ($s === ($req->ill_status ?? '')) { continue; }
+                    if ($s === ($req->status ?? '')) { continue; }
                 ?>
                   <option value="<?php echo $s; ?>"><?php echo esc_entities(ucfirst($s)); ?></option>
                 <?php endforeach; ?>

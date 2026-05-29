@@ -488,6 +488,17 @@ class MarcService
         $leader = (string) ($rec['leader'] ?? '');
         $data['material_type'] = $this->detectMaterialType($leader);
 
+        // Preserve control fields for round-trip export (#111).
+        if ($leader !== '') {
+            $data['marc_leader'] = $leader;
+        }
+        if (!empty($rec['control']['005'])) {
+            $data['marc_005'] = $rec['control']['005'];
+        }
+        if (!empty($rec['control']['008'])) {
+            $data['marc_008'] = $rec['control']['008'];
+        }
+
         $has082 = false;
         $has050 = false;
 
@@ -587,6 +598,29 @@ class MarcService
         $data['subjects'] = $subjects;
 
         return $data;
+    }
+
+    /**
+     * Detect existing library items that conflict with a parsed record by any
+     * standard identifier — ISBN (020), ISSN (022), OCLC (035), LCCN (010) —
+     * so the importer can warn / offer a merge instead of silently duplicating
+     * (#111). Returns [existing library_item.id => [matched identifier columns]].
+     *
+     * @return array<int,string[]>
+     */
+    public function findConflicts(array $parsed): array
+    {
+        $conflicts = [];
+        foreach (['isbn', 'issn', 'lccn', 'oclc_number'] as $col) {
+            if (empty($parsed[$col])) {
+                continue;
+            }
+            foreach (DB::table('library_item')->where($col, $parsed[$col])->pluck('id')->all() as $id) {
+                $conflicts[(int) $id][] = $col;
+            }
+        }
+
+        return array_map(fn ($cols) => array_values(array_unique($cols)), $conflicts);
     }
 
     /**
@@ -738,6 +772,7 @@ class MarcService
                 'target_audience', 'system_requirements', 'binding_note',
                 'frequency', 'numbering_peculiarities',
                 'content_type', 'carrier_type', 'instance_type',
+                'marc_leader', 'marc_005', 'marc_008',
             ]));
             $columns['updated_at'] = $now;
             DB::table('library_item')->where('id', $itemId)->update($columns);
@@ -793,6 +828,7 @@ class MarcService
                 'target_audience', 'system_requirements', 'binding_note',
                 'frequency', 'numbering_peculiarities',
                 'content_type', 'carrier_type', 'instance_type',
+                'marc_leader', 'marc_005', 'marc_008',
             ]));
 
             $itemData['information_object_id'] = $objectId;
@@ -886,14 +922,21 @@ class MarcService
     {
         $xml->startElement('record');
 
-        // Leader
-        $leader = $this->buildLeader($item->material_type);
+        // Leader — preserved from import when available, else regenerated (#111).
+        $leader = !empty($item->marc_leader) ? $item->marc_leader : $this->buildLeader($item->material_type);
         $xml->writeElement('leader', $leader);
 
-        // Control fields
+        // Control fields — round-trip preserved 005/008 when present (#111).
+        if (!empty($item->marc_005)) {
+            $xml->startElement('controlfield');
+            $xml->writeAttribute('tag', '005');
+            $xml->text($item->marc_005);
+            $xml->endElement();
+        }
+
         $xml->startElement('controlfield');
         $xml->writeAttribute('tag', '008');
-        $xml->text($this->build008($item));
+        $xml->text(!empty($item->marc_008) ? $item->marc_008 : $this->build008($item));
         $xml->endElement();
 
         // ISBN (020)

@@ -31,6 +31,31 @@ class KeywordSearchStrategy
     }
 
     /**
+     * Effective field boosts: admin override from ahg_settings
+     * ('discovery_field_boosts', a JSON map of field-pattern => boost) when
+     * present and valid, else the built-in defaults (#108).
+     *
+     * @return array<string,float>
+     */
+    private function fieldBoosts(): array
+    {
+        try {
+            $json = \Illuminate\Database\Capsule\Manager::table('ahg_settings')
+                ->where('setting_key', 'discovery_field_boosts')->value('setting_value');
+            if ($json) {
+                $cfg = json_decode($json, true);
+                if (is_array($cfg) && $cfg !== []) {
+                    return $cfg;
+                }
+            }
+        } catch (\Throwable $e) {
+            // fall back to defaults
+        }
+
+        return self::FIELD_BOOSTS;
+    }
+
+    /**
      * Execute keyword search against Elasticsearch.
      *
      * @param array $expanded ExpandedQuery from QueryExpander
@@ -81,9 +106,9 @@ class KeywordSearchStrategy
         $should = [];
         $filter = [];
 
-        // Build fields list with culture and boosts
+        // Build fields list with culture and boosts (admin-configurable, #108)
         $fields = [];
-        foreach (self::FIELD_BOOSTS as $pattern => $boost) {
+        foreach ($this->fieldBoosts() as $pattern => $boost) {
             $fields[] = sprintf($pattern, $this->culture) . '^' . $boost;
         }
 

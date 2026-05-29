@@ -184,7 +184,7 @@ class SerialService
             'issue_date'      => $data['issue_date'] ?? null,
             'expected_date'   => $data['expected_date'] ?? null,
             'received_date'   => $data['received_date'] ?? date('Y-m-d'),
-            'issue_status'    => 'received',
+            'status'    => 'received',
             'supplement'      => $data['supplement'] ?? null,
             'notes'           => $data['notes'] ?? null,
             'created_at'      => $now,
@@ -209,7 +209,7 @@ class SerialService
         return DB::table('library_serial_issue')
             ->where('id', $issueId)
             ->update([
-                'issue_status' => 'claimed',
+                'status' => 'claimed',
                 'updated_at'   => date('Y-m-d H:i:s'),
             ]) > 0;
     }
@@ -228,7 +228,16 @@ class SerialService
         $current = strtotime($startDate);
         $end = strtotime($endDate);
         $count = 0;
-        $issueNum = 1;
+
+        // Enumeration/chronology prediction: cycle issue numbers within a volume
+        // and roll the volume over each cycle. issues-per-volume comes from
+        // issues_per_year when set, else is derived from the frequency.
+        $perVolume = (int) ($sub->issues_per_year ?? 0);
+        if ($perVolume < 1) {
+            $perVolume = max(1, (int) round(365 / max(1, $frequencyDays)));
+        }
+        $volume = 1;
+        $issueInVol = 1;
 
         $now = date('Y-m-d H:i:s');
 
@@ -244,16 +253,23 @@ class SerialService
             if (!$exists) {
                 DB::table('library_serial_issue')->insert([
                     'subscription_id' => $subscriptionId,
-                    'issue_number'    => (string) $issueNum,
+                    'library_item_id' => $sub->library_item_id ?? null,
+                    'volume'          => (string) $volume,
+                    'issue_number'    => (string) $issueInVol,
+                    'issue_date'      => $expectedDate,
                     'expected_date'   => $expectedDate,
-                    'issue_status'    => 'expected',
+                    'status'    => 'expected',
                     'created_at'      => $now,
                     'updated_at'      => $now,
                 ]);
                 $count++;
             }
 
-            $issueNum++;
+            // Advance enumeration + chronology.
+            if (++$issueInVol > $perVolume) {
+                $issueInVol = 1;
+                $volume++;
+            }
             $current = strtotime('+' . $frequencyDays . ' days', $current);
         }
 
@@ -267,7 +283,7 @@ class SerialService
     {
         return DB::table('library_serial_issue')
             ->where('subscription_id', $subscriptionId)
-            ->whereIn('issue_status', ['expected', 'claimed'])
+            ->whereIn('status', ['expected', 'claimed'])
             ->where('expected_date', '<', date('Y-m-d'))
             ->orderBy('expected_date')
             ->get()
@@ -322,15 +338,93 @@ class SerialService
     /**
      * Get serial statistics.
      */
+    /**
+     * Create a bindery batch from received issues and send it out (#105).
+     *
+     * @param int[] $issueIds library_serial_issue ids to bind
+     * @return int new library_bindery_batch id
+     */
+    public function createBinderyBatch(array $issueIds, ?int $vendorId = null, ?string $notes = null, ?int $userId = null): int
+    {
+        $issueIds = array_values(array_filter(array_map('intval', $issueIds), fn ($v) => $v > 0));
+        $now = date('Y-m-d H:i:s');
+
+        $batchId = (int) DB::table('library_bindery_batch')->insertGetId([
+            'batch_number' => 'BND-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 5)),
+            'vendor_id'    => $vendorId,
+            'status'       => 'sent',
+            'sent_date'    => date('Y-m-d'),
+            'item_count'   => count($issueIds),
+            'notes'        => $notes,
+            'created_by'   => $userId,
+            'created_at'   => $now,
+            'updated_at'   => $now,
+        ]);
+
+        if ($issueIds) {
+            DB::table('library_serial_issue')->whereIn('id', $issueIds)
+                ->update(['bindery_batch_id' => $batchId, 'updated_at' => $now]);
+        }
+
+        return $batchId;
+    }
+
+    /**
+     * Receive a bindery batch back: mark batch returned and its issues bound.
+     */
+    public function receiveBinderyBatch(int $batchId, ?int $boundVolumeId = null): bool
+    {
+        $now = date('Y-m-d H:i:s');
+        $ok = (bool) DB::table('library_bindery_batch')->where('id', $batchId)->update([
+            'status'        => 'returned',
+            'returned_date' => date('Y-m-d'),
+            'updated_at'    => $now,
+        ]);
+
+        $upd = ['status' => 'bound', 'updated_at' => $now];
+        if ($boundVolumeId) {
+            $upd['bound_volume_id'] = $boundVolumeId;
+        }
+        DB::table('library_serial_issue')->where('bindery_batch_id', $batchId)->update($upd);
+
+        return $ok;
+    }
+
+    /**
+     * List bindery batches, newest first.
+     */
+    public function listBinderyBatches(array $params = []): array
+    {
+        $q = DB::table('library_bindery_batch');
+        if (!empty($params['status'])) {
+            $q->where('status', $params['status']);
+        }
+
+        return $q->orderByDesc('id')->limit(200)->get()->all();
+    }
+
+    /**
+     * Received issues not yet sent to a bindery batch (candidates for binding).
+     */
+    public function getBindableIssues(?int $subscriptionId = null): array
+    {
+        $q = DB::table('library_serial_issue')->where('status', 'received')->whereNull('bindery_batch_id');
+        if ($subscriptionId) {
+            $q->where('subscription_id', $subscriptionId);
+        }
+
+        return $q->orderBy('expected_date')->limit(500)->get()->all();
+    }
+
     public function getStatistics(): array
     {
         return [
             'active_subscriptions' => DB::table('library_subscription')->where('status', 'active')->count(),
-            'issues_received'      => DB::table('library_serial_issue')->where('issue_status', 'received')->count(),
-            'issues_expected'      => DB::table('library_serial_issue')->where('issue_status', 'expected')
+            'issues_received'      => DB::table('library_serial_issue')->where('status', 'received')->count(),
+            'issues_expected'      => DB::table('library_serial_issue')->where('status', 'expected')
                 ->where('expected_date', '<=', date('Y-m-d'))
                 ->count(),
-            'claimed'              => DB::table('library_serial_issue')->where('issue_status', 'claimed')->count(),
+            'claimed'              => DB::table('library_serial_issue')->where('status', 'claimed')->count(),
             'renewals_due'         => DB::table('library_subscription')
                 ->where('status', 'active')
                 ->where('renewal_date', '<=', date('Y-m-d', strtotime('+30 days')))

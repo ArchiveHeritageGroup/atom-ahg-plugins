@@ -49,6 +49,49 @@ class ResultMerger
      */
     public function merge(array $keywordResults, array $entityResults, array $hierarchicalResults, array $vectorResults = [], array $imageResults = []): array
     {
+        return $this->doMerge($keywordResults, $entityResults, $hierarchicalResults, $vectorResults, $imageResults);
+    }
+
+    /**
+     * Opt-in personalised re-rank (#108): boost flat_results the user has
+     * previously clicked (heritage_discovery_click), up to +50%, then re-sort.
+     * No-op when $userId is null (not opted in) or there is no history.
+     */
+    public function personalize(array $merged, ?int $userId, int $recentDays = 90): array
+    {
+        if (!$userId || empty($merged['flat_results'])) {
+            return $merged;
+        }
+
+        try {
+            $clicks = \Illuminate\Database\Capsule\Manager::table('heritage_discovery_click')
+                ->where('user_id', $userId)
+                ->where('created_at', '>=', date('Y-m-d H:i:s', strtotime('-' . max(1, $recentDays) . ' days')))
+                ->pluck('item_id')->all();
+        } catch (\Throwable $e) {
+            return $merged;
+        }
+        if (empty($clicks)) {
+            return $merged;
+        }
+
+        $counts = array_count_values(array_map('intval', $clicks));
+        foreach ($merged['flat_results'] as &$r) {
+            $id = (int) ($r['object_id'] ?? 0);
+            if (isset($counts[$id])) {
+                $r['score'] = round(($r['score'] ?? 0) * (1 + min(0.5, 0.1 * $counts[$id])), 4);
+                $r['personalized'] = true;
+            }
+        }
+        unset($r);
+
+        usort($merged['flat_results'], fn ($a, $b) => ($b['score'] ?? 0) <=> ($a['score'] ?? 0));
+
+        return $merged;
+    }
+
+    private function doMerge(array $keywordResults, array $entityResults, array $hierarchicalResults, array $vectorResults = [], array $imageResults = []): array
+    {
         // Step 1: Build unified map
         $map = $this->buildResultMap($keywordResults, $entityResults, $hierarchicalResults, $vectorResults, $imageResults);
 

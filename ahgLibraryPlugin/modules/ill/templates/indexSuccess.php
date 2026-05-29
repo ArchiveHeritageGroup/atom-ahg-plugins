@@ -126,7 +126,7 @@
 
                 // Status badge
                 $stBadge = 'bg-secondary';
-                $st = $row->ill_status ?? '';
+                $st = $row->status ?? '';
                 if ($st === 'submitted') { $stBadge = 'bg-warning text-dark'; }
                 elseif ($st === 'approved') { $stBadge = 'bg-info'; }
                 elseif ($st === 'sent') { $stBadge = 'bg-primary'; }

@@ -285,6 +285,47 @@ class LibraryCounterService
         return implode("\n", $lines) . "\n";
     }
 
+    /**
+     * Write the report as an XLSX workbook to $path (#109). Binary output, so
+     * the caller streams the file rather than echoing a string. Uses the same
+     * flattened SUSHI records as toTsv/toJson.
+     */
+    public function toXlsxFile(string $reportId, array $data, string $path): void
+    {
+        $records = $this->filterForSUSHI($data);
+
+        $ss = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $ss->getActiveSheet();
+        $sheet->setTitle(substr($reportId, 0, 31) ?: 'COUNTER');
+
+        // Report header block.
+        $sheet->fromArray([
+            ['Report_ID', $reportId],
+            ['Report_Name', $this->reportName($reportId)],
+            ['Institution', $this->institutionName],
+            ['Institution_ID', $this->institutionId],
+            ['Platform', $this->platform],
+            ['Reporting_Period', $this->reportStart . ' to ' . $this->reportEnd],
+            ['Created', (new \DateTime())->format('Y-m-d\TH:i:s\Z')],
+        ], null, 'A1');
+
+        $startRow = 9;
+        if (!empty($records)) {
+            $header = array_keys($records[0]);
+            $sheet->fromArray($header, null, 'A' . $startRow);
+            $r = $startRow + 1;
+            foreach ($records as $record) {
+                $row = array_map(fn ($v) => is_scalar($v) || $v === null ? $v : json_encode($v), array_values($record));
+                $sheet->fromArray($row, null, 'A' . $r);
+                $r++;
+            }
+        } else {
+            $sheet->setCellValue('A' . $startRow, 'No data for the selected period');
+        }
+
+        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($ss))->save($path);
+    }
+
     // ── Usage Event Capture ────────────────────────────────────────────────────
 
     /**

@@ -883,6 +883,14 @@ class IngestService
             $ext = strtolower(pathinfo($fileInfo['original_name'], PATHINFO_EXTENSION));
             $typeMap = ['csv' => 'csv', 'zip' => 'zip', 'xml' => 'ead'];
             $fileType = $typeMap[$ext] ?? 'csv';
+
+            // ONIX vs EAD: an XML file whose root is <ONIXMessage> is ONIX (#107).
+            if ($fileType === 'ead' && !empty($fileInfo['stored_path']) && is_readable($fileInfo['stored_path'])) {
+                $head = (string) file_get_contents($fileInfo['stored_path'], false, null, 0, 4096);
+                if (stripos($head, '<ONIXMessage') !== false) {
+                    $fileType = 'onix';
+                }
+            }
         }
 
         $fileId = DB::table('ingest_file')->insertGetId([
@@ -1075,7 +1083,102 @@ class IngestService
             return $this->parseRowsFromSharePoint($sessionId);
         }
 
+        // ONIX (#107)
+        $onix = DB::table('ingest_file')
+            ->where('session_id', $sessionId)
+            ->where('file_type', 'onix')
+            ->first();
+        if ($onix && file_exists($onix->stored_path)) {
+            return $this->parseRowsFromOnix($sessionId, $onix);
+        }
+
         return 0;
+    }
+
+    /**
+     * Parse an ONIX (for Books / ONIX-PL) message into ingest_row entries —
+     * one row per <Product> (#107). Namespace-agnostic; maps the common ONIX
+     * 3.0 reference elements (ISBN/title/contributor/publisher/date). ISBN
+     * validation + dedupe are applied downstream by the existing pipeline.
+     */
+    public function parseRowsFromOnix(int $sessionId, object $file): int
+    {
+        DB::table('ingest_row')->where('session_id', $sessionId)->delete();
+
+        $content = (string) @file_get_contents($file->stored_path);
+        if ($content === '') {
+            return 0;
+        }
+        // Strip namespace declarations so plain element access works regardless
+        // of the ONIX namespace / prefix used.
+        $content = preg_replace('/xmlns(:\w+)?\s*=\s*"[^"]*"/', '', $content);
+        $xml = @simplexml_load_string($content);
+        if (!$xml) {
+            return 0;
+        }
+
+        $products = $xml->xpath('//Product') ?: [];
+        $rowNum = 0;
+        $now = date('Y-m-d H:i:s');
+
+        foreach ($products as $p) {
+            $rowNum++;
+
+            $isbn  = $this->onixIdentifier($p, ['15', '03']); // ISBN-13, ISBN-10
+            $issn  = $this->onixIdentifier($p, ['02']);        // ISSN
+            $title = (string) ($p->DescriptiveDetail->TitleDetail->TitleElement->TitleText
+                ?? $p->DescriptiveDetail->TitleDetail->TitleElement->TitleWithoutPrefix
+                ?? $p->Title->TitleText ?? '');
+            $author = (string) ($p->DescriptiveDetail->Contributor->PersonName
+                ?? $p->DescriptiveDetail->Contributor->PersonNameInverted
+                ?? $p->Contributor->PersonName ?? '');
+            $publisher = (string) ($p->PublishingDetail->Publisher->PublisherName ?? $p->Publisher->PublisherName ?? '');
+            $pubDate   = (string) ($p->PublishingDetail->PublishingDate->Date ?? '');
+
+            $data = [
+                'title'            => trim($title),
+                'isbn'             => $isbn,
+                'issn'             => $issn,
+                'author'           => trim($author),
+                'publisher'        => trim($publisher),
+                'publication_date' => $pubDate,
+            ];
+
+            DB::table('ingest_row')->insert([
+                'session_id' => $sessionId,
+                'row_number' => $rowNum,
+                'legacy_id'  => $isbn ?: ($issn ?: null),
+                'title'      => trim($title) ?: null,
+                'data'       => json_encode($data),
+                'created_at' => $now,
+            ]);
+        }
+
+        DB::table('ingest_file')->where('id', $file->id)->update(['row_count' => $rowNum]);
+
+        return $rowNum;
+    }
+
+    /**
+     * First ONIX ProductIdentifier IDValue matching any of the given
+     * ProductIDType codes (e.g. 15=ISBN-13, 03=ISBN-10, 02=ISSN).
+     */
+    private function onixIdentifier(\SimpleXMLElement $product, array $types): ?string
+    {
+        $ids = $product->xpath('.//ProductIdentifier') ?: [];
+        // Honour the caller's type priority (e.g. prefer ISBN-13 over ISBN-10).
+        foreach ($types as $type) {
+            foreach ($ids as $pid) {
+                if ((string) ($pid->ProductIDType ?? '') === $type) {
+                    $val = trim((string) ($pid->IDValue ?? ''));
+                    if ($val !== '') {
+                        return $val;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
