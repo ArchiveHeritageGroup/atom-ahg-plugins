@@ -96,6 +96,36 @@ class ahgNerService
     }
 
     /**
+     * Extract named entities with embedded-metadata context (#750).
+     *
+     * Prepends a capture-date / place / creator / subjects hint (from EXIF/IPTC,
+     * GPS-gated by #751) to the text so the model is primed. Non-breaking
+     * superset of extract(); degrades to a plain extract() when no hints exist.
+     *
+     * @param string $text
+     * @param int    $informationObjectId
+     * @param bool   $clean
+     */
+    public function extractWithContext($text, $informationObjectId, $clean = true)
+    {
+        $prefix = '';
+        try {
+            require_once __DIR__ . '/AhgAiContextHints.php';
+            require_once __DIR__ . '/AhgEmbeddedMetadataContextService.php';
+            $svc   = new \AhgEmbeddedMetadataContextService();
+            $hints = $svc->forInformationObject((int) $informationObjectId);
+            if (!$hints->isEmpty()) {
+                $prefix = $hints->toPromptPrefix() . "\n\n";
+                $svc->logContextEvent('ner', (int) $informationObjectId, $hints);
+            }
+        } catch (\Throwable $e) {
+            $prefix = '';
+        }
+
+        return $this->extract($prefix . $text, $clean);
+    }
+
+    /**
      * Extract named entities from PDF
      */
     public function extractFromPdf($filePath)

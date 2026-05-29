@@ -414,6 +414,200 @@ class MarcService
     }
 
     /**
+     * Import binary MARC21 (ISO 2709) records from a .mrc file.
+     *
+     * Splits the stream into records, decodes each with Marc21DecoderService,
+     * maps it through the SAME column/creator/subject logic used for MARCXML
+     * (parseDecodedRecord mirrors parseMarcXmlRecord), then persists via
+     * importParsedRecord — so binary and MARCXML import share one create path.
+     *
+     * @param string   $filePath      Path to a binary MARC21 (.mrc) file.
+     * @param int|null $repositoryId  Optional repository to attach records to.
+     * @return array{imported:int,skipped:int,errors:string[]}
+     */
+    public function importMarc21(string $filePath, ?int $repositoryId = null): array
+    {
+        if (!file_exists($filePath)) {
+            return ['imported' => 0, 'skipped' => 0, 'errors' => ['File not found: ' . $filePath]];
+        }
+
+        $raw = file_get_contents($filePath);
+        if ($raw === false || strlen($raw) < 24) {
+            return ['imported' => 0, 'skipped' => 0, 'errors' => ['Empty or invalid MARC21 file']];
+        }
+
+        $decoder = new Marc21DecoderService();
+        $records = $decoder->splitRecords($raw);
+        if (empty($records)) {
+            return ['imported' => 0, 'skipped' => 0, 'errors' => ['No MARC21 records found']];
+        }
+
+        $imported = 0;
+        $skipped = 0;
+        $errors = [];
+
+        foreach ($records as $i => $blob) {
+            try {
+                $decoded = $decoder->decode($blob);
+                $parsed  = $this->parseDecodedRecord($decoded);
+                if (empty($parsed['title'])) {
+                    $skipped++;
+                    $errors[] = 'Record ' . ($i + 1) . ': Missing title (245$a)';
+                    continue;
+                }
+
+                $this->importParsedRecord($parsed, $repositoryId);
+                $imported++;
+            } catch (\Exception $e) {
+                $skipped++;
+                $errors[] = 'Record ' . ($i + 1) . ': ' . $e->getMessage();
+            }
+        }
+
+        $this->logger->info('MARC21 binary import complete', [
+            'file'     => basename($filePath),
+            'imported' => $imported,
+            'skipped'  => $skipped,
+        ]);
+
+        return ['imported' => $imported, 'skipped' => $skipped, 'errors' => $errors];
+    }
+
+    /**
+     * Map a decoded binary MARC record (Marc21DecoderService::decode output)
+     * into the same data array shape as parseMarcXmlRecord(). Reuses the
+     * MARC_MAP / AUTHOR_TAGS / SUBJECT_TAGS constants and the detect/normalize
+     * helpers so the binary path stays consistent with MARCXML import.
+     */
+    protected function parseDecodedRecord(array $rec): array
+    {
+        $data = [];
+        $creators = [];
+        $subjects = [];
+
+        $leader = (string) ($rec['leader'] ?? '');
+        $data['material_type'] = $this->detectMaterialType($leader);
+
+        $has082 = false;
+        $has050 = false;
+
+        foreach (($rec['data'] ?? []) as $field) {
+            $tag = (string) ($field['tag'] ?? '');
+
+            if ($tag === '082') {
+                $has082 = true;
+            }
+            if ($tag === '050') {
+                $has050 = true;
+            }
+
+            // Title (245)
+            if ($tag === '245') {
+                $title = (string) (Marc21DecoderService::subfield($field, 'a') ?? '');
+                $subtitle = Marc21DecoderService::subfield($field, 'b');
+                if ($subtitle) {
+                    $title .= ' : ' . $subtitle;
+                }
+                $data['title'] = rtrim($title, ' /');
+                continue;
+            }
+
+            // RDA carrier / content type (336$a / 337$a / 338$a)
+            if ($tag === '336' && empty($data['content_type'])) {
+                $v = Marc21DecoderService::subfield($field, 'a');
+                if ($v) {
+                    $data['content_type'] = rtrim($v, ' .,;:/');
+                }
+                continue;
+            }
+            if ($tag === '337' && empty($data['carrier_type'])) {
+                $v = Marc21DecoderService::subfield($field, 'a');
+                if ($v) {
+                    $data['carrier_type'] = rtrim($v, ' .,;:/');
+                }
+                continue;
+            }
+            if ($tag === '338' && empty($data['instance_type'])) {
+                $v = Marc21DecoderService::subfield($field, 'a');
+                if ($v) {
+                    $data['instance_type'] = rtrim($v, ' .,;:/');
+                }
+                continue;
+            }
+
+            // Mapped columns
+            if (isset(self::MARC_MAP[$tag])) {
+                foreach (self::MARC_MAP[$tag] as $subCode => $column) {
+                    $val = Marc21DecoderService::subfield($field, $subCode);
+                    if ($val && empty($data[$column])) {
+                        $data[$column] = rtrim($val, ' .,;:/');
+                    }
+                }
+            }
+
+            // Authors / creators
+            if (isset(self::AUTHOR_TAGS[$tag])) {
+                $name = Marc21DecoderService::subfield($field, 'a');
+                if ($name) {
+                    $role = Marc21DecoderService::subfield($field, 'e') ?: self::AUTHOR_TAGS[$tag];
+                    $creators[] = [
+                        'name'       => rtrim($name, ' .,'),
+                        'role'       => $this->normalizeRole($role),
+                        'is_primary' => ($tag === '100' || $tag === '110'),
+                    ];
+                }
+            }
+
+            // Subjects (6XX)
+            if (isset(self::SUBJECT_TAGS[$tag])) {
+                $heading = Marc21DecoderService::subfield($field, 'a');
+                if ($heading) {
+                    $subdivisions = [];
+                    foreach (['x', 'y', 'z', 'v'] as $subCode) {
+                        $subVal = Marc21DecoderService::subfield($field, $subCode);
+                        if ($subVal) {
+                            $subdivisions[] = rtrim($subVal, ' .');
+                        }
+                    }
+                    $subjects[] = [
+                        'heading'      => rtrim($heading, ' .'),
+                        'heading_type' => self::SUBJECT_TAGS[$tag],
+                        'source'       => $this->detectSubjectSource((string) ($field['ind2'] ?? ' ')),
+                        'subdivisions' => $subdivisions,
+                    ];
+                }
+            }
+        }
+
+        if (!empty($data['classification_number'])) {
+            $data['classification_scheme'] = $has082 ? 'dewey' : ($has050 ? 'lcc' : null);
+        }
+
+        $data['creators'] = $creators;
+        $data['subjects'] = $subjects;
+
+        return $data;
+    }
+
+    /**
+     * Static convenience: decode a single binary MARC21 record (ISO 2709) into
+     * the parsed data array (title, mapped columns, creators[], subjects[], RDA).
+     *
+     * This is the bridge Z3950Service::importResults() expects, and the parser
+     * CopyCataloguing uses for Z39.50 result rows. Reuses the binary decoder and
+     * the shared parseDecodedRecord mapping (single source of truth).
+     */
+    public static function parseMarc21(string $raw): array
+    {
+        require_once __DIR__ . '/Marc21DecoderService.php';
+
+        $decoder = new Marc21DecoderService();
+        $decoded = $decoder->decode($raw);
+
+        return (new self())->parseDecodedRecord($decoded);
+    }
+
+    /**
      * Parse a single MarcXML <record> element into a data array.
      */
     protected function parseMarcXmlRecord(\SimpleXMLElement $record): array
@@ -543,6 +737,7 @@ class MarcService
                 'general_note', 'bibliography_note', 'contents_note', 'summary',
                 'target_audience', 'system_requirements', 'binding_note',
                 'frequency', 'numbering_peculiarities',
+                'content_type', 'carrier_type', 'instance_type',
             ]));
             $columns['updated_at'] = $now;
             DB::table('library_item')->where('id', $itemId)->update($columns);
@@ -597,6 +792,7 @@ class MarcService
                 'general_note', 'bibliography_note', 'contents_note', 'summary',
                 'target_audience', 'system_requirements', 'binding_note',
                 'frequency', 'numbering_peculiarities',
+                'content_type', 'carrier_type', 'instance_type',
             ]));
 
             $itemData['information_object_id'] = $objectId;

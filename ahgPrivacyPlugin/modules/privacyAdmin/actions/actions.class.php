@@ -25,7 +25,9 @@ class privacyAdminActions extends AhgController
             'addManualRedaction', 'getRedactedTerms', 'removeManualRedaction',
             // Visual redaction actions
             'visualRedactionEditor', 'getVisualRedactions', 'saveVisualRedaction', 'deleteVisualRedaction',
-            'getNerEntitiesForPage', 'applyVisualRedactions', 'getDocumentInfo', 'downloadRedactedFile'
+            'getNerEntitiesForPage', 'applyVisualRedactions', 'getDocumentInfo', 'downloadRedactedFile',
+            // Embedded-metadata PII review (#751)
+            'embeddedPii', 'embeddedPiiResolve'
         ];
         $currentAction = $this->getActionName();
 
@@ -2049,5 +2051,52 @@ class privacyAdminActions extends AhgController
             $this->requestTypes = $manager->getRequestTypes($code);
             $this->complianceRules = $manager->getComplianceRules($code);
         }
+    }
+
+    /**
+     * Review embedded-metadata PII findings (#751).
+     */
+    public function executeEmbeddedPii($request)
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/EmbeddedMetadataPiiService.php';
+        $service = new \ahgPrivacyPlugin\Service\EmbeddedMetadataPiiService();
+
+        $this->status   = trim((string) $request->getParameter('status', 'pending'));
+        $this->piiType  = trim((string) $request->getParameter('pii_type', ''));
+
+        $filters = [];
+        if ($this->status !== '' && $this->status !== 'all') {
+            $filters['status'] = $this->status;
+        }
+        if ($this->piiType !== '') {
+            $filters['pii_type'] = $this->piiType;
+        }
+
+        $this->findings = $service->getFindings($filters, 300);
+    }
+
+    /**
+     * Resolve an embedded-metadata PII finding (POST).
+     */
+    public function executeEmbeddedPiiResolve($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/EmbeddedMetadataPiiService.php';
+        $service = new \ahgPrivacyPlugin\Service\EmbeddedMetadataPiiService();
+
+        $findingId = (int) $request->getParameter('id');
+        $status    = (string) $request->getParameter('status', 'cleared');
+        $userId    = (int) $this->getUser()->getAttribute('user_id');
+
+        if ($findingId && $service->resolve($findingId, $status, $userId ?: null)) {
+            $this->getUser()->setFlash('notice', $this->context->i18n->__('PII finding updated.'));
+        } else {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('Could not update finding.'));
+        }
+
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'embeddedPii']);
     }
 }

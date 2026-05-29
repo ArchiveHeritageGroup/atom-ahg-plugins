@@ -812,6 +812,282 @@ XML;
             ]);
     }
 
+    // ========================================================================
+    // Per-researcher OAuth credentials (self-service — Heratio #102 parity)
+    // ========================================================================
+
+    /**
+     * Resolve the effective ORCID client credentials for a researcher: their
+     * own registered app if present, otherwise the global admin/.env config.
+     *
+     * @return array{client_id:string,client_secret:string,redirect_uri:string,api_base:string}
+     */
+    public function getCredentials(?int $researcherId): array
+    {
+        if ($researcherId) {
+            try {
+                $row = DB::table('researcher_orcid_credential')->where('researcher_id', $researcherId)->first();
+            } catch (\Throwable $e) {
+                $row = null;
+            }
+            if ($row && !empty($row->client_id)) {
+                return [
+                    'client_id'     => (string) $row->client_id,
+                    'client_secret' => $this->decryptToken($row->client_secret_encrypted ?? ''),
+                    'redirect_uri'  => $row->redirect_uri ?: $this->redirectUri,
+                    'api_base'      => $row->api_base ? rtrim($row->api_base, '/') : $this->getApiUrl(),
+                ];
+            }
+        }
+
+        return [
+            'client_id'     => $this->clientId,
+            'client_secret' => $this->clientSecret,
+            'redirect_uri'  => $this->redirectUri,
+            'api_base'      => $this->getApiUrl(),
+        ];
+    }
+
+    /** True when the researcher (or global config) has a usable OAuth client. */
+    public function isConfiguredFor(?int $researcherId): bool
+    {
+        $c = $this->getCredentials($researcherId);
+
+        return !empty($c['client_id']) && !empty($c['client_secret']) && !empty($c['redirect_uri']);
+    }
+
+    /** Save / update a researcher's own ORCID client credentials (secret encrypted). */
+    public function saveCredentials(int $researcherId, string $clientId, string $clientSecret, ?string $redirectUri = null, ?string $apiBase = null): void
+    {
+        $now    = date('Y-m-d H:i:s');
+        $values = [
+            'client_id'    => trim($clientId),
+            'redirect_uri' => $redirectUri ?: $this->redirectUri,
+            'api_base'     => $apiBase ?: null,
+            'updated_at'   => $now,
+            'created_at'   => $now,
+        ];
+        // Only (re)write the secret when one was supplied — a blank secret on
+        // edit preserves the stored value.
+        if ($clientSecret !== '') {
+            $values['client_secret_encrypted'] = $this->encryptToken(trim($clientSecret));
+        }
+
+        DB::table('researcher_orcid_credential')->updateOrInsert(
+            ['researcher_id' => $researcherId],
+            $values
+        );
+    }
+
+    /** Remove a researcher's stored client credentials (reverts to global config). */
+    public function clearCredentials(int $researcherId): void
+    {
+        DB::table('researcher_orcid_credential')->where('researcher_id', $researcherId)->delete();
+    }
+
+    /** Authorization URL using the researcher's own (or global) client. */
+    public function getAuthorizationUrlFor(?int $researcherId, string $state): string
+    {
+        $c = $this->getCredentials($researcherId);
+        if (empty($c['client_id']) || empty($c['redirect_uri'])) {
+            throw new RuntimeException('ORCID client not configured for this researcher');
+        }
+
+        return $this->getBaseUrl() . '/oauth/authorize?' . http_build_query([
+            'client_id'     => $c['client_id'],
+            'response_type' => 'code',
+            'scope'         => '/authenticate /read-limited',
+            'redirect_uri'  => $c['redirect_uri'],
+            'state'         => $state,
+        ]);
+    }
+
+    /** Token exchange using the researcher's own (or global) client. */
+    public function exchangeCodeForTokenFor(string $code, ?int $researcherId): array
+    {
+        $c = $this->getCredentials($researcherId);
+        if (empty($c['client_id']) || empty($c['client_secret']) || empty($c['redirect_uri'])) {
+            throw new RuntimeException('ORCID client not configured for this researcher');
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $this->getBaseUrl() . '/oauth/token',
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => http_build_query([
+                'client_id'     => $c['client_id'],
+                'client_secret' => $c['client_secret'],
+                'grant_type'    => 'authorization_code',
+                'code'          => $code,
+                'redirect_uri'  => $c['redirect_uri'],
+            ]),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => ['Accept: application/json', 'Content-Type: application/x-www-form-urlencoded'],
+            CURLOPT_TIMEOUT        => 30,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error    = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            throw new RuntimeException('ORCID API request failed: ' . $error);
+        }
+        $data = json_decode($response, true);
+        if ($httpCode !== 200 || isset($data['error'])) {
+            throw new RuntimeException('ORCID token exchange failed: ' . ($data['error_description'] ?? $data['error'] ?? 'Unknown error'));
+        }
+
+        return $data;
+    }
+
+    /** Verify + link using the researcher's own (or global) client. */
+    public function verifyOrcidFor(int $researcherId, string $code): array
+    {
+        try {
+            $token = $this->exchangeCodeForTokenFor($code, $researcherId);
+        } catch (\Throwable $e) {
+            return ['error' => $e->getMessage()];
+        }
+        $this->linkResearcher($researcherId, $token);
+
+        return ['orcid_id' => $token['orcid'] ?? null];
+    }
+
+    // ========================================================================
+    // Tokenless public-record read (pub.orcid.org) — Fetch / Pull profile
+    // ========================================================================
+
+    /** Extract a bare ORCID iD (####-####-####-###X) from a raw string / URL. */
+    public function normaliseOrcidId(?string $raw): ?string
+    {
+        if (!$raw) {
+            return null;
+        }
+        if (preg_match('/(\d{4}-\d{4}-\d{4}-\d{3}[\dXx])/', $raw, $m)) {
+            return strtoupper($m[1]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Fetch a public ORCID record (no credentials required). Returns a flat
+     * profile array, or null on failure. Hard 12s timeout so a slow ORCID
+     * cannot hang the request.
+     *
+     * @return array|null
+     */
+    public function fetchPublicRecord(string $orcidId): ?array
+    {
+        $orcidId = $this->normaliseOrcidId($orcidId);
+        if (!$orcidId) {
+            return null;
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $this->getApiUrl() . '/' . $orcidId . '/record',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+            CURLOPT_TIMEOUT        => 12,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpCode !== 200 || !$response) {
+            return null;
+        }
+        $rec = json_decode($response, true);
+        if (!is_array($rec)) {
+            return null;
+        }
+
+        $person = $rec['person'] ?? [];
+        $name   = $person['name'] ?? [];
+
+        $keywords = [];
+        foreach (($person['keywords']['keyword'] ?? []) as $kw) {
+            if (!empty($kw['content'])) {
+                $keywords[] = $kw['content'];
+            }
+        }
+
+        // Most recent employment, if any.
+        $institution = $department = $position = null;
+        $groups = $rec['activities-summary']['employments']['affiliation-group'] ?? [];
+        foreach ($groups as $g) {
+            $emp = $g['summaries'][0]['employment-summary'] ?? null;
+            if ($emp) {
+                $institution = $emp['organization']['name'] ?? $institution;
+                $department  = $emp['department-name'] ?? $department;
+                $position    = $emp['role-title'] ?? $position;
+                break;
+            }
+        }
+
+        return [
+            'first_name'         => $name['given-names']['value'] ?? null,
+            'last_name'          => $name['family-name']['value'] ?? null,
+            'institution'        => $institution,
+            'department'         => $department,
+            'position'           => $position,
+            'research_interests' => $keywords ? implode(', ', $keywords) : null,
+            'orcid_id'           => $orcidId,
+        ];
+    }
+
+    /**
+     * Pull a researcher's public ORCID profile and update non-empty columns on
+     * research_researcher. Stamps research_orcid_link.last_profile_synced_at.
+     *
+     * @return array|null The fetched profile, or null when nothing was pulled.
+     */
+    public function pullProfile(int $researcherId): ?array
+    {
+        $link    = $this->getLink($researcherId);
+        $orcidId = $link->orcid_id ?? DB::table('research_researcher')->where('id', $researcherId)->value('orcid_id');
+        if (!$orcidId) {
+            throw new RuntimeException('Researcher has no ORCID iD to pull from');
+        }
+
+        $record = $this->fetchPublicRecord($orcidId);
+        if (!$record) {
+            return null;
+        }
+
+        $schema = \Illuminate\Database\Capsule\Manager::schema();
+
+        $update = [];
+        foreach (['first_name', 'last_name', 'institution', 'department', 'position', 'research_interests', 'orcid_id'] as $col) {
+            if (!empty($record[$col]) && $schema->hasColumn('research_researcher', $col)) {
+                $update[$col] = $record[$col];
+            }
+        }
+        if ($update) {
+            try {
+                DB::table('research_researcher')->where('id', $researcherId)->update($update);
+            } catch (\Throwable $e) {
+                // best-effort — leave existing data intact on failure
+            }
+        }
+
+        if ($link) {
+            try {
+                if ($schema->hasColumn('research_orcid_link', 'last_profile_synced_at')) {
+                    DB::table('research_orcid_link')->where('researcher_id', $researcherId)
+                        ->update(['last_profile_synced_at' => date('Y-m-d H:i:s'), 'updated_at' => date('Y-m-d H:i:s')]);
+                }
+            } catch (\Throwable $e) {
+                // ignore
+            }
+        }
+
+        return $record;
+    }
+
     /**
      * AES-256-CBC token encryption keyed off sf_app_secret.
      */

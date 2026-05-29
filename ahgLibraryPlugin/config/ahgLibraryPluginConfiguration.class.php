@@ -160,5 +160,35 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $z3950->any('z3950_delete', '/library/z3950/delete/:id', 'delete', ['id' => '\d+']);
         $z3950->any('z3950_sru', '/api/sru', 'sru');
         $z3950->register($routing);
+
+        // Subject Authority Control routes
+        $authority = new \AtomFramework\Routing\RouteLoader('authorityControl');
+        $authority->any('authority_search', '/library/authority/search', 'search');
+        $authority->any('authority_unlink', '/library/authority/unlink/:linkId', 'unlink', ['linkId' => '\d+']);
+        $authority->any('authority_link_store', '/library/authority/link', 'link');
+        $authority->any('authority_link', '/library/authority/link/:id', 'link', ['id' => '\d+']);
+        $authority->any('authority_delete', '/library/authority/delete/:id', 'delete', ['id' => '\d+']);
+        $authority->any('authority_edit_id', '/library/authority/edit/:id', 'edit', ['id' => '\d+']);
+        $authority->any('authority_edit', '/library/authority/edit', 'edit');
+        $authority->any('authority_view', '/library/authority/view/:id', 'view', ['id' => '\d+']);
+        $authority->any('authority_index', '/library/authority', 'index');
+        $authority->register($routing);
+
+        // EDI Trading Partner routes
+        $tp = new \AtomFramework\Routing\RouteLoader('tradingPartner');
+        $tp->any('trading_partner_preview', '/library/trading-partners/preview/:id', 'preview', ['id' => '\d+']);
+        $tp->any('trading_partner_test', '/library/trading-partners/test/:id', 'test', ['id' => '\d+']);
+        $tp->any('trading_partner_toggle', '/library/trading-partners/toggle/:id', 'toggle', ['id' => '\d+']);
+        $tp->any('trading_partner_delete', '/library/trading-partners/delete/:id', 'delete', ['id' => '\d+']);
+        $tp->any('trading_partner_edit_id', '/library/trading-partners/edit/:id', 'edit', ['id' => '\d+']);
+        $tp->any('trading_partner_edit', '/library/trading-partners/edit', 'edit');
+        $tp->any('trading_partner_index', '/library/trading-partners', 'index');
+        $tp->register($routing);
+
+        // Copy Cataloguing (Z39.50 search → preview → import) routes
+        $cc = new \AtomFramework\Routing\RouteLoader('copyCataloguing');
+        $cc->any('copy_cataloguing_import', '/library/copy-cataloguing/import', 'import');
+        $cc->any('copy_cataloguing_index', '/library/copy-cataloguing', 'index');
+        $cc->register($routing);
     }
 }

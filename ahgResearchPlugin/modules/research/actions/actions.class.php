@@ -1803,15 +1803,15 @@ class researchActions extends AhgController
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
         $orcidService = new OrcidService();
 
-        if (!$orcidService->isConfigured()) {
-            $this->getUser()->setFlash('error', 'ORCID integration is not configured. Please contact the administrator.');
-            $this->redirect('research/profile');
+        if (!$orcidService->isConfiguredFor($researcher->id)) {
+            $this->getUser()->setFlash('error', 'ORCID is not configured. Add your own ORCID client credentials under Connect & Sync, or contact the administrator.');
+            $this->redirect('research/orcid');
         }
 
         $state = $orcidService->generateState();
         $this->getUser()->setAttribute('orcid_state', $state);
 
-        $authUrl = $orcidService->getAuthorizationUrl($state);
+        $authUrl = $orcidService->getAuthorizationUrlFor($researcher->id, $state);
         $this->redirect($authUrl);
     }
 
@@ -1850,11 +1850,6 @@ class researchActions extends AhgController
         require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
         $orcidService = new OrcidService();
 
-        if (!$orcidService->isConfigured()) {
-            $this->getUser()->setFlash('error', 'ORCID integration is not configured');
-            $this->redirect('research/profile');
-        }
-
         $userId = $this->getUser()->getAttribute('user_id');
         $researcher = $this->service->getResearcherByUserId($userId);
 
@@ -1863,7 +1858,12 @@ class researchActions extends AhgController
             $this->redirect('research/profile');
         }
 
-        $result = $orcidService->verifyOrcid($researcher->id, $code);
+        if (!$orcidService->isConfiguredFor($researcher->id)) {
+            $this->getUser()->setFlash('error', 'ORCID integration is not configured');
+            $this->redirect('research/orcid');
+        }
+
+        $result = $orcidService->verifyOrcidFor($researcher->id, $code);
 
         if (isset($result['error'])) {
             $this->getUser()->setFlash('error', $result['error']);
@@ -1902,6 +1902,174 @@ class researchActions extends AhgController
         }
 
         $this->redirect('research/profile');
+    }
+
+    /**
+     * ORCID hub — link status, per-researcher credentials state, and the
+     * Connect & Sync / Pull-profile / Disconnect actions in one place.
+     */
+    public function executeOrcid($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $orcid = new OrcidService();
+
+        $this->link           = $orcid->getLink($this->researcher->id);
+        $this->isConfigured   = $orcid->isConfiguredFor($this->researcher->id);
+        $this->cred           = \Illuminate\Database\Capsule\Manager::table('researcher_orcid_credential')
+            ->where('researcher_id', $this->researcher->id)->first();
+        $this->hasCredentials = (bool) $this->cred;
+    }
+
+    /**
+     * Save (or show the form for) a researcher's own ORCID client credentials.
+     */
+    public function executeOrcidCredentials($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $this->researcher = $this->service->getResearcherByUserId($userId);
+        if (!$this->researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $orcid = new OrcidService();
+
+        if ($request->isMethod('post')) {
+            $clientId     = trim((string) $request->getParameter('client_id', ''));
+            $clientSecret = trim((string) $request->getParameter('client_secret', ''));
+            $apiBase      = trim((string) $request->getParameter('api_base', '')) ?: null;
+
+            $existing = \Illuminate\Database\Capsule\Manager::table('researcher_orcid_credential')
+                ->where('researcher_id', $this->researcher->id)->first();
+
+            // Client ID always required; secret required only on first save
+            // (blank secret on edit keeps the stored one).
+            if ($clientId === '' || ($clientSecret === '' && !$existing)) {
+                $this->getUser()->setFlash('error', 'ORCID Client ID and Client Secret are both required.');
+                $this->redirect('research/orcidCredentials');
+            }
+
+            $orcid->saveCredentials($this->researcher->id, $clientId, $clientSecret, null, $apiBase);
+            $this->getUser()->setFlash('success', 'ORCID credentials saved. You can now Connect & Sync.');
+            $this->redirect('research/orcid');
+        }
+
+        // GET — show the form (client_id only; the secret is never echoed back).
+        $this->cred = \Illuminate\Database\Capsule\Manager::table('researcher_orcid_credential')
+            ->where('researcher_id', $this->researcher->id)->first();
+    }
+
+    /**
+     * Remove a researcher's stored ORCID client credentials.
+     */
+    public function executeOrcidClearCredentials($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        (new OrcidService())->clearCredentials($researcher->id);
+
+        $this->getUser()->setFlash('success', 'ORCID credentials removed.');
+        $this->redirect('research/orcid');
+    }
+
+    /**
+     * Pull the researcher's public ORCID profile (tokenless) into their record.
+     */
+    public function executeOrcidPullProfile($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            $this->redirect('research/register');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $orcid = new OrcidService();
+
+        try {
+            $profile = $orcid->pullProfile($researcher->id);
+            if ($profile) {
+                $this->getUser()->setFlash('success', 'Profile updated from ORCID.');
+            } else {
+                $this->getUser()->setFlash('error', 'Could not read a public ORCID record (check the iD, or ORCID may be unavailable).');
+            }
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', $e->getMessage());
+        }
+
+        $this->redirect('research/orcid');
+    }
+
+    /**
+     * Tokenless public ORCID lookup (JSON) used by the Fetch-from-ORCID button
+     * on the register/profile forms. Per-session rate-guarded (20 / 60s).
+     */
+    public function executeOrcidFetchPublic($request)
+    {
+        $this->setLayout(false);
+        $this->setTemplate(false);
+        header('Content-Type: application/json; charset=utf-8');
+
+        $now  = time();
+        $hits = array_values(array_filter(
+            (array) $this->getUser()->getAttribute('orcid_fetch_hits', []),
+            fn ($t) => $t > $now - 60
+        ));
+        if (count($hits) >= 20) {
+            echo json_encode(['ok' => false, 'error' => 'Rate limit exceeded — please wait a moment.']);
+
+            return sfView::NONE;
+        }
+        $hits[] = $now;
+        $this->getUser()->setAttribute('orcid_fetch_hits', $hits);
+
+        $orcidId = (string) ($request->getParameter('orcid_id') ?? $request->getParameter('orcid') ?? '');
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OrcidService.php';
+        $profile = (new OrcidService())->fetchPublicRecord($orcidId);
+
+        if (!$profile) {
+            echo json_encode(['ok' => false, 'error' => 'No public ORCID record found for that iD.']);
+
+            return sfView::NONE;
+        }
+
+        echo json_encode(['ok' => true, 'profile' => $profile]);
+
+        return sfView::NONE;
     }
 
     // =========================================================================

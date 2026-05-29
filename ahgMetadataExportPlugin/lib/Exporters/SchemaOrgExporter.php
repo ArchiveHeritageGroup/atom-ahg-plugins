@@ -461,6 +461,15 @@ class SchemaOrgExporter extends AbstractRdfExporter
             ];
         }
 
+        // #752: fall back to the IPTC By-line when no ISAD creator exists.
+        if (empty($result)) {
+            require_once __DIR__ . '/../Services/IptcFallbackResolver.php';
+            $byline = (new \AhgMetadataExport\Services\IptcFallbackResolver())->resolveCreatorsWithCanonical($id, []);
+            foreach ($byline as $name) {
+                $result[] = ['@type' => 'Person', 'name' => $name];
+            }
+        }
+
         return $result;
     }
 
@@ -511,7 +520,15 @@ class SchemaOrgExporter extends AbstractRdfExporter
             ->select('term_i18n.name')
             ->get();
 
-        return $subjects->pluck('name')->toArray();
+        $names = $subjects->pluck('name')->toArray();
+
+        // #752: fall back to IPTC Keywords when no ISAD subject access points exist.
+        if (empty($names)) {
+            require_once __DIR__ . '/../Services/IptcFallbackResolver.php';
+            $names = (new \AhgMetadataExport\Services\IptcFallbackResolver())->resolveSubjectsWithCanonical($id, []);
+        }
+
+        return $names;
     }
 
     /**

@@ -21,6 +21,9 @@ class OpacService
     protected static ?OpacService $instance = null;
     protected Logger $logger;
 
+    /** True when the last search() used Elasticsearch relevance (vs MySQL LIKE). */
+    public bool $esMode = false;
+
     public function __construct()
     {
         $this->initLogger();
@@ -85,7 +88,26 @@ class OpacService
         $searchType = $params['search_type'] ?? 'keyword';
         $q = $params['q'] ?? '';
 
-        if (!empty($q)) {
+        // ES-backed relevance over AtoM's EXISTING information-object index
+        // (reuses the library_* fields LibraryService::updateSearchIndex()
+        // upserts). When ES is unavailable or errors, esRelevanceIds() returns
+        // null and we fall straight through to the MySQL LIKE search below.
+        $this->esMode = false;
+        $esOrderIds = [];
+        if (!empty($q) && in_array($searchType, ['keyword', 'title', 'author', 'subject'], true)) {
+            $esIds = $this->esRelevanceIds((string) $q);
+            // Only take the ES path when it actually matched something — an
+            // empty/null result means ES is unavailable OR added no recall, so
+            // we fall through to the MySQL LIKE search (better recall on small
+            // catalogues). The library_item join below keeps results to books.
+            if (is_array($esIds) && count($esIds) > 0) {
+                $this->esMode = true;
+                $esOrderIds = $esIds;
+                $query->whereIn('io.id', $esIds);
+            }
+        }
+
+        if (!empty($q) && !$this->esMode) {
             $like = '%' . $q . '%';
 
             switch ($searchType) {
@@ -163,6 +185,28 @@ class OpacService
             $query->where('li.publication_date', 'LIKE', $params['publication_year'] . '%');
         }
 
+        if (!empty($params['language'])) {
+            $query->where('li.language', $params['language']);
+        }
+
+        if (!empty($params['publisher'])) {
+            $query->where('li.publisher', $params['publisher']);
+        }
+
+        if (!empty($params['availability'])) {
+            $query->where('li.circulation_status', $params['availability']);
+        }
+
+        if (!empty($params['creator'])) {
+            $creatorName = $params['creator'];
+            $query->whereExists(function ($sub) use ($creatorName) {
+                $sub->select(DB::raw(1))
+                    ->from('library_item_creator')
+                    ->whereColumn('library_item_creator.library_item_id', 'li.id')
+                    ->where('library_item_creator.name', $creatorName);
+            });
+        }
+
         // Count before pagination
         $total = $query->count();
 
@@ -186,7 +230,13 @@ class OpacService
                 $query->orderBy('li.call_number');
                 break;
             default:
-                $query->orderBy('ioi.title');
+                // Relevance: preserve ES hit order when ES drove the search;
+                // otherwise fall back to title sort.
+                if ($this->esMode && !empty($esOrderIds)) {
+                    $query->orderByRaw('FIELD(io.id, ' . implode(',', array_map('intval', $esOrderIds)) . ')');
+                } else {
+                    $query->orderBy('ioi.title');
+                }
                 break;
         }
 
@@ -238,15 +288,90 @@ class OpacService
                 'total_works' => count($clusters),
                 'page'        => $page,
                 'pages'       => (int) ceil($total / $limit),
+                'es_mode'     => $this->esMode,
             ];
         }
 
         return [
-            'items' => $rows,
-            'total' => $total,
-            'page'  => $page,
-            'pages' => (int) ceil($total / $limit),
+            'items'   => $rows,
+            'total'   => $total,
+            'page'    => $page,
+            'pages'   => (int) ceil($total / $limit),
+            'es_mode' => $this->esMode,
         ];
+    }
+
+    /**
+     * Query AtoM's existing information-object Elasticsearch index for the
+     * free-text query and return the matched information_object ids in
+     * relevance order. Restricted to library items via the library_material_type
+     * field (upserted by LibraryService::updateSearchIndex()).
+     *
+     * Reuses AtoM's own ES client + index — no dedicated library index. Returns
+     * null when ES is unavailable or errors, signalling the MySQL fallback.
+     *
+     * @return int[]|null
+     */
+    private function esRelevanceIds(string $q, int $cap = 500): ?array
+    {
+        if (!class_exists('arElasticSearchPlugin')) {
+            return null;
+        }
+
+        try {
+            $es     = \arElasticSearchPlugin::getInstance();
+            $client = $es->client;
+            $index  = $es->index->getName();
+
+            $response = $client->search([
+                'index' => $index,
+                'body'  => [
+                    'size'    => $cap,
+                    '_source' => false,
+                    // Relevance over the IO index. The library_* fields (upserted
+                    // by LibraryService::updateSearchIndex) boost catalogue
+                    // matches where present; i18n title carries the rest. We do
+                    // NOT filter to library docs here — the caller's SQL join to
+                    // library_item restricts results to books, so this stays
+                    // correct even on instances where library_* aren't indexed.
+                    'query'   => [
+                        'multi_match' => [
+                            'query'     => $q,
+                            'fields'    => [
+                                'i18n.en.title^4',
+                                'i18n.*.title^2',
+                                'library_isbn^3',
+                                'library_issn^3',
+                                'library_creators^3',
+                                'library_primary_creator^2',
+                                'library_publisher^2',
+                                'library_series_title^2',
+                                'library_call_number^2',
+                                'library_subjects',
+                            ],
+                            'type'      => 'best_fields',
+                            'fuzziness' => 'AUTO',
+                            'lenient'   => true,
+                        ],
+                    ],
+                ],
+            ]);
+
+            $hits = $response['hits']['hits'] ?? [];
+            $ids  = [];
+            foreach ($hits as $hit) {
+                $id = (int) ($hit['_id'] ?? 0);
+                if ($id > 0) {
+                    $ids[] = $id;
+                }
+            }
+
+            return $ids;
+        } catch (\Throwable $e) {
+            $this->logger->warning('OPAC ES relevance failed; falling back to MySQL', ['error' => $e->getMessage()]);
+
+            return null;
+        }
     }
 
     // ========================================================================
@@ -354,9 +479,48 @@ class OpacService
             ->get()
             ->all();
 
+        // Published-only base query helper for the remaining facet dimensions.
+        $base = function () {
+            return DB::table('library_item as li')
+                ->join('information_object as io', 'li.information_object_id', '=', 'io.id')
+                ->join('status as pub_st', function ($j) {
+                    $j->on('io.id', '=', 'pub_st.object_id')->where('pub_st.type_id', '=', 158);
+                })
+                ->where('pub_st.status_id', 160);
+        };
+
+        $languages = $base()
+            ->whereNotNull('li.language')->where('li.language', '!=', '')
+            ->select('li.language', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('li.language')->orderBy('cnt', 'desc')->limit(20)
+            ->get()->all();
+
+        $publishers = $base()
+            ->whereNotNull('li.publisher')->where('li.publisher', '!=', '')
+            ->select('li.publisher', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('li.publisher')->orderBy('cnt', 'desc')->limit(20)
+            ->get()->all();
+
+        $availability = $base()
+            ->whereNotNull('li.circulation_status')
+            ->select('li.circulation_status', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('li.circulation_status')->orderBy('cnt', 'desc')
+            ->get()->all();
+
+        $creators = $base()
+            ->join('library_item_creator as lic', 'lic.library_item_id', '=', 'li.id')
+            ->whereNotNull('lic.name')->where('lic.name', '!=', '')
+            ->select('lic.name', DB::raw('COUNT(*) as cnt'))
+            ->groupBy('lic.name')->orderBy('cnt', 'desc')->limit(20)
+            ->get()->all();
+
         return [
-            'material_types' => $materialTypes,
+            'material_types'    => $materialTypes,
             'publication_years' => $years,
+            'languages'         => $languages,
+            'publishers'        => $publishers,
+            'availability'      => $availability,
+            'creators'          => $creators,
         ];
     }
 

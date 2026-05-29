@@ -92,6 +92,11 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_admin_types', '/research/admin/types', 'adminTypes');
 
         // ORCID
+        $research->any('research_orcid', '/research/orcid', 'orcid');
+        $research->any('research_orcid_fetch_public', '/research/orcid/fetch-public', 'orcidFetchPublic');
+        $research->any('research_orcid_pull_profile', '/research/orcid/pull-profile', 'orcidPullProfile');
+        $research->any('research_orcid_credentials_clear', '/research/orcid/credentials/clear', 'orcidClearCredentials');
+        $research->any('research_orcid_credentials', '/research/orcid/credentials', 'orcidCredentials');
         $research->any('research_orcid_disconnect', '/research/orcid/disconnect', 'orcidDisconnect');
         $research->any('research_orcid_callback', '/research/orcid/callback', 'orcidCallback');
         $research->any('research_orcid_connect', '/research/orcid/connect', 'orcidConnect');
