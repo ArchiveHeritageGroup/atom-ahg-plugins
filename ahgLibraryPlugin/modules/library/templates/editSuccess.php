@@ -151,16 +151,16 @@ $creatorRoles = $taxonomyService->getCreatorRoles(false);
 
           <div class="row">
             <div class="col-md-5 mb-3">
-              <label class="form-label"><?php echo __('ISBN'); ?></label>
+              <label class="form-label"><?php echo __('ISBN / DOI / ISSN'); ?></label>
               <div class="input-group">
                 <input type="text" name="isbn" id="isbn-input" class="form-control"
                        value="<?php echo esc_entities($libraryData['isbn'] ?? ''); ?>"
-                       placeholder="978-0-123456-78-9">
-                <button type="button" class="btn btn-primary" id="isbn-lookup" title="<?php echo __('Lookup ISBN and auto-fill form'); ?>">
-                  <i class="fas fa-search me-1"></i><?php echo __('Lookup'); ?>
+                       placeholder="978-0-123456-78-9  or  10.1000/xyz123  or  1234-5678">
+                <button type="button" class="btn btn-primary" id="isbn-lookup" title="<?php echo __('Auto-detects DOI, ISBN, ISSN and fills the form'); ?>">
+                  <i class="fas fa-search me-1"></i><?php echo __('Resolve'); ?>
                 </button>
               </div>
-              <div class="form-text"><?php echo __('Enter ISBN and click Lookup to auto-fill'); ?></div>
+              <div class="form-text"><?php echo __('Accepts DOI (10.x/...), ISBN-10/13, or ISSN (1234-5678)'); ?></div>
             </div>
             <div class="col-md-4 mb-3">
               <label class="form-label"><?php echo __('ISSN'); ?></label>
@@ -613,17 +613,17 @@ document.addEventListener('DOMContentLoaded', function() {
             var isbnInput = document.getElementById('isbn-input');
             var isbn = isbnInput.value.trim();
             if (!isbn) {
-                alert('<?php echo __('Please enter an ISBN'); ?>');
+                alert('<?php echo __('Please enter a DOI, ISBN, or ISSN'); ?>');
                 return;
             }
 
             var originalHtml = this.innerHTML;
             this.disabled = true;
-            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i><?php echo __('Looking up...'); ?>';
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i><?php echo __('Resolving...'); ?>';
 
             try {
                 var cleanIsbn = isbn.replace(/[\s-]/g, '');
-                var response = await fetch('/index.php/library/isbnLookup?isbn=' + encodeURIComponent(cleanIsbn));
+                var response = await fetch('/index.php/library/isbnLookup?identifier=' + encodeURIComponent(cleanIsbn));
                 var result = await response.json();
                 
 
@@ -690,6 +690,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         setField('cover_url', coverUrl);
                         setField('ebook_preview_url', ebookUrl);
 
+                        // Fill DOI / ISSN / ISBN fields from unified resolver response
+                        if (d.doi)       setField('doi',  d.doi);
+                        if (d.issn)      setField('issn', d.issn);
+                        if (d.eissn)     setField('issn', d.eissn);
+                        if (d.isbn_13)   setField('isbn', d.isbn_13);
+                        if (d.isbn_10 && !d.isbn_13) setField('isbn', d.isbn_10);
+                        if (d.url && !d.openlibrary_url) setField('openlibrary_url', d.url);
+
                         // Fill Authors with authority URIs
                         console.log("Authors data:", authors);
                         if (authors.length > 0) {
@@ -740,7 +748,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 } else {
-                    alert('<?php echo __('ISBN not found in Open Library'); ?>');
+                    alert(result.error || '<?php echo __('Identifier not found'); ?>');
                 }
             } catch (err) {
                 console.error('ISBN lookup error:', err);
