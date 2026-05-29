@@ -3,6 +3,7 @@
 !/.gitignore
 !/README.md
 !/ahg*/
+!/docs/
 
 # Dependencies and build artifacts
 node_modules/
