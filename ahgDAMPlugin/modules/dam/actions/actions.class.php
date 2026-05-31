@@ -301,6 +301,29 @@ class damActions extends AhgController
             ->whereNull('parent_id')
             ->first();
 
+        // #113: full embedded metadata (complete ExifTool tag set), grouped +
+        // GPS-gated for non-admins. Served here because the metadataExtraction
+        // module is filesystem-only; the DAM asset page is the live surface.
+        $this->fullEmbedded = [];
+        $this->fullEmbeddedCount = 0;
+        $this->fullEmbeddedHasGps = false;
+        $this->fullEmbeddedGated = false;
+        if ($this->digitalObject) {
+            $svcPath = sfConfig::get('sf_plugins_dir') . '/ahgMetadataExtractionPlugin/lib/Services/EmbeddedMetadataService.php';
+            if (file_exists($svcPath)) {
+                require_once $svcPath;
+                $embedded = new \AtomExtensions\Extensions\MetadataExtraction\Services\EmbeddedMetadataService();
+                $raw = $embedded->getRaw((int) $this->digitalObject->id);
+                if (is_array($raw) && !empty($raw)) {
+                    $this->fullEmbeddedCount = count($raw);
+                    $this->fullEmbeddedHasGps = $embedded->hasGps($raw);
+                    $this->fullEmbeddedGated = $this->fullEmbeddedHasGps && !$this->getUser()->isAdministrator();
+                    $grouped = $embedded->group($raw);
+                    $this->fullEmbedded = $this->fullEmbeddedGated ? $embedded->gpsGate($grouped) : $grouped;
+                }
+            }
+        }
+
         // Load AtoM administration data (repositories are actors, so name is in actor_i18n)
         $this->repositories = DB::table('repository')
             ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')

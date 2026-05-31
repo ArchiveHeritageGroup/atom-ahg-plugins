@@ -3,7 +3,19 @@
 **Date:** 2026-05-31
 **Issue:** ArchiveHeritageGroup/atom-ahg-plugins#113 (PSIS-parity twin of heratio#1106, CLOSED)
 **Plugins:** ahgMetadataExtractionPlugin (core), ahgAPIPlugin, ahgIiifPlugin
-**Status:** Built, lint-clean. Needs: `CREATE TABLE ahg_embedded_metadata` on PSIS + cache/restart + backfill run (live-DB; awaiting approval).
+**Status:** Built, lint-clean, DEPLOYED to PSIS — table created, 302/304 image masters backfilled, web reloaded. Pending: docs `.docx` + in-app `/help`; release.
+
+## Critical correction (filesystem-only plugin)
+ahgMetadataExtractionPlugin is **filesystem-only** (not enabled in atom_plugin): its classes
+are used directly by the framework, but its Symfony **module/routes/tasks do NOT load**. So:
+- Display moved from `/metadataExtraction/view` (404) → **ahgDAMPlugin** `executeEditIptc` /
+  `editIptcSuccess.php` (the served DAM asset page). DAM viewer panel.
+- Backfill moved from a `php symfony` task → **`php bin/atom metadata:backfill-embedded`**
+  (`lib/Commands/MetadataBackfillEmbeddedCommand.php`; CommandRegistry discovers lib/Commands
+  by filesystem glob, independent of enablement). Self-heals the table (CREATE TABLE IF NOT EXISTS).
+- `EmbeddedMetadataService` constructor made CLI-safe (no hard sfConfig dependency).
+- **ExifTool rc fix:** exiftool returns rc=1 on minor format errors while still emitting tags;
+  `extractFull` now parses output regardless of exit code (was discarding usable data).
 
 ## Problem
 Photos carry far more embedded metadata than was surfaced. Extraction already ran

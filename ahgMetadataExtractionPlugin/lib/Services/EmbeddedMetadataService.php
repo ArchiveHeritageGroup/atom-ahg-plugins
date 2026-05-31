@@ -29,8 +29,15 @@ class EmbeddedMetadataService
 
     public function __construct(?string $exifToolPath = null)
     {
-        $this->exifToolPath = $exifToolPath
-            ?: (string) \sfConfig::get('app_metadata_exiftool_path', '/usr/bin/exiftool');
+        if ($exifToolPath) {
+            $this->exifToolPath = $exifToolPath;
+        } elseif (class_exists('\sfConfig')) {
+            // Symfony web/handler context.
+            $this->exifToolPath = (string) \sfConfig::get('app_metadata_exiftool_path', '/usr/bin/exiftool');
+        } else {
+            // bin/atom CLI context (no Symfony) — sensible default.
+            $this->exifToolPath = '/usr/bin/exiftool';
+        }
     }
 
     /**
@@ -60,10 +67,11 @@ class EmbeddedMetadataService
         $output = [];
         $rc = 0;
         exec($command, $output, $rc);
-        if (0 !== $rc) {
-            return null;
-        }
 
+        // Note: ExifTool returns rc=1 for warnings/minor format errors while
+        // STILL emitting the tags it could read (the error surfaces as an
+        // ExifTool:Error tag). So parse the JSON regardless of exit code and
+        // only fail if the output is unusable.
         $data = json_decode(implode("\n", $output), true);
         if (!is_array($data) || !isset($data[0]) || !is_array($data[0])) {
             return null;
