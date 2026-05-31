@@ -230,14 +230,54 @@ class formsActions extends AhgController
             'field_name' => strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $label)),
             'field_type' => $fieldType,
             'label' => $label,
-            'atom_field' => $atomField ?: null,
             'sort_order' => $maxSort + 1,
             'is_required' => 0,
             'is_readonly' => 0,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
+        // Persist the AtoM field link as a real mapping row (there is no
+        // atom_field column on ahg_form_field — mappings live in
+        // ahg_form_field_mapping).
+        if ($atomField) {
+            $map = $this->resolveAtomFieldMapping($atomField);
+            \Illuminate\Database\Capsule\Manager::table('ahg_form_field_mapping')->insert([
+                'field_id' => $fieldId,
+                'target_table' => $map['target_table'],
+                'target_column' => $map['target_column'],
+                'is_i18n' => $map['is_i18n'],
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
         return $this->renderText(json_encode(['success' => true, 'field_id' => $fieldId]));
+    }
+
+    /**
+     * Resolve a builder "atom_field" key to an information_object mapping target.
+     *
+     * Known ISAD(G) i18n fields map to information_object_i18n; everything else
+     * is treated as a core information_object column.
+     */
+    protected function resolveAtomFieldMapping(string $atomField): array
+    {
+        $column = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $atomField));
+
+        $i18nFields = [
+            'title', 'alternate_title', 'scope_and_content', 'arrangement',
+            'archival_history', 'acquisition', 'appraisal', 'accruals',
+            'physical_characteristics', 'finding_aids', 'access_conditions',
+            'reproduction_conditions', 'location_of_originals', 'location_of_copies',
+            'related_units_of_description', 'rules', 'sources', 'revision_history',
+        ];
+
+        $isI18n = in_array($column, $i18nFields, true);
+
+        return [
+            'target_table' => $isI18n ? 'information_object_i18n' : 'information_object',
+            'target_column' => $column,
+            'is_i18n' => $isI18n ? 1 : 0,
+        ];
     }
 
     /**

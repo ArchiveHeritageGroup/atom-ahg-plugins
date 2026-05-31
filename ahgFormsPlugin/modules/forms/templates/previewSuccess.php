@@ -74,7 +74,7 @@
                                                    value="<?php echo htmlspecialchars($field->default_value ?? ''); ?>"
                                                    <?php echo $field->is_readonly ? 'readonly' : ''; ?>>
 
-                                        <?php elseif ($field->field_type === 'date_range'): ?>
+                                        <?php elseif ($field->field_type === 'daterange'): ?>
                                             <div class="row">
                                                 <div class="col-6">
                                                     <input type="date" class="form-control" placeholder="Start date">
