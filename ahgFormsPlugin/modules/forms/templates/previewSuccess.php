@@ -14,6 +14,11 @@
             <a href="<?php echo url_for(['module' => 'forms', 'action' => 'builder', 'id' => $template->id]); ?>" class="btn btn-outline-primary">
                 <i class="fas fa-edit me-1"></i> Back to Builder
             </a>
+            <?php if ($template->is_active): ?>
+                <a href="<?php echo url_for(['module' => 'forms', 'action' => 'renderNew', 'templateId' => $template->id]); ?>" class="btn btn-primary">
+                    <i class="fas fa-pen-to-square me-1"></i> Use this form
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 

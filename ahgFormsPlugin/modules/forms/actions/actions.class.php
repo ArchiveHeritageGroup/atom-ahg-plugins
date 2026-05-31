@@ -647,6 +647,214 @@ class formsActions extends AhgController
     }
 
     /**
+     * Render a blank data-entry form from a template (/forms/new/:templateId).
+     */
+    public function executeRenderNew($request)
+    {
+        $this->checkAuth();
+
+        $root = $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/';
+        require_once $root . 'FormService.php';
+        require_once $root . 'FormRenderService.php';
+
+        $service = new \ahgFormsPlugin\Services\FormService();
+        $this->template = $service->getTemplate((int) $request->getParameter('templateId'));
+        $this->forward404Unless($this->template);
+
+        $this->formType = $this->routeType($this->template->form_type);
+        $this->objectId = null;
+        $this->record = null;
+
+        $renderer = new \ahgFormsPlugin\Services\FormRenderService();
+        $this->formHtml = $renderer->renderFields($this->template, []);
+        $this->submitLabel = $this->submitLabelFor($this->template);
+
+        $this->setTemplate('renderForm');
+    }
+
+    /**
+     * Render a data-entry form prefilled from an existing record
+     * (/forms/edit/:type/:id). Template is resolved from assignments.
+     */
+    public function executeRenderEdit($request)
+    {
+        $this->checkAuth();
+
+        $root = $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/';
+        require_once $root . 'FormService.php';
+        require_once $root . 'FormRenderService.php';
+        require_once $root . 'FormValueLoader.php';
+
+        $type = $request->getParameter('type');
+        $objectId = (int) $request->getParameter('id');
+        $formType = ('accession' === $type) ? 'accession' : 'information_object';
+
+        // Context for assignment resolution
+        $repositoryId = null;
+        $levelId = null;
+        $this->record = null;
+
+        if ('informationobject' === $type) {
+            $obj = \Illuminate\Database\Capsule\Manager::table('information_object')
+                ->where('id', $objectId)->first();
+            $this->forward404Unless($obj);
+            $repositoryId = $obj->repository_id;
+            $levelId = $obj->level_of_description_id;
+            $this->record = $obj;
+        } else {
+            $obj = \Illuminate\Database\Capsule\Manager::table('accession')
+                ->where('id', $objectId)->first();
+            $this->forward404Unless($obj);
+            $this->record = $obj;
+        }
+
+        $service = new \ahgFormsPlugin\Services\FormService();
+        $this->template = $service->resolveTemplate($formType, $repositoryId, $levelId, $objectId);
+
+        if (!$this->template) {
+            $this->getUser()->setFlash('error', 'No form template is assigned for this record type.');
+            $this->redirect(['module' => 'forms', 'action' => 'index']);
+        }
+
+        // Attach slug so the Cancel button can return to the record.
+        if ($this->record && !isset($this->record->slug)) {
+            $this->record->slug = \Illuminate\Database\Capsule\Manager::table('slug')
+                ->where('object_id', $objectId)
+                ->value('slug');
+        }
+
+        $loader = new \ahgFormsPlugin\Services\FormValueLoader();
+        $values = $loader->load((int) $this->template->id, $type, $objectId, $this->culture());
+
+        $renderer = new \ahgFormsPlugin\Services\FormRenderService();
+        $this->formType = $type;
+        $this->objectId = $objectId;
+        $this->formHtml = $renderer->renderFields($this->template, $values);
+        $this->submitLabel = $this->submitLabelFor($this->template);
+
+        $this->setTemplate('renderForm');
+    }
+
+    /**
+     * Persist a submitted data-entry form (/forms/submit, POST).
+     */
+    public function executeSubmit($request)
+    {
+        $this->checkAuth();
+
+        if (!$request->isMethod('post')) {
+            $this->redirect(['module' => 'forms', 'action' => 'index']);
+        }
+
+        $templateId = (int) $request->getParameter('template_id');
+        $type = $request->getParameter('type', 'informationobject');
+        $objectId = $request->getParameter('object_id') ? (int) $request->getParameter('object_id') : null;
+        $values = $request->getParameter('field', []);
+        if (!is_array($values)) {
+            $values = [];
+        }
+
+        $root = $this->config('sf_root_dir') . '/plugins/ahgFormsPlugin/lib/Services/';
+        require_once $root . 'FormService.php';
+        require_once $root . 'FormSubmitService.php';
+
+        // Server-side required-field validation.
+        $missing = $this->missingRequiredFields($templateId, $values);
+        if (!empty($missing)) {
+            $this->getUser()->setFlash('error', 'Please complete required fields: ' . implode(', ', $missing));
+            if ($objectId) {
+                $this->redirect(['module' => 'forms', 'action' => 'renderEdit', 'type' => $type, 'id' => $objectId]);
+            }
+            $this->redirect(['module' => 'forms', 'action' => 'renderNew', 'templateId' => $templateId]);
+        }
+
+        $submitter = new \ahgFormsPlugin\Services\FormSubmitService();
+        $result = $submitter->submit($templateId, $type, $objectId, $values, $this->culture());
+
+        $msg = 'create' === $result['action'] ? 'Record created successfully.' : 'Record updated successfully.';
+        if (!empty($result['unmapped'])) {
+            $msg .= ' Note: unmapped fields were not saved (' . implode(', ', $result['unmapped']) . ').';
+        }
+        $this->getUser()->setFlash('notice', $msg);
+
+        $this->redirect($this->recordUrl($type, $result['id']));
+    }
+
+    /**
+     * Compute the URL of a saved record for post-submit redirect.
+     */
+    protected function recordUrl(string $type, int $objectId): array
+    {
+        $slug = \Illuminate\Database\Capsule\Manager::table('slug')
+            ->where('object_id', $objectId)
+            ->value('slug');
+
+        $module = ('accession' === $type) ? 'accession' : 'informationobject';
+
+        if ($slug) {
+            return ['module' => $module, 'slug' => $slug];
+        }
+
+        return ['module' => 'forms', 'action' => 'index'];
+    }
+
+    /**
+     * Return labels of required fields that are empty in the submission.
+     */
+    protected function missingRequiredFields(int $templateId, array $values): array
+    {
+        $required = \Illuminate\Database\Capsule\Manager::table('ahg_form_field')
+            ->where('template_id', $templateId)
+            ->where('is_required', 1)
+            ->whereNotIn('field_type', ['heading', 'divider'])
+            ->get(['field_name', 'label']);
+
+        $missing = [];
+        foreach ($required as $field) {
+            $val = $values[$field->field_name] ?? null;
+            if (is_array($val)) {
+                $val = implode('', array_map('strval', $val));
+            }
+            if (null === $val || '' === trim((string) $val)) {
+                $missing[] = $field->label;
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Map a template form_type to the route :type segment.
+     */
+    protected function routeType(string $formType): string
+    {
+        return ('accession' === $formType) ? 'accession' : 'informationobject';
+    }
+
+    /**
+     * Resolve the submit button label from template config.
+     */
+    protected function submitLabelFor(object $template): string
+    {
+        $config = $template->config ?? null;
+        if (is_object($config) && !empty($config->submitLabel)) {
+            return $config->submitLabel;
+        }
+
+        return 'Save Record';
+    }
+
+    /**
+     * Require an authenticated user (data entry is not admin-only).
+     */
+    protected function checkAuth(): void
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    /**
      * Check if admin.
      */
     protected function checkAdmin(): void

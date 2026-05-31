@@ -81,6 +81,12 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
+                                        <?php if ($template->is_active): ?>
+                                            <a href="<?php echo url_for(['module' => 'forms', 'action' => 'renderNew', 'templateId' => $template->id]) ?>"
+                                               class="btn btn-primary" title="Use this form to create a record">
+                                                <i class="fas fa-pen-to-square me-1"></i> Use form
+                                            </a>
+                                        <?php endif ?>
                                         <a href="<?php echo url_for(['module' => 'forms', 'action' => 'builder', 'id' => $template->id]) ?>"
                                            class="btn btn-outline-primary" title="Edit Fields">
                                             <i class="fas fa-edit"></i>

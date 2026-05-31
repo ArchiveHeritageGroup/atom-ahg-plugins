@@ -61,6 +61,11 @@ class ahgFormsPluginConfiguration extends sfPluginConfiguration
         $router->any('ahg_forms_api_get_form', '/api/forms/render/:type/:id', 'apiGetForm', ['type' => 'informationobject|accession', 'id' => '\d+']);
         $router->any('ahg_forms_api_autosave', '/api/forms/autosave', 'apiAutosave');
 
+        // Runtime data-entry forms (render template as a usable edit form + save)
+        $router->any('ahg_forms_render_new', '/forms/new/:templateId', 'renderNew', ['templateId' => '\d+']);
+        $router->any('ahg_forms_render_edit', '/forms/edit/:type/:id', 'renderEdit', ['type' => 'informationobject|accession', 'id' => '\d+']);
+        $router->any('ahg_forms_submit', '/forms/submit', 'submit');
+
         // Library of pre-built templates
         $router->any('ahg_forms_library', '/admin/forms/library', 'library');
         $router->any('ahg_forms_library_install', '/admin/forms/library/:template/install', 'libraryInstall');
