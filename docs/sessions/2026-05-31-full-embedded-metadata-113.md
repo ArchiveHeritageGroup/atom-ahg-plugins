@@ -55,5 +55,12 @@ ahgBackupPlugin DB backups — so it is retained preservation-side without a sep
   php-fpm restart; `metadata:backfill-embedded --dry-run` then a real run; authenticated render
   of the view panel.
 
+## Docs + /help (done)
+- `atom-extensions-catalog/docs/full-embedded-metadata-user-guide.md` + `.docx` — end-user guide.
+- `atom-extensions-catalog/docs/AtoM_Heratio_FullEmbeddedMetadata_Feature_Overview.md` + `.docx`.
+- In-app /help: imported via `php symfony help:import --file=full-embedded-metadata-user-guide.md`
+  (help_article, category "User Guide", 421 words, 5 sections).
+
 ## Remaining
-- Full feature-overview doc (.md + .docx) + in-app /help still to write (acceptance: docs/help).
+- Browser eyeball of the DAM "Full embedded metadata" panel (authenticated).
+- Release: atom-ahg-plugins (code) + atom-extensions-catalog (docs, root-owned → chown first).
