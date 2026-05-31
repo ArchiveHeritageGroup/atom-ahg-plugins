@@ -29,6 +29,10 @@ class ahgSettingsMenuComponent extends AhgComponents
         // Core AtoM Settings only - AHG plugin settings are in AHG Plugin Settings page
         $this->nodes = [
             [
+                'label' => $i18n->__('Auto-Update'),
+                'action' => 'autoUpdate',
+            ],
+            [
                 'label' => $i18n->__('Clipboard'),
                 'action' => 'clipboard',
             ],

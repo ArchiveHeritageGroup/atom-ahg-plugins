@@ -50,6 +50,9 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
         // Plugins
         $router->any('ahg_settings_plugins', '/ahgSettings/plugins', 'plugins');
 
+        // Auto-Update (#72)
+        $router->any('ahg_settings_auto_update', '/ahgSettings/autoUpdate', 'autoUpdate');
+
         // DAM tools
         $router->any('ahg_settings_save_tiff_pdf', '/ahgSettings/saveTiffPdfSettings', 'saveTiffPdfSettings');
         $router->any('ahg_settings_dam_tools', '/ahgSettings/damTools', 'damTools');

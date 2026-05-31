@@ -462,6 +462,11 @@ class ahgSettingsActions extends AhgController
         return $this->executeSettingsAction('cronJobsAction', $request);
     }
 
+    public function executeAutoUpdate($request)
+    {
+        return $this->executeSettingsAction('autoUpdateAction', $request);
+    }
+
     public function executeSystemInfo($request)
     {
         return $this->executeSettingsAction('systemInfoAction', $request);
