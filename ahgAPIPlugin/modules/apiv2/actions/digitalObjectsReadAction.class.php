@@ -121,6 +121,9 @@ class apiv2DigitalObjectsReadAction extends AhgApiController
                 'xmp' => $metadata['xmp'] ?? null,
                 'gps' => $metadata['gps'] ?? null,
                 'file_info' => $metadata['file'] ?? null,
+                // #113: complete ExifTool tag set from the stored capture, grouped
+                // by ExifTool group, GPS-gated (public API surface).
+                'full' => $this->fullEmbeddedSet($digitalObject['id'] ?? null),
             ];
         } catch (\Exception $e) {
             return [
@@ -128,6 +131,34 @@ class apiv2DigitalObjectsReadAction extends AhgApiController
                 'reason' => 'Extraction error: ' . $e->getMessage(),
             ];
         }
+    }
+
+    /**
+     * #113: load the stored complete ExifTool tag set for a DO, grouped and
+     * GPS-gated for the public API surface. Returns null if none stored.
+     */
+    protected function fullEmbeddedSet($digitalObjectId): ?array
+    {
+        if (empty($digitalObjectId)) {
+            return null;
+        }
+
+        $class = '\AtomExtensions\Extensions\MetadataExtraction\Services\EmbeddedMetadataService';
+        $path = \sfConfig::get('sf_plugins_dir') . '/ahgMetadataExtractionPlugin/lib/Services/EmbeddedMetadataService.php';
+        if (!class_exists($class) && file_exists($path)) {
+            require_once $path;
+        }
+        if (!class_exists($class)) {
+            return null;
+        }
+
+        $svc = new $class();
+        $raw = $svc->getRaw((int) $digitalObjectId);
+        if (!is_array($raw) || empty($raw)) {
+            return null;
+        }
+
+        return $svc->gpsGate($svc->group($raw));
     }
 
     /**

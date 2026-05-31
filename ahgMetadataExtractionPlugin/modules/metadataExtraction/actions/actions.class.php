@@ -160,6 +160,27 @@ class metadataExtractionActions extends AhgController
         }
 
         ksort($this->groupedMetadata);
+
+        // #113: full embedded metadata (complete ExifTool tag set), grouped +
+        // GPS-gated for non-admins (full set retained internally / for staff).
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgMetadataExtractionPlugin/lib/Services/EmbeddedMetadataService.php';
+        $embedded = new \AtomExtensions\Extensions\MetadataExtraction\Services\EmbeddedMetadataService();
+        $raw = $embedded->getRaw($this->digitalObjectId);
+
+        $this->hasFullMetadata = is_array($raw) && !empty($raw);
+        $this->fullTagCount = $this->hasFullMetadata ? count($raw) : 0;
+        $this->fullHasGps = $this->hasFullMetadata && $embedded->hasGps($raw);
+        $this->gpsGatedForViewer = $this->fullHasGps && !$this->getUser()->isAdministrator();
+
+        if ($this->hasFullMetadata) {
+            $grouped = $embedded->group($raw);
+            // Public/non-admin viewers get the GPS-gated set; admins see all.
+            $this->fullGroupedMetadata = $this->gpsGatedForViewer
+                ? $embedded->gpsGate($grouped)
+                : $grouped;
+        } else {
+            $this->fullGroupedMetadata = [];
+        }
     }
 
     /**

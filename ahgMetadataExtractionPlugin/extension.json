@@ -28,7 +28,8 @@
     },
     "tables": [
         "extracted_metadata",
-        "metadata_extraction_log"
+        "metadata_extraction_log",
+        "ahg_embedded_metadata"
     ],
     "features": [
         "Automatic metadata extraction from uploaded files",

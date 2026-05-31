@@ -224,6 +224,7 @@ class IiifManifestV3Service
 
         $consolidated = null;
         $gpsData = null;
+        $rawDoId = null;
 
         foreach ($digitalObjects as $do) {
             $mimeType = strtolower($do['mime_type'] ?? '');
@@ -241,6 +242,9 @@ class IiifManifestV3Service
                 continue;
             }
 
+            // #113: remember the master DO for the stored full-set enrichment below.
+            $rawDoId = $do['id'] ?? null;
+
             if (!class_exists($extractorClass)) {
                 break;
             }
@@ -255,6 +259,11 @@ class IiifManifestV3Service
             }
             break; // Use first valid image object
         }
+
+        // #113: expose the COMPLETE stored ExifTool tag set in the manifest,
+        // one entry per ExifTool group, GPS-gated (public IIIF surface). Runs
+        // independently of the live curated extraction above.
+        $this->enrichManifestWithFullEmbeddedMetadata($manifest, $rawDoId, $culture);
 
         if (!$consolidated) {
             return;
@@ -346,6 +355,55 @@ class IiifManifestV3Service
                         'value' => [$culture => [$contribution]],
                     ];
                 }
+            }
+        }
+    }
+
+    /**
+     * #113: append the complete stored ExifTool tag set to the manifest metadata,
+     * one entry per ExifTool group (value = "Tag: value" lines), GPS-gated for
+     * the public IIIF surface. No-op if nothing is stored for the DO.
+     *
+     * @param array    &$manifest Manifest array (by reference)
+     * @param int|null $digitalObjectId Master DO id
+     * @param string   $culture
+     */
+    private function enrichManifestWithFullEmbeddedMetadata(array &$manifest, ?int $digitalObjectId, string $culture): void
+    {
+        if (empty($digitalObjectId)) {
+            return;
+        }
+
+        $class = '\AtomExtensions\Extensions\MetadataExtraction\Services\EmbeddedMetadataService';
+        $path = \sfConfig::get('sf_plugins_dir') . '/ahgMetadataExtractionPlugin/lib/Services/EmbeddedMetadataService.php';
+        if (!class_exists($class) && file_exists($path)) {
+            require_once $path;
+        }
+        if (!class_exists($class)) {
+            return;
+        }
+
+        $svc = new $class();
+        $raw = $svc->getRaw((int) $digitalObjectId);
+        if (!is_array($raw) || empty($raw)) {
+            return;
+        }
+
+        if (!isset($manifest['metadata']) || !is_array($manifest['metadata'])) {
+            $manifest['metadata'] = [];
+        }
+
+        $grouped = $svc->gpsGate($svc->group($raw));
+        foreach ($grouped as $group => $tags) {
+            $lines = [];
+            foreach ((array) $tags as $tag => $value) {
+                $lines[] = $tag . ': ' . (is_array($value) ? json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : (string) $value);
+            }
+            if (!empty($lines)) {
+                $manifest['metadata'][] = [
+                    'label' => [$culture => ['Embedded · ' . $group]],
+                    'value' => [$culture => $lines],
+                ];
             }
         }
     }

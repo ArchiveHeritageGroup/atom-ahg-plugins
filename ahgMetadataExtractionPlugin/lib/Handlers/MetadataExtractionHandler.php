@@ -101,6 +101,16 @@ class MetadataExtractionHandler
             // Add technical metadata
             $this->appendTechnicalMetadata($metadata, $informationObjectId);
 
+            // #113: capture the COMPLETE ExifTool tag set (all groups) verbatim,
+            // alongside the curated fields above. Best-effort; never blocks upload.
+            try {
+                require_once __DIR__ . '/../Services/EmbeddedMetadataService.php';
+                (new \AtomExtensions\Extensions\MetadataExtraction\Services\EmbeddedMetadataService())
+                    ->captureAndStore($digitalObjectId, $absPath, $informationObjectId);
+            } catch (\Throwable $e) {
+                // Full capture is additive; failures must not affect the upload.
+            }
+
             return true;
         } catch (\Throwable $e) {
             return false;

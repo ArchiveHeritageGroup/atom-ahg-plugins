@@ -147,6 +147,58 @@
       </div>
     <?php endif ?>
 
+    <?php // #113: complete ExifTool tag set (all groups), searchable + GPS-gated ?>
+    <?php if (!empty($hasFullMetadata)): ?>
+      <div class="card mt-4" id="ahgFullMetadataCard">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <strong>
+            <i class="bi bi-card-list me-1"></i><?php echo __('Full embedded metadata'); ?>
+            <span class="badge bg-secondary ms-1"><?php echo (int) $fullTagCount ?> <?php echo __('tags'); ?></span>
+          </strong>
+          <input type="search" id="ahgMetaFilter" class="form-control form-control-sm" style="max-width: 16rem;"
+                 placeholder="<?php echo __('Filter tags…'); ?>" autocomplete="off">
+        </div>
+        <?php if (!empty($gpsGatedForViewer)): ?>
+          <div class="alert alert-warning mb-0 rounded-0 small">
+            <i class="bi bi-geo-alt-fill me-1"></i><?php echo __('Location (GPS) tags are hidden — visible to administrators only.'); ?>
+          </div>
+        <?php elseif (!empty($fullHasGps)): ?>
+          <div class="alert alert-info mb-0 rounded-0 small">
+            <i class="bi bi-geo-alt-fill me-1"></i><?php echo __('This image carries GPS/location data — hidden from public display.'); ?>
+          </div>
+        <?php endif ?>
+        <div class="card-body p-0" id="ahgFullMetadataBody">
+          <?php foreach ($fullGroupedMetadata as $group => $tags): ?>
+            <div class="ahg-meta-group">
+              <h6 class="bg-light px-3 py-2 mb-0 border-top d-flex justify-content-between">
+                <span><?php echo htmlspecialchars((string) $group) ?></span>
+                <span class="badge bg-light text-muted border"><?php echo is_array($tags) ? count($tags) : 0 ?></span>
+              </h6>
+              <table class="table table-sm table-striped mb-0">
+                <tbody>
+                  <?php foreach ((array) $tags as $tag => $value): ?>
+                    <tr class="ahg-meta-row">
+                      <td style="width: 32%;"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
+                      <td class="small">
+                        <?php
+                        if (is_array($value)) {
+                            echo htmlspecialchars(json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+                        } else {
+                            $sv = (string) $value;
+                            echo htmlspecialchars(strlen($sv) > 300 ? substr($sv, 0, 300) . '…' : $sv);
+                        }
+                        ?>
+                      </td>
+                    </tr>
+                  <?php endforeach ?>
+                </tbody>
+              </table>
+            </div>
+          <?php endforeach ?>
+        </div>
+      </div>
+    <?php endif ?>
+
   </div>
 </div>
 
@@ -179,6 +231,23 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Error: ' + err.message);
         extractBtn.disabled = false;
         extractBtn.innerHTML = '<i class="bi bi-download me-1"></i>Extract Metadata';
+      });
+    });
+  }
+
+  // #113: live filter over the full embedded-metadata panel.
+  var metaFilter = document.getElementById('ahgMetaFilter');
+  if (metaFilter) {
+    metaFilter.addEventListener('input', function() {
+      var q = this.value.toLowerCase();
+      document.querySelectorAll('#ahgFullMetadataBody .ahg-meta-group').forEach(function(group) {
+        var anyVisible = false;
+        group.querySelectorAll('.ahg-meta-row').forEach(function(row) {
+          var match = row.textContent.toLowerCase().indexOf(q) !== -1;
+          row.style.display = match ? '' : 'none';
+          if (match) { anyVisible = true; }
+        });
+        group.style.display = anyVisible ? '' : 'none';
       });
     });
   }
