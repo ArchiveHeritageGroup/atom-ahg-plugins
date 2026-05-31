@@ -24,6 +24,7 @@ class SettingsLdapAction extends AhgEditController
 {
     // Arrays not allowed in class constants
     public static $NAMES = [
+        'ldap_enabled',
         'ldapHost',
         'ldapPort',
         'ldapBaseDn',
@@ -50,6 +51,17 @@ class SettingsLdapAction extends AhgEditController
     protected function addField($name)
     {
         switch ($name) {
+            case 'ldap_enabled':
+                $setting = SettingService::getByName('ldap_enabled');
+                $this->ldap_enabled = $setting;
+                $default = $setting ? (bool) (int) $setting->getValue(['sourceCulture' => true]) : false;
+
+                $this->form->setDefault($name, $default);
+                $this->form->setValidator($name, new sfValidatorBoolean());
+                $this->form->setWidget($name, new sfWidgetFormInputCheckbox());
+
+                break;
+
             case 'ldapHost':
             case 'ldapPort':
             case 'ldapBaseDn':
@@ -80,6 +92,12 @@ class SettingsLdapAction extends AhgEditController
     protected function processField($field)
     {
         switch ($name = $field->getName()) {
+            case 'ldap_enabled':
+                \AtomFramework\Services\Write\WriteServiceFactory::settings()
+                    ->save($name, $field->getValue() ? '1' : '0', 'ldap');
+
+                break;
+
             case 'ldapHost':
             case 'ldapPort':
             case 'ldapBaseDn':

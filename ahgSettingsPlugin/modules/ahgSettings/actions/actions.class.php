@@ -146,6 +146,11 @@ class ahgSettingsActions extends AhgController
         return $this->executeSettingsAction('ftpTestAction', $request);
     }
 
+    public function executeLdapTest($request)
+    {
+        return $this->executeSettingsAction('ldapTestAction', $request);
+    }
+
     public function executePlugins($request)
     {
         return $this->executeSettingsAction('pluginsAction', $request);

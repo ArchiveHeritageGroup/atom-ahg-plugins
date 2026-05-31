@@ -47,6 +47,9 @@ class ahgSettingsPluginConfiguration extends sfPluginConfiguration
         // FTP test
         $router->any('ahg_settings_ftp_test', '/ahgSettings/ftpTest', 'ftpTest');
 
+        // LDAP test (#29)
+        $router->any('ahg_settings_ldap_test', '/ahgSettings/ldapTest', 'ldapTest');
+
         // Plugins
         $router->any('ahg_settings_plugins', '/ahgSettings/plugins', 'plugins');
 
