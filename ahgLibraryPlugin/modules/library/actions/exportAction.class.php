@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * libraryExportAction — export library items to CSV, BibTeX, or RIS.
  *

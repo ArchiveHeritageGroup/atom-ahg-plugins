@@ -46,6 +46,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $library->any('library_add', '/library/add', 'edit');
         $library->any('library_browse', '/library', 'browse');
         $library->any('library_export', '/library/export', 'export');
+        $library->any('library_advanced_search', '/library/advanced-search', 'advancedSearch');
         $library->any('library_isbn_lookup', '/library/isbnLookup', 'isbnLookup');
         $library->any('library_isbn_provider_delete', '/library/isbn-provider/delete/:id', 'isbnProviderDelete');
         $library->any('library_isbn_provider_toggle', '/library/isbn-provider/toggle/:id', 'isbnProviderToggle');
@@ -111,6 +112,8 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $acq->any('acquisition_receive', '/acquisition/receive', 'receive');
         $acq->any('acquisition_budgets', '/acquisition/budgets', 'budgets');
         $acq->any('acquisition_batch_capture', '/acquisition/batch-capture', 'batchCapture');
+        $acq->any('acquisition_bulk_import', '/acquisition/bulk-import', 'bulkImport');
+        $acq->any('acquisition_bulk_import_sample', '/acquisition/bulk-import-sample', 'bulkImportSample');
         $acq->any('acquisition_index', '/acquisition', 'index');
         $acq->register($routing);
 

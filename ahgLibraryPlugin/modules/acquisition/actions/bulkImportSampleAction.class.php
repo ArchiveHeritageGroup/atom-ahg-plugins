@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * bulkImportSampleAction — serves a sample CSV template for bulk import.
  *

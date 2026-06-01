@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use AtomFramework\Http\Controllers\AhgController;
+
 /**
  * libraryAdvancedSearchAction — Lucene-style advanced search for the library catalogue.
  *
