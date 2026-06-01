@@ -22,7 +22,7 @@ use AtomFramework\Http\Controllers\AhgController;
  *
  * @package ahgLibraryPlugin
  */
-class bulkImportAction extends AhgController
+class acquisitionBulkImportAction extends AhgController
 {
     /** @var array|null */
     public $result;

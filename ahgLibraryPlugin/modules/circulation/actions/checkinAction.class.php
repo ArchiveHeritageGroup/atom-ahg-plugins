@@ -41,12 +41,14 @@ class circulationCheckinAction extends AhgController
             }
 
             $service = CirculationService::getInstance();
-            $result = $service->checkin($itemBarcode);
+            // Station mode passes a BARCODE: checkin(int $checkoutId) expects an
+            // ID, so use checkinByBarcode(). Failures come back under 'error'.
+            $result = $service->checkinByBarcode($itemBarcode);
 
             if ($result['success']) {
                 $this->getUser()->setFlash('notice', $result['message'] ?? __('Item returned successfully.'));
             } else {
-                $this->getUser()->setFlash('error', $result['message'] ?? __('Return failed.'));
+                $this->getUser()->setFlash('error', $result['error'] ?? $result['message'] ?? __('Return failed.'));
             }
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', __('Return error: %1%', ['%1%' => $e->getMessage()]));

@@ -11,7 +11,7 @@ use AtomFramework\Http\Controllers\AhgController;
  *
  * @package ahgLibraryPlugin
  */
-class bulkImportSampleAction extends AhgController
+class acquisitionBulkImportSampleAction extends AhgController
 {
     public function execute($request)
     {

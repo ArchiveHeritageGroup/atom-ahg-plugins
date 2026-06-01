@@ -42,12 +42,16 @@ class circulationCheckoutAction extends AhgController
             }
 
             $service = CirculationService::getInstance();
-            $result = $service->checkout($patronBarcode, $itemBarcode);
+            // Station mode passes BARCODES, not IDs: use checkoutByBarcode
+            // (copyBarcode, patronBarcode). The service returns failures under
+            // the 'error' key (not 'message'), so surface that real reason
+            // instead of the generic fallback.
+            $result = $service->checkoutByBarcode($itemBarcode, $patronBarcode);
 
             if ($result['success']) {
                 $this->getUser()->setFlash('notice', $result['message'] ?? __('Item checked out successfully.'));
             } else {
-                $this->getUser()->setFlash('error', $result['message'] ?? __('Checkout failed.'));
+                $this->getUser()->setFlash('error', $result['error'] ?? $result['message'] ?? __('Checkout failed.'));
             }
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', __('Checkout error: %1%', ['%1%' => $e->getMessage()]));
