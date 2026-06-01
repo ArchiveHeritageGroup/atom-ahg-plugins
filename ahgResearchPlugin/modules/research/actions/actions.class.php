@@ -3,8 +3,14 @@
 use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
+// #116 Lecture builder: execute* actions provided by a trait so they live in the
+// research module's actions class without bloating this file.
+require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/LectureBuilderActionsTrait.php';
+
 class researchActions extends AhgController
 {
+    use LectureBuilderActionsTrait;
+
     protected $service;
 
     public function boot(): void

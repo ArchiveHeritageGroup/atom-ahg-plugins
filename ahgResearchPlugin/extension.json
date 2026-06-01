@@ -83,7 +83,20 @@
         "research_timeline_event",
         "research_map_point",
         "research_rights_policy",
-        "research_access_decision"
+        "research_access_decision",
+        "research_target_journal",
+        "research_journal",
+        "research_journal_issue",
+        "research_journal_article",
+        "research_lecture",
+        "research_lecture_section",
+        "research_lecture_resource",
+        "training_course",
+        "training_module",
+        "training_assessment",
+        "training_enrolment",
+        "training_progress",
+        "training_certificate"
     ],
     "provides": {
         "admin_section": {

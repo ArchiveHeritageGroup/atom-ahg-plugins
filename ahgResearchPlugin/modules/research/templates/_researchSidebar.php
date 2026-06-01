@@ -31,6 +31,22 @@ $isAdmin = $sf_user->isAdministrator();
        class="list-group-item list-group-item-action <?php echo $active === 'journal' ? 'active' : ''; ?>">
         <i class="fas fa-journal-whills me-2"></i><?php echo __('Research Journal'); ?>
     </a>
+    <a href="<?php echo url_for(['module' => 'researchjournal', 'action' => 'index']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'journalBuilder' ? 'active' : ''; ?>">
+        <i class="fas fa-book-open me-2"></i><?php echo __('Journal Builder'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'targetJournals']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'targetJournals' ? 'active' : ''; ?>">
+        <i class="fas fa-compass me-2"></i><?php echo __('Where to Publish'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'lectures']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'lectures' ? 'active' : ''; ?>">
+        <i class="fas fa-chalkboard-teacher me-2"></i><?php echo __('Lecture Builder'); ?>
+    </a>
+    <a href="<?php echo url_for(['module' => 'training', 'action' => 'index']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'training' ? 'active' : ''; ?>">
+        <i class="fas fa-graduation-cap me-2"></i><?php echo __('Training Courses'); ?>
+    </a>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'bibliographies']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'bibliographies' ? 'active' : ''; ?>">
         <i class="fas fa-book me-2"></i><?php echo __('Bibliographies'); ?>

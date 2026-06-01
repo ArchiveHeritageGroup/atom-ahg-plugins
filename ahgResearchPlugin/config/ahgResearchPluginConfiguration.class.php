@@ -28,6 +28,8 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'research';
         $enabledModules[] = 'audit';
         $enabledModules[] = 'researchapi';
+        $enabledModules[] = 'researchjournal'; // #115 journal builder + manuscript workspace
+        $enabledModules[] = 'training';        // #117 training curriculum + LMS
         sfConfig::set('sf_enabled_modules', $enabledModules);
     }
 
@@ -438,6 +440,58 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_renewal', '/research/renewal', 'renewal');
         $research->any('research_index', '/research/dashboard', 'dashboard');
 
+        // #114 Target-journal directory ("Where to Publish"). :id constrained to
+        // \d+ so /new, /seed-dhet, /suggest never collide with the show route.
+        $research->any('research_target_journal_show', '/research/target-journals/:id', 'targetJournalShow', ['id' => '\d+']);
+        $research->any('research_target_journal_edit', '/research/target-journals/:id/edit', 'targetJournalBuilder', ['id' => '\d+']);
+        $research->any('research_target_journal_delete', '/research/target-journals/:id/delete', 'targetJournalDelete', ['id' => '\d+']);
+        $research->any('research_target_journal_new', '/research/target-journals/new', 'targetJournalBuilder');
+        $research->any('research_target_journal_seed_dhet', '/research/target-journals/seed-dhet', 'targetJournalSeedDhet');
+        $research->any('research_target_journal_suggest', '/research/target-journals/suggest', 'targetJournalSuggest');
+        $research->any('research_target_journals', '/research/target-journals', 'targetJournals');
+
+        // #116 Lecture builder
+        $research->any('research_lecture_section_edit', '/research/lectures/section/:id', 'lectureSectionEdit', ['id' => '\d+']);
+        $research->any('research_lecture_section_delete', '/research/lectures/section/:id/delete', 'lectureSectionDelete', ['id' => '\d+']);
+        $research->any('research_lecture_resource_delete', '/research/lectures/resource/:id/delete', 'lectureResourceDelete', ['id' => '\d+']);
+        $research->any('research_lecture_section_store', '/research/lectures/:id/section', 'lectureSectionStore', ['id' => '\d+']);
+        $research->any('research_lecture_resource_store', '/research/lectures/:id/resource', 'lectureResourceStore', ['id' => '\d+']);
+        $research->any('research_lecture_status', '/research/lectures/:id/status', 'lectureStatus', ['id' => '\d+']);
+        $research->any('research_lecture_publish', '/research/lectures/:id/publish', 'lecturePublish', ['id' => '\d+']);
+        $research->any('research_lecture_delete', '/research/lectures/:id/delete', 'lectureDelete', ['id' => '\d+']);
+        $research->any('research_lecture_builder_edit', '/research/lectures/builder/:id', 'lectureBuilder', ['id' => '\d+']);
+        $research->any('research_lecture_builder', '/research/lectures/builder', 'lectureBuilder');
+        $research->any('research_lecture_show', '/research/lectures/:id', 'lectureShow', ['id' => '\d+']);
+        $research->any('research_lectures', '/research/lectures', 'lectures');
+
         $research->register($routing);
+
+        // #115 Journal builder + manuscript workspace (own module)
+        $journal = new \AtomFramework\Routing\RouteLoader('researchjournal');
+        $journal->any('research_journal_article', '/research/journal-builder/article', 'article');
+        $journal->any('research_journal_show', '/research/journal-builder/view', 'show');
+        $journal->any('research_journal_builder', '/research/journal-builder/edit', 'builder');
+        $journal->any('research_journal_index', '/research/journal-builder', 'index');
+        $journal->register($routing);
+
+        // #117 Training curriculum + LMS (own module)
+        $training = new \AtomFramework\Routing\RouteLoader('training');
+        $training->any('training_certificate', '/training/certificate/:id', 'certificate', ['id' => '\d+']);
+        $training->any('training_submit_assessment', '/training/learn/:id/assessment/submit', 'submitAssessment', ['id' => '\d+']);
+        $training->any('training_take_assessment', '/training/learn/:id/assessment', 'takeAssessment', ['id' => '\d+']);
+        $training->any('training_module_complete', '/training/learn/:id/module/:module_id/complete', 'completeModule', ['id' => '\d+', 'module_id' => '\d+']);
+        $training->any('training_learn', '/training/learn/:id', 'learn', ['id' => '\d+']);
+        $training->any('training_enrolment_delete', '/training/enrolment/:id/delete', 'destroyEnrolment', ['id' => '\d+']);
+        $training->any('training_module_edit', '/training/module/:id/edit', 'editModule', ['id' => '\d+']);
+        $training->any('training_module_add', '/training/:id/module/add', 'storeModule', ['id' => '\d+']);
+        $training->any('training_assessment_edit', '/training/:id/assessment', 'editAssessment', ['id' => '\d+']);
+        $training->any('training_enrol', '/training/:id/enrol', 'enrol', ['id' => '\d+']);
+        $training->any('training_status', '/training/:id/status', 'setStatus', ['id' => '\d+']);
+        $training->any('training_delete', '/training/:id/delete', 'destroy', ['id' => '\d+']);
+        $training->any('training_edit', '/training/:id/edit', 'builder', ['id' => '\d+']);
+        $training->any('training_new', '/training/new', 'builder');
+        $training->any('training_show', '/training/:id', 'show', ['id' => '\d+']);
+        $training->any('training_index', '/training', 'index');
+        $training->register($routing);
     }
 }
