@@ -6,6 +6,8 @@
 
 <?php slot('content') ?>
 
+<a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
+
 <?php if ($sf_user->hasFlash('notice')): ?>
 <div class="alert alert-success"><?php echo $sf_user->getFlash('notice'); ?></div>
 <?php endif; ?>

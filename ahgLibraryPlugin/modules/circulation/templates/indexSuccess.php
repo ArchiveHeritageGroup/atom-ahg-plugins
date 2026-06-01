@@ -4,6 +4,8 @@
   <h1><?php echo __('Circulation — Checkout Station'); ?></h1>
 <?php end_slot(); ?>
 
+<a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
+
 <?php if (!empty($notice)): ?>
   <div class="alert alert-success alert-dismissible fade show" role="alert">
     <i class="fas fa-check-circle me-2"></i><?php echo $notice; ?>

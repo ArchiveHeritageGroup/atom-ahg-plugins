@@ -4,6 +4,8 @@
   <h1><?php echo __('Patron Management'); ?></h1>
 <?php end_slot(); ?>
 
+<a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <span class="text-muted"><?php echo __('%1% patrons', ['%1%' => $total]); ?></span>

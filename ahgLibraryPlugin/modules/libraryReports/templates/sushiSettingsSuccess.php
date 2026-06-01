@@ -13,7 +13,7 @@
         <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'frbrOverride']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('FRBR Overrides'); ?></a></li>
     </ul>
     <hr>
-    <a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
+    <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-primary btn-sm w-100"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
 </div>
 <?php end_slot(); ?>
 

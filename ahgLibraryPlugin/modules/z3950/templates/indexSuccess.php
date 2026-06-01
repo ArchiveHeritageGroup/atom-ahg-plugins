@@ -19,9 +19,9 @@
     <?php echo __('%1% target(s)', ['%1%' => count($targets ?: [])]); ?>
   </div>
   <div>
-    <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'index']); ?>"
+    <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library"
        class="btn btn-outline-secondary me-2">
-       <i class="fas fa-chart-bar me-1"></i><?php echo __('Library Reports'); ?>
+       <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Library'); ?>
     </a>
     <a href="<?php echo url_for(['module' => 'z3950', 'action' => 'edit']); ?>"
        class="btn btn-success">

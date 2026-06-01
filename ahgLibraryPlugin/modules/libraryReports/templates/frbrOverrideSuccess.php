@@ -1,6 +1,8 @@
 <?php use_helper('I18N'); ?>
 <div class="container-fluid mt-4">
 
+  <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
+
   <?php if (isset($message)): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
       <?php echo esc_entities($message); ?>

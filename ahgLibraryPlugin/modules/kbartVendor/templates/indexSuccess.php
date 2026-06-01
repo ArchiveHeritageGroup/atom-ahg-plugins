@@ -4,7 +4,7 @@
 <div class="sidebar-content">
     <h4><?php echo __('KBART Management'); ?></h4>
     <ul class="list-unstyled">
-        <li><a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'index']); ?>"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library Reports'); ?></a></li>
+        <li><a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>"><i class="fas fa-book me-2"></i><?php echo __('Library Catalogue'); ?></a></li>
     </ul>
 </div>

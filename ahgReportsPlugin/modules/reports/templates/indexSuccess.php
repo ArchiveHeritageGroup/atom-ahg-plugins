@@ -222,12 +222,17 @@ $canManage = $isAdmin || $isEditor;
             </div>
         </div>
 
-        <?php // Dedicated Library tile — the full library toolset (relocated from the
-              // main-nav Library dropdown). Only shown when the Library plugin is enabled;
-              // each target page enforces its own access control. ?>
+    </div>
+    <?php endif; ?>
+
+    <?php // Library + Workflow & Publishing tiles grouped side by side, with spacing above.
+          // Library was moved out of the main content row to sit to the LEFT of the
+          // workflow cards. Each card keeps its own enable gate. ?>
+    <?php if ($hasLibrary || ($hasWorkflow && $canManage)): ?>
+    <div class="row mb-4 mt-4">
         <?php if ($hasLibrary): ?>
         <!-- Library Column -->
-        <div class="col-md-4">
+        <div class="col-md-4" id="library">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #795548 !important;">
                     <h5 class="mb-0"><i class="fas fa-book me-2"></i><?php echo __('Library'); ?></h5>
@@ -253,13 +258,9 @@ $canManage = $isAdmin || $isEditor;
             </div>
         </div>
         <?php endif; ?>
-    </div>
-    <?php endif; ?>
 
-    <!-- ═══ WORKFLOW & PUBLISHING ═══ -->
-    <?php if ($hasWorkflow && $canManage): ?>
-    <h5 class="mt-4 mb-3 text-muted border-bottom pb-2"><i class="fas fa-project-diagram me-2"></i><?php echo __('Workflow & Publishing'); ?></h5>
-    <div class="row mb-4">
+        <?php if ($hasWorkflow && $canManage): ?>
+        <!-- Approval Workflow -->
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #6610f2 !important;">
@@ -276,7 +277,9 @@ $canManage = $isAdmin || $isEditor;
                 </ul>
             </div>
         </div>
+
         <?php if ($hasSpectrum): ?>
+        <!-- Spectrum Workflow -->
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #0d6efd !important;">
@@ -290,6 +293,7 @@ $canManage = $isAdmin || $isEditor;
                 </ul>
             </div>
         </div>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
     <?php endif; ?>

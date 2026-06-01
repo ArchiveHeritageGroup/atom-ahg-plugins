@@ -27,7 +27,7 @@
     </ul>
     <hr>
     <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'exportCsv', 'report' => 'creators']); ?>" class="btn btn-success btn-sm w-100"><i class="fas fa-download me-2"></i><?php echo __('Export'); ?></a>
-    <a href="<?php echo url_for(['module' => 'libraryReports', 'action' => 'index']); ?>" class="btn btn-outline-primary btn-sm w-100 mt-2"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back'); ?></a>
+    <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-primary btn-sm w-100 mt-2"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
 </div>
 <?php end_slot(); ?>
 
