@@ -21,10 +21,13 @@ class acquisitionOrderEditAction extends AhgController
         $service = AcquisitionService::getInstance();
         $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
 
-        // Load order types from taxonomy
+        // Load order types from taxonomy. getTerms() does not exist on the
+        // service — getTermsWithAttributes() returns [code => term-object]
+        // (with ->code and ->name); catch Throwable so a bad call degrades to
+        // the template's built-in default order types instead of a white screen.
         try {
-            $this->orderTypes = $taxonomyService->getTerms('library_order_type');
-        } catch (\Exception $e) {
+            $this->orderTypes = $taxonomyService->getTermsWithAttributes('library_order_type');
+        } catch (\Throwable $e) {
             $this->orderTypes = [];
         }
 

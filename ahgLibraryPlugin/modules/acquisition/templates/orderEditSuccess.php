@@ -57,7 +57,7 @@
               $currentType = $rawOrder->order_type ?? 'purchase';
               if (!empty($rawOrderTypes)) {
                   foreach ($rawOrderTypes as $ot) {
-                      $val = is_object($ot) ? ($ot->value ?? $ot->name ?? '') : $ot;
+                      $val = is_object($ot) ? ($ot->value ?? $ot->code ?? $ot->name ?? '') : $ot;
                       $label = is_object($ot) ? ($ot->label ?? $ot->name ?? $val) : ucfirst($ot);
             ?>
               <option value="<?php echo esc_entities($val); ?>" <?php echo $currentType === $val ? 'selected' : ''; ?>>
