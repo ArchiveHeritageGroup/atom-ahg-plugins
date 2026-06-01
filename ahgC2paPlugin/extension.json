@@ -1,0 +1,51 @@
+{
+    "name": "C2PA Content Credentials",
+    "machine_name": "ahgC2paPlugin",
+    "version": "0.1.0",
+    "description": "C2PA (Coalition for Content Provenance and Authenticity) 2.1 content credentials. Generate, Ed25519-sign and embed signed provenance manifests on digital-object derivatives (JUMBF via c2patool, or .c2pa.json sidecars), surface embedded EXIF/IPTC/XMP as C2PA Standard Metadata Assertions, declare AI training-mining stance, and verify manifests. PSIS port of Heratio's ahg/c2pa, sharing the ahg/inference-receipts Ed25519 key chain with ahgAiCompliancePlugin.",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.2"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "suggests": {
+        "ahgAiCompliancePlugin": "Provides the shared Ed25519 signing key (ai_inference_key + data/ai-keys) used to sign and verify C2PA manifests",
+        "ahgDAMPlugin": "Provides dam_iptc_metadata used for stds.iptc / stds.xmp Standard Metadata Assertions"
+    },
+    "composer": {
+        "require": {
+            "ahg/inference-receipts": "^0.1"
+        }
+    },
+    "external_binaries": {
+        "c2patool": "Optional. When present (/usr/local/bin/c2patool or on PATH), enables JUMBF embedding of manifests into JPEGs. Absent: manifests are written as .c2pa.json sidecars."
+    },
+    "provides": {
+        "services": [
+            "C2paService",
+            "ManifestBuilder",
+            "C2paSigner",
+            "StandardMetadataLoader"
+        ],
+        "commands": [
+            "c2pa:verify",
+            "c2pa:smoke"
+        ],
+        "endpoints": [
+            "/.well-known/c2pa-info",
+            "/c2pa/verify",
+            "/c2pa/manifest/:id",
+            "/c2pa/manifests/:id"
+        ]
+    },
+    "install_sql": "database/install.sql",
+    "tables": [
+        "ahg_c2pa_manifest"
+    ]
+}

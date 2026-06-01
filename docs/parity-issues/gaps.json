@@ -1,0 +1,778 @@
+{
+ "core-ui": [
+  {
+   "feature": "Inline dropdown manager with multi-source support (ahg_dropdown, term, setting)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-dropdown-manage",
+   "claimed_atom": "ahgSettingsPlugin/ahgDropdown"
+  },
+  {
+   "feature": "Layout service with culture-aware menu data aggregation",
+   "severity": "medium",
+   "heratio_pkg": "ahg-theme-b5",
+   "claimed_atom": "ahgThemeB5Plugin"
+  }
+ ],
+ "descriptive-manage": [
+  {
+   "feature": "Records Management (Classification, Disposal, Retention, Email Capture, etc.)",
+   "severity": "high",
+   "heratio_pkg": "ahg-records-manage",
+   "claimed_atom": "MISSING"
+  },
+  {
+   "feature": "Heritage Public Portal (Landing page, Search, Timeline, Analytics, Contributors)",
+   "severity": "high",
+   "heratio_pkg": "ahg-heritage-manage",
+   "claimed_atom": "MISSING"
+  },
+  {
+   "feature": "DOI Management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-doi-manage",
+   "claimed_atom": "MISSING"
+  },
+  {
+   "feature": "Dropdown/Custom Fields Management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-dropdown-manage",
+   "claimed_atom": "MISSING"
+  },
+  {
+   "feature": "Researcher Submissions/Portal",
+   "severity": "medium",
+   "heratio_pkg": "ahg-researcher-manage",
+   "claimed_atom": "MISSING"
+  },
+  {
+   "feature": "Advanced Authority Management (Merge, Deduplication, NER Pipeline, Reconciliation)",
+   "severity": "high",
+   "heratio_pkg": "ahg-actor-manage",
+   "claimed_atom": "ahgActorManagePlugin"
+  },
+  {
+   "feature": "Accession Advanced Features (Container barcodes, Rights inheritance, Finalisation workflow, Appraisal, Intake Queue)",
+   "severity": "high",
+   "heratio_pkg": "ahg-accession-manage",
+   "claimed_atom": "ahgAccessionManagePlugin"
+  },
+  {
+   "feature": "Information Object Advanced Features (AI Describe, PII Masking, Preservation, Condition, Privacy, Provenance, Extended Rights, Finding Aids, Treeview with Sort, Reports)",
+   "severity": "high",
+   "heratio_pkg": "ahg-information-object-manage",
+   "claimed_atom": "ahgInformationObjectManagePlugin"
+  },
+  {
+   "feature": "User ACL Management (Per-object permission matrix, Per-standard access control, Plugin grants/preferences)",
+   "severity": "high",
+   "heratio_pkg": "ahg-user-manage",
+   "claimed_atom": "ahgUserManagePlugin"
+  },
+  {
+   "feature": "Rights-Holder Management (Embargoes, Orphan Works, Rights Admin, Extended Rights, TK Labels)",
+   "severity": "high",
+   "heratio_pkg": "ahg-rights-holder-manage",
+   "claimed_atom": "ahgRightsHolderManagePlugin"
+  },
+  {
+   "feature": "Storage Location Management (Strongroom CRUD, Holdings Reports, Box Lists, Physical Object Linking)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-storage-manage",
+   "claimed_atom": "ahgStorageManagePlugin"
+  },
+  {
+   "feature": "Institution/Repository Advanced Management (Browse, Show, Create/Edit, Publishing, Settings)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-repository-manage",
+   "claimed_atom": "ahgRepositoryManagePlugin"
+  }
+ ],
+ "dam-media": [
+  {
+   "feature": "Media derivatives (thumbnails, reference images, posters)",
+   "severity": "high",
+   "heratio_pkg": "ahg-media-processing",
+   "claimed_atom": "ahgDAMPlugin"
+  },
+  {
+   "feature": "Watermarking system (visible + invisible)",
+   "severity": "high",
+   "heratio_pkg": "ahg-media-processing",
+   "claimed_atom": "ahgDAMPlugin"
+  },
+  {
+   "feature": "HTTP streaming with Range request support for seeking",
+   "severity": "high",
+   "heratio_pkg": "ahg-media-streaming",
+   "claimed_atom": "none"
+  },
+  {
+   "feature": "Video/audio transcoding to browser formats",
+   "severity": "high",
+   "heratio_pkg": "ahg-media-streaming",
+   "claimed_atom": "none"
+  },
+  {
+   "feature": "Caption/subtitle track management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-media-streaming",
+   "claimed_atom": "none"
+  },
+  {
+   "feature": "PDF text extraction",
+   "severity": "medium",
+   "heratio_pkg": "ahg-pdf-tools",
+   "claimed_atom": "ahgPreservationPlugin"
+  },
+  {
+   "feature": "C2PA manifest generation, signing, embedding",
+   "severity": "high",
+   "heratio_pkg": "ahg-c2pa",
+   "claimed_atom": "none"
+  },
+  {
+   "feature": "AI video animation from static images",
+   "severity": "medium",
+   "heratio_pkg": "ahg-image-ar",
+   "claimed_atom": "none"
+  },
+  {
+   "feature": "RDA export/import with carrier mapping",
+   "severity": "medium",
+   "heratio_pkg": "ahg-metadata-export",
+   "claimed_atom": "ahgMetadataExportPlugin"
+  },
+  {
+   "feature": "DACS export/import",
+   "severity": "medium",
+   "heratio_pkg": "ahg-metadata-export",
+   "claimed_atom": "ahgMetadataExportPlugin"
+  },
+  {
+   "feature": "EAD4, EAD2002, MODS, METS, EAC-F exporters",
+   "severity": "medium",
+   "heratio_pkg": "ahg-metadata-export",
+   "claimed_atom": "ahgMetadataExportPlugin"
+  }
+ ],
+ "iiif-3d": [
+  {
+   "feature": "OCR Export (TXT, ALTO, hOCR, PAGE-XML)",
+   "severity": "high",
+   "heratio_pkg": "ahg-iiif-collection/Services/OcrExportService.php",
+   "claimed_atom": "ahgIiifPlugin"
+  },
+  {
+   "feature": "IIIF Content State (RFC 8947) + Auth 2.0 Flow",
+   "severity": "high",
+   "heratio_pkg": "ahg-iiif-collection/Services/IiifContentStateService.php + IiifAuthFlow2Service.php",
+   "claimed_atom": "ahgIiifPlugin/lib/Services/IiifAuthService.php"
+  },
+  {
+   "feature": "Mirador Workspace Persistence (Issue #699)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-iiif-collection/Services/WorkspaceService.php + Controller + routes",
+   "claimed_atom": "ahgIiifPlugin"
+  },
+  {
+   "feature": "IIIF Metadata Enrichment (IPTC/EXIF/XMP -> Manifest)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-iiif-collection/Services/IiifMetadataEnricher.php",
+   "claimed_atom": "ahgIiifPlugin"
+  },
+  {
+   "feature": "NER -> IIIF Annotation Surface (Issue #697)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-iiif-collection/Controllers/IiifNerAnnotationsController.php + Job",
+   "claimed_atom": "ahgIiifPlugin"
+  },
+  {
+   "feature": "IIIF Change Discovery 1.0 (Activity Streams)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-iiif-collection/Controllers/IiifChangeDiscoveryController.php",
+   "claimed_atom": "ahgIiifPlugin"
+  },
+  {
+   "feature": "TripoSR 2D->3D Auto-configuration",
+   "severity": "medium",
+   "heratio_pkg": "ahg-3d-model/src/Services/ThreeDAutoConfigService.php (referenced in lib)",
+   "claimed_atom": "ahg3DModelPlugin/lib/Services/ThreeDAutoConfigService.php"
+  },
+  {
+   "feature": "RiC Serialization (full RIC-O JSON-LD -> Turtle)",
+   "severity": "high",
+   "heratio_pkg": "ahg-ric/Services/RicSerializationService.php",
+   "claimed_atom": "ahgRicExplorerPlugin"
+  },
+  {
+   "feature": "SHACL Validation (RiC-O Shapes)",
+   "severity": "high",
+   "heratio_pkg": "ahg-ric/Services/ShaclValidationService.php",
+   "claimed_atom": "ahgRicExplorerPlugin"
+  },
+  {
+   "feature": "RiC Entity CRUD + SPARQL Query Service",
+   "severity": "high",
+   "heratio_pkg": "ahg-ric/Services/RicEntityService.php (76KB) + SparqlQueryService.php (10KB)",
+   "claimed_atom": "ahgRicExplorerPlugin/lib/RicSyncListener.class.php"
+  },
+  {
+   "feature": "RDF Import with Dry-run (TTL/JSON-LD/RDF-XML)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ric/Controllers/RdfImportController.php + Services/RdfImportService.php",
+   "claimed_atom": "ahgRicExplorerPlugin"
+  },
+  {
+   "feature": "CIDOC-CRM v7.1.3 Per-Record Export (Issue #659)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ric/Controllers/CrmExportController.php",
+   "claimed_atom": "ahgRicExplorerPlugin"
+  },
+  {
+   "feature": "SPARQL Proxy (Read-only Federated Queries)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ric/Controllers/RdfImportController.php (sparqlProxy method)",
+   "claimed_atom": "ahgRicExplorerPlugin"
+  }
+ ],
+ "search-discovery": [
+  {
+   "feature": "ResourceSync 1.1 Source endpoint",
+   "severity": "high",
+   "heratio_pkg": "ahg-resourcesync",
+   "claimed_atom": "none"
+  },
+  {
+   "feature": "Search analytics dashboard with CTR tracking",
+   "severity": "high",
+   "heratio_pkg": "ahg-search",
+   "claimed_atom": "ahgSearchPlugin"
+  },
+  {
+   "feature": "Vector search with Qdrant + RRF blending",
+   "severity": "high",
+   "heratio_pkg": "ahg-search",
+   "claimed_atom": "ahgSearchPlugin"
+  },
+  {
+   "feature": "Search suggestion (Did you mean)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-search",
+   "claimed_atom": "ahgSearchPlugin"
+  },
+  {
+   "feature": "Advanced search form with filter UI",
+   "severity": "medium",
+   "heratio_pkg": "ahg-search",
+   "claimed_atom": "ahgSearchPlugin"
+  },
+  {
+   "feature": "Faceted search with 6 PSIS-parity facets",
+   "severity": "high",
+   "heratio_pkg": "ahg-search",
+   "claimed_atom": "ahgSearchPlugin"
+  },
+  {
+   "feature": "Cursor-based pagination",
+   "severity": "medium",
+   "heratio_pkg": "ahg-search",
+   "claimed_atom": "ahgSearchPlugin"
+  },
+  {
+   "feature": "Geospatial search filtering",
+   "severity": "medium",
+   "heratio_pkg": "ahg-search",
+   "claimed_atom": "ahgSearchPlugin"
+  },
+  {
+   "feature": "Z3950 server mode (incoming client queries)",
+   "severity": "high",
+   "heratio_pkg": "ahg-z3950",
+   "claimed_atom": "ahgLibraryPlugin"
+  },
+  {
+   "feature": "SRU server endpoint controller",
+   "severity": "medium",
+   "heratio_pkg": "ahg-z3950",
+   "claimed_atom": "ahgLibraryPlugin"
+  },
+  {
+   "feature": "PageIndex LLM hierarchical tree extraction",
+   "severity": "high",
+   "heratio_pkg": "ahg-discovery",
+   "claimed_atom": "ahgDiscoveryPlugin"
+  },
+  {
+   "feature": "Discovery simulated query corpus",
+   "severity": "medium",
+   "heratio_pkg": "ahg-discovery",
+   "claimed_atom": "ahgDiscoveryPlugin"
+  }
+ ],
+ "rights-privacy-compliance": [
+  {
+   "feature": "WebAuthn/FIDO2 passkey MFA (issue #721)",
+   "severity": "high",
+   "heratio_pkg": "ahg-security-clearance",
+   "claimed_atom": "ahgSecurityClearancePlugin"
+  },
+  {
+   "feature": "Visual redaction editor for privacy (images/PDF)",
+   "severity": "high",
+   "heratio_pkg": "ahg-privacy",
+   "claimed_atom": "ahgPrivacyPlugin"
+  },
+  {
+   "feature": "Embedded metadata PII scanning",
+   "severity": "high",
+   "heratio_pkg": "ahg-privacy",
+   "claimed_atom": "ahgPrivacyPlugin"
+  },
+  {
+   "feature": "Article 30 ROPA export (GDPR compliance)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-privacy",
+   "claimed_atom": "ahgPrivacyPlugin"
+  },
+  {
+   "feature": "DPIA with risk scoring",
+   "severity": "medium",
+   "heratio_pkg": "ahg-privacy",
+   "claimed_atom": "ahgPrivacyPlugin"
+  },
+  {
+   "feature": "Audit trail chaining (cryptographic verification)",
+   "severity": "high",
+   "heratio_pkg": "ahg-audit-trail",
+   "claimed_atom": "ahgAuditTrailPlugin"
+  },
+  {
+   "feature": "Retention schedule + disposal workflow (records management)",
+   "severity": "high",
+   "heratio_pkg": "ahg-extended-rights",
+   "claimed_atom": "ahgExtendedRightsPlugin"
+  },
+  {
+   "feature": "MFA policy enforcement per role (issue #738)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-security-clearance",
+   "claimed_atom": "ahgSecurityClearancePlugin"
+  },
+  {
+   "feature": "Watermark application to derivatives (security classification)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-security-clearance",
+   "claimed_atom": "ahgSecurityClearancePlugin"
+  },
+  {
+   "feature": "PII scan & redaction review workflow",
+   "severity": "medium",
+   "heratio_pkg": "ahg-privacy",
+   "claimed_atom": "ahgPrivacyPlugin"
+  }
+ ],
+ "accounting-collection": [
+  {
+   "feature": "IPSAS Report Command",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ipsas",
+   "claimed_atom": "ahgIPSASPlugin"
+  },
+  {
+   "feature": "Create Insurance Policy",
+   "severity": "high",
+   "heratio_pkg": "ahg-ipsas",
+   "claimed_atom": "ahgIPSASPlugin"
+  },
+  {
+   "feature": "Create Impairment Assessment",
+   "severity": "high",
+   "heratio_pkg": "ahg-ipsas",
+   "claimed_atom": "ahgIPSASPlugin"
+  },
+  {
+   "feature": "Heritage Accounting Multi-Standard",
+   "severity": "high",
+   "heratio_pkg": "N/A",
+   "claimed_atom": "ahgHeritageAccountingPlugin"
+  },
+  {
+   "feature": "Provenance AI Inference",
+   "severity": "medium",
+   "heratio_pkg": "ahg-provenance",
+   "claimed_atom": "ahgProvenancePlugin"
+  },
+  {
+   "feature": "Vendor CRUD Service",
+   "severity": "medium",
+   "heratio_pkg": "ahg-vendor",
+   "claimed_atom": "ahgVendorPlugin"
+  }
+ ],
+ "ingest-preservation": [
+  {
+   "feature": "OCFL (Oxford Common File Layout) storage implementation",
+   "severity": "high",
+   "heratio_pkg": "ahg-ocfl",
+   "claimed_atom": "MISSING - no ahgOcflPlugin"
+  },
+  {
+   "feature": "Watched-folder streaming ingest pipeline",
+   "severity": "high",
+   "heratio_pkg": "ahg-scan",
+   "claimed_atom": "MISSING - no ahgScanPlugin"
+  },
+  {
+   "feature": "Format conversion/normalization execution commands",
+   "severity": "medium",
+   "heratio_pkg": "ahg-preservation",
+   "claimed_atom": "ahgPreservationPlugin"
+  },
+  {
+   "feature": "Format identification commands (Siegfried/DROID)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-preservation",
+   "claimed_atom": "ahgPreservationPlugin"
+  },
+  {
+   "feature": "Digital object file replication to preservation targets",
+   "severity": "medium",
+   "heratio_pkg": "ahg-preservation",
+   "claimed_atom": "ahgPreservationPlugin"
+  }
+ ],
+ "ai": [
+  {
+   "feature": "AI Chatbot (RAG-grounded chat engine)",
+   "severity": "high",
+   "heratio_pkg": "ahg-ai-chatbot",
+   "claimed_atom": "None"
+  },
+  {
+   "feature": "Inference Receipt Chain",
+   "severity": "high",
+   "heratio_pkg": "ahg-inference-receipts",
+   "claimed_atom": "ahgAiCompliancePlugin"
+  },
+  {
+   "feature": "EU AI Act Compliance Framework",
+   "severity": "high",
+   "heratio_pkg": "ahg-ai-compliance",
+   "claimed_atom": "ahgAiCompliancePlugin"
+  },
+  {
+   "feature": "AI Governance Dashboard",
+   "severity": "high",
+   "heratio_pkg": "ahg-provenance-ai",
+   "claimed_atom": "ahgProvenancePlugin"
+  },
+  {
+   "feature": "DONUT (Document Understanding)",
+   "severity": "high",
+   "heratio_pkg": "ahg-ai-services",
+   "claimed_atom": "None"
+  },
+  {
+   "feature": "HTR Advanced Features",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ai-services",
+   "claimed_atom": "ahgAIPlugin"
+  },
+  {
+   "feature": "Translation Memory Management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ai-services",
+   "claimed_atom": "None"
+  },
+  {
+   "feature": "Cost & Quota Management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ai-services",
+   "claimed_atom": "None"
+  },
+  {
+   "feature": "LLM Config Admin UI",
+   "severity": "medium",
+   "heratio_pkg": "ahg-ai-services",
+   "claimed_atom": "ahgAIPlugin"
+  }
+ ],
+ "research-public": [
+  {
+   "feature": "Knowledge Graph Assertions & Evidence Tracking",
+   "severity": "high",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Conflict Detection & Resolution for Assertions",
+   "severity": "high",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Snapshot Comparison & Versioning",
+   "severity": "high",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Timeline Builder & Event API",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Map Builder & Geospatial Visualization",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Network Graph Visualization & Export",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Reproducibility Packages (RO-Crate, BagIt)",
+   "severity": "high",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Web Annotation Protocol (WAP) Compliance",
+   "severity": "medium",
+   "heratio_pkg": "ahg-annotations",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Hypothesis Creation & Management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Extraction Job Orchestration & Validation",
+   "severity": "high",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Custody Handoff & Material Request Lifecycle",
+   "severity": "high",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Request Lifecycle Management (SLA, Triage, Correspondence)",
+   "severity": "high",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Institutional Sharing & Access Control",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Favorites Folder Sharing & Import/Export",
+   "severity": "medium",
+   "heratio_pkg": "ahg-favorites",
+   "claimed_atom": "ahgFavoritesPlugin"
+  },
+  {
+   "feature": "Publication Request State Machine & Workflow",
+   "severity": "medium",
+   "heratio_pkg": "ahg-request-publish",
+   "claimed_atom": "ahgRequestToPublishPlugin"
+  },
+  {
+   "feature": "Manuscript Submission & Author Workflow",
+   "severity": "medium",
+   "heratio_pkg": "ahg-researcher-manage",
+   "claimed_atom": "ahgResearcherPlugin"
+  },
+  {
+   "feature": "Collaboration Real-time Panel & Comments",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Compliance Dashboard & Ethics Milestones",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Seat Booking & Equipment Management with History",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  },
+  {
+   "feature": "Retrieval Queue & Walk-In Management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-research",
+   "claimed_atom": "ahgResearchPlugin"
+  }
+ ],
+ "api-integration": [
+  {
+   "feature": "OpenAPI 3.1 Specification Generation",
+   "severity": "high",
+   "heratio_pkg": "ahg-api/src/Services/OpenApiGenerator.php",
+   "claimed_atom": "ahgAPIPlugin"
+  },
+  {
+   "feature": "Idempotency-Key Request Deduplication (RFC 7231 + custom)",
+   "severity": "high",
+   "heratio_pkg": "ahg-api/src/Middleware/IdempotencyKeyMiddleware.php",
+   "claimed_atom": "ahgAPIPlugin"
+  },
+  {
+   "feature": "ETag Conditional Request Support",
+   "severity": "high",
+   "heratio_pkg": "ahg-api/src/Middleware/ETagMiddleware.php",
+   "claimed_atom": "ahgAPIPlugin"
+  },
+  {
+   "feature": "Marketplace REST API Endpoints",
+   "severity": "medium",
+   "heratio_pkg": "ahg-api/routes/api.php:234-239",
+   "claimed_atom": "ahgAPIPlugin/modules/apiv2"
+  },
+  {
+   "feature": "Marketplace Service & Payment Integration",
+   "severity": "medium",
+   "heratio_pkg": "ahg-api/src/Controllers/V2/MarketplaceController.php",
+   "claimed_atom": "ahgAPIPlugin"
+  },
+  {
+   "feature": "Europeana EDM RDF/XML Export Command",
+   "severity": "medium",
+   "heratio_pkg": "ahg-federation/src/Console/EuropeanaExportCommand.php + src/Edm/EdmSerializer.php",
+   "claimed_atom": "ahgFederationPlugin"
+  },
+  {
+   "feature": "API Rate Limiting Headers (X-RateLimit-*)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-api/src/Middleware/ApiRateLimit.php:50-51",
+   "claimed_atom": "ahgAPIPlugin"
+  },
+  {
+   "feature": "Digital Object Embedded Metadata (EXIF/IPTC/ffprobe)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-api/src/Services/EmbeddedMetadataService.php",
+   "claimed_atom": "ahgAPIPlugin"
+  },
+  {
+   "feature": "Batch Operation Support (max 100 ops)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-api/src/Controllers/V2/BatchController.php",
+   "claimed_atom": "ahgAPIPlugin/modules/apiv2/actions/batchAction.class.php"
+  }
+ ],
+ "sectors": [
+  {
+   "feature": "BIBFRAME 2.0 bibliographic serialization",
+   "severity": "high",
+   "heratio_pkg": "ahg-biblio-bf",
+   "claimed_atom": "N/A (no BIBFRAME plugin exists)"
+  },
+  {
+   "feature": "FRBR (IFLA) conceptual model support",
+   "severity": "high",
+   "heratio_pkg": "ahg-biblio-frbr",
+   "claimed_atom": "N/A (no FRBR plugin exists)"
+  },
+  {
+   "feature": "Library API suite (order, serial, vendor, budget APIs)",
+   "severity": "high",
+   "heratio_pkg": "ahg-library",
+   "claimed_atom": "ahgLibraryPlugin"
+  },
+  {
+   "feature": "OPAC patron self-service and OPAC search",
+   "severity": "high",
+   "heratio_pkg": "ahg-library",
+   "claimed_atom": "ahgLibraryPlugin"
+  },
+  {
+   "feature": "Museum loan management (loan out/in, courier, facility)",
+   "severity": "high",
+   "heratio_pkg": "ahg-museum (minimal)",
+   "claimed_atom": "ahgMuseumPlugin"
+  },
+  {
+   "feature": "Museum Getty vocabulary linking (AAT, TGN, ULAN)",
+   "severity": "high",
+   "heratio_pkg": "ahg-museum (missing)",
+   "claimed_atom": "ahgMuseumPlugin"
+  },
+  {
+   "feature": "Museum condition reporting and provenance tracking",
+   "severity": "medium",
+   "heratio_pkg": "ahg-museum (missing)",
+   "claimed_atom": "ahgMuseumPlugin"
+  },
+  {
+   "feature": "Museum object comparison and deduplication",
+   "severity": "medium",
+   "heratio_pkg": "ahg-museum (missing)",
+   "claimed_atom": "ahgMuseumPlugin"
+  },
+  {
+   "feature": "Console commands for serial management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-library",
+   "claimed_atom": "ahgLibraryPlugin"
+  },
+  {
+   "feature": "Exhibition staging and workflow management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-exhibition",
+   "claimed_atom": "ahgExhibitionPlugin"
+  }
+ ],
+ "workflow-reporting-misc": [
+  {
+   "feature": "Observability infrastructure (Prometheus metrics, tracing, APCu/Redis metrics storage)",
+   "severity": "high",
+   "heratio_pkg": "ahg-observability",
+   "claimed_atom": "none"
+  },
+  {
+   "feature": "SLA policies with escalation actions and warning thresholds",
+   "severity": "high",
+   "heratio_pkg": "ahg-workflow",
+   "claimed_atom": "ahgWorkflowPlugin"
+  },
+  {
+   "feature": "Mailable notification classes for workflow tasks (Approved, Rejected, Overdue)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-workflow",
+   "claimed_atom": "ahgWorkflowPlugin"
+  },
+  {
+   "feature": "Console command: WorkflowNotifyOverdueCommand for scheduled overdue notifications",
+   "severity": "medium",
+   "heratio_pkg": "ahg-workflow",
+   "claimed_atom": "ahgWorkflowPlugin"
+  },
+  {
+   "feature": "ReportBuilder service layer with template/section/binding management",
+   "severity": "medium",
+   "heratio_pkg": "ahg-reports",
+   "claimed_atom": "ahgReportBuilderPlugin"
+  },
+  {
+   "feature": "Heritage admin layer (contributor marketplace, analytics, embargoes)",
+   "severity": "medium",
+   "heratio_pkg": "ahg-heritage-manage",
+   "claimed_atom": "ahgHeritagePlugin"
+  }
+ ]
+}

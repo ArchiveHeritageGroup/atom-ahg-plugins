@@ -1,0 +1,41 @@
+{
+    "name": "AHG Observability Plugin",
+    "machine_name": "ahgObservabilityPlugin",
+    "version": "1.0.0",
+    "description": "Prometheus-format /metrics exporter for AtoM. Exposes app, HTTP request, DB query and queue-depth metrics through a lightweight, auth-gated (bearer token OR IP allow-list) endpoint. Auto-selecting APCu/Redis/in-memory counter storage with graceful fallback. CLI commands sample queue depth and emit node_exporter textfiles.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "GPL-3.0",
+    "category": "integration",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "tables": [],
+    "modules": [
+        "observability"
+    ],
+    "routes": {
+        "observability_metrics": "/metrics"
+    },
+    "commands": [
+        "observability:record-queue-depth",
+        "observability:emit-textfile"
+    ],
+    "settings_group": "observability",
+    "features": [
+        "Prometheus text exposition (version 0.0.4) /metrics endpoint",
+        "Bearer-token OR IP allow-list authentication (fail-closed by default)",
+        "Auto-selecting metric storage: Redis (phpredis) -> APCu -> in-memory",
+        "HTTP request count + latency histogram per method/route/status",
+        "Queue backlog gauge sampled from ahg_queue_job",
+        "node_exporter textfile emitter (atomic write-then-rename)",
+        "Zero external composer dependency, never 500s on a metrics fault"
+    ],
+    "external_deps": {
+        "ext-apcu": "optional - cross-worker counters on a single host",
+        "ext-redis": "optional - cross-host counters (phpredis)",
+        "prometheus": "optional - scrapes the /metrics endpoint",
+        "node_exporter": "optional - textfile collector for emit-textfile"
+    }
+}

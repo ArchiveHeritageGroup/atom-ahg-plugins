@@ -197,3 +197,25 @@ ahg_ai_governance_models:
 ahg_ai_governance_inferences:
   url: /ai/governance/inferences
   param: { module: ai, action: governanceInferences }
+
+# DONUT document understanding (#117 parity)
+ahg_ai_donut_dashboard:
+  url: /ai/donut
+  param: { module: ai, action: donutDashboard }
+
+ahg_ai_donut_prefill:
+  url: /ai/donut/prefill
+  param: { module: ai, action: donutPrefill }
+
+ahg_ai_donut_finalize:
+  url: /ai/donut/finalize
+  param: { module: ai, action: donutFinalize }
+
+ahg_ai_donut_positions:
+  url: /ai/donut/positions
+  param: { module: ai, action: donutPositions }
+
+ahg_ai_donut_result:
+  url: /ai/donut/results/:id
+  param: { module: ai, action: donutResult }
+  requirements: { id: '\d+' }

@@ -1,0 +1,36 @@
+{
+    "name": "AHG ResourceSync Plugin",
+    "machine_name": "ahgResourceSyncPlugin",
+    "version": "1.0.0",
+    "description": "ResourceSync 1.1 (NISO Z39.99-2017) Source endpoints: Source Description, Capability List, Resource List and Change List as sitemap-formatted XML. Mirrors the OAI-PMH publication filter so aggregators see the same record + tombstone set across both federation surfaces.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "GPL-3.0",
+    "category": "integration",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "tables": [
+        "oai_deleted_record"
+    ],
+    "features": [
+        "ResourceSync 1.1 Source role",
+        "Source Description (.well-known/resourcesync)",
+        "Capability List",
+        "Resource List (full inventory, paginated)",
+        "Change List (recent updates + tombstones, configurable horizon)",
+        "OAI-PMH publication filter parity (status type_id=158 / status_id=160)",
+        "Tombstones sourced from oai_deleted_record (shared with OAI-PMH)",
+        "Sitemap-formatted XML with rs:md / rs:ln ResourceSync extension"
+    ],
+    "endpoints": {
+        "source_description": "/.well-known/resourcesync",
+        "capability_list": "/resourcesync/capabilitylist.xml",
+        "resource_list": "/resourcesync/resourcelist.xml",
+        "change_list": "/resourcesync/changelist.xml"
+    },
+    "commands": [
+        "resourcesync:mark-deleted"
+    ]
+}

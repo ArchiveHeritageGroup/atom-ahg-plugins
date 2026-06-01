@@ -1,0 +1,5 @@
+# ResourceSync Source endpoints are public, read-only XML documents intended
+# for unauthenticated harvesting by aggregators. No login required.
+all:
+  is_secure: false
+  credentials: []

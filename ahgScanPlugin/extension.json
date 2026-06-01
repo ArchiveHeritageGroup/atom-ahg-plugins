@@ -1,0 +1,39 @@
+{
+    "name": "Watched Folder Scanner",
+    "machine_name": "ahgScanPlugin",
+    "version": "1.0.0",
+    "description": "Watched-folder streaming ingest: configurable watched folders, a scan/watch CLI that detects new files and feeds the ingest pipeline, processed/failed disposition dirs, and dedupe by SHA-256 checksum.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgIngestPlugin"
+    ],
+    "tables": [
+        "scan_folder",
+        "scan_event"
+    ],
+    "category": "ingestion",
+    "cli_commands": [
+        "scan:watch",
+        "scan:install"
+    ],
+    "features": [
+        "Configurable watched folders (path, layout, disposition, quiet period)",
+        "Each folder bound 1:1 to an ahgIngestPlugin session for processing config",
+        "scan:watch CLI detects new files and feeds the ingest commit pipeline",
+        "SHA-256 dedupe — files already ingested in the session are skipped",
+        "Quiet-period guard (skip files still being written)",
+        "Processed (archive) and failed (quarantine) disposition directories",
+        "Per-pass scan_event audit log with counts and errors",
+        "Admin UI at /admin/scan to manage folders and review history"
+    ],
+    "changelog": {
+        "1.0.0": "Initial release: scan_folder config, scan:watch/scan:install CLI, WatchedFolderService, ScannerService, admin module"
+    }
+}

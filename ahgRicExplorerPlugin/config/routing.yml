@@ -60,3 +60,21 @@ ric_explorer_get_data:
 ric_explorer_autocomplete:
   url: /ricExplorer/autocomplete
   param: { module: ricExplorer, action: autocomplete }
+
+# SHACL validation (RiC-O parity)
+ric_shacl_index:
+  url: /admin/ric/shacl
+  param: { module: ricShacl, action: index }
+
+ric_shacl_run:
+  url: /admin/ric/shacl/run
+  param: { module: ricShacl, action: run }
+
+ric_shacl_report:
+  url: /admin/ric/shacl/report/:id
+  param: { module: ricShacl, action: report }
+  requirements: { id: '\d+' }
+
+ric_shacl_ajax_validate_entity:
+  url: /ricShacl/ajaxValidateEntity
+  param: { module: ricShacl, action: ajaxValidateEntity }
