@@ -94,7 +94,9 @@
     <form id="lookupForm" method="post" action="<?php echo url_for(['module' => 'acquisition', 'action' => 'batchCapture']); ?>">
       <input type="hidden" name="action_type" value="lookup">
       <input type="hidden" name="order_id" value="<?php echo $selectedOrderId; ?>">
-      <?php echo $sf_data->getRaw('sf_request')->getCSRFFormTag(); ?>
+      <?php /* sfWebRequest has no getCSRFFormTag(); calling it threw a fatal that
+               aborted the layout (unstyled page). The batchCapture action does not
+               validate a CSRF token, so no hidden field is emitted here. */ ?>
 
       <div class="mb-3">
         <label for="isbns" class="form-label"><?php echo __('Enter ISBNs (one per line)'); ?></label>
@@ -137,7 +139,9 @@
     <form id="saveForm" method="post" action="<?php echo url_for(['module' => 'acquisition', 'action' => 'batchCapture']); ?>">
       <input type="hidden" name="action_type" value="save">
       <input type="hidden" name="order_id" value="<?php echo $selectedOrderId; ?>">
-      <?php echo $sf_data->getRaw('sf_request')->getCSRFFormTag(); ?>
+      <?php /* sfWebRequest has no getCSRFFormTag(); calling it threw a fatal that
+               aborted the layout (unstyled page). The batchCapture action does not
+               validate a CSRF token, so no hidden field is emitted here. */ ?>
 
       <div class="table-responsive">
         <table class="table table-hover table-striped mb-0">

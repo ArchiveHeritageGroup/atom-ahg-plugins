@@ -99,7 +99,7 @@
           <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
                style="height: 100px; overflow: hidden;">
             <?php if (!empty($cleanIsbn)): ?>
-              <img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=<?php echo $cleanIsbn; ?>&size=M"
+              <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg?default=false"
                    alt="Cover" class="img-fluid" style="max-height: 100px; width: auto;"
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php else: ?>
@@ -245,7 +245,7 @@
           <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
                style="height: 100px; overflow: hidden;">
             <?php if (!empty($cleanIsbn)): ?>
-              <img src="/plugins/ahgLibraryPlugin/web/cover-proxy.php?isbn=<?php echo $cleanIsbn; ?>&size=M"
+              <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg?default=false"
                    alt="Cover" class="img-fluid" style="max-height: 100px; width: auto;"
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php else: ?>
