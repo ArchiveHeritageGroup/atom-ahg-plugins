@@ -75,18 +75,17 @@ class ExportService
                 $j->on('li.id', '=', 'lic.library_item_id')
                   ->where('lic.is_primary', '=', 1);
             })
-            ->leftJoin('object_term_relation as otl_subject', function ($j) {
-                $j->on('io.id', '=', 'otl_subject.object_id')
-                  ->where('otl_subject.type_id', '=', function ($sq) {
-                      $sq->from('term', 't')
-                         ->join('taxonomy as tx', 't.taxonomy_id', '=', 'tx.id')
-                         ->where('tx.name', 'subjects')
-                         ->select('t.id')
-                         ->limit(1);
-                  });
+            ->leftJoin('object_term_relation as otl_subject', 'io.id', '=', 'otl_subject.object_id')
+            ->leftJoin('term as sub_term', function ($j) {
+                // object_term_relation has no type_id — a relation is a "subject"
+                // when its term belongs to the Subjects taxonomy (id 35).
+                $j->on('otl_subject.term_id', '=', 'sub_term.id')
+                  ->where('sub_term.taxonomy_id', '=', 35);
             })
-            ->leftJoin('term as sub_term', 'otl_subject.term_id', '=', 'sub_term.id')
-            ->leftJoin('term_i18n as sub_ti', 'sub_term.id', '=', 'sub_ti.id')
+            ->leftJoin('term_i18n as sub_ti', function ($j) {
+                $j->on('sub_term.id', '=', 'sub_ti.id')
+                  ->where('sub_ti.culture', '=', $this->culture);
+            })
             ->where('io.source_standard', 'library')
             ->select([
                 'ioi.title',
@@ -110,9 +109,9 @@ class ExportService
                 'lic.name as primary_creator',
                 DB::raw('GROUP_CONCAT(DISTINCT sub_ti.name ORDER BY sub_ti.name SEPARATOR "; ") as subjects'),
                 'ioi.scope_and_content as scope_and_content',
-                'io.access_restrictions as access_restrictions',
-                'io.created_at as created_at',
-                'io.updated_at as updated_at',
+                'ioi.access_conditions as access_restrictions',
+                'li.created_at as created_at',
+                'li.updated_at as updated_at',
                 's.slug',
             ])
             ->groupBy('li.id')
@@ -308,7 +307,9 @@ class ExportService
             return null;
         }
 
-        return "@$type{$citeKey},\n" . implode(",\n", $fieldLines);
+        // NB: "@$type{$citeKey}" would interpolate {$citeKey} and swallow the
+        // literal brace (→ "@miscunknown2020,"); concatenate to keep the "{".
+        return '@' . $type . '{' . $citeKey . ",\n" . implode(",\n", $fieldLines) . "\n}";
     }
 
     protected function bibAdd(array &$fields, string $key, string $value): void

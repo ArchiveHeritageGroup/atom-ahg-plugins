@@ -26,7 +26,12 @@
         <h6 class="mb-0"><?php echo __('Export Settings'); ?></h6>
       </div>
       <div class="card-body">
-        <form method="post" id="export-form">
+        <form method="get" id="export-form">
+          <?php // GET so changing the Format re-renders this page (updating the
+                // about-text + preview) instead of downloading; the Download buttons
+                // set download=1 to stream the file. Was method="post", which made
+                // every radio change POST-download immediately and never update the view. ?>
+          <input type="hidden" name="download" id="download-flag" value="">
 
           <?php /* Format selector */ ?>
           <div class="mb-3">
@@ -38,7 +43,7 @@
                   <input type="radio" name="format" value="<?php echo $fmt; ?>"
                          <?php echo $isSelected ? 'checked' : ''; ?>
                          class="d-none"
-                         onchange="this.form.submit()">
+                         onchange="var d=document.getElementById('download-flag');if(d){d.value='';}this.form.submit();">
                   <i class="fas fa-<?php echo $fmt === 'csv' ? 'table' : ($fmt === 'bibtex' ? 'file-code' : 'book'); ?> me-2"></i>
                   <?php if ($fmt === 'csv'): ?>
                     <?php echo __('CSV (Spreadsheet)'); ?>
@@ -113,7 +118,8 @@
           </div>
 
           <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-success">
+            <button type="submit" class="btn btn-success"
+                    onclick="var d=document.getElementById('download-flag');if(d){d.value='1';}">
               <i class="fas fa-download me-1"></i>
               <?php echo __('Download %format%', ['%format%' => strtoupper($format)]); ?>
               <?php if ($count > 0): ?>
@@ -185,7 +191,8 @@
       <?php endif; ?>
 
       <div class="mt-3">
-        <button type="submit" form="export-form" class="btn btn-success btn-lg">
+        <button type="submit" form="export-form" class="btn btn-success btn-lg"
+                onclick="var d=document.getElementById('download-flag');if(d){d.value='1';}">
           <i class="fas fa-download me-2"></i>
           <?php echo __('Download %format% (%count% items)', ['%format%' => strtoupper($format), '%count%' => $count]); ?>
         </button>
