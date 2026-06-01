@@ -199,32 +199,6 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'museum', 'action' => 'dashboard']); ?>"><i class="fas fa-landmark me-2 text-muted"></i><?php echo __("Museum"); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'exhibition', 'action' => 'dashboard']); ?>"><i class="fas fa-theater-masks me-2 text-muted"></i><?php echo __("Exhibitions"); ?></a></li>
                     <?php endif; ?>
-                    <?php // Library toolset — relocated here from the main-nav Library dropdown.
-                          // Catalogue + OPAC for any library-enabled view; the staff desk and
-                          // administration tools are gated to administrators, mirroring the
-                          // previous admin-only nav dropdown. Raw paths are the plugin's
-                          // registered RouteLoader routes. ?>
-                    <?php if ($hasLibrary): ?>
-                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>"><i class="fas fa-book fa-fw me-2 text-muted"></i><?php echo __('Library'); ?></a></li>
-                    <li class="list-group-item"><a href="/library"><i class="fas fa-book fa-fw me-2 text-muted"></i><?php echo __('Catalogue'); ?></a></li>
-                    <li class="list-group-item"><a href="/opac"><i class="fas fa-search fa-fw me-2 text-muted"></i><?php echo __('Public catalogue (OPAC)'); ?></a></li>
-                    <?php if ($sf_user->isAdministrator()): ?>
-                    <li class="list-group-item"><a href="/circulation"><i class="fas fa-exchange-alt fa-fw me-2 text-muted"></i><?php echo __('Circulation desk'); ?></a></li>
-                    <li class="list-group-item"><a href="/patron"><i class="fas fa-users fa-fw me-2 text-muted"></i><?php echo __('Patrons'); ?></a></li>
-                    <li class="list-group-item"><a href="/acquisition"><i class="fas fa-shopping-cart fa-fw me-2 text-muted"></i><?php echo __('Acquisitions'); ?></a></li>
-                    <li class="list-group-item"><a href="/serial"><i class="fas fa-newspaper fa-fw me-2 text-muted"></i><?php echo __('Serials'); ?></a></li>
-                    <li class="list-group-item"><a href="/ill"><i class="fas fa-people-arrows fa-fw me-2 text-muted"></i><?php echo __('Interlibrary loan'); ?></a></li>
-                    <li class="list-group-item"><a href="/library/kbart/vendors"><i class="fas fa-rss fa-fw me-2 text-muted"></i><?php echo __('KBART feeds'); ?></a></li>
-                    <li class="list-group-item"><a href="/library/z3950"><i class="fas fa-network-wired fa-fw me-2 text-muted"></i><?php echo __('Z39.50 / SRU'); ?></a></li>
-                    <li class="list-group-item"><a href="/library/isbn-providers"><i class="fas fa-barcode fa-fw me-2 text-muted"></i><?php echo __('ISBN providers'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/library/counter"><i class="fas fa-chart-line fa-fw me-2 text-muted"></i><?php echo __('COUNTER usage'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/library/sushi"><i class="fas fa-key fa-fw me-2 text-muted"></i><?php echo __('SUSHI settings'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/library/catalogue"><i class="fas fa-clipboard-list fa-fw me-2 text-muted"></i><?php echo __('Catalogue audit'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/library/frbr"><i class="fas fa-code-branch fa-fw me-2 text-muted"></i><?php echo __('FRBR work-key overrides'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/library/creators"><i class="fas fa-user-edit fa-fw me-2 text-muted"></i><?php echo __('Creators authority'); ?></a></li>
-                    <li class="list-group-item"><a href="/admin/library/subjects"><i class="fas fa-tags fa-fw me-2 text-muted"></i><?php echo __('Subjects authority'); ?></a></li>
-                    <?php endif; ?>
-                    <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -247,6 +221,38 @@ $canManage = $isAdmin || $isEditor;
                 </ul>
             </div>
         </div>
+
+        <?php // Dedicated Library tile — the full library toolset (relocated from the
+              // main-nav Library dropdown). Only shown when the Library plugin is enabled;
+              // each target page enforces its own access control. ?>
+        <?php if ($hasLibrary): ?>
+        <!-- Library Column -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header text-white" style="background-color: #795548 !important;">
+                    <h5 class="mb-0"><i class="fas fa-book me-2"></i><?php echo __('Library'); ?></h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="/library"><i class="fas fa-book fa-fw me-2 text-muted"></i><?php echo __('Catalogue'); ?></a></li>
+                    <li class="list-group-item"><a href="/opac"><i class="fas fa-search fa-fw me-2 text-muted"></i><?php echo __('Public catalogue (OPAC)'); ?></a></li>
+                    <li class="list-group-item"><a href="/circulation"><i class="fas fa-exchange-alt fa-fw me-2 text-muted"></i><?php echo __('Circulation desk'); ?></a></li>
+                    <li class="list-group-item"><a href="/patron"><i class="fas fa-users fa-fw me-2 text-muted"></i><?php echo __('Patrons'); ?></a></li>
+                    <li class="list-group-item"><a href="/acquisition"><i class="fas fa-shopping-cart fa-fw me-2 text-muted"></i><?php echo __('Acquisitions'); ?></a></li>
+                    <li class="list-group-item"><a href="/serial"><i class="fas fa-newspaper fa-fw me-2 text-muted"></i><?php echo __('Serials'); ?></a></li>
+                    <li class="list-group-item"><a href="/ill"><i class="fas fa-people-arrows fa-fw me-2 text-muted"></i><?php echo __('Interlibrary loan'); ?></a></li>
+                    <li class="list-group-item"><a href="/library/kbart/vendors"><i class="fas fa-rss fa-fw me-2 text-muted"></i><?php echo __('KBART feeds'); ?></a></li>
+                    <li class="list-group-item"><a href="/library/z3950"><i class="fas fa-network-wired fa-fw me-2 text-muted"></i><?php echo __('Z39.50 / SRU'); ?></a></li>
+                    <li class="list-group-item"><a href="/library/isbn-providers"><i class="fas fa-barcode fa-fw me-2 text-muted"></i><?php echo __('ISBN providers'); ?></a></li>
+                    <li class="list-group-item"><a href="/admin/library/counter"><i class="fas fa-chart-line fa-fw me-2 text-muted"></i><?php echo __('COUNTER usage'); ?></a></li>
+                    <li class="list-group-item"><a href="/admin/library/sushi"><i class="fas fa-key fa-fw me-2 text-muted"></i><?php echo __('SUSHI settings'); ?></a></li>
+                    <li class="list-group-item"><a href="/admin/library/catalogue"><i class="fas fa-clipboard-list fa-fw me-2 text-muted"></i><?php echo __('Catalogue audit'); ?></a></li>
+                    <li class="list-group-item"><a href="/admin/library/frbr"><i class="fas fa-code-branch fa-fw me-2 text-muted"></i><?php echo __('FRBR work-key overrides'); ?></a></li>
+                    <li class="list-group-item"><a href="/admin/library/creators"><i class="fas fa-user-edit fa-fw me-2 text-muted"></i><?php echo __('Creators authority'); ?></a></li>
+                    <li class="list-group-item"><a href="/admin/library/subjects"><i class="fas fa-tags fa-fw me-2 text-muted"></i><?php echo __('Subjects authority'); ?></a></li>
+                </ul>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
