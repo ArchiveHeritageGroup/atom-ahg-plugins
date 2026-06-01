@@ -396,8 +396,8 @@
         <div class="col">
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-              <?php if (!empty($item->cover_image_url)): ?>
-                <img src="<?php echo esc_entities($item->cover_image_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
+              <?php if (!empty($item->cover_url)): ?>
+                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
               <?php else: ?>
                 <div class="bg-light d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
                   <i class="fas fa-book fa-3x text-muted"></i>
@@ -425,8 +425,8 @@
         <div class="col">
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
-              <?php if (!empty($item->cover_image_url)): ?>
-                <img src="<?php echo esc_entities($item->cover_image_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
+              <?php if (!empty($item->cover_url)): ?>
+                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
               <?php else: ?>
                 <div class="bg-light d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
                   <i class="fas fa-book fa-3x text-muted"></i>
