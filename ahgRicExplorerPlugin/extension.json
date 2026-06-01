@@ -24,7 +24,8 @@
         "ric_sync_log",
         "ric_sync_queue",
         "ric_sync_status",
-        "ric_sync_summary"
+        "ric_sync_summary",
+        "ric_shacl_report"
     ],
     "shared_tables": [],
     "helpers": [],

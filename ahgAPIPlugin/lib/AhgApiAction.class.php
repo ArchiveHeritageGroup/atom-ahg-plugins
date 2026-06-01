@@ -8,6 +8,8 @@ class AhgApiAction extends sfAction
     protected $apiKeyService;
     protected $bootstrapped = false;
     protected $user = null;
+    protected $idemSvc = null;   // #idempotency: IdempotencyService when a key is in play
+    protected $idemKey = null;
 
     protected function loadBootstrap()
     {
@@ -117,9 +119,21 @@ class AhgApiAction extends sfAction
                 return $this->error(400, 'Bad Request', 'Invalid JSON body');
             }
         }
+        // #idempotency: replay/guard mutating requests carrying an Idempotency-Key.
+        $idem = $this->idempotencyBegin($method, $request);
+        if (null !== $idem && in_array($idem['action'], ['replay', 'conflict', 'error'], true)) {
+            if ('replay' === $idem['action']) {
+                $this->response->setStatusCode((int) $idem['status']);
+                return $this->renderText((string) $idem['body']);
+            }
+            return $this->error((int) $idem['status'], 'conflict' === $idem['action'] ? 'Conflict' : 'Bad Request', (string) ($idem['message'] ?? ''));
+        }
+
         try {
             $result = $this->$method($request, $data);
-            $this->logRequest(200);
+            $status = $this->response->getStatusCode() ?: 200;
+            $this->logRequest($status);
+            $this->idempotencyStore($request, $status);
             return $result;
         } catch (Exception $e) {
             $this->logRequest(500);
@@ -129,8 +143,16 @@ class AhgApiAction extends sfAction
 
     protected function success($data, int $statusCode = 200)
     {
+        $body = json_encode(['success' => true, 'data' => $data], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         $this->response->setStatusCode($statusCode);
-        return $this->renderText(json_encode(['success' => true, 'data' => $data], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+        // #etag: conditional GET — sets ETag and returns 304 on If-None-Match match.
+        // Defensive: an ETag failure must never break the response.
+        if ($this->applyEtag($statusCode, $body)) {
+            return sfView::NONE;
+        }
+
+        return $this->renderText($body);
     }
 
     protected function error(int $statusCode, string $error, string $message)
@@ -197,5 +219,75 @@ class AhgApiAction extends sfAction
     protected function isAdmin(): bool
     {
         return $this->context->user->isAdministrator();
+    }
+
+    /**
+     * #etag: set the ETag header and detect an If-None-Match match (→ 304).
+     * Only fires for cacheable methods/status (the middleware decides). Defensive:
+     * any failure returns false so the normal body is still emitted.
+     */
+    protected function applyEtag(int $statusCode, string $body): bool
+    {
+        try {
+            require_once dirname(__FILE__) . '/Services/ApiETagMiddleware.php';
+            $etag = new \AhgAPIPlugin\Service\ApiETagMiddleware();
+
+            return $etag->apply(
+                $this->response,
+                $this->request->getMethod(),
+                $statusCode,
+                $body,
+                $etag->getIfNoneMatchFromServer(),
+                false
+            );
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * #idempotency: for mutating requests carrying an Idempotency-Key, ask the
+     * service whether to replay/conflict. Returns the begin() array, or null when
+     * not applicable (no key / non-mutating / failure). Sets $idemSvc/$idemKey so
+     * a subsequent success can be stored.
+     */
+    protected function idempotencyBegin(string $method, $request): ?array
+    {
+        if (!in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            return null;
+        }
+        $key = $request->getHttpHeader('Idempotency-Key') ?: $request->getHttpHeader('X-Idempotency-Key');
+        if (empty($key)) {
+            return null;
+        }
+        try {
+            require_once dirname(__FILE__) . '/Services/IdempotencyService.php';
+            $this->idemSvc = new \AhgAPIPlugin\Service\IdempotencyService();
+            $this->idemKey = (string) $key;
+            $userId = (int) ($this->apiKeyInfo['user_id'] ?? 0);
+
+            return $this->idemSvc->begin($method, $this->idemKey, $userId, $request->getPathInfo(), (string) $request->getContent());
+        } catch (\Throwable $e) {
+            $this->idemSvc = null;
+            $this->idemKey = null;
+
+            return null;
+        }
+    }
+
+    /**
+     * #idempotency: persist the produced response against the key (best-effort).
+     */
+    protected function idempotencyStore($request, int $status): void
+    {
+        if (!$this->idemSvc || !$this->idemKey) {
+            return;
+        }
+        try {
+            $userId = (int) ($this->apiKeyInfo['user_id'] ?? 0);
+            $this->idemSvc->store($userId, $request->getPathInfo(), (string) $request->getContent(), $status, (string) $this->response->getContent(), []);
+        } catch (\Throwable $e) {
+            // best-effort; never affect the response
+        }
     }
 }

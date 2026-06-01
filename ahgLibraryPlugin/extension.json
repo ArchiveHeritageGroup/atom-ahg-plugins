@@ -22,6 +22,8 @@
         "atom_isbn_cache",
         "atom_isbn_lookup_audit",
         "atom_isbn_provider",
-        "library_settings"
+        "library_settings",
+        "library_z3950_server_config",
+        "library_z3950_server_request"
     ]
 }

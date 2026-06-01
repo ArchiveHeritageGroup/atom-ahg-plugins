@@ -28,5 +28,8 @@
     "settings": {
         "ocfl_storage_layout": "flat-id",
         "ocfl_digest_algorithm": "sha512"
-    }
+    },
+    "tables": [
+        "ahg_ocfl_object_map"
+    ]
 }

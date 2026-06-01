@@ -750,13 +750,29 @@ class InformationObjectEditAction extends DefaultEditAction
         // Pass if we're using mask or not to template, fill in identifier with generated
         // identifier if so.
         if ($this->mask) {
-            // Try sector-aware NumberingService first (reads sector_archive__* settings)
+            // Sector-aware NumberingService: resolve the record's actual sector
+            // (was hardcoded to 'archive', so per-sector schemes never applied) and
+            // honour that sector's enable toggle (was ignored — disabling numbering
+            // for a sector had no effect).
             try {
                 require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
                 require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/NumberingService.php';
-                $service = \AtomFramework\Services\NumberingService::getInstance();
+                // NB: the class only exists under the AtomExtensions namespace;
+                // \AtomFramework\Services\NumberingService throws (class-not-found).
+                $service = \AtomExtensions\Services\NumberingService::getInstance();
                 $repoId = $this->resource->repositoryId ?: null;
-                $identifier = $service->getNextReference('archive', [], $repoId);
+
+                // Derive the sector from the chosen display standard; only fall back
+                // to 'archive' when the standard is not yet known (new blank record).
+                $sector = $service->getSectorFromDisplayStandard($this->resource->displayStandardId ?? null) ?: 'archive';
+
+                // Respect the per-sector auto-generate toggle. If numbering is disabled
+                // for this sector, leave the identifier blank for manual entry.
+                if (!$service->isAutoGenerateEnabled($sector, $repoId)) {
+                    return;
+                }
+
+                $identifier = $service->getNextReference($sector, [], $repoId);
                 if (!empty($identifier)) {
                     $this->resource->identifier = $identifier;
                     return;

@@ -17,7 +17,8 @@
         "ahg_api_rate_limit",
         "ahg_webhook",
         "ahg_webhook_delivery",
-        "display_standard_sector"
+        "display_standard_sector",
+        "ahg_api_idempotency_key"
     ],
     "features": [
         "REST API v2 endpoints",

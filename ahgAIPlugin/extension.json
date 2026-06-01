@@ -29,7 +29,8 @@
         "ahg_translation_log",
         "ahg_llm_config",
         "ahg_prompt_template",
-        "ahg_description_suggestion"
+        "ahg_description_suggestion",
+        "ahg_donut_extraction"
     ],
     "features": {
         "ner": "Named Entity Recognition - extract persons, organizations, places, dates",
@@ -40,7 +41,9 @@
     },
     "python": {
         "module": "atom_ahg.resources.translation",
-        "requirements": ["argostranslate>=1.9.0"]
+        "requirements": [
+            "argostranslate>=1.9.0"
+        ]
     },
     "llm_providers": {
         "ollama": "Local Ollama instance (default)",
