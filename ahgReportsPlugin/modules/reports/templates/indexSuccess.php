@@ -205,7 +205,7 @@ $canManage = $isAdmin || $isEditor;
                           // previous admin-only nav dropdown. Raw paths are the plugin's
                           // registered RouteLoader routes. ?>
                     <?php if ($hasLibrary): ?>
-                    <li class="list-group-item bg-light fw-semibold text-uppercase small text-muted"><i class="fas fa-book me-2"></i><?php echo __('Library'); ?></li>
+                    <li class="list-group-item"><a href="<?php echo url_for(['module' => 'library', 'action' => 'browse']); ?>"><i class="fas fa-book fa-fw me-2 text-muted"></i><?php echo __('Library'); ?></a></li>
                     <li class="list-group-item"><a href="/library"><i class="fas fa-book fa-fw me-2 text-muted"></i><?php echo __('Catalogue'); ?></a></li>
                     <li class="list-group-item"><a href="/opac"><i class="fas fa-search fa-fw me-2 text-muted"></i><?php echo __('Public catalogue (OPAC)'); ?></a></li>
                     <?php if ($sf_user->isAdministrator()): ?>

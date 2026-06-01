@@ -141,3 +141,26 @@
     </div>
   </div>
 <?php } ?>
+
+<?php // Shared across every sector edit form (ISAD/RAD/DC/MODS/DACS/CCO) that
+      // includes this partial. Browsers heuristically treat the blank, mandatory
+      // id="identifier" field as a username/login and autofill it with the saved
+      // account email. Disable autofill and scrub any email-shaped value the
+      // browser injects (immediately + shortly after load, to catch late fill). ?>
+<script <?php $n = sfConfig::get('csp_nonce', '');
+echo $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>>
+(function () {
+  var input = document.getElementById('identifier')
+    || document.querySelector('input[name="identifier"]');
+  if (!input) { return; }
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('autocorrect', 'off');
+  input.setAttribute('autocapitalize', 'off');
+  input.setAttribute('spellcheck', 'false');
+  var isEmail = function (v) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((v || '').trim()); };
+  var scrub = function () { if (isEmail(input.value)) { input.value = ''; } };
+  scrub();
+  setTimeout(scrub, 250);
+  setTimeout(scrub, 800);
+})();
+</script>
