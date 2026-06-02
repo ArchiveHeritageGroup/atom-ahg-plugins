@@ -11,7 +11,11 @@
   <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
 <?php endif; ?>
 
-<form method="post" action="<?php echo url_for(['module' => 'patron', 'action' => 'edit', 'id' => ($rawPatron->id ?? null)]); ?>">
+<?php // For a new patron, omit the id entirely (passing id=null rendered a
+      // trailing "//"); for an existing patron include it so the POST updates. ?>
+<form method="post" action="<?php echo $rawPatron
+    ? url_for(['module' => 'patron', 'action' => 'edit', 'id' => $rawPatron->id])
+    : url_for(['module' => 'patron', 'action' => 'edit']); ?>">
 
   <div class="card mb-4">
     <div class="card-header bg-primary text-white">
