@@ -66,6 +66,7 @@ class PatronService
             'borrowing_status'   => 'active',
             'max_checkouts'      => $data['max_checkouts'] ?? (int) $this->getSetting('patron_max_checkouts', '5'),
             'max_holds'          => $data['max_holds'] ?? (int) $this->getSetting('patron_max_holds', '3'),
+            'membership_start'   => $data['membership_start'] ?? date('Y-m-d'),
             'membership_expiry'  => $data['membership_expiry'] ?? $this->calculateExpiryDate(),
             'notes'              => $data['notes'] ?? null,
             'created_at'         => $now,
