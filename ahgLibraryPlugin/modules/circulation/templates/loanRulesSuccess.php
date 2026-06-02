@@ -65,7 +65,7 @@
                     <td><?php echo (int) ($rule->max_checkouts ?? 0); ?></td>
                     <td><?php echo number_format((float) ($rule->fine_per_day ?? 0), 2); ?></td>
                     <td>
-                      <?php if (!empty($rule->is_renewable)): ?>
+                      <?php if ((int) ($rule->max_renewals ?? 0) > 0): ?>
                         <i class="fas fa-check text-success"></i>
                       <?php else: ?>
                         <i class="fas fa-times text-danger"></i>
@@ -80,7 +80,7 @@
                               data-max-renewals="<?php echo (int) ($rule->max_renewals ?? 2); ?>"
                               data-max-checkouts="<?php echo (int) ($rule->max_checkouts ?? 5); ?>"
                               data-fine-per-day="<?php echo (float) ($rule->fine_per_day ?? 0); ?>"
-                              data-renewable="<?php echo !empty($rule->is_renewable) ? '1' : '0'; ?>"
+                              data-renewable="<?php echo (int) ($rule->max_renewals ?? 0) > 0 ? '1' : '0'; ?>"
                               title="<?php echo __('Edit'); ?>">
                         <i class="fas fa-edit"></i>
                       </button>

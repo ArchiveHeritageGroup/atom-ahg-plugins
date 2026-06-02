@@ -42,12 +42,14 @@ class circulationRenewAction extends AhgController
             }
 
             $service = CirculationService::getInstance();
-            $result = $service->renew($itemBarcode);
+            // Station mode passes a BARCODE: renew(int $checkoutId) expects an ID,
+            // so resolve via renewByBarcode(). Failures come back under 'error'.
+            $result = $service->renewByBarcode($itemBarcode);
 
             if ($result['success']) {
                 $this->getUser()->setFlash('notice', $result['message'] ?? __('Item renewed successfully.'));
             } else {
-                $this->getUser()->setFlash('error', $result['message'] ?? __('Renewal failed.'));
+                $this->getUser()->setFlash('error', $result['error'] ?? $result['message'] ?? __('Renewal failed.'));
             }
         } catch (\Exception $e) {
             $this->getUser()->setFlash('error', __('Renewal error: %1%', ['%1%' => $e->getMessage()]));

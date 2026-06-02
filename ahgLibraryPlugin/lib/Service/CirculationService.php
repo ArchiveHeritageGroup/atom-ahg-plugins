@@ -351,6 +351,25 @@ class CirculationService
         ];
     }
 
+    /**
+     * Renew by copy barcode (station mode).
+     */
+    public function renewByBarcode(string $copyBarcode): array
+    {
+        $checkout = DB::table('library_checkout as c')
+            ->join('library_copy as cp', 'c.copy_id', '=', 'cp.id')
+            ->where('cp.barcode', $copyBarcode)
+            ->where('c.status', 'checked_out')
+            ->select('c.id')
+            ->first();
+
+        if (!$checkout) {
+            return ['success' => false, 'error' => 'No active checkout found for barcode: ' . $copyBarcode];
+        }
+
+        return $this->renew((int) $checkout->id);
+    }
+
     // ========================================================================
     // OVERDUE & FINES
     // ========================================================================

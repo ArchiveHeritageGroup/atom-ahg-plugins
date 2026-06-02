@@ -74,7 +74,11 @@ class circulationLoanRulesAction extends AhgController
         $maxRenewals = (int) $request->getParameter('max_renewals', 2);
         $maxCheckouts = (int) $request->getParameter('max_checkouts', 5);
         $finePerDay = (float) $request->getParameter('fine_per_day', 0);
-        $isRenewable = $request->getParameter('is_renewable') ? 1 : 0;
+        // library_loan_rule has no is_renewable column — renewability is encoded
+        // as max_renewals > 0, so an unchecked "renewable" box means 0 renewals.
+        if (!$request->getParameter('is_renewable')) {
+            $maxRenewals = 0;
+        }
 
         if (empty($materialType)) {
             $this->getUser()->setFlash('error', __('Material type is required.'));
@@ -82,15 +86,15 @@ class circulationLoanRulesAction extends AhgController
         }
 
         try {
+            // Only real library_loan_rule columns — max_checkouts (patron-level),
+            // is_renewable and updated_at do NOT exist on this table.
             $data = [
-                'material_type' => $materialType,
-                'patron_type' => $patronType ?: null,
+                'material_type'    => $materialType,
+                'patron_type'      => $patronType ?: 'default',
                 'loan_period_days' => $loanPeriodDays,
-                'max_renewals' => $maxRenewals,
-                'max_checkouts' => $maxCheckouts,
-                'fine_per_day' => $finePerDay,
-                'is_renewable' => $isRenewable,
-                'updated_at' => date('Y-m-d H:i:s'),
+                'max_renewals'     => $maxRenewals,
+                'fine_per_day'     => $finePerDay,
+                'is_loanable'      => 1,
             ];
 
             if (!empty($ruleId)) {
