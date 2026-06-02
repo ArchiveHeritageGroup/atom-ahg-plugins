@@ -16,6 +16,21 @@ class customFieldAdminActions extends AhgController
     }
 
     /**
+     * Gate to authenticated administrators. Was called by every action here but
+     * never defined -> "Call to undefined method checkAdmin()" 500 on all the
+     * /admin/customFields pages.
+     */
+    protected function checkAdmin(): void
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        if (!$this->getUser()->hasCredential('administrator')) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    /**
      * JSON response helper.
      */
     protected function jsonResponse(array $data)

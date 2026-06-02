@@ -1179,13 +1179,16 @@ class spectrumActions extends AhgController
     {
         $this->loans = [];
         try {
+            // spectrum_loan_out has loan_status (NOT status); show current loans
+            // out, most recent first. (The loanDashboardSuccess template was also
+            // missing — both caused the /spectrum/loans 500.)
             $this->loans = DB::table('spectrum_loan_out')
-                ->where('status', 'active')
                 ->orderBy('created_at', 'desc')
+                ->limit(100)
                 ->get()
                 ->toArray();
         } catch (\Exception $e) {
-            // Table may not exist
+            // Table may not exist on older installs
         }
     }
 

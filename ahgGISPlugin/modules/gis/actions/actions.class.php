@@ -16,6 +16,11 @@ class gisActions extends sfActions
     public function preExecute()
     {
         parent::preExecute();
+        // Symfony 1.x does not autoload namespaced plugin classes — require it
+        // explicitly (was a "class not found" 500 on every /gis/* endpoint).
+        if (!class_exists('AhgGIS\\Services\\SpatialSearchService', false)) {
+            require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgGISPlugin/lib/Services/SpatialSearchService.php';
+        }
         $this->spatialService = new \AhgGIS\Services\SpatialSearchService();
     }
 

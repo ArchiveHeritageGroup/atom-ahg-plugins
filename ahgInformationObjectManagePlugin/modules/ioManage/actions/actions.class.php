@@ -334,15 +334,21 @@ class ioManageActions extends AhgController
         $parentId = (int) $request->getParameter('parentId', 0);
         $sector = $request->getParameter('sector', 'archive');
 
-        // Try sector-aware NumberingService first
+        // Try sector-aware NumberingService first. Guard the require so we don't
+        // re-include an already-autoloaded class (the unconditional require_once
+        // collided -> "Cannot declare class ... already in use"); the class lives
+        // under AtomExtensions\Services (NOT AtomFramework\); catch Throwable so any
+        // failure degrades to the legacy logic instead of a 500.
         try {
-            require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/NumberingService.php';
-            $service = \AtomFramework\Services\NumberingService::getInstance();
+            if (!class_exists('AtomExtensions\\Services\\NumberingService', false)) {
+                require_once \sfConfig::get('sf_root_dir') . '/atom-framework/src/Services/NumberingService.php';
+            }
+            $service = \AtomExtensions\Services\NumberingService::getInstance();
             $identifier = $service->getNextReference($sector, [], $repositoryId ?: null);
             if (!empty($identifier)) {
                 return $this->renderText(json_encode(['identifier' => $identifier]));
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Fall through to legacy logic
         }
 

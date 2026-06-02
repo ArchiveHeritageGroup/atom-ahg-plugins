@@ -281,20 +281,21 @@ class SpatialSearchService
 
     private function bboxIptc(float $latMin, float $latMax, float $lngMin, float $lngMax, int $limit): array
     {
+        // dam_iptc_metadata.object_id is the information_object id directly —
+        // there is no digital_object_id column, so join straight to the IO.
         $rows = DB::table('dam_iptc_metadata as dim')
-            ->leftJoin('digital_object as do_tbl', 'dim.digital_object_id', '=', 'do_tbl.id')
             ->leftJoin('information_object_i18n as ioi', function ($j) {
-                $j->on('do_tbl.object_id', '=', 'ioi.id')
+                $j->on('dim.object_id', '=', 'ioi.id')
                   ->where('ioi.culture', '=', 'en');
             })
-            ->leftJoin('slug as s', 's.object_id', '=', 'do_tbl.object_id')
+            ->leftJoin('slug as s', 's.object_id', '=', 'dim.object_id')
             ->whereBetween('dim.gps_latitude', [$latMin, $latMax])
             ->whereBetween('dim.gps_longitude', [$lngMin, $lngMax])
             ->whereNotNull('dim.gps_latitude')
             ->whereNotNull('dim.gps_longitude')
             ->select(
                 'dim.id',
-                'do_tbl.object_id',
+                'dim.object_id',
                 'dim.gps_latitude as latitude',
                 'dim.gps_longitude as longitude',
                 'ioi.title',
