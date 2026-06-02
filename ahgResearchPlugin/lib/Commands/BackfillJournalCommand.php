@@ -265,7 +265,10 @@ class BackfillJournalCommand extends BaseCommand
         }
 
         // Background / objectives overview (one per researcher, earliest date).
-        if (!$skipBackground && !empty($collections)) {
+        // Only when the researcher actually has collections to summarise.
+        // NB: $collections is an Illuminate Collection — empty() is always false
+        // on an object, so test isNotEmpty() not !empty().
+        if (!$skipBackground && $collections->isNotEmpty()) {
             $names = array_map(fn ($c) => $this->clean($c->name), $collections->all());
             $list = '<strong>' . implode('</strong>, <strong>', $names) . '</strong>';
             $earliest = $this->toDate($collections->first()->created_at);
