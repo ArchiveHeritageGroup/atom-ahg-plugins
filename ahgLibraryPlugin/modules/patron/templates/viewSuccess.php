@@ -17,7 +17,7 @@
       <div>
         <h3 class="mb-1"><?php echo esc_entities($rawPatron->first_name . ' ' . $rawPatron->last_name); ?></h3>
         <div class="d-flex flex-wrap gap-2 mb-2">
-          <span class="text-muted"><i class="fas fa-barcode me-1"></i><code><?php echo esc_entities($rawPatron->patron_barcode); ?></code></span>
+          <span class="text-muted"><i class="fas fa-barcode me-1"></i><code><?php echo esc_entities($rawPatron->card_number ?? ''); ?></code></span>
           <span class="badge bg-secondary"><?php echo esc_entities(ucfirst($rawPatron->patron_type)); ?></span>
           <?php if ($rawPatron->borrowing_status === 'active'): ?>
             <span class="badge bg-success"><?php echo __('Active'); ?></span>
@@ -33,8 +33,8 @@
         <?php if (!empty($rawPatron->phone)): ?>
           <div class="text-muted"><i class="fas fa-phone me-1"></i><?php echo esc_entities($rawPatron->phone); ?></div>
         <?php endif; ?>
-        <?php if (!empty($rawPatron->expiry_date)): ?>
-          <div class="text-muted mt-1"><i class="fas fa-calendar me-1"></i><?php echo __('Expires: %1%', ['%1%' => esc_entities($rawPatron->expiry_date)]); ?></div>
+        <?php if (!empty($rawPatron->membership_expiry)): ?>
+          <div class="text-muted mt-1"><i class="fas fa-calendar me-1"></i><?php echo __('Expires: %1%', ['%1%' => esc_entities($rawPatron->membership_expiry)]); ?></div>
         <?php endif; ?>
         <div class="text-muted mt-1">
           <small><?php echo __('Max checkouts: %1% | Max holds: %2%', ['%1%' => (int) $rawPatron->max_checkouts, '%2%' => (int) $rawPatron->max_holds]); ?></small>

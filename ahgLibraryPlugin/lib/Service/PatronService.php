@@ -191,14 +191,14 @@ class PatronService
             return ['allowed' => false, 'reason' => 'Patron account is ' . $patron->borrowing_status];
         }
 
-        if ($patron->expiry_date && $patron->expiry_date < date('Y-m-d')) {
-            return ['allowed' => false, 'reason' => 'Patron membership expired on ' . $patron->expiry_date];
+        if ($patron->membership_expiry && $patron->membership_expiry < date('Y-m-d')) {
+            return ['allowed' => false, 'reason' => 'Patron membership expired on ' . $patron->membership_expiry];
         }
 
         // Check current checkout count
         $currentCheckouts = DB::table('library_checkout')
             ->where('patron_id', $patronId)
-            ->where('checkout_status', 'checked_out')
+            ->where('status', 'checked_out')
             ->count();
 
         if ($currentCheckouts >= $patron->max_checkouts) {
@@ -208,7 +208,7 @@ class PatronService
         // Check outstanding fines
         $outstandingFines = DB::table('library_fine')
             ->where('patron_id', $patronId)
-            ->where('fine_status', 'outstanding')
+            ->where('status', 'outstanding')
             ->sum('amount');
 
         $fineThreshold = (float) $this->getSetting('fine_block_threshold', '10.00');
@@ -275,7 +275,7 @@ class PatronService
                 $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
             })
             ->where('c.patron_id', $patronId)
-            ->where('c.checkout_status', 'checked_out')
+            ->where('c.status', 'checked_out')
             ->select([
                 'c.*',
                 'cp.barcode as copy_barcode',
@@ -301,7 +301,7 @@ class PatronService
                 $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
             })
             ->where('h.patron_id', $patronId)
-            ->whereIn('h.hold_status', ['pending', 'ready'])
+            ->whereIn('h.status', ['pending', 'ready'])
             ->select([
                 'h.*',
                 'li.call_number',
@@ -320,7 +320,7 @@ class PatronService
     {
         return DB::table('library_fine')
             ->where('patron_id', $patronId)
-            ->where('fine_status', 'outstanding')
+            ->where('status', 'outstanding')
             ->orderBy('created_at', 'desc')
             ->get()
             ->all();
@@ -395,7 +395,7 @@ class PatronService
             'active_patrons'   => DB::table('library_patron')->where('borrowing_status', 'active')->count(),
             'suspended'        => DB::table('library_patron')->where('borrowing_status', 'suspended')->count(),
             'expired'          => DB::table('library_patron')
-                ->where('expiry_date', '<', date('Y-m-d'))
+                ->where('membership_expiry', '<', date('Y-m-d'))
                 ->where('borrowing_status', 'active')
                 ->count(),
         ];
