@@ -54,6 +54,18 @@ Two-part seed of the `archive` DB (no schema change):
 
 Journal now holds **12 entries** for researcher 25 (4 auto + 5 manual + 3 backfill).
 
+## Fleet-wide backfill + bugfix (same day)
+Ran `--all --dry-run`, which surfaced a bug: `--all` includes researchers with a booking/
+bibliography but **no collections**, and the background guard used `!empty($collections)` —
+always false on an Illuminate Collection *object*, so `->first()` returned null →
+`Attempt to read property "created_at" on null` and a degenerate today-dated background entry.
+**Fix:** guard with `$collections->isNotEmpty()` (one line). After the fix, ran `--all` live:
+**27 backfill rows across 8 researchers** (24 this run + Johan's 3 earlier); Louise (#28, booking
+only) correctly gets none. The bugfix is a follow-up patch release after v3.49.21.
+
+**Lesson:** `empty()`/`!empty()` on an Illuminate `Collection` is always false/true respectively
+(it's an object) — use `->isEmpty()` / `->isNotEmpty()`.
+
 ## Notes
 - Command file committed root-owned (chown johanpiet:www-data is the repo convention before
   `./bin/release`; it committed fine regardless).
