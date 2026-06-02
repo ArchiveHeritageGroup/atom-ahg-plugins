@@ -49,7 +49,6 @@
                   <th><?php echo __('Patron type'); ?></th>
                   <th><?php echo __('Loan period'); ?></th>
                   <th><?php echo __('Max renewals'); ?></th>
-                  <th><?php echo __('Max checkouts'); ?></th>
                   <th><?php echo __('Fine/day'); ?></th>
                   <th><?php echo __('Renewable'); ?></th>
                   <th><?php echo __('Actions'); ?></th>
@@ -62,7 +61,6 @@
                     <td><?php echo esc_entities(ucfirst($rule->patron_type ?? __('All'))); ?></td>
                     <td><?php echo (int) ($rule->loan_period_days ?? 0); ?> <?php echo __('days'); ?></td>
                     <td><?php echo (int) ($rule->max_renewals ?? 0); ?></td>
-                    <td><?php echo (int) ($rule->max_checkouts ?? 0); ?></td>
                     <td><?php echo number_format((float) ($rule->fine_per_day ?? 0), 2); ?></td>
                     <td>
                       <?php if ((int) ($rule->max_renewals ?? 0) > 0): ?>
@@ -78,7 +76,6 @@
                               data-patron-type="<?php echo esc_entities($rule->patron_type ?? ''); ?>"
                               data-loan-period="<?php echo (int) ($rule->loan_period_days ?? 14); ?>"
                               data-max-renewals="<?php echo (int) ($rule->max_renewals ?? 2); ?>"
-                              data-max-checkouts="<?php echo (int) ($rule->max_checkouts ?? 5); ?>"
                               data-fine-per-day="<?php echo (float) ($rule->fine_per_day ?? 0); ?>"
                               data-renewable="<?php echo (int) ($rule->max_renewals ?? 0) > 0 ? '1' : '0'; ?>"
                               title="<?php echo __('Edit'); ?>">
@@ -137,10 +134,9 @@
             <input type="number" class="form-control" name="max_renewals" id="max_renewals" value="2" min="0" max="99">
           </div>
 
-          <div class="mb-3">
-            <label for="max_checkouts" class="form-label"><?php echo __('Max checkouts per patron'); ?></label>
-            <input type="number" class="form-control" name="max_checkouts" id="max_checkouts" value="5" min="1" max="999">
-          </div>
+          <?php /* "Max checkouts per patron" lives on the patron record, not the
+                   loan rule (library_loan_rule has no max_checkouts column), so it
+                   is set on the patron edit form — not here. */ ?>
 
           <div class="mb-3">
             <label for="fine_per_day" class="form-label"><?php echo __('Fine per day overdue'); ?></label>
@@ -179,7 +175,6 @@
         document.getElementById('patron_type').value = this.dataset.patronType || '';
         document.getElementById('loan_period_days').value = this.dataset.loanPeriod || 14;
         document.getElementById('max_renewals').value = this.dataset.maxRenewals || 2;
-        document.getElementById('max_checkouts').value = this.dataset.maxCheckouts || 5;
         document.getElementById('fine_per_day').value = this.dataset.finePerDay || 0;
         document.getElementById('is_renewable').checked = this.dataset.renewable === '1';
         document.getElementById('loan-rule-form').scrollIntoView({ behavior: 'smooth' });
