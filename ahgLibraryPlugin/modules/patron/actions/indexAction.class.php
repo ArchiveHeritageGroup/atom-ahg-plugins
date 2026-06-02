@@ -38,7 +38,7 @@ class patronIndexAction extends AhgController
         foreach ($this->results as $patron) {
             $this->checkoutCounts[$patron->id] = $db->table('library_checkout')
                 ->where('patron_id', $patron->id)
-                ->where('checkout_status', 'checked_out')
+                ->where('status', 'checked_out')
                 ->count();
         }
 

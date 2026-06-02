@@ -128,7 +128,7 @@
                     <?php endif; ?>
                   </td>
                   <td class="text-center"><?php echo (int) ($checkout->renewal_count ?? 0); ?></td>
-                  <td><?php echo esc_entities(ucfirst(str_replace('_', ' ', $checkout->checkout_status ?? ''))); ?></td>
+                  <td><?php echo esc_entities(ucfirst(str_replace('_', ' ', $checkout->status ?? ''))); ?></td>
                   <td class="text-end">
                     <form method="post" action="<?php echo url_for(['module' => 'circulation', 'action' => 'renew']); ?>" class="d-inline">
                       <input type="hidden" name="checkout_id" value="<?php echo (int) $checkout->id; ?>">
@@ -171,10 +171,10 @@
                   <td><?php echo esc_entities($hold->hold_date ?? ''); ?></td>
                   <td class="text-center"><?php echo (int) ($hold->queue_position ?? 0); ?></td>
                   <td>
-                    <?php if ($hold->hold_status === 'ready'): ?>
+                    <?php if ($hold->status === 'ready'): ?>
                       <span class="badge bg-success"><?php echo __('Ready'); ?></span>
                     <?php else: ?>
-                      <span class="badge bg-warning text-dark"><?php echo esc_entities(ucfirst($hold->hold_status ?? '')); ?></span>
+                      <span class="badge bg-warning text-dark"><?php echo esc_entities(ucfirst($hold->status ?? '')); ?></span>
                     <?php endif; ?>
                   </td>
                   <td class="text-end">
@@ -286,14 +286,14 @@
                   <td><?php echo esc_entities($record->checkout_date ?? ''); ?></td>
                   <td><?php echo esc_entities($record->return_date ?? '-'); ?></td>
                   <td>
-                    <?php if ($record->checkout_status === 'returned'): ?>
+                    <?php if ($record->status === 'returned'): ?>
                       <span class="badge bg-success"><?php echo __('Returned'); ?></span>
-                    <?php elseif ($record->checkout_status === 'checked_out'): ?>
+                    <?php elseif ($record->status === 'checked_out'): ?>
                       <span class="badge bg-primary"><?php echo __('Checked Out'); ?></span>
-                    <?php elseif ($record->checkout_status === 'lost'): ?>
+                    <?php elseif ($record->status === 'lost'): ?>
                       <span class="badge bg-danger"><?php echo __('Lost'); ?></span>
                     <?php else: ?>
-                      <span class="badge bg-secondary"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $record->checkout_status ?? ''))); ?></span>
+                      <span class="badge bg-secondary"><?php echo esc_entities(ucfirst(str_replace('_', ' ', $record->status ?? ''))); ?></span>
                     <?php endif; ?>
                   </td>
                 </tr>

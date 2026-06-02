@@ -85,7 +85,7 @@
           ?>
           <?php foreach ($rawResults as $patron): ?>
             <tr>
-              <td><code><?php echo esc_entities($patron->patron_barcode); ?></code></td>
+              <td><code><?php echo esc_entities($patron->card_number ?? ''); ?></code></td>
               <td>
                 <a href="<?php echo url_for(['module' => 'patron', 'action' => 'view', 'id' => $patron->id]); ?>">
                   <?php echo esc_entities($patron->last_name . ', ' . $patron->first_name); ?>
