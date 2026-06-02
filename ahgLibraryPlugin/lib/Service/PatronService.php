@@ -60,12 +60,13 @@ class PatronService
             'last_name'          => $data['last_name'],
             'email'              => $data['email'] ?? null,
             'phone'              => $data['phone'] ?? null,
+            'id_number'          => $data['id_number'] ?? null,
+            'address'            => $data['address'] ?? null,
             'patron_type'        => $data['patron_type'] ?? $this->getSetting('patron_default_type', 'general'),
             'borrowing_status'   => 'active',
             'max_checkouts'      => $data['max_checkouts'] ?? (int) $this->getSetting('patron_max_checkouts', '5'),
             'max_holds'          => $data['max_holds'] ?? (int) $this->getSetting('patron_max_holds', '3'),
-            'expiry_date'        => $data['expiry_date'] ?? $this->calculateExpiryDate(),
-            'user_id'            => $data['user_id'] ?? null,
+            'membership_expiry'  => $data['membership_expiry'] ?? $this->calculateExpiryDate(),
             'notes'              => $data['notes'] ?? null,
             'created_at'         => $now,
             'updated_at'         => $now,
@@ -85,9 +86,9 @@ class PatronService
 
         // Only allow updatable fields
         $allowed = [
-            'first_name', 'last_name', 'email', 'phone', 'patron_type',
-            'borrowing_status', 'max_checkouts', 'max_holds', 'expiry_date',
-            'user_id', 'notes', 'updated_at',
+            'first_name', 'last_name', 'email', 'phone', 'id_number', 'address',
+            'patron_type', 'borrowing_status', 'max_checkouts', 'max_holds',
+            'membership_expiry', 'notes', 'updated_at',
         ];
 
         $update = array_intersect_key($data, array_flip($allowed));

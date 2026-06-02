@@ -69,8 +69,8 @@ class CirculationService
             return ['success' => false, 'error' => 'Copy not found'];
         }
 
-        if ($copy->copy_status !== 'available') {
-            return ['success' => false, 'error' => 'Copy is not available (status: ' . $copy->copy_status . ')'];
+        if ($copy->status !== 'available') {
+            return ['success' => false, 'error' => 'Copy is not available (status: ' . $copy->status . ')'];
         }
 
         $item = DB::table('library_item')->where('id', $copy->library_item_id)->first();
@@ -88,7 +88,7 @@ class CirculationService
 
         // Calculate due date
         if (!$dueDate) {
-            $dueDate = date('Y-m-d', strtotime('+' . $loanRule->loan_days . ' days'));
+            $dueDate = date('Y-m-d', strtotime('+' . $loanRule->loan_period_days . ' days'));
         }
 
         $now = date('Y-m-d H:i:s');
@@ -102,9 +102,8 @@ class CirculationService
                 'patron_id'        => $patronId,
                 'checkout_date'    => $now,
                 'due_date'         => $dueDate,
-                'checkout_status'  => 'checked_out',
-                'renewals_count'   => 0,
-                'max_renewals'     => $loanRule->max_renewals,
+                'status'  => 'checked_out',
+                'renewed_count'   => 0,
                 'checked_out_by'   => $this->getCurrentUserId(),
                 'created_at'       => $now,
                 'updated_at'       => $now,
@@ -114,7 +113,7 @@ class CirculationService
             DB::table('library_copy')
                 ->where('id', $copyId)
                 ->update([
-                    'copy_status' => 'checked_out',
+                    'status' => 'checked_out',
                     'updated_at' => $now,
                 ]);
 
@@ -125,9 +124,9 @@ class CirculationService
             DB::table('library_hold')
                 ->where('patron_id', $patronId)
                 ->where('library_item_id', $copy->library_item_id)
-                ->whereIn('hold_status', ['pending', 'ready'])
+                ->whereIn('status', ['pending', 'ready'])
                 ->update([
-                    'hold_status' => 'fulfilled',
+                    'status' => 'fulfilled',
                     'fulfilled_date' => $now,
                     'updated_at' => $now,
                 ]);
@@ -187,7 +186,7 @@ class CirculationService
             return ['success' => false, 'error' => 'Checkout record not found'];
         }
 
-        if ($checkout->checkout_status !== 'checked_out') {
+        if ($checkout->status !== 'checked_out') {
             return ['success' => false, 'error' => 'Item is not currently checked out'];
         }
 
@@ -207,7 +206,7 @@ class CirculationService
                         'checkout_id' => $checkoutId,
                         'fine_type'   => 'overdue',
                         'amount'      => $fineAmount,
-                        'fine_status' => 'outstanding',
+                        'status' => 'outstanding',
                         'description' => 'Overdue fine — due ' . $checkout->due_date . ', returned ' . $today,
                         'created_at'  => $now,
                         'updated_at'  => $now,
@@ -220,7 +219,7 @@ class CirculationService
                 ->where('id', $checkoutId)
                 ->update([
                     'return_date'     => $now,
-                    'checkout_status' => 'returned',
+                    'status' => 'returned',
                     'checked_in_by'   => $this->getCurrentUserId(),
                     'updated_at'      => $now,
                 ]);
@@ -229,7 +228,7 @@ class CirculationService
             DB::table('library_copy')
                 ->where('id', $checkout->copy_id)
                 ->update([
-                    'copy_status' => 'available',
+                    'status' => 'available',
                     'updated_at' => $now,
                 ]);
 
@@ -268,7 +267,7 @@ class CirculationService
         $checkout = DB::table('library_checkout as c')
             ->join('library_copy as cp', 'c.copy_id', '=', 'cp.id')
             ->where('cp.barcode', $copyBarcode)
-            ->where('c.checkout_status', 'checked_out')
+            ->where('c.status', 'checked_out')
             ->select('c.id')
             ->first();
 
@@ -293,53 +292,62 @@ class CirculationService
             return ['success' => false, 'error' => 'Checkout not found'];
         }
 
-        if ($checkout->checkout_status !== 'checked_out') {
+        if ($checkout->status !== 'checked_out') {
             return ['success' => false, 'error' => 'Item is not currently checked out'];
         }
 
-        if ($checkout->renewals_count >= $checkout->max_renewals) {
-            return ['success' => false, 'error' => 'Maximum renewals reached (' . $checkout->max_renewals . ')'];
+        // Resolve copy/item/patron and the loan rule up front — the renewal limit
+        // lives on the loan rule / patron (library_checkout has no max_renewals
+        // column), so we must know it before enforcing the cap.
+        $copy = DB::table('library_copy')->where('id', $checkout->copy_id)->first();
+        $item = $copy ? DB::table('library_item')->where('id', $copy->library_item_id)->first() : null;
+        $patron = $this->patronService->find($checkout->patron_id);
+        $loanRule = $this->getLoanRule(
+            (string) ($item->material_type ?? 'default'),
+            (string) ($patron->patron_type ?? 'default')
+        );
+
+        $maxRenewals = (int) ($loanRule?->max_renewals
+            ?? $patron?->max_renewals
+            ?? $this->getLibrarySetting('default_max_renewals', '2'));
+
+        if ((int) $checkout->renewed_count >= $maxRenewals) {
+            return ['success' => false, 'error' => 'Maximum renewals reached (' . $maxRenewals . ')'];
         }
 
-        // Check if there are pending holds — block renewal if so
-        $copy = DB::table('library_copy')->where('id', $checkout->copy_id)->first();
-        $item = DB::table('library_item')->where('id', $copy->library_item_id)->first();
-
+        // Block renewal if the item has pending/ready holds
         $pendingHolds = DB::table('library_hold')
-            ->where('library_item_id', $item->id)
-            ->whereIn('hold_status', ['pending', 'ready'])
+            ->where('library_item_id', $item->id ?? 0)
+            ->whereIn('status', ['pending', 'ready'])
             ->count();
 
         if ($pendingHolds > 0) {
             return ['success' => false, 'error' => 'Cannot renew — item has pending holds'];
         }
 
-        // Get patron for loan rule
-        $patron = $this->patronService->find($checkout->patron_id);
-        $loanRule = $this->getLoanRule($item->material_type, $patron->patron_type);
-
-        $renewalDays = $loanRule ? $loanRule->loan_days : (int) $this->getLibrarySetting('default_loan_days', '14');
+        $renewalDays = (int) ($loanRule?->renewal_period_days
+            ?? $loanRule?->loan_period_days
+            ?? $this->getLibrarySetting('default_loan_days', '14'));
         $newDueDate = date('Y-m-d', strtotime('+' . $renewalDays . ' days'));
 
         DB::table('library_checkout')
             ->where('id', $checkoutId)
             ->update([
-                'due_date'        => $newDueDate,
-                'renewals_count'  => $checkout->renewals_count + 1,
-                'last_renewal_date' => date('Y-m-d H:i:s'),
-                'updated_at'      => date('Y-m-d H:i:s'),
+                'due_date'      => $newDueDate,
+                'renewed_count' => (int) $checkout->renewed_count + 1,
+                'updated_at'    => date('Y-m-d H:i:s'),
             ]);
 
         $this->logger->info('Renewal', [
             'checkout_id'  => $checkoutId,
             'new_due_date' => $newDueDate,
-            'renewal_num'  => $checkout->renewals_count + 1,
+            'renewal_num'  => (int) $checkout->renewed_count + 1,
         ]);
 
         return [
-            'success'      => true,
-            'new_due_date' => $newDueDate,
-            'renewals_left' => $checkout->max_renewals - $checkout->renewals_count - 1,
+            'success'       => true,
+            'new_due_date'  => $newDueDate,
+            'renewals_left' => $maxRenewals - (int) $checkout->renewed_count - 1,
         ];
     }
 
@@ -360,7 +368,7 @@ class CirculationService
             ->leftJoin('information_object_i18n as ioi', function ($j) {
                 $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
             })
-            ->where('c.checkout_status', 'checked_out')
+            ->where('c.status', 'checked_out')
             ->where('c.due_date', '<', date('Y-m-d'))
             ->select([
                 'c.*',
@@ -387,7 +395,7 @@ class CirculationService
         $loanRule = $this->getLoanRule($item->material_type, $patron->patron_type);
 
         $finePerDay = $loanRule ? (float) $loanRule->fine_per_day : (float) $this->getLibrarySetting('fine_per_day_default', '1.00');
-        $maxFine = $loanRule ? (float) $loanRule->max_fine : (float) $this->getLibrarySetting('max_fine_cap', '50.00');
+        $maxFine = $loanRule ? (float) $loanRule->fine_cap : (float) $this->getLibrarySetting('max_fine_cap', '50.00');
 
         $daysOverdue = max(0, (int) ((strtotime(date('Y-m-d')) - strtotime($checkout->due_date)) / 86400));
 
@@ -448,9 +456,9 @@ class CirculationService
             'library_item_id' => $libraryItemId,
             'barcode'         => $data['barcode'] ?? ($this->getLibrarySetting('barcode_auto_generate', '1') === '1' ? $this->generateCopyBarcode() : null),
             'copy_number'     => $data['copy_number'] ?? $this->getNextCopyNumber($libraryItemId),
-            'copy_status'     => $data['copy_status'] ?? 'available',
-            'condition_note'  => $data['condition_note'] ?? null,
-            'location'        => $data['location'] ?? null,
+            'status'     => $data['status'] ?? 'available',
+            'condition_notes' => $data['condition_notes'] ?? null,
+            'shelf_location'  => $data['shelf_location'] ?? null,
             'acquisition_date' => $data['acquisition_date'] ?? date('Y-m-d'),
             'acquisition_cost' => $data['acquisition_cost'] ?? null,
             'created_at'      => $now,
@@ -471,12 +479,12 @@ class CirculationService
     {
         $total = DB::table('library_copy')
             ->where('library_item_id', $libraryItemId)
-            ->whereNotIn('copy_status', ['withdrawn', 'lost'])
+            ->whereNotIn('status', ['withdrawn', 'lost'])
             ->count();
 
         $available = DB::table('library_copy')
             ->where('library_item_id', $libraryItemId)
-            ->where('copy_status', 'available')
+            ->where('status', 'available')
             ->count();
 
         DB::table('library_item')
@@ -530,7 +538,7 @@ class CirculationService
     {
         $nextHold = DB::table('library_hold')
             ->where('library_item_id', $libraryItemId)
-            ->where('hold_status', 'pending')
+            ->where('status', 'pending')
             ->orderBy('hold_date')
             ->first();
 
@@ -540,7 +548,7 @@ class CirculationService
             DB::table('library_hold')
                 ->where('id', $nextHold->id)
                 ->update([
-                    'hold_status' => 'ready',
+                    'status' => 'ready',
                     'expiry_date' => $expiry,
                     'updated_at'  => date('Y-m-d H:i:s'),
                 ]);
@@ -565,9 +573,9 @@ class CirculationService
         $today = date('Y-m-d');
 
         return [
-            'active_checkouts'  => DB::table('library_checkout')->where('checkout_status', 'checked_out')->count(),
+            'active_checkouts'  => DB::table('library_checkout')->where('status', 'checked_out')->count(),
             'overdue'           => DB::table('library_checkout')
-                ->where('checkout_status', 'checked_out')
+                ->where('status', 'checked_out')
                 ->where('due_date', '<', $today)
                 ->count(),
             'today_checkouts'   => DB::table('library_checkout')
@@ -576,11 +584,11 @@ class CirculationService
             'today_returns'     => DB::table('library_checkout')
                 ->whereDate('return_date', $today)
                 ->count(),
-            'pending_holds'     => DB::table('library_hold')->where('hold_status', 'pending')->count(),
-            'ready_holds'       => DB::table('library_hold')->where('hold_status', 'ready')->count(),
+            'pending_holds'     => DB::table('library_hold')->where('status', 'pending')->count(),
+            'ready_holds'       => DB::table('library_hold')->where('status', 'ready')->count(),
             'total_copies'      => DB::table('library_copy')->count(),
-            'available_copies'  => DB::table('library_copy')->where('copy_status', 'available')->count(),
-            'outstanding_fines' => DB::table('library_fine')->where('fine_status', 'outstanding')->sum('amount'),
+            'available_copies'  => DB::table('library_copy')->where('status', 'available')->count(),
+            'outstanding_fines' => DB::table('library_fine')->where('status', 'outstanding')->sum('amount'),
         ];
     }
 

@@ -47,6 +47,18 @@
 
       <div class="row">
         <div class="col-md-6 mb-3">
+          <label class="form-label"><?php echo __('ID Number'); ?></label>
+          <input type="text" name="id_number" class="form-control"
+                 value="<?php echo esc_entities($rawPatron->id_number ?? ''); ?>">
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label"><?php echo __('Address'); ?></label>
+          <textarea name="address" class="form-control" rows="2"><?php echo esc_entities($rawPatron->address ?? ''); ?></textarea>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
           <label class="form-label"><?php echo __('Patron Type'); ?></label>
           <select name="patron_type" class="form-select">
             <?php if (!empty($rawPatronTypes)): ?>
@@ -66,8 +78,8 @@
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label"><?php echo __('Expiry Date'); ?></label>
-          <input type="date" name="expiry_date" class="form-control"
-                 value="<?php echo esc_entities($rawPatron->expiry_date ?? ''); ?>">
+          <input type="date" name="membership_expiry" class="form-control"
+                 value="<?php echo esc_entities($rawPatron->membership_expiry ?? ''); ?>">
         </div>
       </div>
 

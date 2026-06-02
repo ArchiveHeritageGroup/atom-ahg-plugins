@@ -42,15 +42,18 @@ class patronEditAction extends AhgController
             }
 
             $data = [
-                'first_name'    => $firstName,
-                'last_name'     => $lastName,
-                'email'         => $request->getParameter('email') ?: null,
-                'phone'         => $request->getParameter('phone') ?: null,
-                'patron_type'   => $request->getParameter('patron_type', 'general'),
-                'max_checkouts' => (int) $request->getParameter('max_checkouts', 5),
-                'max_holds'     => (int) $request->getParameter('max_holds', 3),
-                'expiry_date'   => $request->getParameter('expiry_date') ?: null,
-                'notes'         => $request->getParameter('notes') ?: null,
+                'first_name'        => $firstName,
+                'last_name'         => $lastName,
+                'email'             => $request->getParameter('email') ?: null,
+                'phone'             => $request->getParameter('phone') ?: null,
+                'id_number'         => $request->getParameter('id_number') ?: null,
+                'address'           => $request->getParameter('address') ?: null,
+                'patron_type'       => $request->getParameter('patron_type', 'general'),
+                'max_checkouts'     => (int) $request->getParameter('max_checkouts', 5),
+                'max_holds'         => (int) $request->getParameter('max_holds', 3),
+                'membership_expiry' => $request->getParameter('membership_expiry')
+                    ?: ($request->getParameter('expiry_date') ?: null),
+                'notes'             => $request->getParameter('notes') ?: null,
             ];
 
             if ($this->patron) {
