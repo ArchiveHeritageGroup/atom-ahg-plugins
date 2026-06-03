@@ -151,6 +151,135 @@ jobs:
           if (!class_exists('sfAutoloadAgain', false)) { class sfAutoloadAgain { public static function getInstance() { return new self; } public function loadClass($c) {} public function addDirectory($d) {} public function removeDirectory($d) {} public function register() {} public function unregister() {} } }
 
           // ============================================================
+          // PSR-15 HTTP Server Middleware (used by ahgIiifPlugin etc.)
+          // ============================================================
+          if (!interface_exists('Psr\\Http\\Server\\MiddlewareInterface', false)) {
+            interface _Psr15MiddlewareStub {
+              public function process(\Psr\Http\Message\ServerRequestInterface $request, \Psr\Http\Message\RequestHandlerInterface $handler);
+            }
+            class_alias('_Psr15MiddlewareStub', 'Psr\\Http\\Server\\MiddlewareInterface');
+          }
+          if (!interface_exists('Psr\\Http\\Server\\RequestHandlerInterface', false)) {
+            interface _Psr15RequestHandlerStub {
+              public function handle(\Psr\Http\Message\ServerRequestInterface $request);
+            }
+            class_alias('_Psr15RequestHandlerStub', 'Psr\\Http\\Server\\RequestHandlerInterface');
+          }
+
+          // ============================================================
+          // AtomFramework Contracts (job queue, PII redaction, 3D model)
+          // ============================================================
+          if (!interface_exists('AtomFramework\\Contracts\\QueueJobInterface', false)) {
+            interface _AtomQueueJobStub {
+              public function perform();
+              public function maxAttempts();
+              public function backoffSeconds();
+              public function queue();
+            }
+            class_alias('_AtomQueueJobStub', 'AtomFramework\\Contracts\\QueueJobInterface');
+          }
+          if (!interface_exists('AtomFramework\\Contracts\\PiiRedactionProviderInterface', false)) {
+            interface _AtomPiiStub {
+              public function redact(string $value, array $policy = array());
+              public function supportsPolicy(string $policy);
+            }
+            class_alias('_AtomPiiStub', 'AtomFramework\\Contracts\\PiiRedactionProviderInterface');
+          }
+          if (!interface_exists('AtomFramework\\Contracts\\Model3DProviderInterface', false)) {
+            interface _Atom3DStub {
+              public function load(string $identifier);
+              public function metadata(string $identifier);
+            }
+            class_alias('_Atom3DStub', 'AtomFramework\\Contracts\\Model3DProviderInterface');
+          }
+          if (!interface_exists('AtomFramework\\Museum\\Contracts\\MuseumMetadataInterface', false)) {
+            interface _AtomMuseumStub {
+              public function getIdentifier();
+              public function getTitle();
+              public function getCreator();
+              public function getDateCreated();
+              public function getMedium();
+              public function getDimensions();
+            }
+            class_alias('_AtomMuseumStub', 'AtomFramework\\Museum\\Contracts\\MuseumMetadataInterface');
+          }
+
+          // ============================================================
+          // AhgInferenceReceipts: chain-of-custody hash chain for AI provenance
+          // ============================================================
+          if (!class_exists('AhgInferenceReceipts\\ChainStore', false)) {
+            class _ReceiptChainStoreStub {
+              public function append($receipt) {}
+              public function head() {}
+              public function verifyChain() { return true; }
+              public function getById($id) {}
+            }
+            class_alias('_ReceiptChainStoreStub', 'AhgInferenceReceipts\\ChainStore');
+          }
+          if (!class_exists('AhgInferenceReceipts\\Signer', false)) {
+            class _ReceiptSignerStub {
+              public function sign($payload) { return ''; }
+              public function verify($payload, $signature) { return true; }
+            }
+            class_alias('_ReceiptSignerStub', 'AhgInferenceReceipts\\Signer');
+          }
+          if (!class_exists('AhgInferenceReceipts\\Receipt', false)) {
+            class _ReceiptStub {
+              public $id; public $jobId; public $model; public $inputHash; public $outputHash; public $signature; public $timestamp;
+            }
+            class_alias('_ReceiptStub', 'AhgInferenceReceipts\\Receipt');
+          }
+          if (!class_exists('AhgInferenceReceipts\\ReceiptChain', false)) {
+            class _ReceiptChainStub {
+              public function add($receipt) { return true; }
+              public function verify() { return true; }
+              public function size() { return 0; }
+            }
+            class_alias('_ReceiptChainStub', 'AhgInferenceReceipts\\ReceiptChain');
+          }
+          if (!class_exists('AhgInferenceReceipts\\KeyPair', false)) {
+            class _ReceiptKeyPairStub {
+              public function publicKey() { return ''; }
+              public function sign($data) { return ''; }
+            }
+            class_alias('_ReceiptKeyPairStub', 'AhgInferenceReceipts\\KeyPair');
+          }
+
+          // ============================================================
+          // QubitOai / QubitOaiSet / QubitJob (AtoM OAI-PMH + job runner)
+          // ============================================================
+          if (!class_exists('QubitOai', false)) {
+            class _QubitOaiStub {
+              public function getSets() { return array(); }
+              public function getRecords($set = null, $from = null, $until = null) { return array(); }
+              public function getRecord($identifier) {}
+            }
+            class_alias('_QubitOaiStub', 'QubitOai');
+          }
+          if (!class_exists('QubitOaiSet', false)) {
+            class _QubitOaiSetStub {
+              public $spec; public $name;
+            }
+            class_alias('_QubitOaiSetStub', 'QubitOaiSet');
+          }
+          if (!class_exists('QubitJob', false)) {
+            class _QubitJobStub {
+              public $id; public $name; public $status; public $startedAt; public $finishedAt;
+              public function markRunning() {}
+              public function markComplete() {}
+              public function markFailed($error) {}
+            }
+            class_alias('_QubitJobStub', 'QubitJob');
+          }
+
+          // ============================================================
+          // InformationObjectEditAction stub (AtoM action class; real
+          // parent DefaultEditAction lives in another module's actions
+          // dir and is not autoload-discoverable at this point).
+          // ============================================================
+          if (!class_exists('InformationObjectEditAction', false)) { class InformationObjectEditAction { public function execute($req) {} } }
+
+          // ============================================================
           // Zend (legacy) — used by ahgRightsPlugin etc.
           // ============================================================
           if (!class_exists('Zend_Acl', false)) { class Zend_Acl { public function addRole($r) {} public function addResource($r) {} public function allow($r = null, $res = null, $priv = null, $a = null) {} public function deny($r = null, $res = null, $priv = null, $a = null) {} public function isAllowed($r = null, $res = null, $priv = null) { return true; } } }
