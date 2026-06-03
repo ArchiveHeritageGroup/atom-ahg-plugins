@@ -312,4 +312,25 @@ INSERT INTO icip_config (config_key, config_value, description) VALUES
 ('audit_all_icip_access', '1', 'Log all access to ICIP-flagged records')
 ON DUPLICATE KEY UPDATE config_key = VALUES(config_key);
 
+-- ============================================
+-- 9. ACCESS AUDIT LOG
+-- ============================================
+-- Records object-level ICIP access decisions when audit_all_icip_access = 1.
+-- ahgICIPService::checkAccess() writes here (best-effort); without this table
+-- the insert was silently swallowed and no audit trail was ever produced.
+CREATE TABLE IF NOT EXISTS icip_access_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    information_object_id INT DEFAULT NULL,
+    user_id INT DEFAULT NULL,
+    access_allowed TINYINT(1) DEFAULT NULL,
+    blocked_reason VARCHAR(255) DEFAULT NULL,
+    notice_count INT DEFAULT 0,
+    restriction_count INT DEFAULT 0,
+    ip_address VARCHAR(45) DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_icip_access_object (information_object_id),
+    INDEX idx_icip_access_user (user_id),
+    INDEX idx_icip_access_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
