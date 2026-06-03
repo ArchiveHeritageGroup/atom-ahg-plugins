@@ -71,7 +71,7 @@ jobs:
           )
           found=0
           for pattern in "${PATTERNS[@]}"; do
-            if grep -rniE "$pattern" --include='*.php' --include='*.json' --include='*.xml' --include='*.env' --include='*.ini' --include='*.conf' . 2>/dev/null | grep -v 'vendor/' | grep -v '.md' | grep -v '.yml' | grep -v '/templates/' | grep -vE "[?&][A-Za-z_]+_?token="; then
+            if grep -rniP "$pattern" --include='*.php' --include='*.json' --include='*.xml' --include='*.env' --include='*.ini' --include='*.conf' . 2>/dev/null | grep -v 'vendor/' | grep -v '.md' | grep -v '.yml' | grep -v '/templates/' | grep -vE "[?&][A-Za-z_]+_?token="; then
               found=1
             fi
           done
