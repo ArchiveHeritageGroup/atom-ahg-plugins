@@ -1,0 +1,27 @@
+-- #118 records-manage: file plan / classification scheme (nested-set tree).
+CREATE TABLE IF NOT EXISTS `rm_fileplan_node` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `parent_id` INT UNSIGNED DEFAULT NULL,
+  `function_object_id` INT DEFAULT NULL COMMENT 'optional link to a function (object.id)',
+  `node_type` VARCHAR(20) NOT NULL DEFAULT 'series' COMMENT 'function, series, subseries, file, class',
+  `code` VARCHAR(100) NOT NULL,
+  `title` VARCHAR(500) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `disposal_class_id` INT UNSIGNED DEFAULT NULL COMMENT 'optional rm_disposal_class.id',
+  `retention_period` VARCHAR(100) DEFAULT NULL,
+  `disposal_action` VARCHAR(40) DEFAULT NULL COMMENT 'destroy, transfer, retain_permanent, review',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'active' COMMENT 'active, superseded, draft',
+  `source_department` VARCHAR(255) DEFAULT NULL,
+  `source_agency_code` VARCHAR(50) DEFAULT NULL,
+  `import_session_id` INT UNSIGNED DEFAULT NULL,
+  `depth` INT NOT NULL DEFAULT 0,
+  `lft` INT DEFAULT NULL,
+  `rgt` INT DEFAULT NULL,
+  `created_by` INT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_fileplan_code` (`code`),
+  KEY `idx_fileplan_parent` (`parent_id`),
+  KEY `idx_fileplan_lft` (`lft`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

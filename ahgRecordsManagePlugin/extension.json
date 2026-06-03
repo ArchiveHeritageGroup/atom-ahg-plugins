@@ -1,0 +1,29 @@
+{
+    "name": "Records Management (File Plan)",
+    "machine_name": "ahgRecordsManagePlugin",
+    "version": "0.1.0",
+    "description": "Records-management file plan / classification scheme — a nested-set tree of classification nodes (function/series/file) with retention and disposal-action metadata. PSIS-parity port of the Heratio ahg-records-manage FilePlanService (#118). Email capture and full disposal/retention execution are follow-ups.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "email": "johan@theahg.co.za",
+    "license": "proprietary",
+    "category": "records-management",
+    "keywords": ["records-management", "file-plan", "classification", "retention", "disposal", "narssa"],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "suggests": {
+        "ahgExtendedRightsPlugin": "Link file-plan nodes to retention schedules and disposal workflow",
+        "ahgNARSSAPlugin": "Generate NARSSA transfer manifests for nodes whose disposal action is transfer"
+    },
+    "tables": [
+        "rm_fileplan_node"
+    ],
+    "is_core": false,
+    "is_locked": false,
+    "load_order": 60
+}
