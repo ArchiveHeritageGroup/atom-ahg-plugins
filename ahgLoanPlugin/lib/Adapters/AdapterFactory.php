@@ -13,8 +13,8 @@ namespace AhgLoan\Adapters;
  */
 class AdapterFactory
 {
-    /** Adapter class map */
-    private const ADAPTERS = [
+    /** Adapter class map (mutable so register() can add sectors at runtime) */
+    private static array $adapters = [
         'museum' => MuseumAdapter::class,
         'gallery' => GalleryAdapter::class,
         'archive' => ArchiveAdapter::class,
@@ -37,13 +37,13 @@ class AdapterFactory
     {
         $sector = strtolower($sector);
 
-        if (!isset(self::ADAPTERS[$sector])) {
-            throw new \InvalidArgumentException("Unsupported sector: {$sector}. Supported: ".implode(', ', array_keys(self::ADAPTERS)));
+        if (!isset(self::$adapters[$sector])) {
+            throw new \InvalidArgumentException("Unsupported sector: {$sector}. Supported: ".implode(', ', array_keys(self::$adapters)));
         }
 
         // Return cached instance if available
         if (!isset(self::$instances[$sector])) {
-            $className = self::ADAPTERS[$sector];
+            $className = self::$adapters[$sector];
             self::$instances[$sector] = new $className();
         }
 
@@ -59,7 +59,7 @@ class AdapterFactory
     {
         $sectors = [];
 
-        foreach (array_keys(self::ADAPTERS) as $code) {
+        foreach (array_keys(self::$adapters) as $code) {
             $adapter = self::create($code);
             $sectors[$code] = $adapter->getSectorName();
         }
@@ -72,7 +72,7 @@ class AdapterFactory
      */
     public static function isSupported(string $sector): bool
     {
-        return isset(self::ADAPTERS[strtolower($sector)]);
+        return isset(self::$adapters[strtolower($sector)]);
     }
 
     /**
@@ -87,7 +87,7 @@ class AdapterFactory
             throw new \InvalidArgumentException("Adapter class must implement SectorAdapterInterface");
         }
 
-        self::ADAPTERS[strtolower($sector)] = $class;
+        self::$adapters[strtolower($sector)] = $class;
 
         // Clear cached instance if exists
         unset(self::$instances[strtolower($sector)]);

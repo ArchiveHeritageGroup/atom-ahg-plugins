@@ -429,12 +429,18 @@ class ahgSpectrumConditionReportJob extends arBaseJob
         $objectTitle = $this->getObjectTitle($object);
         $uploadDir = $this->getUploadsDir();
 
+        // CSP nonce for the inline <style>. Built as a PHP string (not a template),
+        // so the nonce is concatenated here; an embedded PHP tag inside the string
+        // literal would not execute and was a hard parse error.
+        $cspNonce = (string) sfConfig::get('csp_nonce', '');
+        $styleNonceAttr = $cspNonce !== '' ? ' ' . preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' : '';
+
         $html = '<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <title>Condition Report - ' . htmlspecialchars($objectTitle) . '</title>
-    <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+    <style' . $styleNonceAttr . '>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { text-align: center; color: #333; }
         h2 { color: #555; border-bottom: 1px solid #ccc; padding-bottom: 5px; }

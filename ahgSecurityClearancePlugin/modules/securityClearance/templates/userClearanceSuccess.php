@@ -278,7 +278,7 @@ function revokeClearance() {
   if (confirm('<?php echo __('Are you sure you want to revoke this clearance?') ?>')) {
     var form = document.createElement('form');
     form.method = 'post';
-    form.action = '<?php echo url_for(\'@security_clearance_revoke?id=\'); ?>' + userId;
+    form.action = '<?php echo url_for('@security_clearance_revoke?id='); ?>' + userId;
     
     var input = document.createElement('input');
     input.type = 'hidden';

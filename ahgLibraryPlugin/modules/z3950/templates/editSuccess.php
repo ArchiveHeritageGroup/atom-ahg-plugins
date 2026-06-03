@@ -140,7 +140,7 @@
 
           <?php if ($targetId > 0): ?>
             <button type="button" class="btn btn-outline-danger ms-auto"
-                    onclick="if(confirm('Delete this target?')) { window.location.href='<?php echo url_for(['module' => 'z3950', 'action' => 'delete', 'id' => $targetId]); }">
+                    onclick="if(confirm('Delete this target?')) { window.location.href='<?php echo url_for(['module' => 'z3950', 'action' => 'delete', 'id' => $targetId]); ?>'; }">
               <i class="fas fa-trash me-1"></i><?php echo __('Delete Target'); ?>
             </button>
           <?php endif; ?>

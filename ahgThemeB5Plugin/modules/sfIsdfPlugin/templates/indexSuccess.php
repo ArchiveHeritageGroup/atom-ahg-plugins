@@ -153,14 +153,14 @@
 <div class="section border-bottom" id="controlArea">
 
   <?php echo render_b5_section_heading(
-  <!-- EXTENDED RIGHTS AREA -->
-  <?php include_partial('informationobject/extendedRightsArea', ['resource' => $resource]); ?>
-
       __('Control area'),
       $headingsCondition,
       $headingsUrl,
       ['anchor' => 'control-collapse']
   ); ?>
+
+  <!-- EXTENDED RIGHTS AREA -->
+  <?php include_partial('informationobject/extendedRightsArea', ['resource' => $resource]); ?>
 
   <?php echo render_show(__('Description identifier'), render_value_inline($resource->descriptionIdentifier)); ?>
 

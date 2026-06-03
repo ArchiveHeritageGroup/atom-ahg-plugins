@@ -47,7 +47,7 @@
       }
   }
   ?>
-  <?php if ($uploadLimitReached): ?>
+  <?php if ($uploadLimitReached) { ?>
 
     <div id="upload_limit_reached">
       <div class="alert alert-warning" role="alert">

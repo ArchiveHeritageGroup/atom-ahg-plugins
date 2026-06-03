@@ -616,30 +616,6 @@ class CourierManagementService
     // =========================================================================
 
     /**
-     * Get shipment types for dropdown.
-     */
-    public function getShipmentTypes(): array
-    {
-        return self::SHIPMENT_TYPES;
-    }
-
-    /**
-     * Get shipment statuses for dropdown.
-     */
-    public function getShipmentStatuses(): array
-    {
-        return self::SHIPMENT_STATUSES;
-    }
-
-    /**
-     * Get cost types for dropdown.
-     */
-    public function getCostTypes(): array
-    {
-        return self::COST_TYPES;
-    }
-
-    /**
      * Get active shipments (not delivered).
      */
     public function getActiveShipments(): array

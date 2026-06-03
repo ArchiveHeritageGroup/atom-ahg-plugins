@@ -565,30 +565,6 @@ class ConditionReportService
     }
 
     /**
-     * Get report types for dropdown.
-     */
-    public function getReportTypes(): array
-    {
-        return self::REPORT_TYPES;
-    }
-
-    /**
-     * Get conditions for dropdown.
-     */
-    public function getConditions(): array
-    {
-        return self::CONDITIONS;
-    }
-
-    /**
-     * Get image types for dropdown.
-     */
-    public function getImageTypes(): array
-    {
-        return self::IMAGE_TYPES;
-    }
-
-    /**
      * Get view positions for dropdown.
      */
     public function getViewPositions(): array

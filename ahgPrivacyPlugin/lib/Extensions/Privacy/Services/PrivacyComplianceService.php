@@ -281,47 +281,6 @@ class PrivacyComplianceService
     }
 
     /**
-     * Update DSAR request status
-     */
-    public static function updateDsarStatus(
-        int $id,
-        string $status,
-        ?string $response = null,
-        int $updatedBy = 0
-    ): bool {
-        try {
-            $updateData = [
-                'status' => $status,
-                'updated_at' => date('Y-m-d H:i:s'),
-            ];
-
-            if ($status === 'completed') {
-                $updateData['completed_date'] = date('Y-m-d H:i:s');
-                $updateData['response'] = $response;
-            }
-
-            if ($status === 'rejected') {
-                $updateData['rejection_reason'] = $response;
-            }
-
-            DB::table('privacy_dsar_request')
-                ->where('id', $id)
-                ->update($updateData);
-
-            self::logDsarAction($id, $status, $updatedBy, $response);
-
-            return true;
-
-        } catch (\Exception $e) {
-            self::getLogger()->error('Failed to update DSAR status', [
-                'id' => $id,
-                'error' => $e->getMessage(),
-            ]);
-            return false;
-        }
-    }
-
-    /**
      * Get DSAR log
      */
     public static function getDsarLog(int $requestId): array
@@ -833,7 +792,7 @@ class PrivacyComplianceService
             ];
 
             if ($status === 'completed') {
-                $updateData['completed_at'] = date('Y-m-d H:i:s');
+                $updateData['completed_date'] = date('Y-m-d H:i:s');
             }
 
             DB::table('privacy_dsar_request')

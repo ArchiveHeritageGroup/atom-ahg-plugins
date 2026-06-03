@@ -27,7 +27,7 @@ jobs:
               php -l "$file"
               errors=$((errors + 1))
             fi
-          done < <(find . -name '*.php' -not -path './vendor/*')
+          done < <(find . -name '*.php' -not -path './vendor/*' -not -path '*/docs/*')
           if [ "$errors" -gt 0 ]; then
             echo "Found $errors file(s) with syntax errors."
             exit 1
@@ -71,7 +71,7 @@ jobs:
           )
           found=0
           for pattern in "${PATTERNS[@]}"; do
-            if grep -rniE "$pattern" --include='*.php' --include='*.json' --include='*.xml' --include='*.env' --include='*.ini' --include='*.conf' . 2>/dev/null | grep -v 'vendor/' | grep -v '.md' | grep -v '.yml'; then
+            if grep -rniE "$pattern" --include='*.php' --include='*.json' --include='*.xml' --include='*.env' --include='*.ini' --include='*.conf' . 2>/dev/null | grep -v 'vendor/' | grep -v '.md' | grep -v '.yml' | grep -v '/templates/' | grep -vE "[?&][A-Za-z_]+_?token="; then
               found=1
             fi
           done

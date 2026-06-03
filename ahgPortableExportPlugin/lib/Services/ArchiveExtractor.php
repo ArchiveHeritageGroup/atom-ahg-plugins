@@ -14,7 +14,9 @@ use Illuminate\Database\Capsule\Manager as DB;
 class ArchiveExtractor
 {
     protected string $culture;
-    protected ?callable $progressCallback;
+
+    /** @var callable|null PHP forbids `callable` as a property type. */
+    protected $progressCallback;
 
     public function __construct(string $culture = 'en', ?callable $progressCallback = null)
     {
