@@ -2099,4 +2099,73 @@ class privacyAdminActions extends AhgController
 
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'embeddedPii']);
     }
+
+    // =====================
+    // DPIA — GDPR Art. 35 Data Protection Impact Assessment (#131)
+    // =====================
+
+    protected function dpiaService(): \ahgPrivacyPlugin\Service\DpiaService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/DpiaService.php';
+
+        return new \ahgPrivacyPlugin\Service\DpiaService();
+    }
+
+    public function executeDpiaList($request)
+    {
+        $this->dpias = $this->dpiaService()->listAll();
+        $this->statuses = \ahgPrivacyPlugin\Service\DpiaService::statuses();
+    }
+
+    public function executeDpiaForm($request)
+    {
+        $service = $this->dpiaService();
+        $id = (int) $request->getParameter('id', 0);
+        $this->dpia = $id ? $service->find($id) : null;
+        if ($id && !$this->dpia) {
+            $this->forward404();
+        }
+        $this->activities = $service->listActivities();
+        $this->statuses = \ahgPrivacyPlugin\Service\DpiaService::statuses();
+
+        if ($request->isMethod('post')) {
+            $data = $request->getPostParameters();
+            if ($id) {
+                $service->update($id, $data);
+                $this->getUser()->setFlash('success', 'DPIA updated');
+            } else {
+                $id = $service->create($data, $this->getUserId());
+                $this->getUser()->setFlash('success', 'DPIA created');
+            }
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'dpiaForm', 'id' => $id]);
+        }
+    }
+
+    public function executeDpiaReview($request)
+    {
+        $this->dpiaService()->moveToReview((int) $request->getParameter('id'));
+        $this->getUser()->setFlash('success', 'DPIA moved to review');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'dpiaForm', 'id' => $request->getParameter('id')]);
+    }
+
+    public function executeDpiaSignOff($request)
+    {
+        $id = (int) $request->getParameter('id');
+        $userId = (int) $this->getUserId();
+        if ($userId <= 0) {
+            $this->getUser()->setFlash('error', 'Sign-off requires an authenticated user');
+            $this->redirect(['module' => 'privacyAdmin', 'action' => 'dpiaList']);
+        }
+        $note = $request->getParameter('signoff_note');
+        $this->dpiaService()->signOff($id, $userId, $note !== '' ? $note : null);
+        $this->getUser()->setFlash('success', 'DPIA signed off — linked ROPA entry marked complete');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'dpiaList']);
+    }
+
+    public function executeDpiaArchive($request)
+    {
+        $this->dpiaService()->archive((int) $request->getParameter('id'), (int) $this->getUserId());
+        $this->getUser()->setFlash('success', 'DPIA archived');
+        $this->redirect(['module' => 'privacyAdmin', 'action' => 'dpiaList']);
+    }
 }
