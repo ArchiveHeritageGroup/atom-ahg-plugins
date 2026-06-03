@@ -27,6 +27,10 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         // Index
         $apiv2->get('apiv2_index', '/api/v2', 'index');
 
+        // OpenAPI 3.1 spec + Swagger-UI docs (#129).
+        $apiv2->get('apiv2_openapi', '/api/v2/openapi', 'openApi');
+        $apiv2->get('apiv2_docs', '/api/v2/docs', 'docs');
+
         // Descriptions
         $apiv2->get('apiv2_descriptionsBrowse', '/api/v2/descriptions', 'descriptionsBrowse');
         $apiv2->post('apiv2_descriptionsCreate', '/api/v2/descriptions', 'descriptionsCreate');

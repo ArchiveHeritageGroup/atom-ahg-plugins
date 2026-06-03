@@ -150,6 +150,9 @@ class privacyAdminActions extends AhgController
         
         if ($request->isMethod('post')) {
             $service->updateDsar($request->getParameter('id'), $request->getPostParameters(), $this->getUserId());
+            if ($request->getParameter('status') === 'processing') {
+                $this->prepopulateDsarScope((int) $request->getParameter('id'));
+            }
             $this->getUser()->setFlash('success', 'DSAR updated successfully');
             $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarView', 'id' => $request->getParameter('id')]);
         }
@@ -167,6 +170,12 @@ class privacyAdminActions extends AhgController
             $request->getPostParameters(),
             $this->getUserId()
         );
+
+        // #130 AC#5 - when a DSAR enters processing, pre-populate a privacy
+        // profile for every in-scope description.
+        if ($request->getParameter('status') === 'processing') {
+            $this->prepopulateDsarScope((int) $request->getParameter('id'));
+        }
 
         $this->getUser()->setFlash('success', 'DSAR updated successfully');
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarView', 'id' => $request->getParameter('id')]);
@@ -2215,6 +2224,95 @@ class privacyAdminActions extends AhgController
         if ($ioId) {
             $this->ioTitle = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                 ->where('id', $ioId)->where('culture', 'en')->value('title');
+        }
+    }
+
+    // =====================
+    // DSAR redaction scope (#130 AC#5)
+    // =====================
+
+    /**
+     * Manage the archival descriptions in a DSAR's scope. Adding one
+     * pre-populates its information_object_privacy profile (status pending)
+     * so the officer can mark fields for redaction in the response.
+     */
+    public function executeDsarScope($request)
+    {
+        $id = (int) $request->getParameter('id');
+        $dsar = DB::table('privacy_dsar')->where('id', $id)->first();
+        if (!$dsar) {
+            $this->forward404();
+        }
+
+        if ($request->isMethod('post')) {
+            $do = $request->getParameter('do');
+            if ($do === 'add') {
+                $ioId = $this->resolveIoIdentifier((string) $request->getParameter('io'));
+                if ($ioId === null) {
+                    $this->getUser()->setFlash('error', 'No archival description found for that id or slug.');
+                } else {
+                    DB::table('privacy_dsar_object')->updateOrInsert(
+                        ['dsar_id' => $id, 'information_object_id' => $ioId],
+                        ['created_by' => $this->getUserId(), 'created_at' => date('Y-m-d H:i:s')]
+                    );
+                    $privacyId = $this->redactionService()->prepopulateForDsar($ioId, $this->getUserId());
+                    DB::table('privacy_dsar_object')->where('dsar_id', $id)->where('information_object_id', $ioId)
+                        ->update(['privacy_id' => $privacyId]);
+                    $this->getUser()->setFlash('success', 'Added description #' . $ioId . ' to scope and pre-populated its privacy profile.');
+                }
+                $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarScope', 'id' => $id]);
+            }
+            if ($do === 'remove') {
+                $ioId = (int) $request->getParameter('io_id');
+                DB::table('privacy_dsar_object')->where('dsar_id', $id)->where('information_object_id', $ioId)->delete();
+                $this->getUser()->setFlash('success', 'Removed description #' . $ioId . ' from scope.');
+                $this->redirect(['module' => 'privacyAdmin', 'action' => 'dsarScope', 'id' => $id]);
+            }
+        }
+
+        $this->dsar = $dsar;
+        $this->objects = DB::table('privacy_dsar_object as o')
+            ->leftJoin('information_object_i18n as i', function ($j) {
+                $j->on('i.id', '=', 'o.information_object_id')->where('i.culture', '=', 'en');
+            })
+            ->leftJoin('information_object_privacy as p', 'p.information_object_id', '=', 'o.information_object_id')
+            ->where('o.dsar_id', $id)
+            ->orderByDesc('o.created_at')
+            ->get(['o.information_object_id', 'o.created_at', 'i.title', 'p.redaction_status'])
+            ->all();
+    }
+
+    /** Resolve a numeric id or a slug to an information_object id, or null. */
+    protected function resolveIoIdentifier(string $value): ?int
+    {
+        $value = trim($value);
+        if ($value === '') {
+            return null;
+        }
+        if (ctype_digit($value)) {
+            return DB::table('information_object')->where('id', (int) $value)->exists() ? (int) $value : null;
+        }
+        $oid = DB::table('slug')->where('slug', $value)->value('object_id');
+        if ($oid && DB::table('information_object')->where('id', $oid)->exists()) {
+            return (int) $oid;
+        }
+
+        return null;
+    }
+
+    /** Pre-populate privacy profiles for every IO currently in a DSAR's scope. */
+    protected function prepopulateDsarScope(int $dsarId): void
+    {
+        try {
+            $svc = $this->redactionService();
+            $ioIds = DB::table('privacy_dsar_object')->where('dsar_id', $dsarId)->pluck('information_object_id');
+            foreach ($ioIds as $iid) {
+                $pid = $svc->prepopulateForDsar((int) $iid, $this->getUserId());
+                DB::table('privacy_dsar_object')->where('dsar_id', $dsarId)->where('information_object_id', (int) $iid)
+                    ->update(['privacy_id' => $pid]);
+            }
+        } catch (\Throwable $e) {
+            // never block the DSAR update
         }
     }
 }

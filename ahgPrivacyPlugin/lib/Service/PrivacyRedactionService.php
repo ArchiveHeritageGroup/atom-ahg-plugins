@@ -119,6 +119,40 @@ class PrivacyRedactionService
         return $p ? (int) $p->id : $this->setProfile($ioId, ['redaction_status' => 'partial'], $userId);
     }
 
+    /**
+     * #130 AC#5 - DSAR integration. Pre-populate a privacy profile for an IO
+     * that is in scope for a data subject access request so the officer can
+     * mark fields for redaction as part of the response. Idempotent: an
+     * existing profile is left untouched. New profiles start at status
+     * 'pending' with the "access request" reason.
+     *
+     * @return int information_object_privacy.id
+     */
+    public function prepopulateForDsar(int $ioId, ?int $userId = null): int
+    {
+        $existing = $this->getProfile($ioId);
+        if ($existing) {
+            return (int) $existing->id;
+        }
+
+        $reasonId = DB::table('privacy_reason')->where('code', 'access_request')->value('id');
+
+        $id = (int) DB::table('information_object_privacy')->insertGetId([
+            'information_object_id' => $ioId,
+            'privacy_reason_id' => $reasonId !== null ? (int) $reasonId : null,
+            'redaction_status' => 'pending',
+            'legal_basis_reference' => 'DSAR / data subject access request',
+            'applied_by' => $userId,
+            'applied_at' => date('Y-m-d H:i:s'),
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->log($ioId, $userId, 'dsar_prepopulated', null);
+
+        return $id;
+    }
+
     // ── Redaction engine (apply to public/unauthorised viewers only) ────
 
     /**
