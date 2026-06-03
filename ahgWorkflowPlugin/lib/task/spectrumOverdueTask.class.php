@@ -29,7 +29,7 @@ class spectrumOverdueTask extends sfBaseTask
         $this->detailedDescription = $this->briefDescription;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $configuration = ProjectConfiguration::getApplicationConfiguration($options['application'], $options['env'], true);
         sfContext::createInstance($configuration);

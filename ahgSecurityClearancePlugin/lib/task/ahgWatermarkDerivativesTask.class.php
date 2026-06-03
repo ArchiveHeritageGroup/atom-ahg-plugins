@@ -18,7 +18,7 @@ class ahgWatermarkDerivativesTask extends arBaseTask
         $this->briefDescription = 'Apply watermarks to derivative images';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

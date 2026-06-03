@@ -20,7 +20,7 @@ class aiConditionStatusTask extends sfBaseTask
         $this->detailedDescription = 'Checks connectivity to the AI condition assessment FastAPI service.';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

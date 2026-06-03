@@ -52,7 +52,7 @@ ed25519.private backed up: losing it means signatures can no longer be minted
 EOD;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $signer = new InferenceSigner();
 

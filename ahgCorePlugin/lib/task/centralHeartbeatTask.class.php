@@ -35,7 +35,7 @@ ahg_central_enabled is off. Run daily via cron.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

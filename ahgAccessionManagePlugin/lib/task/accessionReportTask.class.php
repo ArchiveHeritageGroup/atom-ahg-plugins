@@ -28,7 +28,7 @@ The [accession:report|INFO] task generates accession reports.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         // Bootstrap Laravel Query Builder
         $frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';

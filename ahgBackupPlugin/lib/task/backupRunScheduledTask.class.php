@@ -34,7 +34,7 @@ Designed to be called by cron every hour:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

@@ -30,7 +30,7 @@ The [central:ping|INFO] task checks that this install can reach AHG Central.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

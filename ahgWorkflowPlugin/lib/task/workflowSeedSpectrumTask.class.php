@@ -34,7 +34,7 @@ class workflowSeedSpectrumTask extends sfBaseTask
         $this->detailedDescription = $this->briefDescription;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $this->bootDatabaseConnection($options);
 

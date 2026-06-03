@@ -28,7 +28,7 @@ Examples:
 EOD;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();

@@ -50,7 +50,7 @@ The generated viewer opens in any modern browser with no server or internet.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();

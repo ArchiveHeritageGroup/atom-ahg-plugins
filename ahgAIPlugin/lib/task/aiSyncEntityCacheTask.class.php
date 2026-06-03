@@ -49,7 +49,7 @@ Examples:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         // Initialize framework database connection
         \AhgCore\Core\AhgDb::init();

@@ -95,7 +95,7 @@ deferred to a follow-up - Symfony 1.4 has no first-class queue.
 EOF;
     }
 
-    protected function execute($arguments = array(), $options = array())
+    public function execute($arguments = array(), $options = array())
     {
         parent::execute($arguments, $options);
 

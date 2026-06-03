@@ -22,7 +22,7 @@ class sharepointRenewSubscriptionsTask extends sfBaseTask
         $this->briefDescription = 'Renew Graph webhook subscriptions expiring within 12h';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         require_once __DIR__ . '/../Services/GraphClientService.php';
         require_once __DIR__ . '/../Services/GraphTokenCache.php';

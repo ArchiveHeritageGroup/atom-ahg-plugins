@@ -24,7 +24,7 @@ to 'expired' for patrons past their expiry date.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         QubitSearch::disable();

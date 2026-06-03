@@ -36,7 +36,7 @@ Add this to a cron job for automatic cleanup.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();

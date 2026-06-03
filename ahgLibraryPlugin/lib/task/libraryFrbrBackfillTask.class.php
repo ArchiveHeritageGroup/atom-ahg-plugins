@@ -36,7 +36,7 @@ EOT;
         $this->addOption('batch', null, sfCommandOption::PARAMETER_REQUIRED, 'Rows per MySQL batch', 500);
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $this->logSection('frbr-backfill', 'Starting FRBR work-key backfill');
 

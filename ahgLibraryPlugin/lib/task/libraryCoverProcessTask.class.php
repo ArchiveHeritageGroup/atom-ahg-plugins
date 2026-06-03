@@ -21,7 +21,7 @@ Downloads book covers from Open Library for queued items and saves locally.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         

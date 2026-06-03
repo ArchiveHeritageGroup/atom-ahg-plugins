@@ -29,7 +29,7 @@ class versionBackfillTask extends sfBaseTask
         $this->briefDescription = 'Create v1 baseline versions for entities that have no version history';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $entities = array_map('trim', explode(',', (string) ($options['entity'] ?? '')));
         $entities = array_filter($entities, fn ($e) => in_array($e, ['information_object', 'actor'], true));

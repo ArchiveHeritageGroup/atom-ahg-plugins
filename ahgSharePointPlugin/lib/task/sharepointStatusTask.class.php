@@ -20,7 +20,7 @@ class sharepointStatusTask extends sfBaseTask
         $this->briefDescription = 'Print SharePoint integration health (tenants, drives, subs, queue depth)';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $db = \Illuminate\Database\Capsule\Manager::class;
 

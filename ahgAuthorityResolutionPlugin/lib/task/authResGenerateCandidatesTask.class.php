@@ -68,7 +68,7 @@ shared verbatim with the Laravel side so rankings converge.
 EOF;
     }
 
-    protected function execute($arguments = array(), $options = array())
+    public function execute($arguments = array(), $options = array())
     {
         parent::execute($arguments, $options);
 

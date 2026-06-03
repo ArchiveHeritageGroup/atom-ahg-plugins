@@ -38,7 +38,7 @@ unless ahg_central_enabled AND ahg_central_error_sync are both on.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

@@ -59,7 +59,7 @@ Idempotent - safe to run on a cron schedule (every 5 minutes recommended).
 EOD;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();

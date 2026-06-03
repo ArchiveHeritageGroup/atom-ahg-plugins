@@ -28,7 +28,7 @@ class sharepointAutoIngestTask extends sfBaseTask
         $this->briefDescription = 'Cron-driven SharePoint→AtoM ingest';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $base = __DIR__ . '/../Services';
         require_once $base . '/GraphTokenCache.php';

@@ -31,7 +31,7 @@ Returns exit code 0 if all files pass verification, 1 if errors are found.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

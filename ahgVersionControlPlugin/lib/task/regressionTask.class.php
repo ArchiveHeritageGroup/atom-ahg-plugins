@@ -52,7 +52,7 @@ class regressionTask extends sfBaseTask
         $this->briefDescription = 'AtoM-side regression sweep for F1/F2/F3 (GCIS RFB-001 wiring assertions)';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         // Bootstrap Capsule for Illuminate\Database queries.
         $cfg = ProjectConfiguration::getApplicationConfiguration('qubit', 'cli', false);

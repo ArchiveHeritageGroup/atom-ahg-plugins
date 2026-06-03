@@ -42,7 +42,7 @@ EOF;
      * @param mixed $arguments
      * @param mixed $options
      */
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

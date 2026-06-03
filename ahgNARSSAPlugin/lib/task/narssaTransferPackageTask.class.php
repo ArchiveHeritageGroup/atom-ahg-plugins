@@ -33,7 +33,7 @@ class narssaTransferPackageTask extends sfBaseTask
         $this->briefDescription = 'Build a NARSSA-compliant transfer package (METS + EAD2002 + files)';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $cfg = ProjectConfiguration::getApplicationConfiguration('qubit', 'cli', false);
         sfContext::createInstance($cfg);

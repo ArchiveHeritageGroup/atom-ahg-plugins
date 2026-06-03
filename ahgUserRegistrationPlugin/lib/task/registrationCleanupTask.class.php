@@ -27,7 +27,7 @@ Run this command daily via cron to keep the registration queue clean.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

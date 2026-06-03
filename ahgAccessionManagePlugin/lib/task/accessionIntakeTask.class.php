@@ -36,7 +36,7 @@ The [accession:intake|INFO] task manages the accession intake queue.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         // Bootstrap Laravel Query Builder
         $frameworkBootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';

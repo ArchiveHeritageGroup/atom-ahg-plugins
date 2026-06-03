@@ -36,7 +36,7 @@ Call with --fix to attempt automatic fixes:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

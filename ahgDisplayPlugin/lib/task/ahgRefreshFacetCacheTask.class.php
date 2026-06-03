@@ -34,7 +34,7 @@ Call it with:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $databaseManager = new sfDatabaseManager($this->configuration);
         $conn = DB::connection()->getPdo();

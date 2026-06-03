@@ -43,7 +43,7 @@ Results are logged to the ric_sync_log table for the dashboard.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

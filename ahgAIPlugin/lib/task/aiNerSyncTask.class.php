@@ -26,7 +26,7 @@ Push NER entity corrections to central training server for model improvement.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         \AhgCore\Core\AhgDb::init();
         require_once dirname(__FILE__) . '/../NerTrainingSync.class.php';

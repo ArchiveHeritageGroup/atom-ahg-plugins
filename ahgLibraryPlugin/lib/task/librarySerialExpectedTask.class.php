@@ -24,7 +24,7 @@ their frequency and issues_per_year. Also reports missing/late issues.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         QubitSearch::disable();

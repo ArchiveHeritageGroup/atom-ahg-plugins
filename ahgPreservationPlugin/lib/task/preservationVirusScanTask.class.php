@@ -37,7 +37,7 @@ ClamAV must be installed:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

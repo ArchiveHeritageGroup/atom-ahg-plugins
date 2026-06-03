@@ -22,7 +22,7 @@ and lend requests where partner libraries haven't returned items.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         QubitSearch::disable();

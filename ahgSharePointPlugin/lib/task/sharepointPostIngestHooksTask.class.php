@@ -28,7 +28,7 @@ class sharepointPostIngestHooksTask extends sfBaseTask
         $this->briefDescription = 'Run compliance hooks (sp_xref + version baseline + classification + AIP + PII) on IOs from a given ingest job';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $cfg = ProjectConfiguration::getApplicationConfiguration('qubit', 'cli', false);
         sfContext::createInstance($cfg);

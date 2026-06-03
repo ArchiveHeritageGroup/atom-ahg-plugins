@@ -25,7 +25,7 @@ class versionSnapshotTask extends sfBaseTask
         $this->briefDescription = 'Print a SnapshotBuilder JSON snapshot for an entity (smoke test)';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $entity = (string) ($options['entity'] ?? '');
         $id = (int) ($options['id'] ?? 0);

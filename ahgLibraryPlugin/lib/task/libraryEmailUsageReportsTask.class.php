@@ -47,7 +47,7 @@ emails them as JSON + TSV attachments to the recipients in ahg_settings.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         QubitSearch::disable();

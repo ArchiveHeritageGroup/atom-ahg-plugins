@@ -26,7 +26,7 @@ class versionCaptureTask extends sfBaseTask
         $this->briefDescription = 'Build snapshot + write as the next version for an entity';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $entity = (string) ($options['entity'] ?? '');
         $id = (int) ($options['id'] ?? 0);

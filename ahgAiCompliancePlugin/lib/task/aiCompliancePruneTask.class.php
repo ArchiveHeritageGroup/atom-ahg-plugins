@@ -50,7 +50,7 @@ ahg_settings (or settings_i18n with key ai_compliance_retention_years).
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         $this->bootFramework();

@@ -27,7 +27,7 @@ class versionDiffTask extends sfBaseTask
         $this->briefDescription = 'Print a structured diff between two stored versions';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $entity = (string) ($options['entity'] ?? '');
         $id = (int) ($options['id'] ?? 0);

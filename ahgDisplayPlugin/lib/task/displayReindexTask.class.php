@@ -32,7 +32,7 @@ Options:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $context = sfContext::createInstance($this->configuration);
         

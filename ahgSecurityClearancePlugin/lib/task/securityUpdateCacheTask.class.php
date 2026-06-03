@@ -14,7 +14,7 @@ class securityUpdateCacheTask extends arBaseTask
         $this->briefDescription = 'Update security classification cache for Cantaloupe watermarks';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
         

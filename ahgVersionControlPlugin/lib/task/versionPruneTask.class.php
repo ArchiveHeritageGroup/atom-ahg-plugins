@@ -34,7 +34,7 @@ class versionPruneTask extends sfBaseTask
         $this->briefDescription = 'Apply retention rules to version history (preserves v1 + most-recent N).';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $entities = array_filter(
             array_map('trim', explode(',', (string) ($options['entity'] ?? ''))),

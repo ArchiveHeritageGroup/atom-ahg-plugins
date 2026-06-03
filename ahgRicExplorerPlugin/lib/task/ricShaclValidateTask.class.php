@@ -37,7 +37,7 @@ not available the task falls back gracefully and records an unverified report.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

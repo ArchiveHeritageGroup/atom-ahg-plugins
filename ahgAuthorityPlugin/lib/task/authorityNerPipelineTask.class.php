@@ -36,7 +36,7 @@ for persons, organizations, and places above the confidence threshold.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

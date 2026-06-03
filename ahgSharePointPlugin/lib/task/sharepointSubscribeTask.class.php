@@ -25,7 +25,7 @@ class sharepointSubscribeTask extends sfBaseTask
         $this->briefDescription = 'Create Graph webhook subscriptions (driveItem + list) for a drive';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         if (empty($options['drive'])) {
             throw new \InvalidArgumentException('--drive=<id> required');

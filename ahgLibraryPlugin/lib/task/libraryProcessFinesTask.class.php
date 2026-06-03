@@ -22,7 +22,7 @@ Respects grace periods and fine caps. Run daily via cron.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         QubitSearch::disable();

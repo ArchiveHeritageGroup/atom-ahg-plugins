@@ -22,7 +22,7 @@ The [ai:install|INFO] task creates the database tables required by ahgAIPlugin.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $this->logSection('ai', 'Installing ahgAIPlugin...');
 

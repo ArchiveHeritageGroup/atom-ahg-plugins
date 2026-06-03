@@ -24,7 +24,7 @@ class sharepointIngestEventTask extends sfBaseTask
         $this->briefDescription = 'Process one inbound SharePoint webhook event';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         if (empty($options['event-id'])) {
             throw new \InvalidArgumentException('--event-id=<id> required');

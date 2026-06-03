@@ -68,7 +68,7 @@ Examples:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         // Initialize
         sfContext::createInstance($this->configuration);

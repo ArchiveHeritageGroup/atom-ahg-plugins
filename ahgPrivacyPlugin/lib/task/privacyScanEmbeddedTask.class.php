@@ -38,7 +38,7 @@ dam_iptc_metadata) for PII and records findings in ahg_pii_finding_embedded.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

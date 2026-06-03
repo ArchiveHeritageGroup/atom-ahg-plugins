@@ -24,7 +24,7 @@ class aiConditionBulkScanTask extends sfBaseTask
         $this->detailedDescription = 'Scans all digital objects in a repository or collection through the AI condition service.';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

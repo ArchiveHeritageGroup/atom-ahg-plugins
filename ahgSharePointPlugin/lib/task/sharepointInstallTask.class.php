@@ -25,7 +25,7 @@ class sharepointInstallTask extends sfBaseTask
         $this->briefDescription = 'Install ahgSharePointPlugin schema (idempotent)';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $this->logSection('sharepoint', 'install starting');
         $dryRun = !empty($options['dry-run']);

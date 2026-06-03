@@ -20,7 +20,7 @@ class aiConditionInstallTask extends sfBaseTask
         $this->detailedDescription = 'Creates database tables for the AI-powered condition assessment plugin.';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
 

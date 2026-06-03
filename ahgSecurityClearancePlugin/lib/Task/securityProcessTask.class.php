@@ -41,7 +41,7 @@ Add to crontab for daily execution:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = []): int
+    public function execute($arguments = [], $options = []): int
     {
         parent::execute($arguments, $options);
 

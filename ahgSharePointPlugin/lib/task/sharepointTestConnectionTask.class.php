@@ -24,7 +24,7 @@ class sharepointTestConnectionTask extends sfBaseTask
         $this->briefDescription = 'Test Microsoft Graph connectivity for a configured tenant';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         if (empty($options['tenant'])) {
             throw new \InvalidArgumentException('--tenant=<id> required');

@@ -32,7 +32,7 @@ Cron setup (every 5 minutes):
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         $bootstrap = sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';

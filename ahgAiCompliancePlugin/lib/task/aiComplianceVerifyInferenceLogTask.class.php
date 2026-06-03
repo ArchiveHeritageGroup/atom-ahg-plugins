@@ -45,7 +45,7 @@ registered public key, and reports tampering at the first broken receipt.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         $this->bootFramework();

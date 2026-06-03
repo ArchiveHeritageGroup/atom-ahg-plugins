@@ -46,7 +46,7 @@ More info: https://www.nationalarchives.gov.uk/pronom/
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

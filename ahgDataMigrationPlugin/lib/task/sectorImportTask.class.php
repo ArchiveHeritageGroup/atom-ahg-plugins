@@ -65,7 +65,7 @@ abstract class sectorImportTask extends arBaseTask
         ]);
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         parent::execute($arguments, $options);
 

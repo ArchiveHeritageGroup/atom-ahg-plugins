@@ -58,7 +58,7 @@ that — used before Task 5 (review UI) ships to produce real decisions.
 EOF;
     }
 
-    protected function execute($arguments = array(), $options = array())
+    public function execute($arguments = array(), $options = array())
     {
         parent::execute($arguments, $options);
 

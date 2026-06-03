@@ -38,7 +38,7 @@ object_term_relation. Mirrors ISBN-capture logic for retroactive data.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         QubitSearch::disable();

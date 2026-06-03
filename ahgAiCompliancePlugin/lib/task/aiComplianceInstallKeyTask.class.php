@@ -38,7 +38,7 @@ is also registered in ai_inference_key so the verifier and the
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         // Ensure Symfony app context + Capsule DB are booted.
         sfContext::createInstance($this->configuration);

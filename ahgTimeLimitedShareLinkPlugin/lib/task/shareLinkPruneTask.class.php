@@ -33,7 +33,7 @@ class shareLinkPruneTask extends sfBaseTask
         $this->briefDescription = 'Apply retention rules to share-link tokens + access log.';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $libDir = realpath(__DIR__ . '/../Services');
         require_once $libDir . '/PruneService.php';

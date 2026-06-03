@@ -27,7 +27,7 @@ Use --keep-data to preserve database tables:
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         $this->logSection('ai', 'Uninstalling ahgAIPlugin...');
 

@@ -139,7 +139,7 @@ help_article and help_section database tables for the online help system.
 EOF;
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();

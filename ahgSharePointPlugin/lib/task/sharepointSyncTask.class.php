@@ -33,7 +33,7 @@ class sharepointSyncTask extends sfBaseTask
         $this->briefDescription = 'Delta-poll one or all ingest-enabled SharePoint drives';
     }
 
-    protected function execute($arguments = [], $options = [])
+    public function execute($arguments = [], $options = [])
     {
         require_once __DIR__ . '/../Services/GraphTokenCache.php';
         require_once __DIR__ . '/../Services/GraphClientService.php';
