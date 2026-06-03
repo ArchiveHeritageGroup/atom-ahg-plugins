@@ -17,6 +17,27 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
         $this->dispatcher->connect('response.filter_content', [$this, 'addAssets']);
+        // #130: field-level redaction of the IO view for unauthorised viewers.
+        $this->dispatcher->connect('response.filter_content', [$this, 'applyFieldRedaction']);
+    }
+
+    /**
+     * #130: apply field-level redaction to the rendered information-object view
+     * for public / non-staff viewers. Staff and edit/API paths are untouched.
+     */
+    public function applyFieldRedaction(sfEvent $event, $content)
+    {
+        try {
+            $context = sfContext::getInstance();
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyRedactionService.php';
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/RedactionContentFilter.php';
+
+            return \ahgPrivacyPlugin\Service\RedactionContentFilter::filter(
+                $content, $context->getRequest(), $context->getUser()
+            );
+        } catch (\Throwable $e) {
+            return $content;
+        }
     }
 
     /**

@@ -238,6 +238,12 @@
                             </a>
                         </div>
                         <div class="col-md-2 col-6 text-center mb-3">
+                            <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'redactionManage']); ?>" class="btn btn-outline-dark btn-lg w-100">
+                                <i class="fas fa-eye-slash d-block mb-2 fa-2x"></i>
+                                <?php echo __('Field redaction'); ?>
+                            </a>
+                        </div>
+                        <div class="col-md-2 col-6 text-center mb-3">
                             <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'officerList']); ?>" class="btn btn-outline-secondary btn-lg w-100">
                                 <i class="fas fa-user-tie d-block mb-2 fa-2x"></i>
                                 <?php echo __('Officers'); ?>

@@ -2168,4 +2168,53 @@ class privacyAdminActions extends AhgController
         $this->getUser()->setFlash('success', 'DPIA archived');
         $this->redirect(['module' => 'privacyAdmin', 'action' => 'dpiaList']);
     }
+
+    // =====================
+    // Field-level redaction management (#130)
+    // =====================
+
+    protected function redactionService(): \ahgPrivacyPlugin\Service\PrivacyRedactionService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyRedactionService.php';
+        require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/RedactionContentFilter.php';
+
+        return new \ahgPrivacyPlugin\Service\PrivacyRedactionService();
+    }
+
+    public function executeRedactionManage($request)
+    {
+        $service = $this->redactionService();
+
+        if ($request->isMethod('post')) {
+            $do = $request->getParameter('do');
+            if ($do === 'add') {
+                $ioId = (int) $request->getParameter('io_id');
+                if ($ioId > 0) {
+                    $service->setField($ioId, $request->getPostParameters(), $this->getUserId());
+                    $this->getUser()->setFlash('success', 'Field redaction saved');
+                    $this->redirect(['module' => 'privacyAdmin', 'action' => 'redactionManage', 'id' => $ioId]);
+                }
+                $this->getUser()->setFlash('error', 'A valid information object id is required');
+                $this->redirect(['module' => 'privacyAdmin', 'action' => 'redactionManage']);
+            }
+            if ($do === 'remove') {
+                $service->removeField((int) $request->getParameter('field_id'), $this->getUserId());
+                $this->getUser()->setFlash('success', 'Field redaction removed');
+                $this->redirect(['module' => 'privacyAdmin', 'action' => 'redactionManage', 'id' => $request->getParameter('id')]);
+            }
+        }
+
+        $this->profiled = $service->listProfiledObjects();
+        $this->reasons = $service->getReasons();
+        $this->fieldNames = \ahgPrivacyPlugin\Service\RedactionContentFilter::supportedFields();
+
+        $ioId = (int) $request->getParameter('id', 0);
+        $this->ioId = $ioId;
+        $this->fields = $ioId ? $service->getFields($ioId) : [];
+        $this->ioTitle = null;
+        if ($ioId) {
+            $this->ioTitle = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+                ->where('id', $ioId)->where('culture', 'en')->value('title');
+        }
+    }
 }
