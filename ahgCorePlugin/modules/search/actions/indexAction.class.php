@@ -26,6 +26,17 @@ class SearchIndexAction extends DefaultBrowseAction
     {
         parent::execute($request);
 
+        // An empty/missing query produces an invalid OpenSearch query_string
+        // ("does not support an empty query") and an uncaught 500. This XHR/treeview
+        // search needs a query term; with none there is nothing to match, so treat it
+        // like the no-results case below (404). Crawlers hit /search with no query
+        // param (e.g. /search?collection=1493), which was the source of the 500s.
+        if ('' === trim((string) $request->query)) {
+            $this->forward404();
+
+            return;
+        }
+
         $this->search->queryBool->addMust(
             arElasticSearchPluginUtil::generateQueryString(
                 $request->query,
