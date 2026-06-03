@@ -21,6 +21,17 @@ class apiv2DescriptionsBrowseAction extends AhgApiController
 
         $result = $this->repository->getDescriptions($params);
 
+        // #130 refinement 2 - redact the list layer too (title is the redactable
+        // field exposed here). Admin-scoped keys bypass; no-ops per-IO when no
+        // rules exist.
+        if (!$this->hasScope('admin') && !empty($result['results'])) {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/PrivacyRedactionService.php';
+            $svc = new \ahgPrivacyPlugin\Service\PrivacyRedactionService();
+            foreach ($result['results'] as $k => $item) {
+                $result['results'][$k] = $svc->redactPayload((array) $item);
+            }
+        }
+
         return $this->success($result);
     }
 }

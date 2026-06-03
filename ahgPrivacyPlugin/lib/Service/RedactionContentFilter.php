@@ -32,12 +32,30 @@ class RedactionContentFilter
         'appraisal' => 'appraisal',
         'location_of_originals' => 'location_of_originals',
         'location_of_copies' => 'location_of_copies',
+        // #130 refinement 1 — additional i18n text fields that render verbatim.
+        'title' => 'title',
+        'alternate_title' => 'alternate_title',
+        'edition' => 'edition',
+        'extent_and_medium' => 'extent_and_medium',
+        'finding_aids' => 'finding_aids',
+        'rules' => 'rules',
+        'revision_history' => 'revision_history',
+        'institution_responsible_identifier' => 'institution_responsible_identifier',
     ];
 
-    /** Field names the filter can currently redact on the public view (admin UI). */
+    /**
+     * #130 refinement 1 — event-date / related-entity fields. These render on
+     * the IO view but live outside information_object_i18n, so each is loaded
+     * from its own source. (Short values such as a bare year are not ideal for
+     * whole-value replacement; prefer them only where the rendered string is
+     * distinctive, e.g. a full dates-of-existence phrase.)
+     */
+    private const EXTRA_FIELDS = ['creator_dates', 'event_dates'];
+
+    /** Field names the filter can redact on the public view (admin UI picker). */
     public static function supportedFields(): array
     {
-        return array_keys(self::I18N_FIELDS);
+        return array_merge(array_keys(self::I18N_FIELDS), self::EXTRA_FIELDS);
     }
 
     /** Modules that render a single IO description (per descriptive standard). */
@@ -58,10 +76,10 @@ class RedactionContentFilter
                 return $content;
             }
 
-            // Staff see the full record. (Authenticated researchers with an active
-            // access agreement are a planned refinement — for now only staff bypass.)
-            if ($user->isAuthenticated()
-                && ($user->hasCredential('administrator') || $user->hasCredential('editor'))) {
+            // Staff, and authenticated researchers with an active access
+            // agreement, see the full record (#130 refinement 3). The rule
+            // lives in RedactionAccess so the web view and the REST API agree.
+            if (RedactionAccess::userMaySeeUnredacted($user)) {
                 return $content;
             }
 
@@ -81,6 +99,7 @@ class RedactionContentFilter
             }
 
             $values = self::loadI18nValues($ioId, $fields);
+            $values += self::loadExtraValues($ioId, $fields);
             if (empty($values)) {
                 return $content;
             }
@@ -131,6 +150,51 @@ class RedactionContentFilter
         foreach ($cols as $field => $col) {
             if (!empty($row->$col)) {
                 $out[$field] = $row->$col;
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * #130 refinement 1 — load event-date / related-entity field values that
+     * render on the IO view but live outside information_object_i18n.
+     *
+     * @param array<int,object> $fields
+     * @return array<string,string>
+     */
+    private static function loadExtraValues(int $ioId, array $fields): array
+    {
+        $want = [];
+        foreach ($fields as $f) {
+            $want[$f->field_name] = true;
+        }
+        $out = [];
+
+        // Creator dates of existence (the actor linked via a creation event).
+        if (!empty($want['creator_dates'])) {
+            $val = DB::table('event as e')
+                ->join('actor_i18n as ai', 'ai.id', '=', 'e.actor_id')
+                ->where('e.object_id', $ioId)
+                ->whereNotNull('e.actor_id')
+                ->where('ai.culture', 'en')
+                ->whereNotNull('ai.dates_of_existence')
+                ->value('ai.dates_of_existence');
+            if (!empty($val)) {
+                $out['creator_dates'] = $val;
+            }
+        }
+
+        // Event display date string (creation / accumulation dates on the IO).
+        if (!empty($want['event_dates'])) {
+            $val = DB::table('event_i18n as ei')
+                ->join('event as e', 'e.id', '=', 'ei.id')
+                ->where('e.object_id', $ioId)
+                ->where('ei.culture', 'en')
+                ->whereNotNull('ei.date')
+                ->value('ei.date');
+            if (!empty($val)) {
+                $out['event_dates'] = $val;
             }
         }
 

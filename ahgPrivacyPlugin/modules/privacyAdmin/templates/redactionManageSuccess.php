@@ -5,6 +5,7 @@ $fieldNames = $sf_data->getRaw('fieldNames');
 $fields = $sf_data->getRaw('fields');
 $ioId = $sf_data->getRaw('ioId');
 $ioTitle = $sf_data->getRaw('ioTitle');
+$visualRegions = $sf_data->getRaw('visualRegions');
 ?>
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -23,6 +24,14 @@ $ioTitle = $sf_data->getRaw('ioTitle');
             <div class="card mb-4"><div class="card-header fw-bold"><?php echo $ioId ? __('Redacted fields for IO #').$ioId : __('Add a field redaction'); ?></div>
             <div class="card-body">
                 <?php if ($ioId && $ioTitle !== null): ?><p class="text-muted"><?php echo htmlspecialchars((string) $ioTitle); ?></p><?php endif; ?>
+
+                <?php if ($ioId && !empty($visualRegions)): ?>
+                <div class="alert alert-info py-2 small">
+                    <i class="fas fa-image me-1"></i>
+                    <?php echo __('This description also has %count% visual redaction region(s) on its digital object.', ['%count%' => (int) $visualRegions]); ?>
+                    <a href="<?php echo url_for(['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $ioId]); ?>" class="alert-link"><?php echo __('Open visual redaction editor'); ?></a>
+                </div>
+                <?php endif; ?>
 
                 <?php if ($ioId && !empty($fields)): ?>
                 <table class="table table-sm align-middle">

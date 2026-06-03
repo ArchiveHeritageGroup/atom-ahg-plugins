@@ -2221,9 +2221,21 @@ class privacyAdminActions extends AhgController
         $this->ioId = $ioId;
         $this->fields = $ioId ? $service->getFields($ioId) : [];
         $this->ioTitle = null;
+        $this->visualRegions = 0;
         if ($ioId) {
             $this->ioTitle = \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
                 ->where('id', $ioId)->where('culture', 'en')->value('title');
+
+            // #130 refinement 4 - consistency with the visual (digital-object)
+            // redaction system: surface how many visual regions exist on this
+            // description so the two redaction layers are managed together.
+            try {
+                require_once $this->config('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/Service/VisualRedactionService.php';
+                $this->visualRegions = (new \ahgPrivacyPlugin\Service\VisualRedactionService())
+                    ->getRegionsForObject($ioId)->count();
+            } catch (\Throwable $e) {
+                $this->visualRegions = 0;
+            }
         }
     }
 

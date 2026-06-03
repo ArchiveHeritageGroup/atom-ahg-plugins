@@ -180,6 +180,21 @@ class PrivacyRedactionService
         return $values;
     }
 
+    /**
+     * #130 refinement 2 - redact a flat API payload (a field_name => value map
+     * that also carries an 'id' key) for the REST layer. No-ops when the IO
+     * has no field rules, so the API output is unchanged for the vast majority
+     * of descriptions. Returns the payload with matching fields redacted.
+     */
+    public function redactPayload(array $payload): array
+    {
+        if (empty($payload['id'])) {
+            return $payload;
+        }
+
+        return $this->applyRedaction((int) $payload['id'], $payload, null, false);
+    }
+
     public function applyType(string $value, string $type, ?string $pattern): string
     {
         switch ($type) {
