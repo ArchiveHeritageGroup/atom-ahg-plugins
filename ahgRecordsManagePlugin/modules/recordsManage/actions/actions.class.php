@@ -22,6 +22,54 @@ class recordsManageActions extends sfActions
         return new \AhgRecordsManage\Services\FilePlanService();
     }
 
+    protected function emailService()
+    {
+        require_once dirname(__DIR__, 3) . '/lib/Services/EmailCaptureService.php';
+
+        return new \AhgRecordsManage\Services\EmailCaptureService();
+    }
+
+    public function executeEmailCapture($request)
+    {
+        $svc = $this->emailService();
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+
+        if ($request->isMethod('post')) {
+            $do = $request->getParameter('do');
+            try {
+                if ($do === 'upload') {
+                    $file = $request->getFiles('eml');
+                    if (!empty($file['tmp_name']) && is_uploaded_file($file['tmp_name'])) {
+                        $res = $svc->captureFromEml($file['tmp_name'], $userId);
+                        $this->getUser()->setFlash('success', $res['duplicate']
+                            ? 'Email already captured (duplicate Message-ID)'
+                            : 'Email captured');
+                    } else {
+                        $this->getUser()->setFlash('error', 'No .eml file uploaded');
+                    }
+                } elseif ($do === 'classify') {
+                    $svc->classify((int) $request->getParameter('id'),
+                        (int) $request->getParameter('fileplan_node_id'),
+                        $request->getParameter('disposal_class_id') ? (int) $request->getParameter('disposal_class_id') : null,
+                        $userId);
+                    $this->getUser()->setFlash('success', 'Email classified');
+                } elseif ($do === 'declare') {
+                    $ioId = $svc->declareAsRecord((int) $request->getParameter('id'), $userId);
+                    $this->getUser()->setFlash($ioId ? 'success' : 'error',
+                        $ioId ? 'Declared as record (information object #' . $ioId . ')' : 'Could not declare as record');
+                }
+            } catch (\Throwable $e) {
+                $this->getUser()->setFlash('error', 'Capture failed: ' . $e->getMessage());
+            }
+            $this->redirect(['module' => 'recordsManage', 'action' => 'emailCapture']);
+        }
+
+        $queue = $svc->listQueue(['status' => $request->getParameter('status') ?: null]);
+        $this->rows = $queue['rows'];
+        $this->counts = $svc->counts();
+        $this->nodes = $this->filePlanService()->getNodesForDropdown();
+    }
+
     public function executeFilePlan($request)
     {
         $svc = $this->filePlanService();
