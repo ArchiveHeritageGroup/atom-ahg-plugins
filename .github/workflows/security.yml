@@ -95,6 +95,140 @@ jobs:
           php-version: '8.3'
           tools: phpstan
 
+      - name: Build PHPStan autoload bootstrap
+        run: |
+          # PHPStan needs to resolve framework/ORM classes that are only available
+          # via the AtoM bootstrap (Symfony 1.4, Propel Qubit*, Illuminate Capsule,
+          # AtoM arBase* task/job bases, custom AhgController bases, Zend,
+          # AtomFramework Console, Monolog/PSR-3, etc). Without these stubs, every
+          # consumer file reports 1000+ "class not found" errors that are not real
+          # code defects. We declare no-op stubs so PHPStan can type-check call
+          # sites; the real classes load at runtime via Propel + Composer autoload.
+          cat > /tmp/phpstan-bootstrap.php <<'PHPEOF'
+          <?php
+          // ============================================================
+          // Symfony 1.4 base classes
+          // ============================================================
+          if (!class_exists('sfBaseTask', false)) { class sfBaseTask { public function logSection($a, $b, $c = 0) {} public function execute($a = array()) {} protected function addOptions(array $o) {} protected $configuration; protected $namespace = 'atom-ahg'; protected $name = 'unknown'; protected $briefDescription = ''; protected $detailedDescription = ''; } }
+          if (!class_exists('sfCommandOption', false)) { class sfCommandOption { const PARAMETER_NONE = 1, PARAMETER_OPTIONAL = 2, PARAMETER_REQUIRED = 3; public function __construct($n = null, $sn = null, $p = null, $d = null, $dv = null) {} } }
+          if (!class_exists('sfCommandArgument', false)) { class sfCommandArgument { const IS_OPTIONAL = 1, IS_REQUIRED = 2; public function __construct($n = null, $m = null, $h = '', $d = null) {} } }
+          if (!class_exists('sfContext', false)) { class sfContext { public static function createInstance($cfg = null) { return new self; } } }
+          if (!class_exists('sfEventDispatcher', false)) { class sfEventDispatcher { public function notify($e) {} public function filter($e, $v) { return $v; } } }
+          if (!class_exists('sfController', false)) { class sfController { public function forward($m, $a) {} public function redirect($url) {} public function renderText($t) {} } }
+          if (!class_exists('sfWebController', false)) { class sfWebController extends sfController {} }
+          if (!class_exists('sfAction', false)) { class sfAction { public function execute($req) {} public function getRequest() {} public function getResponse() {} public function getContext() {} public function getUser() {} public function getController() {} public function forward($m, $a) {} public function redirect($u) {} public function renderText($t) {} public function renderPartial($t, $v = array()) {} public function getFlash($k) { return null; } protected function setFlash($k, $v) {} } }
+          if (!class_exists('sfConfig', false)) { class sfConfig { public static function get($k, $d = null) { return $d; } public static function set($k, $v) {} public static function has($k) { return false; } } }
+          if (!class_exists('sfView', false)) { class sfView { public function execute() {} public function setAttribute($k, $v) {} public function getAttribute($k) { return null; } public function getSlot($k) { return ''; } public function hasSlot($k) { return false; } public function setSlot($k, $v) {} public function render() { return ''; } } }
+          if (!class_exists('sfForm', false)) { class sfForm { protected $validatorSchema; protected $widgetSchema; protected $isBound = false; public function __construct($defaults = array(), $options = array(), $CSRFSecret = null) {} public function bind($vals) {} public function isValid() { return true; } public function getValues() { return array(); } public function getValue($n) { return null; } public function setDefault($n, $v) {} public function getDefault($n) { return null; } public function setDefaults($d) {} public function getErrorSchema() {} } }
+          if (!class_exists('sfFilter', false)) { class sfFilter { public function execute($fc, $args = array()) {} } }
+          if (!class_exists('sfValidatorBase', false)) { class sfValidatorBase { protected $options = array(); protected $messages = array(); public function __construct($options = array(), $messages = array()) {} public function clean($v) { return $v; } public function getOption($n) { return null; } public function setOption($n, $v) {} } }
+          if (!class_exists('sfValidatorString', false)) { class sfValidatorString extends sfValidatorBase { } }
+          if (!class_exists('sfValidatedFile', false)) { class sfValidatedFile { public $path; public function save($f, $o = 0666) {} public function isSaved() { return true; } } }
+          if (!class_exists('sfPager', false)) { class sfPager { protected $page = 1; protected $maxPerPage = 20; protected $lastPage = 1; protected $nbResults = 0; public function init() {} public function getResults() { return array(); } public function getPage() { return $this->page; } public function setPage($p) { $this->page = $p; } public function getMaxPerPage() { return $this->maxPerPage; } public function setMaxPerPage($m) { $this->maxPerPage = $m; } public function getLastPage() { return $this->lastPage; } public function getNbResults() { return $this->nbResults; } } }
+          if (!class_exists('sfPropelPager', false)) { class sfPropelPager extends sfPager { public function init() {} public function getResults() { return array(); } public function setQuery($q) {} public function setTableMethod($m) {} } }
+          if (!class_exists('sfWidgetFormInput', false)) { class sfWidgetFormInput { public function __construct($options = array(), $attributes = array()) {} public function render($n, $v = null, $attributes = array(), $errors = array()) { return ''; } } }
+          if (!class_exists('sfWidgetFormInputFile', false)) { class sfWidgetFormInputFile extends sfWidgetFormInput {} }
+          if (!class_exists('sfWidgetFormSelectRadio', false)) { class sfWidgetFormSelectRadio extends sfWidgetFormInput {} }
+          if (!class_exists('sfWidgetFormSchemaFormatter', false)) { class sfWidgetFormSchemaFormatter { public function format($w) { return ''; } public function setNameFormat($f) {} public function getNameFormat() { return ''; } } }
+          if (!class_exists('sfWebResponse', false)) { class sfWebResponse { public function setContentType($t, $c = null) {} public function setHttpHeader($n, $v, $r = false) {} public function setStatusCode($c) {} public function send() {} public function write($c) {} public function getContent() { return ''; } } }
+          if (!class_exists('sfWebDebugPanel', false)) { class sfWebDebugPanel { public function getTitle() { return ''; } public function getPanelContent() { return ''; } public function getPanelTitle() { return ''; } public function getPanelStyle() { return ''; } } }
+          if (!class_exists('sfTestFunctional', false)) { class sfTestFunctional { public function info($t) {} public function click($n, $args = array()) {} public function checkResponseElement($x, $c = array()) {} public function isStatusCode($c) { return true; } } }
+          if (!class_exists('sfSessionStorage', false)) { class sfSessionStorage { public function initialize($c) {} public function read($k) { return null; } public function write($k, $v) {} public function remove($k) {} public function regenerate($b = false) {} } }
+          if (!class_exists('sfRoute', false)) { class sfRoute { public function __construct($p, $d = array(), $o = array()) {} public function matchesUrl($u) { return false; } public function generate($p, $d = array()) { return ''; } } }
+          if (!class_exists('sfPropelAdminGenerator', false)) { class sfPropelAdminGenerator { public function __construct($cls, $props = array()) {} public function getModuleName() { return ''; } } }
+          if (!class_exists('sfYamlConfigHandler', false)) { class sfYamlConfigHandler { public function execute($cf) { return ''; } public function evaluate($cf) { return array(); } } }
+          if (!class_exists('UniversalClassLoader', false)) { class UniversalClassLoader { public function register() {} public function unregister() {} public function isRegistered() { return true; } public function loadClass($c) {} public function getNamespaces() { return array(); } public function getPrefixes() { return array(); } public function getFallbackDirs() { return array(); } } }
+          // Symfony 1.4 additional classes (used by plugins)
+          if (!class_exists('sfDatabaseManager', false)) { class sfDatabaseManager { public function getDatabase($n = 'propel') {} public function getConnection($n = 'propel') {} public function initialize() {} public function shutdown() {} public function getNames() { return array('propel'); } } }
+          if (!class_exists('sfYaml', false)) { class sfYaml { public static function load($f) { return array(); } public static function dump($d, $n = 2) { return ''; } } }
+          if (!class_exists('sfLogger', false)) { class sfLogger { public function log($m, $p = 0) {} public function info($m) {} public function err($m) {} public function debug($m) {} public function warn($m) {} public static function getInstance() { return new self; } } }
+          if (!class_exists('sfNamespacedParameterHolder', false)) { class sfNamespacedParameterHolder implements ArrayAccess { private $data = array(); public function get($n, $d = null) { return $d; } public function set($n, $v) {} public function has($n) { return false; } public function remove($n) {} public function offsetExists($o): bool { return false; } public function offsetGet($o): mixed { return null; } public function offsetSet($o, $v): void {} public function offsetUnset($o): void {} } }
+          if (!class_exists('sfParameterHolder', false)) { class sfParameterHolder implements ArrayAccess { private $data = array(); public function get($n, $d = null) { return $d; } public function set($n, $v) {} public function has($n) { return false; } public function remove($n) {} public function getAll() { return $this->data; } public function offsetExists($o): bool { return false; } public function offsetGet($o): mixed { return null; } public function offsetSet($o, $v): void {} public function offsetUnset($o): void {} } }
+          if (!class_exists('sfViewConfigHandler', false)) { class sfViewConfigHandler { public function execute($cf) { return ''; } } }
+          if (!class_exists('sfValidatorError', false)) { class sfValidatorError { protected $validator; protected $code; protected $message; public function __construct($v, $c, $m = null) { $this->validator = $v; $this->code = $c; $this->message = $m; } public function getCode() { return $this->code; } public function getMessage() { return $this->message ?? ''; } public function __toString() { return (string) $this->message; } } }
+          if (!class_exists('sfValidatorChoice', false)) { class sfValidatorChoice extends sfValidatorBase { protected function configure($o = array(), $m = array()) {} } }
+          if (!class_exists('sfValidatorFile', false)) { class sfValidatorFile extends sfValidatorBase { protected function configure($o = array(), $m = array()) {} } }
+          if (!class_exists('sfAutoloadAgain', false)) { class sfAutoloadAgain { public static function getInstance() { return new self; } public function loadClass($c) {} public function addDirectory($d) {} public function removeDirectory($d) {} public function register() {} public function unregister() {} } }
+
+          // ============================================================
+          // Zend (legacy) — used by ahgRightsPlugin etc.
+          // ============================================================
+          if (!class_exists('Zend_Acl', false)) { class Zend_Acl { public function addRole($r) {} public function addResource($r) {} public function allow($r = null, $res = null, $priv = null, $a = null) {} public function deny($r = null, $res = null, $priv = null, $a = null) {} public function isAllowed($r = null, $res = null, $priv = null) { return true; } } }
+
+          // ============================================================
+          // AtoM custom base classes (defined in atom-framework)
+          // ============================================================
+          if (!class_exists('arBaseTask', false)) { class arBaseTask extends sfBaseTask { public function log($m) {} public function logSection($a, $b, $c = 0) {} public function execute($a = array()) {} } }
+          if (!class_exists('csvImportBaseTask', false)) { class csvImportBaseTask extends arBaseTask { protected $options = array(); public function setCsvSettings($s) {} } }
+          if (!class_exists('exportBulkBaseTask', false)) { class exportBulkBaseTask extends arBaseTask { public function setExportFormat($f) {} } }
+          if (!class_exists('i18nTransformBaseTask', false)) { class i18nTransformBaseTask extends arBaseTask { } }
+          if (!class_exists('arBaseJob', false)) { class arBaseJob { public function execute($p = null) {} public function getCliArgs() { return array(); } } }
+          if (!class_exists('arExportJob', false)) { class arExportJob extends arBaseJob { } }
+          if (!class_exists('arInformationObjectExportJob', false)) { class arInformationObjectExportJob extends arBaseJob { } }
+          if (!class_exists('arActorExportJob', false)) { class arActorExportJob extends arBaseJob { } }
+          if (!class_exists('CsvBaseValidator', false)) { class CsvBaseValidator { public $column; public function __construct($col) { $this->column = $col; } public function test($r) { return true; } public function getInvalidMessage() { return ''; } } }
+          if (!class_exists('AhgController', false)) { class AhgController { public $context; public $request; public $response; public $flash; public function __construct($ctx = null, $req = null, $res = null) { $this->context = $ctx; $this->request = $req; $this->response = $res; } public function forward($m, $a) {} public function redirect($u) {} public function renderText($t) {} public function renderPartial($t, $v = array()) {} public function getUser() {} protected function getContext() { return $this->context; } protected function getRequest() { return $this->request; } protected function getResponse() { return $this->response; } protected function getFlash($k) { return null; } } }
+          if (!class_exists('AhgEditController', false)) { class AhgEditController extends AhgController { } }
+          if (!class_exists('QubitMigrate', false)) { class QubitMigrate { public function up() {} public function down() {} public function preUp() {} public function postUp() {} public function preDown() {} public function postDown() {} public function execute($method, $dir) {} } }
+          if (!class_exists('QubitFlatfileExport', false)) { class QubitFlatfileExport { public function setOptions($o) {} public function export() { return ''; } public function resourceSave($obj) {} } }
+
+          // ============================================================
+          // AtomFramework Console BaseCommand (defined in atom-framework)
+          // ============================================================
+          if (!class_exists('AtomFramework\\Console\\BaseCommand', false)) {
+            eval("class _BaseCommandStub { public function line(\$m, \$style = null) {} public function info(\$m) {} public function comment(\$m) {} public function question(\$m) {} public function error(\$m) {} public function warning(\$m) {} public function newline(\$n = 1) {} public function table(\$h, \$r) {} public function getName() { return ''; } public function setName(\$n) {} public function getDefinition() {} public function getOptions() { return []; } public function run(\$i, \$o) {} }");
+            class_alias('_BaseCommandStub', 'AtomFramework\\Console\\BaseCommand');
+          }
+
+          // ============================================================
+          // Monolog + PSR-3 (used by ahgAiPlugin etc.)
+          // ============================================================
+          if (!interface_exists('Psr\\Log\\LoggerInterface', false)) {
+            eval("interface _PsrLoggerInterfaceStub { public function emergency(\$m, array \$ctx = []); public function alert(\$m, array \$ctx = []); public function critical(\$m, array \$ctx = []); public function error(\$m, array \$ctx = []); public function warning(\$m, array \$ctx = []); public function notice(\$m, array \$ctx = []); public function info(\$m, array \$ctx = []); public function debug(\$m, array \$ctx = []); public function log(\$lvl, \$m, array \$ctx = []); }");
+            class_alias('_PsrLoggerInterfaceStub', 'Psr\\Log\\LoggerInterface');
+          }
+          if (!class_exists('Monolog\\Logger', false)) {
+            eval("class _MonologLoggerStub implements _PsrLoggerInterfaceStub { public function emergency(\$m, array \$ctx = []) {} public function alert(\$m, array \$ctx = []) {} public function critical(\$m, array \$ctx = []) {} public function error(\$m, array \$ctx = []) {} public function warning(\$m, array \$ctx = []) {} public function notice(\$m, array \$ctx = []) {} public function info(\$m, array \$ctx = []) {} public function debug(\$m, array \$ctx = []) {} public function log(\$lvl, \$m, array \$ctx = []) {} public function pushHandler(\$h) {} public function popHandler() {} public function setHandlers(array \$h) {} public function getHandlers() { return []; } }");
+            class_alias('_MonologLoggerStub', 'Monolog\\Logger');
+          }
+
+          // ============================================================
+          // Propel Qubit ORM stubs (eval-based: PHP cannot declare a
+          // class with a namespaced name in a single statement outside
+          // a namespace block).
+          // ============================================================
+          foreach (['QubitInformationObject','QubitDigitalObject','QubitActor','QubitRepository','QubitAccession','QubitTaxonomy','QubitTerm','QubitObject','QubitRelation','QubitEvent','QubitProperty','QubitSetting','QubitUser','QubitGroup','QubitObjectTermRelation','QubitMenu','QubitAclGroup','QubitAclPermission','QubitStaticPage','QubitStatus','QubitIdentifier','QubitContactInformation','QubitPremisObject','QubitRights','QubitNote','QubitRoute'] as $c) {
+            if (!class_exists($c, false)) { eval("class $c { public static function getById(\$id = null) {} public static function getBySlug(\$s = null) {} public function __get(\$n) {} public function __set(\$n, \$v) {} public function save() {} public function delete() {} }"); }
+          }
+          if (!class_exists('TableMap', false)) { class TableMap { public static function getTableMap() {} public static function getPrimaryKey() {} public static function getColumnName() {} } }
+
+          // ============================================================
+          // Illuminate (Eloquent) — used by new plugins
+          // ============================================================
+          if (!class_exists('Illuminate\\Database\\Eloquent\\Model', false)) {
+            eval("class _EloquentModelStub { public static function query() {} public static function find(\$id = null) {} public static function findOrFail(\$id = null) {} public static function where(\$c, \$o = null) {} public static function create(\$a = []) {} public static function firstOrCreate(\$a = []) {} public static function firstOrNew(\$a = []) {} public function save() {} public function delete() {} public function fill(\$a) {} public function setAttribute(\$k, \$v) {} public function getAttribute(\$k) { return null; } public function __get(\$k) { return null; } public function __set(\$k, \$v) {} public function __isset(\$k) { return false; } public function __unset(\$k) {} public function hasMany(\$r, \$fk = null) {} public function belongsTo(\$r, \$fk = null) {} public function belongsToMany(\$r, \$t = null) {} public function hasOne(\$r, \$fk = null) {} public function morphTo(\$n = null, \$t = null) {} public function morphMany(\$r, \$n) {} public function getTable() { return ''; } public function getKey() { return null; } }");
+            class_alias('_EloquentModelStub', 'Illuminate\\Database\\Eloquent\\Model');
+          }
+          if (!class_exists('Illuminate\\Database\\Capsule\\Manager', false)) {
+            eval("class _CapsuleManagerStub { public static function table(\$t = null) {} public static function raw(\$q = null) {} public static function connection(\$n = null) {} public static function schema(\$c = null) {} public static function insert(\$t, \$v = []) {} public static function update(\$t, \$v, \$w = []) {} public static function delete(\$t, \$w = []) {} }");
+            class_alias('_CapsuleManagerStub', 'Illuminate\\Database\\Capsule\\Manager');
+          }
+          if (!interface_exists('Illuminate\\Contracts\\Support\\Arrayable', false)) {
+            eval("interface _ArrayableStub { public function toArray(); }");
+            class_alias('_ArrayableStub', 'Illuminate\\Contracts\\Support\\Arrayable');
+          }
+          if (!class_exists('Illuminate\\Support\\Collection', false)) {
+            eval("class _CollectionStub implements IteratorAggregate, ArrayAccess, Countable { private \$items = []; public function __construct(\$items = []) { \$this->items = is_array(\$items) ? \$items : []; } public function getIterator() { return new ArrayIterator(\$this->items); } public function offsetExists(\$o): bool { return isset(\$this->items[\$o]); } public function offsetGet(\$o): mixed { return \$this->items[\$o] ?? null; } public function offsetSet(\$o, \$v): void { \$this->items[\$o] = \$v; } public function offsetUnset(\$o): void { unset(\$this->items[\$o]); } public function count(): int { return count(\$this->items); } public function isEmpty(): bool { return empty(\$this->items); } public function first() { return reset(\$this->items) ?: null; } public function toArray() { return \$this->items; } }");
+            class_alias('_CollectionStub', 'Illuminate\\Support\\Collection');
+          }
+
+          // ============================================================
+          // Sitemap (used by ahgSitemapPlugin)
+          // ============================================================
+          if (!class_exists('AbstractSitemapUrl', false)) { class AbstractSitemapUrl { public function getLocation() { return ''; } public function getLastMod() { return null; } public function getChangeFreq() { return ''; } public function getPriority() { return 0.5; } } }
+          if (!class_exists('AbstractSitemapObjectSet', false)) { class AbstractSitemapObjectSet { public function getObjects() { return array(); } public function getUrls() { return array(); } } }
+          PHPEOF
+
       - name: Run PHPStan at level 0
         run: |
           LIB_DIRS=$(find . -type d -name 'lib' -not -path './vendor/*' | tr '\n' ' ')
@@ -103,4 +237,4 @@ jobs:
             exit 0
           fi
           echo "Analyzing directories: $LIB_DIRS"
-          phpstan analyse --level=0 --no-progress $LIB_DIRS
+          phpstan analyse --level=0 --no-progress --autoload-file=/tmp/phpstan-bootstrap.php $LIB_DIRS
