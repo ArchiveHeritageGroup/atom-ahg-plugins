@@ -637,4 +637,116 @@ class securityClearanceActions extends AhgController
         $this->recentLogs = \Illuminate\Database\Capsule\Manager::table('user_security_clearance_log')
             ->orderBy('created_at', 'desc')->limit(10)->get()->toArray();
     }
+
+    // =====================
+    // WebAuthn / FIDO2 passkey MFA (#126 / #721)
+    // =====================
+
+    protected function webauthnService()
+    {
+        require_once dirname(__DIR__, 3) . '/lib/Services/WebAuthnService.php';
+
+        return new \AhgSecurityClearance\Services\WebAuthnService();
+    }
+
+    /** Relying-party id = the registrable domain (host without port). */
+    protected function rpId(): string
+    {
+        return preg_replace('/:\d+$/', '', $this->getRequest()->getHost() ?: 'localhost');
+    }
+
+    protected function jsonResponse($data, int $code = 200)
+    {
+        $this->getResponse()->setStatusCode($code);
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/json; charset=utf-8');
+
+        return $this->renderText(json_encode($data, JSON_UNESCAPED_SLASHES));
+    }
+
+    protected function currentUserRow(): ?object
+    {
+        $id = (int) $this->getUser()->getAttribute('user_id');
+        if ($id <= 0) {
+            return null;
+        }
+
+        return \Illuminate\Database\Capsule\Manager::table('user')->where('id', $id)
+            ->select('id', 'username', 'email')->first();
+    }
+
+    /** Passkey management page (list + enrol). */
+    public function executeWebauthnManage($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $this->passkeys = $this->webauthnService()->listForUser($userId);
+        $this->rpId = $this->rpId();
+    }
+
+    public function executeWebauthnRegisterBegin($request)
+    {
+        $u = $this->currentUserRow();
+        if (!$u) {
+            return $this->jsonResponse(['error' => 'not_authenticated'], 401);
+        }
+        $opts = $this->webauthnService()->beginRegistration(
+            (int) $u->id, $u->username ?: $u->email, $u->username ?: $u->email, $this->rpId(), 'PSIS'
+        );
+
+        return $this->jsonResponse($opts);
+    }
+
+    public function executeWebauthnRegisterComplete($request)
+    {
+        $u = $this->currentUserRow();
+        if (!$u) {
+            return $this->jsonResponse(['error' => 'not_authenticated'], 401);
+        }
+        $payload = json_decode((string) $request->getContent(), true) ?: [];
+        $label = (string) ($payload['_label'] ?? 'Passkey');
+        unset($payload['_label']);
+        $ok = $this->webauthnService()->completeRegistration((int) $u->id, $payload, $label, $this->rpId());
+
+        return $this->jsonResponse(['ok' => $ok], $ok ? 200 : 400);
+    }
+
+    public function executeWebauthnAssertBegin($request)
+    {
+        $userId = (int) ($request->getParameter('user_id') ?: $this->getUser()->getAttribute('user_id'));
+        if ($userId <= 0) {
+            return $this->jsonResponse(['error' => 'no_user'], 400);
+        }
+        $opts = $this->webauthnService()->beginAssertion($userId, $this->rpId());
+
+        return $this->jsonResponse($opts);
+    }
+
+    public function executeWebauthnAssertComplete($request)
+    {
+        $userId = (int) ($request->getParameter('user_id') ?: $this->getUser()->getAttribute('user_id'));
+        if ($userId <= 0) {
+            return $this->jsonResponse(['error' => 'no_user'], 400);
+        }
+        $payload = json_decode((string) $request->getContent(), true) ?: [];
+        $ok = $this->webauthnService()->completeAssertion($userId, $payload, $this->rpId());
+        if ($ok) {
+            // Mark this session's MFA as satisfied for the WebAuthn factor.
+            $this->getUser()->setAttribute('mfa_passed', true, 'security');
+        }
+
+        return $this->jsonResponse(['ok' => $ok], $ok ? 200 : 400);
+    }
+
+    public function executeWebauthnDelete($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+        }
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $this->webauthnService()->deleteCredential($userId, (int) $request->getParameter('id'));
+        $this->getUser()->setFlash('success', 'Passkey removed');
+        $this->redirect('/security/2fa/webauthn');
+    }
 }

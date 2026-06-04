@@ -40,6 +40,14 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         $router->post('security_2fa_email', '/security/2fa/send-email', 'sendEmailCode');
         $router->any('security_2fa_remove', '/security/2fa/remove/:id', 'removeTwoFactor', ['id' => '\d+']);
 
+        // WebAuthn / FIDO2 passkey MFA (#126 / #721)
+        $router->any('security_webauthn_manage', '/security/2fa/webauthn', 'webauthnManage');
+        $router->post('security_webauthn_register_begin', '/security/2fa/webauthn/register/begin', 'webauthnRegisterBegin');
+        $router->post('security_webauthn_register_complete', '/security/2fa/webauthn/register/complete', 'webauthnRegisterComplete');
+        $router->post('security_webauthn_assert_begin', '/security/2fa/webauthn/assert/begin', 'webauthnAssertBegin');
+        $router->post('security_webauthn_assert_complete', '/security/2fa/webauthn/assert/complete', 'webauthnAssertComplete');
+        $router->any('security_webauthn_delete', '/security/2fa/webauthn/delete/:id', 'webauthnDelete', ['id' => '\d+']);
+
         $router->register($event->getSubject());
     }
 }
