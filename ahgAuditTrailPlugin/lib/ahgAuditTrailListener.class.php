@@ -283,8 +283,8 @@ class ahgAuditTrailListener
                 }
             }
 
-            // Insert audit log with old/new values
-            $db->table('ahg_audit_log')->insert([
+            // Insert audit log with old/new values (hash-chained, #126)
+            \AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter::append([
                 'uuid' => $uuid,
                 'user_id' => $userId,
                 'username' => $username,

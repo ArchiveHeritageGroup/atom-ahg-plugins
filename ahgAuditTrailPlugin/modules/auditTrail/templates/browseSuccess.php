@@ -61,6 +61,7 @@
       <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'authentication']) ?>"><?php echo __('Authentication Log') ?></a></li>
       <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'securityAccess']) ?>"><?php echo __('Security Access Log') ?></a></li>
       <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'statistics']) ?>"><?php echo __('Statistics Dashboard') ?></a></li>
+      <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'integrity']) ?>"><?php echo __('Integrity check') ?></a></li>
       <li><a href="<?php echo url_for(['module' => 'auditTrail', 'action' => 'settings']) ?>"><?php echo __('Settings') ?></a></li>
     </ul>
   </div>

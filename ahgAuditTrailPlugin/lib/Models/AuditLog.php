@@ -18,6 +18,7 @@ class AuditLog extends Model
         'entity_title', 'module', 'action_name', 'request_method', 'request_uri',
         'old_values', 'new_values', 'changed_fields', 'metadata',
         'security_classification', 'status', 'error_message',
+        'created_at', 'prev_hash', 'entry_hash',
     ];
 
     protected $casts = [

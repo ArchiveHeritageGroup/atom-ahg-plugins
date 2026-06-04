@@ -5,6 +5,7 @@
 namespace AtoM\Framework\Plugins\AuditTrail\Repositories;
 
 use AtoM\Framework\Plugins\AuditTrail\Models\AuditLog;
+use AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Database\Capsule\Manager as Capsule;
@@ -13,7 +14,10 @@ class AuditLogRepository
 {
     public function create(array $data): AuditLog
     {
-        return AuditLog::create($data);
+        // Hash-chained, tamper-evident insert (#126).
+        $id = ChainedAuditWriter::append($data);
+
+        return AuditLog::find($id) ?? new AuditLog($data);
     }
 
     public function find(int $id): ?AuditLog

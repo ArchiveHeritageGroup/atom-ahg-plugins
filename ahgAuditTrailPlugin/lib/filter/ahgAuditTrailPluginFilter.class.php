@@ -156,8 +156,8 @@ class ahgAuditTrailPluginFilter extends sfFilter
                 }
             }
 
-            // Insert audit log
-            \Illuminate\Support\Facades\DB::table('ahg_audit_log')->insert([
+            // Insert audit log (hash-chained, #126)
+            \AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter::append([
                 'uuid' => \Illuminate\Support\Str::uuid()->toString(),
                 'user_id' => $userId,
                 'username' => $username,

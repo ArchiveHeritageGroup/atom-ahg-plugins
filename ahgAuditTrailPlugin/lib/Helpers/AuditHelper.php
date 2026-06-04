@@ -52,7 +52,7 @@ class AuditHelper
                 mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
             );
 
-            DB::table('ahg_audit_log')->insert([
+            \AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter::append([
                 'uuid' => $uuid,
                 'user_id' => $userId,
                 'username' => $username,

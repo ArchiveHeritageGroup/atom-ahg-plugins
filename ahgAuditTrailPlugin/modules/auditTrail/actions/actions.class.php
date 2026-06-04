@@ -334,4 +334,16 @@ class auditTrailActions extends AhgController
             return $this->renderText(json_encode(['error' => $e->getMessage()]));
         }
     }
+
+    /**
+     * Verify the tamper-evident hash chain of ahg_audit_log (#126).
+     */
+    public function executeIntegrity($request)
+    {
+        $this->initFramework();
+        $this->checkAdmin();
+        require_once $this->config('sf_plugins_dir') . '/ahgAuditTrailPlugin/lib/Services/ChainedAuditWriter.php';
+
+        $this->result = \AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter::verifyChain();
+    }
 }

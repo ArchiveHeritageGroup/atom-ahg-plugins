@@ -35,3 +35,7 @@ auditTrail_compareData:
   url: /admin/audit/compare/:id
   param: { module: auditTrail, action: compareData }
   requirements: { id: \d+ }
+
+auditTrail_integrity:
+  url: /admin/audit/integrity
+  param: { module: auditTrail, action: integrity }

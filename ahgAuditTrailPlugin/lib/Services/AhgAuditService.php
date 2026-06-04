@@ -166,7 +166,8 @@ class AhgAuditService implements AuditServiceInterface
         ];
 
         try {
-            $id = AhgDb::table('ahg_audit_log')->insertGetId($data);
+            // Hash-chained, tamper-evident insert (#126)
+            $id = \AtoM\Framework\Plugins\AuditTrail\Services\ChainedAuditWriter::append($data);
             return $id;
         } catch (\Exception $e) {
             error_log('AhgAuditService error: ' . $e->getMessage());

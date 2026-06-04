@@ -57,6 +57,18 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
                     return true;
                 }
             }
+
+            // Handle AtoM\Framework\Plugins\AuditTrail namespace (e.g. ChainedAuditWriter)
+            if (strpos($class, 'AtoM\\Framework\\Plugins\\AuditTrail\\') === 0) {
+                $relativePath = str_replace('AtoM\\Framework\\Plugins\\AuditTrail\\', '', $class);
+                $relativePath = str_replace('\\', DIRECTORY_SEPARATOR, $relativePath);
+                $filePath = __DIR__ . '/../lib/' . $relativePath . '.php';
+
+                if (file_exists($filePath)) {
+                    require_once $filePath;
+                    return true;
+                }
+            }
             return false;
         });
     }
