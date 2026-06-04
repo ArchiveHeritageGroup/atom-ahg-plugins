@@ -25,6 +25,9 @@ $period = $sf_data->getRaw('period');
         <a href="<?php echo url_for(['module' => 'arSecurityAudit', 'action' => 'export']) ?>" class="btn btn-sm btn-success ms-1">
             <i class="fas fa-download me-1"></i><?php echo __('Export CSV') ?>
         </a>
+        <a href="/securityAudit/integrity" class="btn btn-sm btn-outline-primary ms-1">
+            <i class="fas fa-link me-1"></i><?php echo __('Verify integrity') ?>
+        </a>
     </div>
 </div>
 

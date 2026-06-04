@@ -1120,7 +1120,7 @@ class SecurityClearanceService
         bool $granted,
         ?string $reason = null
     ): void {
-        DB::table('security_access_log')->insert([
+        $data = [
             'user_id' => $userId,
             'object_id' => $objectId,
             'classification_id' => $classificationId,
@@ -1130,10 +1130,108 @@ class SecurityClearanceService
             'denial_reason' => $granted ? null : $reason,
             'justification' => $granted ? $reason : null,
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-            'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 500),
+            'user_agent' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
             'session_id' => session_id() ?: null,
             'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        ];
+
+        // Append as a tamper-evident, hash-chained entry. Best-effort: never let
+        // an audit-write failure break the calling request.
+        try {
+            self::appendHashChainedAccessLog($data);
+        } catch (\Throwable $e) {
+            error_log('security.audit.append_failed: ' . $e->getMessage());
+        }
+    }
+
+    // =========================================================================
+    // Tamper-evident audit-trail hash chaining (#126)
+    // =========================================================================
+
+    /** Genesis link for the first chained entry. */
+    private const AUDIT_GENESIS_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
+
+    /**
+     * Insert an access-log row linked to the previous entry by SHA-256, so any
+     * later edit, deletion or insertion of a historical row breaks the chain.
+     * Serialised via a row lock so concurrent writers can't fork the chain.
+     */
+    private static function appendHashChainedAccessLog(array $data): void
+    {
+        DB::connection()->transaction(static function () use ($data) {
+            $last = DB::table('security_access_log')
+                ->lockForUpdate()
+                ->orderByDesc('id')
+                ->first(['entry_hash']);
+
+            $prev = ($last && !empty($last->entry_hash)) ? $last->entry_hash : self::AUDIT_GENESIS_HASH;
+            $data['prev_hash'] = $prev;
+            $data['entry_hash'] = self::computeEntryHash($prev, $data);
+
+            DB::table('security_access_log')->insert($data);
+        });
+    }
+
+    /** entry_hash = SHA-256( prev_hash ‖ canonical(content fields) ). */
+    private static function computeEntryHash(string $prevHash, array $row): string
+    {
+        return hash('sha256', $prevHash . "\x1e" . self::canonicalAuditPayload($row));
+    }
+
+    /** Deterministic serialisation of the content fields (never the hashes). */
+    private static function canonicalAuditPayload(array $row): string
+    {
+        $fields = [
+            'user_id', 'object_id', 'classification_id', 'compartment_id', 'action',
+            'access_granted', 'denial_reason', 'justification', 'ip_address',
+            'user_agent', 'session_id', 'created_at',
+        ];
+        $parts = [];
+        foreach ($fields as $f) {
+            $v = $row[$f] ?? null;
+            if ('access_granted' === $f) {
+                $v = (int) $v;
+            }
+            $parts[] = (null === $v) ? '' : (string) $v;
+        }
+
+        return implode('|', $parts);
+    }
+
+    /**
+     * Walk the chain in insertion order and verify every link. Detects content
+     * tampering (entry_hash mismatch) and structural tampering — deletions or
+     * insertions (prev_hash linkage mismatch).
+     *
+     * @return array{intact:bool,broken_id:?int,reason:?string,checked:int,total:int}
+     */
+    public static function verifyAuditChain(): array
+    {
+        $rows = DB::table('security_access_log')->orderBy('id')->get();
+        $total = count($rows);
+        $expectedPrev = self::AUDIT_GENESIS_HASH;
+        $checked = 0;
+
+        foreach ($rows as $r) {
+            if (null === $r->entry_hash) {
+                continue; // pre-chain legacy row (none after migration on an empty table)
+            }
+            if ($r->prev_hash !== $expectedPrev) {
+                return ['intact' => false, 'broken_id' => (int) $r->id,
+                    'reason' => 'chain linkage broken (a row was deleted or inserted)',
+                    'checked' => $checked, 'total' => $total];
+            }
+            if (self::computeEntryHash($r->prev_hash, (array) $r) !== $r->entry_hash) {
+                return ['intact' => false, 'broken_id' => (int) $r->id,
+                    'reason' => 'entry content was altered after it was written',
+                    'checked' => $checked, 'total' => $total];
+            }
+            $expectedPrev = $r->entry_hash;
+            ++$checked;
+        }
+
+        return ['intact' => true, 'broken_id' => null, 'reason' => null,
+            'checked' => $checked, 'total' => $total];
     }
 
     /**

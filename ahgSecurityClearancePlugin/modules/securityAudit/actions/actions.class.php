@@ -241,6 +241,20 @@ class securityAuditActions extends AhgController
         $this->totalAccess = count($this->accessLogs);
     }
 
+    /**
+     * Verify the tamper-evident hash chain of the security access log (#126).
+     */
+    public function executeIntegrity($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->getUser()->setFlash('error', 'Administrator access required.');
+            $this->redirect('@homepage');
+        }
+
+        require_once dirname(__DIR__, 3) . '/lib/Services/SecurityClearanceService.php';
+        $this->result = \SecurityClearanceService::verifyAuditChain();
+    }
+
     protected function getStatistics($since)
     {
         $db = \Illuminate\Database\Capsule\Manager::class;
