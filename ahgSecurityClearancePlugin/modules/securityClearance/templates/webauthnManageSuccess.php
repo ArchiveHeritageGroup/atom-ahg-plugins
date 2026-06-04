@@ -2,7 +2,12 @@
 <div class="container py-4" style="max-width: 760px">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="h2"><i class="fas fa-fingerprint me-2"></i><?php echo __('Passkeys (WebAuthn / FIDO2)'); ?></span>
-        <a href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'twoFactor']); ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Back to 2FA'); ?></a>
+        <div class="btn-group">
+            <?php if ($sf_user->hasCredential('administrator')): ?>
+            <a href="/security/2fa/policy" class="btn btn-outline-primary btn-sm"><i class="fas fa-user-shield me-1"></i><?php echo __('MFA policy'); ?></a>
+            <?php endif; ?>
+            <a href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'twoFactor']); ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Back to 2FA'); ?></a>
+        </div>
     </div>
     <p class="text-muted"><?php echo __('Register a security key, fingerprint, or device passkey as a second factor. Passkeys are phishing-resistant and never leave your device.'); ?></p>
 

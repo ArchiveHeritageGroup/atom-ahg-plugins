@@ -454,9 +454,12 @@ class securityClearanceActions extends AhgController
         $this->returnUrl = $request->getParameter('return', '/');
         $this->clearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance($userId);
         $this->isEnrolled = \AtomFramework\Core\Security\TotpService::isEnrolled($userId);
+        $this->hasPasskeys = $this->webauthnService()->userHasCredential($userId);
+        $this->rpId = $this->rpId();
 
-        // If not enrolled, redirect to setup
-        if (!$this->isEnrolled) {
+        // If the user has no second factor at all (neither TOTP nor a passkey),
+        // send them to enrol. A passkey alone is a sufficient second factor.
+        if (!$this->isEnrolled && !$this->hasPasskeys) {
             $this->redirect('/security/2fa/setup?return=' . urlencode($this->returnUrl));
         }
     }
@@ -714,9 +717,12 @@ class securityClearanceActions extends AhgController
 
     public function executeWebauthnAssertBegin($request)
     {
-        $userId = (int) ($request->getParameter('user_id') ?: $this->getUser()->getAttribute('user_id'));
+        // MFA assertion always runs for the already password-authenticated user.
+        // We deliberately ignore any user_id in the request to prevent
+        // asserting as a different account.
+        $userId = (int) $this->getUser()->getAttribute('user_id');
         if ($userId <= 0) {
-            return $this->jsonResponse(['error' => 'no_user'], 400);
+            return $this->jsonResponse(['error' => 'not_authenticated'], 401);
         }
         $opts = $this->webauthnService()->beginAssertion($userId, $this->rpId());
 
@@ -725,14 +731,27 @@ class securityClearanceActions extends AhgController
 
     public function executeWebauthnAssertComplete($request)
     {
-        $userId = (int) ($request->getParameter('user_id') ?: $this->getUser()->getAttribute('user_id'));
+        $userId = (int) $this->getUser()->getAttribute('user_id');
         if ($userId <= 0) {
-            return $this->jsonResponse(['error' => 'no_user'], 400);
+            return $this->jsonResponse(['error' => 'not_authenticated'], 401);
         }
         $payload = json_decode((string) $request->getContent(), true) ?: [];
         $ok = $this->webauthnService()->completeAssertion($userId, $payload, $this->rpId());
         if ($ok) {
-            // Mark this session's MFA as satisfied for the WebAuthn factor.
+            // A successful passkey assertion satisfies the SAME 2FA gate that
+            // TOTP/email use, so SecurityClearanceFilter lets the user through.
+            // The 2FA-session methods live on the plugin's GLOBAL
+            // SecurityClearanceService (the framework AtomExtensions\ class has
+            // no create2FASession), which is also what the filter reads.
+            try {
+                require_once dirname(__DIR__, 3) . '/lib/Services/SecurityClearanceService.php';
+                \SecurityClearanceService::create2FASession($userId, session_id());
+            } catch (\Throwable $e) {
+                // create2FASession inserts the security_2fa_session row (which the
+                // filter checks) before a cosmetic denormalisation UPDATE that can
+                // fail on some schemas — don't let that break passkey sign-in.
+                error_log('webauthn.2fasession: ' . $e->getMessage());
+            }
             $this->getUser()->setAttribute('mfa_passed', true, 'security');
         }
 
@@ -748,5 +767,33 @@ class securityClearanceActions extends AhgController
         $this->webauthnService()->deleteCredential($userId, (int) $request->getParameter('id'));
         $this->getUser()->setFlash('success', 'Passkey removed');
         $this->redirect('/security/2fa/webauthn');
+    }
+
+    /**
+     * Admin: configure which roles must complete MFA (#738).
+     */
+    public function executeMfaPolicy($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->redirect('@homepage');
+        }
+        require_once dirname(__DIR__, 3) . '/lib/Services/SecurityClearanceService.php';
+
+        if ($request->isMethod('post')) {
+            $enabled = (bool) $request->getParameter('mfa_enabled');
+            $roles = array_map('intval', (array) $request->getParameter('roles', []));
+            \SecurityClearanceService::setMfaPolicy($enabled, $roles);
+            $this->getUser()->setFlash('success', 'MFA policy saved.');
+            $this->redirect('/security/2fa/policy');
+        }
+
+        $this->enabled = \SecurityClearanceService::isPerRoleMfaEnabled();
+        $this->requiredRoles = \SecurityClearanceService::getMfaRequiredRoles();
+        $this->roles = \Illuminate\Database\Capsule\Manager::table('acl_group as g')
+            ->leftJoin('acl_group_i18n as i', 'i.id', '=', 'g.id')
+            ->where('i.culture', 'en')
+            ->whereIn('g.id', [99, 100, 101, 102, 103])
+            ->orderBy('g.id')
+            ->get(['g.id', 'i.name'])->all();
     }
 }

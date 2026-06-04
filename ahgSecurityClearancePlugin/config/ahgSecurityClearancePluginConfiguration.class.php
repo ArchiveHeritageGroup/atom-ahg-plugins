@@ -1,6 +1,9 @@
 <?php
 class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
 {
+    /** Per-request guard: the MFA gate evaluates only the first dispatched action. */
+    private $mfaGateChecked = false;
+
     public function initialize()
     {
         // Register plugin as enabled
@@ -14,6 +17,74 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
+
+        // #738 — session-wide per-role MFA enforcement. Fires after routing,
+        // before the action runs; redirects MFA-required roles to /security/2fa
+        // until they hold a valid 2FA session.
+        $this->dispatcher->connect('controller.change_action', [$this, 'enforcePerRoleMfa']);
+    }
+
+    /**
+     * Gate the request on MFA when the signed-in user belongs to a role the
+     * admin has marked MFA-required (#738). Fail-open on any error so a policy
+     * misconfiguration can never take the whole site down.
+     */
+    public function enforcePerRoleMfa(sfEvent $event)
+    {
+        if ($this->mfaGateChecked) {
+            return; // controller.change_action also fires on internal forwards
+        }
+        $this->mfaGateChecked = true;
+
+        $params = $event->getParameters();
+        $module = $params['module'] ?? '';
+        $action = $params['action'] ?? '';
+
+        // Never gate the 2FA/clearance pages themselves (loop), the login/logout
+        // flow, or the error module.
+        if (in_array($module, ['securityClearance', 'securityAudit', 'accessFilter', 'default'], true)) {
+            return;
+        }
+        if ('user' === $module && in_array($action, ['login', 'logout'], true)) {
+            return;
+        }
+
+        try {
+            $context = sfContext::getInstance();
+            $user = $context->getUser();
+            if (!$user->isAuthenticated()) {
+                return;
+            }
+
+            // Skip API / AJAX — a 302 would break them; the next full page load
+            // catches the user.
+            $request = $context->getRequest();
+            $fmt = $request->getRequestFormat();
+            if ($request->isXmlHttpRequest() || (null !== $fmt && 'html' !== $fmt)) {
+                return;
+            }
+
+            $userId = (int) $user->getAttribute('user_id');
+            if ($userId <= 0) {
+                return;
+            }
+
+            require_once __DIR__ . '/../lib/Services/SecurityClearanceService.php';
+            if (!SecurityClearanceService::roleRequiresMfa($userId)) {
+                return;
+            }
+            if (SecurityClearanceService::has2FASession($userId, session_id())) {
+                return;
+            }
+
+            $context->getController()->redirect('/security/2fa?return=' . urlencode($request->getUri()));
+
+            throw new sfStopException();
+        } catch (sfStopException $e) {
+            throw $e; // intended redirect control-flow, not an error
+        } catch (\Throwable $e) {
+            error_log('mfa.gate.error: ' . $e->getMessage());
+        }
     }
     
     public function addRoutes(sfEvent $event)
@@ -31,6 +102,11 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
 
         // User clearance management (slug-based)
         $router->any('security_clearance_user', '/security/clearance/user/:slug', 'user', ['slug' => '[a-zA-Z0-9_-]+']);
+
+        // Per-role MFA policy admin (#738). any() matches GET for the page;
+        // POST needs its own post() route (any() 404s on POST here).
+        $router->any('security_mfa_policy', '/security/2fa/policy', 'mfaPolicy');
+        $router->post('security_mfa_policy_save', '/security/2fa/policy/save', 'mfaPolicy');
 
         // Two-Factor Authentication (TOTP)
         $router->any('security_2fa', '/security/2fa', 'twoFactor');

@@ -2,24 +2,21 @@
 
 namespace AhgSecurityClearance\Services;
 
-use Cose\Algorithm\Manager as CoseAlgorithmManager;
-use Cose\Algorithm\Signature\ECDSA;
-use Cose\Algorithm\Signature\EdDSA;
-use Cose\Algorithm\Signature\RSA;
 use Illuminate\Database\Capsule\Manager as DB;
 use Symfony\Component\Serializer\SerializerInterface;
-use Webauthn\AttestationStatement\AttestationObjectLoader;
 use Webauthn\AttestationStatement\AttestationStatementSupportManager;
 use Webauthn\AttestationStatement\NoneAttestationStatementSupport;
-use Webauthn\AuthenticationExtensions\ExtensionOutputCheckerHandler;
 use Webauthn\AuthenticatorAssertionResponse;
 use Webauthn\AuthenticatorAssertionResponseValidator;
 use Webauthn\AuthenticatorAttestationResponse;
 use Webauthn\AuthenticatorAttestationResponseValidator;
 use Webauthn\AuthenticatorSelectionCriteria;
+use Webauthn\CeremonyStep\CeremonyStepManager;
+use Webauthn\CeremonyStep\CeremonyStepManagerFactory;
+use Webauthn\CredentialRecord;
 use Webauthn\Denormalizer\WebauthnSerializerFactory;
+use Webauthn\PublicKeyCredential;
 use Webauthn\PublicKeyCredentialCreationOptions;
-use Webauthn\PublicKeyCredentialLoader;
 use Webauthn\PublicKeyCredentialParameters;
 use Webauthn\PublicKeyCredentialRequestOptions;
 use Webauthn\PublicKeyCredentialRpEntity;
@@ -44,6 +41,8 @@ class WebAuthnService
 
     private SerializerInterface $serializer;
     private AttestationStatementSupportManager $attestationManager;
+    private CeremonyStepManager $creationCeremony;
+    private CeremonyStepManager $requestCeremony;
 
     public function __construct()
     {
@@ -57,6 +56,14 @@ class WebAuthnService
         $this->attestationManager = AttestationStatementSupportManager::create();
         $this->attestationManager->add(NoneAttestationStatementSupport::create());
         $this->serializer = (new WebauthnSerializerFactory($this->attestationManager))->create();
+
+        // web-auth/webauthn-lib 5.x verifies via CeremonyStepManagers built once.
+        // Default origin check (CheckOrigin) validates the clientData origin host
+        // against the RP id, which is correct for same-origin passkeys.
+        $csmFactory = new CeremonyStepManagerFactory();
+        $csmFactory->setAttestationStatementSupportManager($this->attestationManager);
+        $this->creationCeremony = $csmFactory->creationCeremony();
+        $this->requestCeremony = $csmFactory->requestCeremony();
     }
 
     // ─── session (Symfony 1.x sfUser attribute holder) ────────────────────
@@ -94,11 +101,11 @@ class WebAuthnService
             $this->findAllForUserHandle((string) $userId),
         );
 
+        // web-auth/webauthn-lib 5.x: create() takes (authenticatorAttachment,
+        // userVerification, residentKey) — no $attachment / $requireResidentKey.
         $authenticatorSelection = AuthenticatorSelectionCriteria::create(
-            attachment: null,
             userVerification: AuthenticatorSelectionCriteria::USER_VERIFICATION_REQUIREMENT_PREFERRED,
             residentKey: AuthenticatorSelectionCriteria::RESIDENT_KEY_REQUIREMENT_PREFERRED,
-            requireResidentKey: false,
         );
 
         $options = PublicKeyCredentialCreationOptions::create(
@@ -128,23 +135,24 @@ class WebAuthnService
         /** @var PublicKeyCredentialCreationOptions $options */
         $options = $this->serializer->deserialize($optionsJson, PublicKeyCredentialCreationOptions::class, 'json');
 
-        $loader = PublicKeyCredentialLoader::create(AttestationObjectLoader::create($this->attestationManager));
-        $response = $loader->loadArray($browserResponse)->getResponse();
+        /** @var PublicKeyCredential $pkc */
+        $pkc = $this->serializer->deserialize(
+            json_encode($browserResponse, JSON_THROW_ON_ERROR), PublicKeyCredential::class, 'json',
+        );
+        $response = $pkc->response;
         if (!$response instanceof AuthenticatorAttestationResponse) {
             return false;
         }
 
-        $validator = AuthenticatorAttestationResponseValidator::create(
-            $this->attestationManager, $this, null, ExtensionOutputCheckerHandler::create(),
-        );
+        $validator = AuthenticatorAttestationResponseValidator::create($this->creationCeremony);
         try {
-            $source = $validator->check($response, $options, $rpId);
+            $record = $validator->check($response, $options, $rpId);
         } catch (\Throwable $e) {
             error_log('webauthn.register.invalid user=' . $userId . ': ' . $e->getMessage());
 
             return false;
         }
-        $this->persistSource($source, $userId, $label);
+        $this->persistSource(PublicKeyCredentialSource::fromCredentialRecord($record), $userId, $label);
 
         return true;
     }
@@ -181,32 +189,33 @@ class WebAuthnService
         /** @var PublicKeyCredentialRequestOptions $options */
         $options = $this->serializer->deserialize($optionsJson, PublicKeyCredentialRequestOptions::class, 'json');
 
-        $loader = PublicKeyCredentialLoader::create(AttestationObjectLoader::create($this->attestationManager));
-        $credential = $loader->loadArray($browserResponse);
-        $response = $credential->getResponse();
+        /** @var PublicKeyCredential $pkc */
+        $pkc = $this->serializer->deserialize(
+            json_encode($browserResponse, JSON_THROW_ON_ERROR), PublicKeyCredential::class, 'json',
+        );
+        $response = $pkc->response;
         if (!$response instanceof AuthenticatorAssertionResponse) {
             return false;
         }
 
-        $algorithmManager = CoseAlgorithmManager::create();
-        $algorithmManager->add(ECDSA\ES256::create());
-        $algorithmManager->add(ECDSA\ES512::create());
-        $algorithmManager->add(EdDSA\EdDSA::create());
-        $algorithmManager->add(RSA\RS256::create());
+        // v5 validators take the *stored* credential record (not the raw id).
+        $stored = $this->findOneByCredentialId($pkc->rawId);
+        if ($stored === null) {
+            return false;
+        }
 
-        $validator = AuthenticatorAssertionResponseValidator::create(
-            $this, null, ExtensionOutputCheckerHandler::create(), $algorithmManager,
-        );
+        $validator = AuthenticatorAssertionResponseValidator::create($this->requestCeremony);
         try {
-            $updated = $validator->check($credential->getRawId(), $response, $options, $rpId, (string) $userId);
+            $updated = $validator->check($stored, $response, $options, $rpId, (string) $userId);
         } catch (\Throwable $e) {
             error_log('webauthn.assert.invalid user=' . $userId . ': ' . $e->getMessage());
 
             return false;
         }
-        $this->saveCredentialSource($updated);
+        $updatedSource = PublicKeyCredentialSource::fromCredentialRecord($updated);
+        $this->saveCredentialSource($updatedSource);
         DB::table('ahg_webauthn_credential')
-            ->where('credential_id', $updated->getPublicKeyCredentialId())
+            ->whereRaw('credential_id = UNHEX(?)', [bin2hex($updatedSource->publicKeyCredentialId)])
             ->update(['last_used_at' => date('Y-m-d H:i:s')]);
 
         return true;
@@ -238,7 +247,11 @@ class WebAuthnService
 
     public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
     {
-        $row = DB::table('ahg_webauthn_credential')->where('credential_id', $publicKeyCredentialId)->first();
+        // Compare via UNHEX: binding a raw-binary param over a utf8mb4 connection
+        // mangles non-UTF8 bytes so `credential_id = ?` never matches a VARBINARY.
+        $row = DB::table('ahg_webauthn_credential')
+            ->whereRaw('credential_id = UNHEX(?)', [bin2hex($publicKeyCredentialId)])
+            ->first();
 
         return $row ? $this->hydrateSource($row->public_key) : null;
     }
@@ -253,8 +266,8 @@ class WebAuthnService
     {
         $serialized = $this->serializer->serialize($source, 'json', ['json_encode_options' => JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES]);
         DB::table('ahg_webauthn_credential')
-            ->where('credential_id', $source->getPublicKeyCredentialId())
-            ->update(['public_key' => $serialized, 'sign_count' => $source->getCounter()]);
+            ->whereRaw('credential_id = UNHEX(?)', [bin2hex($source->publicKeyCredentialId)])
+            ->update(['public_key' => $serialized, 'sign_count' => $source->counter]);
     }
 
     // ─── internals ────────────────────────────────────────────────────────
@@ -276,7 +289,11 @@ class WebAuthnService
     private function hydrateSource(string $serialized): ?PublicKeyCredentialSource
     {
         try {
-            return $this->serializer->deserialize($serialized, PublicKeyCredentialSource::class, 'json');
+            // v5 serializes credentials as CredentialRecord; deserialize to that
+            // canonical type then wrap (PublicKeyCredentialSource is deprecated).
+            $record = $this->serializer->deserialize($serialized, CredentialRecord::class, 'json');
+
+            return PublicKeyCredentialSource::fromCredentialRecord($record);
         } catch (\Throwable $e) {
             error_log('webauthn.hydrate.failed: ' . $e->getMessage());
 
@@ -289,12 +306,12 @@ class WebAuthnService
         $serialized = $this->serializer->serialize($source, 'json', ['json_encode_options' => JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES]);
         DB::table('ahg_webauthn_credential')->insert([
             'user_id' => $userId,
-            'credential_id' => $source->getPublicKeyCredentialId(),
+            'credential_id' => $source->publicKeyCredentialId,
             'public_key' => $serialized,
-            'attestation_type' => $source->getAttestationType(),
-            'aaguid' => $source->getAaguid()?->__toString(),
-            'sign_count' => $source->getCounter(),
-            'transports' => json_encode($source->getTransports(), JSON_UNESCAPED_SLASHES),
+            'attestation_type' => $source->attestationType,
+            'aaguid' => $source->aaguid->__toString(),
+            'sign_count' => $source->counter,
+            'transports' => json_encode($source->transports, JSON_UNESCAPED_SLASHES),
             'label' => $label !== '' ? $label : 'Passkey',
             'last_used_at' => null,
             'created_at' => date('Y-m-d H:i:s'),

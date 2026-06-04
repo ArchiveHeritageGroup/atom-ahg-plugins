@@ -416,6 +416,73 @@ class SecurityClearanceService
     }
 
     // =========================================================================
+    // Per-role MFA policy (#738)
+    // =========================================================================
+
+    /** Master toggle: is session-wide per-role MFA enforcement active? */
+    public static function isPerRoleMfaEnabled(): bool
+    {
+        return '1' === (string) self::getPolicySetting('mfa_per_role_enabled', '0');
+    }
+
+    /** @return array<int,int> acl_group ids whose members must complete MFA */
+    public static function getMfaRequiredRoles(): array
+    {
+        $ids = json_decode((string) self::getPolicySetting('mfa_required_roles', '[]'), true);
+
+        return is_array($ids) ? array_values(array_map('intval', $ids)) : [];
+    }
+
+    /** Persist the policy (admin UI). */
+    public static function setMfaPolicy(bool $enabled, array $roleIds): void
+    {
+        self::putPolicySetting('mfa_per_role_enabled', $enabled ? '1' : '0', 'boolean');
+        self::putPolicySetting('mfa_required_roles', json_encode(array_values(array_map('intval', $roleIds))), 'json');
+    }
+
+    /**
+     * True if the policy is on AND the user belongs to at least one
+     * MFA-required role. Drives the session-wide login gate.
+     */
+    public static function roleRequiresMfa(int $userId): bool
+    {
+        if ($userId <= 0 || !self::isPerRoleMfaEnabled()) {
+            return false;
+        }
+        $required = self::getMfaRequiredRoles();
+        if (empty($required)) {
+            return false;
+        }
+        $userGroups = DB::table('acl_user_group')->where('user_id', $userId)->pluck('group_id')->all();
+
+        return (bool) array_intersect(array_map('intval', $userGroups), $required);
+    }
+
+    private static function getPolicySetting(string $key, ?string $default = null): ?string
+    {
+        $row = DB::table('ahg_settings')->where('setting_key', $key)->first();
+
+        return $row ? (string) $row->setting_value : $default;
+    }
+
+    private static function putPolicySetting(string $key, string $value, string $type): void
+    {
+        $now = date('Y-m-d H:i:s');
+        if (DB::table('ahg_settings')->where('setting_key', $key)->exists()) {
+            DB::table('ahg_settings')->where('setting_key', $key)->update([
+                'setting_value' => $value, 'setting_type' => $type, 'setting_group' => 'security', 'updated_at' => $now,
+            ]);
+
+            return;
+        }
+        DB::table('ahg_settings')->insert([
+            'setting_key' => $key, 'setting_value' => $value, 'setting_type' => $type,
+            'setting_group' => 'security', 'description' => 'Per-role MFA policy (#738)',
+            'updated_at' => $now, 'created_at' => $now,
+        ]);
+    }
+
+    // =========================================================================
     // Object Classification Management
     // =========================================================================
 

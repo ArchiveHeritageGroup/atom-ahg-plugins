@@ -32,6 +32,19 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         </p>
         <?php endif ?>
 
+        <?php if (!empty($hasPasskeys)): ?>
+        <div class="d-grid gap-2 mb-3">
+          <button type="button" class="btn btn-success btn-lg" id="wa-verify-btn">
+            <i class="fas fa-fingerprint"></i> <?php echo __('Verify with a passkey') ?>
+          </button>
+          <div id="wa-verify-status" class="small text-center"></div>
+        </div>
+        <?php if (!empty($isEnrolled)): ?>
+        <div class="text-center text-muted small mb-2">— <?php echo __('or') ?> —</div>
+        <?php endif ?>
+        <?php endif ?>
+
+        <?php if (!empty($isEnrolled)): ?>
         <form action="/security/2fa/verify" method="post" id="2fa-form">
           <input type="hidden" name="return" value="<?php echo esc_entities($returnUrl ?? '/') ?>">
           <?php echo \AtomFramework\Services\CsrfService::renderHiddenField() ?>
@@ -65,6 +78,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
           </button>
           <div id="email-status" class="mt-2 small"></div>
         </div>
+        <?php endif ?>
       </div>
     </div>
 
@@ -75,7 +89,8 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
 </div>
 
 <script <?php echo $nonceAttr ?>>
-document.getElementById('btn-send-email').addEventListener('click', function() {
+var sendEmailBtn = document.getElementById('btn-send-email');
+if (sendEmailBtn) sendEmailBtn.addEventListener('click', function() {
   var btn = this;
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
@@ -101,3 +116,26 @@ document.getElementById('btn-send-email').addEventListener('click', function() {
   });
 });
 </script>
+
+<?php if (!empty($hasPasskeys)): ?>
+<script src="/plugins/ahgSecurityClearancePlugin/web/js/webauthn.js"></script>
+<script <?php echo $nonceAttr ?>>
+(function () {
+  var btn = document.getElementById('wa-verify-btn'),
+      status = document.getElementById('wa-verify-status'),
+      ret = <?php echo json_encode($returnUrl ?? '/') ?>;
+  function show(msg, cls) { status.className = 'small text-center text-' + cls; status.textContent = msg; }
+  if (!window.PublicKeyCredential) { show('This browser does not support passkeys.', 'muted'); btn.disabled = true; return; }
+  btn.addEventListener('click', function () {
+    btn.disabled = true; show('Follow your device prompt…', 'muted');
+    // No userId: the server uses the already-authenticated session user.
+    window.AhgWebAuthn.authenticate()
+      .then(function (ok) {
+        if (ok) { show('Verified. Redirecting…', 'success'); window.location.href = ret; }
+        else { show('Verification was not completed.', 'danger'); btn.disabled = false; }
+      })
+      .catch(function (e) { show('Failed: ' + (e && e.message ? e.message : e), 'danger'); btn.disabled = false; });
+  });
+})();
+</script>
+<?php endif ?>
