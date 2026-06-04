@@ -2779,4 +2779,34 @@ class aiActions extends AhgController
             'avg_confidence'   => Illuminate\Database\Capsule\Manager::table('ahg_ai_inference')->whereNotNull('confidence')->avg('confidence'),
         );
     }
+
+    // ─── Collection chatbot (RAG over the catalogue, #121) ──────────────────
+
+    public function executeAssistant($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('/user/login');
+        }
+        require_once dirname(__FILE__) . '/../../../lib/Services/CollectionChatbotService.php';
+        $this->aiAvailable = \CollectionChatbotService::isAvailable();
+    }
+
+    public function executeAssistantAsk($request)
+    {
+        $this->setLayout(false);
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/json; charset=utf-8');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderText(json_encode(['error' => 'not_authenticated']));
+        }
+        require_once dirname(__FILE__) . '/../../../lib/Services/CollectionChatbotService.php';
+
+        $payload = json_decode((string) $request->getContent(), true) ?: [];
+        $message = (string) ($payload['message'] ?? $request->getParameter('message', ''));
+        $history = (isset($payload['history']) && is_array($payload['history'])) ? $payload['history'] : [];
+
+        $result = \CollectionChatbotService::chat($message, $history, $this->getUserCulture());
+
+        return $this->renderText(json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+    }
 }

@@ -219,3 +219,11 @@ ahg_ai_donut_result:
   url: /ai/donut/results/:id
   param: { module: ai, action: donutResult }
   requirements: { id: '\d+' }
+
+ahg_ai_assistant:
+  url: /ai/assistant
+  param: { module: ai, action: assistant }
+
+ahg_ai_assistant_ask:
+  url: /ai/assistant/ask
+  param: { module: ai, action: assistantAsk }

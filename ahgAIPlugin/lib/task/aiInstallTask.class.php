@@ -70,6 +70,37 @@ EOF;
         }
 
         $this->logSection('ai', "Executed {$executed} SQL statements");
+
+        // Add the Collection assistant nav link (idempotent; same as ai:install-menu).
+        try {
+            $conn = \Illuminate\Database\Capsule\Manager::connection();
+            if ($conn->table('menu')->where('name', 'collectionAssistant')->exists()) {
+                $this->logSection('ai', 'Collection assistant nav link already present.');
+            } elseif ($parent = $conn->table('menu')->where('name', 'manage')->first()) {
+                $r = (int) $parent->rgt;
+                $pid = (int) $parent->id;
+                $now = date('Y-m-d H:i:s');
+                $conn->transaction(function () use ($conn, $r, $pid, $now) {
+                    $conn->update('UPDATE menu SET rgt = rgt + 2 WHERE rgt >= ?', [$r]);
+                    $conn->update('UPDATE menu SET lft = lft + 2 WHERE lft >= ?', [$r]);
+                    $id = $conn->table('menu')->insertGetId([
+                        'parent_id' => $pid, 'name' => 'collectionAssistant', 'path' => 'ai/assistant',
+                        'lft' => $r, 'rgt' => $r + 1, 'source_culture' => 'en',
+                        'created_at' => $now, 'updated_at' => $now,
+                    ]);
+                    $conn->table('menu_i18n')->insert(['id' => $id, 'culture' => 'en', 'label' => 'Collection assistant']);
+                    $agg = $conn->table('menu')->selectRaw('COUNT(*) n, MIN(lft) mn, MAX(rgt) mx')->first();
+                    $bad = (int) $conn->table('menu')->whereRaw('rgt <= lft')->count();
+                    if ((int) $agg->n !== (int) ((($agg->mx - $agg->mn) + 1) / 2) || $bad > 0) {
+                        throw new \RuntimeException('menu nested-set integrity check failed');
+                    }
+                });
+                $this->logSection('ai', 'Added Collection assistant nav link under Manage.');
+            }
+        } catch (Exception $e) {
+            $this->logSection('ai', 'Nav link skipped: ' . $e->getMessage(), null, 'COMMENT');
+        }
+
         $this->logSection('ai', 'Installation complete!');
 
         $this->logBlock([
