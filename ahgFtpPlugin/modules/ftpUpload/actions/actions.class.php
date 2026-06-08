@@ -63,6 +63,21 @@ class ftpUploadActions extends AhgController
 
         $this->remotePath = $remotePath;
         $this->diskPath = $settings['ftp_disk_path'] ?? $remotePath;
+
+        // Subfolders under the disk path (uploaded folders) for the "combine -> PDF/A" picker.
+        $this->subfolders = [];
+        $dp = $settings['ftp_disk_path'] ?? '';
+        if ($dp !== '' && is_dir($dp)) {
+            foreach (scandir($dp) ?: [] as $d) {
+                if ($d === '.' || $d === '..' || $d[0] === '.') {
+                    continue;
+                }
+                if (is_dir($dp . '/' . $d)) {
+                    $this->subfolders[] = $d;
+                }
+            }
+            sort($this->subfolders);
+        }
         $this->files = $listResult['success'] ? $listResult['files'] : [];
         $this->listError = $listResult['success'] ? null : ($listResult['message'] ?? 'Connection failed');
         $this->protocol = $settings['ftp_protocol'] ?? 'sftp';
@@ -102,6 +117,7 @@ class ftpUploadActions extends AhgController
         $totalChunks = (int) $request->getParameter('totalChunks', 0);
         $fileName = $request->getParameter('fileName', '');
         $fileSize = (int) $request->getParameter('fileSize', 0);
+        $relativeDir = (string) $request->getParameter('relativeDir', '');   // folder upload: place into a subfolder
 
         if (empty($uploadId) || $chunkIndex < 0 || $totalChunks < 1 || empty($fileName)) {
             return $this->json(['success' => false, 'message' => 'Missing chunk metadata']);
@@ -132,6 +148,7 @@ class ftpUploadActions extends AhgController
                 'fileName' => $fileName,
                 'fileSize' => $fileSize,
                 'totalChunks' => $totalChunks,
+                'relativeDir' => $relativeDir,
                 'created' => time(),
             ]));
         }
@@ -149,14 +166,17 @@ class ftpUploadActions extends AhgController
             ]);
         }
 
-        // All chunks received — reassemble and upload
-        return $this->assembleAndUpload($uploadId, $uploadDir, $fileName, $totalChunks);
+        // All chunks received — reassemble and upload (read relativeDir from meta for robustness)
+        $meta = @json_decode(@file_get_contents($metaPath), true) ?: [];
+        $relDir = $relativeDir !== '' ? $relativeDir : (string) ($meta['relativeDir'] ?? '');
+
+        return $this->assembleAndUpload($uploadId, $uploadDir, $fileName, $totalChunks, $relDir);
     }
 
     /**
      * Reassemble chunks into a single file and upload via FTP/SFTP.
      */
-    protected function assembleAndUpload(string $uploadId, string $uploadDir, string $fileName, int $totalChunks)
+    protected function assembleAndUpload(string $uploadId, string $uploadDir, string $fileName, int $totalChunks, string $relativeDir = '')
     {
         $assembledPath = self::CHUNK_DIR . '/' . $uploadId . '_assembled';
 
@@ -195,7 +215,7 @@ class ftpUploadActions extends AhgController
 
             // Upload assembled file via FTP/SFTP
             $svc = $this->getFtpService();
-            $result = $svc->upload($assembledPath, $fileName);
+            $result = $svc->upload($assembledPath, $fileName, $relativeDir);
 
             // Cleanup
             $this->cleanupChunks($uploadDir, $assembledPath);

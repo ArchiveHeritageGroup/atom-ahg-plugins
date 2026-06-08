@@ -96,11 +96,19 @@ class ahgFtpPluginConfiguration extends sfPluginConfiguration
                     container.innerHTML = '<div class="alert alert-info mb-0"><i class="fa fa-info-circle me-2"></i>No files on FTP server. <a href="/index.php/ftp-upload">Upload files first</a>.</div>';
                     return;
                 }
+                // Build a type filter from the files' extensions.
+                var extCounts = {};
+                data.files.forEach(function(f) { var e = (f.name.split('.').pop() || '').toLowerCase(); extCounts[e] = (extCounts[e] || 0) + 1; });
+                var filterOpts = '<option value="">All types (' + data.files.length + ')</option>';
+                Object.keys(extCounts).sort().forEach(function(e) { filterOpts += '<option value="' + escapeAttr(e) + '">.' + escapeHtml(e) + ' (' + extCounts[e] + ')</option>'; });
+
                 var html = '<p class="text-muted small mb-2">Select a file to upload as a digital object (with thumbnails and derivatives).</p>';
-                html += '<div class="list-group">';
+                html += '<div class="mb-2"><label class="form-label small mb-1">Filter by type</label><select class="form-select form-select-sm ftp-type-filter" style="max-width:260px"><\/select></div>';
+                html += '<div class="list-group ftp-file-list-group">';
                 data.files.forEach(function(f) {
                     var size = formatBytes(f.size);
-                    html += '<a href="#" class="list-group-item list-group-item-action ftp-select-file" data-filename="' + escapeAttr(f.name) + '">' +
+                    var ext = (f.name.split('.').pop() || '').toLowerCase();
+                    html += '<a href="#" class="list-group-item list-group-item-action ftp-select-file" data-filename="' + escapeAttr(f.name) + '" data-ext="' + escapeAttr(ext) + '">' +
                         '<div class="d-flex justify-content-between align-items-center">' +
                             '<span><i class="fa fa-file me-2 text-muted"></i><strong>' + escapeHtml(f.name) + '</strong></span>' +
                             '<span class="badge bg-secondary">' + size + '</span>' +
@@ -109,6 +117,18 @@ class ahgFtpPluginConfiguration extends sfPluginConfiguration
                 });
                 html += '</div>';
                 container.innerHTML = html;
+
+                // Populate + wire the type filter.
+                var filterSel = container.querySelector('.ftp-type-filter');
+                if (filterSel) {
+                    filterSel.innerHTML = filterOpts;
+                    filterSel.addEventListener('change', function() {
+                        var v = this.value;
+                        container.querySelectorAll('.ftp-select-file').forEach(function(it) {
+                            it.style.display = (!v || it.getAttribute('data-ext') === v) ? '' : 'none';
+                        });
+                    });
+                }
 
                 container.querySelectorAll('.ftp-select-file').forEach(function(el) {
                     el.addEventListener('click', function(e) {

@@ -53,9 +53,47 @@
                     <p class="text-muted"><?php echo __('or click to browse') ?></p>
                     <input type="file" id="file-input" multiple class="d-none">
                 </div>
+                <div class="text-center mb-3">
+                    <button type="button" id="select-folder-btn" class="btn btn-outline-primary">
+                        <i class="fa fa-folder-open me-2"></i><?php echo __('Select a folder to upload') ?>
+                    </button>
+                    <input type="file" id="folder-input" webkitdirectory directory multiple class="d-none">
+                    <div class="form-text"><?php echo __('Uploads every file in the folder, keeping its subfolder structure.') ?></div>
+                </div>
                 <div id="upload-progress" class="d-none">
                     <!-- Per-file progress bars inserted by JS -->
                 </div>
+            </div>
+        </div>
+
+        <!-- Combine a folder into PDF/A -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fa fa-file-pdf me-2"></i><?php echo __('Combine a folder into PDF/A') ?></h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3"><?php echo __('Combine all images in an uploaded folder into one PDF/A. It runs in the background; you will be notified when it is done.') ?></p>
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label" for="combine-folder"><?php echo __('Folder') ?></label>
+                        <select class="form-select" id="combine-folder">
+                            <option value=""><?php echo __('(all files in the upload root)') ?></option>
+                            <?php foreach (($subfolders ?? []) as $sf) { ?>
+                                <option value="<?php echo htmlspecialchars($sf) ?>"><?php echo htmlspecialchars($sf) ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label" for="combine-record"><?php echo __('Attach to record (slug, optional)') ?></label>
+                        <input type="text" class="form-control" id="combine-record" placeholder="<?php echo __('blank = create + link later') ?>">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-danger w-100" id="combine-btn">
+                            <i class="fa fa-file-pdf me-1"></i><?php echo __('Create PDF/A') ?>
+                        </button>
+                    </div>
+                </div>
+                <div id="combine-result" class="mt-3"></div>
             </div>
         </div>
 
@@ -148,6 +186,51 @@
         if (this.files.length > 0) startUploads(this.files);
         this.value = '';
     });
+
+    // Folder upload (webkitdirectory): each file carries webkitRelativePath so the
+    // server places it under a matching subfolder.
+    var folderInput = document.getElementById('folder-input');
+    var selectFolderBtn = document.getElementById('select-folder-btn');
+    if (selectFolderBtn && folderInput) {
+        selectFolderBtn.addEventListener('click', function() { folderInput.click(); });
+        folderInput.addEventListener('change', function() {
+            if (this.files.length > 0) startUploads(this.files);
+            this.value = '';
+        });
+    }
+
+    // Combine a folder into PDF/A (queues a background job via tiffpdfmerge/importFolder).
+    var combineBtn = document.getElementById('combine-btn');
+    if (combineBtn) {
+        combineBtn.addEventListener('click', function() {
+            var base = <?php echo json_encode($diskPath) ?>;
+            var sub = document.getElementById('combine-folder').value;
+            var rec = document.getElementById('combine-record').value.trim();
+            var folder = sub ? (base.replace(/\/+$/, '') + '/' + sub) : base;
+            var out = document.getElementById('combine-result');
+            combineBtn.disabled = true;
+            out.innerHTML = '<span class="text-muted"><i class="fa fa-spinner fa-spin me-1"></i><?php echo __('Queuing…') ?></span>';
+            var fd = new FormData();
+            fd.append('folder', folder);
+            if (rec) fd.append('information_object_id', rec);
+            fetch('<?php echo url_for(['module' => 'tiffpdfmerge', 'action' => 'importFolder']) ?>', {
+                method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+                combineBtn.disabled = false;
+                if (d.success) {
+                    out.innerHTML = '<div class="alert alert-success mb-0"><i class="fa fa-check me-1"></i>' + (d.message || 'Queued') + '</div>';
+                } else {
+                    out.innerHTML = '<div class="alert alert-danger mb-0">' + (d.error || 'Failed') + '</div>';
+                }
+            })
+            .catch(function() {
+                combineBtn.disabled = false;
+                out.innerHTML = '<div class="alert alert-danger mb-0">Request failed</div>';
+            });
+        });
+    }
 
     dropZone.addEventListener('dragover', function(e) { e.preventDefault(); e.stopPropagation(); this.classList.add('bg-light'); });
     dropZone.addEventListener('dragleave', function(e) { e.preventDefault(); e.stopPropagation(); this.classList.remove('bg-light'); });
@@ -265,6 +348,14 @@
             formData.append('totalChunks', totalChunks);
             formData.append('fileName', file.name);
             formData.append('fileSize', file.size);
+            // Folder upload: send the relative subfolder (path minus filename).
+            var relDir = '';
+            if (file.webkitRelativePath) {
+                var rp = file.webkitRelativePath;
+                var slash = rp.lastIndexOf('/');
+                if (slash > 0) relDir = rp.substring(0, slash);
+            }
+            formData.append('relativeDir', relDir);
 
             var xhr = new XMLHttpRequest();
             xhr.open('POST', UPLOAD_URL, true);

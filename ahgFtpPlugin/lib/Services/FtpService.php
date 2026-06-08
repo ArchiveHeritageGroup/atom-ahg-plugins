@@ -101,18 +101,23 @@ class FtpService
     /**
      * Upload a local file to the remote server.
      */
-    public function upload(string $localPath, string $remoteFilename): array
+    public function upload(string $localPath, string $remoteFilename, string $relativeDir = ''): array
     {
         $remoteFilename = $this->sanitizeFilename($remoteFilename);
         if ($remoteFilename === '') {
             return ['success' => false, 'message' => 'Invalid filename'];
         }
 
-        if ($this->protocol === 'local') {
-            return $this->localUpload($localPath, $remoteFilename);
+        $rel = $relativeDir !== '' ? $this->sanitizeRelativePath($relativeDir) : '';
+        if ($relativeDir !== '' && $rel === '') {
+            return ['success' => false, 'message' => 'Invalid folder path'];
         }
 
-        $remoteFull = $this->remotePath . '/' . $remoteFilename;
+        if ($this->protocol === 'local') {
+            return $this->localUpload($localPath, $remoteFilename, $rel);
+        }
+
+        $remoteFull = $this->remotePath . ($rel !== '' ? '/' . $rel : '') . '/' . $remoteFilename;
 
         if ($this->protocol === 'sftp') {
             return $this->sftpUpload($localPath, $remoteFull);
@@ -208,12 +213,12 @@ class FtpService
         return ['success' => true, 'message' => "Local folder ready: {$dir} ({$n} file(s))."];
     }
 
-    protected function localUpload(string $localPath, string $filename): array
+    protected function localUpload(string $localPath, string $filename, string $relativeDir = ''): array
     {
-        $dir = $this->localDir;
-        if ($dir === '') {
+        if ($this->localDir === '') {
             return ['success' => false, 'message' => 'Server disk path is not configured'];
         }
+        $dir = $this->localDir . ($relativeDir !== '' ? '/' . $relativeDir : '');
         if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
             return ['success' => false, 'message' => "Cannot create folder: {$dir}"];
         }
@@ -544,6 +549,29 @@ SFTPEOF";
         }
 
         return $filename;
+    }
+
+    /**
+     * Sanitize a relative directory path (for folder uploads). Strips traversal,
+     * hidden/empty segments and unsafe characters; returns a safe relative path
+     * like "MyFolder/sub" or '' if nothing valid remains.
+     */
+    protected function sanitizeRelativePath(string $path): string
+    {
+        $parts = [];
+        foreach (explode('/', str_replace('\\', '/', $path)) as $seg) {
+            $seg = trim($seg);
+            if ($seg === '' || $seg === '.' || $seg === '..' || str_contains($seg, "\0")) {
+                continue;
+            }
+            $seg = preg_replace('/[^A-Za-z0-9 ._-]/', '_', $seg);
+            if ($seg === '' || str_starts_with($seg, '.')) {
+                continue;
+            }
+            $parts[] = $seg;
+        }
+
+        return implode('/', $parts);
     }
 
     /**
