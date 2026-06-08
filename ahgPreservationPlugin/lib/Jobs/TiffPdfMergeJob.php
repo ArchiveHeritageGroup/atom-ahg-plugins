@@ -120,6 +120,10 @@ class TiffPdfMergeJob
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
+            // Start fresh: remove the combined source files so the next convert is
+            // clean and never re-combines stale leftovers (only under the FTP folder).
+            $this->clearSourceFiles($files);
+
             $this->log(sprintf('Merge complete! Created %d-page PDF from %d files%s',
                 $actualPages, $files->count(), $digitalObjectId ? ' and attached to record' : ''));
 
@@ -462,12 +466,67 @@ class TiffPdfMergeJob
         return $default;
     }
 
+    /**
+     * Remove the source files that were just combined so the next convert starts
+     * fresh and never re-combines stale leftovers. Guarded to only delete files
+     * under the configured FTP upload folder - never master objects elsewhere.
+     */
+    protected function clearSourceFiles($files): void
+    {
+        try {
+            $base = '';
+            try {
+                $base = (string) DB::table('ahg_settings')
+                    ->where('setting_key', 'ftp_disk_path')
+                    ->value('setting_value');
+            } catch (\Exception $e) {
+            }
+            $base = rtrim($base, '/');
+            if ($base === '' || !is_dir($base)) {
+                $this->log('Source cleanup skipped: FTP folder not configured');
+                return;
+            }
+
+            $touchedDirs = [];
+            $removed = 0;
+            foreach ($files as $f) {
+                $p = $f->file_path ?? '';
+                if ($p === '' || !is_file($p)) {
+                    continue;
+                }
+                // Safety: only delete inside the FTP upload base.
+                if (strpos($p, $base . '/') !== 0) {
+                    continue;
+                }
+                if (@unlink($p)) {
+                    $removed++;
+                    $touchedDirs[dirname($p)] = true;
+                }
+            }
+
+            // Drop now-empty subfolders, but never the base folder itself.
+            foreach (array_keys($touchedDirs) as $d) {
+                if ($d !== $base && is_dir($d) && count(glob($d . '/*') ?: []) === 0) {
+                    @rmdir($d);
+                }
+            }
+
+            $this->log(sprintf('Cleared %d source file(s) after combine (fresh start)', $removed));
+        } catch (\Throwable $e) {
+            $this->log('Source cleanup skipped: ' . $e->getMessage());
+        }
+    }
+
     protected function sanitizeFilename($filename): string
     {
         $filename = basename($filename);
         $filename = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $filename);
         $filename = preg_replace('/_+/', '_', $filename);
         $filename = trim($filename, '_');
+        // Truncate long names (e.g. long record slugs) so the output filename stays sane.
+        if (strlen($filename) > 80) {
+            $filename = rtrim(substr($filename, 0, 80), '_');
+        }
         return !empty($filename) ? $filename : 'merged_document';
     }
 
