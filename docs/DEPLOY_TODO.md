@@ -5,6 +5,23 @@ Tick each instance as it is deployed. Each step runs **once per instance databas
 
 ---
 
+## STANDING STEP — run on EVERY deploy, first, right after `git pull`
+
+```bash
+cd <instance-root>            # e.g. /usr/share/nginx/atom
+sudo atom-ahg-plugins/bin/link-plugins.sh
+```
+
+AtoM discovers plugins only via `plugins/<name>` symlinks → `atom-ahg-plugins/<name>`.
+New plugins added to the repo have NO symlink until this runs. Enabling a plugin
+(`atom_plugin.is_enabled=1`) **without its symlink fatals the whole site** on every
+request (`InvalidArgumentException: The plugin "X" does not exist`) — this took WDB
+down on 2026-06-08. The script is idempotent and only creates missing symlinks; it
+does **not** enable/load anything (loading is driven by `atom_plugin.is_enabled`),
+so it is always safe to run. Run it before enabling plugins or applying migrations.
+
+---
+
 ## 2026-06-04 — Security MFA + audit chaining + AI chatbot
 
 Shipped in `atom-ahg-plugins` (ahgSecurityClearancePlugin, ahgAuditTrailPlugin, ahgAIPlugin)

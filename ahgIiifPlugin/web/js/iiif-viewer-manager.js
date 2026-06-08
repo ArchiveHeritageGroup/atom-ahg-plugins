@@ -349,11 +349,14 @@ export class IiifViewerManager {
 
             this.loaded.osd = true;
 
-            // Add Share button to OSD toolbar
-            this.addShareButton();
+            // Add Share button to OSD toolbar (guard: method may be unimplemented in this build)
+            if (typeof this.addShareButton === 'function') {
+                this.addShareButton();
+            }
 
             // Apply any pending content state
-            if (this.applyContentStateWhenReady && this.pendingContentState) {
+            if (this.applyContentStateWhenReady && this.pendingContentState
+                && typeof this.applyContentState === 'function') {
                 setTimeout(() => this.applyContentState(this.pendingContentState), 500);
             }
         } catch (error) {
