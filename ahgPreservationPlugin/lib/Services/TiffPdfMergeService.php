@@ -30,10 +30,10 @@ class TiffPdfMergeService
         $this->tempDir = $this->settings['temp_directory'] ?? '/tmp/tiff-pdf-merge';
         
         // Get upload directory - handle CLI context
-        if (class_exists('sfConfig') && method_exists('sfConfig', 'get')) {
-            $this->uploadDir = \sfConfig::get('sf_upload_dir', '' . sfConfig::get('sf_upload_dir') . '');
+        if (class_exists('sfConfig')) {
+            $this->uploadDir = \sfConfig::get('sf_upload_dir', 'uploads');
         } else {
-            $this->uploadDir = '' . sfConfig::get('sf_upload_dir') . '';
+            $this->uploadDir = 'uploads';
         }
 
         // Ensure temp directory exists
@@ -163,12 +163,12 @@ class TiffPdfMergeService
             $outputFilename = $this->sanitizeFilename($job->job_name) . '.pdf';
             $outputPath = $this->getJobDirectory($jobId) . '/' . $outputFilename;
 
-            // Build conversion command based on PDF standard
-            if (strpos($job->pdf_standard, 'pdfa') === 0) {
-                $result = $this->convertToPdfA($files, $outputPath, $job);
-            } else {
-                $result = $this->convertToPdf($files, $outputPath, $job);
+            // Always produce PDF/A (archival target). If the job carries a
+            // non-PDF/A standard, convertToPdfA() defaults it to pdfa-2b.
+            if (strpos((string) $job->pdf_standard, 'pdfa') !== 0) {
+                $job->pdf_standard = 'pdfa-2b';
             }
+            $result = $this->convertToPdfA($files, $outputPath, $job);
 
             if (!$result['success']) {
                 throw new Exception($result['error']);
@@ -218,110 +218,62 @@ class TiffPdfMergeService
     }
 
     /**
-     * Convert images to standard PDF using ImageMagick
+     * Public conversion entrypoint shared by the Service's own processJob() and
+     * by TiffPdfMergeJob (the web/worker path), so there is ONE memory-safe
+     * conversion implementation. Always targets PDF/A (archival).
+     *
+     * @param  iterable  $files  rows with a ->file_path, in page order
+     */
+    public function mergeFilesToPdf($files, string $outputPath, object $job): array
+    {
+        if (strpos((string) ($job->pdf_standard ?? ''), 'pdfa') !== 0) {
+            $job->pdf_standard = 'pdfa-2b';
+        }
+
+        return $this->convertToPdfA($files, $outputPath, $job);
+    }
+
+    /**
+     * Convert images to a standard (non-PDF/A) PDF.
+     *
+     * Memory-safe: each page is converted to its own single-page PDF (bounded
+     * ImageMagick resources) and the pages are concatenated with qpdf. This
+     * NEVER loads all pages into one ImageMagick process, so a 258 x 42 MB scan
+     * set merges in roughly one page's worth of RAM instead of ~11 GB.
      */
     protected function convertToPdf($files, string $outputPath, object $job): array
     {
-        $imageMagick = $this->settings['imagemagick_path'] ?? '/usr/bin/convert';
-
-        // Build input file list
-        $inputFiles = [];
-
-        foreach ($files as $file) {
-            if (file_exists($file->file_path)) {
-                $inputFiles[] = escapeshellarg($file->file_path);
-            }
+        $build = $this->buildMergedPdf($files, $job);
+        if (!$build['success']) {
+            return $build;
         }
 
-        if (empty($inputFiles)) {
-            return ['success' => false, 'error' => 'No valid input files found'];
-        }
+        $ok = @rename($build['path'], $outputPath) || @copy($build['path'], $outputPath);
+        $this->cleanupWorkDir($build['work']);
 
-        // Build ImageMagick command
-        $cmd = [
-            escapeshellcmd($imageMagick),
-        ];
-
-        // Add quality setting
-        $cmd[] = '-quality ' . (int) $job->compression_quality;
-
-        // Add DPI
-        $cmd[] = '-density ' . (int) $job->dpi;
-
-        // Add page size if specified
-        if ($job->page_size !== 'auto') {
-            $pageSizes = [
-                'a4' => '595x842',
-                'letter' => '612x792',
-                'legal' => '612x1008',
-                'a3' => '842x1190',
-            ];
-
-            if (isset($pageSizes[$job->page_size])) {
-                $cmd[] = '-page ' . $pageSizes[$job->page_size];
-            }
-        }
-
-        // Add input files
-        $cmd[] = implode(' ', $inputFiles);
-
-        // Output file
-        $cmd[] = escapeshellarg($outputPath);
-
-        $command = implode(' ', $cmd);
-        exec($command . ' 2>&1', $output, $returnCode);
-
-        if ($returnCode !== 0) {
-            return [
-                'success' => false,
-                'error' => 'ImageMagick conversion failed: ' . implode("\n", $output),
-            ];
+        if (!$ok || !is_file($outputPath)) {
+            return ['success' => false, 'error' => 'Failed to write merged PDF output'];
         }
 
         return ['success' => true, 'output_path' => $outputPath];
     }
 
     /**
-     * Convert images to PDF/A using Ghostscript
+     * Convert images to PDF/A.
+     *
+     * Same memory-safe per-page merge as convertToPdf(), then a single
+     * Ghostscript PDF/A pass over the merged PDF (gs streams page-by-page, so
+     * this stage is also bounded regardless of page count).
      */
     protected function convertToPdfA($files, string $outputPath, object $job): array
     {
-        $imageMagick = $this->settings['imagemagick_path'] ?? '/usr/bin/convert';
         $ghostscript = $this->settings['ghostscript_path'] ?? '/usr/bin/gs';
 
-        // First, create intermediate PDF with ImageMagick
-        $tempPdf = $this->tempDir . '/' . uniqid('temp_') . '.pdf';
-
-        $inputFiles = [];
-
-        foreach ($files as $file) {
-            if (file_exists($file->file_path)) {
-                $inputFiles[] = escapeshellarg($file->file_path);
-            }
+        $build = $this->buildMergedPdf($files, $job);
+        if (!$build['success']) {
+            return $build;
         }
-
-        if (empty($inputFiles)) {
-            return ['success' => false, 'error' => 'No valid input files found'];
-        }
-
-        // Create intermediate PDF
-        $imCmd = sprintf(
-            '%s -quality %d -density %d %s %s 2>&1',
-            escapeshellcmd($imageMagick),
-            (int) $job->compression_quality,
-            (int) $job->dpi,
-            implode(' ', $inputFiles),
-            escapeshellarg($tempPdf)
-        );
-
-        exec($imCmd, $imOutput, $imReturn);
-
-        if ($imReturn !== 0) {
-            return [
-                'success' => false,
-                'error' => 'ImageMagick PDF creation failed: ' . implode("\n", $imOutput),
-            ];
-        }
+        $tempPdf = $build['path'];
 
         // Determine PDF/A level
         $pdfaLevel = match ($job->pdf_standard) {
@@ -331,10 +283,8 @@ class TiffPdfMergeService
             default => '2',
         };
 
-        // Create PDF/A definition file
         $pdfaDefFile = $this->createPdfaDefinition($pdfaLevel);
 
-        // Convert to PDF/A with Ghostscript
         $gsCmd = sprintf(
             '%s -dPDFA=%s -dBATCH -dNOPAUSE -dNOOUTERSAVE -dUseCIEColor ' .
             '-sProcessColorModel=DeviceRGB -sDEVICE=pdfwrite ' .
@@ -348,9 +298,8 @@ class TiffPdfMergeService
 
         exec($gsCmd, $gsOutput, $gsReturn);
 
-        // Cleanup
-        @unlink($tempPdf);
         @unlink($pdfaDefFile);
+        $this->cleanupWorkDir($build['work']);   // removes the merged temp PDF + work dir
 
         if ($gsReturn !== 0) {
             return [
@@ -360,6 +309,126 @@ class TiffPdfMergeService
         }
 
         return ['success' => true, 'output_path' => $outputPath];
+    }
+
+    /**
+     * Build a single merged PDF from the job's page images WITHOUT loading them
+     * all into one process. Returns ['success'=>bool, 'path'=>mergedPdf,
+     * 'work'=>workDir, 'error'=>?]. The caller owns the work dir (cleanup via
+     * cleanupWorkDir()). Peak memory is bounded to one page.
+     */
+    protected function buildMergedPdf($files, object $job): array
+    {
+        @set_time_limit(0);
+
+        $imageMagick = $this->settings['imagemagick_path'] ?? '/usr/bin/convert';
+        $qpdf = $this->settings['qpdf_path'] ?? '/usr/bin/qpdf';
+
+        $work = $this->tempDir . '/merge_' . uniqid();
+        if (!@mkdir($work, 0775, true) && !is_dir($work)) {
+            return ['success' => false, 'error' => 'Could not create work directory', 'work' => $work];
+        }
+        // Keep ImageMagick's own scratch off /tmp's memory-backed space.
+        putenv('MAGICK_TMPDIR=' . $work);
+
+        // Optional fixed page geometry (carried over from the old code path).
+        $pageGeom = null;
+        if ($job->page_size !== 'auto') {
+            $pageSizes = ['a4' => '595x842', 'letter' => '612x792', 'legal' => '612x1008', 'a3' => '842x1190'];
+            $pageGeom = $pageSizes[$job->page_size] ?? null;
+        }
+
+        $pagePdfs = [];
+        $n = 0;
+        foreach ($files as $file) {
+            if (!file_exists($file->file_path)) {
+                continue;
+            }
+            $n++;
+            $pageOut = sprintf('%s/p-%05d.pdf', $work, $n);
+            // Bounded-memory single-page convert: caps RAM/scratch so one huge
+            // uncompressed scan cannot blow the box; JPEG-compresses at -quality.
+            $cmd = sprintf(
+                '%s -limit memory 256MiB -limit map 512MiB -limit disk 8GiB -density %d -quality %d -compress JPEG %s%s %s 2>&1',
+                escapeshellcmd($imageMagick),
+                (int) $job->dpi,
+                (int) $job->compression_quality,
+                $pageGeom ? ('-page ' . $pageGeom . ' ') : '',
+                escapeshellarg($file->file_path . '[0]'),   // [0] = first frame (guards multi-page TIFFs)
+                escapeshellarg($pageOut)
+            );
+            // -compress JPEG keeps each page PDF small (~hundreds of KB vs ~30 MB
+            // zip-stored), so 258 pages of intermediates stay well under disk too.
+            exec($cmd, $out, $rc);
+            if ($rc !== 0 || !is_file($pageOut) || filesize($pageOut) < 1) {
+                $this->cleanupWorkDir($work);
+
+                return ['success' => false, 'error' => 'Page conversion failed for ' . basename($file->file_path) . ': ' . implode("\n", array_slice((array) $out, -3)), 'work' => $work];
+            }
+            $pagePdfs[] = $pageOut;
+        }
+
+        if (empty($pagePdfs)) {
+            $this->cleanupWorkDir($work);
+
+            return ['success' => false, 'error' => 'No valid input files found', 'work' => $work];
+        }
+
+        $merged = $this->concatPdfs($qpdf, $pagePdfs, $work, 0);
+        if (!$merged) {
+            $this->cleanupWorkDir($work);
+
+            return ['success' => false, 'error' => 'qpdf concatenation failed', 'work' => $work];
+        }
+
+        return ['success' => true, 'path' => $merged, 'work' => $work];
+    }
+
+    /**
+     * Concatenate page PDFs with qpdf, in batches of 100 so neither the arg
+     * list nor any single qpdf invocation grows unbounded. Recurses on the
+     * sub-batch results. Returns the merged path or null on failure.
+     */
+    protected function concatPdfs(string $qpdf, array $pdfs, string $work, int $depth): ?string
+    {
+        $batchSize = 100;
+
+        if (count($pdfs) <= $batchSize) {
+            $out = $work . '/merged_' . $depth . '_0.pdf';
+            $args = implode(' ', array_map('escapeshellarg', $pdfs));
+            exec(sprintf('%s --empty --pages %s -- %s 2>&1', escapeshellcmd($qpdf), $args, escapeshellarg($out)), $o, $rc);
+
+            // qpdf rc 3 = warnings only, output still valid.
+            return (($rc === 0 || $rc === 3) && is_file($out)) ? $out : null;
+        }
+
+        $subMerged = [];
+        foreach (array_chunk($pdfs, $batchSize) as $i => $chunk) {
+            $sub = sprintf('%s/sub_%d_%03d.pdf', $work, $depth, $i);
+            $args = implode(' ', array_map('escapeshellarg', $chunk));
+            exec(sprintf('%s --empty --pages %s -- %s 2>&1', escapeshellcmd($qpdf), $args, escapeshellarg($sub)), $o, $rc);
+            if (($rc !== 0 && $rc !== 3) || !is_file($sub)) {
+                return null;
+            }
+            $subMerged[] = $sub;
+            foreach ($chunk as $p) {
+                @unlink($p);   // free page PDFs as we fold them up
+            }
+        }
+
+        return $this->concatPdfs($qpdf, $subMerged, $work, $depth + 1);
+    }
+
+    /** Recursively remove a buildMergedPdf() work directory (guarded to merge_ dirs). */
+    protected function cleanupWorkDir(?string $dir): void
+    {
+        if (!$dir || !is_dir($dir) || strpos(basename($dir), 'merge_') !== 0) {
+            return;
+        }
+        foreach (glob($dir . '/*') ?: [] as $f) {
+            @unlink($f);
+        }
+        @rmdir($dir);
     }
 
     /**

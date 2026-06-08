@@ -301,51 +301,192 @@ class tiffpdfmergeActions extends AhgController
             return $this->renderJson(['success' => false, 'error' => 'No files to process']);
         }
 
-        // Process the job synchronously using TiffPdfMergeJob
+        // Queue for the background worker (ahg:tiff-pdf-process). Large volumes
+        // (hundreds of 40 MB+ TIFFs) must never run in the web request - they
+        // exceed the request time and memory limits. The worker runs the
+        // memory-safe batched merge and notifies the user on completion.
+        $db = $this->getDB();
+        $db::table('tiff_pdf_merge_job')
+            ->where('id', $mergeJobId)
+            ->update([
+                'status' => 'queued',
+                'error_message' => null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        return $this->renderJson([
+            'success' => true,
+            'queued' => true,
+            'status' => 'queued',
+            'message' => 'Queued. The PDF/A is being created in the background; you will be notified when it is ready.',
+        ]);
+    }
+
+    /**
+     * Recreate / retry a job. Re-queues a completed or failed job so the
+     * operator can regenerate the PDF/A after an upload finishes or after a
+     * convert failure. Clears prior output + resets file statuses.
+     */
+    public function executeRecreate($request)
+    {
+        sfConfig::set('sf_web_debug', false);
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        }
+
+        $mergeJobId = (int) $request->getParameter('job_id');
+        $job = $this->getRepository()->getJob($mergeJobId);
+
+        if (!$job) {
+            return $this->renderJson(['success' => false, 'error' => 'Job not found']);
+        }
+        if ($job->status === 'processing') {
+            return $this->renderJson(['success' => false, 'error' => 'Job is currently processing']);
+        }
+
+        $files = $this->getRepository()->getJobFiles($mergeJobId);
+        if ($files->isEmpty()) {
+            return $this->renderJson(['success' => false, 'error' => 'No files to process']);
+        }
+
+        $db = $this->getDB();
+        $db::table('tiff_pdf_merge_job')
+            ->where('id', $mergeJobId)
+            ->update([
+                'status' => 'queued',
+                'error_message' => null,
+                'output_path' => null,
+                'output_filename' => null,
+                'completed_at' => null,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+        $db::table('tiff_pdf_merge_file')
+            ->where('merge_job_id', $mergeJobId)
+            ->update(['status' => 'uploaded']);
+
+        return $this->renderJson([
+            'success' => true,
+            'queued' => true,
+            'status' => 'queued',
+            'message' => 'Re-queued. The PDF/A will be recreated in the background.',
+        ]);
+    }
+
+    /**
+     * Import a server-side folder of images (already placed via FTP) as a
+     * combine job, referencing the files IN PLACE (no browser upload, no copy),
+     * and queue it for the background worker. The folder is restricted to an
+     * allowed base to prevent arbitrary filesystem access.
+     */
+    public function executeImportFolder($request)
+    {
+        sfConfig::set('sf_web_debug', false);
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        }
+        if (!$request->isMethod('POST')) {
+            return $this->renderJson(['success' => false, 'error' => 'POST required']);
+        }
+
+        $folder = (string) $request->getParameter('folder');
+        $real = $folder !== '' ? realpath($folder) : false;
+        if (!$real || !is_dir($real)) {
+            return $this->renderJson(['success' => false, 'error' => 'Folder not found']);
+        }
+
+        $base = realpath($this->getImportBase());
+        if (!$base || strpos($real, $base) !== 0) {
+            return $this->renderJson(['success' => false, 'error' => 'Folder is outside the allowed import area']);
+        }
+
+        $images = $this->listImageFiles($real);
+        if (empty($images)) {
+            return $this->renderJson(['success' => false, 'error' => 'No TIFF/image files found in folder']);
+        }
+
+        $informationObjectId = $request->getParameter('information_object_id');
+        if ($informationObjectId && !is_numeric($informationObjectId)) {
+            $io = QubitInformationObject::getBySlug($informationObjectId);
+            $informationObjectId = $io ? $io->id : null;
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $jobName = $request->getParameter('job_name', basename($real));
+
         try {
-            // Load the job class if not already loaded
-            if (!class_exists('AtomFramework\Jobs\TiffPdfMergeJob')) {
-                require_once $this->config('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Jobs/TiffPdfMergeJob.php';
-            }
+            $repo = $this->getRepository();
+            $jobId = $repo->createJob([
+                'user_id' => $userId,
+                'job_name' => $jobName,
+                'information_object_id' => $informationObjectId ?: null,
+                'pdf_standard' => 'pdfa-2b',
+                'attach_to_record' => (int) $request->getParameter('attach_to_record', 1),
+                'status' => 'queued',
+            ]);
 
-            $jobProcessor = new \AtomFramework\Jobs\TiffPdfMergeJob($mergeJobId);
-            $success = $jobProcessor->handle();
-
-            if ($success) {
-                // Refresh job data to get output info
-                $updatedJob = $this->getRepository()->getJob($mergeJobId);
-
-                return $this->renderJson([
-                    'success' => true,
-                    'message' => 'PDF created successfully!',
-                    'output_filename' => $updatedJob->output_filename ?? null,
-                    'output_path' => $updatedJob->output_path ?? null,
-                    'digital_object_id' => $updatedJob->output_digital_object_id ?? null,
-                    'processed_files' => $updatedJob->processed_files ?? $files->count(),
-                ]);
-            } else {
-                $updatedJob = $this->getRepository()->getJob($mergeJobId);
-                return $this->renderJson([
-                    'success' => false,
-                    'error' => $updatedJob->error_message ?? 'Processing failed',
+            $order = 0;
+            foreach ($images as $path) {
+                ++$order;
+                $repo->addFile($jobId, [
+                    'file_path' => $path,
+                    'original_filename' => basename($path),
+                    'stored_filename' => basename($path),   // referenced in place; no separate stored copy
+                    'mime_type' => $this->guessImageMime($path),
+                    'page_order' => $order,
+                    'file_size' => @filesize($path) ?: 0,
                 ]);
             }
-        } catch (Exception $e) {
-            // Mark job as failed
-            $db = $this->getDB();
-            $db::table('tiff_pdf_merge_job')
-                ->where('id', $mergeJobId)
-                ->update([
-                    'status' => 'failed',
-                    'error_message' => $e->getMessage(),
-                    'updated_at' => date('Y-m-d H:i:s'),
-                ]);
 
             return $this->renderJson([
-                'success' => false,
-                'error' => 'Processing error: ' . $e->getMessage(),
+                'success' => true,
+                'job_id' => $jobId,
+                'queued' => true,
+                'files' => count($images),
+                'message' => count($images) . ' file(s) queued. The PDF/A is being created in the background; you will be notified when it is ready.',
             ]);
+        } catch (Exception $e) {
+            return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
         }
+    }
+
+    /** Allowed base directory for folder imports (configurable; defaults to the web dir). */
+    protected function getImportBase()
+    {
+        $cfg = sfConfig::get('app_tiff_combine_import_base');
+
+        return $cfg ?: sfConfig::get('sf_web_dir');
+    }
+
+    /** Best-effort image mime from extension (for the file row). */
+    protected function guessImageMime($path)
+    {
+        $map = ['tif' => 'image/tiff', 'tiff' => 'image/tiff', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'bmp' => 'image/bmp', 'gif' => 'image/gif', 'webp' => 'image/webp'];
+
+        return $map[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? 'application/octet-stream';
+    }
+
+    /** List image files in a folder, natural-sorted so page order follows filenames. */
+    protected function listImageFiles($dir)
+    {
+        $out = [];
+        foreach (scandir($dir) ?: [] as $f) {
+            if ('.' === $f || '..' === $f) {
+                continue;
+            }
+            $p = $dir . '/' . $f;
+            if (!is_file($p)) {
+                continue;
+            }
+            $ext = strtolower(pathinfo($f, PATHINFO_EXTENSION));
+            if (in_array($ext, ['tif', 'tiff', 'jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp'], true)) {
+                $out[] = $p;
+            }
+        }
+        natcasesort($out);
+
+        return array_values($out);
     }
 
     public function executeDownload($request)

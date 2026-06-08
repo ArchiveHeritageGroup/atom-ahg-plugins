@@ -304,6 +304,19 @@ class TiffPdfMergeRepository
     }
 
     /**
+     * Get queued jobs for the background worker, oldest first (FIFO).
+     * Picks up both 'queued' (web/recreate) and legacy 'pending' jobs.
+     */
+    public function getQueuedJobs(int $limit = 5): Collection
+    {
+        return DB::table($this->jobTable)
+            ->whereIn('status', ['queued', 'pending'])
+            ->orderBy('created_at', 'asc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
      * Get statistics
      */
     public function getStatistics(?int $userId = null): array

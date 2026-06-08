@@ -53,13 +53,16 @@ class TiffPdfMergeJob
             $outputFilename = $this->sanitizeFilename($mergeJob->job_name) . '.pdf';
             $outputPath = $jobDir . '/' . $outputFilename;
 
-            $this->log('Converting images to PDF...');
+            $this->log('Converting images to PDF/A...');
 
-            if (strpos($mergeJob->pdf_standard ?? 'pdfa-2b', 'pdfa') === 0) {
-                $result = $this->convertToPdfA($files, $outputPath, $mergeJob);
-            } else {
-                $result = $this->convertToPdf($files, $outputPath, $mergeJob);
+            // Single memory-safe conversion engine (per-page convert -> qpdf
+            // concat -> one gs PDF/A pass). Always PDF/A. This replaces the old
+            // all-at-once ImageMagick call that ran out of memory on volumes.
+            if (!class_exists('AtomFramework\Services\TiffPdfMergeService')) {
+                require_once dirname(__DIR__) . '/Services/TiffPdfMergeService.php';
             }
+            $result = (new \AtomFramework\Services\TiffPdfMergeService())
+                ->mergeFilesToPdf($files, $outputPath, $mergeJob);
 
             if (!$result['success']) {
                 throw new \Exception($result['error']);
