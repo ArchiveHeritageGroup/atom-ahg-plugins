@@ -332,7 +332,10 @@ class DynamicFacetService
                     })
                     ->whereRaw('p_mw.object_id = io.id')
                     ->where('p_mw.name', '=', 'ccoData')
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pi_mw.value, ?)) = ?", ['$.' . $jsonKey, $val]);
+                    // Guard: some ccoData property_i18n.value rows contain non-JSON
+                    // text; JSON_EXTRACT throws SQLSTATE 22032 on invalid JSON and
+                    // 500s the whole browse. Fall back to '{}' (→ NULL, no match).
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(pi_mw.value), pi_mw.value, '{}'), ?)) = ?", ['$.' . $jsonKey, $val]);
             });
         }
 

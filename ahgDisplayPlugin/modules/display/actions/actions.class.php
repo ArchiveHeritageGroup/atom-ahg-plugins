@@ -685,7 +685,9 @@ class displayActions extends AhgController
                     })
                     ->whereRaw('p_mw.object_id = io.id')
                     ->where('p_mw.name', '=', 'ccoData')
-                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(pi_mw.value, ?)) = ?", ['$.' . $jsonKey, $val]);
+                    // Guard invalid-JSON ccoData rows: JSON_EXTRACT throws SQLSTATE
+                    // 22032 on non-JSON text and 500s the browse. Fall back to '{}'.
+                    ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(IF(JSON_VALID(pi_mw.value), pi_mw.value, '{}'), ?)) = ?", ['$.' . $jsonKey, $val]);
             });
         }
 
