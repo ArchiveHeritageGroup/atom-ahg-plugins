@@ -452,4 +452,19 @@ class ftpUploadActions extends AhgController
 
         return $this->json($svc->deleteFile($filename));
     }
+
+    /**
+     * Delete ALL files in the upload folder (clear all).
+     */
+    public function executeClearAll(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->json(['success' => false, 'message' => 'Unauthorized']);
+        }
+        if (!$request->isMethod('post')) {
+            return $this->json(['success' => false, 'message' => 'POST required']);
+        }
+
+        return $this->json($this->getFtpService()->clearAll());
+    }
 }

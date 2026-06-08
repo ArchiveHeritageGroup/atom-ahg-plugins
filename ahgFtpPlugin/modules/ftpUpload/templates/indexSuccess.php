@@ -101,9 +101,14 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fa fa-folder-open me-2"></i><?php echo __('Remote Files') ?></h5>
-                <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-btn">
-                    <i class="fa fa-sync-alt me-1"></i><?php echo __('Refresh') ?>
-                </button>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-btn">
+                        <i class="fa fa-sync-alt me-1"></i><?php echo __('Refresh') ?>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger ms-1" id="clear-all-btn">
+                        <i class="fa fa-trash me-1"></i><?php echo __('Clear all') ?>
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <?php if ($listError): ?>
@@ -157,6 +162,22 @@
     var UPLOAD_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'uploadChunk']) ?>';
     var LIST_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'listFiles']) ?>';
     var DELETE_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'deleteFile']) ?>';
+    var CLEAR_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'clearAll']) ?>';
+    var clearAllBtn = document.getElementById('clear-all-btn');
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', function() {
+            if (!confirm('<?php echo __('Delete ALL uploaded files in this folder? This cannot be undone.') ?>')) return;
+            clearAllBtn.disabled = true;
+            fetch(CLEAR_URL, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function(r) { return r.json(); })
+                .then(function(d) {
+                    clearAllBtn.disabled = false;
+                    var rb = document.getElementById('refresh-btn'); if (rb) rb.click();
+                    alert(d.message || (d.success ? 'Cleared' : 'Failed'));
+                })
+                .catch(function() { clearAllBtn.disabled = false; alert('Request failed'); });
+        });
+    }
 
     // Track active uploads for pause/resume
     var uploads = {};
