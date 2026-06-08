@@ -77,10 +77,60 @@ EOF;
 
             $final = DB::table('tiff_pdf_merge_job')->where('id', $job->id)->first();
             $this->logSection('tiff-pdf', "  -> " . ($final->status ?? 'unknown'));
+            $this->makeWebDerivative($final);
             $this->notify($final);
         }
 
         return 0;
+    }
+
+    /**
+     * Immediately create the fast web-optimized PDF sibling for the combined
+     * master (instead of waiting for the daily ahg:optimize-pdfs cron), so the
+     * big document opens page-1-fast as soon as the combine finishes.
+     * Best-effort; never throws.
+     */
+    protected function makeWebDerivative($job): void
+    {
+        try {
+            if (!$job || ($job->status ?? '') !== 'completed' || empty($job->output_digital_object_id)) {
+                return;
+            }
+            if (!class_exists('ahgWebPdf')) {
+                $f = sfConfig::get('sf_plugins_dir') . '/ahgCorePlugin/lib/ahgWebPdf.class.php';
+                if (is_file($f)) {
+                    require_once $f;
+                }
+            }
+            if (!class_exists('ahgWebPdf') || !ahgWebPdf::toolsAvailable()) {
+                return;
+            }
+            $do = DB::table('digital_object')->where('id', (int) $job->output_digital_object_id)->first();
+            if (!$do || 'application/pdf' !== $do->mime_type) {
+                return;
+            }
+            $abs = rtrim((string) sfConfig::get('sf_web_dir'), '/') . $do->path . $do->name;
+            if (!is_file($abs)) {
+                return;
+            }
+            $sib = ahgWebPdf::siblingPath($abs);
+            if (is_file($sib)) {
+                return;   // already created
+            }
+            $tmp = ahgWebPdf::optimize($abs, 200);
+            if (!$tmp) {
+                return;
+            }
+            if (@copy($tmp, $sib)) {
+                @chmod($sib, 0664);
+                @chown($sib, 'www-data');
+                @chgrp($sib, 'www-data');
+                $this->logSection('tiff-pdf', '  web derivative: ' . basename($sib));
+            }
+            ahgWebPdf::cleanupDirOf($tmp);
+        } catch (\Throwable $e) {
+            error_log('[ahg:tiff-pdf-process] web derivative failed: ' . $e->getMessage());
+        }
     }
 
     /** Best-effort completion notification to the job's user (email). Never throws. */
