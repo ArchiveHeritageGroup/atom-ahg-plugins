@@ -24,10 +24,13 @@ $hasGallery = checkPluginEnabled('ahgGalleryPlugin');
 $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin');
 ?>
 <?php foreach ([$addMenu, $manageMenu, $importMenu, $adminMenu] as $menu) { ?>
+  <?php $menuName = $menu ? $menu->getName() : ''; ?>
   <?php if (
-      $menu && ('add' == $menu->getName()
-      || 'manage' == $menu->getName())
+      $menu && ('add' == $menuName
+      || 'manage' == $menuName)
       || $sf_user->isAdministrator()
+      // Import is also available to the Editor role (Admin still gets everything).
+      || ('import' == $menuName && $sf_user->hasCredential(['administrator', 'editor'], false))
   ) { ?>
     <li class="nav-item dropdown d-flex flex-column">
       <a
