@@ -5,6 +5,11 @@
 !/ahg*/
 !/docs/
 
+# Track the deploy helper so it ships with the repo (other bin/ scripts stay local).
+!/bin/
+/bin/*
+!/bin/link-plugins.sh
+
 # Dependencies and build artifacts
 node_modules/
 .sass-cache/
