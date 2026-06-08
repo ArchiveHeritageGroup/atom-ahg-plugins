@@ -451,6 +451,80 @@ class tiffpdfmergeActions extends AhgController
         }
     }
 
+    /**
+     * List completed combine jobs whose PDF is not yet linked to a record, so
+     * the user can pick one by name and attach it ("Link to digital object").
+     */
+    public function executeReadyToLink($request)
+    {
+        sfConfig::set('sf_web_debug', false);
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $rows = $db::table('tiff_pdf_merge_job')
+            ->where('status', 'completed')
+            ->whereNull('output_digital_object_id')
+            ->orderByDesc('id')
+            ->limit(100)
+            ->get(['id', 'job_name', 'output_filename', 'output_path', 'processed_files', 'completed_at']);
+
+        $list = [];
+        foreach ($rows as $r) {
+            if (empty($r->output_path) || !is_file($r->output_path)) {
+                continue;
+            }
+            $list[] = [
+                'job_id' => (int) $r->id,
+                'name' => $r->output_filename ?: $r->job_name,
+                'pages' => (int) $r->processed_files,
+                'size_mb' => round((@filesize($r->output_path) ?: 0) / 1048576, 2),
+                'completed_at' => $r->completed_at,
+            ];
+        }
+
+        return $this->renderJson(['success' => true, 'items' => $list]);
+    }
+
+    /**
+     * Attach an already-combined job PDF to a record chosen by slug - the
+     * after-the-fact "link by name" path for combines made without a slug.
+     */
+    public function executeAttachExisting($request)
+    {
+        sfConfig::set('sf_web_debug', false);
+
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson(['success' => false, 'error' => 'Authentication required']);
+        }
+        if (!$request->isMethod('POST')) {
+            return $this->renderJson(['success' => false, 'error' => 'POST required']);
+        }
+
+        $jobId = (int) $request->getParameter('job_id');
+        $slug = trim((string) $request->getParameter('slug', ''));
+        if (!$jobId || $slug === '') {
+            return $this->renderJson(['success' => false, 'error' => 'Missing job or record slug']);
+        }
+
+        $ioId = (int) \Illuminate\Database\Capsule\Manager::table('slug')
+            ->where('slug', $slug)
+            ->value('object_id');
+        if (!$ioId) {
+            return $this->renderJson(['success' => false, 'error' => 'Record not found for slug: ' . $slug]);
+        }
+
+        if (!class_exists('AtomFramework\Jobs\TiffPdfMergeJob')) {
+            require_once $this->config('sf_plugins_dir') . '/ahgPreservationPlugin/lib/Jobs/TiffPdfMergeJob.php';
+        }
+        $job = new \AtomFramework\Jobs\TiffPdfMergeJob($jobId);
+        $result = $job->attachExisting($ioId);
+
+        return $this->renderJson($result);
+    }
+
     /** Allowed base directory for folder imports (configurable; defaults to the web dir). */
     protected function getImportBase()
     {

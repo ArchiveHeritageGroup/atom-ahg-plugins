@@ -50,7 +50,10 @@ class TiffPdfMergeJob
                 mkdir($jobDir, 0755, true);
             }
 
-            $outputFilename = $this->sanitizeFilename($mergeJob->job_name) . '.pdf';
+            // Unique per job so a fresh convert never collides with - or serves -
+            // a stale PDF of the same name. Name derived from the slug/folder, with
+            // the job id as the unique token.
+            $outputFilename = $this->sanitizeFilename($mergeJob->job_name) . '_' . $this->mergeJobId . '.pdf';
             $outputPath = $jobDir . '/' . $outputFilename;
 
             $this->log('Converting images to PDF/A...');
@@ -119,6 +122,12 @@ class TiffPdfMergeJob
                 'completed_at' => date('Y-m-d H:i:s'),
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
+
+            // Commit before teardown. AtoM (Propel) opens a transaction on the
+            // shared connection during attach; a CLI/worker run never reaches the
+            // web request filter that would commit it, so the digital_object rows
+            // were being rolled back at process exit (visible mid-run, gone after).
+            $this->commitIfOpen();
 
             // Start fresh: remove the combined source files so the next convert is
             // clean and never re-combines stale leftovers (only under the FTP folder).
@@ -237,6 +246,69 @@ class TiffPdfMergeJob
         }
 
         return ['success' => true];
+    }
+
+    /**
+     * Force-commit any open transaction on the shared DB connection. AtoM Propel
+     * turns autocommit off and opens a transaction during attach; web requests
+     * commit it in a filter, but CLI/worker runs do not - so digital_object rows
+     * were rolled back at process exit. Raw PDO commit because the transaction is
+     * opened by Propel directly (Laravel's own tx counter is unaware of it).
+     */
+    protected function commitIfOpen(): void
+    {
+        try {
+            $pdo = DB::connection()->getPdo();
+            if ($pdo && $pdo->inTransaction()) {
+                $pdo->commit();
+                $this->log('Committed transaction (durable attach)');
+            }
+        } catch (\Throwable $e) {
+            $this->log('Commit skipped: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Link an already-combined job's PDF to a record after the fact - the
+     * "no slug at combine time -> pick the record by name later" path. Reuses
+     * attachToRecord(), then records the link on the job and reindexes.
+     */
+    public function attachExisting(int $informationObjectId): array
+    {
+        $job = DB::table($this->jobTable)->where('id', $this->mergeJobId)->first();
+        if (!$job) {
+            return ['success' => false, 'error' => 'Job not found'];
+        }
+        $path = $job->output_path ?? '';
+        $name = $job->output_filename ?? '';
+        if ($path === '' || !is_file($path)) {
+            return ['success' => false, 'error' => 'Combined PDF is no longer on disk; please re-run the combine'];
+        }
+
+        $doId = $this->attachToRecord($informationObjectId, $path, $name);
+        if (!$doId) {
+            return ['success' => false, 'error' => 'Attach failed'];
+        }
+
+        DB::table($this->jobTable)->where('id', $this->mergeJobId)->update([
+            'information_object_id' => $informationObjectId,
+            'output_digital_object_id' => $doId,
+            'attach_to_record' => 1,
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->commitIfOpen();
+
+        try {
+            $io = \QubitInformationObject::getById($informationObjectId);
+            if ($io) {
+                \QubitSearch::getInstance()->update($io);
+            }
+        } catch (\Exception $e) {
+            $this->log('Warning: Search index update failed: ' . $e->getMessage());
+        }
+
+        return ['success' => true, 'digital_object_id' => $doId];
     }
 
     protected function attachToRecord($informationObjectId, $filePath, $filename): ?int
