@@ -65,8 +65,11 @@ class ftpUploadActions extends AhgController
         $this->diskPath = $settings['ftp_disk_path'] ?? $remotePath;
         $this->files = $listResult['success'] ? $listResult['files'] : [];
         $this->listError = $listResult['success'] ? null : ($listResult['message'] ?? 'Connection failed');
-        $this->configured = !empty($settings['ftp_host']);
         $this->protocol = $settings['ftp_protocol'] ?? 'sftp';
+        // Local (no-FTP) mode only needs a disk path; FTP/SFTP need a host.
+        $this->configured = ($this->protocol === 'local')
+            ? !empty($settings['ftp_disk_path'])
+            : !empty($settings['ftp_host']);
         $this->chunkSize = self::CHUNK_SIZE;
     }
 

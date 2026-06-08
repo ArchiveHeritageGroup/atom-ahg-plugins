@@ -16,6 +16,7 @@ class FtpService
     protected string $username;
     protected string $password;
     protected string $remotePath;
+    protected string $localDir;
     protected bool $passiveMode;
 
     /** @var resource|null FTP connection */
@@ -29,6 +30,9 @@ class FtpService
         $this->username = $config['username'] ?? '';
         $this->password = $config['password'] ?? '';
         $this->remotePath = rtrim($config['remote_path'] ?? '/uploads', '/');
+        // 'local' protocol writes straight to a server folder (no FTP/SFTP). The
+        // destination is the disk path (falls back to remote_path when unset).
+        $this->localDir = rtrim($config['disk_path'] ?? ($config['remote_path'] ?? '/uploads'), '/');
         $this->passiveMode = ($config['passive_mode'] ?? 'true') === 'true' || $config['passive_mode'] === true;
     }
 
@@ -56,8 +60,22 @@ class FtpService
             'username' => $get('ftp_username', ''),
             'password' => $get('ftp_password', ''),
             'remote_path' => $get('ftp_remote_path', '/uploads'),
+            'disk_path' => $get('ftp_disk_path', ''),
             'passive_mode' => $get('ftp_passive_mode', 'true'),
         ]);
+    }
+
+    /**
+     * Is the service configured enough to use? Local mode needs only a disk
+     * path; FTP/SFTP need a host.
+     */
+    public function isConfigured(): bool
+    {
+        if ($this->protocol === 'local') {
+            return $this->localDir !== '';
+        }
+
+        return $this->host !== '';
     }
 
     /**
@@ -65,6 +83,10 @@ class FtpService
      */
     public function testConnection(): array
     {
+        if ($this->protocol === 'local') {
+            return $this->testLocal();
+        }
+
         if (empty($this->host)) {
             return ['success' => false, 'message' => 'Host is not configured'];
         }
@@ -86,6 +108,10 @@ class FtpService
             return ['success' => false, 'message' => 'Invalid filename'];
         }
 
+        if ($this->protocol === 'local') {
+            return $this->localUpload($localPath, $remoteFilename);
+        }
+
         $remoteFull = $this->remotePath . '/' . $remoteFilename;
 
         if ($this->protocol === 'sftp') {
@@ -102,6 +128,10 @@ class FtpService
      */
     public function listFiles(): array
     {
+        if ($this->protocol === 'local') {
+            return $this->localListFiles();
+        }
+
         if (empty($this->host)) {
             return ['success' => false, 'message' => 'Host is not configured', 'files' => []];
         }
@@ -121,6 +151,10 @@ class FtpService
         $filename = $this->sanitizeFilename($filename);
         if ($filename === '') {
             return ['success' => false, 'message' => 'Invalid filename'];
+        }
+
+        if ($this->protocol === 'local') {
+            return $this->localDelete($filename);
         }
 
         $remoteFull = $this->remotePath . '/' . $filename;
@@ -148,7 +182,86 @@ class FtpService
      */
     public function getRemotePath(): string
     {
-        return $this->remotePath;
+        // For local mode the path shown to users (CSV digitalObjectPath) is the
+        // real disk folder; for FTP/SFTP it's the remote path.
+        return $this->protocol === 'local' ? $this->localDir : $this->remotePath;
+    }
+
+    // =========================================================================
+    // Local mode (no FTP/SFTP — write straight to a server folder)
+    // =========================================================================
+
+    protected function testLocal(): array
+    {
+        $dir = $this->localDir;
+        if ($dir === '') {
+            return ['success' => false, 'message' => 'Server disk path is not configured'];
+        }
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+            return ['success' => false, 'message' => "Folder does not exist and could not be created: {$dir}"];
+        }
+        if (!is_writable($dir)) {
+            return ['success' => false, 'message' => "Folder is not writable by the web server: {$dir}"];
+        }
+        $n = count(glob($dir . '/*') ?: []);
+
+        return ['success' => true, 'message' => "Local folder ready: {$dir} ({$n} file(s))."];
+    }
+
+    protected function localUpload(string $localPath, string $filename): array
+    {
+        $dir = $this->localDir;
+        if ($dir === '') {
+            return ['success' => false, 'message' => 'Server disk path is not configured'];
+        }
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+            return ['success' => false, 'message' => "Cannot create folder: {$dir}"];
+        }
+        $dest = $dir . '/' . $filename;
+        if (!@copy($localPath, $dest)) {
+            return ['success' => false, 'message' => "Failed to write file to {$dir} (check permissions)"];
+        }
+        @chmod($dest, 0664);
+
+        return ['success' => true, 'message' => 'File saved to the server folder'];
+    }
+
+    protected function localListFiles(): array
+    {
+        $dir = $this->localDir;
+        if ($dir === '' || !is_dir($dir)) {
+            return ['success' => true, 'files' => []];
+        }
+        $files = [];
+        foreach (scandir($dir) ?: [] as $f) {
+            if ($f === '.' || $f === '..') {
+                continue;
+            }
+            $p = $dir . '/' . $f;
+            if (!is_file($p)) {
+                continue;
+            }
+            $files[] = [
+                'name' => $f,
+                'size' => (int) @filesize($p),
+                'modified' => date('M d H:i', (int) @filemtime($p)),
+            ];
+        }
+
+        return ['success' => true, 'files' => $files];
+    }
+
+    protected function localDelete(string $filename): array
+    {
+        $dest = $this->localDir . '/' . $filename;
+        if (!is_file($dest)) {
+            return ['success' => false, 'message' => 'File not found'];
+        }
+        if (!@unlink($dest)) {
+            return ['success' => false, 'message' => 'Delete failed (check permissions)'];
+        }
+
+        return ['success' => true, 'message' => 'File deleted successfully'];
     }
 
     // =========================================================================

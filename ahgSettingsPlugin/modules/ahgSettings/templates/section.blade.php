@@ -2880,8 +2880,9 @@
                                                 <select class="form-select" id="ftp_protocol" name="settings[ftp_protocol]">
                                                     <option value="sftp" {{ ($settings['ftp_protocol'] ?? 'sftp') === 'sftp' ? 'selected' : '' }}>SFTP (SSH)</option>
                                                     <option value="ftp" {{ ($settings['ftp_protocol'] ?? 'sftp') === 'ftp' ? 'selected' : '' }}>FTP</option>
+                                                    <option value="local" {{ ($settings['ftp_protocol'] ?? 'sftp') === 'local' ? 'selected' : '' }}>{{ __('Local folder (no FTP)') }}</option>
                                                 </select>
-                                                <div class="form-text">{{ __('SFTP recommended for security') }}</div>
+                                                <div class="form-text">{{ __('SFTP recommended for remote servers. Choose "Local folder (no FTP)" to write uploads straight to a folder on this server - then only Server Disk Path below is required (Host/Username/Password are ignored).') }}</div>
                                             </div>
                                             <div class="col-md-5">
                                                 <label for="ftp_host" class="form-label">{{ __('Host') }}</label>
