@@ -144,7 +144,19 @@ slot('title', $title);
                                             </div>
                                         </div>
                                     </div>
-                                    
+
+                                    <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="ahg_active_theme"><?php echo __('Active Theme'); ?></label>
+                                        <div class="col-sm-9">
+                                            <?php $activeTheme = $settings['ahg_active_theme'] ?? 'ahgThemeB5Plugin'; ?>
+                                            <select class="form-control" id="ahg_active_theme" name="settings[ahg_active_theme]">
+                                                <option value="ahgThemeB5Plugin" <?php echo 'ahgThemeB5Plugin' === $activeTheme ? 'selected' : ''; ?>><?php echo __('AHG Heratio (Bootstrap 5)'); ?></option>
+                                                <option value="arDominionB5Plugin" <?php echo 'arDominionB5Plugin' === $activeTheme ? 'selected' : ''; ?>><?php echo __('Base AtoM (Dominion B5)'); ?></option>
+                                            </select>
+                                            <small class="form-text text-muted"><?php echo __('Selecting a non-Heratio theme switches the site to vanilla base AtoM. Takes effect after a cache rebuild + PHP-FPM restart.'); ?></small>
+                                        </div>
+                                    </div>
+
                                     <div class="form-group row">
                                         <label class="col-sm-3 col-form-label" for="ahg_logo_path"><?php echo __('Custom Logo'); ?></label>
                                         <div class="col-sm-9">

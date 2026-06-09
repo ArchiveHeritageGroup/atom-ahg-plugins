@@ -271,6 +271,33 @@ class AhgSettingsSectionAction extends AhgController
             }
         }
 
+        // Active-theme switch (Heratio <-> base AtoM): rebuild the compiled config
+        // so ProjectConfiguration::setup() re-reads ahg_active_theme on the next
+        // request. A cache rebuild alone flips it (no php-fpm restart needed).
+        // Done post-response (shutdown) so the current request isn't disrupted.
+        if ('general' === $this->currentSection && isset($settings['ahg_active_theme'])) {
+            $prod = sfConfig::get('sf_root_dir') . '/cache/qubit/prod';
+            register_shutdown_function(function () use ($prod) {
+                foreach (['config', 'modules'] as $sub) {
+                    $dir = $prod . '/' . $sub;
+                    if (!is_dir($dir)) {
+                        continue;
+                    }
+                    try {
+                        $it = new RecursiveIteratorIterator(
+                            new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+                            RecursiveIteratorIterator::CHILD_FIRST
+                        );
+                        foreach ($it as $f) {
+                            $f->isDir() ? @rmdir($f->getPathname()) : @unlink($f->getPathname());
+                        }
+                    } catch (\Throwable $e) {
+                        // best-effort; admin can run `php symfony cc` if needed
+                    }
+                }
+            });
+        }
+
         // Sync authority settings to ahg_authority_config (plugin reads from there)
         if ($this->currentSection === 'authority') {
             $prefix = 'authority_';

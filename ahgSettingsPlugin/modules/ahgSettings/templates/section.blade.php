@@ -138,6 +138,18 @@
                                     </div>
 
                                     <div class="form-group row">
+                                        <label class="col-sm-3 col-form-label" for="ahg_active_theme">{{ __('Active Theme') }}</label>
+                                        <div class="col-sm-9">
+                                            @php $activeTheme = $settings['ahg_active_theme'] ?? 'ahgThemeB5Plugin'; @endphp
+                                            <select class="form-control" id="ahg_active_theme" name="settings[ahg_active_theme]">
+                                                <option value="ahgThemeB5Plugin" {{ $activeTheme === 'ahgThemeB5Plugin' ? 'selected' : '' }}>{{ __('AHG Heratio (Bootstrap 5)') }}</option>
+                                                <option value="arDominionB5Plugin" {{ $activeTheme === 'arDominionB5Plugin' ? 'selected' : '' }}>{{ __('Base AtoM (Dominion B5)') }}</option>
+                                            </select>
+                                            <small class="form-text text-muted">{{ __('Selecting a non-Heratio theme switches the site to vanilla base AtoM. Applied on save (cache is rebuilt).') }}</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
                                         <label class="col-sm-3 col-form-label" for="ahg_logo_path">{{ __('Custom Logo') }}</label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" id="ahg_logo_path" name="settings[ahg_logo_path]" value="{{ e($settings['ahg_logo_path'] ?? '') }}" placeholder="/uploads/logo.png">
