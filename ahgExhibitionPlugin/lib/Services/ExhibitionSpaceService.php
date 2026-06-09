@@ -153,6 +153,79 @@ class ExhibitionSpaceService
         return DB::table('ahg_exhibition_placement')->where('id', $pid)->delete() > 0;
     }
 
+    // ── Builder (#136): layout coords + room canvas ─────────────────────────
+
+    /**
+     * Placements for the builder / walkthrough: layout coords + object title +
+     * best-available thumbnail URL (usage_id 141).
+     */
+    public function getBuilderPlacements(int $spaceId)
+    {
+        return DB::table('ahg_exhibition_placement as ep')
+            ->leftJoin('information_object_i18n as ioi', function ($j) {
+                $j->on('ioi.id', '=', 'ep.information_object_id')->where('ioi.culture', '=', 'en');
+            })
+            ->leftJoin('digital_object as do', function ($j) {
+                $j->on('do.object_id', '=', 'ep.information_object_id')->where('do.usage_id', '=', 141);
+            })
+            ->where('ep.exhibition_space_id', $spaceId)
+            ->orderBy('ep.z_order')
+            ->select(
+                'ep.id', 'ep.information_object_id', 'ep.pos_x', 'ep.pos_y',
+                'ep.item_w', 'ep.item_h', 'ep.wall', 'ep.z_order', 'ep.rotation', 'ep.tour_order',
+                'ep.size_units_used', 'ep.notes',
+                'ioi.title as title',
+                DB::raw("CASE WHEN do.path IS NOT NULL THEN CONCAT('/', do.path, do.name) ELSE NULL END as thumb")
+            )
+            ->get();
+    }
+
+    /**
+     * Bulk-save builder layout. Each item = {id, pos_x, pos_y, item_w, item_h,
+     * wall, z_order, rotation, tour_order}. Only updates placements that belong
+     * to this space. Returns number of rows updated.
+     */
+    public function saveLayout(int $spaceId, array $items): int
+    {
+        $saved = 0;
+        $now = date('Y-m-d H:i:s');
+        $walls = ['north', 'east', 'south', 'west', 'floor'];
+        foreach ($items as $it) {
+            $pid = (int) ($it['id'] ?? 0);
+            if ($pid <= 0) {
+                continue;
+            }
+            $tour = (isset($it['tour_order']) && '' !== $it['tour_order'] && null !== $it['tour_order'])
+                ? (int) $it['tour_order'] : null;
+            $saved += DB::table('ahg_exhibition_placement')
+                ->where('id', $pid)->where('exhibition_space_id', $spaceId)
+                ->update([
+                    'pos_x' => isset($it['pos_x']) ? (float) $it['pos_x'] : null,
+                    'pos_y' => isset($it['pos_y']) ? (float) $it['pos_y'] : null,
+                    'item_w' => max(20, (float) ($it['item_w'] ?? 120)),
+                    'item_h' => max(20, (float) ($it['item_h'] ?? 120)),
+                    'wall' => in_array(($it['wall'] ?? 'north'), $walls, true) ? $it['wall'] : 'north',
+                    'z_order' => (int) ($it['z_order'] ?? 0),
+                    'rotation' => (float) ($it['rotation'] ?? 0),
+                    'tour_order' => $tour,
+                    'updated_at' => $now,
+                ]);
+        }
+        return $saved;
+    }
+
+    /** Update room canvas dimensions + colours. */
+    public function updateRoom(int $spaceId, array $data): void
+    {
+        DB::table('ahg_exhibition_space')->where('id', $spaceId)->update([
+            'room_width' => max(200, (float) ($data['room_width'] ?? 1200)),
+            'room_height' => max(200, (float) ($data['room_height'] ?? 700)),
+            'wall_color' => substr((string) ($data['wall_color'] ?? '#f3f0ea'), 0, 20),
+            'floor_color' => substr((string) ($data['floor_color'] ?? '#d8c9ac'), 0, 20),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
     private function generateUniqueSlug(string $name): string
     {
         $base = preg_replace('/[^a-z0-9]+/', '-', strtolower(trim($name)));

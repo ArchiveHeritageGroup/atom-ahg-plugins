@@ -6,6 +6,10 @@
       <span class="badge bg-secondary ms-2"><?php echo esc_entities(ucwords(str_replace('_', ' ', $space->space_type))) ?></span>
     </h1>
     <?php if ($sf_user->isAuthenticated()): ?>
+      <a href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'builder', 'slug' => $space->slug]) ?>" class="btn btn-primary"><i class="fas fa-vector-square me-1"></i><?php echo __('Builder') ?></a>
+    <?php endif ?>
+    <a href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'walkthrough', 'slug' => $space->slug]) ?>" class="btn btn-outline-info"><i class="fas fa-walking me-1"></i><?php echo __('Walkthrough') ?></a>
+    <?php if ($sf_user->isAuthenticated()): ?>
       <a href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'edit', 'slug' => $space->slug]) ?>" class="btn btn-outline-primary"><i class="fas fa-edit me-1"></i><?php echo __('Edit') ?></a>
       <?php if ($sf_user->hasCredential('administrator')): ?>
       <a href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'confirmDelete', 'slug' => $space->slug]) ?>" class="btn btn-outline-danger"><i class="fas fa-trash me-1"></i><?php echo __('Delete') ?></a>

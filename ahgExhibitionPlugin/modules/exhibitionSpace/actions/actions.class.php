@@ -174,4 +174,70 @@ class exhibitionSpaceActions extends AhgController
         $slug = $space ? $space->slug : '';
         $this->redirect("exhibitionSpace/show?slug={$slug}");
     }
+
+    // ── Builder (#136) ──────────────────────────────────────────────────────
+
+    /** Drag-and-drop builder canvas. */
+    public function executeBuilder($request)
+    {
+        $this->requireAuth();
+        $space = $this->getService()->getBySlug($request->getParameter('slug'));
+        if (!$space) {
+            $this->forward404('Exhibition space not found');
+        }
+        $this->space = $space;
+        $this->placements = $this->getService()->getBuilderPlacements((int) $space->id);
+    }
+
+    /** AJAX: bulk-save the builder layout (JSON `items`). */
+    public function executeSaveLayout($request)
+    {
+        $this->requireAuth();
+        if (!$request->isMethod('post')) {
+            return $this->renderJsonError('POST required', 405);
+        }
+        $space = $this->getService()->getBySlug($request->getParameter('slug'));
+        if (!$space) {
+            return $this->renderJsonError('Exhibition space not found', 404);
+        }
+        $items = json_decode((string) $request->getParameter('items', '[]'), true);
+        if (!is_array($items)) {
+            $items = [];
+        }
+        try {
+            $n = $this->getService()->saveLayout((int) $space->id, $items);
+
+            return $this->renderJsonSuccess(['saved' => $n], 'Layout saved.');
+        } catch (\Throwable $e) {
+            return $this->renderJsonError($e->getMessage(), 500);
+        }
+    }
+
+    /** Save room canvas dimensions/colours, back to the builder. */
+    public function executeSaveRoom($request)
+    {
+        $this->requireAuth();
+        $space = $this->getService()->getBySlug($request->getParameter('slug'));
+        if (!$space) {
+            $this->forward404('Exhibition space not found');
+        }
+        if ($request->isMethod('post')) {
+            $this->getService()->updateRoom((int) $space->id, $request->getPostParameters());
+            $this->getUser()->setFlash('notice', 'Room settings saved.');
+        }
+        $this->redirect("exhibitionSpace/builder?slug={$space->slug}");
+
+        return;
+    }
+
+    /** Public 2.5D pannable walkthrough viewer. */
+    public function executeWalkthrough($request)
+    {
+        $space = $this->getService()->getBySlug($request->getParameter('slug'));
+        if (!$space) {
+            $this->forward404('Exhibition space not found');
+        }
+        $this->space = $space;
+        $this->placements = $this->getService()->getBuilderPlacements((int) $space->id);
+    }
 }
