@@ -44,6 +44,12 @@ EOF;
         require_once $pluginDir . '/lib/Services/TiffPdfMergeService.php';
         require_once $pluginDir . '/lib/Jobs/TiffPdfMergeJob.php';
 
+        // #1177: purge quarantined combine source files past retention (runs every
+        // tick, even when there are no queued jobs).
+        \AtomFramework\Jobs\TiffPdfMergeJob::purgeQuarantine(function ($m) {
+            $this->logSection('tiff-pdf', $m);
+        });
+
         $repo = new \AtomFramework\Repositories\TiffPdfMergeRepository();
         $jobs = $repo->getQueuedJobs((int) $options['limit']);
 

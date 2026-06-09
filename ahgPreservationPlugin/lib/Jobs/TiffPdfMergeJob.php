@@ -559,22 +559,36 @@ class TiffPdfMergeJob
                 return;
             }
 
+            // #1177 soft-delete: MOVE the combined pages to a quarantine area under
+            // the FTP base instead of unlinking, so a wrong/partial combine (or wrong
+            // folder) is recoverable. purgeQuarantine() finally removes folders past
+            // the retention window (ahg_settings pdf_combine_trash_days, default 7).
+            // rename() is safe-by-default: a file it cannot move is left in place.
+            $stamp = date('Ymd-His') . '-' . substr(md5(uniqid('', true)), 0, 6);
+            $trashDir = $base . '/_trash/' . $stamp;
+            @mkdir($trashDir, 0775, true);
+
             $touchedDirs = [];
-            $removed = 0;
+            $moved = 0;
             foreach ($files as $f) {
                 $p = $f->file_path ?? '';
                 if ($p === '' || !is_file($p)) {
                     continue;
                 }
-                // Safety: only delete inside the FTP upload base.
-                if (strpos($p, $base . '/') !== 0) {
+                // Safety: only act inside the FTP upload base, and never re-quarantine
+                // files already under _trash.
+                if (strpos($p, $base . '/') !== 0 || strpos($p, $base . '/_trash/') === 0) {
                     continue;
                 }
-                if (@unlink($p)) {
-                    $removed++;
+                if (@rename($p, $trashDir . '/' . basename($p))) {
+                    $moved++;
                     $touchedDirs[dirname($p)] = true;
                 }
             }
+            @file_put_contents($trashDir . '/_origin.json', json_encode([
+                'moved_at' => date('c'),
+                'count' => $moved,
+            ]));
 
             // Drop now-empty subfolders, but never the base folder itself.
             foreach (array_keys($touchedDirs) as $d) {
@@ -583,9 +597,73 @@ class TiffPdfMergeJob
                 }
             }
 
-            $this->log(sprintf('Cleared %d source file(s) after combine (fresh start)', $removed));
+            $this->log(sprintf('Quarantined %d source file(s) to %s (recoverable until retention purge)', $moved, $trashDir));
         } catch (\Throwable $e) {
             $this->log('Source cleanup skipped: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * #1177 - remove quarantined combine source folders (<ftp-base>/_trash/<stamp>/)
+     * older than the retention window (ahg_settings pdf_combine_trash_days, default
+     * 7 days). Called each cron tick by ahgTiffPdfProcessTask. Logs what it drops.
+     */
+    public static function purgeQuarantine(?callable $log = null): void
+    {
+        try {
+            $base = '';
+            try {
+                $base = (string) DB::table('ahg_settings')->where('setting_key', 'ftp_disk_path')->value('setting_value');
+            } catch (\Exception $e) {
+            }
+            $base = rtrim($base, '/');
+            $trashRoot = $base . '/_trash';
+            if ($base === '' || !is_dir($trashRoot)) {
+                return;
+            }
+            $days = 7;
+            try {
+                $v = DB::table('ahg_settings')->where('setting_key', 'pdf_combine_trash_days')->value('setting_value');
+                if ($v !== null && $v !== '') {
+                    $days = (int) $v;
+                }
+            } catch (\Exception $e) {
+            }
+            $days = max(0, $days);
+            $cutoff = time() - $days * 86400;
+
+            $purged = 0;
+            $files = 0;
+            foreach (glob($trashRoot . '/*', GLOB_ONLYDIR) ?: [] as $dir) {
+                $movedAt = null;
+                $oj = @file_get_contents($dir . '/_origin.json');
+                if ($oj) {
+                    $d = json_decode($oj, true);
+                    if (!empty($d['moved_at'])) {
+                        $ts = strtotime($d['moved_at']);
+                        if ($ts) {
+                            $movedAt = $ts;
+                        }
+                    }
+                }
+                if ($movedAt === null) {
+                    $movedAt = @filemtime($dir) ?: time();
+                }
+                if ($movedAt > $cutoff) {
+                    continue;   // still within the retention window
+                }
+                $fs = glob($dir . '/*') ?: [];
+                foreach ($fs as $f) {
+                    @unlink($f);
+                }
+                @rmdir($dir);
+                $purged++;
+                $files += count($fs);
+            }
+            if ($purged > 0 && $log) {
+                $log(sprintf('Purged %d quarantine folder(s), %d file(s) past %d-day retention', $purged, $files, $days));
+            }
+        } catch (\Throwable $e) {
         }
     }
 
