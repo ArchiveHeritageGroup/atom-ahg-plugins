@@ -960,4 +960,94 @@ class exhibitionSpaceActions extends AhgController
 
         return $this->jsonOk(['token' => $this->getService()->regenerateSensorToken((int) $space->id)]);
     }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  AI Exhibition Designer (heratio#1186). Curator types a THEME; the AI
+    //  retrieves catalogue candidates and curates them into a draft exhibition
+    //  (rooms + objects + labels) for review; Build creates the real spaces +
+    //  placements via ExhibitionSpaceService.
+    // ════════════════════════════════════════════════════════════════════════
+
+    protected ?GenerativeExhibitionService $generative = null;
+
+    protected function getGenerative(): GenerativeExhibitionService
+    {
+        if ($this->generative === null) {
+            require_once $this->config('sf_root_dir').'/plugins/ahgExhibitionPlugin/lib/Services/GenerativeExhibitionService.php';
+            $this->generative = new GenerativeExhibitionService($this->getService());
+        }
+
+        return $this->generative;
+    }
+
+    /** GET: the AI Exhibition Designer page. */
+    public function executeGenerate($request)
+    {
+        $this->requireAuth();
+        $this->spaceTypes = ExhibitionSpaceService::SPACE_TYPES;
+    }
+
+    /** POST (auth): theme -> AI-curated draft {ok, draft:{theme,rooms:[...]}}. */
+    public function executeGenerateSuggest($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->jsonErr('Authentication required');
+        }
+        $b = $this->jsonBody($request);
+        $theme = trim((string) ($b['theme'] ?? ''));
+        if ($theme === '') {
+            return $this->jsonErr('Please enter a theme.');
+        }
+        $max = (int) ($b['max'] ?? $b['count'] ?? 12);
+        $max = max(4, min(24, $max));
+        $publishedOnly = !array_key_exists('published_only', $b) || (bool) $b['published_only'];
+
+        try {
+            $draft = $this->getGenerative()->suggest($theme, $max, $publishedOnly);
+        } catch (\Throwable $e) {
+            error_log('[ahgExhibitionPlugin] generateSuggest failed: '.$e->getMessage());
+
+            return $this->jsonErr('Could not generate a draft: '.$e->getMessage());
+        }
+
+        if (empty($draft['ok'])) {
+            return $this->jsonErr($draft['error'] ?? 'The AI could not curate an exhibition for that theme.');
+        }
+
+        return $this->jsonOk(['draft' => $draft]);
+    }
+
+    /** POST (auth): reviewed draft -> real exhibition spaces {ok, spaces:[...]}. */
+    public function executeGenerateBuild($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->jsonErr('Authentication required');
+        }
+        $b = $this->jsonBody($request);
+        $draft = isset($b['draft']) && is_array($b['draft']) ? $b['draft'] : $b;
+        $rooms = array_values(array_filter((array) ($draft['rooms'] ?? []), 'is_array'));
+        if (!$rooms) {
+            return $this->jsonErr('Empty draft - nothing to build.');
+        }
+
+        try {
+            $result = $this->getGenerative()->buildExhibition($draft);
+        } catch (\Throwable $e) {
+            error_log('[ahgExhibitionPlugin] generateBuild failed: '.$e->getMessage());
+
+            return $this->jsonErr('Build failed: '.$e->getMessage());
+        }
+
+        if (empty($result['ok'])) {
+            return $this->jsonErr($result['error'] ?? 'Build failed.');
+        }
+
+        $first = $result['spaces'][0] ?? null;
+        return $this->jsonOk([
+            'spaces' => $result['spaces'],
+            'rooms' => $result['rooms'],
+            'placed' => $result['placed'],
+            'builder_url' => $first ? '/exhibition-space/'.$first['slug'].'/builder' : null,
+        ]);
+    }
 }

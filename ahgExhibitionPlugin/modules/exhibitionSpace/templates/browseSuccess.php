@@ -19,7 +19,7 @@ $pageUrl = function ($p) use ($search) {
         <i class="fas fa-wand-magic-sparkles me-1"></i><?php echo __('AI Tools') ?>
       </button>
       <ul class="dropdown-menu dropdown-menu-end">
-        <li><span class="dropdown-item disabled"><i class="fas fa-wand-magic-sparkles me-2"></i><?php echo __('AI Exhibition Designer') ?> <span class="badge bg-light text-muted ms-1"><?php echo __('soon') ?></span></span></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'generate']) ?>"><i class="fas fa-wand-magic-sparkles me-2"></i><?php echo __('AI Exhibition Designer') ?></a></li>
         <li><span class="dropdown-item disabled"><i class="fas fa-feather-pointed me-2"></i><?php echo __('Story Generator') ?> <span class="badge bg-light text-muted ms-1"><?php echo __('soon') ?></span></span></li>
         <li><span class="dropdown-item disabled"><i class="fas fa-robot me-2"></i><?php echo __('Compliance Autopilot') ?> <span class="badge bg-light text-muted ms-1"><?php echo __('soon') ?></span></span></li>
       </ul>

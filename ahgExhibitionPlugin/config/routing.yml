@@ -14,6 +14,16 @@ exhibition_space_generate:
   url: /exhibition-space/generate
   param: { module: exhibitionSpace, action: generate }
 
+# AI Exhibition Designer AJAX (heratio#1186). Literal 'generate' segment — MUST
+# precede the bare /exhibition-space/:slug show route (kept LAST in this file).
+exhibition_space_generate_suggest:
+  url: /exhibition-space/generate/suggest
+  param: { module: exhibitionSpace, action: generateSuggest }
+
+exhibition_space_generate_build:
+  url: /exhibition-space/generate/build
+  param: { module: exhibitionSpace, action: generateBuild }
+
 exhibition_space_remove_placement:
   url: /exhibition-space/placement/:id/remove
   param: { module: exhibitionSpace, action: removePlacement }
