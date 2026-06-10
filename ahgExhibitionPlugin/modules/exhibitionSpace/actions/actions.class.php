@@ -574,4 +574,302 @@ class exhibitionSpaceActions extends AhgController
 
         return $this->jsonOk();
     }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  Building-plan editor (#1143). PAGE + AJAX actions. All AJAX POST a JSON
+    //  body and return HTTP 200 JSON {ok:true,...}/{ok:false,error}. Never
+    //  setStatusCode(4xx/5xx) — AtoM would replace the body with its error page.
+    // ════════════════════════════════════════════════════════════════════════
+
+    /** PAGE: building-plan editor. Mirrors Heratio plan() — passes $space + $plan. */
+    public function executePlan($request)
+    {
+        $this->requireAuth();
+        $space = $this->getService()->getBySlug($request->getParameter('slug'));
+        if (!$space) {
+            $this->forward404('Exhibition space not found');
+        }
+        $this->space = $space;
+        $this->plan = $this->getService()->getBuildingPlan($space);
+    }
+
+    /** POST: bulk-save room plan positions/sizes. body {rooms:[{id,x,y,w?,d?,rot?}]}. */
+    public function executePlanSave($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $rooms = (isset($b['rooms']) && is_array($b['rooms'])) ? $b['rooms'] : [];
+        $svc = $this->getService();
+        $n = 0;
+        foreach ($rooms as $r) {
+            $rid = (int) ($r['id'] ?? 0);
+            if ($rid <= 0) {
+                continue;
+            }
+            $ok = $svc->savePlanRoom(
+                (int) $space->id,
+                $rid,
+                (float) ($r['x'] ?? 0),
+                (float) ($r['y'] ?? 0),
+                isset($r['w']) ? (float) $r['w'] : null,
+                isset($r['d']) ? (float) $r['d'] : null,
+                isset($r['rot']) ? (float) $r['rot'] : null
+            );
+            if ($ok) {
+                $n++;
+            }
+        }
+
+        return $this->jsonOk(['saved' => $n]);
+    }
+
+    /** POST: add a new room to this building. body {name?} -> {ok, room}. */
+    public function executePlanAddRoom($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $name = isset($b['name']) ? (string) $b['name'] : null;
+        $room = $this->getService()->addBuildingRoom($space, $name);
+
+        return $this->jsonOk(['room' => $room]);
+    }
+
+    /** POST: delete a room from this building. body {room_id}. */
+    public function executePlanDeleteRoom($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $roomId = (int) ($b['room_id'] ?? 0);
+        if ($roomId <= 0) {
+            return $this->jsonErr('room_id is required');
+        }
+        $ok = $this->getService()->deleteBuildingRoom($space, $roomId);
+
+        return $ok ? $this->jsonOk() : $this->jsonErr('Room could not be deleted');
+    }
+
+    /** POST: set plan group keys (move-as-one-unit). body {groups:[{room_id,group}]}. */
+    public function executePlanGroup($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $groups = (isset($b['groups']) && is_array($b['groups'])) ? $b['groups'] : [];
+        $n = $this->getService()->setRoomGroups($space, $groups);
+
+        return $this->jsonOk(['updated' => $n]);
+    }
+
+    /** POST: save building stairs. body {stairs:[...]}. */
+    public function executePlanStairs($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $stairs = (isset($b['stairs']) && is_array($b['stairs'])) ? $b['stairs'] : [];
+        $this->getService()->saveBuildingStairs($space, $stairs);
+
+        return $this->jsonOk();
+    }
+
+    /** POST: set a room's floor level. body {room_id,floor}. */
+    public function executePlanRoomFloor($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $roomId = (int) ($b['room_id'] ?? 0);
+        if ($roomId <= 0) {
+            return $this->jsonErr('room_id is required');
+        }
+        $ok = $this->getService()->setRoomFloor($space, $roomId, (int) ($b['floor'] ?? 0));
+
+        return $ok ? $this->jsonOk() : $this->jsonErr('Floor could not be set');
+    }
+
+    /** POST: lock/unlock a room. body {room_id,locked}. */
+    public function executePlanRoomLock($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $roomId = (int) ($b['room_id'] ?? 0);
+        if ($roomId <= 0) {
+            return $this->jsonErr('room_id is required');
+        }
+        $locked = filter_var($b['locked'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $ok = $this->getService()->setRoomLocked($space, $roomId, $locked);
+
+        return $ok ? $this->jsonOk() : $this->jsonErr('Lock could not be set');
+    }
+
+    /** POST: save the blueprint's world rect (derived on PSIS; kept for parity). body {x,y,w,h}. */
+    public function executePlanImageRect($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $this->getService()->savePlanImageRect(
+            $space,
+            (float) ($b['x'] ?? 0),
+            (float) ($b['y'] ?? 0),
+            (float) ($b['w'] ?? 1),
+            (float) ($b['h'] ?? 1)
+        );
+
+        return $this->jsonOk();
+    }
+
+    /** POST: add a corridor object at building-fraction. body {information_object_id,fx,fy}. */
+    public function executePlanCorridorAdd($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $ioId = (int) ($b['information_object_id'] ?? 0);
+        if ($ioId <= 0) {
+            return $this->jsonErr('information_object_id is required');
+        }
+        try {
+            $placement = $this->getService()->createCorridorPlacement(
+                $space,
+                $ioId,
+                (float) ($b['fx'] ?? 0.5),
+                (float) ($b['fy'] ?? 0.5)
+            );
+
+            return $this->jsonOk(['placement' => $placement]);
+        } catch (\Throwable $e) {
+            return $this->jsonErr($e->getMessage());
+        }
+    }
+
+    /** POST: move a corridor object. body {id,fx,fy}. */
+    public function executePlanCorridorMove($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $id = (int) ($b['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->jsonErr('id is required');
+        }
+        $ok = $this->getService()->moveCorridorPlacement(
+            $space,
+            $id,
+            (float) ($b['fx'] ?? 0.5),
+            (float) ($b['fy'] ?? 0.5)
+        );
+
+        return $ok ? $this->jsonOk() : $this->jsonErr('Object could not be moved');
+    }
+
+    /** POST: remove a corridor object. body {id}. Scoped to this building. */
+    public function executePlanCorridorRemove($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $id = (int) ($b['id'] ?? 0);
+        if ($id <= 0) {
+            return $this->jsonErr('id is required');
+        }
+        // Scope: only remove a corridor placement that belongs to this building.
+        $corridor = null;
+        foreach ($this->getService()->getBuildingCorridorObjects($space) as $c) {
+            if ((int) ($c['id'] ?? 0) === $id) {
+                $corridor = $c;
+                break;
+            }
+        }
+        if (!$corridor) {
+            return $this->jsonErr('Object not found in this building');
+        }
+        $ok = $this->getService()->removePlacement($id);
+
+        return $ok ? $this->jsonOk() : $this->jsonErr('Object could not be removed');
+    }
+
+    /**
+     * POST: upload a floorplan/blueprint background image (multipart). Stores the
+     * file under web/uploads/exhibition/ and sets floorplan_image_path on every
+     * room of the building. body: file field `plan_image` (or `file`).
+     */
+    public function executePlanImage($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $files = $request->getFiles();
+        $file = $files['plan_image'] ?? ($files['file'] ?? null);
+        if (!is_array($file) || empty($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+            return $this->jsonErr('No file uploaded');
+        }
+        if (!empty($file['error'])) {
+            return $this->jsonErr('Upload failed (error '.(int) $file['error'].')');
+        }
+        $allowed = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'svg' => 'image/svg+xml'];
+        $orig = (string) ($file['name'] ?? '');
+        $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION) ?: 'png');
+        if (!isset($allowed[$ext])) {
+            return $this->jsonErr('Unsupported image type');
+        }
+        if ((int) ($file['size'] ?? 0) > 8 * 1024 * 1024) {
+            return $this->jsonErr('Image too large (max 8 MB)');
+        }
+        $webRoot = $this->config('sf_web_dir');
+        $relDir = '/plugins/ahgExhibitionPlugin/web/uploads/exhibition';
+        $absDir = $webRoot.$relDir;
+        if (!is_dir($absDir) && !@mkdir($absDir, 0775, true) && !is_dir($absDir)) {
+            return $this->jsonErr('Could not create upload directory');
+        }
+        $base = ($space->building_id ?: $space->slug);
+        $filename = preg_replace('/[^a-z0-9_-]+/', '-', strtolower((string) $base)).'-'.substr(md5((string) microtime(true)), 0, 8).'.'.$ext;
+        $dest = $absDir.'/'.$filename;
+        if (!@move_uploaded_file($file['tmp_name'], $dest)) {
+            return $this->jsonErr('Could not store uploaded file');
+        }
+        $publicUrl = $relDir.'/'.$filename;
+        $this->getService()->setBuildingPlanImage($space, $publicUrl);
+
+        return $this->jsonOk(['url' => $publicUrl]);
+    }
+
+    /** POST: clear the building plan/blueprint image. */
+    public function executePlanImageClear($request)
+    {
+        $space = $this->ajaxSpace($request);
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $this->getService()->setBuildingPlanImage($space, null);
+
+        return $this->jsonOk();
+    }
 }

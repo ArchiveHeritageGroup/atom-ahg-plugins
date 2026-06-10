@@ -1302,4 +1302,330 @@ class ExhibitionSpaceService
             'stairs' => is_array($stairs) ? $stairs : [],
         ];
     }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  Building-plan editor (#1143: floor-plan layout). Ported from Heratio
+    //  ExhibitionSpaceService. NB: PSIS stores the blueprint background in
+    //  `floorplan_image_path` (per-building, on every room) — it has no
+    //  dedicated building_plan_x/y/w/h world-rect columns, so the world rect is
+    //  always derived from the building extent (defaultPlanRect()).
+    // ════════════════════════════════════════════════════════════════════════
+
+    /** Rooms of a building for the plan editor + the plan image (from any room that has one). */
+    public function getBuildingPlan(object $space): array
+    {
+        $rooms = (! empty($space->building_id))
+            ? DB::table('ahg_exhibition_space')->where('building_id', $space->building_id)->orderBy('building_seq')->orderBy('id')->get()->all()
+            : [$space];
+        $plan = null;
+        $list = [];
+        $minX = $maxX = $minZ = $maxZ = null;
+        foreach ($rooms as $r) {
+            if (! $plan && ! empty($r->floorplan_image_path)) {
+                $plan = $r->floorplan_image_path;
+            }
+            $dim = $this->roomDims($r);
+            $list[] = [
+                'id' => (int) $r->id, 'name' => $r->name, 'slug' => $r->slug,
+                'w' => $dim['w'], 'd' => $dim['d'],
+                'bld_x' => $r->bld_x !== null ? (float) $r->bld_x : null,
+                'bld_y' => $r->bld_y !== null ? (float) $r->bld_y : null,
+                'rot' => $r->bld_rot !== null ? (float) $r->bld_rot : 0.0,
+                'doors' => $this->getDoors((int) $r->id),
+                'windows' => $this->getWindows((int) $r->id),   // #1172 authoring
+                'shape' => $this->getShape((int) $r->id),
+                'group' => $r->bld_group ?? null,   // #1143: move-as-one-unit group key
+                'locked' => (int) ($r->bld_locked ?? 0) === 1,   // #1143: room "done" lock
+                'floor' => (int) ($r->floor_level ?? 0),   // #1169: for name-based stair linking
+                'is_current' => (int) $r->id === (int) $space->id,
+            ];
+            if ($r->bld_x !== null && $r->bld_y !== null) {
+                $x = (float) $r->bld_x;
+                $z = (float) $r->bld_y;
+                $minX = $minX === null ? $x : min($minX, $x);
+                $maxX = $maxX === null ? $x + $dim['w'] : max($maxX, $x + $dim['w']);
+                $minZ = $minZ === null ? $z : min($minZ, $z);
+                $maxZ = $maxZ === null ? $z + $dim['d'] : max($maxZ, $z + $dim['d']);
+            }
+        }
+
+        // World-anchor the blueprint: when an image exists, default its world rect
+        // to the building extent so it lines up with the rooms.
+        $planRect = $plan ? $this->defaultPlanRect($space) : null;
+
+        return [
+            'rooms' => $list, 'plan_image' => $plan, 'plan_rect' => $planRect,
+            'corridor' => $this->getBuildingCorridorObjects($space),
+            'stairs' => $this->getStairs($space),   // #1169 plan-editor stairs authoring
+            'bbox' => ['min_x' => $minX ?? 0, 'max_x' => $maxX ?? 0, 'min_z' => $minZ ?? 0, 'max_z' => $maxZ ?? 0],
+        ];
+    }
+
+    /** Stairs (#1169) decoded from the space's stairs_json. */
+    public function getStairs(object $space): array
+    {
+        $s = $space->stairs_json ?? null;
+        if (is_string($s)) {
+            $s = json_decode($s, true);
+        }
+
+        return is_array($s) ? array_values($s) : [];
+    }
+
+    /**
+     * Persist building stairs on EVERY room of the building (so any room's
+     * walkthrough sees them). Each stair: {x, z, from_floor, to_floor, width} in metres.
+     *
+     * @param  array<int,array<string,mixed>>  $stairs
+     */
+    public function saveBuildingStairs(object $space, array $stairs): void
+    {
+        $clean = [];
+        foreach ($stairs as $st) {
+            if ((int) ($st['from_floor'] ?? 0) === (int) ($st['to_floor'] ?? 1)) {
+                continue;   // a staircase must link two different floors
+            }
+            $clean[] = [
+                'x' => round((float) ($st['x'] ?? 0), 2),
+                'z' => round((float) ($st['z'] ?? 0), 2),
+                'from_floor' => (int) ($st['from_floor'] ?? 0),
+                'to_floor' => (int) ($st['to_floor'] ?? 1),
+                'from_room' => isset($st['from_room']) ? (int) $st['from_room'] : null,   // #1169 name-based linking
+                'to_room' => isset($st['to_room']) ? (int) $st['to_room'] : null,
+                'width' => max(0.6, min(8, (float) ($st['width'] ?? 1.6))),
+                'length' => max(1.5, min(30, (float) ($st['length'] ?? 3))),    // run of the first flight (metres)
+                'length2' => max(1.5, min(30, (float) ($st['length2'] ?? ($st['length'] ?? 3)))),   // second flight (elbow)
+                'rot' => ((int) round((float) ($st['rot'] ?? 0)) % 360 + 360) % 360,   // overall orientation (degrees)
+                'hand' => in_array(($st['hand'] ?? 'right'), ['left', 'right'], true) ? $st['hand'] : 'right',   // elbow turn direction
+                'kind' => in_array(($st['kind'] ?? 'straight'), ['straight', 'elbow'], true) ? $st['kind'] : 'straight',
+            ];
+        }
+        $json = $clean ? json_encode($clean) : null;
+        $q = DB::table('ahg_exhibition_space');
+        if (! empty($space->building_id)) {
+            $q->where('building_id', $space->building_id);
+        } else {
+            $q->where('id', $space->id);
+        }
+        $q->update(['stairs_json' => $json, 'updated_at' => $this->nowTs()]);
+    }
+
+    /** Default world rect for a blueprint image = the building's extent (metres). */
+    private function defaultPlanRect(object $space): array
+    {
+        $rooms = (! empty($space->building_id))
+            ? DB::table('ahg_exhibition_space')->where('building_id', $space->building_id)->get()->all()
+            : [$space];
+        $maxR = 0.0;
+        $maxB = 0.0;
+        foreach ($rooms as $r) {
+            $dim = $this->roomDims($r);
+            $x = $r->bld_x !== null ? (float) $r->bld_x : 0.0;
+            $y = $r->bld_y !== null ? (float) $r->bld_y : 0.0;
+            $maxR = max($maxR, $x + $dim['w']);
+            $maxB = max($maxB, $y + $dim['d']);
+        }
+
+        return ['x' => 0.0, 'y' => 0.0, 'w' => max(30.0, $maxR + 2), 'h' => max(22.0, $maxB + 2)];
+    }
+
+    /**
+     * Persist an adjusted blueprint world rect. PSIS has no building_plan_x/y/w/h
+     * columns — the rect is always derived from the building extent — so this is a
+     * no-op kept for editor-contract parity.
+     */
+    public function savePlanImageRect(object $space, float $x, float $y, float $w, float $h): void
+    {
+        // No persistent world-rect columns on PSIS; rect is derived. Intentionally a no-op.
+    }
+
+    /**
+     * Create a new room in this space's building (creating a building from the
+     * space if it has none) and place it to the right of the existing rooms.
+     *
+     * @return array<string,mixed>
+     */
+    public function addBuildingRoom(object $space, ?string $name = null): array
+    {
+        $bid = $space->building_id;
+        if (empty($bid)) {
+            $bid = $space->slug;
+            DB::table('ahg_exhibition_space')->where('id', $space->id)->update(['building_id' => $bid, 'building_seq' => 0, 'updated_at' => $this->nowTs()]);
+        }
+        $rooms = DB::table('ahg_exhibition_space')->where('building_id', $bid)->get();
+        $maxSeq = 0;
+        $maxRight = 0.0;
+        $topY = null;
+        foreach ($rooms as $r) {
+            $maxSeq = max($maxSeq, (int) ($r->building_seq ?? 0));
+            $dim = $this->roomDims($r);
+            if ($r->bld_x !== null && $r->bld_y !== null) {
+                $maxRight = max($maxRight, (float) $r->bld_x + $dim['w']);
+                $topY = $topY === null ? (float) $r->bld_y : min($topY, (float) $r->bld_y);
+            }
+        }
+        $x = $maxRight > 0 ? $maxRight + 1 : 1.0;
+        $y = $topY ?? 1.0;
+        $nm = ($name !== null && trim($name) !== '') ? trim($name) : 'New Room';
+        $now = $this->nowTs();
+        $id = (int) DB::table('ahg_exhibition_space')->insertGetId([
+            'slug' => $this->generateUniqueSlug($nm),
+            'name' => $nm,
+            'space_type' => 'gallery',
+            'capacity_unit' => 'linear_wall_meters',
+            'building_id' => $bid,
+            'building_seq' => $maxSeq + 1,
+            'room_w' => 10, 'room_d' => 8, 'room_h' => 4,
+            'bld_x' => $x, 'bld_y' => $y,
+            // #1176: every room is a numbered-edge polygon. A new room starts as a unit
+            // rectangle (4 walls = edge 0..3) so the whole stack treats it the same.
+            'shape_json' => json_encode([['x' => 0, 'z' => 0], ['x' => 1, 'z' => 0], ['x' => 1, 'z' => 1], ['x' => 0, 'z' => 1]]),
+            'created_at' => $now, 'updated_at' => $now,
+        ]);
+
+        return [
+            'id' => $id, 'name' => $nm, 'slug' => $this->getById($id)->slug,
+            'w' => 10.0, 'd' => 8.0, 'bld_x' => (float) $x, 'bld_y' => (float) $y, 'rot' => 0.0,
+            'doors' => [], 'windows' => [],
+            'shape' => [['x' => 0, 'z' => 0], ['x' => 1, 'z' => 0], ['x' => 1, 'z' => 1], ['x' => 0, 'z' => 1]],
+            'group' => null, 'locked' => false, 'floor' => 0, 'is_current' => false,
+        ];
+    }
+
+    /**
+     * Set the plan group key on rooms (#1143). Rooms sharing a key move as one
+     * unit in the editor and 3D walkthrough. A null key ungroups. Only rooms in
+     * this space's building are touched.
+     *
+     * @param  array<int,array{room_id:int,group:?string}>  $groups
+     */
+    public function setRoomGroups(object $space, array $groups): int
+    {
+        $ids = $this->buildingSpaceIds($space);
+        $n = 0;
+        foreach ($groups as $g) {
+            $rid = (int) ($g['room_id'] ?? 0);
+            if ($rid <= 0 || ! in_array($rid, $ids, true)) {
+                continue;
+            }
+            $key = (isset($g['group']) && $g['group'] !== '' && $g['group'] !== null) ? substr((string) $g['group'], 0, 40) : null;
+            $n += DB::table('ahg_exhibition_space')->where('id', $rid)->update(['bld_group' => $key, 'updated_at' => $this->nowTs()]);
+        }
+
+        return $n;
+    }
+
+    /** Delete a room from the building (and its placements). Won't delete the room you're editing from. */
+    public function deleteBuildingRoom(object $space, int $roomId): bool
+    {
+        $ids = $this->buildingSpaceIds($space);
+        if (! in_array($roomId, $ids, true) || $roomId === (int) $space->id) {
+            return false;
+        }
+        DB::table('ahg_exhibition_placement')->where('exhibition_space_id', $roomId)->delete();
+
+        return DB::table('ahg_exhibition_space')->where('id', $roomId)->delete() > 0;
+    }
+
+    /** Lock/unlock a room ("done" flag, #1143). */
+    public function setRoomLocked(object $space, int $roomId, bool $locked): bool
+    {
+        $ids = $this->buildingSpaceIds($space);
+        if (! in_array($roomId, $ids, true)) {
+            return false;
+        }
+
+        return DB::table('ahg_exhibition_space')->where('id', $roomId)
+            ->update(['bld_locked' => $locked ? 1 : 0, 'updated_at' => $this->nowTs()]) > 0;
+    }
+
+    /** Set which floor a room sits on (#1169 multi-floor). 0 = ground, negative = basement. */
+    public function setRoomFloor(object $space, int $roomId, int $floor): bool
+    {
+        $ids = $this->buildingSpaceIds($space);
+        if (! in_array($roomId, $ids, true)) {
+            return false;
+        }
+
+        return DB::table('ahg_exhibition_space')->where('id', $roomId)
+            ->update(['floor_level' => max(-5, min(20, $floor)), 'updated_at' => $this->nowTs()]) > 0;
+    }
+
+    /** Save a room's plan position + size (metres) + rotation (degrees). */
+    public function savePlanRoom(int $buildingMemberId, int $roomId, float $x, float $y, ?float $w, ?float $d, ?float $rot = null): bool
+    {
+        $member = $this->getById($buildingMemberId);
+        $room = $this->getById($roomId);
+        if (! $member || ! $room) {
+            return false;
+        }
+        // Only allow editing rooms in the same building (or the room itself).
+        if (($member->building_id ?? null) !== ($room->building_id ?? null) && $roomId !== $buildingMemberId) {
+            return false;
+        }
+        $p = ['bld_x' => $x, 'bld_y' => $y, 'updated_at' => $this->nowTs()];
+        if ($w !== null) {
+            $p['room_w'] = max(1, min(200, $w));
+        }
+        if ($d !== null) {
+            $p['room_d'] = max(1, min(200, $d));
+        }
+        if ($rot !== null) {
+            $p['bld_rot'] = fmod($rot, 360);
+        }
+
+        return DB::table('ahg_exhibition_space')->where('id', $roomId)->update($p) > 0;
+    }
+
+    /** Set/clear the building plan (blueprint) image, stored on every room of the building. */
+    public function setBuildingPlanImage(object $space, ?string $publicPath): void
+    {
+        $q = DB::table('ahg_exhibition_space');
+        if (! empty($space->building_id)) {
+            $q->where('building_id', $space->building_id);
+        } else {
+            $q->where('id', $space->id);
+        }
+        $q->update(['floorplan_image_path' => $publicPath, 'updated_at' => $this->nowTs()]);
+    }
+
+    /** Create a corridor object (building-space placement) at building-fraction (fx,fy). */
+    public function createCorridorPlacement(object $space, int $informationObjectId, float $fx, float $fy): array
+    {
+        if ($informationObjectId <= 0) {
+            throw new \InvalidArgumentException('information_object_id is required.');
+        }
+        $now = $this->nowTs();
+        $id = (int) DB::table('ahg_exhibition_placement')->insertGetId([
+            'information_object_id' => $informationObjectId,
+            'exhibition_space_id' => (int) $space->id,
+            'size_units_used' => 0,
+            'wall_or_zone' => 'corridor',
+            'pos_x' => max(0, min(1, $fx)),
+            'pos_y' => max(0, min(1, $fy)),
+            'rotation_deg' => 0, 'scale' => 1, 'z_order' => 0, 'label_visible' => 1,
+            'created_at' => $now, 'updated_at' => $now,
+        ]);
+        $title = DB::table('information_object_i18n')->where('id', $informationObjectId)->where('culture', 'en')->value('title');
+        $media = $this->getObjectMedia($informationObjectId);
+
+        return [
+            'id' => $id,
+            'information_object_id' => $informationObjectId,
+            'title' => $title ?: ('#'.$informationObjectId),
+            'pos_x' => max(0, min(1, $fx)), 'pos_y' => max(0, min(1, $fy)),
+            'kind' => $media['kind'],
+            'thumb_url' => $media['image_url'] ?? $this->thumbnailUrl($informationObjectId),
+        ];
+    }
+
+    /** Move a corridor object to building-fraction (fx,fy) within its building. */
+    public function moveCorridorPlacement(object $space, int $placementId, float $fx, float $fy): bool
+    {
+        $ids = $this->buildingSpaceIds($space);
+
+        return DB::table('ahg_exhibition_placement')
+            ->where('id', $placementId)->whereIn('exhibition_space_id', $ids)->where('wall_or_zone', 'corridor')
+            ->update(['pos_x' => max(0, min(1, $fx)), 'pos_y' => max(0, min(1, $fy)), 'updated_at' => $this->nowTs()]) > 0;
+    }
 }

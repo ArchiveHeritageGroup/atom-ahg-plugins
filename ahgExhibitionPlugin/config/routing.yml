@@ -131,6 +131,61 @@ exhibition_space_plan_shape:
   url: /exhibition-space/:slug/plan/shape
   param: { module: exhibitionSpace, action: planShape }
 
+# ── Building-plan editor AJAX (#1143) ───────────────────────────────────────
+# Literal /:slug/plan/... routes MUST precede the bare /:slug show route.
+
+exhibition_space_plan_save:
+  url: /exhibition-space/:slug/plan/save
+  param: { module: exhibitionSpace, action: planSave }
+
+exhibition_space_plan_add_room:
+  url: /exhibition-space/:slug/plan/add-room
+  param: { module: exhibitionSpace, action: planAddRoom }
+
+exhibition_space_plan_delete_room:
+  url: /exhibition-space/:slug/plan/delete-room
+  param: { module: exhibitionSpace, action: planDeleteRoom }
+
+exhibition_space_plan_group:
+  url: /exhibition-space/:slug/plan/group
+  param: { module: exhibitionSpace, action: planGroup }
+
+exhibition_space_plan_stairs:
+  url: /exhibition-space/:slug/plan/stairs
+  param: { module: exhibitionSpace, action: planStairs }
+
+exhibition_space_plan_room_floor:
+  url: /exhibition-space/:slug/plan/room-floor
+  param: { module: exhibitionSpace, action: planRoomFloor }
+
+exhibition_space_plan_room_lock:
+  url: /exhibition-space/:slug/plan/room-lock
+  param: { module: exhibitionSpace, action: planRoomLock }
+
+exhibition_space_plan_image_rect:
+  url: /exhibition-space/:slug/plan/image-rect
+  param: { module: exhibitionSpace, action: planImageRect }
+
+exhibition_space_plan_corridor_add:
+  url: /exhibition-space/:slug/plan/corridor-add
+  param: { module: exhibitionSpace, action: planCorridorAdd }
+
+exhibition_space_plan_corridor_move:
+  url: /exhibition-space/:slug/plan/corridor-move
+  param: { module: exhibitionSpace, action: planCorridorMove }
+
+exhibition_space_plan_corridor_remove:
+  url: /exhibition-space/:slug/plan/corridor-remove
+  param: { module: exhibitionSpace, action: planCorridorRemove }
+
+exhibition_space_plan_image:
+  url: /exhibition-space/:slug/plan/image
+  param: { module: exhibitionSpace, action: planImage }
+
+exhibition_space_plan_image_clear:
+  url: /exhibition-space/:slug/plan/image-clear
+  param: { module: exhibitionSpace, action: planImageClear }
+
 exhibition_space_show:
   url: /exhibition-space/:slug
   param: { module: exhibitionSpace, action: show }
