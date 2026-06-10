@@ -1,0 +1,136 @@
+# Exhibition Space routes — URL scheme mirrors Heratio (/exhibition-space/...).
+# NB: literal-segment routes (browse, add, placement) MUST precede the bare
+# /:slug route, or Symfony's first-match would treat "browse" as a slug.
+
+exhibition_space_browse:
+  url: /exhibition-space/browse
+  param: { module: exhibitionSpace, action: browse }
+
+exhibition_space_create:
+  url: /exhibition-space/add
+  param: { module: exhibitionSpace, action: create }
+
+exhibition_space_generate:
+  url: /exhibition-space/generate
+  param: { module: exhibitionSpace, action: generate }
+
+exhibition_space_remove_placement:
+  url: /exhibition-space/placement/:id/remove
+  param: { module: exhibitionSpace, action: removePlacement }
+  requirements: { id: \d+ }
+
+exhibition_space_edit:
+  url: /exhibition-space/:slug/edit
+  param: { module: exhibitionSpace, action: edit }
+
+exhibition_space_builder:
+  url: /exhibition-space/:slug/builder
+  param: { module: exhibitionSpace, action: builder }
+
+exhibition_space_builder_layout:
+  url: /exhibition-space/:slug/builder/layout
+  param: { module: exhibitionSpace, action: saveLayout }
+
+exhibition_space_walkthrough:
+  url: /exhibition-space/:slug/walkthrough
+  param: { module: exhibitionSpace, action: walkthrough }
+
+exhibition_space_plan:
+  url: /exhibition-space/:slug/plan
+  param: { module: exhibitionSpace, action: plan }
+
+exhibition_space_analytics:
+  url: /exhibition-space/:slug/analytics
+  param: { module: exhibitionSpace, action: analytics }
+
+exhibition_space_forecast:
+  url: /exhibition-space/:slug/forecast
+  param: { module: exhibitionSpace, action: forecast }
+
+exhibition_space_delete:
+  url: /exhibition-space/:slug/delete
+  param: { module: exhibitionSpace, action: confirmDelete }
+
+exhibition_space_destroy:
+  url: /exhibition-space/:slug/destroy
+  param: { module: exhibitionSpace, action: destroy }
+
+exhibition_space_place:
+  url: /exhibition-space/:slug/place
+  param: { module: exhibitionSpace, action: place }
+
+exhibition_space_save_room:
+  url: /exhibition-space/:slug/save-room
+  param: { module: exhibitionSpace, action: saveRoom }
+
+# ── Digital-twin builder AJAX (heratio#1138+ contract) ──────────────────────
+# All POST a JSON body and return HTTP 200 JSON {ok:true,...}/{ok:false,error}.
+# These literal-suffixed /:slug/... routes MUST precede the bare /:slug show.
+
+exhibition_space_builder_placements:
+  url: /exhibition-space/:slug/builder/placements
+  param: { module: exhibitionSpace, action: builderPlacements }
+
+exhibition_space_builder_place:
+  url: /exhibition-space/:slug/builder/place
+  param: { module: exhibitionSpace, action: builderPlace }
+
+exhibition_space_builder_remove:
+  url: /exhibition-space/:slug/builder/remove
+  param: { module: exhibitionSpace, action: builderRemove }
+
+exhibition_space_builder_size:
+  url: /exhibition-space/:slug/builder/size
+  param: { module: exhibitionSpace, action: builderSize }
+
+exhibition_space_builder_tilt:
+  url: /exhibition-space/:slug/builder/tilt
+  param: { module: exhibitionSpace, action: builderTilt }
+
+exhibition_space_builder_spotlight:
+  url: /exhibition-space/:slug/builder/spotlight
+  param: { module: exhibitionSpace, action: builderSpotlight }
+
+exhibition_space_builder_display_case:
+  url: /exhibition-space/:slug/builder/display-case
+  param: { module: exhibitionSpace, action: builderDisplayCase }
+
+exhibition_space_builder_on_floor:
+  url: /exhibition-space/:slug/builder/on-floor
+  param: { module: exhibitionSpace, action: builderOnFloor }
+
+exhibition_space_builder_view:
+  url: /exhibition-space/:slug/builder/view
+  param: { module: exhibitionSpace, action: builderView }
+
+exhibition_space_builder_z_order:
+  url: /exhibition-space/:slug/builder/z-order
+  param: { module: exhibitionSpace, action: builderZOrder }
+
+exhibition_space_builder_wall:
+  url: /exhibition-space/:slug/builder/wall
+  param: { module: exhibitionSpace, action: builderWall }
+
+exhibition_space_room_dims:
+  url: /exhibition-space/:slug/room-dims
+  param: { module: exhibitionSpace, action: roomDims }
+
+exhibition_space_plan_walls:
+  url: /exhibition-space/:slug/plan/walls
+  param: { module: exhibitionSpace, action: planWalls }
+
+exhibition_space_plan_doors:
+  url: /exhibition-space/:slug/plan/doors
+  param: { module: exhibitionSpace, action: planDoors }
+
+exhibition_space_plan_windows:
+  url: /exhibition-space/:slug/plan/windows
+  param: { module: exhibitionSpace, action: planWindows }
+
+exhibition_space_plan_shape:
+  url: /exhibition-space/:slug/plan/shape
+  param: { module: exhibitionSpace, action: planShape }
+
+exhibition_space_show:
+  url: /exhibition-space/:slug
+  param: { module: exhibitionSpace, action: show }
