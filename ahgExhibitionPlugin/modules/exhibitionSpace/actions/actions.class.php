@@ -872,4 +872,92 @@ class exhibitionSpaceActions extends AhgController
 
         return $this->jsonOk();
     }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  Analytics + conservation forecast (Heratio parity, heratio#1146/1148/
+    //  1173/1187/1188). Pages are PUBLIC (matching Heratio's public-demo routes);
+    //  the sensor token + ingest write actions require auth.
+    // ════════════════════════════════════════════════════════════════════════
+
+    /** PAGE (public): analytics dashboard — historical reading trends per room (heratio#1148). */
+    public function executeAnalytics($request)
+    {
+        $space = $this->getService()->getBySlug($request->getParameter('slug'));
+        if (!$space) {
+            $this->forward404('Exhibition space not found');
+        }
+        $svc = $this->getService();
+        $days = (int) $request->getParameter('days', 7);
+        $this->space = $space;
+        $this->days = $days;
+        $this->data = $svc->buildingAnalytics($space, $days);
+        $this->visitors = $svc->visitorAnalytics($space, $days);   // #1173
+        $this->heatmap = $svc->visitorHeatmap($space, $days);      // #1187
+        $this->sensor = $this->getUser()->isAuthenticated()        // #1188 (token only for logged-in staff)
+            ? ['token' => $svc->getOrCreateSensorToken((int) $space->id), 'alerts' => $svc->recentAlerts($space)]
+            : null;
+    }
+
+    /** PAGE (public): conservation forecast — projected light dose, risk, visitors (heratio#1147). */
+    public function executeForecast($request)
+    {
+        $space = $this->getService()->getBySlug($request->getParameter('slug'));
+        if (!$space) {
+            $this->forward404('Exhibition space not found');
+        }
+        $svc = $this->getService();
+        $this->space = $space;
+        $this->rooms = $svc->buildingForecast($space);
+        $this->timeline = $svc->conservationTimeline($space);   // #1189 time-scrubber
+    }
+
+    /**
+     * POST (auth): live data link (heratio#1146) — ingest sensor/occupancy readings for a space.
+     * Accepts a single {metric,value,recorded_at?} or {readings:[...]} batch.
+     */
+    public function executeRecordReadings($request)
+    {
+        $space = $this->ajaxSpace($request);   // requires auth
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $b = $this->jsonBody($request);
+        $batch = $b['readings'] ?? null;
+        if (!is_array($batch)) {
+            $batch = [['metric' => $b['metric'] ?? null, 'value' => $b['value'] ?? null, 'recorded_at' => $b['recorded_at'] ?? null]];
+        }
+        $n = 0;
+        foreach ($batch as $r) {
+            if (!isset($r['metric']) || !isset($r['value']) || !is_numeric($r['value'])) {
+                continue;
+            }
+            $this->getService()->recordReading((int) $space->id, (string) $r['metric'], (float) $r['value'], $r['recorded_at'] ?? null);
+            $n++;
+        }
+
+        return $this->jsonOk(['recorded' => $n, 'live' => $this->getService()->liveState($space)]);
+    }
+
+    /** POST (auth): seed demo readings across the building so charts/forecast show data (heratio#1147). */
+    public function executeSimulateReadings($request)
+    {
+        $space = $this->ajaxSpace($request);   // requires auth
+        if (!$space) {
+            return sfView::NONE;
+        }
+        $n = $this->getService()->simulateReadings($space);
+
+        return $this->jsonOk(['recorded' => $n]);
+    }
+
+    /** POST (auth): rotate a space's sensor token (heratio#1188). */
+    public function executeSensorRegen($request)
+    {
+        $space = $this->ajaxSpace($request);   // requires auth
+        if (!$space) {
+            return sfView::NONE;
+        }
+
+        return $this->jsonOk(['token' => $this->getService()->regenerateSensorToken((int) $space->id)]);
+    }
 }

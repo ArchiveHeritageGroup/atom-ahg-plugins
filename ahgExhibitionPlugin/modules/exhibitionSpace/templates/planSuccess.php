@@ -1,3 +1,4 @@
+<?php /* AtoM escaping_strategy=true wraps action vars in sfOutputEscaper; unescape before json_encode/use. */ foreach (["space","days","data","visitors","heatmap","sensor","rooms","timeline","building","placements","roomDims","guidedTour","walls","doors","windows","shape","capacityUnits","furniture","tourObjects","plan","navBtns","stairs","corridorObjects","bootData","wtConfig"] as $__ev) { if (isset($$__ev)) { $$__ev = sfOutputEscaper::unescape($$__ev); } } ?>
 <?php
 /*
  * Exhibition Space — Building PLAN editor (Konva.js 2D blueprint).

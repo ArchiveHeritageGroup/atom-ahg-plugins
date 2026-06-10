@@ -186,6 +186,24 @@ exhibition_space_plan_image_clear:
   url: /exhibition-space/:slug/plan/image-clear
   param: { module: exhibitionSpace, action: planImageClear }
 
+# ── Analytics + conservation-forecast ingest AJAX (heratio#1146/1147/1188) ──
+# POST a JSON body, return HTTP 200 JSON. These literal /:slug/... suffix routes
+# MUST precede the bare /:slug show route below (first-match would shadow them).
+# The analytics + forecast PAGE routes are declared higher up (public demo);
+# these are the auth-only ingest writes the builder "Simulate live data" calls.
+
+exhibition_space_simulate_readings:
+  url: /exhibition-space/:slug/readings/simulate
+  param: { module: exhibitionSpace, action: simulateReadings }
+
+exhibition_space_record_readings:
+  url: /exhibition-space/:slug/readings
+  param: { module: exhibitionSpace, action: recordReadings }
+
+exhibition_space_sensor_regen:
+  url: /exhibition-space/:slug/sensor/regenerate
+  param: { module: exhibitionSpace, action: sensorRegen }
+
 exhibition_space_show:
   url: /exhibition-space/:slug
   param: { module: exhibitionSpace, action: show }

@@ -1628,4 +1628,538 @@ class ExhibitionSpaceService
             ->where('id', $placementId)->whereIn('exhibition_space_id', $ids)->where('wall_or_zone', 'corridor')
             ->update(['pos_x' => max(0, min(1, $fx)), 'pos_y' => max(0, min(1, $fy)), 'updated_at' => $this->nowTs()]) > 0;
     }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  Analytics + conservation forecast (Heratio parity, heratio#1146/1148/
+    //  1173/1187/1188). Ported verbatim from packages/ahg-exhibition with PSIS
+    //  conventions: Schema::hasTable -> $this->tableExists; Carbon now()/subDays
+    //  -> nowTs()/timestamp arithmetic; ingest auth passed in as a flag.
+    // ════════════════════════════════════════════════════════════════════════
+
+    // -------- Live data link + sensor ingest (heratio#1146 / #1188) --------
+
+    /** Append a sensor/occupancy reading for a space (the digital-twin data link). */
+    public function recordReading(int $spaceId, string $metric, float $value, ?string $recordedAt = null): void
+    {
+        if (! $this->tableExists('ahg_exhibition_reading')) {
+            return;
+        }
+        DB::table('ahg_exhibition_reading')->insert([
+            'exhibition_space_id' => $spaceId,
+            'metric' => substr($metric, 0, 32),
+            'value' => $value,
+            'recorded_at' => $recordedAt ?: $this->nowTs(),
+        ]);
+    }
+
+    /** heratio#1188 - the per-space sensor token (created on first read). */
+    public function getOrCreateSensorToken(int $spaceId): string
+    {
+        $tok = DB::table('ahg_exhibition_space')->where('id', $spaceId)->value('sensor_token');
+        if (! $tok) {
+            $tok = 'sx_'.bin2hex(random_bytes(20));
+            DB::table('ahg_exhibition_space')->where('id', $spaceId)->update(['sensor_token' => $tok, 'updated_at' => $this->nowTs()]);
+        }
+
+        return $tok;
+    }
+
+    /** heratio#1188 - rotate the token (invalidates any device still using the old one). */
+    public function regenerateSensorToken(int $spaceId): string
+    {
+        $tok = 'sx_'.bin2hex(random_bytes(20));
+        DB::table('ahg_exhibition_space')->where('id', $spaceId)->update(['sensor_token' => $tok, 'updated_at' => $this->nowTs()]);
+
+        return $tok;
+    }
+
+    /**
+     * heratio#1188 - ingest readings from a real sensor/gateway authenticated by token.
+     * Records each reading and raises a conservation alert when one is out of range.
+     * $readings: [['metric'=>'temp_c','value'=>27.4], ...]. Returns a summary or null if the
+     * token is unknown.
+     */
+    public function ingestSensor(string $token, array $readings): ?array
+    {
+        $token = trim($token);
+        if ($token === '') {
+            return null;
+        }
+        $space = DB::table('ahg_exhibition_space')->where('sensor_token', $token)->first();
+        if (! $space) {
+            return null;
+        }
+
+        $recorded = 0;
+        $alerts = [];
+        $hasAlertTable = $this->tableExists('ahg_exhibition_alert');
+        foreach ($readings as $r) {
+            $metric = isset($r['metric']) ? substr((string) $r['metric'], 0, 32) : '';
+            if ($metric === '' || ! isset($r['value']) || ! is_numeric($r['value'])) {
+                continue;
+            }
+            $value = (float) $r['value'];
+            $this->recordReading((int) $space->id, $metric, $value, $r['recorded_at'] ?? null);
+            $recorded++;
+
+            $breach = $this->conservationThreshold($metric, $value, $space);
+            if ($breach && $hasAlertTable) {
+                DB::table('ahg_exhibition_alert')->insert([
+                    'exhibition_space_id' => (int) $space->id,
+                    'metric' => $metric, 'value' => $value,
+                    'threshold' => $breach['threshold'], 'severity' => $breach['severity'],
+                    'message' => $breach['message'], 'created_at' => $this->nowTs(),
+                ]);
+                $alerts[] = $breach['message'];
+            }
+        }
+
+        return ['space' => $space->name, 'recorded' => $recorded, 'alerts' => $alerts];
+    }
+
+    /**
+     * Conservation thresholds. Sensible museum defaults (per-space lux target honoured when
+     * set). Returns ['severity','threshold','message'] when breached, else null.
+     */
+    private function conservationThreshold(string $metric, float $value, object $space): ?array
+    {
+        $name = $space->name ?? ('#'.($space->id ?? '?'));
+        switch ($metric) {
+            case 'temp_c':
+                if ($value < 16 || $value > 24) {
+                    return ['severity' => $value < 10 || $value > 28 ? 'critical' : 'warning', 'threshold' => '16-24 C',
+                        'message' => "Temperature {$value} C in {$name} is outside the 16-24 C range."];
+                }
+                break;
+            case 'humidity':
+                if ($value < 40 || $value > 60) {
+                    return ['severity' => $value < 30 || $value > 70 ? 'critical' : 'warning', 'threshold' => '40-60% RH',
+                        'message' => "Humidity {$value}% in {$name} is outside the 40-60% range."];
+                }
+                break;
+            case 'lux':
+                $cap = isset($space->lighting_lux_target) && $space->lighting_lux_target ? (float) $space->lighting_lux_target : 200.0;
+                if ($value > $cap) {
+                    return ['severity' => $value > $cap * 2 ? 'critical' : 'warning', 'threshold' => '<= '.((int) $cap).' lux',
+                        'message' => "Light {$value} lux in {$name} exceeds the ".((int) $cap)." lux limit."];
+                }
+                break;
+        }
+
+        return null;
+    }
+
+    /** heratio#1188 - recent conservation alerts for a space. */
+    public function recentAlerts(object $space, int $limit = 20): array
+    {
+        if (! $this->tableExists('ahg_exhibition_alert')) {
+            return [];
+        }
+
+        return DB::table('ahg_exhibition_alert')->where('exhibition_space_id', $space->id)
+            ->orderByDesc('id')->limit($limit)->get()
+            ->map(function ($a) {
+                return ['metric' => $a->metric, 'value' => (float) $a->value, 'severity' => $a->severity,
+                    'threshold' => $a->threshold, 'message' => $a->message, 'at' => $a->created_at];
+            })->all();
+    }
+
+    // -------- Conservation timeline (heratio#1189) --------
+
+    /**
+     * heratio#1189 - conservation time-scrubber. For each building room and each daily bucket
+     * (history + a flat forward projection), the conservation status (green/amber/red/none)
+     * from the readings as-of that day. Drives a scrubbable plan on the forecast page.
+     */
+    public function conservationTimeline(object $space, int $days = 21, int $forecastDays = 10): array
+    {
+        $building = $this->getWalkthroughBuilding($space);
+        $roomIds = array_map(fn ($r) => $r['id'], $building['rooms']);
+        $byRoom = [];
+        if ($roomIds && $this->tableExists('ahg_exhibition_reading')) {
+            $since = date('Y-m-d 00:00:00', time() - $days * 86400);
+            $rows = DB::table('ahg_exhibition_reading')->whereIn('exhibition_space_id', $roomIds)
+                ->where('recorded_at', '>=', $since)->orderBy('recorded_at')
+                ->select('exhibition_space_id', 'metric', 'value', 'recorded_at')->get();
+            foreach ($rows as $r) {
+                $byRoom[(int) $r->exhibition_space_id][$r->metric][] = [strtotime((string) $r->recorded_at), (float) $r->value];
+            }
+        }
+
+        $buckets = [];
+        for ($d = -$days; $d <= $forecastDays; $d++) {
+            $t = strtotime(date('Y-m-d 23:59:59', time() + $d * 86400));
+            $buckets[] = ['ts' => $t, 'label' => date('d M', $t), 'future' => $d > 0];
+        }
+        $nowTs = time();
+
+        $status = [];
+        foreach ($building['rooms'] as $rm) {
+            $series = [];
+            $ms = $byRoom[$rm['id']] ?? [];
+            foreach ($buckets as $b) {
+                $cut = $b['future'] ? $nowTs : $b['ts'];   // future buckets carry the latest-known status forward
+                $readings = $this->readingsAsOf($ms, $cut);
+                $series[] = $readings ? $this->statusFromReadings($readings) : 'none';
+            }
+            $status[$rm['id']] = $series;
+        }
+
+        return [
+            'rooms' => array_map(fn ($r) => ['id' => $r['id'], 'name' => $r['name'], 'x' => $r['x_offset'], 'z' => $r['z_offset'], 'w' => $r['w'], 'd' => $r['d']], $building['rooms']),
+            'buckets' => $buckets, 'status' => $status,
+            'min_x' => $building['min_x'] ?? 0, 'max_x' => $building['max_x'] ?? 0,
+            'min_z' => $building['min_z'] ?? 0, 'max_z' => $building['max_z'] ?? 0,
+        ];
+    }
+
+    /** Latest value per metric at or before $ts, from ascending [ts,value] series. */
+    private function readingsAsOf(array $metricSeries, int $ts): array
+    {
+        $out = [];
+        foreach ($metricSeries as $metric => $pairs) {
+            $v = null;
+            foreach ($pairs as $p) {
+                if ($p[0] <= $ts) { $v = $p[1]; } else { break; }
+            }
+            if ($v !== null) { $out[$metric] = $v; }
+        }
+
+        return $out;
+    }
+
+    /** green/amber/red from metric values (museum norms; same thresholds as the live overlay). */
+    private function statusFromReadings(array $r): string
+    {
+        $level = 0;
+        if (isset($r['lux'])) { $level = max($level, $r['lux'] > 300 ? 2 : ($r['lux'] > 200 ? 1 : 0)); }
+        if (isset($r['temp_c'])) { $t = $r['temp_c']; $level = max($level, ($t < 14 || $t > 26) ? 2 : (($t < 16 || $t > 24) ? 1 : 0)); }
+        if (isset($r['humidity'])) { $h = $r['humidity']; $level = max($level, ($h < 35 || $h > 65) ? 2 : (($h < 40 || $h > 60) ? 1 : 0)); }
+
+        return ['green', 'amber', 'red'][$level];
+    }
+
+    // -------- Simulation & prediction (heratio#1147) --------
+
+    /** Annual light-dose budget (lux-hours) by material sensitivity, inferred from the lux target. */
+    public function lightBudget(?float $luxTarget): float
+    {
+        if ($luxTarget === null) {
+            return 150000;
+        }
+        if ($luxTarget <= 50) {
+            return 50000;    // very light-sensitive (textiles, works on paper, dyes)
+        }
+        if ($luxTarget <= 200) {
+            return 150000;   // sensitive (oil/tempera, bone, ivory)
+        }
+
+        return 600000;       // durable (metal, stone, ceramic, glass)
+    }
+
+    /**
+     * Conservation + occupancy forecast for one space from its readings:
+     * projected annual light dose vs budget, days-to-budget, and visitor stats.
+     * displayHoursPerDay defaults to 8; the open-year is ~312 days.
+     *
+     * @return array<string,mixed>
+     */
+    public function conservationForecast(object $space, float $displayHoursPerDay = 8.0): array
+    {
+        $displayDays = 312;
+        $hasReadings = $this->tableExists('ahg_exhibition_reading');
+        $since = date('Y-m-d H:i:s', time() - 30 * 86400);
+        $avgLux = null;
+        $avgVis = null;
+        $peakVis = null;
+        if ($hasReadings) {
+            $lux = DB::table('ahg_exhibition_reading')->where('exhibition_space_id', $space->id)->where('metric', 'lux')->where('recorded_at', '>=', $since);
+            $avgLux = $lux->avg('value');
+            $avgLux = $avgLux !== null ? round((float) $avgLux, 1) : null;
+            $vis = DB::table('ahg_exhibition_reading')->where('exhibition_space_id', $space->id)->where('metric', 'visitors')->where('recorded_at', '>=', $since);
+            $avgVis = $vis->avg('value');
+            $peakVis = $vis->max('value');
+        }
+        $budget = $this->lightBudget($space->lighting_lux_target !== null ? (float) $space->lighting_lux_target : null);
+        $annual = $avgLux !== null ? $avgLux * $displayHoursPerDay * $displayDays : null;
+        $pct = ($annual !== null && $budget > 0) ? $annual / $budget : null;
+        $daysToBudget = ($avgLux !== null && $avgLux > 0) ? (int) round($budget / ($avgLux * $displayHoursPerDay)) : null;
+        $risk = $pct === null ? 'none' : ($pct > 1.5 ? 'alert' : ($pct > 1.0 ? 'warn' : 'ok'));
+
+        return [
+            'id' => (int) $space->id, 'name' => $space->name,
+            'avg_lux' => $avgLux,
+            'lux_target' => $space->lighting_lux_target !== null ? (float) $space->lighting_lux_target : null,
+            'display_hours_per_day' => $displayHoursPerDay, 'display_days' => $displayDays,
+            'budget' => $budget,
+            'annual_dose' => $annual !== null ? (int) round($annual) : null,
+            'pct_of_budget' => $pct !== null ? round($pct * 100, 1) : null,
+            'days_to_budget' => $daysToBudget,
+            'risk' => $risk,
+            'avg_visitors' => $avgVis !== null ? round((float) $avgVis, 1) : null,
+            'peak_visitors' => $peakVis !== null ? (float) $peakVis : null,
+            'capacity' => $space->capacity_value !== null ? (float) $space->capacity_value : null,
+        ];
+    }
+
+    /** Conservation forecast for every room in the building. @return array<int,array<string,mixed>> */
+    public function buildingForecast(object $space): array
+    {
+        $ids = $this->buildingSpaceIds($space);
+        $out = [];
+        foreach ($ids as $id) {
+            $sp = $this->getById($id);
+            if ($sp) {
+                $out[] = $this->conservationForecast($sp);
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Historical analytics for the building (heratio#1148): readings bucketed by
+     * hour (<=7 days) or day (longer), one aligned series per room per metric,
+     * plus per-room/metric summaries. Shaped for charting on a category axis.
+     *
+     * @return array<string,mixed>
+     */
+    public function buildingAnalytics(object $space, int $days = 7): array
+    {
+        $days = max(1, min(365, $days));
+        $ids = $this->buildingSpaceIds($space);
+        $metrics = ['lux', 'temp_c', 'humidity', 'visitors'];
+        $rooms = [];
+        foreach ($ids as $id) {
+            $sp = $this->getById($id);
+            if ($sp) {
+                $rooms[] = ['id' => (int) $id, 'name' => $sp->name];
+            }
+        }
+        $hasReadings = $this->tableExists('ahg_exhibition_reading');
+        $byDay = $days > 7;
+        $bucketExpr = $byDay ? "DATE_FORMAT(recorded_at,'%Y-%m-%d')" : "DATE_FORMAT(recorded_at,'%Y-%m-%d %H:00')";
+        $since = date('Y-m-d H:i:s', time() - $days * 86400);
+        $rows = (empty($ids) || ! $hasReadings) ? collect() : DB::table('ahg_exhibition_reading')
+            ->whereIn('exhibition_space_id', $ids)->where('recorded_at', '>=', $since)
+            ->selectRaw("$bucketExpr as bucket, exhibition_space_id as sid, metric, AVG(value) as avgv, MIN(value) as minv, MAX(value) as maxv, COUNT(*) as cnt")
+            ->groupBy('bucket', 'sid', 'metric')->orderBy('bucket')->get();
+
+        $labelsSet = [];
+        $map = [];        // map[metric][sid][bucket] = avg
+        $agg = [];        // agg[sid][metric] = [sum,count,min,max]
+        foreach ($rows as $r) {
+            $labelsSet[$r->bucket] = true;
+            $map[$r->metric][$r->sid][$r->bucket] = round((float) $r->avgv, 2);
+            $a = $agg[$r->sid][$r->metric] ?? ['sum' => 0, 'n' => 0, 'min' => INF, 'max' => -INF];
+            $a['sum'] += (float) $r->avgv * (int) $r->cnt;
+            $a['n'] += (int) $r->cnt;
+            $a['min'] = min($a['min'], (float) $r->minv);
+            $a['max'] = max($a['max'], (float) $r->maxv);
+            $agg[$r->sid][$r->metric] = $a;
+        }
+        $labels = array_keys($labelsSet);
+        sort($labels);
+
+        $series = [];
+        foreach ($metrics as $m) {
+            foreach ($rooms as $rm) {
+                $sid = $rm['id'];
+                $line = [];
+                foreach ($labels as $b) {
+                    $line[] = $map[$m][$sid][$b] ?? null;
+                }
+                $series[$m][$sid] = $line;
+            }
+        }
+        $summary = [];
+        foreach ($rooms as $rm) {
+            $sid = $rm['id'];
+            $latest = $this->latestReadings($sid);
+            foreach ($metrics as $m) {
+                $a = $agg[$sid][$m] ?? null;
+                $summary[$sid][$m] = [
+                    'avg' => $a && $a['n'] ? round($a['sum'] / $a['n'], 1) : null,
+                    'min' => $a && $a['n'] ? round($a['min'], 1) : null,
+                    'max' => $a && $a['n'] ? round($a['max'], 1) : null,
+                    'latest' => isset($latest[$m]) ? $latest[$m]['value'] : null,
+                    'count' => $a['n'] ?? 0,
+                ];
+            }
+        }
+
+        return ['days' => $days, 'bucket' => $byDay ? 'day' : 'hour', 'labels' => $labels, 'metrics' => $metrics, 'rooms' => $rooms, 'series' => $series, 'summary' => $summary];
+    }
+
+    /** Seed demo readings across the building so the live overlay + charts are visible. */
+    public function simulateReadings(object $space): int
+    {
+        $ids = $this->buildingSpaceIds($space);
+        $n = 0;
+        foreach ($ids as $i => $id) {
+            $sp = $this->getById($id);
+            if (! $sp) {
+                continue;
+            }
+            $target = $sp->lighting_lux_target !== null ? (float) $sp->lighting_lux_target : 200.0;
+            $this->recordReading($id, 'lux', round($target * (0.6 + ($i % 3) * 0.5), 1));   // ok / warn / alert mix
+            $this->recordReading($id, 'temp_c', round(19 + ($i % 4) * 2.5, 1));
+            $this->recordReading($id, 'humidity', round(45 + ($i % 5) * 6, 1));
+            $this->recordReading($id, 'visitors', ($i % 6) * 3);
+            $n += 4;
+        }
+
+        return $n;
+    }
+
+    // -------- Visitor analytics (heratio#1173 / #1187) --------
+
+    /** heratio#1173 - record a visit heartbeat (presence + room dwell tracking). */
+    public function recordVisitBeat(object $space, string $token, ?string $device, ?int $roomId): void
+    {
+        if (! $this->tableExists('ahg_exhibition_visit')) {
+            return;
+        }
+        $token = substr($token, 0, 64);
+        if ($token === '') {
+            return;
+        }
+        $building = $space->building_id ?: $space->slug;
+        $now = $this->nowTs();
+        $nowTs = time();
+        $v = DB::table('ahg_exhibition_visit')->where('building_id', $building)->where('session_token', $token)->first();
+        if (! $v) {
+            // insertOrIgnore: concurrent first beats with the same token must not 1062 on uq_visit.
+            DB::table('ahg_exhibition_visit')->insertOrIgnore([
+                'building_id' => $building, 'session_token' => $token, 'device' => substr((string) $device, 0, 16) ?: null,
+                'cur_room' => $roomId, 'room_entered_at' => $now, 'room_seconds_json' => json_encode([]),
+                'started_at' => $now, 'last_seen' => $now,
+            ]);
+
+            return;
+        }
+        $upd = ['last_seen' => $now];
+        if ((int) $v->cur_room !== (int) $roomId) {   // moved rooms: bank dwell on the one we left
+            $secs = $v->room_seconds_json ? json_decode($v->room_seconds_json, true) : [];
+            if (! is_array($secs)) { $secs = []; }
+            if ($v->cur_room && $v->room_entered_at) {
+                $d = min(3600, max(0, $nowTs - strtotime($v->room_entered_at)));
+                $secs[(string) $v->cur_room] = ($secs[(string) $v->cur_room] ?? 0) + $d;
+            }
+            $upd['room_seconds_json'] = json_encode($secs);
+            $upd['cur_room'] = $roomId;
+            $upd['room_entered_at'] = $now;
+        }
+        DB::table('ahg_exhibition_visit')->where('id', $v->id)->update($upd);
+    }
+
+    /** heratio#1173 - log a visit event (object view / tour / door). */
+    public function recordVisitEvent(object $space, string $token, string $type, ?int $roomId, ?int $objectId): void
+    {
+        if (! $this->tableExists('ahg_exhibition_visit_event')) {
+            return;
+        }
+        $building = $space->building_id ?: $space->slug;
+        DB::table('ahg_exhibition_visit_event')->insert([
+            'building_id' => $building, 'session_token' => substr($token, 0, 64),
+            'type' => substr($type, 0, 16), 'room_id' => $roomId ?: null, 'object_id' => $objectId ?: null, 'created_at' => $this->nowTs(),
+        ]);
+    }
+
+    /** heratio#1173 - aggregate visitor analytics for the dashboard. */
+    public function visitorAnalytics(object $space, int $days = 30): array
+    {
+        if (! $this->tableExists('ahg_exhibition_visit')) {
+            return ['sessions' => 0, 'avg_seconds' => 0, 'devices' => [], 'dwell' => [], 'top_objects' => []];
+        }
+        $building = $space->building_id ?: $space->slug;
+        $since = date('Y-m-d H:i:s', time() - $days * 86400);
+        $visits = DB::table('ahg_exhibition_visit')->where('building_id', $building)->where('started_at', '>=', $since)->get();
+        $sessions = $visits->count();
+        $durs = $visits->map(function ($v) { return max(0, strtotime($v->last_seen) - strtotime($v->started_at)); });
+        $avg = $sessions ? (int) round($durs->avg()) : 0;
+        $devices = $visits->groupBy(function ($v) { return $v->device ?: 'desktop'; })->map->count()->all();
+        $roomSecs = [];
+        foreach ($visits as $v) {
+            $s = $v->room_seconds_json ? json_decode($v->room_seconds_json, true) : [];
+            if (is_array($s)) { foreach ($s as $rid => $sec) { $roomSecs[$rid] = ($roomSecs[$rid] ?? 0) + $sec; } }
+        }
+        $rids = array_keys($roomSecs);
+        $names = $rids ? DB::table('ahg_exhibition_space')->whereIn('id', $rids)->pluck('name', 'id')->all() : [];
+        $dwell = [];
+        foreach ($roomSecs as $rid => $sec) { $dwell[] = ['room' => $names[$rid] ?? ('#'.$rid), 'seconds' => (int) $sec]; }
+        usort($dwell, function ($a, $b) { return $b['seconds'] - $a['seconds']; });
+        $topObjects = [];
+        if ($this->tableExists('ahg_exhibition_visit_event')) {
+            $top = DB::table('ahg_exhibition_visit_event')->where('building_id', $building)->where('type', 'object')
+                ->where('created_at', '>=', $since)->whereNotNull('object_id')
+                ->select('object_id', DB::raw('COUNT(*) as c'))->groupBy('object_id')->orderByDesc('c')->limit(10)->get();
+            $oids = $top->pluck('object_id')->all();
+            $titles = $oids ? DB::table('information_object_i18n')->whereIn('id', $oids)->where('culture', 'en')->pluck('title', 'id')->all() : [];
+            $topObjects = $top->map(function ($r) use ($titles) { return ['title' => $titles[$r->object_id] ?? ('#'.$r->object_id), 'views' => (int) $r->c]; })->all();
+        }
+
+        return ['sessions' => $sessions, 'avg_seconds' => $avg, 'devices' => $devices, 'dwell' => array_slice($dwell, 0, 10), 'top_objects' => $topObjects];
+    }
+
+    /**
+     * heratio#1187 - visitor heatmap. Building room geometry + total dwell seconds per room
+     * (from ahg_exhibition_visit.room_seconds_json) + per-object view counts (from
+     * visit_event), so the analytics page can render a top-down dwell/attention heatmap.
+     */
+    public function visitorHeatmap(object $space, int $days = 30): array
+    {
+        $building = $this->getWalkthroughBuilding($space);
+        $b = $space->building_id ?: $space->slug;
+        $since = date('Y-m-d H:i:s', time() - $days * 86400);
+
+        // Dwell seconds per room id.
+        $roomSecs = [];
+        if ($this->tableExists('ahg_exhibition_visit')) {
+            foreach (DB::table('ahg_exhibition_visit')->where('building_id', $b)->where('started_at', '>=', $since)->get() as $v) {
+                $s = $v->room_seconds_json ? json_decode((string) $v->room_seconds_json, true) : [];
+                if (is_array($s)) {
+                    foreach ($s as $rid => $sec) { $roomSecs[(int) $rid] = ($roomSecs[(int) $rid] ?? 0) + (int) $sec; }
+                }
+            }
+        }
+
+        // Object view counts (for object heat dots), keyed by object id.
+        $objViews = [];
+        if ($this->tableExists('ahg_exhibition_visit_event')) {
+            $rows = DB::table('ahg_exhibition_visit_event')->where('building_id', $b)->where('type', 'object')
+                ->where('created_at', '>=', $since)->whereNotNull('object_id')
+                ->select('object_id', DB::raw('COUNT(*) as c'))->groupBy('object_id')->get();
+            foreach ($rows as $r) { $objViews[(int) $r->object_id] = (int) $r->c; }
+        }
+
+        $rooms = [];
+        $maxSec = 0;
+        $objects = [];
+        $maxViews = 0;
+        foreach ($building['rooms'] as $r) {
+            $sec = (int) ($roomSecs[$r['id']] ?? 0);
+            $maxSec = max($maxSec, $sec);
+            $rooms[] = ['id' => $r['id'], 'name' => $r['name'], 'x' => $r['x_offset'], 'z' => $r['z_offset'], 'w' => $r['w'], 'd' => $r['d'], 'seconds' => $sec];
+            foreach (($r['stops'] ?? []) as $s) {
+                $oid = (int) ($s['information_object_id'] ?? 0);
+                $views = $objViews[$oid] ?? 0;
+                if ($oid && $views > 0) {
+                    $maxViews = max($maxViews, $views);
+                    $objects[] = [
+                        'x' => $r['x_offset'] + (float) ($s['pos_x'] ?? 0.5) * $r['w'],
+                        'z' => $r['z_offset'] + (float) ($s['pos_y'] ?? 0.5) * $r['d'],
+                        'views' => $views, 'title' => $s['title'] ?? ('#'.$oid),
+                    ];
+                }
+            }
+        }
+
+        return [
+            'rooms' => $rooms, 'objects' => $objects,
+            'max_seconds' => $maxSec, 'max_views' => $maxViews,
+            'min_x' => $building['min_x'] ?? 0, 'max_x' => $building['max_x'] ?? 0,
+            'min_z' => $building['min_z'] ?? 0, 'max_z' => $building['max_z'] ?? 0,
+        ];
+    }
 }
