@@ -1,0 +1,21 @@
+{
+    "name": "AHG Email Delivery Plugin",
+    "machine_name": "ahgEmailDeliveryPlugin",
+    "version": "1.0.0",
+    "description": "Email deliverability: bounce capture + suppression list + send-time gate (#145, parity with Heratio EmailBounceController/EmailSuppressionGate)",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "ahg_email_suppression"
+    ],
+    "shared_tables": [],
+    "category": "communication"
+}

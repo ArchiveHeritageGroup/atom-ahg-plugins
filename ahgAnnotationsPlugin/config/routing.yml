@@ -1,0 +1,12 @@
+# ahgAnnotationsPlugin routes (#146) — W3C Web Annotation Protocol.
+# Container handles GET (list/query) + POST (create); single handles GET/PUT/DELETE.
+
+ahg_annotation_container:
+  url: /annotations
+  param: { module: annotation, action: container }
+
+ahg_annotation_single:
+  url: /annotations/:uuid
+  param: { module: annotation, action: single }
+  requirements:
+    uuid: "[0-9a-fA-F-]+"

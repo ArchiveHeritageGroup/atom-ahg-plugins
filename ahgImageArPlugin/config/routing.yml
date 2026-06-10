@@ -1,0 +1,9 @@
+# ahgImageArPlugin routes (#147)
+
+ahg_image_ar_view:
+  url: /imagear/:slug
+  param: { module: imageAr, action: view }
+
+ahg_image_ar_byid:
+  url: /imagear
+  param: { module: imageAr, action: view }

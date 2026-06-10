@@ -1,0 +1,21 @@
+{
+    "name": "AHG Web Annotations Plugin",
+    "machine_name": "ahgAnnotationsPlugin",
+    "version": "1.0.0",
+    "description": "Standalone W3C Web Annotation Data Model + Protocol backend (#146, parity with Heratio ahg-annotations)",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "ahg_web_annotation"
+    ],
+    "shared_tables": [],
+    "category": "advanced_features"
+}

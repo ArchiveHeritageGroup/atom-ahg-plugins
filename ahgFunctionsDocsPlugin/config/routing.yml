@@ -1,0 +1,5 @@
+# ahgFunctionsDocsPlugin routes (#148)
+
+ahg_functions_docs:
+  url: /admin/docs/catalogue
+  param: { module: functionsDocs, action: catalogue }

@@ -1,0 +1,19 @@
+# ahgEmailDeliveryPlugin routes (#145)
+
+# Provider bounce/complaint webhook (server-to-server POST, no UA, JSON body).
+ahg_email_bounce_webhook:
+  url: /email/bounce
+  param: { module: emailDelivery, action: bounce }
+
+# Admin: suppression list management.
+ahg_email_suppressions:
+  url: /admin/email/suppressions
+  param: { module: emailDelivery, action: suppressions }
+
+ahg_email_suppress_add:
+  url: /admin/email/suppressions/add
+  param: { module: emailDelivery, action: add }
+
+ahg_email_suppress_remove:
+  url: /admin/email/suppressions/remove
+  param: { module: emailDelivery, action: remove }
