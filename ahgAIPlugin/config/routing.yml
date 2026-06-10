@@ -227,3 +227,36 @@ ahg_ai_assistant:
 ahg_ai_assistant_ask:
   url: /ai/assistant/ask
   param: { module: ai, action: assistantAsk }
+
+# ============================================================================
+# AI Cataloguer (#149) — full-record AI draft + review/apply
+# ============================================================================
+ahg_ai_catalog:
+  url: /ai/catalog/:id
+  param: { module: ai, action: catalog }
+  requirements: { id: \d+ }
+
+ahg_ai_catalog_apply:
+  url: /ai/catalog/:id/apply
+  param: { module: ai, action: catalogApply }
+  requirements: { id: \d+ }
+
+# ============================================================================
+# Researcher Copilot (#149) — persistent research sessions over the assistant
+# ============================================================================
+ahg_ai_research:
+  url: /ai/research
+  param: { module: ai, action: research }
+
+ahg_ai_research_ask:
+  url: /ai/research/ask
+  param: { module: ai, action: researchAsk }
+
+ahg_ai_research_sessions:
+  url: /ai/research/sessions
+  param: { module: ai, action: researchSessions }
+
+ahg_ai_research_session:
+  url: /ai/research/session/:id
+  param: { module: ai, action: researchSession }
+  requirements: { id: \d+ }

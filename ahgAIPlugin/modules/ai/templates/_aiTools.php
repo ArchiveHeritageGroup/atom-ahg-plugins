@@ -39,6 +39,14 @@ try {
         </button>
     </div>
 
+    <!-- AI Cataloguer Button (#149) -->
+    <div class="mb-2">
+        <a href="<?php echo url_for(['module' => 'ai', 'action' => 'catalog', 'id' => $resource->id]); ?>"
+           class="btn btn-outline-warning btn-sm w-100">
+            <i class="bi bi-magic me-1"></i>Catalogue with AI
+        </a>
+    </div>
+
     <?php if ($hasPdf && $approvedEntityCount > 0): ?>
     <!-- View PDF with Entity Highlights Button -->
     <div class="mb-2">

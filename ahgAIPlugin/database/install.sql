@@ -639,3 +639,45 @@ VALUES
     ('donut', 'donut_service_url', 'http://192.168.0.115:5008'),
     ('donut', 'donut_timeout', '60')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
+
+-- ============================================================================
+-- AI Cataloguer (#149 strand) — full-record AI draft storage
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS ahg_catalog_draft (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    object_id INT NOT NULL,
+    draft_json LONGTEXT NOT NULL,
+    model VARCHAR(120) DEFAULT NULL,
+    tokens_used INT DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, applied, discarded',
+    applied_fields JSON DEFAULT NULL,
+    created_by INT DEFAULT NULL,
+    applied_by INT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    applied_at DATETIME DEFAULT NULL,
+    INDEX idx_catalog_object (object_id),
+    INDEX idx_catalog_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Researcher Copilot (#149 strand) — persistent research sessions over the
+-- collection RAG assistant (#121). Idempotent.
+
+CREATE TABLE IF NOT EXISTS ahg_research_session (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL DEFAULT 'New research session',
+    culture VARCHAR(10) NOT NULL DEFAULT 'en',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_research_session_user (user_id),
+    INDEX idx_research_session_updated (updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ahg_research_message (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    session_id BIGINT UNSIGNED NOT NULL,
+    role VARCHAR(12) NOT NULL COMMENT 'user, assistant',
+    content MEDIUMTEXT NOT NULL,
+    sources_json TEXT DEFAULT NULL COMMENT 'JSON array of {slug,title}',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_research_message_session (session_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

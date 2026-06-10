@@ -78,3 +78,13 @@ ric_shacl_report:
 ric_shacl_ajax_validate_entity:
   url: /ricShacl/ajaxValidateEntity
   param: { module: ricShacl, action: ajaxValidateEntity }
+
+# Provenance graph (#149 strand 3) — relational chain-of-custody view
+ric_provenance_graph:
+  url: /ricExplorer/provenance
+  param: { module: ricExplorer, action: provenanceGraph }
+
+ric_provenance_graph_id:
+  url: /ricExplorer/provenance/:id
+  param: { module: ricExplorer, action: provenanceGraph }
+  requirements: { id: \d+ }
