@@ -40,7 +40,16 @@ class exhibitionSpaceActions extends AhgController
     public function executeBrowse($request)
     {
         $search = trim((string) $request->getParameter('subquery', ''));
-        $this->rows = $this->getService()->browse($search);
+        $all = $this->getService()->browse($search);
+        $all = is_array($all) ? $all : (method_exists($all, 'all') ? $all->all() : (array) $all);
+
+        $perPage = 25;
+        $this->total = count($all);
+        $this->pages = max(1, (int) ceil($this->total / $perPage));
+        $page = min(max(1, (int) $request->getParameter('page', 1)), $this->pages);
+        $this->page = $page;
+        $this->perPage = $perPage;
+        $this->rows = array_slice($all, ($page - 1) * $perPage, $perPage);
         $this->search = $search;
         $this->capacityUnits = ExhibitionSpaceService::CAPACITY_UNITS;
     }

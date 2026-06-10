@@ -94,6 +94,11 @@ class ExhibitionSpaceService
             'capacity_unit' => $this->normalizeType($data['capacity_unit'] ?? null, self::CAPACITY_UNITS, 'linear_wall_meters'),
             'lighting_lux_target' => isset($data['lighting_lux_target']) && $data['lighting_lux_target'] !== '' ? (float) $data['lighting_lux_target'] : null,
             'notes' => $data['notes'] ?? null,
+            'room_w' => ($data['room_w'] ?? '') !== '' ? (float) $data['room_w'] : null,
+            'room_d' => ($data['room_d'] ?? '') !== '' ? (float) $data['room_d'] : null,
+            'room_h' => ($data['room_h'] ?? '') !== '' ? (float) $data['room_h'] : null,
+            'building_id' => ($data['building_id'] ?? '') !== '' ? $data['building_id'] : null,
+            'building_seq' => ($data['building_seq'] ?? '') !== '' ? (int) $data['building_seq'] : null,
             'created_at' => $now, 'updated_at' => $now,
         ]);
     }
@@ -108,6 +113,11 @@ class ExhibitionSpaceService
             'capacity_unit' => isset($data['capacity_unit']) ? $this->normalizeType($data['capacity_unit'], self::CAPACITY_UNITS, 'linear_wall_meters') : null,
             'lighting_lux_target' => isset($data['lighting_lux_target']) && $data['lighting_lux_target'] !== '' ? (float) $data['lighting_lux_target'] : null,
             'notes' => $data['notes'] ?? null,
+            'room_w' => ($data['room_w'] ?? '') !== '' ? (float) $data['room_w'] : null,
+            'room_d' => ($data['room_d'] ?? '') !== '' ? (float) $data['room_d'] : null,
+            'room_h' => ($data['room_h'] ?? '') !== '' ? (float) $data['room_h'] : null,
+            'building_id' => array_key_exists('building_id', $data) ? ($data['building_id'] !== '' ? $data['building_id'] : '') : null,
+            'building_seq' => ($data['building_seq'] ?? '') !== '' ? (int) $data['building_seq'] : null,
             'updated_at' => date('Y-m-d H:i:s'),
         ];
         DB::table('ahg_exhibition_space')->where('id', $id)->update(array_filter($payload, fn ($v) => $v !== null));
