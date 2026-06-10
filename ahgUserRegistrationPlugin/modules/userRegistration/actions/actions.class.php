@@ -214,7 +214,7 @@ class userRegistrationActions extends AhgController
      */
     private function getService(): RegistrationService
     {
-        require_once dirname(__FILE__) . '/../../lib/Services/RegistrationService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/RegistrationService.php';
         return new RegistrationService();
     }
 }
