@@ -134,6 +134,26 @@ class userRegistrationActions extends AhgController
     }
 
     /**
+     * Admin — Manually mark a pending registration as email-verified (AJAX).
+     * For use when the verification email cannot be delivered to the applicant.
+     */
+    public function executeMarkVerified($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Invalid method']));
+        }
+
+        $requestId = (int) $request->getParameter('request_id');
+
+        $service = $this->getService();
+        $result = $service->markVerified($requestId);
+
+        return $this->renderText(json_encode($result));
+    }
+
+    /**
      * Admin — Approve a registration (AJAX).
      */
     public function executeApprove($request)

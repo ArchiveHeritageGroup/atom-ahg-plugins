@@ -101,6 +101,26 @@ try {
             ];
         }
     }
+    // Check for account registration requests needing review (admin only)
+    if ($isAdmin) {
+        try {
+            $pendingRegistrations = (int) \Illuminate\Database\Capsule\Manager::table('ahg_registration_request')
+                ->whereIn('status', ['pending', 'verified'])
+                ->count();
+            if ($pendingRegistrations > 0) {
+                $notifications[] = [
+                    'type' => 'info',
+                    'icon' => 'fa-user-plus',
+                    'text' => sprintf(__('%d account registration request(s) awaiting review'), $pendingRegistrations),
+                    'url' => url_for(['module' => 'userRegistration', 'action' => 'pending']),
+                    'action' => __('Review')
+                ];
+            }
+        } catch (Exception $e) {
+            // Table may not exist
+        }
+    }
+
     // Check for open (unresolved) error log entries (admin only)
     if ($isAdmin) {
         try {

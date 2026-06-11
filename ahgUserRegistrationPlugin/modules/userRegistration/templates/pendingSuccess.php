@@ -106,7 +106,13 @@
                   </button>
                 </div>
               <?php elseif ($req->status === 'pending'): ?>
-                <small class="text-muted"><?php echo __('Awaiting email verification'); ?></small>
+                <button type="button" class="btn btn-sm btn-warning btn-verify"
+                        data-id="<?php echo $req->id; ?>"
+                        data-name="<?php echo esc_entities($req->full_name); ?>"
+                        title="<?php echo __('Mark the email as verified — use when the applicant could not receive the verification email'); ?>">
+                  <i class="fas fa-user-check me-1"></i><?php echo __('Mark verified'); ?>
+                </button>
+                <br><small class="text-muted"><?php echo __('Awaiting email verification — or mark verified to approve manually.'); ?></small>
               <?php endif; ?>
             </td>
           </tr>
@@ -184,6 +190,32 @@
 (function() {
   var approveUrl = '<?php echo url_for(['module' => 'userRegistration', 'action' => 'approve']); ?>';
   var rejectUrl = '<?php echo url_for(['module' => 'userRegistration', 'action' => 'reject']); ?>';
+  var verifyUrl = '<?php echo url_for(['module' => 'userRegistration', 'action' => 'markVerified']); ?>';
+
+  // Mark-verified button click (manual verification when email is undeliverable)
+  document.querySelectorAll('.btn-verify').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var name = this.dataset.name || 'this applicant';
+      if (!confirm('Mark the email for ' + name + ' as verified? Use this only when you have confirmed their identity another way. They can then be approved.')) {
+        return;
+      }
+      var requestId = this.dataset.id;
+      var formData = new FormData();
+      formData.append('request_id', requestId);
+      this.disabled = true;
+      fetch(verifyUrl, { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(result) {
+          if (result.success) {
+            window.location.reload();
+          } else {
+            alert('Error: ' + result.error);
+            btn.disabled = false;
+          }
+        })
+        .catch(function(err) { alert('Network error: ' + err.message); btn.disabled = false; });
+    });
+  });
 
   // Approve button click
   document.querySelectorAll('.btn-approve').forEach(function(btn) {

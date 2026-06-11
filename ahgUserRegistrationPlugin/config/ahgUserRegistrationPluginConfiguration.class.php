@@ -44,6 +44,7 @@ class ahgUserRegistrationPluginConfiguration extends sfPluginConfiguration
 
         // Admin routes
         $router->any('admin_registrations_approve', '/admin/registrations/approve', 'approve');
+        $router->any('admin_registrations_verify', '/admin/registrations/verify', 'markVerified');
         $router->any('admin_registrations_reject', '/admin/registrations/reject', 'reject');
         $router->any('admin_registrations', '/admin/registrations', 'pending');
 

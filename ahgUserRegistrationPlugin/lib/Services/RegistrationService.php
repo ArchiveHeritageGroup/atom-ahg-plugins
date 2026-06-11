@@ -114,6 +114,32 @@ class RegistrationService
     }
 
     /**
+     * Admin — manually mark a pending request's email as verified.
+     * Used when the verification email could not be delivered (e.g. mail down)
+     * and the applicant confirms their identity out-of-band (phone/in person).
+     */
+    public function markVerified(int $requestId): array
+    {
+        $request = DB::table($this->table)->where('id', $requestId)->first();
+
+        if (!$request) {
+            return ['success' => false, 'error' => 'Registration request not found.'];
+        }
+
+        if ($request->status !== 'pending') {
+            return ['success' => false, 'error' => 'Only pending requests can be marked verified.'];
+        }
+
+        DB::table($this->table)->where('id', $requestId)->update([
+            'status' => 'verified',
+            'email_verified_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return ['success' => true];
+    }
+
+    /**
      * Get pending (verified) registrations for admin queue.
      */
     public function getPendingRegistrations(): array
