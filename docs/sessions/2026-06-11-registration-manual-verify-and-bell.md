@@ -36,7 +36,25 @@ Lint clean (5 files); `markVerified($requestId)` present via reflection; cache c
 fpm restarted. Button/queue render is admin-gated (not CLI-clickable) but mirrors the
 proven approve/reject AJAX path. NOT released yet.
 
-## Note (separate lever)
-The AHG mail settings page (`ahgSettings/email` → `email_setting` table → `\AhgCore\Services\EmailService`)
-is already seeded with the gmail SMTP relay (host/port/user/from); deliverability is a
-separate fix. The manual-verify path above unblocks onboarding regardless of mail state.
+## Email deliverability wired (settings-driven)
+All four `RegistrationService` email methods (`sendVerificationEmail`,
+`notifyAdminsNewRegistration`, `sendApprovalEmail`, `sendRejectionEmail`) were calling
+AtoM's Swift mailer `\sfContext::getInstance()->getMailer()` — which targets a dead
+localhost:25 SMTP, so nothing ever delivered. Re-routed all four to
+**`\AhgCore\Services\EmailService::send()`**, which is driven by the mail settings page
+(`email_setting` table). PHPMailer is not installed, so `EmailService` falls back to native
+`mail()` → `/usr/sbin/sendmail` (symlink to **msmtp**) → `smtp.gmail.com:587` (auth as
+`pieterse.johan3@gmail.com`, the same relay Heratio uses). msmtp rewrites the envelope to
+the authenticated gmail account; gmail accepts (250 OK).
+
+**Confirmed end-to-end:** `EmailService::send()` to johan@plainsailingisystems.co.za was
+received (unique `uniqid()` marker matched). So the mail settings page now genuinely drives
+registration email, exactly as asked ("settings page must work … not point somewhere else").
+
+`email_setting` smtp group is seeded: smtp_enabled=1, host=smtp.gmail.com, port=587,
+encryption=tls, username=pieterse.johan3@gmail.com, password set, from=johan@plainsailingisystems.co.za,
+from_name="AtoM Archive". Adjustable on the `ahgSettings/email` page. (If PHPMailer is ever
+installed, `EmailService` switches to direct gmail SMTP using these same values.)
+
+Note: `/var/log/msmtp.log` did not always capture www-data sends in testing (a logging
+quirk) — delivery itself is proven by receipt, not the log.

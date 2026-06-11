@@ -363,9 +363,9 @@ class RegistrationService
             $body .= "If you did not register, you can safely ignore this email.\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            $mailer = \sfContext::getInstance()->getMailer();
-            $message = $mailer->compose(null, $email, $subject, $body);
-            $mailer->send($message);
+            // Send via the settings-driven AHG mailer (email_setting → SMTP/sendmail),
+            // not AtoM's Swift mailer (which targets a dead localhost SMTP).
+            \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
             // Email failure is non-fatal — admin can still see request
         }
@@ -402,15 +402,9 @@ class RegistrationService
             $body .= "Review this request at:\n{$siteUrl}/admin/registrations\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            $mailer = \sfContext::getInstance()->getMailer();
-
             foreach ($admins as $admin) {
-                try {
-                    $message = $mailer->compose(null, $admin->email, $subject, $body);
-                    $mailer->send($message);
-                } catch (\Exception $e) {
-                    // Continue to next admin
-                }
+                // Settings-driven AHG mailer (email_setting), not AtoM's Swift mailer.
+                \AhgCore\Services\EmailService::send($admin->email, $subject, $body);
             }
         } catch (\Exception $e) {
             // Non-fatal
@@ -432,9 +426,9 @@ class RegistrationService
             $body .= "You can now log in at:\n{$siteUrl}/user/login\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            $mailer = \sfContext::getInstance()->getMailer();
-            $message = $mailer->compose(null, $email, $subject, $body);
-            $mailer->send($message);
+            // Send via the settings-driven AHG mailer (email_setting → SMTP/sendmail),
+            // not AtoM's Swift mailer (which targets a dead localhost SMTP).
+            \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
             // Non-fatal
         }
@@ -457,9 +451,9 @@ class RegistrationService
             $body .= "If you believe this is an error, please contact the administrator.\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            $mailer = \sfContext::getInstance()->getMailer();
-            $message = $mailer->compose(null, $email, $subject, $body);
-            $mailer->send($message);
+            // Send via the settings-driven AHG mailer (email_setting → SMTP/sendmail),
+            // not AtoM's Swift mailer (which targets a dead localhost SMTP).
+            \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
             // Non-fatal
         }
