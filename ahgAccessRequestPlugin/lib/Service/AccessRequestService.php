@@ -919,6 +919,8 @@ class AccessRequestService
             $scopeHtml .= '</td></tr>';
         }
 
+        $base = rtrim(\sfConfig::get('app_siteBaseUrl', ''), '/');
+
         return "
         <html><body style='font-family: Arial, sans-serif;'>
             <h2>New Access Request</h2>
@@ -933,7 +935,7 @@ class AccessRequestService
                 <tr><td style='padding: 8px; border: 1px solid #ddd; background: #f5f5f5;'><strong>Reason:</strong></td>
                     <td style='padding: 8px; border: 1px solid #ddd;'>{$request->reason}</td></tr>
             </table>
-            <p><a href='https://nahlisa.theahg.co.za/index.php/security/request/{$request->id}' 
+            <p><a href='{$base}/index.php/security/request/{$request->id}'
                   style='background: #007bff; color: white; padding: 10px 20px; text-decoration: none;'>Review Request</a></p>
         </body></html>";
     }
@@ -944,12 +946,13 @@ class AccessRequestService
     private static function buildUserEmailBody(object $request, string $status): string
     {
         $statusColor = $status === 'approved' ? '#28a745' : '#dc3545';
+        $base = rtrim(\sfConfig::get('app_siteBaseUrl', ''), '/');
         return "
         <html><body style='font-family: Arial, sans-serif;'>
             <h2>Access Request <span style='color: {$statusColor};'>" . strtoupper($status) . "</span></h2>
             <p>Your access request has been {$status}.</p>
             " . ($request->review_notes ? "<p><strong>Notes:</strong> " . htmlspecialchars($request->review_notes) . "</p>" : "") . "
-            <p><a href='https://nahlisa.theahg.co.za/index.php/security/my-requests'>View My Requests</a></p>
+            <p><a href='{$base}/index.php/security/my-requests'>View My Requests</a></p>
         </body></html>";
     }
 
