@@ -115,6 +115,26 @@ class EmbeddingService
     {
         $model = $model ?? $this->config['model'];
 
+        // Gateway-first (host-wide rule: route AI through ai.theahg.co.za, never
+        // direct to a node port). Only when a gateway key is provisioned; until
+        // then we fall through to the legacy Ollama-direct path below so nothing
+        // breaks before the key lands.
+        if (class_exists('\AtomFramework\Services\AI\AiGatewayClient')) {
+            try {
+                $gw = \AtomFramework\Services\AI\AiGatewayClient::fromSettings();
+                if ($gw->isConfigured()) {
+                    $vec = $gw->embed($text, $model);
+                    if (is_array($vec) && $vec !== []) {
+                        return $vec;
+                    }
+                    // Configured but failed: log and fall through to legacy path.
+                    $this->logger->warning('Gateway embed returned empty; falling back to Ollama-direct');
+                }
+            } catch (\Throwable $e) {
+                $this->logger->warning('Gateway embed threw; falling back', ['error' => $e->getMessage()]);
+            }
+        }
+
         try {
             $url = rtrim($this->ollamaEndpoint, '/') . '/api/embeddings';
 

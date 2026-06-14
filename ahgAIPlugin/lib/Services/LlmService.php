@@ -6,6 +6,7 @@ require_once dirname(__FILE__) . '/LlmProviderInterface.php';
 require_once dirname(__FILE__) . '/providers/OllamaProvider.php';
 require_once dirname(__FILE__) . '/providers/OpenAIProvider.php';
 require_once dirname(__FILE__) . '/providers/AnthropicProvider.php';
+require_once dirname(__FILE__) . '/providers/GatewayProvider.php';
 require_once dirname(__FILE__) . '/GuardrailService.php';
 
 /**
@@ -60,6 +61,9 @@ class LlmService
 
             case 'anthropic':
                 return new AnthropicProvider($configArray);
+
+            case 'gateway':
+                return new GatewayProvider($configArray);
 
             default:
                 throw new Exception("Unknown LLM provider: {$config->provider}");

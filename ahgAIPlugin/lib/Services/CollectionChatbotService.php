@@ -83,8 +83,87 @@ class CollectionChatbotService
         }
     }
 
-    /** @return array<int,object> top published descriptions for the query */
+    /**
+     * @return array<int,object> top published descriptions for the query.
+     * Hybrid: gateway-fed semantic search (when configured) merged with MySQL
+     * FULLTEXT, deduped by object id. Falls back to pure FULLTEXT whenever the
+     * semantic index is unavailable, so behaviour is unchanged before the
+     * gateway key + index exist.
+     */
     public static function retrieve(string $message, string $culture = 'en'): array
+    {
+        $fulltext = self::retrieveFulltext($message, $culture);
+
+        $semantic = self::retrieveSemantic($message, $culture);
+        if (empty($semantic)) {
+            return $fulltext;
+        }
+
+        // Merge, semantic-first, dedupe by id, cap at MAX_RECORDS.
+        $merged = [];
+        foreach (array_merge($semantic, $fulltext) as $row) {
+            $id = (int) ($row->id ?? 0);
+            if ($id > 0 && !isset($merged[$id])) {
+                $merged[$id] = $row;
+            }
+            if (count($merged) >= self::MAX_RECORDS) {
+                break;
+            }
+        }
+
+        return array_values($merged);
+    }
+
+    /**
+     * Semantic hits hydrated into the same row shape FULLTEXT returns.
+     *
+     * @return array<int,object>
+     */
+    private static function retrieveSemantic(string $message, string $culture): array
+    {
+        try {
+            $svcFile = \sfConfig::get('sf_plugins_dir') . '/ahgAIPlugin/lib/Services/CatalogueVectorService.php';
+            if (!is_file($svcFile)) {
+                return [];
+            }
+            require_once $svcFile;
+
+            $hits = (new \CatalogueVectorService())->search($message, self::MAX_RECORDS);
+            if (empty($hits)) {
+                return [];
+            }
+
+            $ids = array_values(array_filter(array_map(static fn ($h) => (int) $h['object_id'], $hits)));
+            if (empty($ids)) {
+                return [];
+            }
+
+            $rows = DB::table('information_object_i18n as ioi')
+                ->join('information_object as io', 'io.id', '=', 'ioi.id')
+                ->join('slug as s', 's.object_id', '=', 'io.id')
+                ->where('ioi.culture', $culture)
+                ->whereIn('io.id', $ids)
+                ->get(['io.id', 'io.identifier', 'ioi.title', 'ioi.scope_and_content', 's.slug'])
+                ->keyBy('id');
+
+            // preserve semantic score order
+            $ordered = [];
+            foreach ($ids as $id) {
+                if (isset($rows[$id])) {
+                    $ordered[] = $rows[$id];
+                }
+            }
+
+            return $ordered;
+        } catch (\Throwable $e) {
+            error_log('chatbot.retrieve_semantic_failed: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /** @return array<int,object> FULLTEXT matches (the original retrieval). */
+    private static function retrieveFulltext(string $message, string $culture = 'en'): array
     {
         try {
             return DB::table('information_object_i18n as ioi')
