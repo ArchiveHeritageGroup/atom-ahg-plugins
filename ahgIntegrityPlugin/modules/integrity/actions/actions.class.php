@@ -36,6 +36,67 @@ class integrityActions extends AhgController
         return new IntegrityAlertService();
     }
 
+    protected function getRecordsService(): IntegrityRecordsService
+    {
+        require_once dirname(__DIR__, 3) . '/lib/Services/IntegrityRecordsService.php';
+
+        return new IntegrityRecordsService();
+    }
+
+    // ------------------------------------------------------------------
+    // Records management: vital records, declarations, certificates, events
+    // ------------------------------------------------------------------
+
+    public function executeRecords($request)
+    {
+        $this->requireAdmin();
+        $svc = $this->getRecordsService();
+
+        if ($request->isMethod('post')) {
+            $userId = (int) ($this->getUser()->getAttribute('user_id') ?? 0);
+            $ioId = (int) $request->getParameter('information_object_id');
+
+            switch ($request->getParameter('form_action')) {
+                case 'flag_vital':
+                    $svc->flagAsVital($ioId, (string) $request->getParameter('reason'), (int) $request->getParameter('review_cycle_days', 365), $userId);
+                    break;
+                case 'unflag_vital':
+                    $svc->unflagVital($ioId);
+                    break;
+                case 'review_vital':
+                    $svc->reviewVitalRecord((int) $request->getParameter('vital_id'), $userId);
+                    break;
+                case 'declare_record':
+                    $svc->declareRecord($ioId, $userId, $request->getParameter('notes'));
+                    break;
+                case 'approve_declaration':
+                    $svc->approveDeclaration((int) $request->getParameter('declaration_id'), $userId);
+                    break;
+                case 'generate_certificate':
+                    $svc->generateCertificate([
+                        'information_object_id' => $ioId ?: null,
+                        'destruction_date' => $request->getParameter('destruction_date'),
+                        'destruction_method' => $request->getParameter('destruction_method'),
+                        'witness' => $request->getParameter('witness'),
+                    ], $userId);
+                    break;
+                case 'fire_event':
+                    $svc->fireRetentionEvent($ioId, (string) $request->getParameter('event_type'), $request->getParameter('event_date'), $userId, $request->getParameter('notes'));
+                    break;
+            }
+
+            $this->redirect(['module' => 'integrity', 'action' => 'records']);
+        }
+
+        $this->vitalRecords = $svc->getVitalRecords();
+        $this->overdueReviews = $svc->getOverdueReviews();
+        $this->declarations = $svc->getDeclarations();
+        $this->certificates = $svc->getCertificates();
+        $this->retentionEvents = $svc->getRetentionEvents();
+        $this->eventTypes = $svc->getEventTypes();
+        $this->pageTitle = 'Records Management';
+    }
+
     // ------------------------------------------------------------------
     // Page actions
     // ------------------------------------------------------------------

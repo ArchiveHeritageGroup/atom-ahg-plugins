@@ -56,6 +56,7 @@ class ahgIntegrityPluginConfiguration extends sfPluginConfiguration
         $r->any('integrity_policy_edit', '/admin/integrity/policy/edit', 'policyEdit');
         $r->any('integrity_holds', '/admin/integrity/holds', 'holds');
         $r->any('integrity_disposition', '/admin/integrity/disposition', 'disposition');
+        $r->any('integrity_records', '/admin/integrity/records', 'records');
 
         // Issue #190: Alerting
         $r->any('integrity_alerts', '/admin/integrity/alerts', 'alerts');

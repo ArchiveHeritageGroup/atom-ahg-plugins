@@ -269,3 +269,69 @@ VALUES
 ('integrity_notify_on_mismatch', 'true', 'integrity', NOW(), NOW()),
 ('integrity_alert_email', '', 'integrity', NOW(), NOW()),
 ('integrity_webhook_url', '', 'integrity', NOW(), NOW());
+
+-- ---------------------------------------------------------------------------
+-- Records-management subsystems: vital records, declarations, destruction
+-- certificates, retention trigger events.
+-- ---------------------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `vital_record` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `information_object_id` BIGINT UNSIGNED NOT NULL,
+    `reason` TEXT,
+    `review_cycle_days` INT NOT NULL DEFAULT 365,
+    `next_review_date` DATE,
+    `last_reviewed_at` TIMESTAMP NULL,
+    `last_reviewed_by` INT,
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `created_by` INT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL,
+    INDEX `idx_vr_io` (`information_object_id`),
+    INDEX `idx_vr_review` (`next_review_date`),
+    INDEX `idx_vr_active` (`is_active`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `record_declaration` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `information_object_id` BIGINT UNSIGNED NOT NULL,
+    `status` VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, pending_approval, declared',
+    `declared_by` INT,
+    `declared_at` TIMESTAMP NULL,
+    `workflow_task_id` BIGINT UNSIGNED NULL,
+    `notes` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NULL,
+    INDEX `idx_rd_io` (`information_object_id`),
+    INDEX `idx_rd_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `destruction_certificate` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `disposition_queue_id` BIGINT UNSIGNED NULL,
+    `information_object_id` BIGINT UNSIGNED NULL,
+    `certificate_number` VARCHAR(50) NOT NULL,
+    `destruction_date` DATE,
+    `destruction_method` VARCHAR(100) COMMENT 'shredding, incineration, secure_wipe, pulping, other',
+    `authorized_by` INT,
+    `witness` VARCHAR(255),
+    `content_hash` VARCHAR(128),
+    `pdf_path` VARCHAR(255),
+    `metadata` TEXT COMMENT 'JSON',
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY `uniq_dc_number` (`certificate_number`),
+    INDEX `idx_dc_disp` (`disposition_queue_id`),
+    INDEX `idx_dc_io` (`information_object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `retention_trigger_event` (
+    `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `information_object_id` BIGINT UNSIGNED NOT NULL,
+    `event_type` VARCHAR(50) NOT NULL COMMENT 'e.g. superseded, case_closed, employee_left, project_ended',
+    `event_date` DATE,
+    `triggered_by` INT,
+    `notes` TEXT,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_rte_io` (`information_object_id`),
+    INDEX `idx_rte_type` (`event_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
