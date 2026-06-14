@@ -527,6 +527,37 @@ class nazActions extends AhgController
 
         $this->reportType = $request->getParameter('type', 'summary');
         $this->year = $request->getParameter('year', date('Y'));
+
+        $svc = $this->getService();
+        $this->rows = [];
+        $this->reportTitle = '';
+
+        switch ($this->reportType) {
+            case 'closures':
+                $this->rows = $svc->getClosures();
+                $this->reportTitle = 'Closure periods';
+                break;
+            case 'protected':
+                $this->rows = $svc->getProtectedRecords();
+                $this->reportTitle = 'Protected records';
+                break;
+            case 'schedules':
+                $this->rows = $svc->getSchedules();
+                $this->reportTitle = 'Records schedules';
+                break;
+            case 'permits':
+                $this->rows = $svc->getPermits();
+                $this->reportTitle = 'Research permits';
+                break;
+            case 'transfers':
+                $this->rows = $svc->getTransfers();
+                $this->reportTitle = 'Records transfers';
+                break;
+            case 'audit':
+                $this->rows = $svc->getAuditLog(['entity_type' => $request->getParameter('entity_type')]);
+                $this->reportTitle = 'Audit log';
+                break;
+        }
     }
 
     // =========================================================================
