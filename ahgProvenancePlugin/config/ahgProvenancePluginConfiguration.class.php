@@ -19,6 +19,7 @@ class ahgProvenancePluginConfiguration extends sfPluginConfiguration
     public function initialize()
     {
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
+        $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
         // Register PSR-4 autoloader for namespaced classes
         $this->registerAutoloader();
@@ -27,6 +28,23 @@ class ahgProvenancePluginConfiguration extends sfPluginConfiguration
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'provenance';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
+    }
+
+    /**
+     * Trace API + coverage routes. Other provenance actions use default routing.
+     */
+    public function addRoutes(sfEvent $event)
+    {
+        if (!class_exists('\\AtomFramework\\Routing\\RouteLoader')) {
+            return;
+        }
+        $r = new \AtomFramework\Routing\RouteLoader('provenance');
+        // NB: nginx owns "location ^~ /api/provenance/" (proxied elsewhere), so
+        // these API routes live under /provenance/ to reach Symfony.
+        $r->any('provenance_coverage', '/provenance/coverage', 'coverage');
+        $r->any('provenance_coverage_data', '/provenance/coverage-data', 'apiCoverage');
+        $r->any('provenance_api_trace', '/provenance/trace/:id', 'apiTrace', ['id' => '\d+']);
+        $r->register($event->getSubject());
     }
 
     protected function registerAutoloader()

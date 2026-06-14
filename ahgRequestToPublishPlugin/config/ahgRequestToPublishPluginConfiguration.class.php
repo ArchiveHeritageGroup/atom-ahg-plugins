@@ -46,6 +46,13 @@ class ahgRequestToPublishPluginConfiguration extends sfPluginConfiguration
         $router->any('requesttopublish_index', '/requesttopublish', 'browse');
         $router->any('requesttopublish_index_slash', '/requesttopublish/', 'browse');
 
+        // Workflow routes — added LAST so they match BEFORE the generic
+        // /requesttopublish/:slug route (the loader prepends).
+        $router->any('requesttopublish_receipt_form', '/requesttopublish/receipt', 'receipt');
+        $router->any('requesttopublish_receipt', '/requesttopublish/receipt/:token', 'receipt', ['token' => '[a-f0-9]+']);
+        $router->any('requesttopublish_inbox', '/requesttopublish/inbox', 'inbox');
+        $router->any('requesttopublish_review', '/requesttopublish/review/:id', 'review', ['id' => '\d+']);
+
         $router->register($event->getSubject());
     }
 }

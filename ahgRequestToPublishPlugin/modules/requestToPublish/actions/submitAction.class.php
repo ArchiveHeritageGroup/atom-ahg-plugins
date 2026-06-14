@@ -65,14 +65,16 @@ class requestToPublishSubmitAction extends AhgController
                     'rtp_need_image_by' => $request->getParameter('rtp_need_image_by') ?: null
                 ];
 
-                $service->submitRequest($data);
-                $this->getUser()->setFlash('notice', 'Your request has been submitted successfully. We will contact you soon.');
-                
-                // Redirect back to information object
-                $this->redirect([
-                    'module' => 'informationobject',
-                    'slug' => $this->informationObject->slug
-                ]);
+                $requestId = (int) $service->submitRequest($data);
+
+                // Issue a receipt token so the (possibly anonymous) submitter can
+                // track the request later.
+                require_once $this->config('sf_plugins_dir') . '/ahgRequestToPublishPlugin/lib/Services/WorkflowService.php';
+                $token = (new \ahgRequestToPublishPlugin\Services\WorkflowService())
+                    ->ensureWorkflow($requestId, !$this->getUser()->isAuthenticated());
+
+                $this->getUser()->setFlash('notice', 'Your request has been submitted. Keep this receipt code to track it: ' . $token);
+                $this->redirect(['module' => 'requestToPublish', 'action' => 'receipt', 'token' => $token]);
             } catch (\Exception $e) {
                 $this->getUser()->setFlash('error', 'Error: ' . $e->getMessage());
             }

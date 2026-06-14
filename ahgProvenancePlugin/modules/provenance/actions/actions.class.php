@@ -438,4 +438,72 @@ class provenanceActions extends AhgController
         $this->provenance = $service->getProvenanceForObject($objectId, $this->culture());
         $this->objectId = $objectId;
     }
+
+    // =====================================================================
+    // Trace API (programmatic provenance) + coverage reporting
+    // =====================================================================
+
+    protected function requireAdmin(): void
+    {
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !$user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID)
+        ) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+    }
+
+    /**
+     * GET /api/provenance/object/:id — JSON chain of custody for one object.
+     * Public records only (respects provenance_record.is_public).
+     */
+    public function executeApiTrace($request)
+    {
+        $objectId = (int) $request->getParameter('id');
+        if ($objectId <= 0) {
+            return $this->renderJsonError('Object id required', 400);
+        }
+
+        $service = new \AhgProvenancePlugin\Service\ProvenanceService();
+        $prov = $service->getProvenanceForObject($objectId, $this->culture());
+
+        if (empty($prov['exists'])) {
+            return $this->renderJsonError('No provenance record for this object', 404);
+        }
+        $record = $prov['record'];
+        if (isset($record->is_public) && !$record->is_public) {
+            return $this->renderJsonError('Provenance record is not public', 403);
+        }
+
+        return $this->renderJson([
+            'object_id' => $objectId,
+            'record' => $record,
+            'timeline' => $prov['timeline'] ?? [],
+            'events' => $prov['events'] ?? [],
+            'summary' => $prov['summary'] ?? null,
+        ]);
+    }
+
+    /** GET /api/provenance/coverage — aggregate coverage report (admin, JSON). */
+    public function executeApiCoverage($request)
+    {
+        $this->requireAdmin();
+        $svc = new \AhgProvenancePlugin\Service\CoverageService();
+
+        return $this->renderJson([
+            'report' => $svc->report(),
+            'gaps' => $svc->gaps(100),
+        ]);
+    }
+
+    /** GET /provenance/coverage — admin coverage dashboard. */
+    public function executeCoverage($request)
+    {
+        $this->requireAdmin();
+        $svc = new \AhgProvenancePlugin\Service\CoverageService();
+
+        $this->report = $svc->report();
+        $this->gaps = $svc->gaps(100);
+        $this->uncovered = $svc->uncovered(50, $this->culture());
+    }
 }
