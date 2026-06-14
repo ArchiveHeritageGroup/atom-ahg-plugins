@@ -133,7 +133,74 @@ class FunctionCrudService
             'parallelNames' => array_map(static fn ($n) => $n->name, OtherNameService::getByObjectId($id, 148, $culture)),
             'otherNames' => array_map(static fn ($n) => $n->name, OtherNameService::getByObjectId($id, 149, $culture)),
             'maintenanceNotes' => (NoteService::getByObjectId($id, 127, $culture)[0]->content ?? ''),
+            'relatedFunctions' => self::getRelatedFunctions($id, $culture),
+            'relatedResources' => self::getRelatedResources($id, $culture),
         ];
+    }
+
+    /**
+     * Functions related to this function (bidirectional, via relation table).
+     * Mirrors ActorCrudService::getRelatedActors but scoped to QubitFunctionObject.
+     *
+     * @return array<int, object>
+     */
+    public static function getRelatedFunctions(int $id, string $culture = 'en'): array
+    {
+        $select = function (string $thisCol, string $otherCol) use ($id, $culture) {
+            return DB::table('relation')
+                ->join('object as o', "relation.$otherCol", '=', 'o.id')
+                ->leftJoin('function_object_i18n as fi', function ($j) use ($culture) {
+                    $j->on('o.id', '=', 'fi.id')->where('fi.culture', '=', $culture);
+                })
+                ->leftJoin('relation_i18n as ri', function ($j) use ($culture) {
+                    $j->on('relation.id', '=', 'ri.id')->where('ri.culture', '=', $culture);
+                })
+                ->leftJoin('slug as s', 'o.id', '=', 's.object_id')
+                ->where("relation.$thisCol", $id)
+                ->where('o.class_name', 'QubitFunctionObject')
+                ->select(
+                    'relation.id as relationId',
+                    'o.id',
+                    'fi.authorized_form_of_name as name',
+                    'ri.description as relationDescription',
+                    's.slug'
+                )
+                ->get()
+                ->all();
+        };
+
+        return array_merge($select('subject_id', 'object_id'), $select('object_id', 'subject_id'));
+    }
+
+    /**
+     * Information objects related to this function (via relation table).
+     *
+     * @return array<int, object>
+     */
+    public static function getRelatedResources(int $id, string $culture = 'en'): array
+    {
+        return DB::table('relation')
+            ->join('object as o', 'relation.object_id', '=', 'o.id')
+            ->leftJoin('information_object_i18n as ioi', function ($j) use ($culture) {
+                $j->on('o.id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+            })
+            ->leftJoin('information_object as io', 'o.id', '=', 'io.id')
+            ->leftJoin('relation_i18n as ri', function ($j) use ($culture) {
+                $j->on('relation.id', '=', 'ri.id')->where('ri.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 'o.id', '=', 's.object_id')
+            ->where('relation.subject_id', $id)
+            ->where('o.class_name', 'QubitInformationObject')
+            ->select(
+                'relation.id as relationId',
+                'o.id',
+                'ioi.title',
+                'io.identifier',
+                'ri.description as relationDescription',
+                's.slug'
+            )
+            ->get()
+            ->all();
     }
 
     /**

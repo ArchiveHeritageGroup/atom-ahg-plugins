@@ -46,15 +46,16 @@
 <?php
   $rawFunc = $sf_data->getRaw('func');
   $relatedActors = $rawFunc['relatedActors'] ?? [];
+  $relatedFunctions = $rawFunc['relatedFunctions'] ?? [];
+  $relatedResources = $rawFunc['relatedResources'] ?? [];
 ?>
-<?php if (!empty($relatedActors)) { ?>
+<?php if (!empty($relatedActors) || !empty($relatedFunctions) || !empty($relatedResources)) { ?>
 <div class="section border-bottom" id="relationshipsArea">
 
   <h2 class="h5 mb-0 atom-section-header d-flex p-3 border-bottom text-primary"><?php echo __('Relationships area'); ?></h2>
 
   <?php foreach ($relatedActors as $rel) { ?>
     <?php
-      $relatedId = ($rel->subject_id == $rawFunc['id']) ? $rel->object_id : $rel->subject_id;
       $relatedName = ($rel->subject_id == $rawFunc['id']) ? $rel->object_name : $rel->subject_name;
       $relatedSlug = ($rel->subject_id == $rawFunc['id']) ? $rel->object_slug : $rel->subject_slug;
     ?>
@@ -63,6 +64,32 @@
     <?php } else { ?>
       <?php echo render_show(__('Related authority record'), render_value_inline($relatedName)); ?>
     <?php } ?>
+  <?php } ?>
+
+  <?php foreach ($relatedFunctions as $rel) { ?>
+    <?php
+      $label = $rel->name ?: __('Untitled');
+      $value = $rel->slug
+        ? link_to(esc_specialchars($label), '@function_view_override?slug=' . $rel->slug)
+        : render_value_inline($label);
+      if (!empty($rel->relationDescription)) {
+          $value .= ' <span class="text-muted">(' . esc_specialchars($rel->relationDescription) . ')</span>';
+      }
+    ?>
+    <?php echo render_show(__('Related function'), $value); ?>
+  <?php } ?>
+
+  <?php foreach ($relatedResources as $rel) { ?>
+    <?php
+      $label = $rel->title ?: ($rel->identifier ?: __('Untitled'));
+      $value = $rel->slug
+        ? link_to(esc_specialchars($label), '/' . $rel->slug)
+        : render_value_inline($label);
+      if (!empty($rel->relationDescription)) {
+          $value .= ' <span class="text-muted">(' . esc_specialchars($rel->relationDescription) . ')</span>';
+      }
+    ?>
+    <?php echo render_show(__('Related resource'), $value); ?>
   <?php } ?>
 
 </div>
