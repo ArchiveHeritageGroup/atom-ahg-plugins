@@ -916,6 +916,140 @@ class MarcService
     }
 
     /**
+     * Export library items as binary MARC21 (ISO 2709) — a concatenation of
+     * records suitable for a .mrc file. Reuses the same field map as the XML
+     * export via buildRecordFields().
+     */
+    public function exportMarc21(array $itemIds = []): string
+    {
+        $query = DB::table('library_item as li')
+            ->join('information_object as io', 'li.information_object_id', '=', 'io.id')
+            ->join('information_object_i18n as ioi', function ($j) {
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
+            });
+        if (!empty($itemIds)) {
+            $query->whereIn('li.id', $itemIds);
+        }
+        $items = $query->select(['li.*', 'ioi.title'])->get();
+
+        $out = '';
+        foreach ($items as $item) {
+            $out .= $this->recordToIso2709($this->buildRecordFields($item));
+        }
+
+        return $out;
+    }
+
+    /**
+     * Build a structured MARC record (leader + control + data fields) from a
+     * library_item. Mirrors writeRecordXml()'s field map.
+     *
+     * @return array{leader:string,control:array<int,array{0:string,1:string}>,data:array<int,array{tag:string,ind1:string,ind2:string,subfields:array<string,string>}>}
+     */
+    protected function buildRecordFields(object $item): array
+    {
+        $leader = !empty($item->marc_leader) ? $item->marc_leader : $this->buildLeader($item->material_type);
+
+        $control = [];
+        if (!empty($item->marc_005)) {
+            $control[] = ['005', (string) $item->marc_005];
+        }
+        $control[] = ['008', !empty($item->marc_008) ? (string) $item->marc_008 : $this->build008($item)];
+
+        $data = [];
+        $df = function (string $tag, string $i1, string $i2, array $subs) use (&$data): void {
+            $subs = array_filter($subs, static fn ($v) => $v !== null && $v !== '');
+            if ($subs !== []) {
+                $data[] = ['tag' => $tag, 'ind1' => $i1, 'ind2' => $i2, 'subfields' => $subs];
+            }
+        };
+
+        $df('020', ' ', ' ', ['a' => $item->isbn ?? '']);
+        $df('022', ' ', ' ', ['a' => $item->issn ?? '']);
+        $df('010', ' ', ' ', ['a' => $item->lccn ?? '']);
+
+        if (!empty($item->classification_number)) {
+            $tag = (($item->classification_scheme ?? '') === 'dewey') ? '082' : '050';
+            $df($tag, '0', '4', ['a' => $item->classification_number, 'b' => $item->cutter_number ?? '']);
+        }
+        $df('099', ' ', ' ', ['a' => $item->call_number ?? '']);
+
+        $creators = DB::table('library_item_creator')->where('library_item_id', $item->id)->orderBy('sort_order')->get();
+        foreach ($creators as $i => $creator) {
+            $subs = ['a' => $creator->name];
+            if ($creator->role && $creator->role !== 'author') {
+                $subs['e'] = $creator->role;
+            }
+            $df(($i === 0) ? '100' : '700', '1', ' ', $subs);
+        }
+
+        $df('245', '1', '0', ['a' => $item->title ?? 'Untitled']);
+        $df('250', ' ', ' ', ['a' => $item->edition_statement ?? '']);
+        $df('264', ' ', '1', ['a' => $item->publication_place ?? '', 'b' => $item->publisher ?? '', 'c' => $item->publication_date ?? '']);
+        $df('300', ' ', ' ', ['a' => $item->pagination ?? '', 'b' => $item->physical_details ?? '', 'c' => $item->dimensions ?? '']);
+        $df('490', '0', ' ', ['a' => $item->series_title ?? '', 'v' => $item->series_number ?? '']);
+        $df('500', ' ', ' ', ['a' => $item->general_note ?? '']);
+        $df('504', ' ', ' ', ['a' => $item->bibliography_note ?? '']);
+        $df('520', ' ', ' ', ['a' => $item->summary ?? '']);
+
+        $subjects = DB::table('library_item_subject')->where('library_item_id', $item->id)->orderBy('sort_order')->get();
+        foreach ($subjects as $subject) {
+            $df($this->getSubjectTag($subject->heading_type), ' ', $this->getSubjectSourceIndicator($subject->source), ['a' => $subject->heading]);
+        }
+
+        return ['leader' => $leader, 'control' => $control, 'data' => $data];
+    }
+
+    /**
+     * Serialize a structured record to ISO 2709 (binary MARC). Byte-accurate:
+     * directory + leader length/base-address are computed in bytes (UTF-8 safe).
+     */
+    protected function recordToIso2709(array $rec): string
+    {
+        $FT = "\x1E"; // field terminator
+        $RT = "\x1D"; // record terminator
+        $SF = "\x1F"; // subfield delimiter
+
+        $dir = '';
+        $fields = '';
+        $pos = 0;
+
+        $append = function (string $tag, string $content) use (&$dir, &$fields, &$pos, $FT): void {
+            $f = $content . $FT;
+            $len = strlen($f); // bytes
+            $dir .= $tag . str_pad((string) $len, 4, '0', STR_PAD_LEFT) . str_pad((string) $pos, 5, '0', STR_PAD_LEFT);
+            $fields .= $f;
+            $pos += $len;
+        };
+
+        foreach ($rec['control'] as [$tag, $val]) {
+            $append($tag, $val);
+        }
+        foreach ($rec['data'] as $d) {
+            $content = $d['ind1'] . $d['ind2'];
+            foreach ($d['subfields'] as $code => $v) {
+                $content .= $SF . $code . $v;
+            }
+            $append($d['tag'], $content);
+        }
+
+        $dir .= $FT;
+        $base = 24 + strlen($dir);
+        $body = $fields . $RT;
+        $recLen = $base + strlen($body);
+
+        // Normalise the 24-byte leader, stamping record length (0-4) + base
+        // address of data (12-16); keep the other positions from the leader.
+        $leader = str_pad(substr((string) $rec['leader'], 0, 24), 24);
+        $leader = str_pad((string) $recLen, 5, '0', STR_PAD_LEFT)
+            . substr($leader, 5, 7)
+            . str_pad((string) $base, 5, '0', STR_PAD_LEFT)
+            . substr($leader, 17, 7);
+
+        return $leader . $dir . $body;
+    }
+
+    /**
      * Write a single MARC record to XML.
      */
     protected function writeRecordXml(\XMLWriter $xml, object $item): void

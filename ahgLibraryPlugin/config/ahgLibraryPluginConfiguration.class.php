@@ -46,6 +46,8 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $library->any('library_add', '/library/add', 'edit');
         $library->any('library_browse', '/library', 'browse');
         $library->any('library_export', '/library/export', 'export');
+        $library->any('library_marc_export', '/library/marc-export', 'marcExport');
+        $library->any('library_onix', '/library/onix', 'onix');
         $library->any('library_advanced_search', '/library/advanced-search', 'advancedSearch');
         $library->any('library_isbn_lookup', '/library/isbnLookup', 'isbnLookup');
         $library->any('library_isbn_provider_delete', '/library/isbn-provider/delete/:id', 'isbnProviderDelete');
