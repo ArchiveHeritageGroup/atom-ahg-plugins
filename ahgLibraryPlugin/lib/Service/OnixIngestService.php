@@ -334,6 +334,92 @@ class OnixIngestService
         });
     }
 
+    // ── Commit (review queue -> acquisitions order) ──────────────────────────
+
+    /**
+     * Commit a parsed ingest: every 'valid' line becomes an acquisitions order
+     * line (one order per commit). Cataloguing the bibliographic record happens
+     * later on receipt (PSIS has no array catalogue-create path), so unlike
+     * Heratio this commit targets acquisitions only — the order_line carries the
+     * full ONIX bib data and a null library_item_id until received.
+     *
+     * @return array{imported:int,skipped:int,failed:int,order_id:?int}
+     */
+    public function commit(int $ingestId, ?int $userId = null): array
+    {
+        $ingest = $this->getIngest($ingestId);
+        if (!$ingest) {
+            throw new \RuntimeException("ONIX ingest #{$ingestId} not found.");
+        }
+        if ('committed' === $ingest->status) {
+            throw new \RuntimeException("ONIX ingest #{$ingestId} is already committed.");
+        }
+
+        require_once __DIR__ . '/AcquisitionService.php';
+        $acq = \AcquisitionService::getInstance();
+
+        $lines = DB::table('library_onix_ingest_line')
+            ->where('ingest_id', $ingestId)
+            ->where('status', 'valid')
+            ->get();
+
+        $imported = 0;
+        $failed = 0;
+        $orderId = $ingest->order_id ? (int) $ingest->order_id : null;
+        $now = date('Y-m-d H:i:s');
+
+        foreach ($lines as $line) {
+            try {
+                if (null === $orderId) {
+                    $orderId = $acq->createOrder([
+                        'order_type' => 'deposit',
+                        'vendor_name' => $line->supplier ?: 'ONIX ingest',
+                        'currency' => $line->currency ?: 'ZAR',
+                        'status' => 'ordered',
+                        'notes' => 'Auto-created from ONIX ingest #' . $ingestId
+                            . ($ingest->filename ? ' (' . $ingest->filename . ')' : ''),
+                    ]);
+                }
+
+                $lineId = $acq->addOrderLine($orderId, [
+                    'title' => $line->title,
+                    'isbn' => $line->isbn,
+                    'quantity' => 1,
+                    'unit_price' => $line->price ?? 0,
+                ]);
+
+                DB::table('library_onix_ingest_line')->where('id', $line->id)->update([
+                    'status' => 'imported',
+                    'order_line_id' => $lineId,
+                    'error' => null,
+                    'updated_at' => $now,
+                ]);
+                $imported++;
+            } catch (\Throwable $e) {
+                DB::table('library_onix_ingest_line')->where('id', $line->id)->update([
+                    'status' => 'invalid',
+                    'error' => $this->clip('Commit failed: ' . $e->getMessage(), 1000),
+                    'updated_at' => $now,
+                ]);
+                $failed++;
+            }
+        }
+
+        $skipped = (int) DB::table('library_onix_ingest_line')
+            ->where('ingest_id', $ingestId)
+            ->whereIn('status', ['skipped', 'duplicate'])
+            ->count();
+
+        DB::table('library_onix_ingest')->where('id', $ingestId)->update([
+            'status' => 'committed',
+            'imported_count' => $imported,
+            'order_id' => $orderId,
+            'updated_at' => $now,
+        ]);
+
+        return ['imported' => $imported, 'skipped' => $skipped, 'failed' => $failed, 'order_id' => $orderId];
+    }
+
     // ── Review queue ──────────────────────────────────────────────────────
 
     public function listIngests(array $filters = []): array

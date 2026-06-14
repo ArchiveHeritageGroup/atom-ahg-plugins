@@ -21,6 +21,21 @@ class libraryOnixAction extends AhgController
 
         $this->error = null;
 
+        if ($request->isMethod('post') && 'commit' === $request->getParameter('form_action')) {
+            $cid = (int) $request->getParameter('id');
+            try {
+                $res = $svc->commit($cid, (int) ($this->getUser()->getAttribute('user_id') ?? 0) ?: null);
+                $this->getUser()->setFlash('notice', __('Committed %1% line(s) to acquisitions order #%2% (%3% failed).', [
+                    '%1%' => $res['imported'], '%2%' => $res['order_id'] ?? '-', '%3%' => $res['failed'],
+                ]));
+            } catch (\Throwable $e) {
+                $this->getUser()->setFlash('error', __('Commit failed: %1%', ['%1%' => $e->getMessage()]));
+            }
+            $this->redirect('/index.php/library/onix?id=' . $cid);
+
+            return;
+        }
+
         if ($request->isMethod('post')) {
             $xml = '';
             $filename = null;

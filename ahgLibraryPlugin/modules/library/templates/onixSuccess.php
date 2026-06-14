@@ -33,10 +33,20 @@ $statusTone = ['valid' => 'success', 'duplicate' => 'warning', 'invalid' => 'dan
     <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0"><?php echo __('Review'); ?>: <?php echo esc_entities($ingest->filename ?? ('#' . $ingest->id)); ?>
         <span class="text-muted small">ONIX <?php echo esc_entities($ingest->onix_version ?? '?'); ?></span></h5>
-      <span>
+      <span class="d-flex align-items-center gap-2">
         <span class="badge bg-success"><?php echo (int) $ingest->valid_count; ?> <?php echo __('valid'); ?></span>
         <span class="badge bg-danger"><?php echo (int) $ingest->error_count; ?> <?php echo __('issues'); ?></span>
         <span class="badge bg-secondary"><?php echo (int) $ingest->record_count; ?> <?php echo __('total'); ?></span>
+        <?php if ($ingest->status === 'committed'): ?>
+          <span class="badge bg-primary"><?php echo __('committed'); ?> → <?php echo __('order'); ?> #<?php echo (int) $ingest->order_id; ?></span>
+        <?php elseif ((int) $ingest->valid_count > 0): ?>
+          <form method="post" action="<?php echo url_for(['module' => 'library', 'action' => 'onix']); ?>" class="d-inline"
+                onsubmit="return confirm('<?php echo __('Create an acquisitions order from the valid lines?'); ?>');">
+            <input type="hidden" name="form_action" value="commit">
+            <input type="hidden" name="id" value="<?php echo (int) $ingest->id; ?>">
+            <button class="btn btn-sm btn-primary"><i class="fas fa-check me-1"></i><?php echo __('Commit to acquisitions'); ?></button>
+          </form>
+        <?php endif; ?>
       </span>
     </div>
     <div class="card-body p-0">
