@@ -61,6 +61,8 @@ class ahgHelpPluginConfiguration extends sfPluginConfiguration
         $router->get('help_api_index', '/help/api/search-index', 'apiSearchIndex');
         $router->get('help_api_context', '/help/api/context-map', 'apiContextMap');
         $router->any('help_api_chat', '/help/api/chat', 'apiChat');
+        $router->get('help_system_map', '/help/system-map', 'systemMap');
+        $router->get('help_api_system_map', '/help/api/system-map', 'apiSystemMap');
 
         $router->register($routing);
     }

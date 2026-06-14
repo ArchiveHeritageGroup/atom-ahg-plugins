@@ -296,6 +296,65 @@ class helpActions extends AhgController
     }
 
     /**
+     * System map — interactive Cytoscape graph of the enabled plugins, grouped
+     * by category (root → category → plugin). Admin-only dev/admin navigation.
+     */
+    public function executeSystemMap($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+
+        return sfView::SUCCESS;
+    }
+
+    /** JSON graph data for the system map (Cytoscape elements). */
+    public function executeApiSystemMap($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            // Keep HTTP 200 (a 4xx would render AtoM's themed error page).
+            return $this->renderText(json_encode(['nodes' => [], 'edges' => [], 'count' => 0]));
+        }
+
+        $plugins = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
+            ->where('is_enabled', 1)
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get(['name', 'category', 'is_core', 'description']);
+
+        $nodes = [['data' => ['id' => '__root', 'label' => 'AtoM Heratio', 'type' => 'root']]];
+        $edges = [];
+        $cats = [];
+
+        foreach ($plugins as $p) {
+            $cat = $p->category ?: 'general';
+            $catId = 'cat_' . preg_replace('/[^a-z0-9]+/i', '_', $cat);
+            if (!isset($cats[$catId])) {
+                $cats[$catId] = true;
+                $nodes[] = ['data' => ['id' => $catId, 'label' => ucwords(str_replace('_', ' ', $cat)), 'type' => 'category']];
+                $edges[] = ['data' => ['id' => 'e_root_' . $catId, 'source' => '__root', 'target' => $catId]];
+            }
+            $pid = 'p_' . $p->name;
+            $nodes[] = ['data' => [
+                'id' => $pid,
+                'label' => $p->name,
+                'type' => 'plugin',
+                'core' => (int) $p->is_core,
+                'desc' => mb_substr((string) ($p->description ?? ''), 0, 200),
+            ]];
+            $edges[] = ['data' => ['id' => 'e_' . $catId . '_' . $pid, 'source' => $catId, 'target' => $pid]];
+        }
+
+        return $this->renderText(json_encode([
+            'nodes' => $nodes,
+            'edges' => $edges,
+            'count' => count($plugins),
+        ], JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
      * Load plugin services (lazy loading for Symfony 1.x).
      */
     protected function loadServices()

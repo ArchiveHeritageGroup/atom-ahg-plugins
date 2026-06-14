@@ -889,6 +889,7 @@ class workflowActions extends AhgController
     public function executeApiStats($request)
     {
         $this->requireAuth();
+        $this->getResponse()->setContentType('application/json');
         $stats = $this->getService()->getDashboardStats($this->getCurrentUserId());
         return $this->renderText(json_encode($stats));
     }
@@ -896,6 +897,7 @@ class workflowActions extends AhgController
     public function executeApiTasks($request)
     {
         $this->requireAuth();
+        $this->getResponse()->setContentType('application/json');
         $type = $request->getParameter('type', 'my');
 
         $tasks = $type === 'pool'
