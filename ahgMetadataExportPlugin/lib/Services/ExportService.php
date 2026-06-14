@@ -15,8 +15,11 @@ namespace AhgMetadataExport\Services;
 
 use AhgMetadataExport\Contracts\ExporterInterface;
 use AhgMetadataExport\Exporters\BibframeExporter;
+use AhgMetadataExport\Exporters\EacCpfExporter;
 use AhgMetadataExport\Exporters\Ead3Exporter;
 use AhgMetadataExport\Exporters\EbucoreExporter;
+use AhgMetadataExport\Exporters\MetsExporter;
+use AhgMetadataExport\Exporters\ModsExporter;
 use AhgMetadataExport\Exporters\LidoExporter;
 use AhgMetadataExport\Exporters\Marc21Exporter;
 use AhgMetadataExport\Exporters\PbcoreExporter;
@@ -42,6 +45,9 @@ class ExportService
         'ebucore' => EbucoreExporter::class,
         'premis' => PremisExporter::class,
         'schema-org' => SchemaOrgExporter::class,
+        'mods' => ModsExporter::class,
+        'eac-cpf' => EacCpfExporter::class,
+        'mets' => MetsExporter::class,
     ];
 
     /**

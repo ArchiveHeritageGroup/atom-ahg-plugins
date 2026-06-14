@@ -249,6 +249,56 @@ class discoveryActions extends AhgController
     }
 
     /**
+     * AJAX type-ahead suggestions across descriptions, authorities and terms.
+     *
+     * GET /discovery/suggest?q=...&limit=10
+     */
+    public function executeSuggest($request)
+    {
+        $query = trim((string) $request->getParameter('q', ''));
+        $limit = min(20, max(1, (int) $request->getParameter('limit', 10)));
+
+        if (strlen($query) < 2) {
+            return $this->renderJson(['success' => true, 'suggestions' => []]);
+        }
+
+        $culture = class_exists('\AtomExtensions\Helpers\CultureHelper')
+            ? \AtomExtensions\Helpers\CultureHelper::getCulture() : 'en';
+        $like = '%' . $query . '%';
+        $suggestions = [];
+
+        try {
+            foreach (DB::table('information_object_i18n as ioi')
+                ->leftJoin('slug', 'ioi.id', '=', 'slug.object_id')
+                ->where('ioi.culture', $culture)->where('ioi.title', 'like', $like)->where('ioi.id', '!=', 1)
+                ->select('ioi.title as label', 'slug.slug')->limit(5)->get() as $r) {
+                $suggestions[] = ['label' => $r->label, 'slug' => $r->slug, 'type' => 'Archival description'];
+            }
+            foreach (DB::table('actor_i18n as ai')
+                ->leftJoin('slug', 'ai.id', '=', 'slug.object_id')
+                ->where('ai.culture', $culture)->where('ai.authorized_form_of_name', 'like', $like)->where('ai.id', '!=', 1)
+                ->select('ai.authorized_form_of_name as label', 'slug.slug')->limit(5)->get() as $r) {
+                $suggestions[] = ['label' => $r->label, 'slug' => $r->slug, 'type' => 'Authority record'];
+            }
+            if (count($suggestions) < $limit) {
+                $remaining = $limit - count($suggestions);
+                foreach (DB::table('term_i18n')
+                    ->join('term', 'term.id', '=', 'term_i18n.id')
+                    ->leftJoin('slug', 'term.id', '=', 'slug.object_id')
+                    ->where('term_i18n.culture', $culture)->where('term_i18n.name', 'like', $like)
+                    ->whereIn('term.taxonomy_id', [35, 42])
+                    ->select('term_i18n.name as label', 'slug.slug')->limit($remaining)->get() as $r) {
+                    $suggestions[] = ['label' => $r->label, 'slug' => $r->slug, 'type' => 'Term'];
+                }
+            }
+        } catch (\Exception $e) {
+            return $this->renderJson(['success' => true, 'suggestions' => []]);
+        }
+
+        return $this->renderJson(['success' => true, 'suggestions' => array_slice($suggestions, 0, $limit)]);
+    }
+
+    /**
      * AJAX popular topics endpoint.
      *
      * GET /discovery/popular?limit=8

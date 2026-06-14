@@ -34,6 +34,7 @@ class ahgAPIPluginConfiguration extends sfPluginConfiguration
         // Descriptions
         $apiv2->get('apiv2_descriptionsBrowse', '/api/v2/descriptions', 'descriptionsBrowse');
         $apiv2->post('apiv2_descriptionsCreate', '/api/v2/descriptions', 'descriptionsCreate');
+        $apiv2->get('apiv2_descriptionsCitation', '/api/v2/descriptions/:slug/citation', 'descriptionsCitation', ['slug' => '[a-z0-9_-]+']);
         $apiv2->get('apiv2_descriptionsRead', '/api/v2/descriptions/:slug', 'descriptionsRead', ['slug' => '[a-z0-9_-]+']);
         $apiv2->any('apiv2_descriptionsUpdate', '/api/v2/descriptions/:slug', 'descriptionsUpdate', ['slug' => '[a-z0-9_-]+']);
         $apiv2->any('apiv2_descriptionsDelete', '/api/v2/descriptions/:slug', 'descriptionsDelete', ['slug' => '[a-z0-9_-]+']);

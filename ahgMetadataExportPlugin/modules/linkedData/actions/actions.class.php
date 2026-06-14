@@ -201,6 +201,150 @@ class linkedDataActions extends AhgController
     }
 
     /**
+     * RSS 2.0 feed of recently updated published descriptions.
+     * GET /linkedData/feed?limit=50
+     */
+    public function executeFeed($request)
+    {
+        $baseUrl = rtrim($this->config('app_siteBaseUrl', 'https://example.org'), '/');
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $limit = min(100, max(1, (int) $request->getParameter('limit', 50)));
+
+        $records = DB::table('information_object as io')
+            ->join('status as s', function ($j) {
+                $j->on('io.id', '=', 's.object_id')->where('s.type_id', '=', 158)->where('s.status_id', '=', 160);
+            })
+            ->join('slug', 'io.id', '=', 'slug.object_id')
+            ->leftJoin('information_object_i18n as ioi', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+            })
+            ->where('io.id', '>', 1)->whereNotNull('ioi.title')->where('ioi.title', '!=', '')
+            ->select('slug.slug', 'ioi.title', 'ioi.scope_and_content', 'io.updated_at')
+            ->orderBy('io.updated_at', 'desc')->limit($limit)->get();
+
+        $xml = new XMLWriter();
+        $xml->openMemory();
+        $xml->setIndent(true);
+        $xml->startDocument('1.0', 'UTF-8');
+        $xml->startElement('rss');
+        $xml->writeAttribute('version', '2.0');
+        $xml->startElement('channel');
+        $xml->writeElement('title', $this->config('app_siteTitle', 'Archival catalogue') . ' — recent descriptions');
+        $xml->writeElement('link', $baseUrl);
+        $xml->writeElement('description', 'Recently updated published archival descriptions');
+        foreach ($records as $r) {
+            $xml->startElement('item');
+            $xml->writeElement('title', (string) $r->title);
+            $xml->writeElement('link', $baseUrl . '/' . $r->slug);
+            $xml->writeElement('guid', $baseUrl . '/' . $r->slug);
+            if (!empty($r->scope_and_content)) {
+                $xml->startElement('description');
+                $xml->text(mb_substr(trim(strip_tags((string) $r->scope_and_content)), 0, 500));
+                $xml->endElement();
+            }
+            if ($r->updated_at) {
+                $xml->writeElement('pubDate', date(DATE_RSS, strtotime($r->updated_at)));
+            }
+            $xml->endElement();
+        }
+        $xml->endElement();
+        $xml->endElement();
+
+        $this->response->setContentType('application/rss+xml; charset=utf-8');
+        $this->response->setHttpHeader('Cache-Control', 'public, max-age=3600');
+        $this->response->setContent($xml->outputMemory());
+
+        return sfView::NONE;
+    }
+
+    /**
+     * DCAT (Data Catalog Vocabulary) description of the catalogue as JSON-LD.
+     * GET /linkedData/dcat   (a.k.a. /data/catalog)
+     */
+    public function executeDcat($request)
+    {
+        $baseUrl = rtrim($this->config('app_siteBaseUrl', 'https://example.org'), '/');
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        $repos = DB::table('repository as r')
+            ->join('slug', 'r.id', '=', 'slug.object_id')
+            ->leftJoin('actor_i18n as ai', function ($j) use ($culture) {
+                $j->on('r.id', '=', 'ai.id')->where('ai.culture', '=', $culture);
+            })
+            ->where('r.id', '>', 1)
+            ->select('slug.slug', 'ai.authorized_form_of_name as name')
+            ->get();
+
+        $datasets = [];
+        foreach ($repos as $repo) {
+            $datasets[] = [
+                '@type' => 'dcat:Dataset',
+                '@id' => $baseUrl . '/' . $repo->slug,
+                'dct:title' => $repo->name ?: $repo->slug,
+                'dcat:landingPage' => $baseUrl . '/' . $repo->slug,
+            ];
+        }
+
+        $catalog = [
+            '@context' => ['dcat' => 'http://www.w3.org/ns/dcat#', 'dct' => 'http://purl.org/dc/terms/'],
+            '@type' => 'dcat:Catalog',
+            '@id' => $baseUrl . '/data/catalog',
+            'dct:title' => $this->config('app_siteTitle', 'Archival catalogue'),
+            'dct:publisher' => $this->config('app_siteTitle', ''),
+            'dcat:dataset' => $datasets,
+        ];
+
+        $this->response->setContentType('application/ld+json; charset=utf-8');
+        $this->response->setHttpHeader('Cache-Control', 'public, max-age=3600');
+        $this->response->setContent(json_encode($catalog, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+
+        return sfView::NONE;
+    }
+
+    /**
+     * VoID (Vocabulary of Interlinked Datasets) description as Turtle.
+     * GET /linkedData/void  (a.k.a. /.well-known/void)
+     */
+    public function executeVoid($request)
+    {
+        $base = rtrim($this->config('app_siteBaseUrl', 'https://example.org'), '/');
+        $title = $this->config('app_siteTitle', 'Archival catalogue');
+
+        $publishedIo = DB::table('information_object as io')
+            ->join('status as s', function ($j) {
+                $j->on('io.id', '=', 's.object_id')->where('s.type_id', '=', 158)->where('s.status_id', '=', 160);
+            })
+            ->where('io.id', '>', 1)->count();
+        $actorCount = (int) DB::table('actor')->where('id', '>', 1)->count();
+        $repoCount = (int) DB::table('repository')->where('id', '>', 1)->count();
+        $entities = $publishedIo + $actorCount + $repoCount;
+
+        $esc = function ($s) { return str_replace(['\\', '"'], ['\\\\', '\\"'], (string) $s); };
+
+        $ttl = "@prefix void: <http://rdfs.org/ns/void#> .\n"
+            . "@prefix dct: <http://purl.org/dc/terms/> .\n"
+            . "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n"
+            . "@prefix format: <http://www.w3.org/ns/formats/> .\n\n"
+            . "<{$base}/.well-known/void#dataset> a void:Dataset ;\n"
+            . "    dct:title \"" . $esc($title) . "\" ;\n"
+            . "    dct:description \"Archival catalogue linked-data dataset\" ;\n"
+            . "    foaf:homepage <{$base}/> ;\n"
+            . "    void:uriSpace \"{$base}/\" ;\n"
+            . "    void:rootResource <{$base}/> ;\n"
+            . "    void:feature format:JSON-LD, format:RDF_XML ;\n"
+            . "    void:dataDump <{$base}/index.php/linkedData/sitemap> ;\n"
+            . "    void:entities {$entities} ;\n"
+            . "    void:classPartition [ void:class <http://www.w3.org/2004/02/skos/core#Concept> ] ;\n"
+            . "    void:exampleResource <{$base}/index.php/linkedData/dcat> .\n";
+
+        $this->response->setContentType('text/turtle; charset=utf-8');
+        $this->response->setHttpHeader('Cache-Control', 'public, max-age=86400');
+        $this->response->setContent($ttl);
+
+        return sfView::NONE;
+    }
+
+    /**
      * Content negotiation handler
      *
      * Checks Accept header and redirects to JSON-LD if requested

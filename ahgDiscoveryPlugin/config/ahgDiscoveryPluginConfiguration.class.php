@@ -59,6 +59,7 @@ class ahgDiscoveryPluginConfiguration extends sfPluginConfiguration
         $loader->get('discovery_related', '/discovery/related/:id', 'related', ['id' => '\d+']);
         $loader->any('discovery_click', '/discovery/click', 'click');
         $loader->get('discovery_popular', '/discovery/popular', 'popular');
+        $loader->get('discovery_suggest', '/discovery/suggest', 'suggest');
 
         // PageIndex routes
         $loader->get('discovery_pageindex', '/discovery/pageindex', 'pageindex');
