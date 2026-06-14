@@ -342,6 +342,32 @@ class NAZService
     }
 
     /**
+     * Update an existing researcher's editable details.
+     */
+    public function updateResearcher(int $id, array $data): void
+    {
+        $editable = [
+            'researcher_type', 'title', 'first_name', 'last_name', 'email', 'phone',
+            'nationality', 'passport_number', 'national_id', 'institution', 'position',
+            'address', 'city', 'country', 'research_interests',
+        ];
+
+        $fields = [];
+        foreach ($editable as $f) {
+            if (array_key_exists($f, $data)) {
+                $fields[$f] = $data[$f];
+            }
+        }
+        if (empty($fields)) {
+            return;
+        }
+
+        $old = $this->getResearcher($id);
+        DB::table('naz_researcher')->where('id', $id)->update($fields);
+        $this->logAction('researcher_updated', 'researcher', $id, $data['updated_by'] ?? null, $old, $data);
+    }
+
+    /**
      * Get researcher by ID
      */
     public function getResearcher(int $id)
@@ -424,6 +450,49 @@ class NAZService
         $this->logAction('permit_applied', 'permit', $id, $data['created_by'], null, $data);
 
         return $id;
+    }
+
+    /**
+     * Record a reading-room visit against a permit (naz_research_visit).
+     */
+    public function createVisit(array $data): int
+    {
+        $permitId = (int) $data['permit_id'];
+        $researcherId = !empty($data['researcher_id'])
+            ? (int) $data['researcher_id']
+            : (int) DB::table('naz_research_permit')->where('id', $permitId)->value('researcher_id');
+
+        $id = DB::table('naz_research_visit')->insertGetId([
+            'permit_id' => $permitId,
+            'researcher_id' => $researcherId,
+            'visit_date' => $data['visit_date'],
+            'check_in_time' => $data['check_in_time'] ?: null,
+            'check_out_time' => $data['check_out_time'] ?: null,
+            'materials_requested' => $data['materials_requested'] ?: null,
+            'materials_provided' => $data['materials_provided'] ?: null,
+            'reading_room' => $data['reading_room'] ?: null,
+            'notes' => $data['notes'] ?: null,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        if (!empty($data['created_by'])) {
+            $this->logAction('visit_recorded', 'visit', $id, (int) $data['created_by'], null, $data);
+        }
+
+        return $id;
+    }
+
+    /**
+     * Visits recorded against a permit (most recent first).
+     */
+    public function getVisitsByPermit(int $permitId): array
+    {
+        return DB::table('naz_research_visit')
+            ->where('permit_id', $permitId)
+            ->orderByDesc('visit_date')
+            ->orderByDesc('id')
+            ->get()
+            ->all();
     }
 
     /**

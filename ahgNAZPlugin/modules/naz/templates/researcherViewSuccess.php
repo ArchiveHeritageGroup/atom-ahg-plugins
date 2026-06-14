@@ -16,6 +16,9 @@
             <a href="<?php echo url_for(['module' => 'naz', 'action' => 'permitCreate']); ?>?researcher_id=<?php echo $researcher->id; ?>" class="btn btn-primary">
                 <i class="fas fa-id-card me-1"></i> Issue Permit
             </a>
+            <a href="<?php echo url_for(['module' => 'naz', 'action' => 'researcherEdit', 'id' => $researcher->id]); ?>" class="btn btn-outline-primary">
+                <i class="fas fa-user-edit me-1"></i> Edit
+            </a>
             <a href="<?php echo url_for(['module' => 'naz', 'action' => 'researchers']); ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Back
             </a>

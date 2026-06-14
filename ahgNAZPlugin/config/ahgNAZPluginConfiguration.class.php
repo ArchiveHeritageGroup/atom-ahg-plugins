@@ -89,6 +89,7 @@ class ahgNAZPluginConfiguration extends sfPluginConfiguration
         // Researchers
         $naz->any('naz_researchers', '/admin/naz/researchers', 'researchers');
         $naz->any('naz_researcher_create', '/admin/naz/researcher/create', 'researcherCreate');
+        $naz->any('naz_researcher_edit', '/admin/naz/researcher/:id/edit', 'researcherEdit', ['id' => '\d+']);
         $naz->any('naz_researcher_view', '/admin/naz/researcher/:id', 'researcherView', ['id' => '\d+']);
 
         // Records schedules

@@ -195,6 +195,37 @@ class nazActions extends AhgController
         }
     }
 
+    public function executeResearcherEdit($request)
+    {
+        $this->checkAdmin();
+
+        $id = $request->getParameter('id');
+        $this->researcher = $this->getService()->getResearcher($id);
+
+        if (!$this->researcher) {
+            $this->forward404('Researcher not found');
+        }
+
+        if ($request->isMethod('post')) {
+            $this->getService()->updateResearcher((int) $id, [
+                'researcher_type' => $request->getParameter('researcher_type'),
+                'title' => $request->getParameter('title'),
+                'first_name' => $request->getParameter('first_name'),
+                'last_name' => $request->getParameter('last_name'),
+                'email' => $request->getParameter('email'),
+                'phone' => $request->getParameter('phone'),
+                'nationality' => $request->getParameter('nationality'),
+                'national_id' => $request->getParameter('national_id'),
+                'institution' => $request->getParameter('institution'),
+                'position' => $request->getParameter('position'),
+                'research_interests' => $request->getParameter('research_interests'),
+                'updated_by' => $this->getUser()->getAttribute('user_id'),
+            ]);
+
+            $this->redirect(['module' => 'naz', 'action' => 'researcherView', 'id' => $id]);
+        }
+    }
+
     public function executeResearcherView($request)
     {
         $this->checkAdmin();
@@ -270,6 +301,8 @@ class nazActions extends AhgController
             $this->forward404('Permit not found');
         }
 
+        $this->visits = $this->getService()->getVisitsByPermit((int) $id);
+
         // Handle actions
         if ($request->isMethod('post')) {
             $action = $request->getParameter('form_action');
@@ -295,6 +328,20 @@ class nazActions extends AhgController
                     \Illuminate\Database\Capsule\Manager::table('naz_research_permit')
                         ->where('id', $id)
                         ->update(['status' => 'revoked']);
+                    break;
+                case 'record_visit':
+                    $service->createVisit([
+                        'permit_id' => (int) $id,
+                        'researcher_id' => $this->permit->researcher_id ?? null,
+                        'visit_date' => $request->getParameter('visit_date'),
+                        'check_in_time' => $request->getParameter('check_in_time'),
+                        'check_out_time' => $request->getParameter('check_out_time'),
+                        'materials_requested' => $request->getParameter('materials_requested'),
+                        'materials_provided' => $request->getParameter('materials_provided'),
+                        'reading_room' => $request->getParameter('reading_room'),
+                        'notes' => $request->getParameter('visit_notes'),
+                        'created_by' => $userId,
+                    ]);
                     break;
             }
 

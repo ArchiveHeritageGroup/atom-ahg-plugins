@@ -88,6 +88,47 @@
                 </div>
             </div>
             <?php endif; ?>
+
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Research visits</h5>
+                    <span class="badge bg-secondary"><?php echo count($visits ?? []); ?></span>
+                </div>
+                <div class="card-body">
+                    <?php if (!empty($visits)): ?>
+                    <table class="table table-sm align-middle">
+                        <thead><tr><th>Date</th><th>In</th><th>Out</th><th>Reading room</th><th>Materials requested</th></tr></thead>
+                        <tbody>
+                            <?php foreach ($visits as $v): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars((string) $v->visit_date); ?></td>
+                                <td><?php echo htmlspecialchars((string) ($v->check_in_time ?? '')); ?></td>
+                                <td><?php echo htmlspecialchars((string) ($v->check_out_time ?? '')); ?></td>
+                                <td><?php echo htmlspecialchars((string) ($v->reading_room ?? '')); ?></td>
+                                <td><?php echo htmlspecialchars((string) ($v->materials_requested ?? '')); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                    <?php else: ?>
+                    <p class="text-muted mb-2">No visits recorded yet.</p>
+                    <?php endif; ?>
+
+                    <details class="mt-2">
+                        <summary class="btn btn-sm btn-outline-primary">Record a visit</summary>
+                        <form method="post" class="row g-2 mt-2">
+                            <div class="col-md-4"><label class="form-label">Date</label><input type="date" name="visit_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required></div>
+                            <div class="col-md-4"><label class="form-label">Check-in</label><input type="time" name="check_in_time" class="form-control"></div>
+                            <div class="col-md-4"><label class="form-label">Check-out</label><input type="time" name="check_out_time" class="form-control"></div>
+                            <div class="col-md-6"><label class="form-label">Reading room</label><input type="text" name="reading_room" class="form-control"></div>
+                            <div class="col-md-6"><label class="form-label">Materials requested</label><input type="text" name="materials_requested" class="form-control"></div>
+                            <div class="col-12"><label class="form-label">Materials provided</label><input type="text" name="materials_provided" class="form-control"></div>
+                            <div class="col-12"><label class="form-label">Notes</label><textarea name="visit_notes" class="form-control" rows="2"></textarea></div>
+                            <div class="col-12"><button type="submit" name="form_action" value="record_visit" class="btn btn-primary btn-sm">Save visit</button></div>
+                        </form>
+                    </details>
+                </div>
+            </div>
         </div>
 
         <div class="col-lg-4">
