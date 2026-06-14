@@ -78,6 +78,26 @@ class nmmzActions extends AhgController
         if (!$this->monument) {
             $this->forward404('Monument not found');
         }
+
+        if ($request->isMethod('post') && 'record_inspection' === $request->getParameter('form_action')) {
+            $this->getService()->createInspection([
+                'monument_id' => $this->monument->id,
+                'inspection_date' => $request->getParameter('inspection_date'),
+                'inspector_name' => $request->getParameter('inspector_name'),
+                'condition_rating' => $request->getParameter('condition_rating'),
+                'structural_condition' => $request->getParameter('structural_condition'),
+                'vegetation_encroachment' => $request->getParameter('vegetation_encroachment') ? 1 : 0,
+                'vandalism_observed' => $request->getParameter('vandalism_observed') ? 1 : 0,
+                'erosion_observed' => $request->getParameter('erosion_observed') ? 1 : 0,
+                'other_damage' => $request->getParameter('other_damage'),
+                'recommendations' => $request->getParameter('recommendations'),
+                'urgent_action_required' => $request->getParameter('urgent_action_required') ? 1 : 0,
+                'follow_up_date' => $request->getParameter('follow_up_date') ?: null,
+            ]);
+
+            $this->redirect(['module' => 'nmmz', 'action' => 'monumentView', 'id' => $this->monument->id]);
+        }
+
         $this->inspections = $this->getService()->getMonumentInspections($this->monument->id);
     }
 

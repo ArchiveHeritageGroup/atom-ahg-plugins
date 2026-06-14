@@ -110,6 +110,34 @@
                             </tbody>
                         </table>
                     <?php endif; ?>
+
+                    <div class="p-3 border-top">
+                        <details>
+                            <summary class="btn btn-sm btn-outline-primary">Record inspection</summary>
+                            <form method="post" class="row g-2 mt-2">
+                                <div class="col-md-4"><label class="form-label">Date</label><input type="date" name="inspection_date" class="form-control" value="<?php echo date('Y-m-d'); ?>" required></div>
+                                <div class="col-md-4"><label class="form-label">Inspector</label><input type="text" name="inspector_name" class="form-control" required></div>
+                                <div class="col-md-4"><label class="form-label">Condition</label>
+                                    <select name="condition_rating" class="form-select" required>
+                                        <?php foreach (['excellent', 'good', 'fair', 'poor', 'critical'] as $c): ?>
+                                            <option value="<?php echo $c; ?>"><?php echo ucfirst($c); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-12"><label class="form-label">Structural condition</label><input type="text" name="structural_condition" class="form-control"></div>
+                                <div class="col-12 d-flex flex-wrap gap-3">
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" name="vegetation_encroachment" value="1" id="nmmz-veg"><label class="form-check-label" for="nmmz-veg">Vegetation</label></div>
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" name="vandalism_observed" value="1" id="nmmz-van"><label class="form-check-label" for="nmmz-van">Vandalism</label></div>
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" name="erosion_observed" value="1" id="nmmz-ero"><label class="form-check-label" for="nmmz-ero">Erosion</label></div>
+                                    <div class="form-check"><input class="form-check-input" type="checkbox" name="urgent_action_required" value="1" id="nmmz-urg"><label class="form-check-label" for="nmmz-urg">Urgent action</label></div>
+                                </div>
+                                <div class="col-md-6"><label class="form-label">Other damage</label><input type="text" name="other_damage" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label">Follow-up date</label><input type="date" name="follow_up_date" class="form-control"></div>
+                                <div class="col-12"><label class="form-label">Recommendations</label><textarea name="recommendations" class="form-control" rows="2"></textarea></div>
+                                <div class="col-12"><button type="submit" name="form_action" value="record_inspection" class="btn btn-primary btn-sm">Save inspection</button></div>
+                            </form>
+                        </details>
+                    </div>
                 </div>
             </div>
         </div>
