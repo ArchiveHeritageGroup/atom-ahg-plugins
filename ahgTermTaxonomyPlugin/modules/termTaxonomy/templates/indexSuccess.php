@@ -57,6 +57,10 @@
 
   <?php echo get_partial('term/actions', ['resource' => $resource]); ?>
 
+  <p class="mb-3">
+    <?php echo link_to(__('View related authority records'), '@term_related_authorities?slug=' . $resource->slug, ['class' => 'btn atom-btn-outline-light btn-sm']); ?>
+  </p>
+
   <?php if ($addBrowseElements) { ?>
     <h1>
       <?php echo __('%1% %2% results for %3%', [

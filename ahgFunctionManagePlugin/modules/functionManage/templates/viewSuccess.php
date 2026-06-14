@@ -17,6 +17,17 @@
 
   <?php echo render_show(__('Type'), render_value_inline($func['typeName'])); ?>
   <?php echo render_show(__('Authorized form of name'), render_value_inline($func['authorizedFormOfName'])); ?>
+  <?php
+    $rawFuncNames = $sf_data->getRaw('func');
+    $parallelNames = $rawFuncNames['parallelNames'] ?? [];
+    $otherNames = $rawFuncNames['otherNames'] ?? [];
+  ?>
+  <?php if (!empty($parallelNames)) { ?>
+    <?php echo render_show(__('Parallel form(s) of name'), render_value_inline(implode('; ', $parallelNames))); ?>
+  <?php } ?>
+  <?php if (!empty($otherNames)) { ?>
+    <?php echo render_show(__('Other form(s) of name'), render_value_inline(implode('; ', $otherNames))); ?>
+  <?php } ?>
   <?php echo render_show(__('Classification'), render_value_inline($func['classification'])); ?>
   <?php echo render_show(__('Dates'), render_value_inline($func['dates'])); ?>
   <?php echo render_show(__('Description'), render_value($func['description'])); ?>
@@ -64,6 +75,9 @@
   <?php echo render_show(__('Description identifier'), render_value_inline($func['descriptionIdentifier'])); ?>
   <?php echo render_show(__('Institution identifier'), render_value_inline($func['institutionIdentifier'])); ?>
   <?php echo render_show(__('Rules and/or conventions used'), render_value($func['rules'])); ?>
+  <?php if (!empty($func['maintenanceNotes'])) { ?>
+    <?php echo render_show(__('Maintenance notes'), render_value($func['maintenanceNotes'])); ?>
+  <?php } ?>
   <?php echo render_show(__('Status'), render_value_inline($func['descriptionStatusName'])); ?>
   <?php echo render_show(__('Level of detail'), render_value_inline($func['descriptionDetailName'])); ?>
   <?php echo render_show(__('Dates of creation, revision and deletion'), render_value($func['revisionHistory'])); ?>

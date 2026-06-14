@@ -10,6 +10,12 @@ term_delete_override:
   param: { module: termTaxonomy, action: delete }
   requirements: { slug: "[a-zA-Z0-9_-]+" }
 
+term_related_authorities:
+  class: QubitResourceRoute
+  url: /term/:slug/related-authorities
+  param: { module: termTaxonomy, action: relatedAuthorities }
+  requirements: { slug: "[a-zA-Z0-9_-]+" }
+
 term_add:
   url: /term/add
   class: AddActionRoute
@@ -20,6 +26,11 @@ term_browse_override:
   url: /term/:slug
   param: { module: termTaxonomy, action: index }
   requirements: { slug: "(?!add$)[a-zA-Z0-9_-]+" }
+
+taxonomy_skos_export:
+  url: /taxonomy/:id/skos
+  param: { module: termTaxonomy, action: exportSkos }
+  requirements: { id: \d+ }
 
 taxonomy_browse_override:
   url: /taxonomy/:id

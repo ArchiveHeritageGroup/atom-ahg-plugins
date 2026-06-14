@@ -171,6 +171,14 @@ class CustomFieldService
             case 'dropdown':
                 $data['value_dropdown'] = is_string($rawValue) ? trim($rawValue) : null;
                 break;
+            case 'multiselect':
+                // Store selected dropdown codes as a JSON array in value_text.
+                $codes = array_values(array_filter(array_map(
+                    static fn ($v) => is_string($v) ? trim($v) : '',
+                    is_array($rawValue) ? $rawValue : ($rawValue !== null && $rawValue !== '' ? [$rawValue] : [])
+                ), static fn ($v) => $v !== ''));
+                $data['value_text'] = empty($codes) ? null : json_encode($codes);
+                break;
         }
 
         return $data;
@@ -194,6 +202,9 @@ class CustomFieldService
                 return (bool) $row->value_boolean;
             case 'dropdown':
                 return $row->value_dropdown;
+            case 'multiselect':
+                $decoded = $row->value_text !== null ? json_decode($row->value_text, true) : null;
+                return is_array($decoded) ? $decoded : [];
             default:
                 return $row->value_text;
         }
@@ -266,6 +277,11 @@ class CustomFieldService
      */
     public function validateValue(object $definition, $value): bool|string
     {
+        // Multi-select: treat an empty selection array as empty for required/skip checks.
+        if ($definition->field_type === 'multiselect' && is_array($value) && empty(array_filter($value, static fn ($v) => $v !== '' && $v !== null))) {
+            $value = '';
+        }
+
         // Required check
         if ($definition->is_required && ($value === null || $value === '')) {
             return $definition->field_label . ' is required.';
@@ -387,6 +403,7 @@ class CustomFieldService
             'number' => 'Number',
             'boolean' => 'Boolean (Checkbox)',
             'dropdown' => 'Dropdown (from ahg_dropdown)',
+            'multiselect' => 'Multi-select (from ahg_dropdown)',
             'url' => 'URL',
         ];
     }

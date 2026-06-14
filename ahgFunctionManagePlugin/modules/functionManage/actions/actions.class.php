@@ -178,6 +178,9 @@ class functionManageActions extends AhgController
                     'descriptionDetailId' => $request->getParameter('descriptionDetailId', ''),
                     'descriptionIdentifier' => trim($request->getParameter('descriptionIdentifier', '')),
                     'sourceStandard' => trim($request->getParameter('sourceStandard', '')),
+                    'parallelNames' => $request->getParameter('parallelNames', ''),
+                    'otherNames' => $request->getParameter('otherNames', ''),
+                    'maintenanceNotes' => trim($request->getParameter('maintenanceNotes', '')),
                 ];
 
                 if ($this->isNew) {
@@ -206,7 +209,18 @@ class functionManageActions extends AhgController
             $this->func['descriptionDetailId'] = $request->getParameter('descriptionDetailId', '');
             $this->func['descriptionIdentifier'] = $request->getParameter('descriptionIdentifier', '');
             $this->func['sourceStandard'] = $request->getParameter('sourceStandard', '');
+            $this->func['parallelNames'] = self::splitParam($request->getParameter('parallelNames', ''));
+            $this->func['otherNames'] = self::splitParam($request->getParameter('otherNames', ''));
+            $this->func['maintenanceNotes'] = $request->getParameter('maintenanceNotes', '');
         }
+    }
+
+    /**
+     * Split a textarea value into trimmed, non-empty lines for form re-display.
+     */
+    protected static function splitParam(string $value): array
+    {
+        return array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $value)), static fn ($v) => $v !== ''));
     }
 
     /**

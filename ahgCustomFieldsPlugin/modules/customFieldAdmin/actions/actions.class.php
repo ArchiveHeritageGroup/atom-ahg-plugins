@@ -176,7 +176,7 @@ class customFieldAdminActions extends AhgController
             'field_type' => $fieldType,
             'entity_type' => $entityType,
             'field_group' => trim($request->getParameter('field_group', '')) ?: null,
-            'dropdown_taxonomy' => ($fieldType === 'dropdown') ? trim($request->getParameter('dropdown_taxonomy', '')) : null,
+            'dropdown_taxonomy' => in_array($fieldType, ['dropdown', 'multiselect'], true) ? trim($request->getParameter('dropdown_taxonomy', '')) : null,
             'is_required' => $request->getParameter('is_required') ? 1 : 0,
             'is_searchable' => $request->getParameter('is_searchable') ? 1 : 0,
             'is_visible_public' => $request->getParameter('is_visible_public') ? 1 : 0,

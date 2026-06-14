@@ -3,7 +3,9 @@
 namespace AhgFunctionManage\Services;
 
 use AhgCore\Services\I18nService;
+use AhgCore\Services\NoteService;
 use AhgCore\Services\ObjectService;
+use AhgCore\Services\OtherNameService;
 use AhgCore\Services\RelationService;
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -127,6 +129,10 @@ class FunctionCrudService
             'updatedAt' => $func->updated_at,
             'serialNumber' => $func->serial_number,
             'relatedActors' => $relatedActors,
+            // ISDF 5.2 names + 5.4.3 maintenance notes (type ids 148/149/127)
+            'parallelNames' => array_map(static fn ($n) => $n->name, OtherNameService::getByObjectId($id, 148, $culture)),
+            'otherNames' => array_map(static fn ($n) => $n->name, OtherNameService::getByObjectId($id, 149, $culture)),
+            'maintenanceNotes' => (NoteService::getByObjectId($id, 127, $culture)[0]->content ?? ''),
         ];
     }
 
@@ -174,6 +180,11 @@ class FunctionCrudService
                 I18nService::save('function_object_i18n', $id, $culture, $i18nData);
             }
 
+            // 5. Names + maintenance notes
+            self::saveOtherNamesOfType($id, 148, $data['parallelNames'] ?? [], $culture);
+            self::saveOtherNamesOfType($id, 149, $data['otherNames'] ?? [], $culture);
+            self::saveMaintenanceNote($id, $data['maintenanceNotes'] ?? '', $culture);
+
             return $id;
         });
     }
@@ -211,10 +222,58 @@ class FunctionCrudService
                 I18nService::save('function_object_i18n', $id, $culture, $i18nData);
             }
 
-            // 3. Touch the object record
+            // 3. Names + maintenance notes (only when the form submitted them)
+            if (array_key_exists('parallelNames', $data)) {
+                self::saveOtherNamesOfType($id, 148, $data['parallelNames'], $culture);
+            }
+            if (array_key_exists('otherNames', $data)) {
+                self::saveOtherNamesOfType($id, 149, $data['otherNames'], $culture);
+            }
+            if (array_key_exists('maintenanceNotes', $data)) {
+                self::saveMaintenanceNote($id, $data['maintenanceNotes'], $culture);
+            }
+
+            // 4. Touch the object record
             ObjectService::touch($id);
             ObjectService::incrementSerialNumber($id);
         });
+    }
+
+    /**
+     * Normalise a textarea/array value into a trimmed, non-empty list of lines.
+     */
+    protected static function splitLines($value): array
+    {
+        $lines = is_array($value) ? $value : preg_split('/\r\n|\r|\n/', (string) $value);
+
+        return array_values(array_filter(array_map('trim', $lines), static fn ($v) => $v !== ''));
+    }
+
+    /**
+     * Replace all other_name rows of a given type for an object (delete-then-insert).
+     */
+    protected static function saveOtherNamesOfType(int $id, int $typeId, $value, string $culture): void
+    {
+        OtherNameService::deleteByObjectId($id, $typeId);
+        foreach (self::splitLines($value) as $name) {
+            OtherNameService::save($id, $typeId, $name, $culture);
+        }
+    }
+
+    /**
+     * Upsert the single ISDF maintenance note (type 127) without touching other notes.
+     */
+    protected static function saveMaintenanceNote(int $id, $value, string $culture): void
+    {
+        $content = trim(is_array($value) ? implode("\n", $value) : (string) $value);
+        $existing = NoteService::getByObjectId($id, 127, $culture);
+        $existingId = isset($existing[0]->id) ? (int) $existing[0]->id : null;
+
+        if ($content !== '') {
+            NoteService::save($id, 127, $content, $culture, null, $existingId);
+        } elseif ($existingId) {
+            NoteService::delete($existingId);
+        }
     }
 
     /**

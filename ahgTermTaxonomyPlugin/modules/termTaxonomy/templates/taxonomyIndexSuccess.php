@@ -125,4 +125,18 @@
     </section>
   <?php } ?>
 
+  <section class="actions mb-3">
+    <div class="btn-group">
+      <button type="button" class="btn atom-btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <?php echo __('Export SKOS'); ?>
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'termTaxonomy', 'action' => 'exportSkos', 'id' => $resource->id, 'format' => 'rdf']); ?>">RDF/XML (.rdf)</a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'termTaxonomy', 'action' => 'exportSkos', 'id' => $resource->id, 'format' => 'ttl']); ?>">Turtle (.ttl)</a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'termTaxonomy', 'action' => 'exportSkos', 'id' => $resource->id, 'format' => 'nt']); ?>">N-Triples (.nt)</a></li>
+        <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'termTaxonomy', 'action' => 'exportSkos', 'id' => $resource->id, 'format' => 'jsonld']); ?>">JSON-LD (.jsonld)</a></li>
+      </ul>
+    </div>
+  </section>
+
 <?php end_slot(); ?>

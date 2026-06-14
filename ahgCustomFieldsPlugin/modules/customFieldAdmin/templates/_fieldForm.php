@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle dropdown taxonomy visibility
     function toggleDropdown() {
-        dropdownWrap.style.display = (fieldTypeSelect.value === 'dropdown') ? '' : 'none';
+        dropdownWrap.style.display = (fieldTypeSelect.value === 'dropdown' || fieldTypeSelect.value === 'multiselect') ? '' : 'none';
     }
     fieldTypeSelect.addEventListener('change', toggleDropdown);
     toggleDropdown();

@@ -65,7 +65,7 @@
                                     <td><?php echo htmlspecialchars($def->field_label); ?></td>
                                     <td>
                                         <span class="badge bg-info text-dark"><?php echo htmlspecialchars($def->field_type); ?></span>
-                                        <?php if ($def->field_type === 'dropdown' && $def->dropdown_taxonomy): ?>
+                                        <?php if (in_array($def->field_type, ['dropdown', 'multiselect'], true) && $def->dropdown_taxonomy): ?>
                                             <small class="text-muted">(<?php echo htmlspecialchars($def->dropdown_taxonomy); ?>)</small>
                                         <?php endif; ?>
                                     </td>

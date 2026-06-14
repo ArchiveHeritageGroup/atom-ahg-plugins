@@ -401,6 +401,35 @@ class TermTaxonomyService
         }
     }
 
+    /**
+     * Load authority records (actors) linked to a term via object_term_relation.
+     *
+     * @return array<int, object> rows with id, name, slug, entity_type_id
+     */
+    public function loadRelatedAuthorities(int $termId): array
+    {
+        try {
+            return DB::table('object_term_relation as otr')
+                ->join('object as o', 'otr.object_id', '=', 'o.id')
+                ->leftJoin('actor as a', 'o.id', '=', 'a.id')
+                ->leftJoin('actor_i18n as ai', function ($j) {
+                    $j->on('o.id', '=', 'ai.id')
+                        ->where('ai.culture', '=', $this->culture);
+                })
+                ->leftJoin('slug as s', 'o.id', '=', 's.object_id')
+                ->where('otr.term_id', $termId)
+                ->where('o.class_name', 'QubitActor')
+                ->select('o.id', 'ai.authorized_form_of_name as name', 's.slug', 'a.entity_type_id')
+                ->orderBy('ai.authorized_form_of_name')
+                ->get()
+                ->all();
+        } catch (\Exception $e) {
+            error_log('ahgTermTaxonomyPlugin loadRelatedAuthorities error: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Edit/Delete support methods
     // -----------------------------------------------------------------------

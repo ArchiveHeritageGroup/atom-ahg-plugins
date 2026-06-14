@@ -105,6 +105,8 @@ class CustomFieldRenderService
                     . $safe . ' <i class="bi bi-box-arrow-up-right"></i></a>';
 
             case 'dropdown':
+            case 'multiselect':
+                // renderViewField iterates array values, so $value is a single code here.
                 return $this->resolveDropdownLabel($def->dropdown_taxonomy, $value);
 
             case 'date':
@@ -239,6 +241,24 @@ class CustomFieldRenderService
                     }
                 }
                 $html .= '</select>';
+                break;
+
+            case 'multiselect':
+                $selected = is_array($value) ? $value : ($value !== null && $value !== '' ? [$value] : []);
+                $msName = 'cf[' . $key . '][]';
+                $html .= '<select class="form-select cf-multiselect" multiple id="' . $id . '" name="' . $msName . '"'
+                    . ' size="5"' . $required . $ariaDesc . '>';
+                if (!empty($def->dropdown_taxonomy)) {
+                    $options = $this->service->getDropdownOptions($def->dropdown_taxonomy);
+                    foreach ($options as $opt) {
+                        $sel = in_array((string) $opt->code, array_map('strval', $selected), true) ? ' selected' : '';
+                        $optLabel = htmlspecialchars($opt->label, ENT_QUOTES, 'UTF-8');
+                        $optCode = htmlspecialchars($opt->code, ENT_QUOTES, 'UTF-8');
+                        $html .= '<option value="' . $optCode . '"' . $sel . '>' . $optLabel . '</option>';
+                    }
+                }
+                $html .= '</select>';
+                $html .= '<div class="form-text">Hold Ctrl (Cmd on Mac) to select multiple.</div>';
                 break;
 
             case 'url':

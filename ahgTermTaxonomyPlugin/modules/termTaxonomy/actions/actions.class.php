@@ -4,6 +4,58 @@ use AtomFramework\Http\Controllers\AhgController;
 class termTaxonomyActions extends AhgController
 {
     // -----------------------------------------------------------------------
+    // SKOS export: /taxonomy/:id/skos (?format=rdf|ttl|nt|jsonld&skosxl=1)
+    // -----------------------------------------------------------------------
+
+    public function executeExportSkos($request)
+    {
+        $id = (int) $request->getParameter('id');
+        if ($id < 1) {
+            $this->forward404();
+
+            return;
+        }
+
+        $formats = \AhgTermTaxonomy\Services\SkosExportService::formats();
+        $format = (string) $request->getParameter('format', 'rdf');
+        if (!array_key_exists($format, $formats)) {
+            $format = 'rdf';
+        }
+
+        $skosXl = filter_var($request->getParameter('skosxl', false), FILTER_VALIDATE_BOOLEAN);
+        $culture = \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+
+        $service = new \AhgTermTaxonomy\Services\SkosExportService($culture);
+        $content = $service->export($id, $format, $skosXl);
+
+        [$mime, $ext] = $formats[$format];
+        $this->getResponse()->setContentType($mime);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="taxonomy-' . $id . '.' . $ext . '"');
+        $this->getResponse()->setContent($content);
+
+        return sfView::NONE;
+    }
+
+    // -----------------------------------------------------------------------
+    // Related authorities: /term/:slug/related-authorities
+    // -----------------------------------------------------------------------
+
+    public function executeRelatedAuthorities($request)
+    {
+        $this->resource = $this->getRoute()->resource;
+
+        if (!$this->resource instanceof QubitTerm) {
+            $this->forward404();
+
+            return;
+        }
+
+        $culture = \sfContext::getInstance()->getUser()->getCulture() ?: 'en';
+        $service = new \AhgTermTaxonomy\Services\TermTaxonomyService($culture);
+        $this->authorities = $service->loadRelatedAuthorities((int) $this->resource->id);
+    }
+
+    // -----------------------------------------------------------------------
     // Term browse: /term/:slug (moved from ahgTermBrowsePlugin)
     // -----------------------------------------------------------------------
 

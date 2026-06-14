@@ -64,6 +64,18 @@
             </div>
 
             <div class="mb-3">
+              <label for="parallelNames" class="form-label"><?php echo __('Parallel form(s) of name'); ?></label>
+              <textarea class="form-control" id="parallelNames" name="parallelNames" rows="2" aria-describedby="parallelNames-help"><?php echo esc_specialchars(implode("\n", $func['parallelNames'] ?? [])); ?></textarea>
+              <div id="parallelNames-help" class="form-text"><?php echo __('One per line.'); ?></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="otherNames" class="form-label"><?php echo __('Other form(s) of name'); ?></label>
+              <textarea class="form-control" id="otherNames" name="otherNames" rows="2" aria-describedby="otherNames-help"><?php echo esc_specialchars(implode("\n", $func['otherNames'] ?? [])); ?></textarea>
+              <div id="otherNames-help" class="form-text"><?php echo __('One per line.'); ?></div>
+            </div>
+
+            <div class="mb-3">
               <label for="classification" class="form-label"><?php echo __('Classification'); ?></label>
               <input type="text" class="form-control" id="classification" name="classification"
                      value="<?php echo esc_specialchars($func['classification']); ?>">
@@ -130,6 +142,11 @@
             <div class="mb-3">
               <label for="rules" class="form-label"><?php echo __('Rules and/or conventions used'); ?></label>
               <textarea class="form-control" id="rules" name="rules" rows="3"><?php echo esc_specialchars($func['rules']); ?></textarea>
+            </div>
+
+            <div class="mb-3">
+              <label for="maintenanceNotes" class="form-label"><?php echo __('Maintenance notes'); ?></label>
+              <textarea class="form-control" id="maintenanceNotes" name="maintenanceNotes" rows="3"><?php echo esc_specialchars($func['maintenanceNotes'] ?? ''); ?></textarea>
             </div>
 
             <?php $rawStatuses = $sf_data->getRaw('descriptionStatuses'); ?>
