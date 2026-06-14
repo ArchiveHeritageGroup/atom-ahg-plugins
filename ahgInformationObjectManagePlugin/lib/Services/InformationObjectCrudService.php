@@ -20,6 +20,9 @@ class InformationObjectCrudService
     // Name access point relation type
     const RELATION_NAME_ACCESS_POINT = 161;
 
+    // Related material descriptions relation type (IO -> IO)
+    const RELATION_RELATED_MATERIAL = 173;
+
     // Event type IDs
     const EVENT_TYPE_CREATION = 111;
 
@@ -170,6 +173,26 @@ class InformationObjectCrudService
             ->get()
             ->all();
 
+        // Related material descriptions (relation table, type_id = 173, IO -> IO)
+        $relatedMaterials = DB::table('relation')
+            ->leftJoin('information_object_i18n', function ($j) use ($culture) {
+                $j->on('relation.object_id', '=', 'information_object_i18n.id')
+                    ->where('information_object_i18n.culture', '=', $culture);
+            })
+            ->leftJoin('information_object as rio', 'relation.object_id', '=', 'rio.id')
+            ->leftJoin('slug', 'relation.object_id', '=', 'slug.object_id')
+            ->where('relation.subject_id', $id)
+            ->where('relation.type_id', self::RELATION_RELATED_MATERIAL)
+            ->select(
+                'relation.id as relation_id',
+                'relation.object_id as related_id',
+                'information_object_i18n.title as related_title',
+                'rio.identifier as related_identifier',
+                'slug.slug as related_slug'
+            )
+            ->get()
+            ->all();
+
         // Notes (general — excludes typed notes handled separately)
         $notes = NoteService::getByObjectId($id, null, $culture);
 
@@ -252,6 +275,7 @@ class InformationObjectCrudService
             'materialTypes' => $materialTypes,
             'stringProperties' => $stringProperties,
             'nameAccessPoints' => $nameAPs,
+            'relatedMaterials' => $relatedMaterials,
             'notes' => $notes,
             'creators' => $creators,
             'alternativeIdentifiers' => $altIds,
@@ -345,6 +369,11 @@ class InformationObjectCrudService
             // 9. Save name access points
             if (!empty($data['nameAccessPoints'])) {
                 self::saveNameAccessPoints($id, $data['nameAccessPoints'], $culture);
+            }
+
+            // 9b. Related material descriptions (only when the form included the section)
+            if (!empty($data['relatedMaterialsIncluded'])) {
+                self::saveRelatedMaterials($id, $data['relatedMaterialDescriptionIds'] ?? [], $culture);
             }
 
             // 10. Save notes
@@ -562,6 +591,22 @@ class InformationObjectCrudService
                 if (!empty($data['nameAccessPoints'])) {
                     self::saveNameAccessPoints($id, $data['nameAccessPoints'], $culture);
                 }
+            }
+
+            // 6b. Replace related material descriptions — ONLY when the form submitted the section.
+            // Forms without it (IO-manage, mods, etc.) never reach here, so type-173 relations are untouched.
+            if (!empty($data['relatedMaterialsIncluded'])) {
+                $existingRM = DB::table('relation')
+                    ->where('subject_id', $id)
+                    ->where('type_id', self::RELATION_RELATED_MATERIAL)
+                    ->pluck('id')
+                    ->all();
+
+                foreach ($existingRM as $relId) {
+                    RelationService::delete($relId);
+                }
+
+                self::saveRelatedMaterials($id, $data['relatedMaterialDescriptionIds'] ?? [], $culture);
             }
 
             // 7. Replace notes (general)
@@ -1046,6 +1091,26 @@ class InformationObjectCrudService
                 'subject_id' => $objectId,
                 'object_id' => $actorId,
                 'type_id' => self::RELATION_NAME_ACCESS_POINT,
+                'source_culture' => $culture,
+            ], $culture);
+        }
+    }
+
+    /**
+     * Save related material descriptions as IO->IO relations (type 173).
+     */
+    protected static function saveRelatedMaterials(int $objectId, array $relatedIds, string $culture): void
+    {
+        foreach ($relatedIds as $relatedId) {
+            $relatedId = (int) $relatedId;
+            if ($relatedId <= 0 || $relatedId === $objectId) {
+                continue;
+            }
+
+            RelationService::save([
+                'subject_id' => $objectId,
+                'object_id' => $relatedId,
+                'type_id' => self::RELATION_RELATED_MATERIAL,
                 'source_culture' => $culture,
             ], $culture);
         }

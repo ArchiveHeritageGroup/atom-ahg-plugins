@@ -472,6 +472,34 @@
               <textarea class="form-control" id="relatedUnitsOfDescription" name="relatedUnitsOfDescription" rows="3"><?php echo esc_specialchars($rawIo['relatedUnitsOfDescription']); ?></textarea>
             </div>
             <div class="mb-3">
+              <label class="form-label"><?php echo __('Related material descriptions'); ?></label>
+              <input type="hidden" name="_relatedMaterialsIncluded" value="1">
+              <?php $rawRelMat = $rawIo['relatedMaterials'] ?? []; ?>
+              <?php if (empty($rawRelMat)) { ?>
+                <p class="text-muted small mb-0"><?php echo __('No linked descriptions.'); ?></p>
+              <?php } else { ?>
+                <ul class="list-group">
+                  <?php foreach ($rawRelMat as $rm) { ?>
+                    <?php $rmLabel = $rm->related_title ?: ($rm->related_identifier ?: __('Untitled')); ?>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                      <span>
+                        <?php if (!empty($rm->related_slug)) { ?>
+                          <?php echo link_to(esc_specialchars($rmLabel), '/' . $rm->related_slug); ?>
+                        <?php } else { ?>
+                          <?php echo esc_specialchars($rmLabel); ?>
+                        <?php } ?>
+                      </span>
+                      <span class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" name="relatedMaterialDescriptionIds[]" value="<?php echo (int) $rm->related_id; ?>" id="rm<?php echo (int) $rm->related_id; ?>" checked>
+                        <label class="form-check-label small" for="rm<?php echo (int) $rm->related_id; ?>"><?php echo __('Keep'); ?></label>
+                      </span>
+                    </li>
+                  <?php } ?>
+                </ul>
+                <div class="form-text"><?php echo __('Uncheck to remove a linked description when you save.'); ?></div>
+              <?php } ?>
+            </div>
+            <div class="mb-3">
               <label for="accruals" class="form-label"><?php echo __('Accruals'); ?></label>
               <textarea class="form-control" id="accruals" name="accruals" rows="3"><?php echo esc_specialchars($rawIo['accruals']); ?></textarea>
             </div>

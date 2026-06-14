@@ -291,6 +291,7 @@ class IoFormHelper
             'materialTypes' => [],
             'stringProperties' => [],
             'nameAccessPoints' => [],
+            'relatedMaterials' => [],
             'notes' => [],
             'creators' => [],
             'alternativeIdentifiers' => [],
@@ -394,6 +395,14 @@ class IoFormHelper
                 $data['stringProperties'][$propName] = $val;
             }
         }
+
+        // Related material descriptions (relation type 173, IO->IO).
+        // Guarded by a presence marker so forms WITHOUT this section never touch type-173 relations.
+        $data['relatedMaterialsIncluded'] = (bool) $request->getParameter('_relatedMaterialsIncluded', false);
+        $data['relatedMaterialDescriptionIds'] = array_values(array_filter(array_map(
+            'intval',
+            (array) $request->getParameter('relatedMaterialDescriptionIds', [])
+        )));
 
         // Name access points
         $nameAPsRaw = $request->getParameter('nameAccessPoints', []);
