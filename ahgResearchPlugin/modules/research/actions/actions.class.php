@@ -8960,4 +8960,167 @@ class researchActions extends AhgController
         ]);
     }
 
+    // =====================================================================
+    // Data Management Plans (DMP) — Science Europe / Horizon Europe core
+    // =====================================================================
+
+    protected function dmpService(): DmpService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/DmpService.php';
+
+        return new DmpService();
+    }
+
+    /** Resolve the current researcher or redirect; returns the researcher row. */
+    protected function currentResearcherOrRedirect()
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+
+            return null;
+        }
+        $researcher = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$researcher) {
+            $this->redirect('research/register');
+
+            return null;
+        }
+
+        return $researcher;
+    }
+
+    public function executeDmps($request)
+    {
+        $researcher = $this->currentResearcherOrRedirect();
+        if (!$researcher) {
+            return sfView::NONE;
+        }
+        $svc = $this->dmpService();
+
+        if ($request->isMethod('post') && 'create' === $request->getParameter('form_action')) {
+            $id = $svc->create((int) $researcher->id, $request->getParameterHolder()->getAll());
+            $this->getUser()->setFlash('success', 'DMP created');
+            $this->redirect('research/dmpEdit?id=' . $id);
+
+            return sfView::NONE;
+        }
+
+        $this->researcher = $researcher;
+        $this->dmps = $svc->listForResearcher((int) $researcher->id);
+        $this->svc = $svc;
+
+        return sfView::SUCCESS;
+    }
+
+    public function executeDmpEdit($request)
+    {
+        $researcher = $this->currentResearcherOrRedirect();
+        if (!$researcher) {
+            return sfView::NONE;
+        }
+        $svc = $this->dmpService();
+        $id = (int) $request->getParameter('id');
+
+        if (!$id || !$svc->ownsDmp($id, (int) $researcher->id)) {
+            $this->getUser()->setFlash('error', 'DMP not found');
+            $this->redirect('research/dmps');
+
+            return sfView::NONE;
+        }
+
+        if ($request->isMethod('post')) {
+            $svc->update($id, $request->getParameterHolder()->getAll());
+            $this->getUser()->setFlash('success', 'DMP saved');
+            $this->redirect('research/dmpView?id=' . $id);
+
+            return sfView::NONE;
+        }
+
+        $this->researcher = $researcher;
+        $this->dmp = $svc->get($id);
+        $this->svc = $svc;
+        // Researcher's projects for the optional link dropdown.
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ProjectService.php';
+        $this->projects = (new ProjectService())->getProjects((int) $researcher->id, []);
+
+        return sfView::SUCCESS;
+    }
+
+    public function executeDmpView($request)
+    {
+        $researcher = $this->currentResearcherOrRedirect();
+        if (!$researcher) {
+            return sfView::NONE;
+        }
+        $svc = $this->dmpService();
+        $id = (int) $request->getParameter('id');
+
+        if (!$id || !$svc->ownsDmp($id, (int) $researcher->id)) {
+            $this->getUser()->setFlash('error', 'DMP not found');
+            $this->redirect('research/dmps');
+
+            return sfView::NONE;
+        }
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('form_action');
+            if ('add_dataset' === $action) {
+                $svc->addDataset($id, $request->getParameterHolder()->getAll());
+                $this->getUser()->setFlash('success', 'Dataset added');
+            } elseif ('delete_dataset' === $action) {
+                $svc->deleteDataset((int) $request->getParameter('dataset_id'), $id);
+                $this->getUser()->setFlash('success', 'Dataset removed');
+            } elseif ('delete_dmp' === $action) {
+                $svc->delete($id);
+                $this->getUser()->setFlash('success', 'DMP deleted');
+                $this->redirect('research/dmps');
+
+                return sfView::NONE;
+            }
+            $this->redirect('research/dmpView?id=' . $id);
+
+            return sfView::NONE;
+        }
+
+        $this->researcher = $researcher;
+        $this->dmp = $svc->get($id);
+        $this->datasets = $svc->datasets($id);
+        $this->completeness = $svc->completeness($this->dmp);
+        $this->svc = $svc;
+
+        return sfView::SUCCESS;
+    }
+
+    public function executeDmpExport($request)
+    {
+        $researcher = $this->currentResearcherOrRedirect();
+        if (!$researcher) {
+            return sfView::NONE;
+        }
+        $svc = $this->dmpService();
+        $id = (int) $request->getParameter('id');
+        if (!$id || !$svc->ownsDmp($id, (int) $researcher->id)) {
+            $this->forward404('DMP not found');
+        }
+
+        $dmp = $svc->get($id);
+        $slug = preg_replace('/[^a-z0-9]+/', '-', strtolower((string) $dmp->title)) ?: 'dmp';
+
+        if ('json' === $request->getParameter('format')) {
+            $payload = (array) $dmp;
+            $payload['datasets'] = $svc->datasets($id);
+            $body = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            $this->getResponse()->setContentType('application/json; charset=utf-8');
+            $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $slug . '.json"');
+
+            return $this->renderText($body);
+        }
+
+        $body = $svc->exportMarkdown($id);
+        $this->getResponse()->setContentType('text/markdown; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="' . $slug . '.md"');
+
+        return $this->renderText($body);
+    }
+
 }

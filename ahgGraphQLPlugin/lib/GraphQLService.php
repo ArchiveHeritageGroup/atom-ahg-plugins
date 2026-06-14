@@ -7,6 +7,7 @@ use AhgGraphQLPlugin\GraphQL\Resolvers\ActorResolver;
 use AhgGraphQLPlugin\GraphQL\Resolvers\ItemResolver;
 use AhgGraphQLPlugin\GraphQL\Resolvers\TaxonomyResolver;
 use AhgGraphQLPlugin\GraphQL\Resolvers\UserResolver;
+use AhgGraphQLPlugin\GraphQL\Resolvers\ResearchResolver;
 use AhgGraphQLPlugin\GraphQL\Schema\SchemaBuilder;
 use AhgGraphQLPlugin\GraphQL\Security\ComplexityAnalyzer;
 use AhgGraphQLPlugin\GraphQL\Security\DepthLimitRule;
@@ -120,6 +121,7 @@ class GraphQLService
         $resolvers->actor = new ActorResolver($this->repository, $this->culture);
         $resolvers->taxonomy = new TaxonomyResolver($this->repository, $this->culture);
         $resolvers->user = new UserResolver($this->repository, $this->culture);
+        $resolvers->research = new ResearchResolver($this->repository, $this->culture);
 
         return [
             'resolvers' => $resolvers,

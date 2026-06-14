@@ -440,6 +440,12 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_renewal', '/research/renewal', 'renewal');
         $research->any('research_index', '/research/dashboard', 'dashboard');
 
+        // Data Management Plans (DMP). Specific paths before any generic slug route.
+        $research->any('research_dmps', '/research/dmps', 'dmps');
+        $research->any('research_dmp_edit', '/research/dmp/edit', 'dmpEdit');
+        $research->any('research_dmp_view', '/research/dmp/view', 'dmpView');
+        $research->any('research_dmp_export', '/research/dmp/export', 'dmpExport');
+
         // #114 Target-journal directory ("Where to Publish"). :id constrained to
         // \d+ so /new, /seed-dhet, /suggest never collide with the show route.
         $research->any('research_target_journal_show', '/research/target-journals/:id', 'targetJournalShow', ['id' => '\d+']);

@@ -51,6 +51,10 @@ $isAdmin = $sf_user->isAdministrator();
        class="list-group-item list-group-item-action <?php echo $active === 'bibliographies' ? 'active' : ''; ?>">
         <i class="fas fa-book me-2"></i><?php echo __('Bibliographies'); ?>
     </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'dmps']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'dmps' ? 'active' : ''; ?>">
+        <i class="fas fa-clipboard-list me-2"></i><?php echo __('Data Management Plans'); ?>
+    </a>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'reports']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'reports' ? 'active' : ''; ?>">
         <i class="fas fa-file-alt me-2"></i><?php echo __('My Reports'); ?>

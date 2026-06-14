@@ -6,6 +6,7 @@ use AhgGraphQLPlugin\GraphQL\Schema\Types\ActorType;
 use AhgGraphQLPlugin\GraphQL\Schema\Types\ConnectionTypes;
 use AhgGraphQLPlugin\GraphQL\Schema\Types\ItemType;
 use AhgGraphQLPlugin\GraphQL\Schema\Types\RepositoryType;
+use AhgGraphQLPlugin\GraphQL\Schema\Types\ResearchType;
 use AhgGraphQLPlugin\GraphQL\Schema\Types\ScalarTypes;
 use AhgGraphQLPlugin\GraphQL\Schema\Types\TermType;
 use AhgGraphQLPlugin\GraphQL\Schema\Types\UserType;
@@ -266,6 +267,85 @@ class SchemaBuilder
                             $first,
                             $offset
                         );
+                    },
+                ],
+
+                // Research domain (ahgResearchPlugin)
+                'researcher' => [
+                    'type' => ResearchType::getResearcherType(),
+                    'description' => 'Get a researcher profile by id or ORCID',
+                    'args' => [
+                        'id' => ['type' => Type::id(), 'description' => 'Researcher ID'],
+                        'orcid' => ['type' => Type::string(), 'description' => 'ORCID identifier'],
+                    ],
+                    'resolve' => function ($root, $args, $context) {
+                        if (!empty($args['orcid'])) {
+                            return $context['resolvers']->research->resolveResearcherByOrcid((string) $args['orcid']);
+                        }
+                        if (!empty($args['id'])) {
+                            return $context['resolvers']->research->resolveResearcherById((int) $args['id']);
+                        }
+
+                        return null;
+                    },
+                ],
+
+                'researchers' => [
+                    'type' => Type::nonNull(ConnectionTypes::connection('Researcher', ResearchType::getResearcherType())),
+                    'description' => 'Browse approved researcher profiles',
+                    'args' => [
+                        'first' => ['type' => Type::int(), 'defaultValue' => 10],
+                        'after' => ['type' => Type::string()],
+                    ],
+                    'complexity' => fn($childrenComplexity, $args) => 10 + $childrenComplexity * min($args['first'] ?? 10, 100),
+                    'resolve' => function ($root, $args, $context) {
+                        $first = min($args['first'] ?? 10, 100);
+                        $offset = ScalarTypes::decodeCursor($args['after'] ?? null);
+
+                        return $context['resolvers']->research->resolveResearchers($first, $offset);
+                    },
+                ],
+
+                'researchProject' => [
+                    'type' => ResearchType::getProjectType(),
+                    'description' => 'Get a public research project by ID',
+                    'args' => ['id' => ['type' => Type::nonNull(Type::id())]],
+                    'resolve' => function ($root, $args, $context) {
+                        return $context['resolvers']->research->resolveProjectById((int) $args['id']);
+                    },
+                ],
+
+                'researchProjects' => [
+                    'type' => Type::nonNull(ConnectionTypes::connection('ResearchProject', ResearchType::getProjectType())),
+                    'description' => 'Browse public research projects',
+                    'args' => [
+                        'first' => ['type' => Type::int(), 'defaultValue' => 10],
+                        'after' => ['type' => Type::string()],
+                    ],
+                    'complexity' => fn($childrenComplexity, $args) => 10 + $childrenComplexity * min($args['first'] ?? 10, 100),
+                    'resolve' => function ($root, $args, $context) {
+                        $first = min($args['first'] ?? 10, 100);
+                        $offset = ScalarTypes::decodeCursor($args['after'] ?? null);
+
+                        return $context['resolvers']->research->resolveProjects($first, $offset);
+                    },
+                ],
+
+                'annotations' => [
+                    'type' => Type::nonNull(ConnectionTypes::connection('Annotation', ResearchType::getAnnotationType())),
+                    'description' => 'Browse public research annotations',
+                    'args' => [
+                        'first' => ['type' => Type::int(), 'defaultValue' => 10],
+                        'after' => ['type' => Type::string()],
+                        'objectId' => ['type' => Type::id(), 'description' => 'Filter by annotated object ID'],
+                    ],
+                    'complexity' => fn($childrenComplexity, $args) => 10 + $childrenComplexity * min($args['first'] ?? 10, 100),
+                    'resolve' => function ($root, $args, $context) {
+                        $first = min($args['first'] ?? 10, 100);
+                        $offset = ScalarTypes::decodeCursor($args['after'] ?? null);
+                        $objectId = !empty($args['objectId']) ? (int) $args['objectId'] : null;
+
+                        return $context['resolvers']->research->resolveAnnotations($first, $offset, $objectId);
                     },
                 ],
 
