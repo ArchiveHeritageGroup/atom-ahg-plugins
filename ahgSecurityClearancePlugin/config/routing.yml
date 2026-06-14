@@ -52,3 +52,13 @@ security_compartments:
 security_request_submit:
   url: /security/request/submit
   param: { module: accessRequest, action: createObjectRequest }
+
+# ACL groups (management + permission matrix)
+acl_groups:
+  url: /admin/security/acl-groups
+  param: { module: securityClearance, action: aclGroups }
+
+acl_group_edit:
+  url: /admin/security/acl-group/:id
+  param: { module: securityClearance, action: aclGroupEdit }
+  requirements: { id: \d+ }

@@ -6,6 +6,93 @@ class securityClearanceActions extends AhgController
     public function boot(): void
     {
         require_once $this->config('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
+        require_once dirname(__DIR__, 3).'/lib/Services/AclGroupService.php';
+    }
+
+    protected function requireAclAdmin(): void
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->hasCredential('administrator')) {
+            $this->getUser()->setFlash('error', 'Administrator access required.');
+            $this->redirect('@homepage');
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // ACL groups: management + permission matrix (enforcement deferred/flagged)
+    // -----------------------------------------------------------------------
+
+    public function executeAclGroups($request)
+    {
+        $this->requireAclAdmin();
+        $svc = new \AclGroupService();
+
+        if ($request->isMethod('post')) {
+            $fa = $request->getParameter('form_action');
+            if ('create' === $fa && '' !== trim((string) $request->getParameter('name', ''))) {
+                $svc->createGroup(trim((string) $request->getParameter('name')), $request->getParameter('description'));
+            } elseif ('delete' === $fa) {
+                $svc->deleteGroup((int) $request->getParameter('group_id'));
+            }
+            $this->redirect(['module' => 'securityClearance', 'action' => 'aclGroups']);
+        }
+
+        $this->groups = $svc->getGroups();
+    }
+
+    public function executeAclGroupEdit($request)
+    {
+        $this->requireAclAdmin();
+        $svc = new \AclGroupService();
+        $id = (int) $request->getParameter('id');
+        $group = $svc->getGroup($id);
+        if (!$group) {
+            $this->forward404('ACL group not found');
+
+            return;
+        }
+
+        if ($request->isMethod('post')) {
+            switch ($request->getParameter('form_action')) {
+                case 'profile':
+                    $svc->saveGroupProfile($id, [
+                        'name' => $request->getParameter('name'),
+                        'description' => $request->getParameter('description'),
+                        'translate' => $request->getParameter('translate'),
+                    ]);
+                    break;
+                case 'add_member':
+                    $uid = (int) $request->getParameter('user_id');
+                    if ($uid) {
+                        $svc->addMember($id, $uid);
+                    }
+                    break;
+                case 'remove_member':
+                    $svc->removeMember((int) $request->getParameter('membership_id'));
+                    break;
+                case 'permissions':
+                    $class = (string) $request->getParameter('entity_class');
+                    $allowed = \AclGroupService::CLASS_ACTIONS[$class] ?? [];
+                    if (!empty($allowed)) {
+                        $svc->applyAclForm($id, (array) $request->getParameter('acl', []), $allowed, $class);
+                    }
+                    break;
+            }
+            $this->redirect(['module' => 'securityClearance', 'action' => 'aclGroupEdit', 'id' => $id]);
+        }
+
+        $this->group = $group;
+        $this->classActions = \AclGroupService::CLASS_ACTIONS;
+        $this->rootPerms = [];
+        foreach (\AclGroupService::CLASS_ACTIONS as $class => $actions) {
+            $bucket = $svc->bucketPermissions($svc->getGroupPermissionsByClass($id, $class));
+            $this->rootPerms[$class] = $bucket['root'];
+        }
+        $this->users = \Illuminate\Database\Capsule\Manager::table('user as u')
+            ->leftJoin('actor_i18n as ai', function ($j) {
+                $j->on('ai.id', '=', 'u.id')->where('ai.culture', '=', 'en');
+            })
+            ->select('u.id', 'u.username', 'ai.authorized_form_of_name as display_name')
+            ->orderBy('u.username')->limit(500)->get()->all();
     }
 
     /**
