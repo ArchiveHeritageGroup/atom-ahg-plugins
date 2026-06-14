@@ -119,6 +119,12 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // Mounted under /iiif/v3/manifest/ to match what the Pres 3 manifest advertises
         $iiif->get('iiif_search', '/iiif/v3/manifest/:slug/search', 'search');
         $iiif->get('iiif_autocomplete', '/iiif/v3/manifest/:slug/autocomplete', 'autocomplete');
+
+        // Change Discovery (Activity Streams) + OCR export.
+        $iiif->get('iiif_activity', '/iiif/activity', 'activity');
+        $iiif->get('iiif_activity_page', '/iiif/activity/page/:n', 'activityPage', ['n' => '\d+']);
+        $iiif->get('iiif_ocr_export', '/iiif/ocr/object/:id', 'ocrExport', ['id' => '\d+']);
+
         $iiif->register($routing);
 
         // ===================
@@ -187,6 +193,8 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $media->any('media_transcribe', '/media/transcribe/:id', 'transcribe', ['id' => '\d+']);
         $media->any('media_transcription', '/media/transcription/:id', 'transcription', ['id' => '\d+']);
         $media->any('media_transcription_format', '/media/transcription/:id/:format', 'transcription', ['id' => '\d+', 'format' => '(json|vtt|srt|txt)']);
+        $media->any('media_audio_description', '/media/audio-description/:id', 'audioDescription', ['id' => '\d+']);
+        $media->any('media_audio_description_edit', '/media/audio-description/:id/edit', 'audioDescriptionEdit', ['id' => '\d+']);
         $media->any('media_convert', '/media/convert/:id', 'convert', ['id' => '\d+']);
         $media->any('media_metadata', '/media/metadata/:id', 'metadata', ['id' => '\d+']);
         $media->register($routing);
@@ -196,6 +204,7 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // ===================
         $mediaSettings = new \AtomFramework\Routing\RouteLoader('mediaSettings');
         $mediaSettings->any('media_settings_index', '/mediaSettings/index', 'index');
+        $mediaSettings->any('media_settings_coverage', '/mediaSettings/coverage', 'coverage');
         $mediaSettings->any('media_settings_save', '/mediaSettings/save', 'save');
         $mediaSettings->any('media_settings_test', '/mediaSettings/test', 'test');
         $mediaSettings->any('media_settings_queue', '/mediaSettings/queue', 'queue');

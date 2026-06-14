@@ -1003,4 +1003,70 @@ PHP;
 
         return sprintf('%02d:%02d:%02d,%03d', $h, $m, $s, $ms);
     }
+
+    /**
+     * Serve a digital object's audio-description track as WebVTT (public).
+     * Route: /media/audio-description/:id  (:id = digital_object id)
+     */
+    public function executeAudioDescription($request)
+    {
+        $doId = (int) $request->getParameter('id');
+        $row = $doId ? DB::table('media_audio_description')->where('digital_object_id', $doId)->first() : null;
+
+        // Keep HTTP 200 even when empty — a 4xx makes AtoM render its themed
+        // error page (swallowing the body). An empty WEBVTT is a valid track.
+        $vtt = ($row && trim((string) ($row->vtt_content ?? '')) !== '') ? trim((string) $row->vtt_content) : 'WEBVTT';
+        if (stripos($vtt, 'WEBVTT') !== 0) {
+            $vtt = "WEBVTT\n\n" . $vtt;
+        }
+
+        $this->getResponse()->setContentType('text/vtt; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'public, max-age=300');
+        echo $vtt;
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Author / edit an audio-description track (admin).
+     * Route: /media/audio-description/:id/edit
+     */
+    public function executeAudioDescriptionEdit($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+
+        $doId = (int) $request->getParameter('id');
+        if (!$doId) {
+            $this->forward404();
+        }
+
+        if ($request->isMethod('post')) {
+            $vtt = (string) $request->getParameter('vtt_content');
+            $payload = [
+                'object_id' => DB::table('digital_object')->where('id', $doId)->value('object_id'),
+                'language' => mb_substr(trim((string) $request->getParameter('language', 'en')), 0, 10) ?: 'en',
+                'label' => mb_substr(trim((string) $request->getParameter('label', 'Audio description')), 0, 120) ?: 'Audio description',
+                'vtt_content' => $vtt,
+                'updated_at' => date('Y-m-d H:i:s'),
+            ];
+            $exists = DB::table('media_audio_description')->where('digital_object_id', $doId)->exists();
+            if ($exists) {
+                DB::table('media_audio_description')->where('digital_object_id', $doId)->update($payload);
+            } else {
+                $payload['digital_object_id'] = $doId;
+                $payload['created_at'] = date('Y-m-d H:i:s');
+                DB::table('media_audio_description')->insert($payload);
+            }
+            $this->getUser()->setFlash('notice', 'Audio description saved.');
+            $this->redirect('/index.php/media/audio-description/' . $doId . '/edit');
+        }
+
+        $this->doId = $doId;
+        $this->record = DB::table('media_audio_description')->where('digital_object_id', $doId)->first();
+        $this->digitalObject = DB::table('digital_object')->where('id', $doId)->first();
+
+        return sfView::SUCCESS;
+    }
 }

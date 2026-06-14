@@ -294,6 +294,21 @@ if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()
     }
 
     /**
+     * Derivative coverage dashboard: how many digital objects have reference /
+     * thumbnail derivatives, by media type, with lists of objects missing them.
+     * Admin-gated via boot().
+     */
+    public function executeCoverage($request)
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/MediaCoverageService.php';
+        $svc = new \AhgIiif\Services\MediaCoverageService();
+
+        $this->report = $svc->report();
+        $this->missingThumbnail = $svc->missing('thumbnail', 100, $this->culture());
+        $this->missingReference = $svc->missing('reference', 100, $this->culture());
+    }
+
+    /**
      * Check if a tool is available
      */
     private function checkTool(string $path): bool

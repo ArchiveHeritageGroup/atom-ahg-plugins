@@ -56,17 +56,17 @@ class SerialService
 
         $id = DB::table('library_subscription')->insertGetId([
             'library_item_id'       => $data['library_item_id'],
-            'vendor_name'           => $data['vendor_name'] ?? null,
+            'vendor_id'             => $data['vendor_id'] ?? null,
             'subscription_number'   => $data['subscription_number'] ?? null,
             'status'                => 'active',
             'start_date'            => $data['start_date'] ?? date('Y-m-d'),
             'end_date'              => $data['end_date'] ?? null,
             'renewal_date'          => $data['renewal_date'] ?? null,
             'frequency'             => $data['frequency'] ?? 'monthly',
-            'expected_issues_year'  => $data['expected_issues_year'] ?? 12,
+            'issues_per_year'       => $data['issues_per_year'] ?? $data['expected_issues_year'] ?? 12,
             'cost_per_year'         => $data['cost_per_year'] ?? null,
-            'currency'              => $data['currency'] ?? 'USD',
-            'budget_id'             => $data['budget_id'] ?? null,
+            'currency'              => $data['currency'] ?? 'ZAR',
+            'budget_code'           => $data['budget_code'] ?? null,
             'notes'                 => $data['notes'] ?? null,
             'created_at'            => $now,
             'updated_at'            => $now,
@@ -83,10 +83,18 @@ class SerialService
     public function updateSubscription(int $id, array $data): bool
     {
         $allowed = [
-            'vendor_name', 'subscription_number', 'status',
+            'vendor_id', 'subscription_number', 'status',
             'start_date', 'end_date', 'renewal_date', 'frequency',
-            'expected_issues_year', 'cost_per_year', 'currency', 'budget_id', 'notes',
+            'issues_per_year', 'cost_per_year', 'currency', 'budget_code', 'notes',
         ];
+
+        // Tolerate legacy input keys from older callers.
+        if (isset($data['expected_issues_year']) && !isset($data['issues_per_year'])) {
+            $data['issues_per_year'] = $data['expected_issues_year'];
+        }
+        if (isset($data['budget_id']) && !isset($data['budget_code'])) {
+            $data['budget_code'] = $data['budget_id'];
+        }
 
         $update = array_intersect_key($data, array_flip($allowed));
         $update['updated_at'] = date('Y-m-d H:i:s');
@@ -105,8 +113,9 @@ class SerialService
             ->leftJoin('information_object_i18n as ioi', function ($j) {
                 $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', 'en');
             })
+            ->leftJoin('ahg_vendors as v', 's.vendor_id', '=', 'v.id')
             ->where('s.id', $id)
-            ->select(['s.*', 'li.call_number', 'li.issn', 'ioi.title'])
+            ->select(['s.*', 'li.call_number', 'li.issn', 'ioi.title', 'v.name as vendor_name'])
             ->first();
 
         if (!$sub) {
@@ -143,7 +152,7 @@ class SerialService
             $q = '%' . $params['q'] . '%';
             $query->where(function ($qb) use ($q) {
                 $qb->where('ioi.title', 'LIKE', $q)
-                    ->orWhere('s.vendor_name', 'LIKE', $q)
+                    ->orWhere('s.subscription_number', 'LIKE', $q)
                     ->orWhere('li.issn', 'LIKE', $q);
             });
         }
@@ -152,10 +161,13 @@ class SerialService
         $page = max(1, (int) ($params['page'] ?? 1));
         $limit = min(100, max(1, (int) ($params['limit'] ?? 25)));
 
+        $query->leftJoin('ahg_vendors as v', 's.vendor_id', '=', 'v.id');
+
         $rows = $query->select([
                 's.*',
                 'li.call_number', 'li.issn',
                 'ioi.title',
+                'v.name as vendor_name',
             ])
             ->orderBy('ioi.title')
             ->offset(($page - 1) * $limit)
@@ -164,6 +176,23 @@ class SerialService
             ->all();
 
         return ['items' => $rows, 'total' => $total, 'page' => $page, 'pages' => (int) ceil($total / $limit)];
+    }
+
+    /**
+     * Active vendor options for the subscription vendor picker (vendor_id FK to
+     * ahg_vendors). @return array<int,object> {id, name}
+     */
+    public function getVendorOptions(): array
+    {
+        try {
+            if (!DB::schema()->hasTable('ahg_vendors')) {
+                return [];
+            }
+
+            return DB::table('ahg_vendors')->where('status', 'active')->orderBy('name')->get(['id', 'name'])->all();
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     // ========================================================================

@@ -20,6 +20,12 @@ class ahgLabelPluginConfiguration extends sfPluginConfiguration
 
         $router->any('label_index', '/label/:slug', 'index');
 
+        // Templates + batch printing — added after the generic :slug route so the
+        // loader (which prepends) matches these specific paths first.
+        $router->any('label_templates', '/label/templates', 'templates');
+        $router->any('label_template_edit', '/label/template/edit', 'templateEdit');
+        $router->any('label_batch', '/label/batch', 'batch');
+
         $router->register($event->getSubject());
     }
 }

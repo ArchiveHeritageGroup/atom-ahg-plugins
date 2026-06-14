@@ -60,9 +60,9 @@ class AcquisitionService
             'vendor_name'  => $data['vendor_name'] ?? null,
             'order_date'   => $data['order_date'] ?? date('Y-m-d'),
             'order_type'   => $data['order_type'] ?? 'purchase',
-            'status'       => 'pending',
+            'status'       => $data['status'] ?? 'draft', // Heratio canonical (not 'pending')
             'budget_code'  => $data['budget_code'] ?? null,
-            'currency'     => $data['currency'] ?? 'USD',
+            'currency'     => $data['currency'] ?? 'ZAR',
             'total'        => 0,
             'notes'        => $data['notes'] ?? null,
             'created_by'   => $this->getCurrentUserId(),
@@ -162,19 +162,27 @@ class AcquisitionService
      */
     protected function updateOrderStatus(int $orderId): void
     {
-        $lines = DB::table('library_order_line')->where('order_id', $orderId)->get();
-        if ($lines->isEmpty()) {
+        $order = DB::table('library_order')->where('id', $orderId)->first();
+        if (!$order) {
+            return;
+        }
+        // A cancelled / written-off order keeps its terminal status (Heratio).
+        if (($order->status ?? '') === 'cancelled') {
             return;
         }
 
-        $allReceived = $lines->every(fn($l) => $l->status === 'received');
-        $anyReceived = $lines->contains(fn($l) => in_array($l->status, ['received', 'partial']));
+        $lines = DB::table('library_order_line')->where('order_id', $orderId)->get();
 
-        $status = 'pending';
-        if ($allReceived) {
+        // Derive order-level status from line statuses, using only valid
+        // library_order dropdown values (draft/ordered/partial/received).
+        if ($lines->isEmpty()) {
+            $status = 'draft';
+        } elseif ($lines->every(fn($l) => $l->status === 'received')) {
             $status = 'received';
-        } elseif ($anyReceived) {
+        } elseif ($lines->contains(fn($l) => in_array($l->status, ['received', 'partial'], true))) {
             $status = 'partial';
+        } else {
+            $status = 'ordered';
         }
 
         DB::table('library_order')
@@ -274,7 +282,7 @@ class AcquisitionService
             'allocated_amount' => (float) ($data['allocated_amount'] ?? 0),
             'spent_amount'   => 0,
             'committed_amount' => 0,
-            'currency'       => $data['currency'] ?? 'USD',
+            'currency'       => $data['currency'] ?? 'ZAR',
             'category'       => $data['category'] ?? 'general',
             'notes'          => $data['notes'] ?? null,
             'created_at'     => $now,
@@ -414,7 +422,7 @@ class AcquisitionService
             return false;
         }
         DB::table('library_order')->where('id', $orderId)
-            ->update(['status' => 'sent', 'updated_at' => date('Y-m-d H:i:s')]);
+            ->update(['status' => 'ordered', 'updated_at' => date('Y-m-d H:i:s')]); // 'ordered' is the valid dropdown value (not 'sent')
         if (!empty($order->budget_code)) {
             $this->encumberByCode($order->budget_code, (float) $order->total);
         }
@@ -427,8 +435,9 @@ class AcquisitionService
         $year = date('Y');
 
         return [
-            'orders_this_year'   => DB::table('library_order')->where('fiscal_year', $year)->count(),
-            'pending_orders'     => DB::table('library_order')->where('status', 'pending')->count(),
+            // library_order has no fiscal_year column — derive from order_date.
+            'orders_this_year'   => DB::table('library_order')->whereRaw('YEAR(order_date) = ?', [$year])->count(),
+            'pending_orders'     => DB::table('library_order')->whereIn('status', ['draft', 'submitted', 'approved', 'ordered', 'partial'])->count(),
             'total_spent'        => (float) DB::table('library_budget')->where('fiscal_year', $year)->sum('spent_amount'),
             'total_allocated'    => (float) DB::table('library_budget')->where('fiscal_year', $year)->sum('allocated_amount'),
         ];

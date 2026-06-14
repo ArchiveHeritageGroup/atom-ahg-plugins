@@ -162,6 +162,58 @@ if (!$model): ?>
     </div>
 </model-viewer>
 
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+.cam-bm{position:absolute;left:8px;bottom:8px;display:flex;gap:4px;flex-wrap:wrap;z-index:10}
+.cam-bm button{font:12px sans-serif;padding:3px 8px;border:0;border-radius:3px;background:rgba(0,0,0,.6);color:#fff;cursor:pointer}
+.cam-bm button:hover{background:rgba(0,0,0,.85)}
+</style>
+<div class="cam-bm" id="camBookmarks" aria-label="Camera bookmarks"></div>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Camera bookmarks: load saved viewpoints + allow saving the current view.
+(function () {
+    var mv = document.getElementById('embed-viewer');
+    var bar = document.getElementById('camBookmarks');
+    var modelId = <?php echo (int) $model->id ?>;
+    if (!mv || !bar) { return; }
+    function render(list) {
+        bar.innerHTML = '';
+        (list || []).forEach(function (b) {
+            var btn = document.createElement('button');
+            btn.textContent = b.name;
+            btn.addEventListener('click', function () {
+                mv.cameraOrbit = b.camera_orbit;
+                if (b.field_of_view) { mv.fieldOfView = b.field_of_view; }
+            });
+            bar.appendChild(btn);
+        });
+        var save = document.createElement('button');
+        save.textContent = '＋ ' + 'Save view';
+        save.addEventListener('click', function () {
+            var name = prompt('Name this view:');
+            if (!name) { return; }
+            var fov = (typeof mv.getFieldOfView === 'function') ? (mv.getFieldOfView() + 'deg') : null;
+            fetch('/index.php/ahg3DModel/addBookmark/' + modelId, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: name, camera_orbit: mv.getCameraOrbit().toString(), field_of_view: fov})
+            }).then(function (r) {
+                if (r.status === 401) { alert('Please log in to save views.'); return null; }
+                return r.json();
+            }).then(function (d) { if (d && d.success) { load(); } });
+        });
+        bar.appendChild(save);
+    }
+    function load() {
+        fetch('/index.php/api/3d/bookmarks/' + modelId)
+            .then(function (r) { return r.json(); })
+            .then(function (d) { render(d.bookmarks || []); })
+            .catch(function () { render([]); });
+    }
+    load();
+})();
+</script>
+
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Handle hotspot clicks for links
 document.querySelectorAll('.hotspot[data-link]').forEach(hotspot => {

@@ -284,6 +284,18 @@ function render_enhanced_media_player(array $digitalObjectData, array $options =
         } catch (\Exception $e) {
             // media_transcription table may not exist
         }
+        try {
+            $audioDesc = \Illuminate\Database\Capsule\Manager::table('media_audio_description')
+                ->where('digital_object_id', $doId)
+                ->first();
+            if ($audioDesc && trim((string) ($audioDesc->vtt_content ?? '')) !== '') {
+                $html .= '<track kind="descriptions" src="/media/audio-description/' . (int) $doId . '" '
+                    . 'srclang="' . htmlspecialchars($audioDesc->language ?? 'en') . '" '
+                    . 'label="' . htmlspecialchars($audioDesc->label ?? 'Audio description') . '">';
+            }
+        } catch (\Exception $e) {
+            // media_audio_description table may not exist
+        }
         $html .= '<source src="' . htmlspecialchars($mediaUrl) . '" type="' . htmlspecialchars($outputMime) . '">';
         $html .= 'Your browser does not support video playback.</video>';
     }

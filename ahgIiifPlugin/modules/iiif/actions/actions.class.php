@@ -1212,4 +1212,75 @@ class iiifActions extends AhgController
         return $map;
     }
 
+    // =====================================================================
+    // IIIF Change Discovery (Activity Streams) + OCR export
+    // =====================================================================
+
+    protected function discoveryService(): \AhgIiif\Services\IiifDiscoveryService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifDiscoveryService.php';
+
+        return new \AhgIiif\Services\IiifDiscoveryService();
+    }
+
+    /** GET /iiif/activity — Change Discovery OrderedCollection. */
+    public function executeActivity($request)
+    {
+        $body = json_encode($this->discoveryService()->collection(), JSON_UNESCAPED_SLASHES);
+        $this->getResponse()->setContentType('application/ld+json; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'public, max-age=300');
+
+        return $this->renderText($body);
+    }
+
+    /** GET /iiif/activity/page/:n — one OrderedCollectionPage. */
+    public function executeActivityPage($request)
+    {
+        $body = json_encode($this->discoveryService()->page((int) $request->getParameter('n')), JSON_UNESCAPED_SLASHES);
+        $this->getResponse()->setContentType('application/ld+json; charset=utf-8');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'public, max-age=300');
+
+        return $this->renderText($body);
+    }
+
+    /** GET /iiif/ocr/object/:id(.:format) — export stored OCR (txt|json|alto). */
+    public function executeOcrExport($request)
+    {
+        $svc = $this->discoveryService();
+        $objectId = (int) $request->getParameter('id');
+        $row = $objectId ? $svc->ocrForObject($objectId) : null;
+
+        if (!$row) {
+            $this->getResponse()->setStatusCode(404);
+            $this->getResponse()->setContentType('text/plain; charset=utf-8');
+
+            return $this->renderText('No OCR text found for this object.');
+        }
+
+        $format = strtolower((string) $request->getParameter('format', 'txt'));
+        $text = (string) ($row->full_text ?? '');
+
+        switch ($format) {
+            case 'json':
+                $this->getResponse()->setContentType('application/json; charset=utf-8');
+
+                return $this->renderText(json_encode([
+                    'object_id' => $objectId,
+                    'language' => $row->language ?? null,
+                    'format' => $row->format ?? null,
+                    'confidence' => $row->confidence ?? null,
+                    'text' => $text,
+                ], JSON_UNESCAPED_SLASHES));
+            case 'alto':
+            case 'xml':
+                $this->getResponse()->setContentType('application/xml; charset=utf-8');
+
+                return $this->renderText($svc->toAlto($text, (string) ($row->language ?? '')));
+            default:
+                $this->getResponse()->setContentType('text/plain; charset=utf-8');
+
+                return $this->renderText($text);
+        }
+    }
+
 }

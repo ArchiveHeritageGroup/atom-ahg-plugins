@@ -71,6 +71,9 @@ class ahg3DModelPluginConfiguration extends sfPluginConfiguration
         $model->any('ar3d_hotspot_delete', '/ahg3DModel/deleteHotspot/:id', 'deleteHotspot', ['id' => '\d+']);
         $model->any('ar3d_api_models', '/api/3d/models/:object_id', 'apiModels', ['object_id' => '\d+']);
         $model->any('ar3d_api_hotspots', '/api/3d/hotspots/:model_id', 'apiHotspots', ['model_id' => '\d+']);
+        $model->any('ar3d_bookmark_add', '/ahg3DModel/addBookmark/:id', 'addBookmark', ['id' => '\d+']);
+        $model->any('ar3d_bookmark_delete', '/ahg3DModel/deleteBookmark/:id', 'deleteBookmark', ['id' => '\d+']);
+        $model->any('ar3d_api_bookmarks', '/api/3d/bookmarks/:model_id', 'apiBookmarks', ['model_id' => '\d+']);
         $model->register($event->getSubject());
 
         // model3dSettings module routes

@@ -902,6 +902,106 @@ class model3dActions extends AhgController
     }
 
     /**
+     * Save a camera bookmark (named viewpoint) for a model.
+     */
+    public function executeAddBookmark($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->getResponse()->setStatusCode(405);
+            return sfView::NONE;
+        }
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+            $this->getResponse()->setContentType('application/json');
+            echo json_encode(['success' => false, 'error' => 'Authentication required']);
+            return sfView::NONE;
+        }
+
+        $modelId = (int) $request->getParameter('id');
+        $db = $this->db;
+        $input = json_decode(file_get_contents('php://input'), true) ?: $request->getParameterHolder()->getAll();
+
+        $orbit = trim((string) ($input['camera_orbit'] ?? ''));
+        if ('' === $orbit) {
+            $this->getResponse()->setStatusCode(400);
+            $this->getResponse()->setContentType('application/json');
+            echo json_encode(['success' => false, 'error' => 'camera_orbit required']);
+            return sfView::NONE;
+        }
+
+        $maxOrder = $db::table('object_3d_camera_bookmark')->where('model_id', $modelId)->max('display_order') ?? -1;
+
+        $id = $db::table('object_3d_camera_bookmark')->insertGetId([
+            'model_id' => $modelId,
+            'name' => mb_substr(trim((string) ($input['name'] ?? 'View')), 0, 120) ?: 'View',
+            'camera_orbit' => mb_substr($orbit, 0, 64),
+            'field_of_view' => !empty($input['field_of_view']) ? mb_substr((string) $input['field_of_view'], 0, 32) : null,
+            'display_order' => $maxOrder + 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $this->logAction($modelId, 'bookmark_add', ['bookmark_id' => $id]);
+
+        $this->getResponse()->setContentType('application/json');
+        echo json_encode(['success' => true, 'id' => $id]);
+
+        return sfView::NONE;
+    }
+
+    /**
+     * Delete a camera bookmark.
+     */
+    public function executeDeleteBookmark($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->getResponse()->setStatusCode(405);
+            return sfView::NONE;
+        }
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+            return sfView::NONE;
+        }
+
+        $bookmarkId = (int) $request->getParameter('id');
+        $db = $this->db;
+
+        $bookmark = $db::table('object_3d_camera_bookmark')->where('id', $bookmarkId)->first();
+        if (!$bookmark) {
+            $this->getResponse()->setStatusCode(404);
+            return sfView::NONE;
+        }
+
+        $this->logAction($bookmark->model_id, 'bookmark_delete', ['bookmark_id' => $bookmarkId]);
+        $db::table('object_3d_camera_bookmark')->where('id', $bookmarkId)->delete();
+
+        $this->getResponse()->setContentType('application/json');
+        echo json_encode(['success' => true]);
+
+        return sfView::NONE;
+    }
+
+    /**
+     * API: Get camera bookmarks for a model (public, for the viewer).
+     */
+    public function executeApiBookmarks($request)
+    {
+        $modelId = (int) $request->getParameter('model_id');
+        $db = $this->db;
+
+        $bookmarks = $db::table('object_3d_camera_bookmark')
+            ->where('model_id', $modelId)
+            ->orderBy('display_order')
+            ->get(['id', 'name', 'camera_orbit', 'field_of_view'])
+            ->toArray();
+
+        $this->getResponse()->setContentType('application/json');
+        $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+        echo json_encode(['bookmarks' => $bookmarks]);
+
+        return sfView::NONE;
+    }
+
+    /**
      * Get a setting from viewer_3d_settings
      */
     private function getSetting(string $key, $default = null)

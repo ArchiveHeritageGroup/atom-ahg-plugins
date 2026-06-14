@@ -41,6 +41,16 @@ class serialEditAction extends AhgController
             }
         }
 
+        // Vendor options for the picker (vendor_id FK to ahg_vendors).
+        $this->vendorOptions = [];
+        try {
+            if (class_exists('SerialService')) {
+                $this->vendorOptions = SerialService::getInstance()->getVendorOptions();
+            }
+        } catch (\Throwable $e) {
+            // leave empty — form still renders
+        }
+
         // POST: save
         if ('POST' === $request->getMethod()) {
             $libraryItemId = $request->getParameter('library_item_id');
@@ -52,15 +62,16 @@ class serialEditAction extends AhgController
 
             $formData = [
                 'library_item_id'      => (int) $libraryItemId,
-                'vendor_name'          => $request->getParameter('vendor_name'),
+                'vendor_id'            => $request->getParameter('vendor_id') ?: null,
                 'subscription_number'  => $request->getParameter('subscription_number'),
                 'frequency'            => $request->getParameter('frequency', 'monthly'),
                 'start_date'           => $request->getParameter('start_date'),
                 'end_date'             => $request->getParameter('end_date'),
                 'renewal_date'         => $request->getParameter('renewal_date'),
-                'expected_issues_year' => $request->getParameter('expected_issues_year'),
+                'issues_per_year'      => $request->getParameter('issues_per_year', $request->getParameter('expected_issues_year')),
                 'cost_per_year'        => $request->getParameter('cost_per_year'),
-                'currency'             => $request->getParameter('currency', 'USD'),
+                'currency'             => $request->getParameter('currency', 'ZAR'),
+                'budget_code'          => $request->getParameter('budget_code'),
                 'notes'                => $request->getParameter('notes'),
             ];
 

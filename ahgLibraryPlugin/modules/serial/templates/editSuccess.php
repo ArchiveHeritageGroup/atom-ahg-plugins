@@ -31,9 +31,14 @@
         </div>
 
         <div class="col-md-6">
-          <label for="sub_vendor_name" class="form-label"><?php echo __('Vendor name'); ?></label>
-          <input type="text" class="form-control" id="sub_vendor_name" name="vendor_name"
-                 value="<?php echo esc_entities($rawSub->vendor_name ?? ''); ?>">
+          <label for="sub_vendor_id" class="form-label"><?php echo __('Vendor'); ?></label>
+          <?php $vendorOptions = $sf_data->getRaw('vendorOptions') ?: []; $curVendor = (int) ($rawSub->vendor_id ?? 0); ?>
+          <select class="form-select" id="sub_vendor_id" name="vendor_id">
+            <option value=""><?php echo __('— none —'); ?></option>
+            <?php foreach ($vendorOptions as $vo): ?>
+              <option value="<?php echo (int) $vo->id; ?>" <?php echo $curVendor === (int) $vo->id ? 'selected' : ''; ?>><?php echo esc_entities($vo->name); ?></option>
+            <?php endforeach; ?>
+          </select>
         </div>
 
         <div class="col-md-6">
@@ -88,8 +93,8 @@
 
         <div class="col-md-4">
           <label for="sub_expected_issues" class="form-label"><?php echo __('Expected issues/year'); ?></label>
-          <input type="number" class="form-control" id="sub_expected_issues" name="expected_issues_year"
-                 value="<?php echo (int) ($rawSub->expected_issues_year ?? 12); ?>" min="1">
+          <input type="number" class="form-control" id="sub_expected_issues" name="issues_per_year"
+                 value="<?php echo (int) ($rawSub->issues_per_year ?? 12); ?>" min="1">
         </div>
 
         <div class="col-md-4">
