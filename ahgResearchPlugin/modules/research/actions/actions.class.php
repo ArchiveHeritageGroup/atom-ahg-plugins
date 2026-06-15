@@ -285,7 +285,14 @@ class researchActions extends AhgController
 
     public function executeViewResearcher($request)
     {
-        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        // Admin-only: this action views another researcher's record and, on POST,
+        // approves/suspends it. Was previously gated only by isAuthenticated(),
+        // letting any logged-in user (incl. a self-registered researcher) approve
+        // or suspend accounts — privilege escalation (security audit 2026-06-15).
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
         $id = (int) $request->getParameter('id');
         $this->researcher = $this->service->getResearcher($id);
         if (!$this->researcher) { $this->forward404('Not found'); }
