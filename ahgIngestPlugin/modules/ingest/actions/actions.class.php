@@ -202,7 +202,20 @@ class ingestActions extends sfActions
                     $this->getUser()->setFlash('error', 'Failed to save uploaded file');
                     return;
                 }
-            } elseif (!empty($dirPath) && is_dir($dirPath)) {
+            } elseif (!empty($dirPath)) {
+                // Server-directory ingest reads an arbitrary server path, so it is
+                // restricted to administrators. Session ownership alone is NOT
+                // enough: any logged-in user can create their own session, so
+                // without this gate a non-admin could ingest /etc, /root, etc.
+                // (security audit 2026-06-15 — arbitrary directory read).
+                if (!$this->getUser()->isAdministrator()) {
+                    $this->getUser()->setFlash('error', 'Server directory ingest requires administrator access.');
+                    return;
+                }
+                if (!is_dir($dirPath)) {
+                    $this->getUser()->setFlash('error', 'Directory not found: ' . $dirPath);
+                    return;
+                }
                 // Server directory path — register as directory type
                 $svc->processUpload($id, [
                     'original_name' => basename($dirPath),

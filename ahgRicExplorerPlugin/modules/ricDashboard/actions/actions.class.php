@@ -321,13 +321,20 @@ class ricDashboardActions extends AhgController
      */
     public function executeAjaxSyncProgress($request)
     {
-        $logFile = $request->getParameter('log_file');
+        $logFile = (string) $request->getParameter('log_file');
 
-        if (!$logFile || !file_exists($logFile)) {
+        // Only the sync logs this dashboard creates (<root>/cache/ric_sync_*.log).
+        // Was an unconstrained file_get_contents on a request param → arbitrary
+        // file read (admin-only, but hardened; security audit 2026-06-15).
+        $logDir = $this->config('sf_root_dir') . '/cache';
+        $real = '' !== $logFile ? realpath($logFile) : false;
+        if (false === $real
+            || 0 !== strpos($real, $logDir . DIRECTORY_SEPARATOR)
+            || !preg_match('#/ric_sync_[0-9_]+\.log$#', $real)) {
             return $this->renderJson(['running' => false, 'output' => '']);
         }
 
-        $output = file_get_contents($logFile);
+        $output = file_get_contents($real);
         $lines = explode("\n", trim($output));
         $lastLines = array_slice($lines, -15);
 
