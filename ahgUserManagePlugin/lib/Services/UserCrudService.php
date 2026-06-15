@@ -158,19 +158,15 @@ class UserCrudService
                 ]);
             }
 
-            // Hash password using AtoM's dual-layer approach
-            $salt = md5(rand(100000, 999999) . ($data['email'] ?? ''));
-            $sha1Hash = sha1($salt . ($data['password'] ?? ''));
-
-            $hashAlgo = defined('PASSWORD_ARGON2I') ? PASSWORD_ARGON2I : PASSWORD_DEFAULT;
-            $passwordHash = password_hash($sha1Hash, $hashAlgo);
+            // Argon2id over plaintext, empty salt (migration 2026-06-15).
+            $ph = \AtomFramework\Core\Security\PasswordService::hash((string) ($data['password'] ?? ''));
 
             DB::table('user')->insert([
                 'id' => $id,
                 'username' => $data['username'] ?? '',
                 'email' => $data['email'] ?? '',
-                'password_hash' => $passwordHash,
-                'salt' => $salt,
+                'password_hash' => $ph['password_hash'],
+                'salt' => $ph['salt'],
                 'active' => isset($data['active']) ? (int) $data['active'] : 1,
             ]);
 
@@ -220,14 +216,11 @@ class UserCrudService
             $updateFields['active'] = (int) $data['active'];
         }
 
-        // Update password if provided
+        // Update password if provided — Argon2id over plaintext (migration 2026-06-15).
         if (!empty($data['password'])) {
-            $salt = md5(rand(100000, 999999) . ($data['email'] ?? ''));
-            $sha1Hash = sha1($salt . $data['password']);
-
-            $hashAlgo = defined('PASSWORD_ARGON2I') ? PASSWORD_ARGON2I : PASSWORD_DEFAULT;
-            $updateFields['password_hash'] = password_hash($sha1Hash, $hashAlgo);
-            $updateFields['salt'] = $salt;
+            $ph = \AtomFramework\Core\Security\PasswordService::hash((string) $data['password']);
+            $updateFields['password_hash'] = $ph['password_hash'];
+            $updateFields['salt'] = $ph['salt'];
         }
 
         if (!empty($updateFields)) {

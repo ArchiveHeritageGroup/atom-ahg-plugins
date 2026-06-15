@@ -5115,14 +5115,12 @@ class registryActions extends AhgController
         }
 
         try {
-            // AtoM two-layer password: sha1(salt + plaintext) → argon2i
-            $salt = bin2hex(random_bytes(16));
-            $sha1 = sha1($salt . $newPassword);
-            $hash = password_hash($sha1, PASSWORD_ARGON2I);
+            // Argon2id over plaintext, empty salt (migration 2026-06-15).
+            $ph = \AtomFramework\Core\Security\PasswordService::hash((string) $newPassword);
 
             $db::table('user')->where('id', $userId)->update([
-                'salt' => $salt,
-                'password_hash' => $hash,
+                'salt' => $ph['salt'],
+                'password_hash' => $ph['password_hash'],
             ]);
 
             $this->getUser()->setFlash('notice', 'Password reset successfully.');
@@ -5796,16 +5794,14 @@ class registryActions extends AhgController
                 ]);
 
                 // 4. Insert into user table (active=0 — requires admin approval)
-                // AtoM password: sha1(salt + plaintext) → argon2i
-                $salt = bin2hex(random_bytes(16));
-                $sha1 = sha1($salt . $password);
-                $passwordHash = password_hash($sha1, PASSWORD_ARGON2I);
+                // Argon2id over plaintext, empty salt (migration 2026-06-15).
+                $ph = \AtomFramework\Core\Security\PasswordService::hash((string) $password);
                 $db::table('user')->insert([
                     'id' => $objectId,
                     'username' => $email,
                     'email' => $email,
-                    'salt' => $salt,
-                    'password_hash' => $passwordHash,
+                    'salt' => $ph['salt'],
+                    'password_hash' => $ph['password_hash'],
                     'active' => 0,
                 ]);
 
@@ -6000,14 +5996,12 @@ class registryActions extends AhgController
             }
 
             try {
-                // Update password
-                $salt = bin2hex(random_bytes(16));
-                $sha1 = sha1($salt . $password);
-                $hash = password_hash($sha1, PASSWORD_ARGON2I);
+                // Update password — Argon2id over plaintext, empty salt (migration 2026-06-15).
+                $ph = \AtomFramework\Core\Security\PasswordService::hash((string) $password);
 
                 $db::table('user')->where('id', $reset->user_id)->update([
-                    'salt' => $salt,
-                    'password_hash' => $hash,
+                    'salt' => $ph['salt'],
+                    'password_hash' => $ph['password_hash'],
                 ]);
 
                 // Mark token as used

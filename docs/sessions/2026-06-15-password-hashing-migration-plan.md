@@ -6,7 +6,14 @@
 - **Deploy P1 ALONE is safe + starts migrating users:** verify handles both schemes; legacy users keep logging in and get upgraded to Argon2id+salt='' on next login. Write sites still create legacy hashes (P2) — fine, they verify via the legacy branch. **No lockout risk.**
 - **`PasswordPolicyService.php:131`** (password-REUSE history check, not a login gate) deferred to P2 (it's part of the change-password flow).
 - **Files:** atom-framework {PasswordService.php(new), AuthService.php, UserService.php}; atom-ahg-plugins {ahgUserManagePlugin/UserCrudService.php, ahgRegistryPlugin/.../actions.class.php}.
-- **Remaining: P2** (write sites → PasswordService::hash + reuse-history) **P3** (ArchiveImporter raw-sha1 bug) **P4** (ahgResearchPlugin, locked).
+## ✅ P2 IMPLEMENTED (2026-06-15, unreleased) — write sites → PasswordService::hash
+All non-locked create/change/reset/CLI write sites now mint Argon2id-over-plaintext + `salt=''`:
+- atom-framework: `UserService::updatePassword`, `Console/.../AddSuperuserCommand.php:64`, `Console/.../ResetPasswordCommand.php:49`.
+- atom-ahg-plugins: `ahgUserManagePlugin/UserCrudService.php` (create + update), `ahgUserRegistrationPlugin/RegistrationService.php` (register; flows through request→approval which copies salt=''), `ahgRegistryPlugin actions.class.php` (register insert + 2 reset paths).
+- **Bonus bug fix:** AddSuperuserCommand + ResetPasswordCommand previously stored a **raw `sha1()`** as password_hash (unverifiable by AuthService — same class as the ArchiveImporter bug); now correct.
+- **Deferred (locked caller):** `PasswordPolicyService::isPasswordReused` + its ONLY caller `ahgCorePlugin/.../passwordEditAction.class.php` are both in locked ahgCorePlugin; the change-password write + reuse-history stay old-scheme there (verify+upgrade still handle those users). The reuse-check was already salt-imperfect and is not a login gate → moved to the locked-plugin pass (with P4).
+- All lint clean. New users are now Argon2id-from-birth; existing users upgrade on login (P1).
+- **Remaining: P3** (ArchiveImporter raw-sha1 bug) **P4** (ahgResearchPlugin writes + ahgCore passwordEdit/PasswordPolicy — all locked).
 
 ---
 

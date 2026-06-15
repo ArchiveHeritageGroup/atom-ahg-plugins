@@ -44,11 +44,11 @@ class RegistrationService
             return ['success' => false, 'error' => 'This username is already taken.'];
         }
 
-        // Hash password using AtoM's dual-layer approach
-        $salt = md5(rand(100000, 999999) . $data['email']);
-        $sha1Hash = sha1($salt . $data['password']);
-        $hashAlgo = defined('PASSWORD_ARGON2I') ? PASSWORD_ARGON2I : PASSWORD_DEFAULT;
-        $passwordHash = password_hash($sha1Hash, $hashAlgo);
+        // Argon2id over plaintext, empty salt (migration 2026-06-15). Stored on the
+        // request row and copied verbatim to the user on approval.
+        $ph = \AtomFramework\Core\Security\PasswordService::hash((string) $data['password']);
+        $passwordHash = $ph['password_hash'];
+        $salt = $ph['salt'];
 
         // Generate email verification token
         $token = bin2hex(random_bytes(32));
