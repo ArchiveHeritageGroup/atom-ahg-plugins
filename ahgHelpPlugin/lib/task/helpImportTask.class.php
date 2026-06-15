@@ -38,6 +38,11 @@ class helpImportTask extends arBaseTask
 
     /** @var array Plugin name detection from filenames */
     protected static $pluginMap = [
+        // Specific-before-generic: these must precede 'condition-'/'research'/etc.
+        // because matching is first-substring-wins (2026-06-15).
+        'ai-condition-assessment' => 'ahgAiConditionPlugin',
+        'researcher-submissions' => 'ahgResearcherPlugin',
+        'watched-folder-scanner' => 'ahgScanPlugin',
         '3d-model' => 'ahg3DModelPlugin',
         'access-request' => 'ahgAccessRequestPlugin',
         'advanced-search' => 'ahgSearchPlugin',
@@ -112,6 +117,45 @@ class helpImportTask extends arBaseTask
         'vendor-' => 'ahgVendorPlugin',
         'marketplace-' => 'ahgMarketplacePlugin',
         'workflow-' => 'ahgWorkflowPlugin',
+        // Application-wide help coverage (2026-06-15) — link the new guides to their plugins.
+        'dacs-manage' => 'ahgDacsManagePlugin',
+        'dublin-core-manage' => 'ahgDcManagePlugin',
+        'mods-manage' => 'ahgModsManagePlugin',
+        'rad-manage' => 'ahgRadManagePlugin',
+        'isadg-information-object-manage' => 'ahgInformationObjectManagePlugin',
+        'isdf-function-manage' => 'ahgFunctionManagePlugin',
+        'actor-manage' => 'ahgActorManagePlugin',
+        'rights-holder-manage' => 'ahgRightsHolderManagePlugin',
+        'accession-manage' => 'ahgAccessionManagePlugin',
+        'donor-manage' => 'ahgDonorManagePlugin',
+        'user-management' => 'ahgUserManagePlugin',
+        'user-registration' => 'ahgUserRegistrationPlugin',
+        'storage-management' => 'ahgStorageManagePlugin',
+        'menu-management' => 'ahgMenuManagePlugin',
+        'static-page-management' => 'ahgStaticPagePlugin',
+        'cdpa-compliance' => 'ahgCDPAPlugin',
+        'naz-compliance' => 'ahgNAZPlugin',
+        'nmmz-compliance' => 'ahgNMMZPlugin',
+        'ipsas-accounting' => 'ahgIPSASPlugin',
+        'ai-act-governance' => 'ahgAiCompliancePlugin',
+        'integrity-fixity' => 'ahgIntegrityPlugin',
+        'c2pa-content-credentials' => 'ahgC2paPlugin',
+        'version-control' => 'ahgVersionControlPlugin',
+        'ocfl-storage' => 'ahgOcflPlugin',
+        'resourcesync' => 'ahgResourceSyncPlugin',
+        'observability' => 'ahgObservabilityPlugin',
+        'ftp-sftp-upload' => 'ahgFtpPlugin',
+        'email-delivery' => 'ahgEmailDeliveryPlugin',
+        'gis-spatial-heritage' => 'ahgGISPlugin',
+        'image-ar' => 'ahgImageArPlugin',
+        'accessibility' => 'ahgAccessibilityPlugin',
+        'web-annotations' => 'ahgAnnotationsPlugin',
+        'authority-records' => 'ahgAuthorityPlugin',
+        'share-links' => 'ahgTimeLimitedShareLinkPlugin',
+        'functions-catalogue' => 'ahgFunctionsDocsPlugin',
+        'help-system' => 'ahgHelpPlugin',
+        'research-modes' => 'ahgResearchPlugin',
+        'ai-assistant' => 'ahgAIPlugin',
     ];
 
     protected function configure()
