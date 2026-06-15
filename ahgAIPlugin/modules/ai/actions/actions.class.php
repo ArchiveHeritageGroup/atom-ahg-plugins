@@ -1526,25 +1526,18 @@ class aiActions extends AhgController
     {
         $this->getResponse()->setContentType('application/json');
 
-        $apiUrl = $this->config('app_ai_api_url', 'http://192.168.0.112:5004');
-        $url = $apiUrl . '/ai/v1/translate/languages';
+        // Route through the AHG AI gateway (keyed + SSRF-guarded) instead of a
+        // direct node port (migration 2026-06-15).
+        $langs = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()->translateLanguages();
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        if ($httpCode !== 200 || !$response) {
+        if ($langs === null) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => 'Could not fetch languages'
             ]));
         }
 
-        return $this->renderText($response);
+        return $this->renderText(json_encode($langs));
     }
 
     /**
@@ -1552,44 +1545,16 @@ class aiActions extends AhgController
      */
     private function callTranslationApi($text, $sourceLang, $targetLang)
     {
-        $apiUrl = $this->config('app_ai_api_url', 'http://192.168.0.112:5004');
-        $apiKey = $this->config('app_ai_api_key', ''); // no embedded credential (security audit 2026-06-15)
+        // Route through the AHG AI gateway (keyed from ahg_ai_settings +
+        // SSRF-guarded) instead of a direct node port (migration 2026-06-15).
+        $data = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()
+            ->translate((string) $text, (string) $sourceLang, (string) $targetLang);
 
-        $url = $apiUrl . '/ai/v1/translate';
-
-        $payload = json_encode([
-            'text' => $text,
-            'source' => $sourceLang,
-            'target' => $targetLang
-        ]);
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'X-API-Key: ' . $apiKey
-        ]);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error) {
-            return ['success' => false, 'error' => 'Connection error: ' . $error];
+        if ($data === null) {
+            return ['success' => false, 'error' => 'Translation service unavailable'];
         }
 
-        if ($httpCode !== 200) {
-            $data = json_decode($response, true);
-            return ['success' => false, 'error' => $data['error'] ?? "HTTP $httpCode"];
-        }
-
-        $data = json_decode($response, true);
-
-        if (!$data || !isset($data['success']) || !$data['success']) {
+        if (!isset($data['success']) || !$data['success']) {
             return ['success' => false, 'error' => $data['error'] ?? 'Unknown error'];
         }
 

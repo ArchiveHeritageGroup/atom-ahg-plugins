@@ -34,7 +34,7 @@
     ],
     "llm": {
         "provider": "ollama",
-        "endpoint": "http://192.168.0.112:11434",
+        "endpoint": "https://ai.theahg.co.za/ai/v1/ollama",
         "model": "llama3.1:8b"
     },
     "is_core": false,
