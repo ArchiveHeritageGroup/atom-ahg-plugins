@@ -37,7 +37,14 @@ Four parallel audits (CSP, authZ/ACL, injection/XSS/file, secrets/SSRF/crypto). 
 - **[AGENT] md5() for dedup/cache keys** (ErrorNotificationService, CCO vocab cache) — collision risk; prefer sha256.
 - **[AGENT] File-extension allowlist** missing on DonorAgreement upload (`editAction.class.php:309`); zip extraction without size cap (`ahgIiifPlugin media actions:925`).
 
-## CSP (the headline)
+## CSP CLEANUP (2026-06-15) — verify-first collapsed the "37"
+Auditing each flagged inline `<script>` showed the count was massively inflated: many are **external `src=` scripts** (no nonce needed), several were **already nonce'd**, ~14 are in the **dead `heritage.bak/` dir** (no active `heritage` module sibling, unreferenced, and a dotted dir name can't load as a Symfony module → never renders → zero CSP risk), and the rest are in **locked plugins**.
+- **FIXED (non-locked):** `ahgVendorPlugin/serviceTypesSuccess.php:243` (added nonce) + `ahg3DModelPlugin/Model3DHelper.php` splat-viewer inline init script (nonce injected into the heredoc). Lint clean.
+- **FALSE POSITIVES (no action):** ahg3DModel editSuccess:9/viewSuccess:17 (external model-viewer src), ahgLandingPage _block_glam_browser:45 (already nonce'd).
+- **NEEDS EXPLICIT UNLOCK (locked plugins — batched for Johan):** nonce the genuine inline scripts in ahgGalleryPlugin (indexSuccess — verify which are inline vs importmap), ahgLibraryPlugin (kbartVendor:201, z3950 editSuccess:176, opac:359), ahgSecurityClearancePlugin (compliance index.blade:295), ahgThemeB5Plugin (_show3D:20), ahgStorageManagePlugin (strongroom browseSuccess:4), ahgCorePlugin (_tagManager:5 — conditional GTM fallback). Plus optional hygiene: delete the dead `heritage.bak/` + `*.class.php.bak` cruft in ahgThemeB5Plugin.
+- **`style-src 'unsafe-inline'` removal = separate refactor, NOT done:** removing it breaks ~2,645 inline `style=` attributes; needs its own project. CSP is in Report-Only mode so nothing is breaking meanwhile.
+
+## CSP (original audit notes)
 - **Mode:** currently **Report-Only** (`config/app.yml:68`) — violations are logged, not enforced. So missing-nonce items are not breaking *yet*.
 - **`style-src 'unsafe-inline'`** in `config/app.yml:76` — defeats style CSP. Removing it would break **2,645 inline `style=` attributes + 33 inline `<style>`** → a refactor project, not a quick fix. (script-src correctly has NO unsafe-inline; no unsafe-eval anywhere.)
 - **Inline `<script>` WITHOUT nonce: 37** (of 581 = ~94% compliant). Many (~14) are in `ahgThemeB5Plugin/modules/heritage.bak/` — a **backup/dead dir** (delete it). Genuine live ones: ahgGalleryPlugin (6), ahgLibraryPlugin (3), ahg3DModelPlugin (2/3), ahgStorageManagePlugin strongroom, ahgVendorPlugin, ahgLandingPagePlugin, a few action/service-generated `window.print()` blocks.

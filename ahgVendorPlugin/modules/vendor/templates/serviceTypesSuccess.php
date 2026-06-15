@@ -240,7 +240,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
-<script id="sortable-table-script">
+<script id="sortable-table-script" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener("DOMContentLoaded", function() {
     const table = document.querySelector(".table tbody");
     if (!table) return;

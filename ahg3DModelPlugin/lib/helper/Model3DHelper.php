@@ -274,6 +274,9 @@ function render_splat_viewer(string $url, array $options = []): string
     $title = $options['title'] ?? 'Gaussian Splat';
     $viewerId = 'splat-' . substr(md5($url . uniqid()), 0, 8);
     $pluginPath = '/plugins/ahg3DModelPlugin';
+    // CSP nonce for the inline init script (security audit 2026-06-15).
+    $n = \sfConfig::get('csp_nonce', '');
+    $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
 
     $html = <<<HTML
 <div class="splat-viewer-container" id="{$viewerId}-container">
@@ -299,7 +302,7 @@ function render_splat_viewer(string $url, array $options = []): string
 </div>
 <script src="{$pluginPath}/web/vendor/gaussian-splats3d/gaussian-splats-3d.umd.js"></script>
 <script src="{$pluginPath}/web/js/model3d.js"></script>
-<script>
+<script {$nonceAttr}>
 (function() {
     var container = document.getElementById('{$viewerId}');
     var loading = document.getElementById('{$viewerId}-loading');
