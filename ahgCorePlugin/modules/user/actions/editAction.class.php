@@ -366,7 +366,7 @@ class UserEditAction extends DefaultEditAction
                         }
 
                         // Generate new OAI-PMH API key
-                        $apiKey->value = bin2hex(openssl_random_pseudo_bytes(8));
+                        $apiKey->value = bin2hex(random_bytes(16)); // CSPRNG, 16 bytes (was openssl_random_pseudo_bytes(8); security audit 2026-06-15)
 
                         if (!isset($apiKey->id)) {
                             $this->resource->propertys[] = $apiKey;

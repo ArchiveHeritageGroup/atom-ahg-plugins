@@ -1277,7 +1277,7 @@ class SecurityClearanceService
     public static function generateWatermark(int $userId, int $objectId, ?int $digitalObjectId = null): array
     {
         $user = DB::table('user')->where('id', $userId)->first();
-        $code = strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 12));
+        $code = strtoupper(substr(bin2hex(random_bytes(8)), 0, 12)); // CSPRNG, not md5(uniqid(mt_rand)) (security audit 2026-06-15)
 
         $watermarkText = sprintf(
             'CONFIDENTIAL - %s - %s - %s',
