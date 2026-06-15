@@ -656,15 +656,17 @@ class ArchiveImporter
                 'authorized_form_of_name' => $user['display_name'] ?? $user['username'] ?? '',
             ]);
 
-            // Insert user with a random temporary password (must be reset)
+            // Insert user with a random temporary password (must be reset).
+            // Argon2id over plaintext, empty salt — was a raw sha1() that
+            // AuthService could not verify (migration P3, 2026-06-15).
             $tempPassword = bin2hex(random_bytes(16));
-            $salt = bin2hex(random_bytes(32));
+            $ph = \AtomFramework\Core\Security\PasswordService::hash($tempPassword);
             DB::table('user')->insert([
                 'id' => $objectId,
                 'username' => $user['username'] ?? $user['email'],
                 'email' => $user['email'] ?? null,
-                'password_hash' => sha1($salt . $tempPassword),
-                'salt' => $salt,
+                'password_hash' => $ph['password_hash'],
+                'salt' => $ph['salt'],
                 'active' => $user['active'] ?? 1,
             ]);
 

@@ -13,7 +13,10 @@ All non-locked create/change/reset/CLI write sites now mint Argon2id-over-plaint
 - **Bonus bug fix:** AddSuperuserCommand + ResetPasswordCommand previously stored a **raw `sha1()`** as password_hash (unverifiable by AuthService — same class as the ArchiveImporter bug); now correct.
 - **Deferred (locked caller):** `PasswordPolicyService::isPasswordReused` + its ONLY caller `ahgCorePlugin/.../passwordEditAction.class.php` are both in locked ahgCorePlugin; the change-password write + reuse-history stay old-scheme there (verify+upgrade still handle those users). The reuse-check was already salt-imperfect and is not a login gate → moved to the locked-plugin pass (with P4).
 - All lint clean. New users are now Argon2id-from-birth; existing users upgrade on login (P1).
-- **Remaining: P3** (ArchiveImporter raw-sha1 bug) **P4** (ahgResearchPlugin writes + ahgCore passwordEdit/PasswordPolicy — all locked).
+- **Remaining: P4** (ahgResearchPlugin writes + ahgCore passwordEdit/PasswordPolicy — all locked).
+
+## P3 IMPLEMENTED (2026-06-15, unreleased)
+`ahgPortableExportPlugin/ArchiveImporter.php:666` — imported users were stored with a **raw sha1($salt.$tempPassword)** as password_hash (AuthService can't verify it). Now `PasswordService::hash($tempPassword)` (Argon2id + salt=''). Temp password is still random + must-be-reset; this just makes the stored hash valid. Lint clean. **No raw-sha1-as-password_hash writes remain in code** — only locked ahgResearch/ahgCore still use the old verifiable dual-layer argon(sha1) scheme (P4).
 
 ---
 
