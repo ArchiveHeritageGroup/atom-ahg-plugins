@@ -88,3 +88,13 @@ ric_provenance_graph_id:
   url: /ricExplorer/provenance/:id
   param: { module: ricExplorer, action: provenanceGraph }
   requirements: { id: \d+ }
+
+# Unified cross-domain knowledge graph (#150) — record ↔ creators/repository/subjects/related
+ric_knowledge_graph:
+  url: /ricExplorer/knowledge-graph
+  param: { module: ricExplorer, action: knowledgeGraph }
+
+ric_knowledge_graph_id:
+  url: /ricExplorer/knowledge-graph/:id
+  param: { module: ricExplorer, action: knowledgeGraph }
+  requirements: { id: \d+ }
