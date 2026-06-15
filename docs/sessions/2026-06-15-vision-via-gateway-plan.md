@@ -3,7 +3,9 @@
 ## ✅ Step 1 + ConditionAIService IMPLEMENTED 2026-06-15 (unreleased)
 - **Step 1:** `AiGatewayClient::visionGenerate($prompt, $base64Images, $model=null, $options=[])` — keyed POST `/ollama/api/generate` with `{model, prompt, images, stream:false, options(temperature/seed/num_predict)}`; returns `{success, text(=`$data['response']`), model, error, raw}`; fails closed without a key. Lint + Reflection verified.
 - **ConditionAIService::analyzePhoto** → `AiGatewayClient::fromSettings()->visionGenerate($prompt, [$base64], $this->model, ['temperature'=>0,'seed'=>42,'timeout'=>…])`; dropped the localhost curl; image-prep/buildPrompt/parseResponse unchanged. (`$this->ollamaUrl` property now unused — harmless.) Lint clean; no `/api/generate`/`curl_init` left.
-- **Remaining:** ahgThemeB5 voice `describeImageAction::callLocal` + `describeObjectAction::callLocal` + `voiceConfig.php` — same swap, **pending Johan's ahgThemeB5 unlock**.
+- **✅ Voice callers DONE 2026-06-15 (Johan unlocked ahgThemeB5):** `describeImageAction::callLocal` + `describeObjectAction::callCollageLocal` → `AiGatewayClient::fromSettings()->visionGenerate([$base64], $model, ['timeout'=>…])`; return shapes (success/description/source/model + error/fallback_available) preserved; the Anthropic `callCloud()` paths untouched (legit external). Lint clean; no direct `/api/generate` vision calls left. The `local_llm_url` config defaults (voiceConfig.php + the two loadConfig defaults) are now **vestigial** (call path no longer reads them) — left as harmless override docs.
+- **ALL THREE VISION CALLERS NOW ROUTE THROUGH THE GATEWAY.**
+- ⚠️ **Dependency:** the plugin changes need atom-framework (AiGatewayClient::visionGenerate) deployed first.
 - ⚠️ Still needs the operator prereq below (gateway must serve `llava:7b`) before a live vision smoke test passes.
 
 ---

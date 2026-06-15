@@ -537,53 +537,37 @@ class ahgVoiceDescribeImageAction extends sfAction
     {
         require_once dirname(__FILE__) . '/../lib/VoicePromptTemplates.php';
 
-        $url = rtrim($config['local_llm_url'] ?? 'http://localhost:11434', '/') . '/api/generate';
         $model = $config['local_llm_model'] ?? 'llava:7b';
         $timeout = (int) ($config['local_llm_timeout'] ?? 30);
         $prompt = VoicePromptTemplates::getPrompt($context);
 
-        $payload = json_encode([
-            'model'  => $model,
-            'prompt' => $prompt,
-            'images' => [$base64],
-            'stream' => false,
-        ]);
+        // Vision via the AHG AI gateway (keyed + SSRF-guarded) — no direct node
+        // port (migration 2026-06-15). "local" provider = local models via gateway.
+        $result = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()->visionGenerate(
+            $prompt,
+            [$base64],
+            $model,
+            ['timeout' => $timeout]
+        );
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-            CURLOPT_TIMEOUT        => $timeout,
-            CURLOPT_CONNECTTIMEOUT => 5,
-        ]);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error || $httpCode !== 200) {
+        if (empty($result['success'])) {
             return [
                 'success' => false,
-                'error' => 'Local LLM unavailable' . ($error ? ': ' . $error : ''),
+                'error' => 'Local LLM unavailable' . (!empty($result['error']) ? ': ' . $result['error'] : ''),
                 'fallback_available' => true,
             ];
         }
 
-        $data = json_decode($response, true);
-        $description = $data['response'] ?? '';
-
-        if (empty($description)) {
+        $description = trim((string) $result['text']);
+        if ('' === $description) {
             return ['success' => false, 'error' => 'Local LLM returned empty response'];
         }
 
         return [
             'success'     => true,
-            'description' => trim($description),
+            'description' => $description,
             'source'      => 'local',
-            'model'       => $model,
+            'model'       => $result['model'] ?? $model,
         ];
     }
 
