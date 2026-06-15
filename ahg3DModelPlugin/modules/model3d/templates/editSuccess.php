@@ -280,6 +280,74 @@ $hotspots = $sf_data->getRaw('hotspots');
         </div>
     </div>
 
+    <?php
+      $mv  = fn($f) => esc_entities((string) ($model->$f ?? ''));
+      $sel = fn($f, $v) => ((string) ($model->$f ?? '') === (string) $v ? 'selected' : '');
+      $yn  = function ($f) use ($model, $sel) {
+          return '<option value="" ' . $sel($f, '') . '>—</option>'
+               . '<option value="1" ' . $sel($f, '1') . '>Yes</option>'
+               . '<option value="0" ' . $sel($f, '0') . '>No</option>';
+      };
+    ?>
+    <div class="card mt-4">
+      <div class="card-header p-0">
+        <button class="btn btn-link text-decoration-none w-100 text-start px-3 py-2" type="button"
+                data-bs-toggle="collapse" data-bs-target="#captureMeta">
+          <i class="fas fa-ruler-combined me-2"></i>Capture, provenance &amp; rights metadata
+        </button>
+      </div>
+      <div id="captureMeta" class="collapse">
+        <div class="card-body">
+          <h6 class="text-muted">Physical dimensions</h6>
+          <div class="row g-2 mb-3">
+            <div class="col-md-2"><label class="form-label">Width</label><input type="number" step="0.0001" class="form-control" name="real_width" value="<?php echo $mv('real_width') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Height</label><input type="number" step="0.0001" class="form-control" name="real_height" value="<?php echo $mv('real_height') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Depth</label><input type="number" step="0.0001" class="form-control" name="real_depth" value="<?php echo $mv('real_depth') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Unit</label><input type="text" class="form-control" name="dimension_unit" value="<?php echo $mv('dimension_unit') ?>" placeholder="mm/cm/m"></div>
+            <div class="col-md-2"><label class="form-label">Coord system</label><input type="text" class="form-control" name="coordinate_system" value="<?php echo $mv('coordinate_system') ?>" placeholder="Y-up"></div>
+            <div class="col-md-2"><label class="form-label">Scale note</label><input type="text" class="form-control" name="scale_note" value="<?php echo $mv('scale_note') ?>"></div>
+            <div class="col-md-8"><label class="form-label">Bounding box</label><input type="text" class="form-control" name="bounding_box" value="<?php echo $mv('bounding_box') ?>" placeholder="minX,minY,minZ maxX,maxY,maxZ"></div>
+            <div class="col-md-4"><label class="form-label">Georeference</label><input type="text" class="form-control" name="georeference" value="<?php echo $mv('georeference') ?>"></div>
+          </div>
+
+          <h6 class="text-muted">Format &amp; technical</h6>
+          <div class="row g-2 mb-3">
+            <div class="col-md-3"><label class="form-label">Format version</label><input type="text" class="form-control" name="format_version" value="<?php echo $mv('format_version') ?>" placeholder="glTF 2.0"></div>
+            <div class="col-md-2"><label class="form-label">Compression</label><input type="text" class="form-control" name="compression" value="<?php echo $mv('compression') ?>" placeholder="Draco"></div>
+            <div class="col-md-2"><label class="form-label">LOD levels</label><input type="number" class="form-control" name="lod_levels" value="<?php echo $mv('lod_levels') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Lossless master</label><select class="form-select" name="is_lossless_master"><?php echo $yn('is_lossless_master') ?></select></div>
+            <div class="col-md-2"><label class="form-label">Watertight</label><select class="form-select" name="is_watertight"><?php echo $yn('is_watertight') ?></select></div>
+            <div class="col-md-1"><label class="form-label">Rig</label><select class="form-select" name="has_rig"><?php echo $yn('has_rig') ?></select></div>
+            <div class="col-md-6"><label class="form-label">PBR maps</label><input type="text" class="form-control" name="pbr_maps" value="<?php echo $mv('pbr_maps') ?>" placeholder="baseColor,normal,metalRough,occlusion,emissive"></div>
+            <div class="col-md-3"><label class="form-label">Texture colorspace</label><input type="text" class="form-control" name="texture_colorspace" value="<?php echo $mv('texture_colorspace') ?>"></div>
+            <div class="col-md-3"><label class="form-label">Turntable MP4 path</label><input type="text" class="form-control" name="turntable_mp4_path" value="<?php echo $mv('turntable_mp4_path') ?>"></div>
+          </div>
+
+          <h6 class="text-muted">Capture provenance</h6>
+          <div class="row g-2 mb-3">
+            <div class="col-md-3"><label class="form-label">Capture method</label><input type="text" class="form-control" name="capture_method" value="<?php echo $mv('capture_method') ?>" placeholder="photogrammetry/laser scan"></div>
+            <div class="col-md-3"><label class="form-label">Capture device</label><input type="text" class="form-control" name="capture_device" value="<?php echo $mv('capture_device') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Capture date</label><input type="date" class="form-control" name="capture_date" value="<?php echo $mv('capture_date') ?>"></div>
+            <div class="col-md-4"><label class="form-label">Capture operator</label><input type="text" class="form-control" name="capture_operator" value="<?php echo $mv('capture_operator') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Source count</label><input type="number" class="form-control" name="source_count" value="<?php echo $mv('source_count') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Point density</label><input type="text" class="form-control" name="point_density" value="<?php echo $mv('point_density') ?>"></div>
+            <div class="col-md-2"><label class="form-label">Accuracy (mm)</label><input type="number" step="0.001" class="form-control" name="accuracy_mm" value="<?php echo $mv('accuracy_mm') ?>"></div>
+            <div class="col-md-6"><label class="form-label">Processing software</label><input type="text" class="form-control" name="processing_software" value="<?php echo $mv('processing_software') ?>"></div>
+            <div class="col-12"><label class="form-label">Processing notes</label><textarea class="form-control" name="processing_notes" rows="2"><?php echo $mv('processing_notes') ?></textarea></div>
+          </div>
+
+          <h6 class="text-muted">Rights &amp; attribution</h6>
+          <div class="row g-2">
+            <div class="col-md-4"><label class="form-label">Model author</label><input type="text" class="form-control" name="model_author" value="<?php echo $mv('model_author') ?>"></div>
+            <div class="col-md-4"><label class="form-label">Licence</label><input type="text" class="form-control" name="model_license" value="<?php echo $mv('model_license') ?>" placeholder="CC BY 4.0"></div>
+            <div class="col-md-4"><label class="form-label">Licence holder</label><input type="text" class="form-control" name="model_license_holder" value="<?php echo $mv('model_license_holder') ?>"></div>
+            <div class="col-md-8"><label class="form-label">Attribution</label><input type="text" class="form-control" name="attribution" value="<?php echo $mv('attribution') ?>"></div>
+            <div class="col-12"><label class="form-label">Derivation note</label><textarea class="form-control" name="derivation_note" rows="2"><?php echo $mv('derivation_note') ?></textarea></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <hr>
 
     <div class="d-flex justify-content-between">

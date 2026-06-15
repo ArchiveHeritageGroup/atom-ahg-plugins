@@ -429,6 +429,25 @@ class model3dActions extends AhgController
                 'updated_at' => date('Y-m-d H:i:s'),
             ]);
 
+        // Capture / provenance / technical / licensing metadata (Heratio parity).
+        $nz = fn($k) => (($v = trim((string) $request->getParameter($k))) !== '') ? $v : null;
+        $nzInt = fn($k) => (($v = $request->getParameter($k)) !== null && $v !== '') ? (int) $v : null;
+        $nzDec = fn($k) => (($v = $request->getParameter($k)) !== null && $v !== '') ? (float) $v : null;
+        $nzBool = fn($k) => in_array($request->getParameter($k), ['0', '1'], true) ? (int) $request->getParameter($k) : null;
+        $db::table('object_3d_model')->where('id', $modelId)->update([
+            'real_width' => $nzDec('real_width'), 'real_height' => $nzDec('real_height'), 'real_depth' => $nzDec('real_depth'),
+            'dimension_unit' => $nz('dimension_unit'), 'scale_note' => $nz('scale_note'), 'coordinate_system' => $nz('coordinate_system'),
+            'bounding_box' => $nz('bounding_box'), 'format_version' => $nz('format_version'), 'compression' => $nz('compression'),
+            'is_lossless_master' => $nzBool('is_lossless_master'), 'pbr_maps' => $nz('pbr_maps'), 'texture_colorspace' => $nz('texture_colorspace'),
+            'lod_levels' => $nzInt('lod_levels'), 'is_watertight' => $nzBool('is_watertight'), 'has_rig' => $nzBool('has_rig'),
+            'capture_method' => $nz('capture_method'), 'capture_device' => $nz('capture_device'), 'capture_date' => $nz('capture_date'),
+            'capture_operator' => $nz('capture_operator'), 'source_count' => $nzInt('source_count'), 'point_density' => $nz('point_density'),
+            'accuracy_mm' => $nzDec('accuracy_mm'), 'processing_software' => $nz('processing_software'), 'processing_notes' => $nz('processing_notes'),
+            'georeference' => $nz('georeference'), 'model_author' => $nz('model_author'), 'derivation_note' => $nz('derivation_note'),
+            'model_license' => $nz('model_license'), 'model_license_holder' => $nz('model_license_holder'), 'attribution' => $nz('attribution'),
+            'turntable_mp4_path' => $nz('turntable_mp4_path'),
+        ]);
+
         // Update translations
         $db::table('object_3d_model_i18n')
             ->updateOrInsert(

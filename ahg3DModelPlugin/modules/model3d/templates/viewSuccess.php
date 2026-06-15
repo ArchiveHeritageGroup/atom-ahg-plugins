@@ -56,6 +56,47 @@ $posterUrl = $model->poster_image ? "{$baseUrl}/uploads/{$model->poster_image}" 
 </div>
 <?php endif ?>
 
+<?php
+// Capture / provenance / rights metadata panel — shows only populated fields.
+$dims = array_filter([$model->real_width ?? null, $model->real_height ?? null, $model->real_depth ?? null], fn ($v) => $v !== null && $v !== '');
+$metaRows = [
+    'Dimensions'      => $dims ? (implode(' × ', array_map(fn ($v) => rtrim(rtrim((string) $v, '0'), '.'), [$model->real_width, $model->real_height, $model->real_depth])) . ' ' . esc_entities((string) ($model->dimension_unit ?? ''))) : '',
+    'Coordinate system' => esc_entities((string) ($model->coordinate_system ?? '')),
+    'Bounding box'    => esc_entities((string) ($model->bounding_box ?? '')),
+    'Format'          => esc_entities(trim(((string) ($model->format_version ?? '')) . ' ' . ($model->compression ? '(' . $model->compression . ')' : ''))),
+    'LOD levels'      => ($model->lod_levels ?? '') !== '' ? (int) $model->lod_levels : '',
+    'PBR maps'        => esc_entities((string) ($model->pbr_maps ?? '')),
+    'Watertight'      => isset($model->is_watertight) && $model->is_watertight !== null ? ($model->is_watertight ? 'Yes' : 'No') : '',
+    'Capture method'  => esc_entities((string) ($model->capture_method ?? '')),
+    'Capture device'  => esc_entities((string) ($model->capture_device ?? '')),
+    'Capture date'    => esc_entities((string) ($model->capture_date ?? '')),
+    'Capture operator' => esc_entities((string) ($model->capture_operator ?? '')),
+    'Source count'    => ($model->source_count ?? '') !== '' ? (int) $model->source_count : '',
+    'Accuracy (mm)'   => esc_entities((string) ($model->accuracy_mm ?? '')),
+    'Processing'      => esc_entities((string) ($model->processing_software ?? '')),
+    'Author'          => esc_entities((string) ($model->model_author ?? '')),
+    'Licence'         => esc_entities(trim(((string) ($model->model_license ?? '')) . ($model->model_license_holder ? ' — ' . $model->model_license_holder : ''))),
+    'Attribution'     => esc_entities((string) ($model->attribution ?? '')),
+];
+$metaRows = array_filter($metaRows, fn ($v) => $v !== '' && $v !== null);
+?>
+<?php if ($metaRows): ?>
+<div class="card mb-4">
+    <div class="card-header"><i class="fas fa-ruler-combined me-2"></i><?php echo __('Capture &amp; provenance') ?></div>
+    <div class="card-body">
+        <dl class="row mb-0">
+            <?php foreach ($metaRows as $k => $v): ?>
+                <dt class="col-sm-3 text-muted"><?php echo $k ?></dt><dd class="col-sm-9"><?php echo $v ?></dd>
+            <?php endforeach ?>
+        </dl>
+        <?php if (!empty($model->derivation_note) || !empty($model->processing_notes)): ?>
+          <?php if (!empty($model->processing_notes)): ?><p class="small text-muted mt-2 mb-0"><strong>Processing notes:</strong> <?php echo nl2br(esc_entities($model->processing_notes)) ?></p><?php endif ?>
+          <?php if (!empty($model->derivation_note)): ?><p class="small text-muted mb-0"><strong>Derivation:</strong> <?php echo nl2br(esc_entities($model->derivation_note)) ?></p><?php endif ?>
+        <?php endif ?>
+    </div>
+</div>
+<?php endif ?>
+
 <!-- 3D Viewer -->
 <div class="card mb-4">
     <div class="card-body p-0">
