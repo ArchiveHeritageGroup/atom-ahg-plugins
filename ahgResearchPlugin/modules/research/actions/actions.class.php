@@ -1003,9 +1003,10 @@ class researchActions extends AhgController
                 
                 if ($wasRejected) {
                     // Reactivate existing user with new password
-                    $salt = md5(rand(100000, 999999) . $email);
-                    $sha1Hash = sha1($salt . $password);
-                    $passwordHash = password_hash($sha1Hash, PASSWORD_ARGON2I);
+                    // Argon2id over plaintext, empty salt (migration P4, 2026-06-15).
+                    $ph = \AtomFramework\Core\Security\PasswordService::hash($password);
+                    $passwordHash = $ph['password_hash'];
+                    $salt = $ph['salt'];
                     
                     DB::table('user')->where('id', $existingUser->id)->update([
                         'username' => $username,
@@ -1065,10 +1066,10 @@ class researchActions extends AhgController
 
     protected function createAtomUser(string $username, string $email, string $password): int
     {
-        // AtoM double-hash: SHA1(salt+password) then Argon2i
-        $salt = md5(rand(100000, 999999) . $email);
-        $sha1Hash = sha1($salt . $password);
-        $passwordHash = password_hash($sha1Hash, PASSWORD_ARGON2I);
+        // Argon2id over plaintext, empty salt (migration P4, 2026-06-15).
+        $ph = \AtomFramework\Core\Security\PasswordService::hash($password);
+        $passwordHash = $ph['password_hash'];
+        $salt = $ph['salt'];
         $now = date('Y-m-d H:i:s');
         
         // AtoM inheritance: object -> actor -> user
@@ -1163,8 +1164,12 @@ class researchActions extends AhgController
                 $this->getUser()->setFlash('error', 'Passwords do not match');
                 return sfView::SUCCESS;
             }
-            $salt = bin2hex(random_bytes(16));
-            $passwordHash = password_hash($password, PASSWORD_ARGON2I);
+            // Argon2id over plaintext, empty salt (migration P4, 2026-06-15) — was
+            // argon(plaintext) with a random salt, which the scheme-aware verify
+            // would have mis-treated as legacy and rejected.
+            $ph = \AtomFramework\Core\Security\PasswordService::hash($password);
+            $passwordHash = $ph['password_hash'];
+            $salt = $ph['salt'];
             DB::table('user')->where('id', $reset->user_id)->update([
                 'password_hash' => $passwordHash,
                 'salt' => $salt,
@@ -1340,11 +1345,12 @@ class researchActions extends AhgController
             $this->forward404('Researcher not found');
         }
         $newPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 12);
-        $salt = bin2hex(random_bytes(16));
-        $passwordHash = sha1($salt . $newPassword);
+        // Argon2id over plaintext, empty salt (migration P4, 2026-06-15) — was a
+        // raw sha1() that AuthService could not verify.
+        $ph = \AtomFramework\Core\Security\PasswordService::hash($newPassword);
         DB::table('user')->where('id', $researcher->user_id)->update([
-            'password_hash' => $passwordHash,
-            'salt' => $salt,
+            'password_hash' => $ph['password_hash'],
+            'salt' => $ph['salt'],
         ]);
         $this->getUser()->setFlash('success', "Password reset. New password: <strong>{$newPassword}</strong>");
         $this->redirect('research/viewResearcher?id=' . $researcherId);

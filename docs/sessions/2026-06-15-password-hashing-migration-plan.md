@@ -13,7 +13,15 @@ All non-locked create/change/reset/CLI write sites now mint Argon2id-over-plaint
 - **Bonus bug fix:** AddSuperuserCommand + ResetPasswordCommand previously stored a **raw `sha1()`** as password_hash (unverifiable by AuthService — same class as the ArchiveImporter bug); now correct.
 - **Deferred (locked caller):** `PasswordPolicyService::isPasswordReused` + its ONLY caller `ahgCorePlugin/.../passwordEditAction.class.php` are both in locked ahgCorePlugin; the change-password write + reuse-history stay old-scheme there (verify+upgrade still handle those users). The reuse-check was already salt-imperfect and is not a login gate → moved to the locked-plugin pass (with P4).
 - All lint clean. New users are now Argon2id-from-birth; existing users upgrade on login (P1).
-- **Remaining: P4** (ahgResearchPlugin writes + ahgCore passwordEdit/PasswordPolicy — all locked).
+- **P4 DONE — see below.**
+
+## P4 IMPLEMENTED (2026-06-15, unreleased) — locked plugins (Johan-authorized unlock)
+- **ahgResearchPlugin** 4 direct-DB write sites → `PasswordService::hash` (Argon2id + salt=''): createAtomUser (1069), reactivate-rejected (1006), researcher reset (1166 — was argon(plaintext) with a RANDOM salt → scheme-aware verify would have mis-treated as legacy and rejected: BUG fixed), admin reset (1344 — was raw sha1(): BUG fixed). Lint clean.
+- **ahgCorePlugin `passwordEditAction` + `PasswordPolicyService` — correctly LEFT AS-IS:** the actual password write delegates to base-AtoM `QubitUser::setPassword` (lib/model/ — HARD-LOCKED), which writes the legacy dual-layer (`salt=md5(rand.email)`, `argon(sha1(salt.pw))`). That is verifiable by PasswordService's legacy branch and upgrades on next login. The reuse-history uses *unsalted* sha1 consistently for both check + record → already scheme-independent. Nothing to change.
+- **Single unavoidable legacy writer remaining = base-AtoM `QubitUser::setPassword`** (locked; used by the Symfony user-edit path). Cannot change without modifying base AtoM. Impact is nil: those users are transparently migrated to Argon2id on their next login by P1's verify+upgrade.
+
+## ✅ MIGRATION COMPLETE (P0–P4, unreleased)
+Every app-owned write site mints Argon2id-over-plaintext + salt=''. All login-verify paths support both schemes and upgrade legacy users on login. Raw-sha1 storage bugs (CLI add-superuser/reset-password, ArchiveImporter, research admin-reset) all fixed; research reset random-salt bug fixed. Only base-AtoM QubitUser still writes legacy (locked, auto-upgraded on login).
 
 ## P3 IMPLEMENTED (2026-06-15, unreleased)
 `ahgPortableExportPlugin/ArchiveImporter.php:666` — imported users were stored with a **raw sha1($salt.$tempPassword)** as password_hash (AuthService can't verify it). Now `PasswordService::hash($tempPassword)` (Argon2id + salt=''). Temp password is still random + must-be-reset; this just makes the stored hash valid. Lint clean. **No raw-sha1-as-password_hash writes remain in code** — only locked ahgResearch/ahgCore still use the old verifiable dual-layer argon(sha1) scheme (P4).
