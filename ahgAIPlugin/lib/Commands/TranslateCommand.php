@@ -221,6 +221,7 @@ class TranslateCommand extends BaseCommand
         }
 
         $script = $this->getAtomRoot() . '/atom-ahg-python/src/atom_ahg/resources/translation.py';
+        require_once dirname(__DIR__) . '/Services/TranslationMemoryService.php';
 
         foreach ($fields as $field) {
             $field = trim($field);
@@ -230,27 +231,36 @@ class TranslateCommand extends BaseCommand
                 continue;
             }
 
-            // Call Python translation
-            $cmd = sprintf(
-                '%s %s translate %s --from=%s --to=%s 2>&1',
-                escapeshellarg($pythonPath),
-                escapeshellarg($script),
-                escapeshellarg($sourceText),
-                escapeshellarg($fromCulture),
-                escapeshellarg($toCulture)
-            );
+            // Translation memory: reuse a prior translation of the same source
+            // into the same language instead of re-running Argos.
+            $translatedText = \TranslationMemoryService::lookup($sourceText, $fromCulture, $toCulture);
 
-            $output = [];
-            $code = 0;
-            exec($cmd, $output, $code);
-            $result = json_decode(implode('', $output), true);
+            if (null === $translatedText) {
+                // Call Python translation
+                $cmd = sprintf(
+                    '%s %s translate %s --from=%s --to=%s 2>&1',
+                    escapeshellarg($pythonPath),
+                    escapeshellarg($script),
+                    escapeshellarg($sourceText),
+                    escapeshellarg($fromCulture),
+                    escapeshellarg($toCulture)
+                );
 
-            if (!isset($result['translation'])) {
-                $this->warning("Translation failed for field: $field");
-                continue;
+                $output = [];
+                $code = 0;
+                exec($cmd, $output, $code);
+                $result = json_decode(implode('', $output), true);
+
+                if (!isset($result['translation'])) {
+                    $this->warning("Translation failed for field: $field");
+                    continue;
+                }
+
+                $translatedText = $result['translation'];
+
+                // Remember it for next time.
+                \TranslationMemoryService::store($sourceText, $fromCulture, $toCulture, $translatedText, 'machine');
             }
-
-            $translatedText = $result['translation'];
 
             // Check if target culture record exists
             $exists = DB::table('information_object_i18n')

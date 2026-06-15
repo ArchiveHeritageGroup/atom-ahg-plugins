@@ -2805,7 +2805,21 @@ class aiActions extends AhgController
         $message = (string) ($payload['message'] ?? $request->getParameter('message', ''));
         $history = (isset($payload['history']) && is_array($payload['history'])) ? $payload['history'] : [];
 
+        // Thread a session id across turns so the conversation is persisted.
+        $sessionId = trim((string) ($payload['session_id'] ?? $request->getParameter('session_id', '')));
+        if ('' === $sessionId) {
+            $sessionId = \CollectionChatbotService::newSessionId();
+        }
+        \CollectionChatbotService::persistTurn($sessionId, 'user', $message);
+
         $result = \CollectionChatbotService::chat($message, $history, $this->getUserCulture());
+
+        \CollectionChatbotService::persistTurn($sessionId, 'assistant', (string) ($result['answer'] ?? ''), [
+            'sources' => $result['sources'] ?? [],
+            'model' => $result['model'] ?? null,
+            'tokens_out' => $result['tokens_used'] ?? null,
+        ]);
+        $result['session_id'] = $sessionId;
 
         return $this->renderText(json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }

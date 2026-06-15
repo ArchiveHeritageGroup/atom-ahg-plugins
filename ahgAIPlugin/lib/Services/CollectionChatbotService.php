@@ -226,4 +226,62 @@ class CollectionChatbotService
 
         return ['answer' => $answer, 'sources' => $sources, 'mode' => 'fallback', 'error' => $error];
     }
+
+    // ─── Conversation persistence (build-order #4) ──────────────────────────
+
+    /** A fresh chatbot session id (caller threads it across turns). */
+    public static function newSessionId(): string
+    {
+        try {
+            return 'chat_' . bin2hex(random_bytes(12));
+        } catch (\Throwable $e) {
+            return 'chat_' . substr(md5(uniqid('', true)), 0, 24);
+        }
+    }
+
+    /**
+     * Persist one conversation turn to ahg_ai_chatbot_message. Best-effort:
+     * a missing table never breaks the chat endpoint.
+     *
+     * @param array{sources?:array,grounding_score?:float,model?:string,tokens_in?:int,tokens_out?:int} $meta
+     */
+    public static function persistTurn(string $sessionId, string $role, string $content, array $meta = []): void
+    {
+        $sessionId = trim($sessionId);
+        $content = trim($content);
+        if ('' === $sessionId || '' === $content) {
+            return;
+        }
+
+        try {
+            DB::table('ahg_ai_chatbot_message')->insert([
+                'session_id' => mb_substr($sessionId, 0, 64),
+                'role' => in_array($role, ['user', 'assistant', 'system'], true) ? $role : 'user',
+                'content' => $content,
+                'sources' => isset($meta['sources']) ? json_encode($meta['sources']) : null,
+                'grounding_score' => $meta['grounding_score'] ?? null,
+                'model' => isset($meta['model']) ? mb_substr((string) $meta['model'], 0, 100) : null,
+                'tokens_in' => $meta['tokens_in'] ?? null,
+                'tokens_out' => $meta['tokens_out'] ?? null,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            // persistence is non-essential; never surface to the user.
+        }
+    }
+
+    /** Read back a session's turns oldest-first. @return array<int,object> */
+    public static function history(string $sessionId, int $limit = 100): array
+    {
+        try {
+            return DB::table('ahg_ai_chatbot_message')
+                ->where('session_id', $sessionId)
+                ->orderBy('created_at')->orderBy('id')
+                ->limit(max(1, $limit))
+                ->get(['role', 'content', 'sources', 'model', 'created_at'])
+                ->all();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
 }
