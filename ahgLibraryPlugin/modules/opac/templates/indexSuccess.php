@@ -356,7 +356,7 @@
   </div>
 
   <!-- FRBR Show/Hide toggle script -->
-  <script>
+  <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.frbr-toggle-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {

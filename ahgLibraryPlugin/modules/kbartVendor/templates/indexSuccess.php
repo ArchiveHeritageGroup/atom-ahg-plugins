@@ -198,7 +198,7 @@
     </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Edit button click — populate modal
 document.querySelectorAll('.edit-vendor-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {

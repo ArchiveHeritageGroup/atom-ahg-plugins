@@ -173,7 +173,7 @@
   </div>
 </div>
 
-<script>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function testZ3950() {
   var host = document.getElementById('test-host').value;
   var port = document.getElementById('test-port').value;

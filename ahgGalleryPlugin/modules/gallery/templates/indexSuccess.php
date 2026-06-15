@@ -59,7 +59,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
             <?php else: ?>
               <!-- Three.js preview for OBJ/STL -->
               <div id="sidebar-3d-viewer" style="width:100%;height:250px;background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);border-radius:8px;"></div>
-              <script type="importmap">
+              <script type="importmap" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
               {
                 "imports": {
                   "three": "/plugins/ahgGalleryPlugin/web/vendor/threejs-esm/three.module.js",
@@ -67,7 +67,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
                 }
               }
               </script>
-              <script type="module">
+              <script type="module" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
               import * as THREE from 'three';
               import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
               import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
@@ -886,7 +886,7 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close
 
 <?php if (!in_array($ext3D, ['glb', 'gltf'])): ?>
 <!-- Three.js ES Module for fullscreen OBJ/STL viewer -->
-<script type="importmap">
+<script type="importmap" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 {
   "imports": {
     "three": "/plugins/ahgGalleryPlugin/web/vendor/threejs-esm/three.module.js",
@@ -894,7 +894,7 @@ document.addEventListener('keydown', function(e) { if (e.key === 'Escape') close
   }
 }
 </script>
-<script type="module">
+<script type="module" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
