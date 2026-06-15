@@ -4,7 +4,14 @@
 - **Helper:** added `AiGatewayClient::translate($text,$src,$tgt,$maxLen=null)` (POST /ai/v1/translate) + `translateLanguages()` (GET /ai/v1/translate/languages) — reuse the existing keyed `postJson()`/`authHeaders()` + GET pattern. Lint clean; ReflectionClass confirms methods + signature.
 - **A:** ahgAIPlugin `executeTranslateLanguages` + `callTranslationApi` now call `AiGatewayClient::fromSettings()->translateLanguages()/translate()` — removes the raw curl + the `app_ai_api_key` (config.php) key source; key now comes from `ahg_ai_settings` via fromSettings(), URL is the gateway, SSRF-guarded. Return shapes preserved ({success,translated}/{success:false,error}).
 - **D:** ahgDiscoveryPlugin `extension.json:37` endpoint `192.168.0.112:11434` → `https://ai.theahg.co.za/ai/v1/ollama` (vestigial config default; valid JSON).
-- **Remaining: B** (OllamaPageIndexClient — medium, response-shape mapping) and **C** (PageIndexService OCR — BLOCKED on gateway OCR-route confirmation).
+## ✅ B IMPLEMENTED 2026-06-15 (unreleased)
+`atom-framework/src/Services/OllamaPageIndexClient.php` now routes through `AiGatewayClient`:
+- Added a lazy `gateway()` (→ `AiGatewayClient::fromSettings()`); dropped the `endpoint` property + `:11434` default; **removed the raw `request()`** curl method entirely.
+- Private `chat()` → `gateway()->chat($messages, $gwOptions)` with `num_predict`→`max_tokens` mapping; **return shape preserved** (`success/text/model/tokens_used/generation_time_ms/error`), token counts read from `result['raw']` (prompt_eval_count+eval_count) → `buildTree()`/`retrieveNodes()` untouched.
+- `isAvailable()`/`getHealth()` → gateway liveness (`/api/tags` model-list not exposed via gateway; health is now up/down). Docblock updated.
+- Verified: lint clean, no dangling `$this->endpoint`/`request()`, no direct `:11434` in code (comments updated). Consumers use only preserved keys.
+
+- **Remaining: C** (PageIndexService OCR — BLOCKED on gateway OCR-route confirmation).
 
 ---
 
