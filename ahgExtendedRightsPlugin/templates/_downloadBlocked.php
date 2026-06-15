@@ -121,7 +121,7 @@ if (isset($embargoInfo['type'])) {
     </div>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .embargo-download-blocked {
     border-left: 4px solid;
 }

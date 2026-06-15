@@ -52,7 +52,7 @@ $colClass = 'col-md-' . (12 / max(1, (int)$columns));
   <?php endif ?>
 </div>
 
-<style>
+<style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .browse-panel-item {
   color: #176442;
   transition: background-color 0.15s ease;
