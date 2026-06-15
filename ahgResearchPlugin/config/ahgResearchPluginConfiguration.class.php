@@ -116,6 +116,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_project_edit', '/research/project/:id/edit', 'editProject', ['id' => '\d+']);
         $research->any('research_view_project', '/research/project/:id', 'viewProject', ['id' => '\d+']);
         $research->any('research_projects', '/research/projects', 'projects');
+        $research->any('research_save_experience_level', '/research/experience-level', 'saveExperienceLevel');
 
         // Bibliographies
         $research->any('research_bibliography_export', '/research/bibliography/:id/export/:format', 'exportBibliography', ['id' => '\d+']);

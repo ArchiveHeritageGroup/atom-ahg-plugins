@@ -9,6 +9,8 @@
     </ol>
 </nav>
 
+<?php include_partial('research/levelsGuide') ?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2"><i class="fas fa-project-diagram text-primary me-2"></i>Research Projects</h1>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">

@@ -9123,4 +9123,34 @@ class researchActions extends AhgController
         return $this->renderText($body);
     }
 
+    /**
+     * POST /research/experience-level — save the current researcher's research
+     * mode (beginning/intermediate/advanced). Cloned from Heratio: the mode
+     * curates the research sidebar (Beginning = essentials, Intermediate adds the
+     * working tools, Advanced reveals everything). Returns JSON; the client
+     * reloads so the server-rendered sidebar re-curates.
+     */
+    public function executeSaveExperienceLevel($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJsonError('unauthenticated', 401);
+        }
+
+        $payload = json_decode((string) $request->getContent(), true) ?: [];
+        $level = (string) ($payload['level'] ?? $request->getParameter('level', ''));
+        if (!in_array($level, ['beginning', 'intermediate', 'advanced'], true)) {
+            return $this->renderJsonError('invalid_level', 400);
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderJsonError('no_researcher', 404);
+        }
+
+        $this->service->updateResearcher((int) $researcher->id, ['experience_level' => $level]);
+
+        return $this->renderJson(['ok' => true, 'level' => $level]);
+    }
+
 }
