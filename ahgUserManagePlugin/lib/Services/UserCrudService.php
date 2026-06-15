@@ -401,13 +401,13 @@ class UserCrudService
             ->select(['password_hash', 'salt'])
             ->first();
 
-        if (!$user || !$user->password_hash || !$user->salt) {
+        if (!$user || !$user->password_hash) {
             return false;
         }
 
-        $sha1Hash = sha1($user->salt . $password);
-
-        return password_verify($sha1Hash, $user->password_hash);
+        // Scheme-aware: empty salt = new Argon2id-over-plaintext; non-empty =
+        // legacy sha1(salt.plaintext). Migration 2026-06-15.
+        return \AtomFramework\Core\Security\PasswordService::verify($password, (string) $user->password_hash, $user->salt ?? '');
     }
 
     /**

@@ -5669,14 +5669,15 @@ class registryActions extends AhgController
                 return;
             }
 
-            // Verify password using AtoM's dual-layer: password_verify(sha1(salt + password), hash)
+            // Scheme-aware verify: new (Argon2id over plaintext, empty salt) +
+            // legacy (sha1(salt.plaintext)). Migration 2026-06-15.
             $validPassword = false;
-            if (!empty($userRow->password_hash) && !empty($userRow->salt)) {
-                $validPassword = password_verify(sha1($userRow->salt . $password), $userRow->password_hash);
+            if (!empty($userRow->password_hash)) {
+                $validPassword = \AtomFramework\Core\Security\PasswordService::verify($password, (string) $userRow->password_hash, $userRow->salt ?? '');
             }
-            // Legacy fallback: plain SHA-1 stored directly
+            // Legacy fallback: a raw SHA-1 stored directly as password_hash (pre-fix imports)
             if (!$validPassword && !empty($userRow->salt) && !empty($userRow->password_hash)) {
-                $validPassword = sha1($userRow->salt . $password) === $userRow->password_hash;
+                $validPassword = hash_equals((string) $userRow->password_hash, sha1($userRow->salt . $password));
             }
 
             if (!$validPassword) {
