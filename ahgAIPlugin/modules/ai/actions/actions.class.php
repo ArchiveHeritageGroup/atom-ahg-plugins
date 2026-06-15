@@ -1553,7 +1553,7 @@ class aiActions extends AhgController
     private function callTranslationApi($text, $sourceLang, $targetLang)
     {
         $apiUrl = $this->config('app_ai_api_url', 'http://192.168.0.112:5004');
-        $apiKey = $this->config('app_ai_api_key', 'ahg_ai_demo_internal_2026');
+        $apiKey = $this->config('app_ai_api_key', ''); // no embedded credential (security audit 2026-06-15)
 
         $url = $apiUrl . '/ai/v1/translate';
 
@@ -1652,7 +1652,7 @@ class aiActions extends AhgController
         // Call the HTR service through the AI gateway (heratio#131).
         // app_htr_url is the full gateway HTR endpoint - not suffixed.
         $url    = $this->config('app_htr_url', 'https://ai.theahg.co.za/ai/v1/htr');
-        $apiKey = $this->config('app_ai_api_key', 'ahg_ai_demo_internal_2026');
+        $apiKey = $this->config('app_ai_api_key', ''); // no embedded credential (security audit 2026-06-15)
 
         $payload = json_encode([
             'image_path' => $imagePath,

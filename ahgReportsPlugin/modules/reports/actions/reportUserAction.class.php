@@ -46,7 +46,7 @@ class reportsReportUserAction extends BaseReportAction
         // Get CSRF token from form or generate a fallback
         $csrfToken = $this->form->getCSRFToken();
         if ('' == $csrfToken) {
-            $csrfToken = md5(session_id() . microtime(true) . mt_rand());
+            $csrfToken = bin2hex(random_bytes(16)); // CSPRNG, not md5(mt_rand) (security audit 2026-06-15)
         }
         $defaults = [
             'dateStart' => date('Y-m-d', strtotime('-1 month')),

@@ -343,7 +343,7 @@ class UserCrudService
      */
     public static function generateApiKey(int $userId, string $keyName): string
     {
-        $newKey = bin2hex(openssl_random_pseudo_bytes(8));
+        $newKey = bin2hex(random_bytes(16)); // CSPRNG, 16 bytes (was openssl_random_pseudo_bytes(8); security audit 2026-06-15)
 
         $prop = DB::table('property')
             ->where('object_id', $userId)

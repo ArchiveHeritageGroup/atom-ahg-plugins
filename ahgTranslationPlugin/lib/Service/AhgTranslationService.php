@@ -24,7 +24,7 @@ class AhgTranslationService
     {
         // Use NLLB-200 API (ahg-ai service)
         $endpoint = $this->getSetting('mt.endpoint', 'http://192.168.0.112:5004/ai/v1/translate');
-        $apiKey = $this->getSetting('mt.api_key', 'ahg_ai_demo_internal_2026');
+        $apiKey = $this->getSetting('mt.api_key', ''); // fail closed — no embedded credential (security audit 2026-06-15)
         $timeout = (int)$this->getSetting('mt.timeout_seconds', '60');
 
         // NLLB-200 API format with max_length for field

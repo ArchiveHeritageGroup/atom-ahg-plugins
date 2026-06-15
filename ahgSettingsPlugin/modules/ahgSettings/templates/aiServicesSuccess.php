@@ -801,7 +801,7 @@ function testConnection() {
 function testTranslation() {
     const endpoint = document.querySelector('input[name="mt_endpoint"]').value;
     const baseUrl = endpoint.replace(/\/translate$/, '');
-    const apiKey = document.querySelector('input[name="api_key"]')?.value || 'ahg_ai_demo_internal_2026';
+    const apiKey = document.querySelector('input[name="api_key"]')?.value || '';
     const resultDiv = document.getElementById('connectionResult');
 
     resultDiv.className = 'alert alert-info';
