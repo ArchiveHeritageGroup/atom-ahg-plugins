@@ -840,7 +840,7 @@ class IiifAiService
             // Fall through
         }
 
-        return 'http://192.168.0.112:5004/ai/v1';
+        return 'https://ai.theahg.co.za/ai/v1'; // gateway, not direct node (2026-06-15)
     }
 
     /**

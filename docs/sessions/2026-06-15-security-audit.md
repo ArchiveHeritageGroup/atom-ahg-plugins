@@ -37,6 +37,16 @@ Four parallel audits (CSP, authZ/ACL, injection/XSS/file, secrets/SSRF/crypto). 
 - **[AGENT] md5() for dedup/cache keys** (ErrorNotificationService, CCO vocab cache) — collision risk; prefer sha256.
 - **[AGENT] File-extension allowlist** missing on DonorAgreement upload (`editAction.class.php:309`); zip extraction without size cap (`ahgIiifPlugin media actions:925`).
 
+## DIRECT-NODE → GATEWAY CLEANUP (2026-06-15)
+Standing rule: all AI must route via `https://ai.theahg.co.za/ai/v1/...`, never a GPU-node port (`:5004`/`:5006`/`:11434`/`:8011`). Hardcoded **remote-node-IP** defaults were the "`.112:5004` dead-default" anti-pattern.
+- **SWAPPED to gateway (these callers send `X-API-Key`, so it's safe):** ahgTranslationPlugin `AhgTranslationService:26` (→ `…/ai/v1/translate`), ahgAIPlugin `NerService:13`, ahgAIPlugin `IiifAiService:843`, ahgSettingsPlugin `aiServicesAction:34` (api_url default), ahgAIPlugin `database/install.sql` api_url seeds (localhost:5004 → gateway). All consumed by key-sending services → no 401. Lint clean.
+- **FLAGGED, NOT swapped (would 401 / break — these callers send NO gateway key; need the sanctioned `AtomFramework\Services\AI\AiGatewayClient` or to add `X-API-Key`, a refactor not a string swap):**
+  - `ahgAIPlugin/modules/ai/actions/actions.class.php:1529,1555` (translate-languages/translate curl — no key header)
+  - `atom-framework/src/Services/OllamaPageIndexClient.php:31` (`:11434`, only Content-Type header)
+  - `atom-framework/src/Services/PageIndexService.php:42` (OCR `:5006` — also unknown gateway route)
+  - `ahgDiscoveryPlugin/extension.json:37` (`:11434` config default — consumer/key unclear)
+- **tier-2 (separate):** numerous `localhost:11434` voice/semantic/condition defaults (some in locked ahgThemeB5) — local-Ollama features; route via AiGatewayClient in a dedicated pass.
+
 ## CSP CLEANUP (2026-06-15) — verify-first collapsed the "37"
 Auditing each flagged inline `<script>` showed the count was massively inflated: many are **external `src=` scripts** (no nonce needed), several were **already nonce'd**, ~14 are in the **dead `heritage.bak/` dir** (no active `heritage` module sibling, unreferenced, and a dotted dir name can't load as a Symfony module → never renders → zero CSP risk), and the rest are in **locked plugins**.
 - **FIXED (non-locked):** `ahgVendorPlugin/serviceTypesSuccess.php:243` (added nonce) + `ahg3DModelPlugin/Model3DHelper.php` splat-viewer inline init script (nonce injected into the heredoc). Lint clean.

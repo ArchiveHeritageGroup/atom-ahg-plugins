@@ -23,7 +23,7 @@ class AhgTranslationService
     public function translateText(string $text, string $sourceCulture, string $targetCulture = 'en', ?int $maxLength = null): array
     {
         // Use NLLB-200 API (ahg-ai service)
-        $endpoint = $this->getSetting('mt.endpoint', 'http://192.168.0.112:5004/ai/v1/translate');
+        $endpoint = $this->getSetting('mt.endpoint', 'https://ai.theahg.co.za/ai/v1/translate'); // gateway, not direct node (2026-06-15)
         $apiKey = $this->getSetting('mt.api_key', ''); // fail closed — no embedded credential (security audit 2026-06-15)
         $timeout = (int)$this->getSetting('mt.timeout_seconds', '60');
 

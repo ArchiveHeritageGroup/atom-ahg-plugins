@@ -382,7 +382,7 @@ CREATE TABLE IF NOT EXISTS ahg_ai_auto_trigger_log (
 
 INSERT IGNORE INTO ahg_ai_settings (id, feature, setting_key, setting_value) VALUES
     -- General AI settings
-    (1, 'general', 'api_url', 'http://localhost:5004/ai/v1'),
+    (1, 'general', 'api_url', 'https://ai.theahg.co.za/ai/v1'),
     (2, 'general', 'api_key', ''),
     (3, 'general', 'api_timeout', '60'),
 
@@ -448,7 +448,7 @@ INSERT IGNORE INTO ahg_ai_settings (feature, setting_key, setting_value) VALUES
 
 INSERT IGNORE INTO ahg_ner_settings (id, setting_key, setting_value) VALUES
     (1, 'backend', 'local'),
-    (2, 'api_url', 'http://localhost:5004/ai/v1'),
+    (2, 'api_url', 'https://ai.theahg.co.za/ai/v1'),
     (3, 'api_key', ''),
     (4, 'auto_extract', '0'),
     (5, 'require_review', '1'),

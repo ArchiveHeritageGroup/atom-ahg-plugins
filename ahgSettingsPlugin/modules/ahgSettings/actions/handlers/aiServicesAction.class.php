@@ -31,7 +31,7 @@ class AhgSettingsAiServicesAction extends AhgController
             'translation_enabled' => '1',
             'processing_mode' => 'job',
             'summary_field' => 'scopeAndContent',
-            'api_url' => 'http://192.168.0.112:5004/ai/v1',
+            'api_url' => 'https://ai.theahg.co.za/ai/v1', // gateway, not direct node (2026-06-15)
             'api_key' => '', // no embedded credential — configure per deployment (security audit 2026-06-15)
             'api_timeout' => '60',
             'auto_extract_on_upload' => '0',

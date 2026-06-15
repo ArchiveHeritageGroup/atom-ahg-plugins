@@ -10,7 +10,7 @@ class ahgNerService
 
     public function __construct()
     {
-        $this->apiUrl = $this->loadSetting('api_url', 'http://192.168.0.112:5004/ai/v1');
+        $this->apiUrl = $this->loadSetting('api_url', 'https://ai.theahg.co.za/ai/v1'); // gateway, not direct node (2026-06-15)
         $this->apiKey = $this->loadSetting('api_key', '');
         $this->timeout = (int) $this->loadSetting('api_timeout', '300');
     }
