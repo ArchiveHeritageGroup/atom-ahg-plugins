@@ -11,7 +11,13 @@
 - `isAvailable()`/`getHealth()` → gateway liveness (`/api/tags` model-list not exposed via gateway; health is now up/down). Docblock updated.
 - Verified: lint clean, no dangling `$this->endpoint`/`request()`, no direct `:11434` in code (comments updated). Consumers use only preserved keys.
 
-- **Remaining: C** (PageIndexService OCR — BLOCKED on gateway OCR-route confirmation).
+## ✅ C IMPLEMENTED 2026-06-15 (unreleased) — OCR route found in the gateway
+**Gateway OCR route confirmed by reading the gateway itself** (`/opt/ahg-ai/gateway/app/routes/ai_proxy.py`): there is no `/ai/v1/ocr/*`, but a transparent legacy-HTR catch-all `@router.api_route("/htr/legacy/{subpath}")` forwards to `HTR_LEGACY_URL` (= `http://192.168.0.115:5006`, the same node PageIndexService used directly). So `:5006/ocr/extract` → **`https://ai.theahg.co.za/ai/v1/htr/legacy/ocr/extract`** (keyed, `gateway` scope).
+- ⚠️ **Correction:** ai-demo does NOT OCR through the gateway — its `ocrExtract` runs **local Tesseract** (`exec("tesseract")`) and its NER/HTR point at direct nodes (`:5004`/`:5006`). The route above came from the gateway code, not ai-demo. (ai-demo's own direct-node use is a separate app's gap, out of PSIS scope.)
+- **Fix:** `PageIndexService` ocrEndpoint default → `https://ai.theahg.co.za/ai/v1/htr/legacy` (callOcrService appends `/ocr/extract`); added an `ocrApiKey` loaded from `ahg_ai_settings` (feature gateway→general) and sent as `X-API-Key`. Multipart `CURLFile` body unchanged (the gateway catch-all forwards it). No `AiGatewayClient::ocr()` needed (OCR is multipart; postJson is JSON-only). Lint clean; no direct node IPs left in framework src.
+- ⚠️ **Needs a live OCR smoke test post-deploy** (multipart through the gateway catch-all couldn't be e2e-verified offline).
+
+## ✅ REFACTOR COMPLETE — A, B, C, D all implemented (unreleased).
 
 ---
 
