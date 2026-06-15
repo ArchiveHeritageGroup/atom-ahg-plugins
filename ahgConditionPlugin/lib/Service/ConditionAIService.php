@@ -63,42 +63,21 @@ class ConditionAIService
         $base64 = base64_encode($imageData);
         $prompt = $this->buildPrompt($materialType);
 
-        // Call Ollama
-        $url = rtrim($this->ollamaUrl, '/') . '/api/generate';
-        $payload = json_encode([
-            'model'   => $this->model,
-            'prompt'  => $prompt,
-            'images'  => [$base64],
-            'stream'  => false,
-            'options' => [
-                'temperature' => 0,
-                'seed'        => 42,
-            ],
-        ]);
+        // Vision via the AHG AI gateway (keyed + SSRF-guarded) — no direct node
+        // port (migration 2026-06-15). Native Ollama generate over the passthrough.
+        $result = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()->visionGenerate(
+            $prompt,
+            [$base64],
+            $this->model,
+            ['temperature' => 0, 'seed' => 42, 'timeout' => $this->timeout]
+        );
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_POST           => true,
-            CURLOPT_POSTFIELDS     => $payload,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-            CURLOPT_TIMEOUT        => $this->timeout,
-            CURLOPT_CONNECTTIMEOUT => 5,
-        ]);
-
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
-
-        if ($error || $httpCode !== 200) {
-            return ['success' => false, 'error' => 'LLM unavailable: ' . ($error ?: "HTTP {$httpCode}")];
+        if (empty($result['success'])) {
+            return ['success' => false, 'error' => 'LLM unavailable: ' . ($result['error'] ?? 'unknown')];
         }
 
-        $data = json_decode($response, true);
-        $rawText = trim($data['response'] ?? '');
-
-        if (empty($rawText)) {
+        $rawText = trim((string) $result['text']);
+        if ('' === $rawText) {
             return ['success' => false, 'error' => 'LLM returned empty response'];
         }
 
