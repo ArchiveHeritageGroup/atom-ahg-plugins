@@ -506,4 +506,30 @@ class provenanceActions extends AhgController
         $this->gaps = $svc->gaps(100);
         $this->uncovered = $svc->uncovered(50, $this->culture());
     }
+
+    /**
+     * GET /provenance/authenticity/:id — authenticity dossier for a record (#152).
+     *
+     * Surfaces the AI-inference provenance (ahg_ai_inference, with each row's
+     * Ed25519 signature verdict) and any C2PA content credentials bound to the
+     * record's digital objects as a single trust report.
+     */
+    public function executeAuthenticity($request)
+    {
+        $this->requireAuth();
+
+        $id = (int) $request->getParameter('id');
+        if ($id <= 0) {
+            $this->forward404('Record id required');
+        }
+
+        $this->resource = QubitInformationObject::getById($id);
+        if (!$this->resource) {
+            $this->forward404('Record not found');
+        }
+
+        $svc = new \AhgProvenancePlugin\Service\InferenceService();
+        $this->authenticity = $svc->authenticityForObject($id);
+        $this->objectId = $id;
+    }
 }

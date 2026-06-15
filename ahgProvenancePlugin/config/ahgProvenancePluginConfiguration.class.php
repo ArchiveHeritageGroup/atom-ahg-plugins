@@ -44,6 +44,7 @@ class ahgProvenancePluginConfiguration extends sfPluginConfiguration
         $r->any('provenance_coverage', '/provenance/coverage', 'coverage');
         $r->any('provenance_coverage_data', '/provenance/coverage-data', 'apiCoverage');
         $r->any('provenance_api_trace', '/provenance/trace/:id', 'apiTrace', ['id' => '\d+']);
+        $r->any('provenance_authenticity', '/provenance/authenticity/:id', 'authenticity', ['id' => '\d+']);
         $r->register($event->getSubject());
     }
 

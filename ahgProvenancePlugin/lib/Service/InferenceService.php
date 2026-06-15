@@ -448,6 +448,107 @@ class InferenceService
         return Capsule::table('ahg_ai_inference')->where('uuid', $uuid)->first() ?: null;
     }
 
+    /**
+     * Authenticity dossier for one information object (issue #152).
+     *
+     * Surfaces the provenance the platform already records as a trust report:
+     *  - every AI inference that touched the record's fields (ahg_ai_inference),
+     *    each with the model identity, confidence and a cryptographic verdict on
+     *    its Ed25519 signature (signed / verified / unsigned);
+     *  - any C2PA content-credential manifests bound to the record's digital
+     *    objects (ahg_c2pa_manifest), the signed-provenance side of the picture.
+     *
+     * Read-only and self-contained: a missing table or absent signing key never
+     * throws - the corresponding section is simply reported empty/unverifiable.
+     *
+     * @return array{inferences:array,c2pa:array,summary:array}
+     */
+    public function authenticityForObject(int $ioId): array
+    {
+        $inferences = [];
+        $signed = 0;
+        $verified = 0;
+
+        try {
+            $rows = Capsule::table('ahg_ai_inference')
+                ->where('target_entity_type', 'information_object')
+                ->where('target_entity_id', $ioId)
+                ->orderByDesc('occurred_at')
+                ->get([
+                    'id', 'uuid', 'occurred_at', 'service_name', 'model_name', 'model_version',
+                    'endpoint', 'input_hash', 'output_hash', 'confidence', 'standard',
+                    'target_entity_type', 'target_entity_id', 'target_field',
+                    'model_manifest', 'signature', 'signer_key_id',
+                ])->all();
+
+            // One signer instance: its current public key verifies any row whose
+            // signature was minted by the current key. A rotated key id is
+            // reported signed-but-unverifiable rather than failed.
+            $signer = null;
+            $publicKey = null;
+            $currentKeyId = null;
+            try {
+                $signer = new InferenceSigner();
+                $publicKey = $signer->publicKey();
+                $currentKeyId = $signer->keyId();
+            } catch (\Throwable $e) {
+                // signing not configured - everything reports unsigned/unverifiable.
+            }
+
+            foreach ($rows as $row) {
+                $hasSig = isset($row->signature) && $row->signature !== null && $row->signature !== '';
+                $verdict = $hasSig ? 'signed' : 'unsigned';
+
+                if ($hasSig) {
+                    ++$signed;
+                    if ($signer !== null && $publicKey !== null
+                        && (string) $row->signer_key_id === (string) $currentKeyId) {
+                        try {
+                            if ($signer->verify((string) $row->signature, $this->manifestFromRow($row), $publicKey)) {
+                                $verdict = 'verified';
+                                ++$verified;
+                            } else {
+                                $verdict = 'tampered';
+                            }
+                        } catch (\Throwable $e) {
+                            $verdict = 'signed'; // key present but verify errored - leave as signed.
+                        }
+                    }
+                }
+
+                $row->verdict = $verdict;
+                $row->confidence_pct = ($row->confidence === null || $row->confidence === '')
+                    ? null : round(((float) $row->confidence) * 100, 1);
+                $inferences[] = $row;
+            }
+        } catch (\Throwable $e) {
+            // ahg_ai_inference absent on an older install - report nothing.
+            $inferences = [];
+        }
+
+        $c2pa = [];
+        try {
+            $c2pa = Capsule::table('ahg_c2pa_manifest')
+                ->where('information_object_id', $ioId)
+                ->orderByDesc('created_at')
+                ->get(['id', 'digital_object_id', 'manifest_label', 'asset_hash', 'kid', 'created_at'])
+                ->all();
+        } catch (\Throwable $e) {
+            $c2pa = []; // ahgC2paPlugin not installed / table absent.
+        }
+
+        return [
+            'inferences' => $inferences,
+            'c2pa' => $c2pa,
+            'summary' => [
+                'inferences' => count($inferences),
+                'signed' => $signed,
+                'verified' => $verified,
+                'c2pa' => count($c2pa),
+            ],
+        ];
+    }
+
     /** RFC 4122 version-4 UUID, dependency-free (no Laravel Str helper here). */
     private function uuid4(): string
     {

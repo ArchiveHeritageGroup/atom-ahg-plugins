@@ -25,6 +25,9 @@
       <i class="bi bi-bar-chart me-1"></i> View Timeline
     </a>
     <?php endif ?>
+    <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'authenticity', 'id' => $resource->id]) ?>" class="btn btn-outline-dark ms-2">
+      <i class="bi bi-fingerprint me-1"></i> Authenticity Report
+    </a>
   </div>
 
   <?php if (!$provenance['exists']): ?>
