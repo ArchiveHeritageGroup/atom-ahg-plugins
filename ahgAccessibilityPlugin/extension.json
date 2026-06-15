@@ -1,0 +1,65 @@
+{
+    "name": "AHG Accessibility",
+    "machine_name": "ahgAccessibilityPlugin",
+    "version": "1.0.0",
+    "description": "WCAG accessibility tooling for archival descriptions — human-authored image alternative text (WCAG 1.1.1), authoring UI, coverage dashboard and a consumer API.",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0",
+    "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
+
+    "type": "atom-plugin",
+    "category": "reporting",
+
+    "keywords": [
+        "accessibility",
+        "wcag",
+        "alt-text",
+        "a11y",
+        "image"
+    ],
+
+    "require": {
+        "atom": ">=2.7.0",
+        "php": ">=8.0",
+        "ahgCorePlugin": ">=1.0.0"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "AhgAccessibility\\": "lib/"
+        }
+    },
+
+    "config": {
+        "enabled_modules": [
+            "accessibility"
+        ]
+    },
+
+    "database": {
+        "install": "database/install.sql",
+        "tables": [
+            "image_alt_text"
+        ]
+    },
+
+    "routes": {
+        "accessibility_index": {
+            "path": "/accessibility/alt-text",
+            "module": "accessibility",
+            "action": "index"
+        },
+        "accessibility_edit": {
+            "path": "/accessibility/alt-text/edit/:id",
+            "module": "accessibility",
+            "action": "edit"
+        }
+    },
+
+    "permissions": {
+        "accessibility_author": {
+            "description": "Author image alternative text",
+            "default": ["administrator", "editor"]
+        }
+    }
+}
