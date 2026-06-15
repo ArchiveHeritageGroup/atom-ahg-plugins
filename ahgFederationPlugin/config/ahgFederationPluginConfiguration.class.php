@@ -95,6 +95,9 @@ class ahgFederationPluginConfiguration extends sfPluginConfiguration
         // Harvest log
         $router->any('federation_log', '/admin/federation/log', 'log');
 
+        // Union catalogue (#151)
+        $router->any('federation_union', '/admin/federation/union', 'union');
+
         // API endpoints for AJAX
         $router->any('federation_api_test_peer', '/admin/federation/api/test-peer', 'testPeer');
         $router->any('federation_api_harvest_run', '/admin/federation/api/harvest/:peerId', 'runHarvest', ['peerId' => '\d+']);

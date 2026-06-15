@@ -485,4 +485,35 @@ class federationActions extends AhgController
             'session' => $session,
         ]));
     }
+
+    /**
+     * Union catalogue (#151) — unified holdings across the federation with
+     * source attribution (Local / peer), member list + counts.
+     */
+    public function executeUnion($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+
+            return sfView::NONE;
+        }
+        if (!$this->getUser()->isAdministrator()) {
+            $this->forward('admin', 'secure');
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgFederationPlugin/lib/UnionCatalogueService.php';
+        $svc = new \AhgFederation\UnionCatalogueService();
+
+        $this->members = $svc->members();
+        $this->counts = $svc->counts();
+        $this->filters = [
+            'peer_id' => (int) $request->getParameter('peer_id', 0) ?: null,
+            'source' => (string) $request->getParameter('source', ''),
+            'q' => trim((string) $request->getParameter('q', '')),
+            'page' => (int) $request->getParameter('page', 1),
+        ];
+        $this->result = $svc->browse($this->filters);
+
+        return sfView::SUCCESS;
+    }
 }
