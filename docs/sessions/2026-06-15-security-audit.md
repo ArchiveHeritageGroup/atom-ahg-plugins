@@ -45,7 +45,12 @@ Standing rule: all AI must route via `https://ai.theahg.co.za/ai/v1/...`, never 
   - `atom-framework/src/Services/OllamaPageIndexClient.php:31` (`:11434`, only Content-Type header)
   - `atom-framework/src/Services/PageIndexService.php:42` (OCR `:5006` — also unknown gateway route)
   - `ahgDiscoveryPlugin/extension.json:37` (`:11434` config default — consumer/key unclear)
-- **tier-2 (separate):** numerous `localhost:11434` voice/semantic/condition defaults (some in locked ahgThemeB5) — local-Ollama features; route via AiGatewayClient in a dedicated pass.
+- **tier-2 pass (2026-06-15):**
+  - **SWAPPED (key-sending worker fallbacks → gateway):** `localhost:5004/ai/v1` default in ahgAIPlugin `ProcessPendingCommand`, `aiProcessPendingTask`, `JobQueueService`, `aiHtrExtractTask` → `https://ai.theahg.co.za/ai/v1` (all send `X-API-Key: settings.api_key`; default is a fallback). Lint clean.
+  - **ALREADY COMPLIANT (no change):** ahgSemanticSearch `EmbeddingService` is gateway-first (`AiGatewayClient::embed()`; localhost is its documented fallback).
+  - **BY DESIGN (no change):** ahgAIPlugin `OllamaProvider` (`localhost:11434`) is the *direct-local-Ollama provider* in LlmService's provider abstraction — the gateway path is the separate `GatewayProvider`; the localhost default is the operator's explicit local-provider choice.
+  - **FLAGGED (vision / locked — need AiGatewayClient vision path or unlock):** ahgConditionPlugin `ConditionAIService` (`/api/generate` with image, no key), ahgThemeB5Plugin voice `describeImageAction`/`describeObjectAction` + `voiceConfig.php` (LOCKED + vision). Vision through the gateway needs the Ollama-vision passthrough, not text `generate()`.
+  - **LOW-VALUE (left):** ahgSettings form-field placeholders/`systemInfo` diagnostic `localhost:11434`, and config-default/seed fallback strings (intentional local fallbacks).
 
 ## CSP CLEANUP (2026-06-15) — verify-first collapsed the "37"
 Auditing each flagged inline `<script>` showed the count was massively inflated: many are **external `src=` scripts** (no nonce needed), several were **already nonce'd**, ~14 are in the **dead `heritage.bak/` dir** (no active `heritage` module sibling, unreferenced, and a dotted dir name can't load as a Symfony module → never renders → zero CSP risk), and the rest are in **locked plugins**.

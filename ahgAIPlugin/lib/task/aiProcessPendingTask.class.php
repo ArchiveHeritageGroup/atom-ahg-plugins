@@ -171,7 +171,7 @@ EOF;
         // Get settings
         $settings = $this->getSettings();
 
-        $apiUrl = rtrim($settings['api_url'] ?? 'http://localhost:5004/ai/v1', '/') . '/ner/extract';
+        $apiUrl = rtrim($settings['api_url'] ?? 'https://ai.theahg.co.za/ai/v1', '/') . '/ner/extract';
 
         $ch = curl_init($apiUrl);
         curl_setopt_array($ch, [
@@ -232,7 +232,7 @@ EOF;
         }
 
         $settings = $this->getSettings();
-        $apiUrl = rtrim($settings['api_url'] ?? 'http://localhost:5004/ai/v1', '/') . '/summarize';
+        $apiUrl = rtrim($settings['api_url'] ?? 'https://ai.theahg.co.za/ai/v1', '/') . '/summarize';
 
         $ch = curl_init($apiUrl);
         curl_setopt_array($ch, [

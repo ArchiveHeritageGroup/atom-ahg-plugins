@@ -751,7 +751,7 @@ class JobQueueService
             $settings[$row->setting_key] = $row->setting_value;
         }
 
-        $apiUrl = rtrim($settings['api_url'] ?? 'http://localhost:5004/ai/v1', '/') . '/translate';
+        $apiUrl = rtrim($settings['api_url'] ?? 'https://ai.theahg.co.za/ai/v1', '/') . '/translate';
 
         $ch = curl_init($apiUrl);
         curl_setopt_array($ch, [

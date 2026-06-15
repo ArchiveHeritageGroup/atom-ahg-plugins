@@ -58,7 +58,7 @@ EOD;
         $this->logSection('ai', "Mode: $mode");
 
         $settings = $this->getSettings();
-        $apiUrl = rtrim($settings['api_url'] ?? 'http://localhost:5004/ai/v1', '/');
+        $apiUrl = rtrim($settings['api_url'] ?? 'https://ai.theahg.co.za/ai/v1', '/');
         $apiKey = $settings['api_key'] ?? '';
 
         // Check API availability
