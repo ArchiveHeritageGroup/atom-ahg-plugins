@@ -324,33 +324,60 @@ class LlmService
     }
 
     /**
-     * Encrypt an API key for storage
+     * 32-byte AEAD key derived from the configured secret (XChaCha20-Poly1305
+     * needs exactly 32 bytes; the stored secret is an arbitrary-length string).
+     */
+    private function aeadKey(): string
+    {
+        return hash('sha256', (string) $this->encryptionKey, true);
+    }
+
+    /**
+     * Encrypt an API key for storage.
+     *
+     * Uses the framework's authenticated EncryptionService (XChaCha20-Poly1305 /
+     * AES-256-GCM) instead of the previous unauthenticated AES-256-CBC
+     * (security audit 2026-06-15). Result is base64 for DB storage.
      *
      * @param string $apiKey
      * @return string
      */
     public function encryptApiKey(string $apiKey): string
     {
-        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::ENCRYPTION_METHOD));
-        $encrypted = openssl_encrypt($apiKey, self::ENCRYPTION_METHOD, $this->encryptionKey, 0, $iv);
-
-        return base64_encode($iv . $encrypted);
+        return base64_encode(
+            \AtomFramework\Core\Security\EncryptionService::encrypt($apiKey, $this->aeadKey())
+        );
     }
 
     /**
-     * Decrypt a stored API key
+     * Decrypt a stored API key.
+     *
+     * Transparently reads BOTH the new AEAD format and the legacy AES-256-CBC
+     * format (keys re-encrypt to AEAD whenever they are next saved). AEAD
+     * authentication means a legacy blob can never be silently mis-decrypted —
+     * decrypt() throws and we fall back to the legacy reader.
      *
      * @param string $encrypted
      * @return string
      */
     public function decryptApiKey(string $encrypted): string
     {
-        $data = base64_decode($encrypted);
-        $ivLength = openssl_cipher_iv_length(self::ENCRYPTION_METHOD);
-        $iv = substr($data, 0, $ivLength);
-        $encryptedData = substr($data, $ivLength);
+        $data = base64_decode($encrypted, true);
+        if (false === $data || '' === $data) {
+            return '';
+        }
 
-        return openssl_decrypt($encryptedData, self::ENCRYPTION_METHOD, $this->encryptionKey, 0, $iv);
+        try {
+            return \AtomFramework\Core\Security\EncryptionService::decrypt($data, $this->aeadKey());
+        } catch (\Throwable $e) {
+            // Legacy AES-256-CBC (pre-2026-06-15): base64(iv . ciphertext), key used raw.
+            $ivLength = openssl_cipher_iv_length(self::ENCRYPTION_METHOD);
+            $iv = substr($data, 0, $ivLength);
+            $encryptedData = substr($data, $ivLength);
+            $plain = openssl_decrypt($encryptedData, self::ENCRYPTION_METHOD, $this->encryptionKey, 0, $iv);
+
+            return false === $plain ? '' : $plain;
+        }
     }
 
     /**

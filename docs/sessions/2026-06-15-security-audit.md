@@ -33,7 +33,7 @@ Four parallel audits (CSP, authZ/ACL, injection/XSS/file, secrets/SSRF/crypto). 
 ## MEDIUM
 - **[AGENT] Weak CSRF token** `md5(session_id().microtime().mt_rand())` — `ahgReportsPlugin/.../reportUserAction.class.php:49`. Use `bin2hex(random_bytes(16))` (other endpoints already do).
 - **[AGENT] Weak randomness for tokens/ids** — `uniqid()`/`mt_rand()`/`openssl_random_pseudo_bytes()` in ahgSecurityClearancePlugin (clearance codes), ahgCartPlugin (order ids), ahgAPIPlugin (refs), ahgUserManage/ahgCore (API keys). Use `random_bytes()`.
-- **[AGENT] LlmService AES-256-CBC without auth tag** — `ahgAIPlugin/lib/Services/LlmService.php:334`. No HMAC; key stored in DB. Migrate to the framework's `EncryptionService` (XChaCha20-Poly1305, AEAD).
+- **[FIXED 2026-06-15] LlmService AES-256-CBC → AEAD** — `ahgAIPlugin/lib/Services/LlmService.php` `encryptApiKey`/`decryptApiKey` now use `EncryptionService::encrypt/decrypt` (XChaCha20-Poly1305 V2 / AES-256-GCM V1). Key = `sha256($this->encryptionKey, raw)` (32 bytes; keeps the existing `ahg_ai_settings` secret, no KeyManager dependency). **Backward-compatible:** decrypt tries AEAD, falls back to legacy CBC (existing stored keys still read; re-encrypt to AEAD on next save). Verified: new round-trip ✓, legacy CBC fallback ✓, tamper rejected ✓. Removes the last token-area `openssl_random_pseudo_bytes` (the CBC IV); `ENCRYPTION_METHOD` const retained only for the legacy reader.
 - **[AGENT] md5() for dedup/cache keys** (ErrorNotificationService, CCO vocab cache) — collision risk; prefer sha256.
 - **[AGENT] File-extension allowlist** missing on DonorAgreement upload (`editAction.class.php:309`); zip extraction without size cap (`ahgIiifPlugin media actions:925`).
 
