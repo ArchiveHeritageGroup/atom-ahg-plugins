@@ -1,0 +1,38 @@
+-- ahg3DModelPlugin — 3D capture / provenance / PBR / LOD / licensing metadata.
+-- Parity with Heratio object_3d_model (DB audit 2026-06-15). All columns
+-- nullable + additive (safe on populated tables). Run once on existing installs.
+
+ALTER TABLE `object_3d_model`
+  ADD COLUMN `turntable_mp4_path`    VARCHAR(500) NULL,
+  ADD COLUMN `turntable_generated_at` DATETIME NULL,
+  ADD COLUMN `real_width`            DECIMAL(12,4) NULL,
+  ADD COLUMN `real_height`           DECIMAL(12,4) NULL,
+  ADD COLUMN `real_depth`            DECIMAL(12,4) NULL,
+  ADD COLUMN `dimension_unit`        VARCHAR(16) NULL COMMENT 'dropdown model_3d_units',
+  ADD COLUMN `scale_note`            VARCHAR(64) NULL,
+  ADD COLUMN `coordinate_system`     VARCHAR(16) NULL COMMENT 'dropdown model_3d_coordinate_system',
+  ADD COLUMN `bounding_box`          VARCHAR(96) NULL COMMENT 'auto: minX,minY,minZ maxX,maxY,maxZ (model units)',
+  ADD COLUMN `format_version`        VARCHAR(32) NULL COMMENT 'auto: e.g. glTF 2.0',
+  ADD COLUMN `compression`           VARCHAR(24) NULL COMMENT 'dropdown model_3d_compression',
+  ADD COLUMN `is_lossless_master`    TINYINT(1) NULL,
+  ADD COLUMN `pbr_maps`              VARCHAR(128) NULL COMMENT 'baseColor,normal,metalRough,occlusion,emissive',
+  ADD COLUMN `texture_colorspace`    VARCHAR(24) NULL,
+  ADD COLUMN `lod_levels`            INT NULL,
+  ADD COLUMN `is_watertight`         TINYINT(1) NULL,
+  ADD COLUMN `has_rig`               TINYINT(1) NULL,
+  ADD COLUMN `capture_method`        VARCHAR(40) NULL COMMENT 'dropdown model_3d_capture_method',
+  ADD COLUMN `capture_device`        VARCHAR(255) NULL,
+  ADD COLUMN `capture_date`          DATE NULL,
+  ADD COLUMN `capture_operator`      VARCHAR(255) NULL,
+  ADD COLUMN `source_count`          INT NULL COMMENT 'e.g. number of source photos',
+  ADD COLUMN `point_density`         VARCHAR(64) NULL,
+  ADD COLUMN `accuracy_mm`           DECIMAL(8,3) NULL,
+  ADD COLUMN `processing_software`   VARCHAR(255) NULL,
+  ADD COLUMN `processing_notes`      TEXT NULL,
+  ADD COLUMN `georeference`          VARCHAR(255) NULL,
+  ADD COLUMN `model_author`          VARCHAR(255) NULL,
+  ADD COLUMN `derivation_note`       TEXT NULL,
+  ADD COLUMN `model_license`         VARCHAR(100) NULL COMMENT 'dropdown model_3d_licence',
+  ADD COLUMN `model_license_holder`  VARCHAR(255) NULL,
+  ADD COLUMN `attribution`           VARCHAR(500) NULL,
+  ADD COLUMN `alt_text`              VARCHAR(500) NULL;
