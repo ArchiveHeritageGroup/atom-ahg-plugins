@@ -49,24 +49,49 @@ class ChainedAuditWriter
             return (int) DB::connection()->transaction(static function () use ($data) {
                 $state = DB::table('ahg_audit_chain_state')->where('id', 1)->lockForUpdate()->first();
                 $prev = $state ? $state->last_hash : self::initStateLocked();
+                $prevSeq = ($state && isset($state->last_seq)) ? (int) $state->last_seq : 0;
 
                 $data['prev_hash'] = $prev;
+                // entry_hash is computed over content only (SCALAR_FIELDS/JSON_FIELDS),
+                // exactly as before — the seal columns below are NOT part of the hash,
+                // so every pre-seal row still verifies unchanged.
                 $data['entry_hash'] = self::entryHash($prev, $data);
+
+                // Cryptographic seal (#5): monotonic seq + Ed25519 signature over
+                // the entry_hash. Opt-in — null kid/signature until a key is minted.
+                // Column-tolerant: if the seal columns aren't migrated yet, skip
+                // them entirely so deploy order (code vs ALTER) can never break
+                // audit logging.
+                $seq = $prevSeq + 1;
+                $sealCols = self::hasSealColumns();
+                if ($sealCols) {
+                    $data['seq'] = $seq;
+                    $sealed = self::sealEntry($data['entry_hash']);
+                    $data['signature'] = $sealed['signature'];
+                    $data['kid'] = $sealed['kid'];
+                    if (!array_key_exists('tenant_id', $data)) {
+                        $data['tenant_id'] = self::resolveTenantId();
+                    }
+                }
 
                 $id = DB::table('ahg_audit_log')->insertGetId(self::forStorage($data));
 
-                DB::table('ahg_audit_chain_state')->where('id', 1)->update([
+                $stateUpdate = [
                     'last_hash' => $data['entry_hash'],
                     'last_audit_id' => $id,
                     'updated_at' => date('Y-m-d H:i:s'),
-                ]);
+                ];
+                if (self::hasStateSeqColumn()) {
+                    $stateUpdate['last_seq'] = $seq;
+                }
+                DB::table('ahg_audit_chain_state')->where('id', 1)->update($stateUpdate);
 
                 return $id;
             });
         } catch (\Throwable $e) {
             error_log('audit.chain.append_failed: ' . $e->getMessage());
             try {
-                unset($data['prev_hash'], $data['entry_hash']);
+                unset($data['prev_hash'], $data['entry_hash'], $data['seq'], $data['signature'], $data['kid']);
 
                 return (int) DB::table('ahg_audit_log')->insertGetId(self::forStorage($data));
             } catch (\Throwable $e2) {
@@ -109,12 +134,42 @@ class ChainedAuditWriter
         $expectedPrev = $state->genesis_hash;
         $checked = 0;
 
+        // Cryptographic seal verification (#5): verify each row's Ed25519
+        // signature over its entry_hash against the current public key. A
+        // failure against a rotated key is reported as sig_failed, not as a
+        // chain break, so key rotation never trips the integrity gate.
+        $signer = null;
+        $publicKey = null;
+        $currentKid = null;
+        try {
+            $signer = new AuditSigner();
+            $publicKey = $signer->publicKey();
+            $currentKid = $signer->keyId();
+        } catch (\Throwable $e) {
+            // signing not configured — seal counts stay zero.
+        }
+        $signed = 0;
+        $sigVerified = 0;
+        $sigFailed = 0;
+        $firstSigFailId = null;
+
         foreach ($rows as $r) {
             if ($r->prev_hash !== $expectedPrev) {
                 return self::broken((int) $r->id, 'chain linkage broken (an entry was deleted or inserted)', $checked, $total);
             }
             if (self::entryHash($r->prev_hash, self::rowToData($r)) !== $r->entry_hash) {
                 return self::broken((int) $r->id, 'entry content was altered after it was written', $checked, $total);
+            }
+            if (!empty($r->signature)) {
+                ++$signed;
+                if (null !== $signer && null !== $publicKey && (string) $r->kid === (string) $currentKid) {
+                    if ($signer->verify((string) $r->signature, (string) $r->entry_hash, $publicKey)) {
+                        ++$sigVerified;
+                    } else {
+                        ++$sigFailed;
+                        $firstSigFailId = $firstSigFailId ?? (int) $r->id;
+                    }
+                }
             }
             $expectedPrev = $r->entry_hash;
             ++$checked;
@@ -125,8 +180,10 @@ class ChainedAuditWriter
                 'chain tip mismatch (the most recent entries were deleted)', $checked, $total);
         }
 
-        return ['sealed' => true, 'intact' => true, 'broken_id' => null,
-            'reason' => null, 'checked' => $checked, 'total' => $total];
+        return ['sealed' => true, 'intact' => true, 'broken_id' => null, 'reason' => null,
+            'checked' => $checked, 'total' => $total,
+            'signed' => $signed, 'sig_verified' => $sigVerified, 'sig_failed' => $sigFailed,
+            'first_sig_fail_id' => $firstSigFailId];
     }
 
     /**
@@ -176,6 +233,68 @@ class ChainedAuditWriter
     private static function entryHash(string $prevHash, array $row): string
     {
         return hash('sha256', $prevHash . self::SEP . self::canonical($row));
+    }
+
+    /** Whether the ahg_audit_log seal columns have been migrated (cached per request). */
+    private static function hasSealColumns(): bool
+    {
+        static $has = null;
+        if (null === $has) {
+            try {
+                $has = DB::getSchemaBuilder()->hasColumn('ahg_audit_log', 'signature');
+            } catch (\Throwable $e) {
+                $has = false;
+            }
+        }
+
+        return $has;
+    }
+
+    /** Whether ahg_audit_chain_state has the last_seq column (cached per request). */
+    private static function hasStateSeqColumn(): bool
+    {
+        static $has = null;
+        if (null === $has) {
+            try {
+                $has = DB::getSchemaBuilder()->hasColumn('ahg_audit_chain_state', 'last_seq');
+            } catch (\Throwable $e) {
+                $has = false;
+            }
+        }
+
+        return $has;
+    }
+
+    /**
+     * Ed25519-sign an entry hash. Returns ['signature' => ?string, 'kid' => ?string];
+     * both null when no signing key is configured (seal is opt-in) or signing errors.
+     */
+    private static function sealEntry(string $entryHash): array
+    {
+        try {
+            $signer = new AuditSigner();
+            if (!$signer->isEnabled()) {
+                return ['signature' => null, 'kid' => null];
+            }
+            $sig = $signer->sign($entryHash);
+
+            return ['signature' => $sig, 'kid' => null === $sig ? null : $signer->keyId()];
+        } catch (\Throwable $e) {
+            error_log('audit.chain.sign_failed: ' . $e->getMessage());
+
+            return ['signature' => null, 'kid' => null];
+        }
+    }
+
+    /**
+     * Resolve the current tenant id for multi-tenant deployments. PSIS multi-tenancy
+     * is disabled, so this returns null; the column exists for parity + forward use.
+     */
+    private static function resolveTenantId(): ?int
+    {
+        $tid = class_exists('sfConfig') ? \sfConfig::get('ahg_current_tenant_id') : null;
+
+        return (null === $tid || '' === $tid) ? null : (int) $tid;
     }
 
     private static function canonical(array $f): string
