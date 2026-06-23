@@ -22,89 +22,46 @@ class AhgTranslationService
 
     public function translateText(string $text, string $sourceCulture, string $targetCulture = 'en', ?int $maxLength = null): array
     {
-        // Use NLLB-200 API (ahg-ai service)
-        $endpoint = $this->getSetting('mt.endpoint', 'https://ai.theahg.co.za/ai/v1/translate'); // gateway, not direct node (2026-06-15)
-        $apiKey = $this->getSetting('mt.api_key', ''); // fail closed — no embedded credential (security audit 2026-06-15)
-        $timeout = (int)$this->getSetting('mt.timeout_seconds', '60');
-
-        // NLLB-200 API format with max_length for field
-        $payloadData = array(
-            'text'   => $text,
-            'source' => $sourceCulture,
-            'target' => $targetCulture,
-        );
-        if ($maxLength !== null) {
-            $payloadData['max_length'] = $maxLength;
-        }
-        $payload = json_encode($payloadData);
-
+        // Route translation through the AHG AI gateway (keyed + SSRF-guarded),
+        // using the real key from ahg_ai_settings — never a direct node port and
+        // never the stale mt.endpoint/mt.api_key settings (2026-06-22).
         $t0 = microtime(true);
+        $result = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()
+            ->translate($text, $sourceCulture, $targetCulture, $maxLength);
+        $elapsedMs = (int) round((microtime(true) - $t0) * 1000);
 
-        $ch = curl_init($endpoint);
-        curl_setopt_array($ch, array(
-            CURLOPT_POST => true,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'X-API-Key: ' . $apiKey,
-            ),
-            CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_TIMEOUT => $timeout,
-        ));
-
-        $raw = curl_exec($ch);
-        $errno = curl_errno($ch);
-        $errstr = curl_error($ch);
-        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        $elapsedMs = (int)round((microtime(true) - $t0) * 1000);
-
-        if ($errno !== 0) {
+        if ($result === null) {
             return array(
                 'ok' => false,
                 'translation' => null,
-                'http_status' => $status ?: null,
-                'error' => 'cURL error ' . $errno . ': ' . $errstr,
+                'http_status' => null,
+                'error' => 'Translation gateway unavailable or no API key configured',
                 'elapsed_ms' => $elapsedMs,
-                'endpoint' => $endpoint,
+                'endpoint' => 'gateway',
             );
         }
 
-        $data = json_decode((string)$raw, true);
-        if (!is_array($data)) {
+        $translation = $result['translated'] ?? $result['translatedText'] ?? $result['translation'] ?? null;
+
+        if (empty($result['success']) || !is_string($translation)) {
             return array(
                 'ok' => false,
                 'translation' => null,
-                'http_status' => $status,
-                'error' => 'Invalid JSON from MT endpoint',
+                'http_status' => 200,
+                'error' => $result['error'] ?? $result['detail'] ?? 'MT returned no translation',
                 'elapsed_ms' => $elapsedMs,
-                'endpoint' => $endpoint,
-            );
-        }
-
-        // NLLB-200 returns 'translated' field
-        $translation = $data['translated'] ?? $data['translatedText'] ?? $data['translation'] ?? null;
-
-        if ($status < 200 || $status >= 300 || !is_string($translation)) {
-            return array(
-                'ok' => false,
-                'translation' => null,
-                'http_status' => $status,
-                'error' => $data['detail'] ?? $data['error'] ?? 'MT endpoint returned non-2xx or missing translation',
-                'elapsed_ms' => $elapsedMs,
-                'endpoint' => $endpoint,
+                'endpoint' => 'gateway',
             );
         }
 
         return array(
             'ok' => true,
             'translation' => $translation,
-            'http_status' => $status,
+            'http_status' => 200,
             'error' => null,
             'elapsed_ms' => $elapsedMs,
-            'endpoint' => $endpoint,
-            'model' => $data['model'] ?? 'nllb-200',
+            'endpoint' => 'gateway',
+            'model' => $result['model'] ?? 'opus-mt-ct2',
         );
     }
 
