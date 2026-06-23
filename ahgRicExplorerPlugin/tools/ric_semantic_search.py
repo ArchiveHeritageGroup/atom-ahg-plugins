@@ -17,8 +17,11 @@ FUSEKI_QUERY = f"{FUSEKI_ENDPOINT}/query"
 ES_ENDPOINT = os.environ.get('ES_ENDPOINT', 'http://localhost:9200')
 ATOM_BASE_URL = os.environ.get('ATOM_BASE_URL', 'https://psis.theahg.co.za')
 
-ES_INDEX_IO = 'atom_psis_qubitinformationobject'
-ES_INDEX_ACTOR = 'atom_psis_qubitactor'
+# Index names must match this instance's OpenSearch prefix (config/search.yml
+# index.name). PSIS uses 'archive'; the old 'atom_psis_*' literals were a stale
+# name that 404s (RiC semantic search returned nothing). Env-overridable per deployment.
+ES_INDEX_IO = os.environ.get('ES_INDEX_IO', 'archive_qubitinformationobject')
+ES_INDEX_ACTOR = os.environ.get('ES_INDEX_ACTOR', 'archive_qubitactor')
 
 PREFIXES = """
 PREFIX rico: <https://www.ica.org/standards/RiC/ontology#>
