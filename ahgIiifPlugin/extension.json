@@ -1,7 +1,7 @@
 {
     "machine_name": "ahgIiifPlugin",
     "name": "AHG IIIF Plugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "IIIF viewer integration with Mirador and OpenSeadragon support",
     "author": "The Archive and Heritage Group",
     "category": "viewer",

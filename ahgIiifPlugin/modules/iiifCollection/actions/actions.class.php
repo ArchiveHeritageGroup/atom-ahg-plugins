@@ -58,7 +58,7 @@ class iiifCollectionActions extends AhgController
     public function executeNew($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('@login');
+            $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
         $this->initService();
@@ -74,15 +74,15 @@ class iiifCollectionActions extends AhgController
     public function executeCreate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('@login');
+            $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
         if (!$request->isMethod('post')) {
-            $this->redirect(['module' => 'iiifCollection', 'action' => 'new']);
+            $this->redirect('@iiif_collection_new');
         }
-        
+
         $this->initService();
-        
+
         $data = [
             'name' => $request->getParameter('name'),
             'description' => $request->getParameter('description'),
@@ -92,10 +92,10 @@ class iiifCollectionActions extends AhgController
             'is_public' => $request->getParameter('is_public', 1),
             'created_by' => $this->getUser()->getAttribute('user_id'),
         ];
-        
+
         $id = $this->collectionService->createCollection($data);
-        
-        $this->redirect(['module' => 'iiifCollection', 'action' => 'view', 'id' => $id]);
+
+        $this->redirect('@iiif_collection_view?id=' . $id);
     }
 
     /**
@@ -104,7 +104,7 @@ class iiifCollectionActions extends AhgController
     public function executeEdit($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('@login');
+            $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
         $this->initService();
@@ -127,11 +127,11 @@ class iiifCollectionActions extends AhgController
     public function executeUpdate($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('@login');
+            $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
         if (!$request->isMethod('post')) {
-            $this->redirect(['module' => 'iiifCollection', 'action' => 'index']);
+            $this->redirect('@iiif_collection_index');
         }
         
         $this->initService();
@@ -149,7 +149,7 @@ class iiifCollectionActions extends AhgController
         
         $this->collectionService->updateCollection($id, $data);
         
-        $this->redirect(['module' => 'iiifCollection', 'action' => 'view', 'id' => $id]);
+        $this->redirect('@iiif_collection_view?id=' . $id);
     }
 
     /**
@@ -158,7 +158,7 @@ class iiifCollectionActions extends AhgController
     public function executeDelete($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('@login');
+            $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
         $this->initService();
@@ -170,9 +170,9 @@ class iiifCollectionActions extends AhgController
         $this->collectionService->deleteCollection($id);
         
         if ($parentId) {
-            $this->redirect(['module' => 'iiifCollection', 'action' => 'view', 'id' => $parentId]);
+            $this->redirect('@iiif_collection_view?id=' . $parentId);
         }
-        $this->redirect(['module' => 'iiifCollection', 'action' => 'index']);
+        $this->redirect('@iiif_collection_index');
     }
 
     /**
@@ -181,7 +181,7 @@ class iiifCollectionActions extends AhgController
     public function executeAddItems($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('@login');
+            $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
         $this->initService();
@@ -222,7 +222,7 @@ class iiifCollectionActions extends AhgController
                 }
             }
 
-            $this->redirect(['module' => 'iiifCollection', 'action' => 'view', 'id' => $id]);
+            $this->redirect('@iiif_collection_view?id=' . $id);
         }
         
         // Search for objects to add
@@ -242,7 +242,7 @@ class iiifCollectionActions extends AhgController
     public function executeRemoveItem($request)
     {
         if (!$this->getUser()->isAuthenticated()) {
-            $this->redirect('@login');
+            $this->redirect(['module' => 'user', 'action' => 'login']);
         }
         
         $this->initService();
@@ -252,7 +252,7 @@ class iiifCollectionActions extends AhgController
         
         $this->collectionService->removeItem($itemId);
         
-        $this->redirect(['module' => 'iiifCollection', 'action' => 'view', 'id' => $collectionId]);
+        $this->redirect('@iiif_collection_view?id=' . $collectionId);
     }
 
     /**

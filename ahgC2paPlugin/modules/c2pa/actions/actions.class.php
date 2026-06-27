@@ -45,22 +45,24 @@ class c2paActions extends AhgController
             return $this->renderJson(['information_object_id' => $ioId, 'manifests' => []]);
         }
 
+        // #187: align with the actual ahg_c2pa_manifest schema — the prior select
+        // referenced columns (action/model_id/model_version/sidecar_path/
+        // claim_signature) that don't exist, 500-ing on every call.
         $rows = DB::table('ahg_c2pa_manifest')
             ->where('information_object_id', $ioId)
             ->orderByDesc('created_at')
-            ->get(['id', 'action', 'model_id', 'model_version', 'sidecar_path', 'kid', 'claim_signature', 'created_at']);
+            ->get(['id', 'digital_object_id', 'manifest_label', 'asset_hash', 'kid', 'signature_hex', 'created_at']);
 
         $manifests = [];
         foreach ($rows as $row) {
             $manifests[] = [
-                'id'            => (int) $row->id,
-                'action'        => (string) $row->action,
-                'model_id'      => (string) $row->model_id,
-                'model_version' => $row->model_version,
-                'sidecar_path'  => $row->sidecar_path,
-                'kid'           => (string) $row->kid,
-                'signature'     => (string) $row->claim_signature,
-                'created_at'    => (string) $row->created_at,
+                'id'                => (int) $row->id,
+                'digital_object_id' => isset($row->digital_object_id) ? (int) $row->digital_object_id : null,
+                'label'             => (string) $row->manifest_label,
+                'asset_hash'        => (string) $row->asset_hash,
+                'kid'               => (string) $row->kid,
+                'signature'         => (string) $row->signature_hex,
+                'created_at'        => (string) $row->created_at,
             ];
         }
 

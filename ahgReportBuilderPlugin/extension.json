@@ -1,7 +1,7 @@
 {
     "name": "Report Builder",
     "machine_name": "ahgReportBuilderPlugin",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "Enterprise report builder with rich text editing (Quill.js), Word/PDF/XLSX/CSV export, drag-drop sections, templates, collaboration workflows, SQL queries, sharing, and scheduling",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

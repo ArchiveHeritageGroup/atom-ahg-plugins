@@ -1,7 +1,7 @@
 {
     "name": "C2PA Content Credentials",
     "machine_name": "ahgC2paPlugin",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "C2PA (Coalition for Content Provenance and Authenticity) 2.1 content credentials. Generate, Ed25519-sign and embed signed provenance manifests on digital-object derivatives (JUMBF via c2patool, or .c2pa.json sidecars), surface embedded EXIF/IPTC/XMP as C2PA Standard Metadata Assertions, declare AI training-mining stance, and verify manifests. PSIS port of Heratio's ahg/c2pa, sharing the ahg/inference-receipts Ed25519 key chain with ahgAiCompliancePlugin.",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",

@@ -1699,7 +1699,7 @@ class reportBuilderActions extends AhgController
 
         if (!$share) {
             $this->expired = true;
-            $this->setTemplate('shareSuccess');
+            $this->setTemplate('share');
 
             return;
         }
@@ -1709,7 +1709,7 @@ class reportBuilderActions extends AhgController
 
         if (!$this->report) {
             $this->expired = true;
-            $this->setTemplate('shareSuccess');
+            $this->setTemplate('share');
 
             return;
         }
@@ -1724,7 +1724,7 @@ class reportBuilderActions extends AhgController
         $this->reportData = $this->service->executeReport($share->report_id, [], 1, 100);
         $this->allColumns = ColumnDiscovery::getColumns($this->report->data_source);
 
-        $this->setTemplate('shareSuccess');
+        $this->setTemplate('share');
     }
 
     // ===================

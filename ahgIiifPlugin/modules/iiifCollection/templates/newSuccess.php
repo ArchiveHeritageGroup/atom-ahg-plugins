@@ -20,7 +20,7 @@
 
 <?php slot('content') ?>
 <div class="iiif-collection-form">
-    <form method="post" action="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'create']) ?>">
+    <form method="post" action="<?php echo url_for('@iiif_collection_create') ?>">
         <div class="card mb-4">
             <div class="card-header bg-primary text-white">
                 <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i><?php echo __('Collection Details') ?></h5>
@@ -91,7 +91,7 @@
             <button type="submit" class="btn btn-success">
                 <i class="fas fa-save me-2"></i><?php echo __('Create Collection') ?>
             </button>
-            <a href="<?php echo url_for(['module' => 'iiifCollection', 'action' => 'index']) ?>" class="btn btn-outline-secondary">
+            <a href="<?php echo url_for('@iiif_collection_index') ?>" class="btn btn-outline-secondary">
                 <i class="fas fa-times me-2"></i><?php echo __('Cancel') ?>
             </a>
         </div>
