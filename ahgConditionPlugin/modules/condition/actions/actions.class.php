@@ -12,6 +12,23 @@ use Illuminate\Database\Capsule\Manager as DB;
 class conditionActions extends AhgController
 {
     /**
+     * #183: condition assessment is internal collection-care work, but the module
+     * had unauthenticated creates (photos?id=new) and login-only IDOR on
+     * save/upload/delete/updateMeta/aiAssess (deletePhoto even ignored userId) +
+     * unauthenticated reads. It is not a public-facing feature, so gate the WHOLE
+     * module to authenticated collection-care staff (editor/administrator).
+     */
+    public function preExecute()
+    {
+        parent::preExecute();
+
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    /**
      * Initialize AhgDb for Laravel Query Builder.
      */
     public function boot(): void

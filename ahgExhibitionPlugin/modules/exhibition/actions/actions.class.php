@@ -12,6 +12,35 @@ use AtomFramework\Http\Controllers\AhgController;
 class exhibitionActions extends AhgController
 {
     /**
+     * #181: the exhibition module's mutating actions had NO auth (and defaulted
+     * the actor to user 1) → anonymous CRUD of exhibitions, objects, sections,
+     * storylines, stops, events and checklists. Gate every WRITE action to
+     * authenticated staff (editor/administrator); public read views (index/show
+     * and the read-list/AJAX helpers) are left open for visitors.
+     */
+    public function preExecute()
+    {
+        parent::preExecute();
+
+        $writeActions = [
+            'add', 'edit', 'transition',
+            'addobject', 'updateobject', 'removeobject', 'reorderobjects',
+            'updatesection', 'deletesection',
+            'addstoryline', 'updatestoryline', 'deletestoryline',
+            'addstop', 'updatestop', 'deletestop',
+            'addevent', 'updateevent', 'deleteevent',
+            'createchecklist', 'addchecklistitem', 'completeitem',
+        ];
+
+        if (in_array(strtolower($this->getActionName()), $writeActions, true)) {
+            if (!$this->getUser()->isAuthenticated()
+                || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+                $this->forward('admin', 'secure');
+            }
+        }
+    }
+
+    /**
      * Browse/list exhibitions.
      */
     public function executeIndex($request)

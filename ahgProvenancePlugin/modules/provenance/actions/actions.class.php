@@ -4,6 +4,25 @@ use AtomFramework\Http\Controllers\AhgController;
 class provenanceActions extends AhgController
 {
     /**
+     * #182: provenance writes were under-protected — `deleteDocument` had NO auth
+     * (unauth DELETE + file unlink), and edit/addEvent/deleteEvent were login-only
+     * (no ACL) despite writing POPIA / Nazi-era / cultural-property fields. Gate
+     * every write action to authenticated staff (editor/administrator).
+     */
+    public function preExecute()
+    {
+        parent::preExecute();
+
+        $writeActions = ['edit', 'deletedocument', 'addevent', 'deleteevent'];
+        if (in_array(strtolower($this->getActionName()), $writeActions, true)) {
+            if (!$this->getUser()->isAuthenticated()
+                || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+                $this->forward('admin', 'secure');
+            }
+        }
+    }
+
+    /**
      * Dashboard / List view
      */
     public function executeIndex($request)
