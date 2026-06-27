@@ -22,6 +22,22 @@ class provenanceActions extends AhgController
         }
     }
 
+    /** Staff (editor/administrator) may see non-public provenance; nobody else. */
+    protected function maySeeNonPublicProvenance(): bool
+    {
+        return $this->getUser()->isAuthenticated()
+            && $this->getUser()->hasCredential(['editor', 'administrator'], false);
+    }
+
+    /** True when this provenance is hidden from the current viewer (#182 read leak). */
+    protected function provenanceHidden(array $prov): bool
+    {
+        return !empty($prov['exists'])
+            && isset($prov['record']->is_public)
+            && !$prov['record']->is_public
+            && !$this->maySeeNonPublicProvenance();
+    }
+
     /**
      * Dashboard / List view
      */
@@ -51,6 +67,9 @@ class provenanceActions extends AhgController
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
 
         $this->provenance = $service->getProvenanceForObject($this->resource->id, $this->culture());
+        if ($this->provenanceHidden($this->provenance)) {
+            $this->forward404('Provenance not available');
+        }
         $this->eventTypes = $service->getEventTypes();
     }
 
@@ -70,6 +89,9 @@ class provenanceActions extends AhgController
 
         // Load provenance data first
         $this->provenance = $service->getProvenanceForObject($this->resource->id, $this->culture());
+        if ($this->provenanceHidden($this->provenance)) {
+            $this->forward404('Provenance not available');
+        }
 
         // Then prepare timeline data for D3.js
         $this->timelineData = $this->prepareTimelineData();
@@ -455,6 +477,10 @@ class provenanceActions extends AhgController
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
 
         $this->provenance = $service->getProvenanceForObject($objectId, $this->culture());
+        if ($this->provenanceHidden($this->provenance)) {
+            // Component embedded in the IO view — render nothing rather than 404.
+            $this->provenance = ['exists' => false, 'record' => null, 'events' => [], 'documents' => [], 'timeline' => []];
+        }
         $this->objectId = $objectId;
     }
 
