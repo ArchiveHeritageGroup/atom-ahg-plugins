@@ -1,7 +1,7 @@
 {
     "name": "3D Model Viewer",
     "machine_name": "ahg3DModelPlugin",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "3D model viewing with Google Model Viewer, Gaussian Splat support, AR, hotspots, and IIIF 3D manifests",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

@@ -800,6 +800,25 @@ class spectrumActions extends AhgController
         $this->repositories = $this->getRepositoriesForFilter();
     }
 
+    /**
+     * #186: shared staff gate for the JSON photo endpoints. Returns false and
+     * writes a 403 body when the caller isn't authenticated staff (editor/admin).
+     * These routes are currently unreachable (action-name/route mismatch), but the
+     * gate ensures they can never become unauthenticated mutations.
+     */
+    private function spectrumStaffGate(): bool
+    {
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->getResponse()->setStatusCode(403);
+            echo json_encode(['success' => false, 'error' => 'Forbidden']);
+
+            return false;
+        }
+
+        return true;
+    }
+
     public function executeConditionPhotos($request)
     {
         // #185: creates a spectrum_condition_check on GET and uploads a
@@ -1319,6 +1338,9 @@ class spectrumActions extends AhgController
     public function executeAnnotationSave($request)
     {
         $this->getResponse()->setContentType('application/json');
+        if (!$this->spectrumStaffGate()) {
+            return sfView::NONE;
+        }
         
         if (!$request->isMethod('post')) {
             return $this->renderText(json_encode(['success' => false, 'error' => 'POST required']));
@@ -1356,6 +1378,9 @@ class spectrumActions extends AhgController
     public function executeAnnotationGet($request)
     {
         $this->getResponse()->setContentType('application/json');
+        if (!$this->spectrumStaffGate()) {
+            return sfView::NONE;
+        }
         
         $photoId = $request->getParameter('photo_id');
         
@@ -1389,6 +1414,9 @@ class spectrumActions extends AhgController
     public function executePhotoDelete($request)
     {
         $this->getResponse()->setContentType('application/json');
+        if (!$this->spectrumStaffGate()) {
+            return sfView::NONE;
+        }
         
         $photoId = $request->getParameter('photo_id');
         
@@ -1430,6 +1458,9 @@ class spectrumActions extends AhgController
     public function executePhotoSetPrimary($request)
     {
         $this->getResponse()->setContentType('application/json');
+        if (!$this->spectrumStaffGate()) {
+            return sfView::NONE;
+        }
         
         $photoId = $request->getParameter('photo_id');
         $conditionId = $request->getParameter('condition_id');
@@ -1463,6 +1494,9 @@ class spectrumActions extends AhgController
     public function executePhotoRotate($request)
     {
         $this->getResponse()->setContentType('application/json');
+        if (!$this->spectrumStaffGate()) {
+            return sfView::NONE;
+        }
         
         $photoId = $request->getParameter('photo_id');
         $degrees = (int) $request->getParameter('degrees', 90);

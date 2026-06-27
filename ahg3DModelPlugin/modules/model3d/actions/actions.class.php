@@ -882,10 +882,47 @@ class model3dActions extends AhgController
     /**
      * API: Get models for an object
      */
+    /** #186: the information_object backing a 3D model is published (anon gate). */
+    private function ioPublishedFor3d(int $ioId): bool
+    {
+        $db = $this->db;
+
+        return $db::table('status')->where('object_id', $ioId)
+            ->where('type_id', 158)->where('status_id', 160)->exists();
+    }
+
+    /**
+     * #186: may the current viewer see this model's data? Staff always; a guest
+     * only when the model is_public AND its IO is published — so the by-id JSON
+     * read endpoints can't surface hotspots/bookmarks of a draft model.
+     */
+    private function modelVisibleToViewer(int $modelId): bool
+    {
+        if ($this->getUser()->isAuthenticated()) {
+            return true;
+        }
+        $db = $this->db;
+        $model = $db::table('object_3d_model')->where('id', $modelId)->first();
+        if (!$model || (int) ($model->is_public ?? 0) !== 1) {
+            return false;
+        }
+
+        return $this->ioPublishedFor3d((int) $model->object_id);
+    }
+
     public function executeApiModels($request)
     {
         $objectId = (int)$request->getParameter('object_id');
         $db = $this->db;
+
+        // #186: a guest only sees models of a PUBLISHED information_object.
+        if (!$this->getUser()->isAuthenticated() && !$this->ioPublishedFor3d($objectId)) {
+            $this->getResponse()->setContentType('application/json');
+            $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+            echo json_encode(['models' => []]);
+
+            return sfView::NONE;
+        }
 
         $models = $db::table('object_3d_model as m')
             ->leftJoin('object_3d_model_i18n as i18n', function($join) {
@@ -914,6 +951,14 @@ class model3dActions extends AhgController
     {
         $modelId = (int)$request->getParameter('model_id');
         $db = $this->db;
+
+        if (!$this->modelVisibleToViewer($modelId)) {
+            $this->getResponse()->setContentType('application/json');
+            $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+            echo json_encode(['hotspots' => []]);
+
+            return sfView::NONE;
+        }
 
         $hotspots = $db::table('object_3d_hotspot as h')
             ->leftJoin('object_3d_hotspot_i18n as i18n', function($join) {
@@ -947,6 +992,14 @@ class model3dActions extends AhgController
             $this->getResponse()->setStatusCode(401);
             $this->getResponse()->setContentType('application/json');
             echo json_encode(['success' => false, 'error' => 'Authentication required']);
+            return sfView::NONE;
+        }
+        // #186: bookmarks are shared per-model curation (no user_id), so require
+        // staff — not just any login (was a login-only IDOR on any model).
+        if (!$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->getResponse()->setStatusCode(403);
+            $this->getResponse()->setContentType('application/json');
+            echo json_encode(['success' => false, 'error' => 'Forbidden']);
             return sfView::NONE;
         }
 
@@ -994,6 +1047,11 @@ class model3dActions extends AhgController
             $this->getResponse()->setStatusCode(401);
             return sfView::NONE;
         }
+        // #186: shared per-model curation — require staff (was login-only IDOR).
+        if (!$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->getResponse()->setStatusCode(403);
+            return sfView::NONE;
+        }
 
         $bookmarkId = (int) $request->getParameter('id');
         $db = $this->db;
@@ -1020,6 +1078,14 @@ class model3dActions extends AhgController
     {
         $modelId = (int) $request->getParameter('model_id');
         $db = $this->db;
+
+        if (!$this->modelVisibleToViewer($modelId)) {
+            $this->getResponse()->setContentType('application/json');
+            $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
+            echo json_encode(['bookmarks' => []]);
+
+            return sfView::NONE;
+        }
 
         $bookmarks = $db::table('object_3d_camera_bookmark')
             ->where('model_id', $modelId)
