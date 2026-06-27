@@ -207,12 +207,21 @@ class DatasetService
             ->all();
     }
 
-    /** All datasets (most recent first) for the index, with project + file count. */
-    public function list(): array
+    /**
+     * Datasets for the index (most recent first) with project + file count.
+     * When $ownerId is given, scope to that depositor (non-admin view, #178).
+     */
+    public function list(?int $ownerId = null): array
     {
-        return DB::table('rdm_dataset as d')
+        $q = DB::table('rdm_dataset as d')
             ->leftJoin('research_project as p', 'p.id', '=', 'd.project_id')
-            ->leftJoin('rdm_dataset_file as f', 'f.dataset_id', '=', 'd.id')
+            ->leftJoin('rdm_dataset_file as f', 'f.dataset_id', '=', 'd.id');
+
+        if ($ownerId !== null) {
+            $q->where('d.created_by', $ownerId);
+        }
+
+        return $q
             ->groupBy('d.id', 'd.title', 'd.status', 'd.created_at', 'p.title')
             ->orderByDesc('d.id')
             ->select('d.id', 'd.title', 'd.status', 'd.created_at', 'p.title as project_title', DB::raw('COUNT(f.id) as file_count'))

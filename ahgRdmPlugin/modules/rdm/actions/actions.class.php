@@ -59,12 +59,43 @@ class rdmActions extends sfActions
         return $id ? (int) $id : null;
     }
 
+    protected function isAdmin(): bool
+    {
+        return $this->getUser()->isAdministrator();
+    }
+
+    /** Admin-only oversight surfaces (cross-faculty POPIA data). */
+    protected function requireAdmin(): void
+    {
+        if (!$this->isAdmin()) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    /**
+     * Ownership gate (#178 Class 2 — IDOR): a dataset's depositor (created_by)
+     * or an admin may act on / view it. Everyone else is denied, so a logged-in
+     * non-owner can't read or mutate another researcher's POPIA dataset by id.
+     */
+    protected function requireDatasetOwner(int $datasetId): void
+    {
+        if ($this->isAdmin()) {
+            return;
+        }
+        $ownerId = (int) \Illuminate\Database\Capsule\Manager::table('rdm_dataset')->where('id', $datasetId)->value('created_by');
+        if ($ownerId === 0 || $ownerId !== (int) $this->currentUserId()) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
     // ─── Index: list datasets ───────────────────────────────────────────
 
     public function executeIndex(sfWebRequest $request)
     {
         $this->requireAuth();
-        $this->datasets = $this->getDatasetService()->list();
+        // #178 Class 2: non-admins see only their own datasets (titles + POPIA
+        // verdicts are themselves sensitive); admins get the full list.
+        $this->datasets = $this->getDatasetService()->list($this->isAdmin() ? null : $this->currentUserId());
     }
 
     // ─── Create: GET shows the form, POST creates + redirects to show ───
@@ -106,6 +137,7 @@ class rdmActions extends sfActions
 
         $this->dataset = $svc->get((int) $request->getParameter('id'));
         $this->forward404Unless($this->dataset, 'Dataset not found.');
+        $this->requireDatasetOwner((int) $this->dataset->id);
 
         $this->files = $svc->files((int) $this->dataset->id);
         $this->findings = \Illuminate\Database\Capsule\Manager::table('rdm_scan_finding')
@@ -125,6 +157,7 @@ class rdmActions extends sfActions
     {
         $this->requireAuth();
         $datasetId = (int) $request->getParameter('id');
+        $this->requireDatasetOwner($datasetId);
 
         if (!$request->isMethod('post')) {
             $this->redirect('@rdm_datasets_show?id=' . $datasetId);
@@ -160,6 +193,7 @@ class rdmActions extends sfActions
     {
         $this->requireAuth();
         $datasetId = (int) $request->getParameter('id');
+        $this->requireDatasetOwner($datasetId);
 
         if ($request->isMethod('post')) {
             $this->getDmpLinkService()->unlink($datasetId);
@@ -174,6 +208,7 @@ class rdmActions extends sfActions
     public function executeDashboard(sfWebRequest $request)
     {
         $this->requireAuth();
+        $this->requireAdmin(); // #178: cross-faculty POPIA roll-up is oversight-only
 
         if (!class_exists('\AhgRdm\Services\DashboardService')) {
             require_once sfConfig::get('sf_plugins_dir') . '/ahgRdmPlugin/lib/Services/DashboardService.php';
@@ -194,6 +229,7 @@ class rdmActions extends sfActions
     public function executeCompliance(sfWebRequest $request)
     {
         $this->requireAuth();
+        $this->requireAdmin(); // #178: cross-faculty POPIA scoreboard is oversight-only
         $svc = $this->getComplianceService();
 
         $this->filters = array_filter([
@@ -231,16 +267,25 @@ class rdmActions extends sfActions
         }
         $doId = (int) $do->id;
 
-        // Authorisation: admins bypass; everyone else is evaluated against the
-        // dataset IO's ODRL policies (restricted/embargoed -> prohibition -> deny).
-        if (!$this->getUser()->isAdministrator()) {
-            if (!class_exists('\OdrlService')) {
-                require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OdrlService.php';
-            }
-            $researcherId = (int) ($DB::table('research_researcher')->where('user_id', $this->currentUserId())->value('id') ?: 0);
-            $verdict = (new \OdrlService())->evaluateAccess('archival_description', $ioId, $researcherId, 'use');
-            if (empty($verdict['permitted'])) {
-                return $this->deny(403, 'Access to this file is restricted (POPIA / personal data). Contact the repository for mediated access.');
+        // Authorisation: admins + the dataset owner bypass. Anyone else may only
+        // reach a dataset that has been through the human gate (disposition set),
+        // and then only if ODRL permits — closing the pre-gate window where a
+        // draft dataset has no policies yet (ODRL default-allow). #178.
+        if (!$this->isAdmin()) {
+            $ds = $DB::table('rdm_dataset')->where('id', $datasetId)->first();
+            $isOwner = $ds && (int) $ds->created_by !== 0 && (int) $ds->created_by === (int) $this->currentUserId();
+            if (!$isOwner) {
+                if (empty($ds->disposition)) {
+                    return $this->deny(403, 'This dataset has not been released for access.');
+                }
+                if (!class_exists('\OdrlService')) {
+                    require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OdrlService.php';
+                }
+                $researcherId = (int) ($DB::table('research_researcher')->where('user_id', $this->currentUserId())->value('id') ?: 0);
+                $verdict = (new \OdrlService())->evaluateAccess('archival_description', $ioId, $researcherId, 'use');
+                if (empty($verdict['permitted'])) {
+                    return $this->deny(403, 'Access to this file is restricted (POPIA / personal data). Contact the repository for mediated access.');
+                }
             }
         }
 
@@ -322,6 +367,7 @@ class rdmActions extends sfActions
     {
         $this->requireAuth();
         $datasetId = (int) $request->getParameter('id');
+        $this->requireDatasetOwner($datasetId);
 
         if (!$request->isMethod('post')) {
             $this->redirect('@rdm_datasets_show?id=' . $datasetId);
@@ -354,6 +400,7 @@ class rdmActions extends sfActions
     {
         $this->requireAuth();
         $datasetId = (int) $request->getParameter('id');
+        $this->requireDatasetOwner($datasetId);
 
         if (!$request->isMethod('post')) {
             $this->redirect('@rdm_datasets_show?id=' . $datasetId);
@@ -385,6 +432,7 @@ class rdmActions extends sfActions
         }
 
         $datasetId = (int) $request->getParameter('id');
+        $this->requireDatasetOwner($datasetId);
         $dataset = $this->getDatasetService()->get($datasetId);
         $this->forward404Unless($dataset, 'Dataset not found.');
 
@@ -411,6 +459,7 @@ class rdmActions extends sfActions
         $this->requireAuth();
 
         $datasetId = (int) $request->getParameter('id');
+        $this->requireDatasetOwner($datasetId);
         $dataset = $this->getDatasetService()->get($datasetId);
         $this->forward404Unless($dataset, 'Dataset not found.');
 
