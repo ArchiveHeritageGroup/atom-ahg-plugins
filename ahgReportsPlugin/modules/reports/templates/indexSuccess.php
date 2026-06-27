@@ -313,6 +313,10 @@ $canManage = $isAdmin || $isEditor;
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt me-2 text-muted"></i><?php echo __('Research Dashboard'); ?></a></li>
+                    <?php if (isPluginActive('ahgRdmPlugin')): ?>
+                    <li class="list-group-item"><a href="/research/datasets/dashboard"><i class="fas fa-gauge-high me-2 text-muted"></i><?php echo __('RDM Dashboard'); ?></a></li>
+                    <li class="list-group-item"><a href="/research/datasets/compliance"><i class="fas fa-clipboard-check me-2 text-muted"></i><?php echo __('RDM Compliance'); ?></a></li>
+                    <?php endif; ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'projects']); ?>"><i class="fas fa-project-diagram me-2 text-muted"></i><?php echo __('Projects'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'collections']); ?>"><i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Evidence Sets'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'research', 'action' => 'journal']); ?>"><i class="fas fa-journal-whills me-2 text-muted"></i><?php echo __('Research Journal'); ?></a></li>

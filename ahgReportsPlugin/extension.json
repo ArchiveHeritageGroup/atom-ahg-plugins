@@ -1,7 +1,7 @@
 {
     "name": "AHG Reports",
     "machine_name": "ahgReportsPlugin",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "Central reporting dashboard with accession, authority, repository, storage and taxonomy reports",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

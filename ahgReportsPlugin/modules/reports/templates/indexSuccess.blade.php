@@ -120,6 +120,10 @@ $canManage = $isAdmin || $isEditor;
     <h4 class="mt-4">{{ __('Research') }}</h4>
     <ul class="list-unstyled">
         <li><a href="{{ url_for(['module' => 'research', 'action' => 'dashboard']) }}"><i class="fas fa-graduation-cap me-2"></i>{{ __('Research Dashboard') }}</a></li>
+        @if (isPluginActive('ahgRdmPlugin'))
+        <li><a href="/research/datasets/dashboard"><i class="fas fa-gauge-high me-2"></i>{{ __('RDM Dashboard') }}</a></li>
+        <li><a href="/research/datasets/compliance"><i class="fas fa-clipboard-check me-2"></i>{{ __('RDM Compliance') }}</a></li>
+        @endif
         <li><a href="{{ url_for(['module' => 'research', 'action' => 'bookings']) }}"><i class="fas fa-calendar-alt me-2"></i>{{ __('Bookings') }}</a></li>
     </ul>
     @endif
