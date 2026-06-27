@@ -159,6 +159,59 @@
   </form>
 <?php endif; ?>
 
+<?php if (!empty($dmp['available'])): ?>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h2 class="h5"><i class="fas fa-clipboard-list me-1"></i>Data Management Plan</h2>
+      <?php if (!empty($dmp['linked'])): ?>
+        <p class="mb-2">
+          <strong><?php echo esc_specialchars($dmp['linked']->title ?? 'DMP'); ?></strong>
+          <span class="badge bg-light text-dark border"><?php echo esc_specialchars($dmp['linked']->status ?? 'draft'); ?></span>
+          <?php if ($dmp['completeness'] !== null): ?>
+            <span class="text-muted small">· <?php echo (int) $dmp['completeness']; ?>% complete</span>
+          <?php endif; ?>
+        </p>
+        <div class="progress mb-2" style="height:6px;">
+          <div class="progress-bar" role="progressbar" style="width:<?php echo (int) ($dmp['completeness'] ?? 0); ?>%"></div>
+        </div>
+        <?php if (!empty($dmp['show_url'])): ?>
+          <a class="btn btn-sm btn-outline-secondary" href="<?php echo esc_specialchars($dmp['show_url']); ?>"><i class="fas fa-up-right-from-square"></i> Open DMP</a>
+        <?php endif; ?>
+        <form method="post" action="<?php echo url_for('@rdm_datasets_dmp_unlink?id=' . $dataset->id); ?>" class="d-inline">
+          <button class="btn btn-sm btn-outline-danger">Unlink</button>
+        </form>
+      <?php elseif (empty($dmp['project_id'])): ?>
+        <p class="text-muted small mb-0">Link this dataset to a research project to attach a Data Management Plan.</p>
+      <?php else: ?>
+        <?php if (!empty($dmp['plans'])): ?>
+          <form method="post" action="<?php echo url_for('@rdm_datasets_dmp_link?id=' . $dataset->id); ?>" class="row g-2 align-items-end mb-2">
+            <div class="col-auto">
+              <label class="form-label small mb-0">Link an existing plan</label>
+              <select name="dmp_id" class="form-select form-select-sm">
+                <?php foreach ($dmp['plans'] as $p): ?>
+                  <option value="<?php echo (int) $p->id; ?>"><?php echo esc_specialchars($p->title ?? ('DMP #' . $p->id)); ?> (<?php echo esc_specialchars($p->status ?? 'draft'); ?>)</option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-auto"><button class="btn btn-sm btn-primary">Link</button></div>
+          </form>
+        <?php endif; ?>
+        <form method="post" action="<?php echo url_for('@rdm_datasets_dmp_link?id=' . $dataset->id); ?>" class="row g-2 align-items-end">
+          <input type="hidden" name="mode" value="create">
+          <div class="col-auto">
+            <label class="form-label small mb-0">Or create a new DMP</label>
+            <input type="text" name="title" class="form-control form-control-sm" placeholder="DMP title" style="max-width:240px;">
+          </div>
+          <div class="col-auto">
+            <input type="text" name="funder" class="form-control form-control-sm" placeholder="Funder (optional)" style="max-width:180px;">
+          </div>
+          <div class="col-auto"><button class="btn btn-sm btn-outline-primary">Create &amp; link</button></div>
+        </form>
+      <?php endif; ?>
+    </div>
+  </div>
+<?php endif; ?>
+
 <hr>
 
 <h2 class="h4">Deposited files (<?php echo count($files); ?>)</h2>

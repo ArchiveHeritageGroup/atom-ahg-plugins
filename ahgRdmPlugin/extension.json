@@ -36,6 +36,7 @@
         "0.3.0": "Phase 3 (#170): PopiaGateService — confirm/dismiss findings + provenance + release blocked until gate clear + disposition",
         "0.4.0": "Phase 4 (#171): DatasetReleaseService — ODRL access/embargo policies + env-gated DataCite DOI + public citable landing page",
         "0.5.0": "Phase 5 (#172): ComplianceReportService — filterable per-faculty compliance scoreboard (verdict/findings/access/DOI/DMP)",
-        "0.6.0": "Phase 6 (#173): rdm:demo symfony task — full pipeline on 100%-synthetic assets (deposit->scan->gate->restrict->DOI->landing->scoreboard)"
+        "0.6.0": "Phase 6 (#173): rdm:demo symfony task — full pipeline on 100%-synthetic assets (deposit->scan->gate->restrict->DOI->landing->scoreboard)",
+        "0.7.0": "Phase 7 (#174): Feature 1 — DmpLinkService orchestrating the existing ahgResearch DmpService; DMP card on show + line on landing + scoreboard column"
     }
 }

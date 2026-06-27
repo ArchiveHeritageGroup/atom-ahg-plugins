@@ -13,7 +13,7 @@
 class ahgRdmPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Sovereign RDM: dataset deposit + POPIA scan + compliance';
-    public static $version = '0.6.0';
+    public static $version = '0.7.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
@@ -76,6 +76,11 @@ class ahgRdmPluginConfiguration extends sfPluginConfiguration
         $r->any('rdm_datasets_scan', '/research/datasets/:id/scan', 'scan', ['id' => '\d+']);
         $r->any('rdm_datasets_finding_resolve', '/research/datasets/:id/findings/:fid/resolve', 'resolveFinding', ['id' => '\d+', 'fid' => '\d+']);
         $r->any('rdm_datasets_disposition', '/research/datasets/:id/disposition', 'disposition', ['id' => '\d+']);
+
+        // Feature 1 (#174): link / unlink a Data Management Plan (orchestrates the
+        // ahgResearch DMP builder; the plan itself is authored in the portal).
+        $r->any('rdm_datasets_dmp_link', '/research/datasets/:id/dmp', 'linkDmp', ['id' => '\d+']);
+        $r->any('rdm_datasets_dmp_unlink', '/research/datasets/:id/dmp/unlink', 'unlinkDmp', ['id' => '\d+']);
 
         // Public citable landing (no auth) — a DOI resolves here. Metadata +
         // citation + access badge only; binaries stay gated by the disposition.

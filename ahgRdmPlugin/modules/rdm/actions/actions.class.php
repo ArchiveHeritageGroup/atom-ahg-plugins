@@ -36,6 +36,15 @@ class rdmActions extends sfActions
         return new \AhgRdm\Services\ComplianceReportService();
     }
 
+    protected function getDmpLinkService(): \AhgRdm\Services\DmpLinkService
+    {
+        if (!class_exists('\AhgRdm\Services\DmpLinkService')) {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgRdmPlugin/lib/Services/DmpLinkService.php';
+        }
+
+        return new \AhgRdm\Services\DmpLinkService();
+    }
+
     protected function requireAuth(): void
     {
         if (!$this->getUser()->isAuthenticated()) {
@@ -107,6 +116,57 @@ class rdmActions extends sfActions
             ->all();
 
         $this->gate = $this->getGateService()->gateStatus((int) $this->dataset->id);
+        $this->dmp = $this->getDmpLinkService()->context($this->dataset);
+    }
+
+    // ─── Feature 1: link / unlink a Data Management Plan ─────────────────
+
+    public function executeLinkDmp(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $datasetId = (int) $request->getParameter('id');
+
+        if (!$request->isMethod('post')) {
+            $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+        }
+
+        $svc = $this->getDmpLinkService();
+        try {
+            if ($request->getParameter('mode') === 'create') {
+                $title = trim((string) $request->getParameter('title')) ?: 'Data Management Plan';
+                $dmpId = $svc->createAndLink($datasetId, [
+                    'title'  => $title,
+                    'funder' => trim((string) $request->getParameter('funder')) ?: null,
+                ], $this->currentUserId());
+                $msg = $dmpId
+                    ? "Created and linked DMP #{$dmpId}."
+                    : 'Could not create a DMP — the dataset needs a project with an owner.';
+                $this->getUser()->setFlash($dmpId ? 'notice' : 'error', $msg);
+            } else {
+                $dmpId = (int) $request->getParameter('dmp_id');
+                $ok = $dmpId > 0 && $svc->link($datasetId, $dmpId, $this->currentUserId());
+                $this->getUser()->setFlash($ok ? 'notice' : 'error', $ok
+                    ? "Linked DMP #{$dmpId}."
+                    : 'Could not link that plan — it must belong to the dataset\'s project.');
+            }
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', $e->getMessage());
+        }
+
+        $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+    }
+
+    public function executeUnlinkDmp(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $datasetId = (int) $request->getParameter('id');
+
+        if ($request->isMethod('post')) {
+            $this->getDmpLinkService()->unlink($datasetId);
+            $this->getUser()->setFlash('notice', 'DMP unlinked.');
+        }
+
+        $this->redirect('@rdm_datasets_show?id=' . $datasetId);
     }
 
     // ─── Compliance scoreboard ──────────────────────────────────────────
@@ -138,6 +198,7 @@ class rdmActions extends sfActions
         $this->year = !empty($this->dataset->created_at) ? substr((string) $this->dataset->created_at, 0, 4) : date('Y');
         $this->doiUrl = !empty($this->dataset->doi) ? 'https://doi.org/' . $this->dataset->doi : null;
         $this->fileCount = count($svc->files((int) $this->dataset->id));
+        $this->dmp = $this->getDmpLinkService()->context($this->dataset);
     }
 
     // ─── Human gate: confirm/dismiss a finding ──────────────────────────

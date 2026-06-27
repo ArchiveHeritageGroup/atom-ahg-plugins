@@ -53,6 +53,14 @@
       <p class="small mb-2"><span class="text-muted">DOI:</span> <code><?php echo esc_specialchars($dataset->doi); ?></code></p>
     <?php endif; ?>
 
+    <?php if (!empty($dmp['linked'])): ?>
+      <p class="small mb-2">
+        <span class="text-muted"><i class="fas fa-clipboard-list me-1"></i>Data management:</span>
+        Governed by a Data Management Plan
+        <span class="badge bg-light text-dark border"><?php echo esc_specialchars($dmp['linked']->status ?? 'draft'); ?></span>
+      </p>
+    <?php endif; ?>
+
     <?php if ($isOpen): ?>
       <div class="alert alert-success py-2 small mb-0"><i class="fas fa-lock-open me-1"></i>This dataset is openly available. Sign in to access the files.</div>
     <?php elseif ($access[0] === 'Embargoed'): ?>
