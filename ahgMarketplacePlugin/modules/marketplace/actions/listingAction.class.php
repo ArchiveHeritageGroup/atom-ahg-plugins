@@ -36,6 +36,20 @@ class marketplaceListingAction extends AhgController
             $this->forward404();
         }
 
+        // #185: only 'active' listings are public. Draft/pending/withdrawn/
+        // suspended/expired are visible only to the owning seller or an admin —
+        // otherwise an anon could view them by guessing the (deterministic) slug.
+        if (($listing->status ?? '') !== 'active') {
+            $ownsListing = false;
+            if ($this->getUser()->isAuthenticated()) {
+                $mySeller = $sellerService->getSellerByUserId((int) $this->getUser()->getAttribute('user_id'));
+                $ownsListing = $mySeller && (int) $mySeller->id === (int) $listing->seller_id;
+            }
+            if (!$this->getUser()->isAdministrator() && !$ownsListing) {
+                $this->forward404();
+            }
+        }
+
         // Get seller profile
         $seller = $sellerService->getSellerById($listing->seller_id);
 

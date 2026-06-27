@@ -50,6 +50,13 @@ class marketplaceSellerListingImagesAction extends AhgController
         $settingsRepo = new SettingsRepository();
         $this->maxImages = (int) $settingsRepo->get('max_listing_images', $settingsRepo->get('max_images_per_listing', 10));
 
+        // #185: the posted image_id must belong to THIS listing — otherwise a
+        // seller could set-primary/delete another seller's image by id (IDOR).
+        $ownImageIds = array_map(
+            static fn ($img) => (int) $img->id,
+            $marketplaceService->getListingImages($listingId)
+        );
+
         // Handle POST actions
         if ($request->isMethod('post')) {
             $formAction = $request->getParameter('form_action', '');
@@ -58,13 +65,13 @@ class marketplaceSellerListingImagesAction extends AhgController
                 $this->handleUpload($request, $marketplaceService, $listingId);
             } elseif ($formAction === 'set_primary') {
                 $imageId = (int) $request->getParameter('image_id');
-                if ($imageId) {
+                if ($imageId && in_array($imageId, $ownImageIds, true)) {
                     $marketplaceService->setPrimaryImage($listingId, $imageId);
                     $this->getUser()->setFlash('notice', 'Primary image updated.');
                 }
             } elseif ($formAction === 'delete') {
                 $imageId = (int) $request->getParameter('image_id');
-                if ($imageId) {
+                if ($imageId && in_array($imageId, $ownImageIds, true)) {
                     $marketplaceService->deleteListingImage($imageId);
                     $this->getUser()->setFlash('notice', 'Image removed.');
                 }

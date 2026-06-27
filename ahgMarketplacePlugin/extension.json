@@ -1,7 +1,7 @@
 {
     "name": "AHG Marketplace Plugin",
     "machine_name": "ahgMarketplacePlugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Online art/gallery marketplace with multi-GLAM sector support. Fixed pricing, make-an-offer negotiations, and timed auctions. Multi-currency, seller verification, commission tracking, and payout management.",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

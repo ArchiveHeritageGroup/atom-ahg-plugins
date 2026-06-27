@@ -802,6 +802,13 @@ class spectrumActions extends AhgController
 
     public function executeConditionPhotos($request)
     {
+        // #185: creates a spectrum_condition_check on GET and uploads a
+        // spectrum_condition_photo on POST — it had NO auth. Require staff.
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->forward('admin', 'secure');
+        }
+
         $slug = $request->getParameter('slug');
         $this->objectSlug = $slug;
         $photoAction = $request->getParameter('photo_action');

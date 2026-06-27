@@ -37,8 +37,13 @@ class eventApiAction extends AhgController
                     break;
 
                 case 'POST':
+                    // #185: creating a spectrum event is curation — require staff,
+                    // not just any authenticated user.
                     if (!$this->context->user->isAuthenticated()) {
                         throw new Exception('Authentication required', 401);
+                    }
+                    if (!$this->context->user->hasCredential(['editor', 'administrator'], false)) {
+                        throw new Exception('Forbidden', 403);
                     }
                     $result = $this->createEvent($eventService, $request);
                     break;

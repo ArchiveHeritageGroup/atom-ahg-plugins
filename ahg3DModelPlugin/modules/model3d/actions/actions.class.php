@@ -734,6 +734,13 @@ class model3dActions extends AhgController
             return sfView::NONE;
         }
 
+        // #185: hotspots are curation data — require staff, not just any login
+        // (was an IDOR: any authed user could add hotspots to any model).
+        if (!$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->getResponse()->setStatusCode(403);
+            return sfView::NONE;
+        }
+
         $modelId = (int)$request->getParameter('id');
         $db = $this->db;
 
@@ -824,6 +831,13 @@ class model3dActions extends AhgController
 
         if (!$this->getUser()->isAuthenticated()) {
             $this->getResponse()->setStatusCode(401);
+            return sfView::NONE;
+        }
+
+        // #185: require staff (was login-only IDOR — any authed user could delete
+        // any hotspot by id).
+        if (!$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->getResponse()->setStatusCode(403);
             return sfView::NONE;
         }
 
