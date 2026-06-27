@@ -31,6 +31,7 @@
         "Compliance scoreboard + roll-up dashboard [later phases]"
     ],
     "changelog": {
-        "0.1.0": "Phase 1 (#168): scaffold + Dataset model + deposit via AtoM IngestService"
+        "0.1.0": "Phase 1 (#168): scaffold + Dataset model + deposit via AtoM IngestService",
+        "0.2.0": "Phase 2 (#169): PopiaScanService (deterministic + lexicon + gateway NER) + rdm:scan async task + findings UI"
     }
 }

@@ -81,6 +81,12 @@ class rdmActions extends sfActions
         $this->forward404Unless($this->dataset, 'Dataset not found.');
 
         $this->files = $svc->files((int) $this->dataset->id);
+        $this->findings = \Illuminate\Database\Capsule\Manager::table('rdm_scan_finding')
+            ->where('dataset_id', (int) $this->dataset->id)
+            ->orderByRaw("FIELD(category,'special_category','personal')")
+            ->orderBy('type')
+            ->get()
+            ->all();
     }
 
     // ─── Deposit: POST file uploads into the dataset ────────────────────
@@ -110,6 +116,48 @@ class rdmActions extends sfActions
             $msg .= sprintf(' %d skipped (invalid upload).', $result['skipped']);
         }
         $this->getUser()->setFlash('notice', $msg);
+        $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+    }
+
+    // ─── Scan: kick the POPIA scan in the background ────────────────────
+
+    public function executeScan(sfWebRequest $request)
+    {
+        $this->requireAuth();
+
+        $datasetId = (int) $request->getParameter('id');
+        $dataset = $this->getDatasetService()->get($datasetId);
+        $this->forward404Unless($dataset, 'Dataset not found.');
+
+        if (!$request->isMethod('post')) {
+            $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+        }
+
+        $fileCount = (int) \Illuminate\Database\Capsule\Manager::table('rdm_dataset_file')
+            ->where('dataset_id', $datasetId)->count();
+        if ($fileCount === 0) {
+            $this->getUser()->setFlash('error', 'Deposit at least one file before scanning.');
+            $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+        }
+
+        // Mark scanning now so the UI reflects it immediately, then launch the
+        // task off-thread (NER can exceed request limits) — mirrors ingest:commit.
+        \Illuminate\Database\Capsule\Manager::table('rdm_dataset')
+            ->where('id', $datasetId)
+            ->update(['status' => 'scanning', 'updated_at' => date('Y-m-d H:i:s')]);
+
+        $atomRoot = sfConfig::get('sf_root_dir');
+        $logDir = sfConfig::get('sf_log_dir');
+        $cmd = sprintf(
+            'nohup php %s/symfony rdm:scan --dataset-id=%d > %s/rdm-scan-%d.log 2>&1 &',
+            escapeshellarg($atomRoot),
+            $datasetId,
+            escapeshellarg($logDir),
+            $datasetId
+        );
+        @exec($cmd);
+
+        $this->getUser()->setFlash('notice', 'POPIA scan started. Findings will appear when it completes.');
         $this->redirect('@rdm_datasets_show?id=' . $datasetId);
     }
 
