@@ -18,6 +18,15 @@ class rdmActions extends sfActions
         return new \AhgRdm\Services\DatasetService();
     }
 
+    protected function getGateService(): \AhgRdm\Services\PopiaGateService
+    {
+        if (!class_exists('\AhgRdm\Services\PopiaGateService')) {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgRdmPlugin/lib/Services/PopiaGateService.php';
+        }
+
+        return new \AhgRdm\Services\PopiaGateService();
+    }
+
     protected function requireAuth(): void
     {
         if (!$this->getUser()->isAuthenticated()) {
@@ -87,6 +96,66 @@ class rdmActions extends sfActions
             ->orderBy('type')
             ->get()
             ->all();
+
+        $this->gate = $this->getGateService()->gateStatus((int) $this->dataset->id);
+    }
+
+    // ─── Human gate: confirm/dismiss a finding ──────────────────────────
+
+    public function executeResolveFinding(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $datasetId = (int) $request->getParameter('id');
+
+        if (!$request->isMethod('post')) {
+            $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+        }
+
+        $decision = (string) $request->getParameter('decision');
+        if (!in_array($decision, ['confirm', 'dismiss'], true)) {
+            $this->getUser()->setFlash('error', 'Invalid decision.');
+            $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+        }
+
+        try {
+            $this->getGateService()->resolveFinding(
+                (int) $request->getParameter('fid'),
+                $decision,
+                trim((string) $request->getParameter('note')) ?: null,
+                $this->currentUserId()
+            );
+            $this->getUser()->setFlash('notice', 'Finding ' . ($decision === 'dismiss' ? 'dismissed' : 'confirmed') . '.');
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', $e->getMessage());
+        }
+
+        $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+    }
+
+    // ─── Human gate: apply a disposition (release gated) ────────────────
+
+    public function executeDisposition(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $datasetId = (int) $request->getParameter('id');
+
+        if (!$request->isMethod('post')) {
+            $this->redirect('@rdm_datasets_show?id=' . $datasetId);
+        }
+
+        try {
+            $result = $this->getGateService()->setDisposition(
+                $datasetId,
+                (string) $request->getParameter('disposition'),
+                $this->currentUserId(),
+                trim((string) $request->getParameter('embargo_until')) ?: null
+            );
+            $this->getUser()->setFlash('notice', 'Disposition set: ' . $result['disposition'] . ' (status ' . $result['status'] . ').');
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', $e->getMessage());
+        }
+
+        $this->redirect('@rdm_datasets_show?id=' . $datasetId);
     }
 
     // ─── Deposit: POST file uploads into the dataset ────────────────────

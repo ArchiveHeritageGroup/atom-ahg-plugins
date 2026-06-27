@@ -13,7 +13,7 @@
 class ahgRdmPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Sovereign RDM: dataset deposit + POPIA scan + compliance';
-    public static $version = '0.2.0';
+    public static $version = '0.3.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
@@ -73,6 +73,8 @@ class ahgRdmPluginConfiguration extends sfPluginConfiguration
         $r->any('rdm_datasets_show', '/research/datasets/:id', 'show', ['id' => '\d+']);
         $r->any('rdm_datasets_deposit', '/research/datasets/:id/deposit', 'deposit', ['id' => '\d+']);
         $r->any('rdm_datasets_scan', '/research/datasets/:id/scan', 'scan', ['id' => '\d+']);
+        $r->any('rdm_datasets_finding_resolve', '/research/datasets/:id/findings/:fid/resolve', 'resolveFinding', ['id' => '\d+', 'fid' => '\d+']);
+        $r->any('rdm_datasets_disposition', '/research/datasets/:id/disposition', 'disposition', ['id' => '\d+']);
 
         $r->register($routing);
     }

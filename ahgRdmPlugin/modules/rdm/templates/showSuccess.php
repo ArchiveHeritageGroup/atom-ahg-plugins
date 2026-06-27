@@ -60,12 +60,29 @@
   <?php endif; ?>
 </form>
 
-<?php if (!empty($findings)): ?>
-  <h2 class="h4">POPIA findings (<?php echo count($findings); ?>)</h2>
-  <p class="text-muted">Samples are masked. Each finding is <strong>pending</strong> human review (next phase).</p>
-  <table class="table table-sm table-striped">
+<?php if (!empty($dataset->verdict)): ?>
+  <h2 class="h4">POPIA review<?php echo !empty($findings) ? ' — findings (' . count($findings) . ')' : ''; ?></h2>
+
+  <?php // Gate status banner ?>
+  <?php if ($gate['can_release']): ?>
+    <div class="alert alert-success">
+      <i class="fas fa-unlock"></i> Gate clear — no pending or confirmed PERSONAL/SPECIAL findings.
+      Open release is permitted (<?php echo (int) $gate['dismissed']; ?> dismissed as false positives).
+    </div>
+  <?php else: ?>
+    <div class="alert alert-warning">
+      <i class="fas fa-lock"></i> Open release blocked —
+      <strong><?php echo (int) $gate['pending']; ?></strong> finding(s) pending review and
+      <strong><?php echo (int) $gate['confirmed_pii']; ?></strong> confirmed PERSONAL/SPECIAL.
+      Resolve every finding (none confirmed as PII) to release open, or choose restrict / embargo / de-identify below.
+    </div>
+  <?php endif; ?>
+
+  <?php if (!empty($findings)): ?>
+  <p class="text-muted">Samples are masked. The scan only suggests — confirm real PII or dismiss false positives.</p>
+  <table class="table table-sm table-striped align-middle">
     <thead>
-      <tr><th>Type</th><th>Category</th><th>Sample</th><th>Confidence</th><th>Method</th><th>File</th></tr>
+      <tr><th>Type</th><th>Category</th><th>Sample</th><th>Conf.</th><th>Method</th><th>File</th><th>Review</th></tr>
     </thead>
     <tbody>
       <?php foreach ($findings as $fd): ?>
@@ -82,10 +99,53 @@
           <td><?php echo esc_specialchars($fd->confidence); ?></td>
           <td><?php echo esc_specialchars($fd->method); ?></td>
           <td><?php echo esc_specialchars((string) $fd->file_name); ?></td>
+          <td>
+            <?php if ($fd->review_status === 'pending'): ?>
+              <form method="post" action="<?php echo url_for('@rdm_datasets_finding_resolve?id=' . $dataset->id . '&fid=' . $fd->id); ?>" class="d-flex gap-1">
+                <input type="text" name="note" class="form-control form-control-sm" placeholder="note (optional)" style="max-width:140px;">
+                <button name="decision" value="confirm" class="btn btn-sm btn-outline-danger" title="Confirm real PII">Confirm</button>
+                <button name="decision" value="dismiss" class="btn btn-sm btn-outline-secondary" title="False positive">Dismiss</button>
+              </form>
+            <?php elseif ($fd->review_status === 'confirmed'): ?>
+              <span class="badge bg-danger">confirmed</span>
+              <?php if (!empty($fd->decision_note)): ?><small class="text-muted d-block"><?php echo esc_specialchars($fd->decision_note); ?></small><?php endif; ?>
+            <?php else: ?>
+              <span class="badge bg-secondary">dismissed</span>
+              <?php if (!empty($fd->decision_note)): ?><small class="text-muted d-block"><?php echo esc_specialchars($fd->decision_note); ?></small><?php endif; ?>
+            <?php endif; ?>
+          </td>
         </tr>
       <?php endforeach; ?>
     </tbody>
   </table>
+  <?php endif; ?>
+
+  <?php // Disposition — release gated on the human review being clear ?>
+  <h2 class="h4 mt-4">Disposition</h2>
+  <p class="text-muted">
+    <?php if (!empty($dataset->disposition)): ?>
+      Current: <span class="badge bg-info text-dark"><?php echo esc_specialchars($dataset->disposition); ?></span>
+    <?php endif; ?>
+    Access/embargo enforcement + DOI are wired in the next phase; this records the decision and the publish gate now.
+  </p>
+  <form method="post" action="<?php echo url_for('@rdm_datasets_disposition?id=' . $dataset->id); ?>" class="row g-2" style="max-width:760px;">
+    <div class="col-auto">
+      <select name="disposition" class="form-select form-select-sm">
+        <option value="restrict">Restrict access</option>
+        <option value="embargo">Embargo (time-limited)</option>
+        <option value="de-identify">De-identify then release</option>
+        <option value="release" <?php echo $gate['can_release'] ? '' : 'disabled'; ?>>
+          Release (open access)<?php echo $gate['can_release'] ? '' : ' — blocked'; ?>
+        </option>
+      </select>
+    </div>
+    <div class="col-auto">
+      <input type="date" name="embargo_until" class="form-control form-control-sm" title="Embargo until (for embargo)">
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-sm btn-primary">Apply disposition</button>
+    </div>
+  </form>
 <?php endif; ?>
 
 <hr>

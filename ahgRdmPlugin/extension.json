@@ -32,6 +32,7 @@
     ],
     "changelog": {
         "0.1.0": "Phase 1 (#168): scaffold + Dataset model + deposit via AtoM IngestService",
-        "0.2.0": "Phase 2 (#169): PopiaScanService (deterministic + lexicon + gateway NER) + rdm:scan async task + findings UI"
+        "0.2.0": "Phase 2 (#169): PopiaScanService (deterministic + lexicon + gateway NER) + rdm:scan async task + findings UI",
+        "0.3.0": "Phase 3 (#170): PopiaGateService — confirm/dismiss findings + provenance + release blocked until gate clear + disposition"
     }
 }
