@@ -35,6 +35,17 @@ class galleryBrowseAction extends AhgController
             })
             ->where('io.display_standard_id', \AtomFramework\Helpers\DisplayStandardHelper::getTermIdByCode('gallery'));
 
+        // #184: unauthenticated visitors see PUBLISHED records only (status
+        // type 158 / status_id 160). Staff (any authed user) see drafts too.
+        if (!$this->getUser()->isAuthenticated()) {
+            $query->whereExists(function ($sub) {
+                $sub->selectRaw('1')->from('status')
+                    ->whereColumn('status.object_id', 'io.id')
+                    ->where('status.type_id', 158)
+                    ->where('status.status_id', 160);
+            });
+        }
+
         $this->total = $query->count();
         $this->totalPages = ceil($this->total / $limit);
         $this->currentPage = $page;

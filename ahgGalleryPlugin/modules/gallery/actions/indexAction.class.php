@@ -27,7 +27,7 @@ class galleryIndexAction extends AhgController
         }
 
         // Load resource using Laravel
-        $this->resource = DB::table('information_object as io')
+        $resourceQuery = DB::table('information_object as io')
             ->join('information_object_i18n as ioi', function($j) {
                 $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
@@ -36,7 +36,21 @@ class galleryIndexAction extends AhgController
                 $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
             ->join('slug as s', 'io.id', '=', 's.object_id')
-            ->where('s.slug', $slug)
+            ->where('s.slug', $slug);
+
+        // #184: an anonymous visitor must not view a DRAFT gallery record by slug.
+        // Require published status (type 158 / status_id 160) for guests; staff
+        // (any authed user) may view drafts.
+        if (!$this->getUser()->isAuthenticated()) {
+            $resourceQuery->whereExists(function ($sub) {
+                $sub->selectRaw('1')->from('status')
+                    ->whereColumn('status.object_id', 'io.id')
+                    ->where('status.type_id', 158)
+                    ->where('status.status_id', 160);
+            });
+        }
+
+        $this->resource = $resourceQuery
             ->select(
                 'io.id',
                 'io.identifier',

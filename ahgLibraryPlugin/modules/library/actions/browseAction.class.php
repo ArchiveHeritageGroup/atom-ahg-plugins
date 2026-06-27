@@ -25,6 +25,20 @@ class libraryBrowseAction extends AhgController
         $db     = \Illuminate\Database\Capsule\Manager::connection();
         $culture = $this->getContext()->user->getCulture() ?? 'en';
 
+        // #184: unauthenticated visitors see PUBLISHED library records only
+        // (status type 158 / status_id 160); staff (any authed user) see drafts.
+        $publishedOnly = !$this->getUser()->isAuthenticated();
+        $publishedFilter = function ($q) use ($publishedOnly) {
+            $q->when($publishedOnly, function ($qq) {
+                $qq->whereExists(function ($sub) {
+                    $sub->selectRaw('1')->from('status')
+                        ->whereColumn('status.object_id', 'io.id')
+                        ->where('status.type_id', 158)
+                        ->where('status.status_id', 160);
+                });
+            });
+        };
+
         // ======================================================================
         // FRBR Clustering Toggle  (default ON to match OPAC)
         // ======================================================================
@@ -47,6 +61,7 @@ class libraryBrowseAction extends AhgController
                   ->where('lic.is_primary', '=', 1);
             })
             ->where('io.source_standard', 'library')
+            ->where($publishedFilter)
             ->select([
                 'li.id as id',
                 'li.id as library_item_id',
@@ -146,6 +161,7 @@ class libraryBrowseAction extends AhgController
                       ->where('lic.is_primary', '=', 1);
                 })
                 ->where('io.source_standard', 'library')
+                ->where($publishedFilter)
                 ->select([
                     'li.id as id',
                 'li.id as library_item_id',

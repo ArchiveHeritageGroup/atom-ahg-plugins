@@ -14,6 +14,11 @@ class museumDashboardAction extends AhgController
 {
     public function execute($request)
     {
+        // #184: staff overview (recent items incl. drafts + stats); had no auth.
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward('admin', 'secure');
+        }
+
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
             \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
         }

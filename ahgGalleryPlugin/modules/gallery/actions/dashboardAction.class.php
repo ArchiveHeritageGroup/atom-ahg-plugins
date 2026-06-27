@@ -7,6 +7,12 @@ class galleryDashboardAction extends AhgController
 {
     public function execute($request)
     {
+        // #184: the gallery dashboard is a staff overview (recent items incl.
+        // drafts, stats). It had no auth → require it.
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->forward('admin', 'secure');
+        }
+
         if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
             \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
         }

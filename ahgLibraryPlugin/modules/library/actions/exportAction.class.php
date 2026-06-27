@@ -53,6 +53,10 @@ class libraryExportAction extends AhgController
         ];
         $this->filters = array_filter($this->filters);
 
+        // #184: unauthenticated exporters get PUBLISHED records only; staff (any
+        // authed user) export everything. Set after array_filter so 0 persists.
+        $this->filters['published_only'] = $this->getUser()->isAuthenticated() ? 0 : 1;
+
         // Immediate download via GET ?download=1
         if ($request->getParameter('download')) {
             return $this->streamDownload();

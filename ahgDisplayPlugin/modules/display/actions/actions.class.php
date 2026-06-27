@@ -1486,23 +1486,35 @@ class displayActions extends AhgController
         $esHost = $this->config('app_opensearch_host', 'localhost');
         $esPort = (int) $this->config('app_opensearch_port', 9200);
 
+        $multiMatch = [
+            'multi_match' => [
+                'query' => $query,
+                'fields' => [
+                    'i18n.en.title^3',
+                    'i18n.en.scopeAndContent',
+                    'creators.i18n.en.authorizedFormOfName^2',
+                    'i18n.en.alternateTitle^2',
+                ],
+                'fuzziness' => 'AUTO',
+                'prefix_length' => 1,
+                'max_expansions' => 50,
+            ],
+        ];
+
+        // #184: this fuzzy-fallback path bypasses applyFilters(), so add the
+        // published-status filter here for guests (the ES index contains drafts).
+        // Staff (authenticated) keep the unfiltered fuzzy search.
         $body = [
             'size' => 200,
             '_source' => false,
-            'query' => [
-                'multi_match' => [
-                    'query' => $query,
-                    'fields' => [
-                        'i18n.en.title^3',
-                        'i18n.en.scopeAndContent',
-                        'creators.i18n.en.authorizedFormOfName^2',
-                        'i18n.en.alternateTitle^2',
+            'query' => $this->isAuthenticated
+                ? $multiMatch
+                : [
+                    'bool' => [
+                        'must'   => [$multiMatch],
+                        'filter' => [['term' => ['publicationStatusId' => 160]]],
                     ],
-                    'fuzziness' => 'AUTO',
-                    'prefix_length' => 1,
-                    'max_expansions' => 50,
                 ],
-            ],
         ];
 
         $url = sprintf('http://%s:%d/%s/_search', $esHost, $esPort, $indexName);

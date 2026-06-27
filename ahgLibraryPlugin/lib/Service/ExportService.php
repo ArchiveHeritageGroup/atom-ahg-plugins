@@ -86,7 +86,21 @@ class ExportService
                 $j->on('sub_term.id', '=', 'sub_ti.id')
                   ->where('sub_ti.culture', '=', $this->culture);
             })
-            ->where('io.source_standard', 'library')
+            ->where('io.source_standard', 'library');
+
+        // #184: an unauthenticated bulk export must not dump unpublished/draft
+        // catalogue items. When the caller flags published_only, restrict to
+        // published records (status type 158 / status_id 160).
+        if (!empty($params['published_only'])) {
+            $query->whereExists(function ($sub) {
+                $sub->selectRaw('1')->from('status')
+                    ->whereColumn('status.object_id', 'io.id')
+                    ->where('status.type_id', 158)
+                    ->where('status.status_id', 160);
+            });
+        }
+
+        $query
             ->select([
                 'ioi.title',
                 'li.isbn',
