@@ -100,6 +100,19 @@ class rdmActions extends sfActions
         $this->gate = $this->getGateService()->gateStatus((int) $this->dataset->id);
     }
 
+    // ─── Public landing (no auth): citable metadata + access badge ──────
+
+    public function executeLanding(sfWebRequest $request)
+    {
+        $svc = $this->getDatasetService();
+        $this->dataset = $svc->get((int) $request->getParameter('id'));
+        $this->forward404Unless($this->dataset, 'Dataset not found.');
+
+        $this->year = !empty($this->dataset->created_at) ? substr((string) $this->dataset->created_at, 0, 4) : date('Y');
+        $this->doiUrl = !empty($this->dataset->doi) ? 'https://doi.org/' . $this->dataset->doi : null;
+        $this->fileCount = count($svc->files((int) $this->dataset->id));
+    }
+
     // ─── Human gate: confirm/dismiss a finding ──────────────────────────
 
     public function executeResolveFinding(sfWebRequest $request)

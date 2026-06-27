@@ -124,10 +124,21 @@
   <h2 class="h4 mt-4">Disposition</h2>
   <p class="text-muted">
     <?php if (!empty($dataset->disposition)): ?>
-      Current: <span class="badge bg-info text-dark"><?php echo esc_specialchars($dataset->disposition); ?></span>
+      Current: <span class="badge bg-info text-dark"><?php echo esc_specialchars($dataset->disposition); ?></span> ·
     <?php endif; ?>
-    Access/embargo enforcement + DOI are wired in the next phase; this records the decision and the publish gate now.
+    Applying a disposition writes ODRL access/embargo policies on the dataset's records and mints a citable DOI
+    (real DataCite registration only on a production DOI config; otherwise a reserved test-prefix DOI).
   </p>
+  <?php if (!empty($dataset->doi) || !empty($dataset->disposition)): ?>
+    <p class="small mb-3">
+      <?php if (!empty($dataset->doi)): ?>
+        <span class="text-muted">DOI:</span> <code><?php echo esc_specialchars($dataset->doi); ?></code> ·
+      <?php endif; ?>
+      <a href="<?php echo url_for('@rdm_datasets_landing?id=' . $dataset->id); ?>" target="_blank" rel="noopener">
+        <i class="fas fa-external-link-alt"></i> Public landing page
+      </a>
+    </p>
+  <?php endif; ?>
   <form method="post" action="<?php echo url_for('@rdm_datasets_disposition?id=' . $dataset->id); ?>" class="row g-2" style="max-width:760px;">
     <div class="col-auto">
       <select name="disposition" class="form-select form-select-sm">

@@ -13,7 +13,7 @@
 class ahgRdmPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Sovereign RDM: dataset deposit + POPIA scan + compliance';
-    public static $version = '0.3.0';
+    public static $version = '0.4.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
@@ -75,6 +75,10 @@ class ahgRdmPluginConfiguration extends sfPluginConfiguration
         $r->any('rdm_datasets_scan', '/research/datasets/:id/scan', 'scan', ['id' => '\d+']);
         $r->any('rdm_datasets_finding_resolve', '/research/datasets/:id/findings/:fid/resolve', 'resolveFinding', ['id' => '\d+', 'fid' => '\d+']);
         $r->any('rdm_datasets_disposition', '/research/datasets/:id/disposition', 'disposition', ['id' => '\d+']);
+
+        // Public citable landing (no auth) — a DOI resolves here. Metadata +
+        // citation + access badge only; binaries stay gated by the disposition.
+        $r->any('rdm_datasets_landing', '/research/datasets/:id/landing', 'landing', ['id' => '\d+']);
 
         $r->register($routing);
     }
