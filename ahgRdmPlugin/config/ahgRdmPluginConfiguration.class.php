@@ -13,7 +13,7 @@
 class ahgRdmPluginConfiguration extends sfPluginConfiguration
 {
     public static $summary = 'Sovereign RDM: dataset deposit + POPIA scan + compliance';
-    public static $version = '0.5.0';
+    public static $version = '0.6.0';
 
     public function contextLoadFactories(sfEvent $event)
     {
