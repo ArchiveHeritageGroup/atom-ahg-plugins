@@ -15,36 +15,30 @@ class cartOrderConfirmationAction extends AhgController
     {
         $orderNumber = $request->getParameter('order');
         $ecommerceService = new EcommerceService();
-        
+
         $this->order = $ecommerceService->getOrderByNumber($orderNumber);
-        
+
         if (!$this->order) {
             $this->getUser()->setFlash('error', 'Order not found.');
             $this->redirect(['module' => 'cart', 'action' => 'browse']);
             return;
         }
-        
-        // Verify access (user or session)
-        if ($this->getUser()->isAuthenticated()) {
-            $userId = $this->getUser()->getAttribute('user_id');
-            if ($this->order->user_id && $this->order->user_id != $userId) {
-                $this->getUser()->setFlash('error', 'Access denied.');
-                $this->redirect(['module' => 'cart', 'action' => 'browse']);
-                return;
-            }
-        } else {
+
+        // Verify ownership — deny by default (#180). Closes the prior
+        // null-conditional bypass (guest orders leaked to any authed user,
+        // account orders to any anonymous visitor).
+        $userId = $this->getUser()->isAuthenticated() ? (int) $this->getUser()->getAttribute('user_id') : null;
+        $sessionId = session_id();
+        if (empty($sessionId)) {
+            @session_start();
             $sessionId = session_id();
-            if (empty($sessionId)) {
-                @session_start();
-                $sessionId = session_id();
-            }
-            if ($this->order->session_id && $this->order->session_id != $sessionId) {
-                $this->getUser()->setFlash('error', 'Access denied.');
-                $this->redirect(['module' => 'cart', 'action' => 'browse']);
-                return;
-            }
         }
-        
+        if (!$ecommerceService->viewerOwnsOrder($this->order, $userId, $this->getUser()->isAdministrator(), $sessionId)) {
+            $this->getUser()->setFlash('error', 'Access denied.');
+            $this->redirect(['module' => 'cart', 'action' => 'browse']);
+            return;
+        }
+
         $this->items = $ecommerceService->getOrderItems($this->order->id);
     }
 }

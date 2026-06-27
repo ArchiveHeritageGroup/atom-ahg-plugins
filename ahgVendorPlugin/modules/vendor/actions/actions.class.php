@@ -5,6 +5,22 @@ class vendorActions extends AhgController
 {
     protected $service;
 
+    /**
+     * #179: the vendor module exposes vendor PII + banking/financial data and
+     * destructive CRUD. It previously had NO auth (no security.yml, no inline
+     * checks) → every action was anonymously reachable. Gate the WHOLE module to
+     * authenticated staff (editor or administrator) at a single point.
+     */
+    public function preExecute()
+    {
+        parent::preExecute();
+
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
     public function boot(): void
     {
         require_once $this->config('sf_plugins_dir') . '/ahgVendorPlugin/lib/Service/VendorService.php';

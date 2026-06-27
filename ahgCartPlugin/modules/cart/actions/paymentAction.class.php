@@ -25,30 +25,19 @@ class cartPaymentAction extends AhgController
             return;
         }
         
-        // Verify order belongs to user or session
-        if ($this->getUser()->isAuthenticated()) {
-            $userId = $this->getUser()->getAttribute('user_id');
-            // Check if order belongs to this user
-            if ($this->order->user_id && $this->order->user_id != $userId) {
-                $this->getUser()->setFlash('error', 'Access denied.');
-                $this->redirect(['module' => 'cart', 'action' => 'browse']);
-                return;
-            }
-        } else {
-            // Guest - verify by session
+        // Verify ownership — deny by default (#180).
+        $userId = $this->getUser()->isAuthenticated() ? (int) $this->getUser()->getAttribute('user_id') : null;
+        $sessionId = session_id();
+        if (empty($sessionId)) {
+            @session_start();
             $sessionId = session_id();
-            if (empty($sessionId)) {
-                @session_start();
-                $sessionId = session_id();
-            }
-            // Check if order belongs to this session
-            if ($this->order->session_id && $this->order->session_id != $sessionId) {
-                $this->getUser()->setFlash('error', 'Access denied.');
-                $this->redirect(['module' => 'cart', 'action' => 'browse']);
-                return;
-            }
         }
-        
+        if (!$ecommerceService->viewerOwnsOrder($this->order, $userId, $this->getUser()->isAdministrator(), $sessionId)) {
+            $this->getUser()->setFlash('error', 'Access denied.');
+            $this->redirect(['module' => 'cart', 'action' => 'browse']);
+            return;
+        }
+
         // Check order status
         if ($this->order->status !== 'pending') {
             $this->getUser()->setFlash('error', 'This order has already been processed.');

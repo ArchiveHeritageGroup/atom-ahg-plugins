@@ -335,6 +335,17 @@ class EcommerceService
             return ['success' => false, 'message' => 'Order not found.'];
         }
 
+        // #180: validate the PayFast ITN before trusting payment_status. Without
+        // this, anyone could POST payment_status=COMPLETE to mark any order paid
+        // and trigger download-token generation. Validation = signature + amount
+        // + PayFast server validate-callback (source IP advisory).
+        $settings = $this->getSettings($order->repository_id ?? null);
+        if (!$this->validatePayFastItn($data, $order, $settings)) {
+            error_log('[ahgCart] PayFast ITN REJECTED for order ' . $orderNumber);
+
+            return ['success' => false, 'message' => 'ITN validation failed.'];
+        }
+
         $paymentStatus = $data['payment_status'] ?? '';
         $transactionId = $data['pf_payment_id'] ?? null;
 
@@ -364,6 +375,134 @@ class EcommerceService
         }
 
         return ['success' => false, 'message' => 'Payment not completed.'];
+    }
+
+    /**
+     * Validate a PayFast ITN (#180). Returns true only when the notification is
+     * provably from PayFast for this order. Any failure => reject (the order is
+     * NOT marked paid; PayFast will retry, so we fail closed).
+     */
+    private function validatePayFastItn(array $data, object $order, ?object $settings): bool
+    {
+        $passphrase = $settings ? trim((string) ($settings->payfast_passphrase ?? '')) : '';
+
+        // 1. Signature (strong when a passphrase is configured).
+        if (!$this->verifyPayFastSignature($data, $passphrase)) {
+            error_log('[ahgCart] ITN signature mismatch');
+
+            return false;
+        }
+
+        // 2. Amount must match the order total (cent tolerance).
+        if (isset($data['amount_gross']) && isset($order->total)) {
+            if (abs((float) $order->total - (float) $data['amount_gross']) > 0.01) {
+                error_log('[ahgCart] ITN amount mismatch');
+
+                return false;
+            }
+        }
+
+        // 3. Source IP — advisory only (reverse proxies can rewrite REMOTE_ADDR);
+        // logged but not fatal, the server validate-callback is the hard check.
+        if (!$this->payFastSourceIpValid()) {
+            error_log('[ahgCart] ITN source IP not in PayFast ranges (advisory)');
+        }
+
+        // 4. Server-to-server validate-callback — the authoritative check: ask
+        // PayFast whether it really sent this. No false positives.
+        $sandbox = $settings ? (bool) ($settings->payfast_sandbox ?? true) : true;
+        if (!$this->payFastServerConfirm($data, $sandbox)) {
+            error_log('[ahgCart] ITN server validate-callback failed');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private function verifyPayFastSignature(array $data, string $passphrase): bool
+    {
+        if (empty($data['signature'])) {
+            return false;
+        }
+        $str = '';
+        foreach ($data as $key => $val) {
+            if ($key === 'signature') {
+                continue;
+            }
+            $str .= $key . '=' . urlencode(trim((string) $val)) . '&';
+        }
+        $str = rtrim($str, '&');
+        if ($passphrase !== '') {
+            $str .= '&passphrase=' . urlencode($passphrase);
+        }
+
+        return hash_equals(md5($str), strtolower((string) $data['signature']));
+    }
+
+    private function payFastSourceIpValid(): bool
+    {
+        $remote = $_SERVER['REMOTE_ADDR'] ?? '';
+        if ($remote === '') {
+            return false;
+        }
+        $valid = [];
+        foreach (['www.payfast.co.za', 'sandbox.payfast.co.za', 'w1w.payfast.co.za', 'w2w.payfast.co.za'] as $h) {
+            $ips = gethostbynamel($h);
+            if ($ips) {
+                $valid = array_merge($valid, $ips);
+            }
+        }
+
+        return in_array($remote, $valid, true);
+    }
+
+    private function payFastServerConfirm(array $data, bool $sandbox): bool
+    {
+        $url = $sandbox
+            ? 'https://sandbox.payfast.co.za/eng/query/validate'
+            : 'https://www.payfast.co.za/eng/query/validate';
+
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => http_build_query($data),
+            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+        ]);
+        $resp = curl_exec($ch);
+        curl_close($ch);
+
+        if (!is_string($resp)) {
+            return false;
+        }
+        $lines = explode("\n", trim($resp));
+
+        return strtoupper(trim($lines[0])) === 'VALID';
+    }
+
+    /**
+     * Deny-by-default order ownership check (#180). The viewer owns the order
+     * ONLY when: they are an admin; OR an authenticated user whose id equals the
+     * order's user_id; OR an anonymous visitor whose session matches the order's
+     * (non-empty) session_id. A NULL user_id/session_id never passes — closing
+     * the prior null-conditional bypass that leaked guest orders to any user and
+     * account orders to any anon.
+     */
+    public function viewerOwnsOrder(object $order, ?int $userId, bool $isAdmin, ?string $sessionId): bool
+    {
+        if ($isAdmin) {
+            return true;
+        }
+        if ($userId) {
+            return (int) ($order->user_id ?? 0) === (int) $userId;
+        }
+
+        return !empty($order->session_id)
+            && !empty($sessionId)
+            && hash_equals((string) $order->session_id, (string) $sessionId);
     }
 
     /**

@@ -5,6 +5,21 @@ use Illuminate\Database\Capsule\Manager as DB;
 
 class contractActions extends AhgController
 {
+    /**
+     * #179: contract data (payment terms, value, counterparty PII) + destructive
+     * cascade-delete with no inline guards. Module is currently dormant (not in
+     * sf_enabled_modules) but gate it anyway so it can never be exposed if enabled.
+     */
+    public function preExecute()
+    {
+        parent::preExecute();
+
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
     protected function initFramework()
     {
     }
