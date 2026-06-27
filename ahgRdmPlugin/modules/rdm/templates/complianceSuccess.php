@@ -4,7 +4,8 @@
   <h1 class="h4 mb-0"><i class="fas fa-clipboard-check me-2"></i>RDM Compliance Scoreboard</h1>
 <?php end_slot(); ?>
 
-<div class="d-flex align-items-center justify-content-end mb-3">
+<div class="d-flex align-items-center justify-content-end mb-3 gap-2">
+  <a href="<?php echo url_for('@rdm_datasets_dashboard'); ?>" class="btn btn-outline-secondary btn-sm"><i class="fas fa-gauge-high me-1"></i>Dashboard</a>
   <a href="<?php echo url_for('@rdm_datasets_index'); ?>" class="btn btn-outline-secondary btn-sm">All datasets</a>
 </div>
 

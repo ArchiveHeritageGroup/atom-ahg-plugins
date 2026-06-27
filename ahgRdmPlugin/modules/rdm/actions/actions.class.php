@@ -169,6 +169,26 @@ class rdmActions extends sfActions
         $this->redirect('@rdm_datasets_show?id=' . $datasetId);
     }
 
+    // ─── RDM dashboard (roll-up) ────────────────────────────────────────
+
+    public function executeDashboard(sfWebRequest $request)
+    {
+        $this->requireAuth();
+
+        if (!class_exists('\AhgRdm\Services\DashboardService')) {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgRdmPlugin/lib/Services/DashboardService.php';
+        }
+
+        $this->filters = array_filter([
+            'institution' => trim((string) $request->getParameter('institution')),
+            'from'        => trim((string) $request->getParameter('from')),
+            'to'          => trim((string) $request->getParameter('to')),
+        ], fn ($v) => $v !== '');
+
+        $this->d = (new \AhgRdm\Services\DashboardService())->overview($this->filters);
+        $this->institutions = $this->getComplianceService()->institutions();
+    }
+
     // ─── Compliance scoreboard ──────────────────────────────────────────
 
     public function executeCompliance(sfWebRequest $request)

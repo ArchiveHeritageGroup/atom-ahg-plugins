@@ -8,6 +8,9 @@
   <a class="btn btn-primary" href="<?php echo url_for('@rdm_datasets_create'); ?>">
     <i class="fas fa-plus"></i> New dataset
   </a>
+  <a class="btn btn-outline-secondary" href="<?php echo url_for('@rdm_datasets_dashboard'); ?>">
+    <i class="fas fa-gauge-high"></i> Dashboard
+  </a>
   <a class="btn btn-outline-secondary" href="<?php echo url_for('@rdm_datasets_compliance'); ?>">
     <i class="fas fa-clipboard-check"></i> Compliance scoreboard
   </a>
