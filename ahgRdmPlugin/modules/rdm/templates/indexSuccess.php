@@ -4,9 +4,12 @@
   <h1>Research datasets</h1>
 <?php end_slot(); ?>
 
-<div class="mb-3">
+<div class="mb-3 d-flex gap-2">
   <a class="btn btn-primary" href="<?php echo url_for('@rdm_datasets_create'); ?>">
     <i class="fas fa-plus"></i> New dataset
+  </a>
+  <a class="btn btn-outline-secondary" href="<?php echo url_for('@rdm_datasets_compliance'); ?>">
+    <i class="fas fa-clipboard-check"></i> Compliance scoreboard
   </a>
 </div>
 

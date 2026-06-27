@@ -27,6 +27,15 @@ class rdmActions extends sfActions
         return new \AhgRdm\Services\PopiaGateService();
     }
 
+    protected function getComplianceService(): \AhgRdm\Services\ComplianceReportService
+    {
+        if (!class_exists('\AhgRdm\Services\ComplianceReportService')) {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgRdmPlugin/lib/Services/ComplianceReportService.php';
+        }
+
+        return new \AhgRdm\Services\ComplianceReportService();
+    }
+
     protected function requireAuth(): void
     {
         if (!$this->getUser()->isAuthenticated()) {
@@ -98,6 +107,24 @@ class rdmActions extends sfActions
             ->all();
 
         $this->gate = $this->getGateService()->gateStatus((int) $this->dataset->id);
+    }
+
+    // ─── Compliance scoreboard ──────────────────────────────────────────
+
+    public function executeCompliance(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $svc = $this->getComplianceService();
+
+        $this->filters = array_filter([
+            'institution' => trim((string) $request->getParameter('institution')),
+            'verdict'     => trim((string) $request->getParameter('verdict')),
+            'disposition' => trim((string) $request->getParameter('disposition')),
+        ], fn ($v) => $v !== '');
+
+        $this->rows = $svc->rows($this->filters);
+        $this->institutions = $svc->institutions();
+        $this->summary = $svc->summary($this->filters);
     }
 
     // ─── Public landing (no auth): citable metadata + access badge ──────
