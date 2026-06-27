@@ -38,6 +38,7 @@
         "0.5.0": "Phase 5 (#172): ComplianceReportService — filterable per-faculty compliance scoreboard (verdict/findings/access/DOI/DMP)",
         "0.6.0": "Phase 6 (#173): rdm:demo symfony task — full pipeline on 100%-synthetic assets (deposit->scan->gate->restrict->DOI->landing->scoreboard)",
         "0.7.0": "Phase 7 (#174): Feature 1 — DmpLinkService orchestrating the existing ahgResearch DmpService; DMP card on show + line on landing + scoreboard column",
-        "0.8.0": "Phase 8 (#175): Feature 3 — DashboardService roll-up (8 KPIs + 5 Chart.js charts + per-faculty posture + gate backlog) with date/faculty filters. Completes epic #167."
+        "0.8.0": "Phase 8 (#175): Feature 3 — DashboardService roll-up (8 KPIs + 5 Chart.js charts + per-faculty posture + gate backlog) with date/faculty filters. Completes epic #167.",
+        "0.9.0": "#176: byte-level enforcement — restricted datasets' files relocated out of /uploads (rdm_protected_object) + authed ODRL-gated download controller via X-Accel-Redirect (needs nginx internal location)"
     }
 }

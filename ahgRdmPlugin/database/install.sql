@@ -93,3 +93,21 @@ PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 SET @c := (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'rdm_scan_finding' AND column_name = 'reviewed_by');
 SET @s := IF(@c = 0, 'ALTER TABLE rdm_scan_finding ADD COLUMN reviewed_by INT NULL AFTER review_status, ADD COLUMN reviewed_at TIMESTAMP NULL AFTER reviewed_by, ADD COLUMN decision_note VARCHAR(500) NULL AFTER reviewed_at', 'SELECT 1');
 PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- #176: protected-object relocation map. When a dataset is restricted/embargoed,
+-- its digital_object files are MOVED out of the public /uploads tree into a
+-- non-web-served protected dir, so a guessed raw URL can't fetch the bytes. One
+-- row per relocated digital_object; the authed download controller serves them
+-- via X-Accel-Redirect after an ODRL check. release() moves them back + clears.
+CREATE TABLE IF NOT EXISTS rdm_protected_object (
+    id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    dataset_id     INT UNSIGNED NOT NULL,           -- FK rdm_dataset.id
+    io_id          INT NOT NULL,                    -- information_object.id the DO hangs on
+    do_id          INT NOT NULL,                    -- digital_object.id that was moved
+    original_path  VARCHAR(1024) NOT NULL,          -- web-relative path it was moved FROM (e.g. /uploads/r/.../file)
+    protected_path VARCHAR(1024) NOT NULL,          -- absolute path it was moved TO
+    moved_at       TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_rdm_protected_do (do_id),
+    KEY idx_rdm_protected_dataset (dataset_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

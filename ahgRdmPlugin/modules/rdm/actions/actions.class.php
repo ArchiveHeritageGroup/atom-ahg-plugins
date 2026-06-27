@@ -207,6 +207,101 @@ class rdmActions extends sfActions
         $this->summary = $svc->summary($this->filters);
     }
 
+    // ─── Authed file download (ODRL-gated, X-Accel served) ─────────────
+
+    public function executeFileDownload(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $DB = '\Illuminate\Database\Capsule\Manager';
+        $datasetId = (int) $request->getParameter('id');
+        $fid = (int) $request->getParameter('fid');
+
+        $file = $DB::table('rdm_dataset_file')->where('id', $fid)->where('dataset_id', $datasetId)->first();
+        if (!$file) {
+            return $this->deny(404, 'File not found.');
+        }
+
+        $ioId = (int) $file->io_id;
+        $doId = (int) ($file->do_id ?: 0);
+        $do = $doId
+            ? $DB::table('digital_object')->where('id', $doId)->first()
+            : $DB::table('digital_object')->where('object_id', $ioId)->whereNull('parent_id')->first();
+        if (!$do) {
+            return $this->deny(404, 'No file stored.');
+        }
+        $doId = (int) $do->id;
+
+        // Authorisation: admins bypass; everyone else is evaluated against the
+        // dataset IO's ODRL policies (restricted/embargoed -> prohibition -> deny).
+        if (!$this->getUser()->isAdministrator()) {
+            if (!class_exists('\OdrlService')) {
+                require_once sfConfig::get('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OdrlService.php';
+            }
+            $researcherId = (int) ($DB::table('research_researcher')->where('user_id', $this->currentUserId())->value('id') ?: 0);
+            $verdict = (new \OdrlService())->evaluateAccess('archival_description', $ioId, $researcherId, 'use');
+            if (empty($verdict['permitted'])) {
+                return $this->deny(403, 'Access to this file is restricted (POPIA / personal data). Contact the repository for mediated access.');
+            }
+        }
+
+        // Serve. Protected (relocated) files go via X-Accel from the internal
+        // nginx location; non-protected files stream from their public path.
+        $guard = $this->getGuardService();
+        $name = (string) $do->name;
+        $mime = (string) ($do->mime_type ?: 'application/octet-stream');
+        $protected = $guard->protectedPathForDo($doId);
+
+        $resp = $this->getResponse();
+        $resp->setContentType($mime);
+        $resp->setHttpHeader('Content-Disposition', 'attachment; filename="' . basename($name) . '"');
+        $resp->setHttpHeader('X-Content-Type-Options', 'nosniff');
+
+        if ($protected && is_file($protected)) {
+            if (sfConfig::get('app_rdm_xaccel', true)) {
+                $resp->setHttpHeader('X-Accel-Redirect', $guard->accelUri($doId, $name));
+
+                return sfView::NONE;
+            }
+
+            return $this->streamFile($protected, $mime, $name);
+        }
+
+        // Not protected (open dataset): stream from the public /uploads path.
+        $webDir = rtrim((string) sfConfig::get('sf_web_dir'), '/');
+        $publicPath = $webDir . '/' . ltrim((string) $do->path, '/') . $name;
+        if (is_file($publicPath)) {
+            return $this->streamFile($publicPath, $mime, $name);
+        }
+
+        return $this->deny(404, 'File is unavailable.');
+    }
+
+    private function streamFile(string $path, string $mime, string $name)
+    {
+        $resp = $this->getResponse();
+        $resp->setHttpHeader('Content-Length', (string) filesize($path));
+        $resp->sendHttpHeaders();
+        readfile($path);
+
+        return sfView::NONE;
+    }
+
+    private function deny(int $code, string $message)
+    {
+        $this->getResponse()->setStatusCode($code);
+
+        return $this->renderText($message);
+    }
+
+    protected function getGuardService(): \AhgRdm\Services\DatasetFileGuardService
+    {
+        if (!class_exists('\AhgRdm\Services\DatasetFileGuardService')) {
+            require_once sfConfig::get('sf_plugins_dir') . '/ahgRdmPlugin/lib/Services/DatasetFileGuardService.php';
+        }
+
+        return new \AhgRdm\Services\DatasetFileGuardService();
+    }
+
     // ─── Public landing (no auth): citable metadata + access badge ──────
 
     public function executeLanding(sfWebRequest $request)

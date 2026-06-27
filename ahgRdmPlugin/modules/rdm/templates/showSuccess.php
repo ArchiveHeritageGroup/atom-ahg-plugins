@@ -221,7 +221,7 @@
 <?php else: ?>
   <table class="table table-sm table-striped">
     <thead>
-      <tr><th>File</th><th>Child IO</th><th>Digital object</th></tr>
+      <tr><th>File</th><th>Child IO</th><th>Digital object</th><th>Download</th></tr>
     </thead>
     <tbody>
       <?php foreach ($files as $f): ?>
@@ -229,10 +229,16 @@
           <td><?php echo esc_specialchars($f->original_name); ?></td>
           <td>#<?php echo (int) $f->io_id; ?></td>
           <td><?php echo $f->do_id ? '#' . (int) $f->do_id : '—'; ?></td>
+          <td>
+            <a class="btn btn-sm btn-outline-secondary py-0" href="<?php echo url_for('@rdm_datasets_file?id=' . $dataset->id . '&fid=' . $f->id); ?>">
+              <i class="fas fa-download"></i> Download
+            </a>
+          </td>
         </tr>
       <?php endforeach; ?>
     </tbody>
   </table>
+  <p class="small text-muted">Downloads are access-controlled (ODRL): restricted/embargoed files return 403 except for authorised users. Raw <code>/uploads</code> paths for restricted datasets are relocated out of the public tree.</p>
 <?php endif; ?>
 
 <hr>

@@ -49,6 +49,13 @@ class DatasetReleaseService
             }
             $this->restrict($ioIds, $dateTo, $userId);
             $out['policies'] = count($ioIds) * 2; // use + reproduce per IO
+            // #176: move the bytes out of the public /uploads tree so a guessed
+            // raw URL can't fetch them; the authed download controller serves
+            // them via X-Accel after an ODRL check.
+            $out['protected'] = $this->guard()->protect($datasetId);
+        } else {
+            // Open release: restore any previously protected files to /uploads.
+            $out['restored'] = $this->guard()->release($datasetId);
         }
 
         // Mint a DOI for ANY finalised disposition — a restricted/embargoed dataset
@@ -76,6 +83,15 @@ class DatasetReleaseService
         }
 
         return new \OdrlService();
+    }
+
+    private function guard(): DatasetFileGuardService
+    {
+        if (!class_exists('\AhgRdm\Services\DatasetFileGuardService')) {
+            require_once \sfConfig::get('sf_plugins_dir') . '/ahgRdmPlugin/lib/Services/DatasetFileGuardService.php';
+        }
+
+        return new DatasetFileGuardService();
     }
 
     /** Remove the dataset's existing ODRL policies (these IOs are rdm-owned). */
