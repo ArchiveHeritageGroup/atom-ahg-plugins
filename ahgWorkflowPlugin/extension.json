@@ -1,7 +1,7 @@
 {
     "name": "Workflow Manager",
     "machine_name": "ahgWorkflowPlugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Configurable approval workflow system for archival submissions with role-based task routing, pool claiming, and email notifications",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

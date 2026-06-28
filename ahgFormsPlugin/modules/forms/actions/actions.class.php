@@ -82,6 +82,10 @@ class formsActions extends AhgController
 
             $this->redirect(['module' => 'forms', 'action' => 'templates']);
         }
+
+        // #187: there is no templateEditSuccess.php view — the drag-drop builder is
+        // the template editor. On GET, send the user there instead of 500ing.
+        $this->redirect(['module' => 'forms', 'action' => 'builder', 'id' => $this->template->id]);
     }
 
     /**

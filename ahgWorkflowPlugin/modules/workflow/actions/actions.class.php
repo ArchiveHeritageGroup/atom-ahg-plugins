@@ -229,7 +229,9 @@ class workflowActions extends AhgController
             $this->getUser()->setFlash('error', $e->getMessage());
         }
 
-        $this->redirect($request->getReferer() ?? 'workflow/dashboard');
+        // #187: getReferer() returns '' (not null) when absent, so ?? wouldn't fall
+        // back and redirect('') 500s ("Cannot redirect to an empty URL"). Use ?:.
+        $this->redirect($request->getReferer() ?: 'workflow/dashboard');
     }
 
     // =========================================================================

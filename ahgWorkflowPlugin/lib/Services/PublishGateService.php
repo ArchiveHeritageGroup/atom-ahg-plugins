@@ -148,12 +148,18 @@ class PublishGateService
             ->get()
             ->toArray();
 
-        // Get rights
+        // Get rights. The base `rights` table has no object_id; rights link to an
+        // object through the `relation` table (type_id 168 = QubitTerm::RIGHT_ID,
+        // subject_id = the information object, object_id = the rights record).
         $rights = DB::table('rights as r')
+            ->join('relation as rel', function ($join) use ($objectId) {
+                $join->on('rel.object_id', '=', 'r.id')
+                    ->where('rel.type_id', '=', 168)
+                    ->where('rel.subject_id', '=', $objectId);
+            })
             ->leftJoin('rights_i18n as ri', function ($join) use ($culture) {
                 $join->on('r.id', '=', 'ri.id')->where('ri.culture', '=', $culture);
             })
-            ->where('r.object_id', $objectId)
             ->select('r.id', 'r.basis_id', 'ri.rights_note', 'ri.copyright_note', 'ri.license_note')
             ->get()
             ->toArray();
@@ -346,8 +352,14 @@ class PublishGateService
 
     private function evaluateHasRights(int $objectId): array
     {
-        $count = DB::table('rights')
-            ->where('object_id', $objectId)
+        // rights link via the relation table (type 168 = QubitTerm::RIGHT_ID), not a
+        // non-existent rights.object_id column.
+        $count = DB::table('rights as r')
+            ->join('relation as rel', function ($join) use ($objectId) {
+                $join->on('rel.object_id', '=', 'r.id')
+                    ->where('rel.type_id', '=', 168)
+                    ->where('rel.subject_id', '=', $objectId);
+            })
             ->count();
 
         if ($count > 0) {

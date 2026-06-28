@@ -1,7 +1,7 @@
 {
     "name": "Forms Builder",
     "machine_name": "ahgFormsPlugin",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Configurable metadata entry forms per repository — drag-drop form builder, template library, field assignments, draft saving, and import/export",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",

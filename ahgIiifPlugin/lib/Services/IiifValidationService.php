@@ -85,9 +85,15 @@ class IiifValidationService
             'message' => $hasThumb ? 'Thumbnail derivable from first canvas' : 'No named digital objects for thumbnail generation',
         ];
 
-        // Check 4: Rights field
-        $hasRights = DB::table('rights')
-            ->where('object_id', $objectId)
+        // Check 4: Rights field. The base `rights` table has no object_id — rights
+        // link via the `relation` table (type_id 168 = QubitTerm::RIGHT_ID,
+        // subject_id = the information object, object_id = the rights record).
+        $hasRights = DB::table('rights as r')
+            ->join('relation as rel', function ($join) use ($objectId) {
+                $join->on('rel.object_id', '=', 'r.id')
+                    ->where('rel.type_id', '=', 168)
+                    ->where('rel.subject_id', '=', $objectId);
+            })
             ->exists();
 
         $results[] = [
