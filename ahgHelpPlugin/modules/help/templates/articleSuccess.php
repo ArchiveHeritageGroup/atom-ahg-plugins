@@ -83,6 +83,35 @@
         <?php echo $rawArticle['body_html'] ?>
       </article>
 
+      <!-- Related manuals (linked from the article's plugin) -->
+      <?php
+        $relPlugin = $rawArticle['related_plugin'] ?? '';
+        if ($relPlugin) {
+            static $manualMap = null;
+            if ($manualMap === null) {
+                $mapFile = sfConfig::get('sf_plugins_dir') . '/ahgHelpPlugin/lib/manualLinks.php';
+                $manualMap = is_file($mapFile) ? (include $mapFile) : [];
+            }
+            $catBase = 'https://github.com/ArchiveHeritageGroup/atom-extensions-catalog/blob/main/docs';
+            $techUrl = $catBase . '/technical/' . $relPlugin . '.md';
+            $userFile = $manualMap[$relPlugin] ?? null;
+            $userUrl = $userFile ? $catBase . '/' . $userFile : null;
+      ?>
+        <div class="card mt-4 help-related-manuals">
+          <div class="card-header bg-light"><i class="bi bi-book me-2"></i><?php echo __('Full manuals') ?></div>
+          <div class="card-body d-flex flex-wrap gap-2">
+            <?php if ($userUrl): ?>
+              <a href="<?php echo htmlspecialchars($userUrl) ?>" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-person-lines-fill me-1"></i><?php echo __('User manual') ?>
+              </a>
+            <?php endif; ?>
+            <a href="<?php echo htmlspecialchars($techUrl) ?>" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-gear me-1"></i><?php echo __('Technical manual') ?>
+            </a>
+          </div>
+        </div>
+      <?php } ?>
+
       <!-- Prev / Next Navigation -->
       <nav class="help-article-nav d-flex justify-content-between mt-5 pt-4 border-top">
         <?php if ($rawPrev): ?>

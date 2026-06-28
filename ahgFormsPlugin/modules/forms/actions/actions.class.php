@@ -167,6 +167,11 @@ class formsActions extends AhgController
                 }
             }
         }
+
+        // #187: this action has no view (templateImportSuccess.php) — the import
+        // is driven from the templates page. On GET, or any failed/no-file POST,
+        // return there instead of rendering a non-existent template (was a 500).
+        $this->redirect('@ahg_forms_templates');
     }
 
     /**

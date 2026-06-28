@@ -380,8 +380,11 @@ class accessionIntakeActions extends sfActions
     {
         $this->requireEditor();
 
+        // #187: a repository's display name lives on actor_i18n (repository.id ==
+        // actor.id), not repository_i18n — selecting ri.authorized_form_of_name
+        // from repository_i18n 500s (unknown column). Join actor_i18n instead.
         $this->sequences = \Illuminate\Database\Capsule\Manager::table('accession_numbering_sequence')
-            ->leftJoin('repository_i18n as ri', function ($j) {
+            ->leftJoin('actor_i18n as ri', function ($j) {
                 $j->on('accession_numbering_sequence.repository_id', '=', 'ri.id')
                     ->where('ri.culture', '=', 'en');
             })

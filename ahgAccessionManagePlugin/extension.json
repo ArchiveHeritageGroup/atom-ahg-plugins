@@ -1,7 +1,7 @@
 {
     "name": "AHG Accession Manage",
     "machine_name": "ahgAccessionManagePlugin",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "description": "First-class accession management with intake queue, appraisal workflow, container tracking, rights inheritance, and multi-tenant isolation",
     "author": "The Archive and Heritage Group",
     "license": "GPL-3.0",
