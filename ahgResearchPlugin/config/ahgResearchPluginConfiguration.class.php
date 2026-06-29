@@ -471,6 +471,12 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $research->any('research_lecture_show', '/research/lectures/:id', 'lectureShow', ['id' => '\d+']);
         $research->any('research_lectures', '/research/lectures', 'lectures');
 
+        // Researcher self-description submission portal + reviewer workflow (6d)
+        $research->any('research_submission_review_one', '/research/submissions/review/:id', 'submissionReview', ['id' => '\d+']);
+        $research->any('research_submission_review_queue', '/research/submissions/review', 'submissionReviewQueue');
+        $research->any('research_submission_edit', '/research/submissions/edit', 'submissionEdit');
+        $research->any('research_submissions', '/research/submissions', 'submissions');
+
         $research->register($routing);
 
         // #115 Journal builder + manuscript workspace (own module)
