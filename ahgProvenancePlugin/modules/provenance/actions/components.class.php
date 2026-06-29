@@ -11,9 +11,13 @@ class provenanceComponents extends AhgComponents
      */
     public function executeProvenanceDisplay(sfWebRequest $request)
     {
-        $this->objectId = $request->getParameter('objectId');
+        // objectId normally arrives as a component variable via
+        // include_component('provenance', 'provenanceDisplay', ['objectId' => ...]);
+        // fall back to a request parameter when invoked as a standalone action.
+        $objectId = $this->getVarHolder()->get('objectId') ?: $request->getParameter('objectId');
+        $this->objectId = $objectId;
 
-        if (!$this->objectId) {
+        if (!$objectId) {
             $this->provenance = ['exists' => false];
 
             return sfView::SUCCESS;
@@ -21,6 +25,6 @@ class provenanceComponents extends AhgComponents
 
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
 
-        $this->provenance = $service->getProvenanceForObject($this->objectId, $this->culture());
+        $this->provenance = $service->getProvenanceForObject((int) $objectId, $this->culture());
     }
 }
