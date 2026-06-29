@@ -81,6 +81,12 @@
                 <h5 class="card-title">
                     <i class="fas fa-plug me-2 text-muted"></i>
                     {{ e($plugin['name']) }}
+                    <a href="https://heratio.theahg.co.za/help/article/{{ strtolower($plugin['name']) }}"
+                       target="_blank" rel="noopener"
+                       class="float-end text-info text-decoration-none"
+                       title="{{ __('Help for this plugin') }}">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
                 </h5>
                 <p class="card-text text-muted small">
                     {{ e($plugin['description'] ?? 'No description available') }}

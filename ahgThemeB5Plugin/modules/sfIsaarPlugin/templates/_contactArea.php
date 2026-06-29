@@ -7,6 +7,13 @@
 use AtomFramework\Extensions\Contact\Repositories\ContactInformationRepository;
 use AtomFramework\Services\LanguageService;
 
+// This extended contact area is provided by ahgContactPlugin. If that plugin is
+// not enabled its repository class isn't autoloaded — skip the section gracefully
+// instead of fataling the whole actor add/edit form.
+if (!class_exists(ContactInformationRepository::class)) {
+    return;
+}
+
 // Get existing contacts
 $contactRepo = new ContactInformationRepository();
 $culture = sfContext::getInstance()->getUser()->getCulture();

@@ -72,8 +72,14 @@ class AhgSettingsEmailAction extends AhgController
             ->get()
             ->toArray();
 
+        // The error_alert_* keys live in the 'notifications' group but are NOT
+        // email-address fields — they have their own dedicated section (rendered
+        // from $errorAlertSettings and saved via the error_alert[] params). Exclude
+        // them here so they aren't ALSO rendered as bogus type="email" inputs in the
+        // notifications loop (which made them appear unsaveable).
         $this->notificationSettings = DB::table('email_setting')
             ->where('setting_group', 'notifications')
+            ->whereNotIn('setting_key', ['error_alert_enabled', 'error_alert_throttle_ttl', 'error_alert_daily_cap', 'error_alert_env_gate'])
             ->orderBy('id')
             ->get()
             ->toArray();

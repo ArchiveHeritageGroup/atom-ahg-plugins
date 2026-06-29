@@ -82,6 +82,12 @@
                 <h5 class="card-title">
                     <i class="fas fa-plug me-2 text-muted"></i>
                     <?php echo htmlspecialchars($plugin['name']); ?>
+                    <a href="https://heratio.theahg.co.za/help/article/<?php echo strtolower($plugin['name']); ?>"
+                       target="_blank" rel="noopener"
+                       class="float-end text-info text-decoration-none"
+                       title="<?php echo __('Help for this plugin'); ?>">
+                        <i class="fas fa-question-circle"></i>
+                    </a>
                 </h5>
                 <p class="card-text text-muted small">
                     <?php echo htmlspecialchars($plugin['description'] ?? 'No description available'); ?>

@@ -579,7 +579,11 @@ class AHGVoiceCommands {
 
     console.log('[Voice] Heard: "' + text + '" (confidence: ' + (confidence * 100).toFixed(1) + '%)');
 
-    if (confidence < this.confidenceThreshold) {
+    // Chrome's Web Speech API frequently returns confidence === 0 for final
+    // command results even when the transcript is correct. Only treat a result
+    // as "low confidence" when a real (non-zero) score is reported, otherwise
+    // every command would be dropped here (speaks/toasts but never acts).
+    if (confidence > 0 && confidence < this.confidenceThreshold) {
       this.showToast('Low confidence (' + (confidence * 100).toFixed(0) + '%): "' + transcript + '"', 'warning');
       return;
     }

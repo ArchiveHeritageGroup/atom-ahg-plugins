@@ -23,10 +23,6 @@
         </div>
       </div>
     </div>
-    <div class="alert alert-info py-2 mb-3">
-      <i class="fas fa-info-circle me-1"></i><strong><?php echo __('Demo'); ?>:</strong>
-      <code>louise@theahg.co.za</code> / <code>Password@123</code>
-    </div>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <button type="submit" class="btn atom-btn-outline-success">
         <i class="fas fa-sign-in-alt me-1"></i><?php echo __('Log in'); ?>

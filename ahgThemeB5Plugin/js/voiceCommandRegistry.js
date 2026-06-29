@@ -13,7 +13,7 @@ var AHGVoiceRegistry = (function () {
     // -- Navigation -------------------------------------------------------
     {
       patterns: ['go home', 'go to home', 'home', 'homepage'],
-      action: function () { window.location.href = '/'; },
+      action: function () { window.location.href = '/index.php/heritage'; },
       mode: 'nav',
       description: 'Go to homepage',
       feedback: 'Going to homepage'
@@ -27,7 +27,7 @@ var AHGVoiceRegistry = (function () {
     },
     {
       patterns: ['go to admin', 'admin', 'admin panel'],
-      action: function () { window.location.href = '/admin'; },
+      action: function () { window.location.href = '/index.php/settings'; },
       mode: 'nav',
       description: 'Go to admin panel',
       feedback: 'Going to admin panel'
