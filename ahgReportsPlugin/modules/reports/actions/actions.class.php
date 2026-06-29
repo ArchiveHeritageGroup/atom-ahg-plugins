@@ -113,6 +113,30 @@ class reportsActions extends AhgController
             ->where('information_object.id', '!=', 1)
             ->count();
 
+        // Data Ingest stats (guarded — tables exist only if the plugin is installed)
+        $ingestJobsCompleted = 0;
+        $ingestRecords = 0;
+        $ingestDOs = 0;
+        $lastIngestAt = null;
+        try {
+            $ingestJobsCompleted = DB::table('ingest_job')->where('status', 'completed')->count();
+            $ingestRecords = (int) DB::table('ingest_job')->sum('created_records');
+            $ingestDOs = (int) DB::table('ingest_job')->sum('created_dos');
+            $lastIngestAt = DB::table('ingest_job')->whereNotNull('completed_at')->max('completed_at');
+        } catch (\Throwable $e) {
+            // ahgIngestPlugin not installed
+        }
+
+        // Digital Preservation stats (guarded — Archivematica-style pipeline)
+        $preservedObjects = 0;
+        $premisEvents = 0;
+        try {
+            $preservedObjects = DB::table('preservation_checksum')->distinct()->count('digital_object_id');
+            $premisEvents = DB::table('preservation_event')->count();
+        } catch (\Throwable $e) {
+            // ahgPreservationPlugin not installed
+        }
+
         return [
             'totalDescriptions' => DB::table('information_object')->where('id', '!=', 1)->count(),
             'totalActors' => DB::table('actor')->where('id', '!=', 1)->count(),
@@ -121,7 +145,13 @@ class reportsActions extends AhgController
             'totalAccessions' => DB::table('accession')->count(),
             'recentUpdates' => $recentUpdates,
             'draftRecords' => $draftCount,
-            'publishedRecords' => $publishedCount
+            'publishedRecords' => $publishedCount,
+            'ingestJobsCompleted' => $ingestJobsCompleted,
+            'ingestRecords' => $ingestRecords,
+            'ingestDOs' => $ingestDOs,
+            'lastIngestAt' => $lastIngestAt,
+            'preservedObjects' => $preservedObjects,
+            'premisEvents' => $premisEvents,
         ];
     }
 }

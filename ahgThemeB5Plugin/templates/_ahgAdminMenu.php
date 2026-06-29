@@ -184,6 +184,13 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'forms', 'action' => 'index']); ?>"><i class="fas fa-edit fa-fw me-1"></i><?php echo __('Form Templates'); ?></a></li>
     <?php endif; ?>
 
+    <?php if (ahgIsPluginEnabled('ahgIngestPlugin')): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><?php echo __('Data Ingest'); ?></h6></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ingest', 'action' => 'index']); ?>"><i class="fas fa-file-upload fa-fw me-1"></i><?php echo __('Ingest Dashboard'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ingest', 'action' => 'configure']); ?>"><i class="fas fa-plus-circle fa-fw me-1"></i><?php echo __('New Ingest'); ?></a></li>
+    <?php endif; ?>
+
     <?php if ($hasDoiPlugin): ?>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header"><?php echo __('DOI Management'); ?></h6></li>

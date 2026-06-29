@@ -123,6 +123,18 @@ class IngestCommitService
 
         // Post-commit: processing, derivatives, packaging, indexing
 
+        // Digital preservation baseline (Archivematica-style). Runs for EVERY
+        // ingested digital object regardless of the optional processing
+        // toggles: fixity checksum baseline, format identification, virus scan
+        // (when ClamAV is present) and a PREMIS "ingestion" event. This is what
+        // makes ingested objects appear in the Digital Preservation dashboard
+        // with full provenance.
+        try {
+            $this->runPreservationBaseline($jobId, $session);
+        } catch (\Throwable $e) {
+            $errors[] = ['stage' => 'preservation_baseline', 'error' => $e->getMessage()];
+        }
+
         // Virus scan (before anything else)
         if ($session->process_virus_scan) {
             try {
@@ -264,6 +276,91 @@ class IngestCommitService
             'dos_created' => $createdDOs,
             'errors' => count($errors),
         ]);
+    }
+
+    /**
+     * Archivematica-style preservation baseline applied to every ingested
+     * digital object: fixity checksum baseline + format identification +
+     * virus scan (when available) + a PREMIS "ingestion" event. Idempotent and
+     * non-fatal per object. Format-id / virus-scan are skipped here when the
+     * session already requested them as explicit processing steps (to avoid
+     * double work) — the checksum baseline and the PREMIS event always run.
+     *
+     * No-op when the Digital Preservation plugin is not installed.
+     */
+    protected function runPreservationBaseline(int $jobId, object $session): void
+    {
+        $serviceFile = \sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/PreservationService.php';
+        if (!file_exists($serviceFile)) {
+            return; // preservation plugin not installed — nothing to wire into
+        }
+        require_once $serviceFile;
+        if (!class_exists('\PreservationService')) {
+            return;
+        }
+
+        $svc = new \PreservationService();
+
+        $clamAvailable = false;
+        try {
+            $clamAvailable = $svc->isClamAvAvailable();
+        } catch (\Throwable $e) {
+            $clamAvailable = false;
+        }
+
+        $rows = DB::table('ingest_row')
+            ->where('session_id', $session->id)
+            ->whereNotNull('created_do_id')
+            ->get();
+
+        foreach ($rows as $row) {
+            $doId = (int) $row->created_do_id;
+            if ($doId <= 0) {
+                continue;
+            }
+            $ioId = !empty($row->created_atom_id) ? (int) $row->created_atom_id : null;
+
+            // 1. Fixity baseline (always)
+            try {
+                $svc->generateChecksums($doId, ['sha256']);
+            } catch (\Throwable $e) {
+                // non-fatal per object
+            }
+
+            // 2. Format identification (skip if requested as an explicit step)
+            if (empty($session->process_format_id)) {
+                try {
+                    $svc->identifyFormat($doId, true);
+                } catch (\Throwable $e) {
+                    // non-fatal
+                }
+            }
+
+            // 3. Virus scan (skip if requested as an explicit step; needs ClamAV)
+            if ($clamAvailable && empty($session->process_virus_scan)) {
+                try {
+                    $svc->scanForVirus($doId, true, 'ingest');
+                } catch (\Throwable $e) {
+                    // non-fatal
+                }
+            }
+
+            // 4. PREMIS ingestion event (always)
+            try {
+                $svc->logEvent(
+                    $doId,
+                    $ioId,
+                    'ingestion',
+                    'Digital object ingested via Data Ingest session #' . $session->id . ' (job #' . $jobId . ')',
+                    'success',
+                    null,
+                    'software',
+                    'ahgIngestPlugin'
+                );
+            } catch (\Throwable $e) {
+                // non-fatal
+            }
+        }
     }
 
     public function processRow(int $jobId, object $row, object $session, array $legacyToAtomId): ?array
@@ -815,35 +912,47 @@ class IngestCommitService
 
         $session = $this->ingestService->getSession($job->session_id);
 
-        // Try to use PreservationService if available
-        if (class_exists('\AhgPreservationPlugin\PreservationService')) {
+        // Generate checksums + a PREMIS packaging event via the Digital
+        // Preservation plugin when it is installed.
+        $preservationFile = \sfConfig::get('sf_plugins_dir') . '/ahgPreservationPlugin/lib/PreservationService.php';
+        if (file_exists($preservationFile)) {
+            require_once $preservationFile;
+        }
+        if (class_exists('\PreservationService')) {
             try {
-                $preservationService = new \AhgPreservationPlugin\PreservationService();
+                $preservationService = new \PreservationService();
 
                 $rows = DB::table('ingest_row')
                     ->where('session_id', $session->id)
-                    ->whereNotNull('created_atom_id')
+                    ->whereNotNull('created_do_id')
                     ->get();
 
                 $objectIds = [];
                 foreach ($rows as $row) {
-                    $objectIds[] = $row->created_atom_id;
+                    $doId = (int) $row->created_do_id;
+                    if ($doId <= 0) {
+                        continue;
+                    }
+                    $objectIds[] = $doId;
+                    // Ensure a fixity checksum exists for the packaged object
+                    $preservationService->generateChecksums($doId, ['sha256']);
                 }
 
-                // Generate checksums for all ingested objects
-                foreach ($objectIds as $oid) {
-                    $preservationService->generateChecksums($oid, ['sha256']);
-                }
-
-                // Log preservation event
-                $preservationService->logEvent('ingest_sip', [
-                    'session_id' => $session->id,
-                    'object_count' => count($objectIds),
-                ]);
+                // PREMIS event: SIP package generated
+                $preservationService->logEvent(
+                    null,
+                    null,
+                    'replication',
+                    'SIP package generated for ' . count($objectIds) . ' object(s) via Data Ingest session #' . $session->id,
+                    'success',
+                    null,
+                    'software',
+                    'ahgIngestPlugin'
+                );
 
                 return count($objectIds);
             } catch (\Throwable $e) {
-                // PreservationService not available or error
+                // PreservationService not available or error — fall through to manifest
             }
         }
 

@@ -760,6 +760,32 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'sharepoint', 'action' => 'mappings']); ?>"><i class="fas fa-exchange-alt me-2 text-muted"></i><?php echo __('SharePoint Mappings'); ?></a></li>
                     <?php endif; ?>
                 </ul>
+                <div class="card-footer bg-light">
+                    <div class="row text-center g-0 small">
+                        <div class="col">
+                            <div class="fw-bold"><?php echo number_format($stats['ingestJobsCompleted'] ?? 0); ?></div>
+                            <div class="text-muted"><?php echo __('Jobs'); ?></div>
+                        </div>
+                        <div class="col">
+                            <div class="fw-bold"><?php echo number_format($stats['ingestRecords'] ?? 0); ?></div>
+                            <div class="text-muted"><?php echo __('Records'); ?></div>
+                        </div>
+                        <div class="col">
+                            <div class="fw-bold"><?php echo number_format($stats['ingestDOs'] ?? 0); ?></div>
+                            <div class="text-muted"><?php echo __('Objects'); ?></div>
+                        </div>
+                    </div>
+                    <?php if (!empty($stats['lastIngestAt'])): ?>
+                    <div class="text-muted small text-center mt-2"><i class="fas fa-clock me-1"></i><?php echo __('Last ingest'); ?>: <?php echo esc_specialchars($stats['lastIngestAt']); ?></div>
+                    <?php endif; ?>
+                    <?php if ($hasPreservation): ?>
+                    <div class="small text-center mt-2">
+                        <i class="fas fa-shield-alt me-1 text-success"></i><?php echo __('Ingested objects are auto-preserved'); ?>
+                        &mdash; <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'events']); ?>"><?php echo number_format($stats['premisEvents'] ?? 0); ?> <?php echo __('PREMIS events'); ?></a>,
+                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'fixityLog']); ?>"><?php echo number_format($stats['preservedObjects'] ?? 0); ?> <?php echo __('with checksums'); ?></a>
+                    </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
         <?php endif; ?>
