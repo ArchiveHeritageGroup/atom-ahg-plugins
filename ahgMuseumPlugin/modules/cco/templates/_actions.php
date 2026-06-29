@@ -263,8 +263,8 @@ function cco_get_repository($resource): ?object
             </a>
             <?php endif; ?>
             
-            <!-- Provenance -->
-            <a class="dropdown-item" href="<?php echo cco_url($resource, 'cco', 'provenance'); ?>">
+            <!-- Provenance (unified, sector-agnostic — replaces legacy museum cco/provenance) -->
+            <a class="dropdown-item" href="<?php echo !empty($resource->slug) ? url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) : cco_url($resource, 'cco', 'provenance'); ?>">
                 <?php echo __('Provenance'); ?>
             </a>
 
