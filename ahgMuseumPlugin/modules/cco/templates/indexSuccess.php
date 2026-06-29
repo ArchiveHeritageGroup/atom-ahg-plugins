@@ -1149,6 +1149,14 @@ $ancestors = cco_get_ancestors($resource);
 
     </section> <!-- /section#accessionArea -->
 
+    <!-- PROVENANCE AREA (unified, sector-agnostic) -->
+    <?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+    <section id="provenanceArea" class="border-bottom">
+      <?php echo render_b5_section_heading(__('Provenance & Chain of Custody'), false, null, ['anchor' => 'provenance-collapse']); ?>
+      <?php include_component('provenance', 'provenanceDisplay', ['objectId' => $resource->id]); ?>
+    </section> <!-- /section#provenanceArea -->
+    <?php endif ?>
+
 <?php end_slot(); ?>
 
 <?php slot('after-content'); ?>
