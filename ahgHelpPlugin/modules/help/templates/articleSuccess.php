@@ -92,20 +92,28 @@
                 $mapFile = sfConfig::get('sf_plugins_dir') . '/ahgHelpPlugin/lib/manualLinks.php';
                 $manualMap = is_file($mapFile) ? (include $mapFile) : [];
             }
-            $catBase = 'https://github.com/ArchiveHeritageGroup/atom-extensions-catalog/blob/main/docs';
-            $techUrl = $catBase . '/technical/' . $relPlugin . '.md';
+            $toHelpSlug = function ($filename) {
+                $filename = basename($filename, ".md");
+                $slug = preg_replace("/_?user[_-]?guide$/i", "-user-guide", $filename);
+                $slug = preg_replace("/_?user[_-]?manual$/i", "-user-manual", $slug);
+                $slug = strtolower(str_replace(["_", " "], "-", $slug));
+                $slug = preg_replace("/-+/", "-", $slug);
+
+                return trim($slug, "-");
+            };
+            $techUrl = url_for("@help_article_view?slug=" . urlencode($toHelpSlug($relPlugin . ".md")));
             $userFile = $manualMap[$relPlugin] ?? null;
-            $userUrl = $userFile ? $catBase . '/' . $userFile : null;
+            $userUrl = $userFile ? url_for("@help_article_view?slug=" . urlencode($toHelpSlug($userFile))) : null;
       ?>
         <div class="card mt-4 help-related-manuals">
           <div class="card-header bg-light"><i class="bi bi-book me-2"></i><?php echo __('Full manuals') ?></div>
           <div class="card-body d-flex flex-wrap gap-2">
             <?php if ($userUrl): ?>
-              <a href="<?php echo htmlspecialchars($userUrl) ?>" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+              <a href="<?php echo htmlspecialchars($userUrl) ?>" class="btn btn-outline-primary btn-sm">
                 <i class="bi bi-person-lines-fill me-1"></i><?php echo __('User manual') ?>
               </a>
             <?php endif; ?>
-            <a href="<?php echo htmlspecialchars($techUrl) ?>" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+            <a href="<?php echo htmlspecialchars($techUrl) ?>" class="btn btn-outline-secondary btn-sm">
               <i class="bi bi-gear me-1"></i><?php echo __('Technical manual') ?>
             </a>
           </div>

@@ -40,12 +40,12 @@
         <div class="card-body">
           <div class="row align-items-center">
             <div class="col-md-8">
-              <h5 class="card-title mb-1"><i class="fas fa-book me-2"></i><?php echo __('Documentation Portal') ?></h5>
+              <h5 class="card-title mb-1"><i class="fas fa-book me-2"></i><?php echo __('Instance Documentation') ?></h5>
               <p class="card-text text-muted mb-0"><?php echo __('Full user guides, technical reference, plugin documentation, and API reference for Heratio.') ?></p>
             </div>
             <div class="col-md-4 text-md-end mt-2 mt-md-0">
-              <a href="https://docs.theahg.co.za" target="_blank" rel="noopener" class="btn btn-primary">
-                <i class="fas fa-external-link-alt me-1"></i><?php echo __('Open Documentation') ?>
+              <a href="<?php echo url_for('@help_category?category=' . urlencode('User Manual')) ?>" class="btn btn-primary">
+                <i class="fas fa-book-open me-1"></i><?php echo __('Open User Manual') ?>
               </a>
             </div>
           </div>
