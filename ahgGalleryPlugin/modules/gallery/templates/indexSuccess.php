@@ -970,6 +970,14 @@ window.cleanupThreeJs = function() { if (renderer) { renderer.dispose(); rendere
 </script>
 <?php endif; ?>
 <?php endif; ?>
+<!-- PROVENANCE AREA (unified, sector-agnostic) -->
+<?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+<section id="provenanceArea" class="border-bottom">
+  <?php echo render_b5_section_heading(__('Provenance & Chain of Custody'), false, null, ['anchor' => 'provenance-collapse']); ?>
+  <?php include_component('provenance', 'provenanceDisplay', ['objectId' => $resource->id]); ?>
+</section> <!-- /section#provenanceArea -->
+<?php endif ?>
+
 </div><!-- /TTS Content Area -->
 
 <!-- Fullscreen Image Modal -->

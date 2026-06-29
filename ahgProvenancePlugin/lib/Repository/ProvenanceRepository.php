@@ -263,4 +263,27 @@ class ProvenanceRepository
             'by_certainty' => $byCertainty
         ];
     }
+
+    /**
+     * Read-bridge: legacy ahgMuseumPlugin provenance_entry rows (soft-retired).
+     * Non-destructive — lets existing museum provenance still surface in the
+     * unified, sector-agnostic view. Returns [] if the table is absent/empty.
+     */
+    public function getLegacyMuseumEntries(int $objectId): array
+    {
+        try {
+            if (!DB::schema()->hasTable('provenance_entry')) {
+                return [];
+            }
+
+            return DB::table('provenance_entry')
+                ->where('information_object_id', $objectId)
+                ->orderBy('sequence')
+                ->get()
+                ->map(fn ($e) => (array) $e)
+                ->all();
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
 }

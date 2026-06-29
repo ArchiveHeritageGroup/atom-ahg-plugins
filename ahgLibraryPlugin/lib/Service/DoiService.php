@@ -379,8 +379,8 @@ class DoiService
     public function resolveIsbn(string $isbn): array
     {
         try {
-            $repo = new \AtomFramework\Repositories\IsbnLookupRepository();
-            $svc  = new \AtomFramework\Services\WorldCatService($repo);
+            $repo = new \ahgLibraryPlugin\Repository\IsbnLookupRepository();
+            $svc  = new \ahgLibraryPlugin\Service\WorldCatService($repo);
             $result = $svc->lookup($isbn);
 
             if (!$result['success']) {

@@ -27,7 +27,15 @@ class ccoProvenanceAction extends AhgController
     {
         // Get resource from slug parameter
         $slug = $request->getParameter('slug');
-        
+
+        // SOFT-RETIRED: provenance is now unified in ahgProvenancePlugin and
+        // available on ALL sectors. Redirect the legacy museum provenance page
+        // to the unified, sector-agnostic view. (Legacy provenance_entry data
+        // still surfaces there via the read-bridge; nothing is deleted.)
+        if ($slug) {
+            $this->redirect('@provenance_view?slug=' . $slug);
+        }
+
         if ($slug) {
             $this->resource = $this->getInformationObjectBySlug($slug);
         } else {

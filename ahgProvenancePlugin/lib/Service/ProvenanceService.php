@@ -19,8 +19,15 @@ class ProvenanceService
     public function getProvenanceForObject(int $objectId, string $culture = 'en'): array
     {
         $record = $this->repository->getByInformationObjectId($objectId, $culture);
-        
+
         if (!$record) {
+            // Read-bridge: surface legacy ahgMuseumPlugin provenance_entry rows
+            // (soft-retired) so existing museum provenance still displays here.
+            $legacy = $this->repository->getLegacyMuseumEntries($objectId);
+            if (!empty($legacy)) {
+                return $this->buildLegacyMuseumDisplay($legacy);
+            }
+
             return [
                 'exists' => false,
                 'record' => null,
@@ -40,6 +47,71 @@ class ProvenanceService
             'documents' => $documents,
             'timeline' => $this->buildTimeline($events),
             'summary' => $this->generateSummary($record, $events)
+        ];
+    }
+
+    /**
+     * Read-bridge display for legacy ahgMuseumPlugin provenance_entry rows.
+     * Read-only synthesis (no data is written/migrated) so soft-retired museum
+     * provenance still shows in the unified, sector-agnostic panel.
+     */
+    private function buildLegacyMuseumDisplay(array $entries): array
+    {
+        $timeline = [];
+        $names = [];
+        $hasGaps = false;
+
+        foreach ($entries as $e) {
+            $start = $e['start_date'] ?? null;
+            $end = $e['end_date'] ?? null;
+            if ($start && $end) {
+                $dateDisplay = $start . '–' . $end;
+            } elseif ($start) {
+                $dateDisplay = $start;
+            } elseif ($end) {
+                $dateDisplay = 'until ' . $end;
+            } else {
+                $dateDisplay = 'Unknown date';
+            }
+
+            $transfer = $e['transfer_type'] ?? 'unknown';
+            $timeline[] = [
+                'id' => $e['id'] ?? null,
+                'date' => $start,
+                'date_display' => $dateDisplay,
+                'type' => $transfer,
+                'type_label' => ucfirst(str_replace('_', ' ', $transfer)),
+                'from' => null,
+                'to' => $e['owner_name'] ?? null,
+                'location' => $e['owner_location'] ?? null,
+                'certainty' => $e['certainty'] ?? 'unknown',
+                'description' => $e['notes'] ?? '',
+            ];
+
+            if (!empty($e['is_gap'])) {
+                $hasGaps = true;
+            }
+            if (!empty($e['owner_name'])) {
+                $names[] = $e['owner_name'];
+            }
+        }
+
+        $record = (object) [
+            'certainty_level' => 'unknown',
+            'has_gaps' => $hasGaps ? 1 : 0,
+            'nazi_era_provenance_checked' => 0,
+            'nazi_era_provenance_clear' => null,
+            'is_public' => 1,
+        ];
+
+        return [
+            'exists' => true,
+            'legacy_museum' => true,
+            'record' => $record,
+            'events' => [],
+            'documents' => [],
+            'timeline' => $timeline,
+            'summary' => $names ? ('Chain of custody: ' . implode(' → ', $names)) : '',
         ];
     }
 
