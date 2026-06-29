@@ -258,7 +258,29 @@ $entityTypeVal = $session->entity_type ?? 'description';
         </div>
         <div class="card-body">
             <p class="text-muted mb-3"><?php echo __('Select AI and processing actions to run on ingested records after commit.') ?></p>
+            <?php
+            // Only surface a processing option when its backend is actually available.
+            // Detection mirrors the "Service Availability" card in AHG Settings > Data Ingest:
+            // CLI tools are probed on PATH; AI tasks require the ahgAIPlugin to be enabled
+            // (its config class is autoloaded only when the plugin is enabled in atom_plugin).
+            $aiReady = class_exists('ahgAIPluginConfiguration');
+            $svcAvail = [
+                'virus_scan'  => (bool) @shell_exec('clamdscan --version 2>/dev/null'),
+                'ocr'         => (bool) @shell_exec('tesseract --version 2>&1'),
+                'ner'         => $aiReady,
+                'summarize'   => $aiReady,
+                'spellcheck'  => (bool) @shell_exec('aspell --version 2>&1'),
+                'format_id'   => (bool) @shell_exec('sf -version 2>&1'),
+                'face_detect' => $aiReady,
+                'translate'   => $aiReady,
+            ];
+            $anyAvail = in_array(true, $svcAvail, true);
+            ?>
+            <?php if (!$anyAvail): ?>
+            <p class="text-muted fst-italic mb-0"><i class="fas fa-info-circle me-1"></i><?php echo __('No processing services are currently available on this server.') ?></p>
+            <?php endif ?>
             <div class="row">
+                <?php if ($svcAvail['virus_scan']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_virus_scan" name="process_virus_scan" value="1"
@@ -269,6 +291,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('ClamAV malware scan') ?></small>
                 </div>
+                <?php endif ?>
+                <?php if ($svcAvail['ocr']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_ocr" name="process_ocr" value="1"
@@ -279,6 +303,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('Tesseract text extraction') ?></small>
                 </div>
+                <?php endif ?>
+                <?php if ($svcAvail['ner']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_ner" name="process_ner" value="1"
@@ -289,6 +315,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('Named entity extraction') ?></small>
                 </div>
+                <?php endif ?>
+                <?php if ($svcAvail['summarize']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_summarize" name="process_summarize" value="1"
@@ -299,6 +327,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('Auto-generate summaries') ?></small>
                 </div>
+                <?php endif ?>
+                <?php if ($svcAvail['spellcheck']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_spellcheck" name="process_spellcheck" value="1"
@@ -309,6 +339,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('aspell grammar check') ?></small>
                 </div>
+                <?php endif ?>
+                <?php if ($svcAvail['format_id']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_format_id" name="process_format_id" value="1"
@@ -319,6 +351,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('Siegfried PRONOM identification') ?></small>
                 </div>
+                <?php endif ?>
+                <?php if ($svcAvail['face_detect']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_face_detect" name="process_face_detect" value="1"
@@ -329,6 +363,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('Detect & match faces') ?></small>
                 </div>
+                <?php endif ?>
+                <?php if ($svcAvail['translate']): ?>
                 <div class="col-md-3 mb-2">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="process_translate" name="process_translate" value="1"
@@ -339,9 +375,11 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
                     <small class="text-muted d-block ms-4"><?php echo __('Argos offline translation') ?></small>
                 </div>
+                <?php endif ?>
             </div>
 
             <!-- Translation language row (shown when translate checked) -->
+            <?php if ($svcAvail['translate']): ?>
             <div id="translate-lang-panel" class="row mt-2" style="display:none;">
                 <div class="col-md-4">
                     <label for="process_translate_lang" class="form-label"><?php echo __('Translate to') ?></label>
@@ -352,6 +390,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </select>
                 </div>
             </div>
+            <?php endif ?>
         </div>
     </div>
 
@@ -431,14 +470,16 @@ document.addEventListener('DOMContentLoaded', function() {
     sectorSel.addEventListener('change', filterStandards);
     filterStandards();
 
-    // Toggle translate language panel
+    // Toggle translate language panel (only present when the Translate option is available)
     var translateChk = document.getElementById('process_translate');
     var translatePanel = document.getElementById('translate-lang-panel');
-    function toggleTranslate() {
-        translatePanel.style.display = translateChk.checked ? '' : 'none';
+    if (translateChk && translatePanel) {
+        var toggleTranslate = function() {
+            translatePanel.style.display = translateChk.checked ? '' : 'none';
+        };
+        translateChk.addEventListener('change', toggleTranslate);
+        toggleTranslate();
     }
-    translateChk.addEventListener('change', toggleTranslate);
-    toggleTranslate();
 
     // Parent search autocomplete
     var searchInput = document.getElementById('parent_search');

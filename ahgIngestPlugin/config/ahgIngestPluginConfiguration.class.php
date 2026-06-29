@@ -68,6 +68,9 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
         $r->any('ingest_download_manifest', '/ingest/:id/manifest', 'downloadManifest', ['id' => '\d+']);
         $r->any('ingest_download_template', '/ingest/template/:sector', 'downloadTemplate');
 
+        // Watched (hot) folder — register the server directory as an auto-ingest source
+        $r->any('ingest_set_watch_folder', '/ingest/:id/watch-folder', 'setWatchFolder', ['id' => '\d+']);
+
         $r->register($routing);
     }
 

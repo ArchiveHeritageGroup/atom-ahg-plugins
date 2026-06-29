@@ -135,3 +135,19 @@ CREATE TABLE IF NOT EXISTS ingest_job (
     KEY idx_session (session_id),
     KEY idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Watched (hot) folder registry for unattended auto-ingest (php symfony ingest:watch).
+CREATE TABLE IF NOT EXISTS ingest_watch_folder (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    watch_path VARCHAR(1024) NOT NULL,
+    label VARCHAR(255) DEFAULT NULL,
+    config TEXT COMMENT 'JSON snapshot of the template ingest_session config',
+    user_id INT DEFAULT NULL COMMENT 'creator; becomes the user_id of auto-created sessions',
+    is_enabled TINYINT(1) NOT NULL DEFAULT 1 COMMENT '0/1 - disabled folders are skipped',
+    last_scan_at DATETIME DEFAULT NULL,
+    last_status VARCHAR(255) DEFAULT NULL,
+    files_ingested INT NOT NULL DEFAULT 0,
+    created_at DATETIME DEFAULT NULL,
+    updated_at DATETIME DEFAULT NULL,
+    UNIQUE KEY uq_watch_path (watch_path(255))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

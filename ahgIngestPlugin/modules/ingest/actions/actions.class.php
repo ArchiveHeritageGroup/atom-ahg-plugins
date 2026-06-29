@@ -184,9 +184,48 @@ class ingestActions extends sfActions
             }
 
             $file = $request->getFiles('ingest_file');
+            $folder = $request->getFiles('ingest_folder');
             $dirPath = $request->getParameter('directory_path');
 
-            if ($file && $file['error'] === UPLOAD_ERR_OK) {
+            $folderNames = (is_array($folder) && isset($folder['name']) && is_array($folder['name']))
+                ? array_filter($folder['name'], static function ($n) { return $n !== null && $n !== ''; })
+                : [];
+
+            if (!empty($folderNames)) {
+                // Browser folder upload (webkitdirectory): land every file in a
+                // per-batch subdir and register it as a directory-type source so it
+                // flows through the same pipeline as a server directory. Files come
+                // from the user's machine (not an arbitrary server path), so this is
+                // NOT admin-gated like the server-directory branch below.
+                $batchDir = $uploadDir . '/folder_' . uniqid();
+                if (!is_dir($batchDir)) {
+                    mkdir($batchDir, 0755, true);
+                }
+                $saved = 0;
+                foreach ($folder['name'] as $i => $origName) {
+                    if (($folder['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+                        continue;
+                    }
+                    $dest = $batchDir . '/' . basename((string) $origName);
+                    if (file_exists($dest)) {
+                        $dest = $batchDir . '/' . uniqid() . '_' . basename((string) $origName);
+                    }
+                    if (move_uploaded_file($folder['tmp_name'][$i], $dest)) {
+                        ++$saved;
+                    }
+                }
+                if (0 === $saved) {
+                    $this->getUser()->setFlash('error', 'No files could be saved from the selected folder.');
+
+                    return;
+                }
+                $svc->processUpload($id, [
+                    'original_name' => 'Uploaded folder (' . $saved . ' files)',
+                    'stored_path' => $batchDir,
+                    'file_size' => 0,
+                    'mime_type' => 'directory',
+                ]);
+            } elseif ($file && $file['error'] === UPLOAD_ERR_OK) {
                 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
                 $storedName = uniqid('ingest_') . '.' . $ext;
                 $storedPath = $uploadDir . '/' . $storedName;
@@ -255,6 +294,90 @@ class ingestActions extends sfActions
                 // Plugin not installed yet — leave empty
             }
         }
+    }
+
+    /**
+     * Register a server directory as a watched (hot) folder. New files dropped
+     * into it are auto-ingested by `php symfony ingest:watch` (cron) using THIS
+     * session's configuration as the template. Reads a server path and creates
+     * unattended records, so it is administrator-only (same gate as the
+     * server-directory ingest branch in executeUpload).
+     */
+    public function executeSetWatchFolder(sfWebRequest $request)
+    {
+        $this->requireAuth();
+        $svc = $this->getIngestService();
+
+        $id = (int) $request->getParameter('id');
+        $this->session = $svc->getSession($id);
+        if (!$this->session) {
+            $this->forward404();
+        }
+        $this->requireSessionOwner($this->session);
+
+        if (!$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Setting a watched folder requires administrator access.');
+            $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+        }
+
+        $path = rtrim((string) $request->getParameter('directory_path'), '/');
+        if ($path === '' || !is_dir($path)) {
+            $this->getUser()->setFlash('error', 'Enter a valid server directory path in the field above, then click "Set as watched folder".');
+            $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
+        }
+
+        $s = $this->session;
+        $config = [
+            'entity_type' => $s->entity_type ?? 'description',
+            'sector' => $s->sector ?? 'archive',
+            'standard' => $s->standard ?? 'isadg',
+            'repository_id' => $s->repository_id ?? null,
+            'parent_id' => $s->parent_id ?? null,
+            'parent_placement' => $s->parent_placement ?? 'top_level',
+            'new_parent_title' => $s->new_parent_title ?? null,
+            'new_parent_level' => $s->new_parent_level ?? null,
+            'output_create_records' => $s->output_create_records ?? 1,
+            'output_generate_sip' => $s->output_generate_sip ?? 0,
+            'output_generate_aip' => $s->output_generate_aip ?? 0,
+            'output_generate_dip' => $s->output_generate_dip ?? 0,
+            'output_sip_path' => $s->output_sip_path ?? null,
+            'output_aip_path' => $s->output_aip_path ?? null,
+            'output_dip_path' => $s->output_dip_path ?? null,
+            'derivative_thumbnails' => $s->derivative_thumbnails ?? 1,
+            'derivative_reference' => $s->derivative_reference ?? 1,
+            'derivative_normalize_format' => $s->derivative_normalize_format ?? null,
+            'security_classification_id' => $s->security_classification_id ?? null,
+            'process_ner' => $s->process_ner ?? 0,
+            'process_ocr' => $s->process_ocr ?? 0,
+            'process_virus_scan' => $s->process_virus_scan ?? 1,
+            'process_summarize' => $s->process_summarize ?? 0,
+            'process_spellcheck' => $s->process_spellcheck ?? 0,
+            'process_translate' => $s->process_translate ?? 0,
+            'process_translate_lang' => $s->process_translate_lang ?? null,
+            'process_format_id' => $s->process_format_id ?? 0,
+            'process_face_detect' => $s->process_face_detect ?? 0,
+        ];
+
+        $now = date('Y-m-d H:i:s');
+        $db = '\Illuminate\Database\Capsule\Manager';
+        $existing = $db::table('ingest_watch_folder')->where('watch_path', $path)->first();
+        $row = [
+            'watch_path' => $path,
+            'label' => $s->title ?: basename($path),
+            'config' => json_encode($config),
+            'user_id' => (int) ($s->user_id ?? 0) ?: null,
+            'is_enabled' => 1,
+            'updated_at' => $now,
+        ];
+        if ($existing) {
+            $db::table('ingest_watch_folder')->where('id', $existing->id)->update($row);
+        } else {
+            $row['created_at'] = $now;
+            $db::table('ingest_watch_folder')->insert($row);
+        }
+
+        $this->getUser()->setFlash('notice', 'Watched folder set: ' . $path . ' — new files dropped here will be auto-ingested once the ingest:watch cron is active.');
+        $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
     }
 
     // ─── SharePoint browse + import (v2 ingest plan, step D) ────────────

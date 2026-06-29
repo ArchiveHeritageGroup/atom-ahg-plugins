@@ -83,10 +83,29 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
                             <hr>
 
                             <div class="mb-3">
+                                <label for="ingest_folder" class="form-label"><?php echo __('Or upload an entire local folder') ?></label>
+                                <input type="file" class="form-control" id="ingest_folder" name="ingest_folder[]"
+                                       webkitdirectory directory multiple>
+                                <small class="text-muted"><?php echo __('Pick a folder on your computer — every file inside is uploaded as a batch of digital objects (no CSV required).') ?></small>
+                                <div id="folder-info" class="alert alert-info mt-2" style="display:none;"></div>
+                            </div>
+
+                            <hr>
+
+                            <div class="mb-3">
                                 <label for="directory_path" class="form-label"><?php echo __('Or enter a server directory path') ?></label>
                                 <input type="text" class="form-control" id="directory_path" name="directory_path"
                                        placeholder="<?php echo __('/path/to/files/on/server') ?>">
                                 <small class="text-muted"><?php echo __('For large batches, point to a directory on the server instead of uploading') ?></small>
+                                <?php if ($sf_user->isAdministrator()): ?>
+                                <div class="mt-2">
+                                    <button type="submit" class="btn btn-outline-info btn-sm" formnovalidate
+                                            formaction="<?php echo url_for(['module' => 'ingest', 'action' => 'setWatchFolder', 'id' => $session->id]) ?>">
+                                        <i class="fas fa-binoculars me-1"></i><?php echo __('Set as watched folder') ?>
+                                    </button>
+                                    <small class="text-muted d-block mt-1"><?php echo __('Auto-ingest new files dropped into this folder, using this session\'s settings as the template (requires the ingest:watch cron).') ?></small>
+                                </div>
+                                <?php endif ?>
                             </div>
                         </div>
                     </div>
@@ -253,6 +272,22 @@ document.addEventListener('DOMContentLoaded', function() {
         var size = (file.size / 1024 / 1024).toFixed(2);
         fileInfo.style.display = '';
         fileInfo.innerHTML = '<strong>' + file.name + '</strong> (' + size + ' MB)';
+    }
+
+    // Local folder picker — summarise the selection (file count + total size)
+    var folderInput = document.getElementById('ingest_folder');
+    var folderInfo = document.getElementById('folder-info');
+    if (folderInput && folderInfo) {
+        folderInput.addEventListener('change', function() {
+            var n = this.files.length;
+            if (!n) { folderInfo.style.display = 'none'; return; }
+            var total = 0;
+            for (var i = 0; i < n; i++) { total += this.files[i].size; }
+            var mb = (total / 1024 / 1024).toFixed(2);
+            folderInfo.style.display = '';
+            folderInfo.innerHTML = '<strong>' + n + '</strong> ' +
+                (n === 1 ? 'file' : 'files') + ' selected (' + mb + ' MB total)';
+        });
     }
 
     // ── SharePoint picker ─────────────────────────────────────────

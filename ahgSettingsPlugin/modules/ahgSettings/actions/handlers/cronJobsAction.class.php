@@ -1727,6 +1727,19 @@ class SettingsCronJobsAction extends AhgController
                 'duration' => 'Long (depends on row count and AI processing options)',
                 'category' => 'ahg',
             ],
+            [
+                'name' => 'Ingest Watch — Hot-folder auto-ingest',
+                'command' => 'php symfony ingest:watch',
+                'description' => 'Scans the watched (hot) folders registered in ingest_watch_folder and auto-ingests any new files using each folder\'s template config, then moves them to a .processed/ subfolder. Set a watched folder from the ingest Upload step ("Set as watched folder"). Run as www-data.',
+                'options' => [
+                    '--id=ID' => 'Process only one watched folder',
+                    '--dry-run' => 'Report new files without ingesting',
+                ],
+                'schedule' => 'Every 15 minutes (recommended)',
+                'example' => 'cd {root} && sudo -u www-data php symfony ingest:watch >> /var/log/atom/ingest-watch.log 2>&1',
+                'duration' => 'Varies (depends on files dropped since last scan)',
+                'category' => 'ahg',
+            ],
 
             // ============================================
             // COMPLIANCE — PRIVACY, CDPA, NAZ, NMMZ
