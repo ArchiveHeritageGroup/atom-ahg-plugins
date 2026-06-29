@@ -71,6 +71,32 @@ class provenanceActions extends AhgController
             $this->forward404('Provenance not available');
         }
         $this->eventTypes = $service->getEventTypes();
+        $this->gaps = $service->identifyGaps($this->resource->id, $this->culture());
+    }
+
+    /**
+     * Export the provenance chain as a CSV download.
+     */
+    public function executeExport($request)
+    {
+        $slug = $request->getParameter('slug');
+        $this->resource = QubitInformationObject::getBySlug($slug);
+
+        if (!$this->resource) {
+            $this->forward404('Record not found');
+        }
+
+        $service = new \AhgProvenancePlugin\Service\ProvenanceService();
+        $csv = $service->exportCsv($this->resource->id, $this->culture());
+
+        $response = $this->getResponse();
+        $response->setContentType('text/csv; charset=utf-8');
+        $response->setHttpHeader(
+            'Content-Disposition',
+            'attachment; filename="provenance-'.$slug.'.csv"'
+        );
+
+        return $this->renderText($csv);
     }
 
     /**

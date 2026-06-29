@@ -35,3 +35,7 @@ provenance_delete_document:
 provenance_timeline:
   url: /provenance/:slug/timeline
   param: { module: provenance, action: timeline }
+
+provenance_export:
+  url: /provenance/:slug/export
+  param: { module: provenance, action: export }

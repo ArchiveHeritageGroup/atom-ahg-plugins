@@ -244,7 +244,7 @@ CREATE TABLE IF NOT EXISTS library_kbart_vendor (
     last_error TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uk_feed_url (feed_url),
+    UNIQUE KEY uk_feed_url (feed_url(768)),
     INDEX idx_active (active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

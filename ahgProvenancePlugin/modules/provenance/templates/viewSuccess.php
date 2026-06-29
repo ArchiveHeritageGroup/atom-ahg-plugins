@@ -28,7 +28,27 @@
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'authenticity', 'id' => $resource->id]) ?>" class="btn btn-outline-dark ms-2">
       <i class="bi bi-fingerprint me-1"></i> Authenticity Report
     </a>
+    <?php if (!empty($provenance['exists'])): ?>
+    <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'export', 'slug' => $resource->slug]) ?>" class="btn btn-outline-success ms-2">
+      <i class="bi bi-filetype-csv me-1"></i> Export CSV
+    </a>
+    <?php endif ?>
   </div>
+
+  <?php if (!empty($gaps)): ?>
+  <div class="alert alert-warning">
+    <h6 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i><?php echo __('Provenance gaps detected') ?></h6>
+    <ul class="mb-0 small">
+      <?php foreach ($gaps as $g): ?>
+      <li>
+        <?php echo htmlspecialchars($g['from_owner']) ?> &rarr; <?php echo htmlspecialchars($g['to_owner']) ?>:
+        <strong><?php echo (int) $g['gap_years'] ?></strong> <?php echo __('year gap') ?>
+        (<?php echo (int) $g['gap_start'] ?>&ndash;<?php echo (int) $g['gap_end'] ?>)
+      </li>
+      <?php endforeach ?>
+    </ul>
+  </div>
+  <?php endif ?>
 
   <?php if (!$provenance['exists']): ?>
   <!-- No provenance recorded -->

@@ -490,4 +490,123 @@ class ProvenanceService
             'actor_id' => $actorId
         ]);
     }
+
+    /**
+     * Export the provenance chain as CSV (best-of-both: ported from the
+     * soft-retired museum provenance). Works for unified events and for legacy
+     * museum entries surfaced via the read-bridge.
+     */
+    public function exportCsv(int $objectId, string $culture = 'en'): string
+    {
+        $data = $this->getProvenanceForObject($objectId, $culture);
+
+        $headers = [
+            'sequence', 'event_type', 'from', 'to', 'date_start', 'date_end',
+            'date_text', 'location', 'price', 'currency', 'certainty',
+            'evidence', 'source', 'notes',
+        ];
+
+        $rows = [];
+        if (!empty($data['events'])) {
+            $seq = 0;
+            foreach ($data['events'] as $e) {
+                ++$seq;
+                $rows[] = [
+                    $e->sequence_number ?? $seq,
+                    $e->event_type ?? '',
+                    $e->from_agent_name ?? '',
+                    $e->to_agent_name ?? '',
+                    $e->event_date_start ?? '',
+                    $e->event_date_end ?? '',
+                    $e->event_date_text ?? '',
+                    $e->event_location ?? ($e->event_city ?? ''),
+                    $e->price ?? '',
+                    $e->currency ?? '',
+                    $e->certainty ?? '',
+                    $e->evidence_type ?? '',
+                    $e->source_reference ?? '',
+                    $e->notes ?? '',
+                ];
+            }
+        } else {
+            $seq = 0;
+            foreach (($data['timeline'] ?? []) as $t) {
+                ++$seq;
+                $rows[] = [
+                    $seq, $t['type'] ?? '', $t['from'] ?? '', $t['to'] ?? '',
+                    $t['date'] ?? '', '', $t['date_display'] ?? '',
+                    $t['location'] ?? '', '', '', $t['certainty'] ?? '',
+                    '', '', $t['description'] ?? '',
+                ];
+            }
+        }
+
+        $csv = implode(',', $headers)."\n";
+        foreach ($rows as $row) {
+            $csv .= implode(',', array_map(
+                fn ($v) => '"'.str_replace('"', '""', (string) $v).'"',
+                $row
+            ))."\n";
+        }
+
+        return $csv;
+    }
+
+    /**
+     * Identify chronological gaps in the provenance chain (best-of-both:
+     * ported from the museum provenance). Returns [] when there are fewer than
+     * two dated links, or no gap greater than one year.
+     */
+    public function identifyGaps(int $objectId, string $culture = 'en'): array
+    {
+        $data = $this->getProvenanceForObject($objectId, $culture);
+
+        $chain = [];
+        if (!empty($data['events'])) {
+            foreach ($data['events'] as $e) {
+                $chain[] = [
+                    'name' => $e->to_agent_name ?? ($e->from_agent_name ?? 'Unknown'),
+                    'start' => $this->extractYear($e->event_date_start ?? ($e->event_date ?? null)),
+                    'end' => $this->extractYear($e->event_date_end ?? null),
+                ];
+            }
+        } else {
+            foreach (($data['timeline'] ?? []) as $t) {
+                $chain[] = [
+                    'name' => $t['to'] ?? 'Unknown',
+                    'start' => $this->extractYear($t['date'] ?? null),
+                    'end' => null,
+                ];
+            }
+        }
+
+        $gaps = [];
+        for ($i = 0, $n = count($chain); $i < $n - 1; ++$i) {
+            $curEnd = $chain[$i]['end'] ?: $chain[$i]['start'];
+            $nextStart = $chain[$i + 1]['start'];
+            if ($curEnd && $nextStart && ($nextStart - $curEnd) > 1) {
+                $gaps[] = [
+                    'from_owner' => $chain[$i]['name'],
+                    'to_owner' => $chain[$i + 1]['name'],
+                    'gap_start' => $curEnd,
+                    'gap_end' => $nextStart,
+                    'gap_years' => $nextStart - $curEnd,
+                ];
+            }
+        }
+
+        return $gaps;
+    }
+
+    private function extractYear($date): ?int
+    {
+        if (!$date) {
+            return null;
+        }
+        if (preg_match('/(\d{4})/', (string) $date, $m)) {
+            return (int) $m[1];
+        }
+
+        return null;
+    }
 }

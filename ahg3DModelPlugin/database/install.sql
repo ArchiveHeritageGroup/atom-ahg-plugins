@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS `object_3d_settings` (
   `background_color` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT '#f5f5f5',
   `ar_enabled` tinyint(1) DEFAULT '1',
   `ar_scale` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'auto',
-  `ar_placement` VARCHAR(23) COMMENT 'floor, wall' CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'floor',
+  `ar_placement` VARCHAR(23) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'floor' COMMENT 'floor, wall',
   `poster_image` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
