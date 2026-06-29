@@ -47,6 +47,12 @@ final class ViewLinkInjector
 
     private function maybeInject(string $content): ?string
     {
+        // Idempotency guard: response.filter_content can fire more than once per
+        // request, which would inject the share button/modal twice. Never inject
+        // if the modal is already present in the content.
+        if (str_contains($content, 'ahgShareLinkModal')) {
+            return null;
+        }
         if (!\sfContext::hasInstance()) {
             return null;
         }
