@@ -1214,6 +1214,7 @@ class IngestCommitService
             ->get();
 
         $deleted = 0;
+        $errors = [];
 
         foreach ($rows as $row) {
             try {
@@ -1221,21 +1222,14 @@ class IngestCommitService
                 if ($row->created_do_id) {
                     $do = \QubitDigitalObject::getById($row->created_do_id);
                     if ($do) {
-                        $do->delete();
+                        $this->deleteWithoutIndexHook($do);
                     }
                 }
 
                 // Delete information object
                 $io = \QubitInformationObject::getById($row->created_atom_id);
                 if ($io) {
-                    // Remove from search index
-                    try {
-                        \QubitSearch::getInstance()->delete($io);
-                    } catch (\Throwable $e) {
-                        // Non-fatal
-                    }
-
-                    $io->delete();
+                    $this->deleteWithoutIndexHook($io);
                     $deleted++;
                 }
 
@@ -1245,7 +1239,10 @@ class IngestCommitService
                     'created_do_id' => null,
                 ]);
             } catch (\Throwable $e) {
-                // Log but continue
+                // Surface the failure instead of silently swallowing it — a
+                // swallowed delete leaves orphaned records while still marking
+                // the job rolled back.
+                $errors[] = ['row' => $row->row_number ?? null, 'error' => $e->getMessage()];
             }
         }
 
@@ -1261,9 +1258,36 @@ class IngestCommitService
             'session_id' => $job->session_id,
             'job_id' => $jobId,
             'records_deleted' => $deleted,
+            'errors' => $errors,
         ]);
 
         return $deleted;
+    }
+
+    /**
+     * Delete a Qubit object reliably in any execution context.
+     *
+     * QubitObject::delete() updates the search index on delete; when the search
+     * backend is not fully initialised (CLI / unattended ingest:rollback — the
+     * OpenSearch model's allowedLanguages is null) that re-index throws, which
+     * previously aborted the whole delete and left orphaned records. We remove
+     * the document from the index while search is enabled, then disable indexing
+     * for the actual model delete so it cannot throw, and re-enable afterwards.
+     */
+    private function deleteWithoutIndexHook($object): void
+    {
+        try {
+            \QubitSearch::getInstance()->delete($object);
+        } catch (\Throwable $e) {
+            // Index removal is best-effort (a later search:populate reconciles).
+        }
+
+        \QubitSearch::disable();
+        try {
+            $object->delete();
+        } finally {
+            \QubitSearch::enable();
+        }
     }
 
     // ─── Security Classification ────────────────────────────────────────
