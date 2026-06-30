@@ -2,7 +2,12 @@
   <?php return; ?>
 <?php } ?>
 
-<?php $openned = (isset($sf_request->{$name}) || (isset($open) && $open && 0 < count($aggs[$name]))); ?>
+<?php
+// Facet panels are open by default on all standard browse/search pages. (The
+// GLAM/DAM browse pages render their own facet markup and are unaffected.) Still
+// honours an explicit $open=false override and always opens an active filter.
+$openned = (isset($sf_request->{$name}) || !isset($open) || $open) && 0 < count($aggs[$name]);
+?>
 
 <div class="accordion mb-3">
   <div class="accordion-item aggregation">
