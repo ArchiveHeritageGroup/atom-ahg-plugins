@@ -689,6 +689,9 @@ class preservationActions extends AhgController
 
                 $this->redirect(['module' => 'preservation', 'action' => 'scheduler']);
             } catch (Exception $e) {
+                if ($e instanceof sfStopException) {
+                    throw $e;
+                }
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
         }
@@ -938,6 +941,13 @@ class preservationActions extends AhgController
                     $this->redirect(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $id]);
                 }
             } catch (Exception $e) {
+                // $this->redirect() throws sfStopException to halt the action — it
+                // must NOT be treated as an error (that produced a phantom empty
+                // "Error:" flash alongside the success notice, and cancelled the
+                // redirect). Let control-flow exceptions propagate.
+                if ($e instanceof sfStopException) {
+                    throw $e;
+                }
                 $this->getUser()->setFlash('error', 'Error: '.$e->getMessage());
             }
         }
