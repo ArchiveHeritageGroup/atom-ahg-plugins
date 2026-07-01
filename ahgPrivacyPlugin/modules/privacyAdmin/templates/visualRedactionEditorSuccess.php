@@ -331,18 +331,16 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Fabric canvas updated for tool:', tool);
         } else if (!isPdf && annotorious) {
             if (tool === 'rect') {
-                // Stop OpenSeadragon from panning the image while drawing —
-                // otherwise a click-drag pans the image instead of drawing the
-                // redaction box (scroll-to-zoom stays available).
-                if (osdViewer && osdViewer.gestureSettingsMouse) {
-                    osdViewer.gestureSettingsMouse.dragToPan = false;
-                }
+                // Fully suspend OpenSeadragon mouse navigation while drawing.
+                // Tweaking gestureSettingsMouse.dragToPan is not honoured by the
+                // live mouse-tracker, so a click-drag kept panning the image
+                // instead of drawing the redaction box. setMouseNavEnabled(false)
+                // hands the drag over to the Annotorious drawing layer.
+                if (osdViewer) { osdViewer.setMouseNavEnabled(false); }
                 annotorious.setDrawingTool('rect');
                 annotorious.setDrawingEnabled(true);
             } else {
-                if (osdViewer && osdViewer.gestureSettingsMouse) {
-                    osdViewer.gestureSettingsMouse.dragToPan = true;
-                }
+                if (osdViewer) { osdViewer.setMouseNavEnabled(true); }
                 annotorious.setDrawingEnabled(false);
             }
         }

@@ -513,11 +513,14 @@ function scanForPii(objectId) {
 <section class="sidebar-widget">
   <h4><?php echo __('Privacy & PII'); ?></h4>
   <ul>
+    <?php // "Scan for PII" runs AI NER (ahgNerService) — only show when the AI plugin is enabled. ?>
+    <?php if (isPluginActive('ahgAIPlugin')): ?>
     <li>
       <a href="#" id="piiScanBtn" data-object-id="<?php echo $resource->id; ?>">
         <i class="bi bi-shield-exclamation me-1"></i><?php echo __('Scan for PII'); ?>
       </a>
     </li>
+    <?php endif; ?>
     <?php if ($resource->digitalObjectsRelatedByobjectId->count() > 0): ?>
     <li>
       <?php echo link_to('<i class="bi bi-eraser me-1"></i>' . __('Visual Redaction'), ['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resource->id]); ?>

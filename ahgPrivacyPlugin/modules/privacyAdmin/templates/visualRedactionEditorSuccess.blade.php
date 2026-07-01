@@ -334,9 +334,13 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Fabric canvas updated for tool:', tool);
         } else if (!isPdf && annotorious) {
             if (tool === 'rect') {
+                // Suspend OpenSeadragon mouse navigation so the drag draws the
+                // redaction box instead of panning the image.
+                if (osdViewer) { osdViewer.setMouseNavEnabled(false); }
                 annotorious.setDrawingTool('rect');
                 annotorious.setDrawingEnabled(true);
             } else {
+                if (osdViewer) { osdViewer.setMouseNavEnabled(true); }
                 annotorious.setDrawingEnabled(false);
             }
         }

@@ -57,6 +57,12 @@ class privacyActions extends AhgController
                 $this->getUser()->setFlash('success', 'Your request has been submitted. Reference: DSAR-' . date('Ym') . '-' . str_pad($id, 4, '0', STR_PAD_LEFT));
                 $this->redirect(['module' => 'privacy', 'action' => 'dsarConfirmation', 'id' => $id]);
             } catch (\Exception $e) {
+                // redirect() sets the Location header then throws sfStopException;
+                // catching it produced a phantom "Failed to submit request:" flash
+                // shown alongside the success message on the confirmation page.
+                if ($e instanceof \sfStopException) {
+                    throw $e;
+                }
                 $this->getUser()->setFlash('error', 'Failed to submit request: ' . $e->getMessage());
             }
         }
@@ -136,6 +142,9 @@ class privacyActions extends AhgController
                 $this->getUser()->setFlash('success', 'Your complaint has been submitted. Reference: ' . $refNum);
                 $this->redirect(['module' => 'privacy', 'action' => 'complaintConfirmation', 'id' => $id]);
             } catch (\Exception $e) {
+                if ($e instanceof \sfStopException) {
+                    throw $e;
+                }
                 $this->getUser()->setFlash('error', 'Failed to submit complaint: ' . $e->getMessage());
             }
         }
