@@ -58,7 +58,7 @@
               </div>
               <div class="form-text text-muted small">
                 <?php echo __('Scheme: Archive Standard'); ?> <code>{REPO}/{FONDS}/{SEQ:4}</code>
-                — <?php echo __('select a repository first, then click Generate'); ?>
+                — <?php echo __('optionally select a repository, then click Generate'); ?>
               </div>
             </div>
 
@@ -841,12 +841,10 @@
   var genBtn = document.getElementById('generate-identifier');
   if (genBtn) {
     genBtn.addEventListener('click', function() {
+      // Repository is optional — NumberingService generates an identifier with a
+      // placeholder repo code when none is selected, so don't force one here.
       var repoId = document.getElementById('repositoryId').value || '0';
       var parentId = document.querySelector('input[name="parentId"]').value || '0';
-      if (!repoId || repoId === '0') {
-        alert('<?php echo __("Please select a repository first."); ?>');
-        return;
-      }
       var url = genBtn.getAttribute('data-url')
         + '?repositoryId=' + encodeURIComponent(repoId)
         + '&parentId=' + encodeURIComponent(parentId);

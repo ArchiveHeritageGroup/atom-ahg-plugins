@@ -383,10 +383,9 @@ class ioManageActions extends AhgController
         }
 
         if (!$repoCode) {
-            return $this->renderText(json_encode([
-                'identifier' => '',
-                'error' => 'Select a repository first.',
-            ]));
+            // Repository is optional — fall back to a placeholder code rather than
+            // forcing the user to select a repository before generating.
+            $repoCode = 'REPO';
         }
 
         // 2. Resolve FONDS — walk up parent chain to find fonds-level ancestor
