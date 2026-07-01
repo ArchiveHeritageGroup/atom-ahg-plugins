@@ -41,7 +41,10 @@ if ($resource instanceof QubitInformationObject) {
 }
 ?>
 
-<?php if (function_exists('checkPluginEnabled') && checkPluginEnabled('ahgExtendedRightsPlugin')): ?>
+<?php // Robust check: checkPluginEnabled() is only defined inside _mainMenu.php
+      // (template-scoped), so relying on function_exists() here silently blanked
+      // this block when that template hadn't rendered first. Use the plugin list. ?>
+<?php if (in_array('ahgExtendedRightsPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
 <!-- Extended Rights Display -->
 <?php include_component('extendedRights', 'rightsDisplay', ['objectId' => $resourceId]); ?>
 <!-- Provenance Display (authenticated users only) -->
