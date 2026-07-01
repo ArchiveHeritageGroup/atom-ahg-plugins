@@ -105,6 +105,13 @@ class ObjectAddDigitalObjectAction extends AhgController
                 // Run metadata extraction in background (async)
                 $this->runMetadataBackground();
 
+                // External-URI link: the reference is stored instantly (no
+                // download), then derivatives (thumbnail/reference) are generated
+                // and the record reindexed in the background — so the request never
+                // blocks on the remote fetch (which used to hang past php-fpm's
+                // request_terminate_timeout and roll the whole save back).
+                $this->generateExternalDerivativesBackground();
+
                 if ($this->resource instanceof QubitInformationObject) {
                     $this->resource->updateXmlExports();
                 }
@@ -674,6 +681,42 @@ class ObjectAddDigitalObjectAction extends AhgController
         exec($cmd);
         
         error_log("METADATA: Queued background processing for IO $ioId");
+    }
+
+    /**
+     * For an external-URI digital object, generate derivatives (download the
+     * remote bitstream + build thumbnail/reference) and update the search index
+     * in the background. Runs `digitalobject:regen-derivatives`, which natively
+     * handles EXTERNAL_URI usage, so the web request is never blocked on the
+     * remote fetch.
+     */
+    protected function generateExternalDerivativesBackground()
+    {
+        if (!($this->resource instanceof QubitInformationObject)) {
+            return;
+        }
+
+        $do = $this->resource->getDigitalObject();
+        if (!$do || (int) $do->usageId !== (int) QubitTerm::EXTERNAL_URI_ID) {
+            return;
+        }
+
+        $slug = $this->resource->slug;
+        if (empty($slug)) {
+            return;
+        }
+
+        $root = sfConfig::get('sf_root_dir');
+        $log = sfConfig::get('sf_log_dir') . '/external_derivatives.log';
+        // --force: skip the interactive confirmation (this runs non-interactively).
+        // --only-externals: touch only the external-URI object, not other derivatives.
+        $cmd = 'cd ' . escapeshellarg($root)
+            . ' && php symfony digitalobject:regen-derivatives'
+            . ' --slug=' . escapeshellarg($slug)
+            . ' --only-externals --force --index >> ' . escapeshellarg($log) . ' 2>&1 &';
+        exec($cmd);
+
+        error_log('EXTERNAL DO: queued background derivative generation for ' . $slug);
     }
 
 }

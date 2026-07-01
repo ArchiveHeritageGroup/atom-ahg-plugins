@@ -312,6 +312,25 @@ class TiffPdfMergeJob
             $this->log('Warning: Search index update skipped: ' . $e->getMessage());
         }
 
+        // The framework-only worker cannot reindex via QubitSearch, so kick off
+        // regen-derivatives (--index) in the background: it builds the merged PDF's
+        // thumbnail/reference derivatives AND updates the search index, so the
+        // record shows its digital object in browse/search.
+        try {
+            $reindexSlug = DB::table('slug')->where('object_id', $informationObjectId)->value('slug');
+            if (!empty($reindexSlug)) {
+                $reindexRoot = dirname(__DIR__, 4);
+                $reindexLog = $reindexRoot . '/log/merge_derivatives.log';
+                exec('cd ' . escapeshellarg($reindexRoot)
+                    . ' && php symfony digitalobject:regen-derivatives --slug='
+                    . escapeshellarg($reindexSlug) . ' --force --index >> '
+                    . escapeshellarg($reindexLog) . ' 2>&1 &');
+                $this->log('Queued background derivative/reindex for ' . $reindexSlug);
+            }
+        } catch (\Throwable $e) {
+            $this->log('Warning: could not queue reindex: ' . $e->getMessage());
+        }
+
         return ['success' => true, 'digital_object_id' => $doId];
     }
 
