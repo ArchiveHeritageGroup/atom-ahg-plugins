@@ -174,15 +174,49 @@ if ($users->isEmpty()) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Procedure steps: reference checklist (not a live progress bar) -->
-                <?php if (!empty($steps)): ?>
+                <!-- Procedure steps checklist (per-record; tick off in any order,
+                     independent of the approval state above). -->
+                <?php if (!empty($steps)):
+                    $stepStates = $stepStates ?? [];
+                    $totalSteps = count($steps);
+                    $doneCount = 0;
+                    foreach ($steps as $s) {
+                        if (!empty($stepStates[$s['key']]) && $stepStates[$s['key']]->is_done) { $doneCount++; }
+                    }
+                ?>
                 <div class="mb-4">
-                    <h6 class="text-muted"><i class="fas fa-list-ol me-1"></i><?php echo __('Procedure steps'); ?></h6>
-                    <ol class="small text-muted mb-0 ps-3">
-                        <?php foreach ($steps as $step): ?>
-                        <li><?php echo esc_entities($step['name']); ?></li>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0"><i class="fas fa-list-check me-1"></i><?php echo __('Procedure steps'); ?></h6>
+                        <span class="badge <?php echo ($totalSteps > 0 && $doneCount === $totalSteps) ? 'bg-success' : 'bg-secondary'; ?>"><?php echo $doneCount; ?>/<?php echo $totalSteps; ?> <?php echo __('done'); ?></span>
+                    </div>
+                    <?php if ($canEdit): ?>
+                    <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowSteps', 'slug' => $resource->slug]); ?>">
+                        <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
+                        <?php foreach ($steps as $step):
+                            $st = $stepStates[$step['key']] ?? null;
+                            $done = $st && $st->is_done;
+                        ?>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="steps_done[]" value="<?php echo esc_entities($step['key']); ?>" id="step_<?php echo esc_entities($step['key']); ?>" <?php echo $done ? 'checked' : ''; ?>>
+                            <label class="form-check-label" for="step_<?php echo esc_entities($step['key']); ?>">
+                                <?php echo esc_entities($step['name']); ?>
+                                <?php if ($done && $st->completed_at): ?>
+                                <small class="text-muted">&mdash; <?php echo esc_entities(substr((string) $st->completed_at, 0, 10)); ?></small>
+                                <?php endif; ?>
+                            </label>
+                        </div>
                         <?php endforeach; ?>
-                    </ol>
+                        <button type="submit" class="btn btn-sm btn-outline-primary mt-2"><i class="fas fa-save me-1"></i><?php echo __('Save steps'); ?></button>
+                    </form>
+                    <?php else: ?>
+                    <ul class="list-unstyled small mb-0">
+                        <?php foreach ($steps as $step):
+                            $done = !empty($stepStates[$step['key']]) && $stepStates[$step['key']]->is_done;
+                        ?>
+                        <li><i class="fas <?php echo $done ? 'fa-check-square text-success' : 'fa-square text-muted'; ?> me-1"></i><?php echo esc_entities($step['name']); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
                 

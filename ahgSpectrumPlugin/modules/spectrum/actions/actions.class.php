@@ -314,8 +314,99 @@ class spectrumActions extends AhgController
         // Check if user can edit
         $informationObject = $this->resource;
         $this->canEdit = $this->getUser()->isAuthenticated() && $informationObject && ($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor'));
+
+        // Per-record step checklist state (step_key => row). Guarded so the page
+        // still renders if the migration hasn't run yet.
+        $this->stepStates = [];
+        try {
+            $rows = DB::table('spectrum_workflow_step_state')
+                ->where('record_id', $this->resource->id)
+                ->where('procedure_type', $this->procedureType)
+                ->get();
+            foreach ($rows as $r) {
+                $this->stepStates[$r->step_key] = $r;
+            }
+        } catch (\Throwable $e) {
+            // spectrum_workflow_step_state not migrated yet — steps render unticked.
+        }
     }
-    
+
+    /**
+     * Save the per-record procedure step checklist (tick steps off in any order).
+     */
+    public function executeWorkflowSteps($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $slug = $request->getParameter('slug');
+        $resource = $this->getResourceBySlug($slug);
+        if (!$resource) {
+            $this->forward404();
+        }
+
+        if (!$this->getUser()->isAuthenticated() || !($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor'))) {
+            $this->forward('admin', 'secure');
+        }
+
+        $procedureType = $request->getParameter('procedure_type');
+        $userId = $this->getUser()->getAttribute('user_id');
+
+        // Resolve the full set of step keys from the config so unticked steps are
+        // cleared (the form only posts the ticked ones).
+        $config = DB::table('spectrum_workflow_config')
+            ->where('procedure_type', $procedureType)
+            ->where('is_active', 1)
+            ->first();
+        $allStepKeys = [];
+        if ($config) {
+            $cfg = json_decode($config->config_json, true);
+            foreach (($cfg['steps'] ?? []) as $s) {
+                if (!empty($s['key'])) {
+                    $allStepKeys[] = $s['key'];
+                }
+            }
+        }
+
+        $checked = (array) $request->getParameter('steps_done', []);
+        $now = date('Y-m-d H:i:s');
+
+        foreach ($allStepKeys as $stepKey) {
+            $isDone = in_array($stepKey, $checked, true) ? 1 : 0;
+            $existing = DB::table('spectrum_workflow_step_state')
+                ->where('record_id', $resource->id)
+                ->where('procedure_type', $procedureType)
+                ->where('step_key', $stepKey)
+                ->first();
+
+            // Preserve original completed_at/by if it was already done.
+            $completedAt = $isDone ? (($existing && $existing->is_done) ? $existing->completed_at : $now) : null;
+            $completedBy = $isDone ? (($existing && $existing->is_done) ? $existing->completed_by : $userId) : null;
+
+            $data = [
+                'is_done' => $isDone,
+                'completed_by' => $completedBy,
+                'completed_at' => $completedAt,
+                'updated_at' => $now,
+            ];
+
+            if ($existing) {
+                DB::table('spectrum_workflow_step_state')->where('id', $existing->id)->update($data);
+            } else {
+                DB::table('spectrum_workflow_step_state')->insert(array_merge($data, [
+                    'record_id' => $resource->id,
+                    'procedure_type' => $procedureType,
+                    'step_key' => $stepKey,
+                    'created_at' => $now,
+                ]));
+            }
+        }
+
+        $this->getUser()->setFlash('notice', 'Procedure steps updated.');
+        $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
+    }
+
     public function executeWorkflowUpdate($request)
     {
         if (!$request->isMethod('post')) {
