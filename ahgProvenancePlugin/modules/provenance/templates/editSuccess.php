@@ -316,8 +316,8 @@
                 <label class="form-label">Result</label>
                 <select name="nazi_era_provenance_clear" class="form-select">
                   <option value="">-- Select --</option>
-                  <option value="1" <?php echo ($record->nazi_era_provenance_clear ?? '') === '1' ? 'selected' : '' ?>>Clear - No issues found</option>
-                  <option value="0" <?php echo ($record->nazi_era_provenance_clear ?? '') === '0' ? 'selected' : '' ?>>Requires investigation</option>
+                  <option value="1" <?php echo (string) ($record->nazi_era_provenance_clear ?? '') === '1' ? 'selected' : '' ?>>Clear - No issues found</option>
+                  <option value="0" <?php echo (string) ($record->nazi_era_provenance_clear ?? '') === '0' ? 'selected' : '' ?>>Requires investigation</option>
                 </select>
               </div>
               <div class="mb-0">

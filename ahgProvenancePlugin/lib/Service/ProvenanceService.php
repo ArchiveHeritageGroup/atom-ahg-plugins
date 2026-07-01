@@ -510,6 +510,50 @@ class ProvenanceService
     public function exportCsv(int $objectId, string $culture = 'en'): string
     {
         $data = $this->getProvenanceForObject($objectId, $culture);
+        $rec = $data['record'] ?? null;
+
+        $csv = '';
+
+        // Record-level provenance metadata (key/value section). Without this the
+        // export only carried the chain-of-custody events and dropped acquisition,
+        // research, nazi-era, cultural-property, summary and status fields.
+        if ($rec) {
+            $naziResult = '';
+            $nc = $rec->nazi_era_provenance_clear ?? null;
+            if ($nc !== null && $nc !== '') {
+                $naziResult = ((string) $nc === '1') ? 'Clear - no issues found' : 'Requires investigation';
+            }
+            $recFields = [
+                'current_status' => $rec->current_status ?? '',
+                'custody_type' => $rec->custody_type ?? '',
+                'current_owner' => $rec->current_agent_name ?? '',
+                'acquisition_type' => $rec->acquisition_type ?? '',
+                'acquisition_date' => $rec->acquisition_date ?? '',
+                'acquisition_date_text' => $rec->acquisition_date_text ?? '',
+                'acquisition_price' => $rec->acquisition_price ?? '',
+                'acquisition_currency' => $rec->acquisition_currency ?? '',
+                'certainty_level' => $rec->certainty_level ?? '',
+                'has_gaps' => ($rec->has_gaps ?? 0) ? 'yes' : 'no',
+                'gap_description' => $rec->gap_description ?? '',
+                'research_status' => $rec->research_status ?? '',
+                'research_notes' => $rec->research_notes ?? ($rec->research_notes_i18n ?? ''),
+                'nazi_era_checked' => ($rec->nazi_era_provenance_checked ?? 0) ? 'yes' : 'no',
+                'nazi_era_result' => $naziResult,
+                'nazi_era_notes' => $rec->nazi_era_notes ?? '',
+                'cultural_property_status' => $rec->cultural_property_status ?? '',
+                'cultural_property_notes' => $rec->cultural_property_notes ?? '',
+                'provenance_summary' => $rec->provenance_summary ?? ($rec->summary_i18n ?? ''),
+                'acquisition_notes' => $rec->acquisition_notes ?? '',
+                'is_complete' => ($rec->is_complete ?? 0) ? 'yes' : 'no',
+                'is_public' => ($rec->is_public ?? 1) ? 'yes' : 'no',
+            ];
+            $csv .= "Provenance Record\n";
+            $csv .= $this->csvRow(['field', 'value']);
+            foreach ($recFields as $k => $v) {
+                $csv .= $this->csvRow([$k, $v]);
+            }
+            $csv .= "\n";
+        }
 
         $headers = [
             'sequence', 'event_type', 'from', 'to', 'date_start', 'date_end',
@@ -552,15 +596,24 @@ class ProvenanceService
             }
         }
 
-        $csv = implode(',', $headers)."\n";
+        $csv .= "Chain of Custody Events\n";
+        $csv .= $this->csvRow($headers);
         foreach ($rows as $row) {
-            $csv .= implode(',', array_map(
-                fn ($v) => '"'.str_replace('"', '""', (string) $v).'"',
-                $row
-            ))."\n";
+            $csv .= $this->csvRow($row);
         }
 
         return $csv;
+    }
+
+    /**
+     * Format one CSV row with RFC-4180 quoting (handles commas, quotes, newlines).
+     */
+    private function csvRow(array $row): string
+    {
+        return implode(',', array_map(
+            fn ($v) => '"'.str_replace('"', '""', (string) $v).'"',
+            $row
+        ))."\n";
     }
 
     /**
