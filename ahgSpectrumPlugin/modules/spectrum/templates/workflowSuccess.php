@@ -127,50 +127,62 @@ if ($users->isEmpty()) {
                 <span class="badge bg-primary fs-6"><?php echo ucwords(str_replace('_', ' ', $currentStateName)); ?></span>
             </div>
             <div class="card-body">
-                <!-- Steps Progress -->
-                <?php if (!empty($steps)): ?>
+                <!-- Workflow progress = the state machine itself (what the
+                     transition actions actually advance). The earlier version
+                     stretched the 4 states over a separate 6-step list, so the
+                     marker jumped (1→3→5) and never flowed. The named procedure
+                     steps are reference metadata and are listed separately below. -->
+                <?php if (!empty($states)): ?>
                 <div class="mb-4">
-                    <h6><?php echo __('Steps'); ?></h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        <?php 
-                        // Steps and states are independent, different-length lists
-                        // (e.g. cataloguing has 6 steps but 4 states), so mapping the
-                        // state index straight onto the step index left the last steps
-                        // permanently "pending" and the workflow never appeared to
-                        // complete. Instead map the state's PROGRESS across the steps,
-                        // and mark ALL steps done once the state is terminal.
+                    <h6><?php echo __('Progress'); ?></h6>
+                    <div class="d-flex flex-wrap gap-2 align-items-start">
+                        <?php
                         $stateIndex = array_search($currentStateName, $states);
                         if ($stateIndex === false) { $stateIndex = 0; }
-                        $stepCount = count($steps);
-                        $isFinalState = ($stateIndex >= count($states) - 1);
-                        $progress = (count($states) > 1) ? ($stateIndex / (count($states) - 1)) : 0;
-                        $doneSteps = $isFinalState ? $stepCount : (int) floor($progress * $stepCount);
-                        foreach ($steps as $index => $step):
-                            $stepStatus = 'pending';
-                            if ($index < $doneSteps) $stepStatus = 'completed';
-                            elseif ($index == $doneSteps) $stepStatus = 'current';
-                            
-                            $badgeClass = match($stepStatus) {
+                        $stateLabels = $configData['state_labels'] ?? [];
+                        $lastStateIndex = count($states) - 1;
+                        foreach ($states as $sIndex => $stateKey):
+                            if ($sIndex < $stateIndex || ($sIndex === $stateIndex && $sIndex === $lastStateIndex)) {
+                                $stateStatus = 'completed';
+                            } elseif ($sIndex === $stateIndex) {
+                                $stateStatus = 'current';
+                            } else {
+                                $stateStatus = 'pending';
+                            }
+                            $badgeClass = match($stateStatus) {
                                 'completed' => 'bg-success',
-                                'current' => 'bg-warning',
+                                'current' => 'bg-warning text-dark',
                                 default => 'bg-secondary'
                             };
+                            $stateLabel = $stateLabels[$stateKey] ?? ucwords(str_replace('_', ' ', $stateKey));
                         ?>
                         <div class="text-center">
                             <span class="badge <?php echo $badgeClass; ?> d-block mb-1" style="min-width: 30px;">
-                                <?php echo $step['order']; ?>
+                                <?php echo $sIndex + 1; ?>
                             </span>
-                            <small class="d-block" style="max-width: 80px; font-size: 0.7rem;">
-                                <?php echo esc_entities($step['name']); ?>
+                            <small class="d-block" style="max-width: 90px; font-size: 0.7rem;">
+                                <?php echo esc_entities($stateLabel); ?>
                             </small>
                         </div>
-                        <?php if ($index < count($steps) - 1): ?>
+                        <?php if ($sIndex < $lastStateIndex): ?>
                         <div class="d-flex align-items-center" style="margin-top: -15px;">
                             <i class="fas fa-arrow-right text-muted"></i>
                         </div>
                         <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Procedure steps: reference checklist (not a live progress bar) -->
+                <?php if (!empty($steps)): ?>
+                <div class="mb-4">
+                    <h6 class="text-muted"><i class="fas fa-list-ol me-1"></i><?php echo __('Procedure steps'); ?></h6>
+                    <ol class="small text-muted mb-0 ps-3">
+                        <?php foreach ($steps as $step): ?>
+                        <li><?php echo esc_entities($step['name']); ?></li>
+                        <?php endforeach; ?>
+                    </ol>
                 </div>
                 <?php endif; ?>
                 
