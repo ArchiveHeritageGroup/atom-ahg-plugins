@@ -23,7 +23,11 @@ class extendedRightsExportAction extends AhgController
         
         $objectId = $request->getParameter('id');
         $format = $request->getParameter('format');
-        
+
+        // Expose the record (when exporting a single object) so the view can
+        // offer a "Back to record" link alongside "Back to Dashboard".
+        $this->record = $objectId ? QubitInformationObject::getById((int) $objectId) : null;
+
         // Handle export request
         if ($objectId || $format === 'csv' || $format === 'json-ld') {
             if ($objectId) {

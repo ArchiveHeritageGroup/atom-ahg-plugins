@@ -90,10 +90,15 @@
     </div>
   </div>
 
-  <div class="mt-3">
+  <div class="mt-3 d-flex gap-2">
     <a href="{{ url_for(['module' => 'extendedRights', 'action' => 'dashboard']) }}" class="btn btn-secondary">
       <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
     </a>
+    @if (isset($record) && $record)
+      <a href="{{ url_for([$record, 'module' => 'informationobject']) }}" class="btn btn-outline-secondary">
+        <i class="fas fa-file-alt me-1"></i>{{ __('Back to record') }}
+      </a>
+    @endif
   </div>
 </main>
 
