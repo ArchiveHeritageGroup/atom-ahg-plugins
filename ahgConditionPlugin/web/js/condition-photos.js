@@ -65,13 +65,29 @@
       return;
     }
 
+    // Loading state: disable the button and show a spinner so the (potentially
+    // slow) upload + thumbnail step is obviously in progress.
+    var btn = document.getElementById("upload-btn");
+    var btnHtml = btn ? btn.innerHTML : null;
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Uploading…';
+    }
+    var restoreBtn = function () {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = btnHtml;
+      }
+    };
+
     fetch("/condition/check/" + checkId + "/upload", { method: "POST", body: formData })
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (data.success) location.reload();
-        else alert("Upload failed: " + (data.error || "Unknown error"));
+        else { alert("Upload failed: " + (data.error || "Unknown error")); restoreBtn(); }
       })
-      .catch(function (err) { alert("Upload failed: " + err.message); });
+      .catch(function (err) { alert("Upload failed: " + err.message); restoreBtn(); });
   }
 
   function openAnnotator(photoId, imageSrc) {

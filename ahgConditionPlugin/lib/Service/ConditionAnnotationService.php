@@ -275,6 +275,33 @@ class ConditionAnnotationService
                 return null;
             }
 
+            $thumbFilename = 'thumb_' . basename($filepath);
+
+            // Fast path: Imagick decodes large JPEGs at reduced resolution via the
+            // jpeg:size hint (libjpeg shrink-on-load) — far faster and much lower
+            // memory than GD, which loads the full-size image into RAM just to
+            // shrink it. Falls back to the GD path below on any failure.
+            if (class_exists('\\Imagick')) {
+                try {
+                    $im = new \Imagick();
+                    if ((int) $imageInfo[2] === IMAGETYPE_JPEG) {
+                        $im->setOption('jpeg:size', $maxSize . 'x' . $maxSize);
+                    }
+                    $im->readImage($filepath);
+                    if (in_array((int) $imageInfo[2], [IMAGETYPE_PNG, IMAGETYPE_GIF], true)) {
+                        $im->setImageBackgroundColor(new \ImagickPixel('transparent'));
+                    }
+                    $im->thumbnailImage($maxSize, $maxSize, true); // bestfit, preserves aspect
+                    $im->stripImage();
+                    $im->writeImage($uploadDir . '/' . $thumbFilename);
+                    $im->clear();
+
+                    return $thumbFilename;
+                } catch (\Throwable $e) {
+                    // Fall through to the GD implementation below.
+                }
+            }
+
             $width = $imageInfo[0];
             $height = $imageInfo[1];
             $type = $imageInfo[2];

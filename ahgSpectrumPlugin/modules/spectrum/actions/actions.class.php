@@ -207,9 +207,12 @@ class spectrumActions extends AhgController
 
         // If no specific assignees, notify admins for certain transitions
         if (empty($notifyUserIds) && in_array($transitionKey, ['submit_for_review', 'complete', 'report'])) {
+            // Administrators are users in the AtoM administrator ACL group (id 100).
+            // (The old code joined a non-existent `user_role_relation` table, which
+            // fatalled the whole transition with a 500.)
             $admins = DB::table('user')
-                ->join('user_role_relation', 'user.id', '=', 'user_role_relation.user_id')
-                ->where('user_role_relation.role_id', 1)
+                ->join('acl_user_group', 'user.id', '=', 'acl_user_group.user_id')
+                ->where('acl_user_group.group_id', 100)
                 ->where('user.id', '!=', $actingUserId)
                 ->pluck('user.id')
                 ->toArray();
