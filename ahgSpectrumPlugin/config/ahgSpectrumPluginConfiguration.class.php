@@ -32,6 +32,7 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         $spectrum->any('spectrum_workflow_update', '/spectrum/:slug/workflow/update', 'workflowUpdate');
         $spectrum->any('spectrum_workflow_transition', '/spectrum/:slug/workflow/transition', 'workflowTransition');
         $spectrum->any('spectrum_workflow_steps', '/spectrum/:slug/workflow/steps', 'workflowSteps');
+        $spectrum->any('spectrum_workflow_steps_mode', '/spectrum/:slug/workflow/steps-mode', 'workflowStepsMode');
 
         // Dashboard routes
         $spectrum->any('spectrum_dashboard', '/spectrum/dashboard', 'dashboard');

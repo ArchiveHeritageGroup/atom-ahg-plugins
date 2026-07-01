@@ -360,8 +360,10 @@ class spectrumActions extends AhgController
             ->where('is_active', 1)
             ->first();
         $allStepKeys = [];
+        $linear = false;
         if ($config) {
             $cfg = json_decode($config->config_json, true);
+            $linear = !empty($cfg['steps_linear']);
             foreach (($cfg['steps'] ?? []) as $s) {
                 if (!empty($s['key'])) {
                     $allStepKeys[] = $s['key'];
@@ -372,8 +374,22 @@ class spectrumActions extends AhgController
         $checked = (array) $request->getParameter('steps_done', []);
         $now = date('Y-m-d H:i:s');
 
+        // Linear mode: the completed set must be a contiguous prefix (step N can
+        // only be done if every earlier step is done). Once a step is unticked,
+        // all later steps are forced unticked regardless of what was posted.
+        $prefixBroken = false;
         foreach ($allStepKeys as $stepKey) {
-            $isDone = in_array($stepKey, $checked, true) ? 1 : 0;
+            if ($linear) {
+                $checkedThis = in_array($stepKey, $checked, true);
+                if ($prefixBroken || !$checkedThis) {
+                    $prefixBroken = true;
+                    $isDone = 0;
+                } else {
+                    $isDone = 1;
+                }
+            } else {
+                $isDone = in_array($stepKey, $checked, true) ? 1 : 0;
+            }
             $existing = DB::table('spectrum_workflow_step_state')
                 ->where('record_id', $resource->id)
                 ->where('procedure_type', $procedureType)
@@ -404,6 +420,45 @@ class spectrumActions extends AhgController
         }
 
         $this->getUser()->setFlash('notice', 'Procedure steps updated.');
+        $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
+    }
+
+    /**
+     * Toggle a procedure between "checklist" (tick steps in any order) and
+     * "linear" (ordered ticking + can't finalise until all steps done) mode.
+     * Procedure-level policy, so admin/editor only.
+     */
+    public function executeWorkflowStepsMode($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $slug = $request->getParameter('slug');
+        $resource = $this->getResourceBySlug($slug);
+        if (!$resource) {
+            $this->forward404();
+        }
+
+        if (!$this->getUser()->isAuthenticated() || !($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor'))) {
+            $this->forward('admin', 'secure');
+        }
+
+        $procedureType = $request->getParameter('procedure_type');
+        $config = DB::table('spectrum_workflow_config')
+            ->where('procedure_type', $procedureType)
+            ->where('is_active', 1)
+            ->first();
+
+        if ($config) {
+            $cfg = json_decode($config->config_json, true);
+            $cfg['steps_linear'] = empty($cfg['steps_linear']);
+            DB::table('spectrum_workflow_config')
+                ->where('id', $config->id)
+                ->update(['config_json' => json_encode($cfg)]);
+            $this->getUser()->setFlash('notice', 'Step mode set to ' . ($cfg['steps_linear'] ? 'linear (ordered + gated)' : 'checklist (any order)') . '.');
+        }
+
         $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
     }
 
@@ -494,7 +549,29 @@ class spectrumActions extends AhgController
         if (!in_array($fromState, $transition['from'])) {
             $this->forward404();
         }
-        
+
+        // Linear-gated steps: a procedure in linear mode cannot reach its final
+        // state until every procedure step is ticked complete.
+        if (!empty($configData['steps_linear'])) {
+            $states = $configData['states'] ?? [];
+            $finalState = !empty($states) ? end($states) : null;
+            if ($finalState !== null && $toState === $finalState) {
+                $stepKeys = array_column($configData['steps'] ?? [], 'key');
+                if (!empty($stepKeys)) {
+                    $doneCount = DB::table('spectrum_workflow_step_state')
+                        ->where('record_id', $resource->id)
+                        ->where('procedure_type', $procedureType)
+                        ->where('is_done', 1)
+                        ->whereIn('step_key', $stepKeys)
+                        ->count();
+                    if ($doneCount < count($stepKeys)) {
+                        $this->getUser()->setFlash('error', 'Linear mode: all procedure steps must be completed before this workflow can be finalised (' . $doneCount . '/' . count($stepKeys) . ' done).');
+                        $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
+                    }
+                }
+            }
+        }
+
         // Prepare assignment data
         $assignedToInt = $assignedTo ? (int) $assignedTo : null;
 

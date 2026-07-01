@@ -174,10 +174,12 @@ if ($users->isEmpty()) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Procedure steps checklist (per-record; tick off in any order,
-                     independent of the approval state above). -->
+                <!-- Procedure steps checklist (per-record). Two modes: "checklist"
+                     (tick any order) or "linear" (ordered ticking + can't finalise
+                     the workflow until all steps are done). -->
                 <?php if (!empty($steps)):
                     $stepStates = $stepStates ?? [];
+                    $stepsLinear = !empty($configData['steps_linear']);
                     $totalSteps = count($steps);
                     $doneCount = 0;
                     foreach ($steps as $s) {
@@ -186,20 +188,31 @@ if ($users->isEmpty()) {
                 ?>
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0"><i class="fas fa-list-check me-1"></i><?php echo __('Procedure steps'); ?></h6>
+                        <h6 class="mb-0">
+                            <i class="fas fa-list-check me-1"></i><?php echo __('Procedure steps'); ?>
+                            <span class="badge <?php echo $stepsLinear ? 'bg-info' : 'bg-light text-dark'; ?> ms-1" style="font-weight:normal;"><?php echo $stepsLinear ? __('Linear') : __('Checklist'); ?></span>
+                        </h6>
                         <span class="badge <?php echo ($totalSteps > 0 && $doneCount === $totalSteps) ? 'bg-success' : 'bg-secondary'; ?>"><?php echo $doneCount; ?>/<?php echo $totalSteps; ?> <?php echo __('done'); ?></span>
                     </div>
+                    <?php if ($stepsLinear): ?>
+                    <p class="small text-muted mb-2"><i class="fas fa-lock me-1"></i><?php echo __('Linear mode: complete steps in order; the workflow cannot be finalised until all steps are done.'); ?></p>
+                    <?php endif; ?>
                     <?php if ($canEdit): ?>
                     <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowSteps', 'slug' => $resource->slug]); ?>">
                         <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
-                        <?php foreach ($steps as $step):
+                        <?php foreach ($steps as $index => $step):
                             $st = $stepStates[$step['key']] ?? null;
                             $done = $st && $st->is_done;
+                            // In linear mode, only "done" steps and the first not-done
+                            // step are actionable; later steps are locked until their
+                            // predecessor is complete.
+                            $locked = $stepsLinear && ($index > $doneCount);
                         ?>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="steps_done[]" value="<?php echo esc_entities($step['key']); ?>" id="step_<?php echo esc_entities($step['key']); ?>" <?php echo $done ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="step_<?php echo esc_entities($step['key']); ?>">
+                            <input class="form-check-input" type="checkbox" name="steps_done[]" value="<?php echo esc_entities($step['key']); ?>" id="step_<?php echo esc_entities($step['key']); ?>" <?php echo $done ? 'checked' : ''; ?> <?php echo $locked ? 'disabled' : ''; ?>>
+                            <label class="form-check-label <?php echo $locked ? 'text-muted' : ''; ?>" for="step_<?php echo esc_entities($step['key']); ?>">
                                 <?php echo esc_entities($step['name']); ?>
+                                <?php if ($locked): ?><i class="fas fa-lock text-muted ms-1" style="font-size:0.7rem;"></i><?php endif; ?>
                                 <?php if ($done && $st->completed_at): ?>
                                 <small class="text-muted">&mdash; <?php echo esc_entities(substr((string) $st->completed_at, 0, 10)); ?></small>
                                 <?php endif; ?>
@@ -208,6 +221,14 @@ if ($users->isEmpty()) {
                         <?php endforeach; ?>
                         <button type="submit" class="btn btn-sm btn-outline-primary mt-2"><i class="fas fa-save me-1"></i><?php echo __('Save steps'); ?></button>
                     </form>
+                    <div class="mt-2">
+                        <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowStepsMode', 'slug' => $resource->slug]); ?>" class="d-inline">
+                            <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
+                            <button type="submit" class="btn btn-sm btn-link text-muted p-0" onclick="return confirm('<?php echo __('Switch step mode for this procedure?'); ?>');">
+                                <i class="fas fa-exchange-alt me-1"></i><?php echo $stepsLinear ? __('Switch to checklist mode (any order)') : __('Switch to linear mode (ordered + gated)'); ?>
+                            </button>
+                        </form>
+                    </div>
                     <?php else: ?>
                     <ul class="list-unstyled small mb-0">
                         <?php foreach ($steps as $step):
