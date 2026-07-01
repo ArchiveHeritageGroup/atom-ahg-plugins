@@ -513,8 +513,8 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
     <?php echo get_component('informationobject', 'accessions', ['resource' => $resource]); ?>
   </div>
 
-  <!-- EXTENDED RIGHTS AREA -->
-  <?php // include_partial('informationobject/extendedRightsArea', ['resource' => $resource]); ?>
+  <!-- EXTENDED RIGHTS AREA (rights statement, CC, TK labels, embargo status) -->
+  <?php include_partial('informationobject/extendedRightsArea', ['resource' => $resource]); ?>
 
 </section> <!-- /section#accessionArea -->
 

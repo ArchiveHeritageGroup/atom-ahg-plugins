@@ -131,6 +131,13 @@ class ObjectAddDigitalObjectAction extends AhgController
             $this->uploadedFilePath = $this->form->getValue('file')->getTempName();
         } elseif (null !== $this->form->getValue('url')) {
             try {
+                // "Link to an external digital object": store the URI reference
+                // (usageId EXTERNAL_URI_ID, name, path) WITHOUT synchronously
+                // downloading the remote bitstream. The download hangs past
+                // php-fpm's request_terminate_timeout (90s) for slow/large/
+                // unreachable URLs, which killed the request and rolled back the
+                // whole save — so the link "reported success" but never persisted.
+                $digitalObject->createDerivatives = false;
                 $digitalObject->importFromURI($this->form->getValue('url'));
             } catch (sfException $e) {
                 $this->logMessage($e->getMessage(), 'err');
