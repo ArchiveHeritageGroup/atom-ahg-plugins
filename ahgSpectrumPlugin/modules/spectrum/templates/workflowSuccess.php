@@ -133,11 +133,22 @@ if ($users->isEmpty()) {
                     <h6><?php echo __('Steps'); ?></h6>
                     <div class="d-flex flex-wrap gap-2">
                         <?php 
+                        // Steps and states are independent, different-length lists
+                        // (e.g. cataloguing has 6 steps but 4 states), so mapping the
+                        // state index straight onto the step index left the last steps
+                        // permanently "pending" and the workflow never appeared to
+                        // complete. Instead map the state's PROGRESS across the steps,
+                        // and mark ALL steps done once the state is terminal.
                         $stateIndex = array_search($currentStateName, $states);
-                        foreach ($steps as $index => $step): 
+                        if ($stateIndex === false) { $stateIndex = 0; }
+                        $stepCount = count($steps);
+                        $isFinalState = ($stateIndex >= count($states) - 1);
+                        $progress = (count($states) > 1) ? ($stateIndex / (count($states) - 1)) : 0;
+                        $doneSteps = $isFinalState ? $stepCount : (int) floor($progress * $stepCount);
+                        foreach ($steps as $index => $step):
                             $stepStatus = 'pending';
-                            if ($index < $stateIndex) $stepStatus = 'completed';
-                            elseif ($index == $stateIndex) $stepStatus = 'current';
+                            if ($index < $doneSteps) $stepStatus = 'completed';
+                            elseif ($index == $doneSteps) $stepStatus = 'current';
                             
                             $badgeClass = match($stepStatus) {
                                 'completed' => 'bg-success',
