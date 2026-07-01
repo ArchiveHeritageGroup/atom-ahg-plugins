@@ -50,8 +50,14 @@ class InformationObjectMultiFileUploadAction extends AhgController
         $this->maxFileSize = QubitDigitalObject::getMaxUploadSize();
         $this->maxPostSize = QubitDigitalObject::getMaxPostSize();
 
-        // Paths for uploader javascript
-        $this->uploadResponsePath = "{$this->context->routing->generate(null, ['module' => 'digitalobject', 'action' => 'upload'])}?".http_build_query(['informationObjectId' => $this->resource->id]);
+        // Paths for uploader javascript.
+        // Base AtoM's digitalobject/upload (per-file temp uploader) resolves the
+        // parent object via 'parentSlug'. The previous 'informationObjectId' param
+        // was paired with a route hijack (/digitalobject/upload -> ioManage/doUpload)
+        // that has been removed; against base uploadAction it left parentSlug empty
+        // so every file 404'd ("0 of N uploaded"). processForm() below then commits
+        // one child description per uploaded temp file (stock two-step flow).
+        $this->uploadResponsePath = "{$this->context->routing->generate(null, ['module' => 'digitalobject', 'action' => 'upload'])}?".http_build_query(['parentSlug' => $this->resource->slug]);
 
         // Add form fields
         $this->form->setValidator('title', new sfValidatorString());

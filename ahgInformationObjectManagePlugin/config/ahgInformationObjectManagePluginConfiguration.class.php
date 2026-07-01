@@ -43,7 +43,14 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
         $router->any('io_edit_override', '/informationobject/:slug/edit', 'edit');
 
         // Digital object routes (checked after treeview, before slug catch-alls)
-        $router->any('io_do_upload', '/digitalobject/upload', 'doUpload');
+        // NB: URL must NOT be '/digitalobject/upload' — that is base AtoM's own
+        // multi-file uploader endpoint (digitalobject/uploadAction). Shadowing it
+        // broke the informationobject/multiFileUpload page (every file 404'd via
+        // ioManage/doUpload). The doUpload page references this by route name
+        // (@io_do_upload), so the URL is free to change.
+        // 3-segment URL so base AtoM's 2-segment '/:module/:action' catch-all
+        // cannot swallow it (a 2-segment '/digitalobject/x' always loses to base).
+        $router->any('io_do_upload', '/digitalobject/attach/file', 'doUpload');
         $router->any('io_do_edit', '/digitalobject/:id/edit', 'doEdit', ['id' => '\d+']);
         $router->any('io_do_delete', '/digitalobject/:id/delete', 'doDelete', ['id' => '\d+']);
 

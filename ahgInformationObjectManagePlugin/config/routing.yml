@@ -35,8 +35,13 @@ io_add_override:
   param: { module: ioManage, action: edit }
 
 # Digital object management routes
+# NB: url must NOT be /digitalobject/upload — that is base AtoM's own multi-file
+# uploader endpoint (digitalobject/uploadAction). Shadowing it broke the
+# informationobject/multiFileUpload page (every file 404'd via ioManage/doUpload).
+# 3 segments so base's 2-segment /:module/:action catch-all cannot swallow it.
+# Referenced by route name (@io_do_upload), so the url is free to change.
 io_do_upload:
-  url: /digitalobject/upload
+  url: /digitalobject/attach/file
   param: { module: ioManage, action: doUpload }
 
 io_do_edit:
