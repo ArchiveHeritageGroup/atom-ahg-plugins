@@ -230,17 +230,14 @@
             var clb = document.getElementById('tpmClearBtn');
             if (clb) clb.addEventListener('click', clearAll);
 
-            // Collapse other accordions when merge is expanded
-            var mergeCollapse = document.getElementById('merge-collapse');
-            if (mergeCollapse) {
-                mergeCollapse.addEventListener('shown.bs.collapse', function() {
-                    if (!currentJob) initMergeJob();
-                });
-            }
+            // NB: the merge job is now created lazily when the first file is added
+            // (see processFiles), NOT when the accordion opens — this avoids empty
+            // jobs from merely browsing the section, and the race where files added
+            // before the async job-create finished were discarded.
         });
 
         function initMergeJob() {
-            fetch(createUrl, {
+            return fetch(createUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -269,11 +266,22 @@
         }
 
         function processFiles(files) {
-            if (!currentJob) { showAlert('Open the merge section first.', 'warning'); return; }
             var validExts = ['tif', 'tiff', 'jpg', 'jpeg', 'png', 'bmp', 'gif'];
             var validFiles = files.filter(function(f) { return validExts.indexOf(f.name.split('.').pop().toLowerCase()) !== -1; });
             if (!validFiles.length) { showAlert('No valid image files.', 'warning'); return; }
 
+            // Create the merge job lazily on first file add. Previously the job was
+            // auto-created (async) when the accordion opened, and any files dropped
+            // before that create finished were discarded with "Open the merge
+            // section first" — leaving empty jobs that failed "No files to process".
+            if (!currentJob) {
+                initMergeJob().then(function() { if (currentJob) uploadFiles(validFiles); });
+            } else {
+                uploadFiles(validFiles);
+            }
+        }
+
+        function uploadFiles(validFiles) {
             showProgress(true);
             var uploaded = 0;
             function uploadNext() {
