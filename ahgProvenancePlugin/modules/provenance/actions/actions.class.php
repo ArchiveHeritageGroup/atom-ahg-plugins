@@ -244,6 +244,7 @@ class provenanceActions extends AhgController
                 'event_date_text' => $eventDateTexts[$i] ?? null,
                 'event_location' => $eventLocations[$i] ?? null,
                 'certainty' => $eventCertainties[$i] ?? 'uncertain',
+                'notes' => $eventNotes[$i] ?? null,
                 'created_by' => $userId,
             ];
 

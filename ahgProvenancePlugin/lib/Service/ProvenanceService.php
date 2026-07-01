@@ -392,11 +392,21 @@ class ProvenanceService
             'nazi_era_provenance_checked' => $data['nazi_era_provenance_checked'] ?? 0,
             'nazi_era_provenance_clear' => $data['nazi_era_provenance_clear'] ?? null,
             'cultural_property_status' => $data['cultural_property_status'] ?? 'none',
+            // Notes/summary fields live on the base provenance_record table AND are
+            // read from it (getByInformationObjectId selects pr.*). They must be
+            // written here — not only to provenance_record_i18n — or they never
+            // round-trip on the edit form. (acquisition_notes has no base column, so
+            // it stays i18n-only below.)
+            'provenance_summary' => $data['provenance_summary'] ?? null,
+            'gap_description' => $data['gap_description'] ?? null,
+            'research_notes' => $data['research_notes'] ?? null,
+            'nazi_era_notes' => $data['nazi_era_notes'] ?? null,
+            'cultural_property_notes' => $data['cultural_property_notes'] ?? null,
             'is_complete' => $data['is_complete'] ?? 0,
             'is_public' => $data['is_public'] ?? 1,
             'created_by' => $data['created_by'] ?? null
         ];
-        
+
         $id = $this->repository->saveRecord($recordData);
         
         // Save i18n
@@ -446,6 +456,7 @@ class ProvenanceService
             'sale_reference' => $data['sale_reference'] ?? null,
             'evidence_type' => $data['evidence_type'] ?? 'none',
             'certainty' => $data['certainty'] ?? 'uncertain',
+            'notes' => $data['notes'] ?? null,
             'sequence_number' => $data['sequence_number'] ?? ($maxSeq + 1),
             'is_public' => $data['is_public'] ?? 1,
             'created_by' => $data['created_by'] ?? null
