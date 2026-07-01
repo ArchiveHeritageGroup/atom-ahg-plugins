@@ -840,7 +840,31 @@
   // ── Generate identifier button ──────────────────────────────────────
   var genBtn = document.getElementById('generate-identifier');
   if (genBtn) {
+    // The server RESERVES a sequence number on each generate call, so calling it
+    // repeatedly burns numbers. Cache the reserved identifier and re-apply it on
+    // subsequent clicks instead of requesting a new one.
+    var generatedIdentifier = null;
+
+    function applyIdentifier(val) {
+      var f = document.getElementById('identifier');
+      f.value = val;
+      // Re-assert shortly after: on the first click the value could appear then
+      // get wiped by late async form init. Put it back if something cleared it.
+      setTimeout(function() { if (f && f.value !== val) { f.value = val; } }, 400);
+    }
+
+    // If the repository changes, the reserved identifier no longer matches — drop
+    // the cache so the next click regenerates against the new repository.
+    var repoSelect = document.getElementById('repositoryId');
+    if (repoSelect) {
+      repoSelect.addEventListener('change', function() { generatedIdentifier = null; });
+    }
+
     genBtn.addEventListener('click', function() {
+      if (generatedIdentifier) {
+        applyIdentifier(generatedIdentifier);
+        return;
+      }
       // Repository is optional — NumberingService generates an identifier with a
       // placeholder repo code when none is selected, so don't force one here.
       var repoId = document.getElementById('repositoryId').value || '0';
@@ -855,7 +879,8 @@
           if (data.error) {
             alert(data.error);
           } else if (data.identifier) {
-            document.getElementById('identifier').value = data.identifier;
+            generatedIdentifier = data.identifier;
+            applyIdentifier(data.identifier);
           } else {
             alert('<?php echo __("Could not generate identifier."); ?>');
           }

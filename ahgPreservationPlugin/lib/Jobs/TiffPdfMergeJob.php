@@ -111,8 +111,10 @@ class TiffPdfMergeJob
                             \QubitSearch::getInstance()->update($io);
                             $this->log('Elasticsearch index updated for record');
                         }
-                    } catch (\Exception $e) {
-                        $this->log('Warning: Search index update failed: ' . $e->getMessage());
+                    } catch (\Throwable $e) {
+                        // \Throwable, not \Exception: QubitSearch/QubitInformationObject
+                        // are undefined in the framework-only worker and throw \Error.
+                        $this->log('Warning: Search index update skipped: ' . $e->getMessage());
                     }
                 }
             }
@@ -304,8 +306,10 @@ class TiffPdfMergeJob
             if ($io) {
                 \QubitSearch::getInstance()->update($io);
             }
-        } catch (\Exception $e) {
-            $this->log('Warning: Search index update failed: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            // \Throwable, not \Exception: QubitSearch/QubitInformationObject are
+            // undefined in the framework-only worker and throw \Error.
+            $this->log('Warning: Search index update skipped: ' . $e->getMessage());
         }
 
         return ['success' => true, 'digital_object_id' => $doId];
@@ -326,7 +330,12 @@ class TiffPdfMergeJob
 
         // Compute checksum for AtoM hash-based directory path
         $checksum = hash_file('sha256', $filePath);
-        $uploadBase = \sfConfig::get('sf_upload_dir');
+        // The background worker runs in the framework-only (non-Symfony) context,
+        // where sfConfig is not loaded; derive the uploads dir from the plugin path
+        // (<root>/uploads) when it is unavailable.
+        $uploadBase = class_exists('sfConfig')
+            ? \sfConfig::get('sf_upload_dir')
+            : dirname(__DIR__, 4) . '/uploads';
 
         // AtoM path: /uploads/r/<repo-slug>/<c0>/<c1>/<c2>/<checksum>/
         $hashPath = $checksum[0] . '/' . $checksum[1] . '/' . $checksum[2] . '/' . $checksum;
