@@ -173,7 +173,11 @@ class AccessionEditAction extends AhgEditController
     {
         switch ($name) {
             case 'acquisitionType':
-                $this->form->setDefault('acquisitionType', $this->context->routing->generate(null, [$this->resource->acquisitionType, 'module' => 'term']));
+                // Only build the default URL when a term is set — generating from a
+                // null term (new accession) probes a route that throws on the model.
+                if (isset($this->resource->acquisitionType)) {
+                    $this->form->setDefault('acquisitionType', $this->context->routing->generate(null, [$this->resource->acquisitionType, 'module' => 'term']));
+                }
                 $this->form->setValidator('acquisitionType', new sfValidatorString());
 
                 $choices = [];
@@ -187,7 +191,9 @@ class AccessionEditAction extends AhgEditController
                 break;
 
             case 'processingPriority':
-                $this->form->setDefault('processingPriority', $this->context->routing->generate(null, [$this->resource->processingPriority, 'module' => 'term']));
+                if (isset($this->resource->processingPriority)) {
+                    $this->form->setDefault('processingPriority', $this->context->routing->generate(null, [$this->resource->processingPriority, 'module' => 'term']));
+                }
                 $this->form->setValidator('processingPriority', new sfValidatorString());
 
                 $choices = [];

@@ -49,5 +49,14 @@ class ahgDonorManagePluginConfiguration extends sfPluginConfiguration
         $router->any('donor_add_override', '/donor/add', 'edit');
         $router->any('donor_browse_override', '/donor/browse', 'browse');
         $router->register($routing);
+
+        // Autocomplete endpoint lives in the 'donor' module (not donorManage).
+        // Registered AFTER the /donor/:slug catch-all so it is prepended last and
+        // therefore checked FIRST — otherwise /donor/autocomplete matches
+        // /donor/:slug (slug="autocomplete") and 404s, breaking the donor dropdown
+        // on the accession form.
+        $donor = new \AtomFramework\Routing\RouteLoader('donor');
+        $donor->any('donor_autocomplete', '/donor/autocomplete', 'autocomplete');
+        $donor->register($routing);
     }
 }

@@ -95,9 +95,23 @@ class RelationEditComponent extends sfComponent
                 break;
 
             case 'resource':
+                // Forbid linking the resource to itself — but only when it already
+                // exists. For a NEW/unsaved resource (e.g. /accession/add) there is
+                // no self to link yet, and routing->generate() has no canonical
+                // route to build, so it falls through to a route whose offsetExists()
+                // throws "Unknown record property sf_method" (base-AtoM __isset bug),
+                // 500-ing the whole add form.
+                $forbiddenValues = [];
+                if (isset($this->resource->id)) {
+                    try {
+                        $forbiddenValues[] = $this->context->routing->generate(null, $this->resource);
+                    } catch (\Throwable $e) {
+                        // No canonical route for this resource yet — nothing to forbid.
+                    }
+                }
                 $this->form->setValidator('resource', new sfValidatorAnd([
                     new sfValidatorString(),
-                    new QubitValidatorForbiddenValues(['forbidden_values' => [$this->context->routing->generate(null, $this->resource)]]),
+                    new QubitValidatorForbiddenValues(['forbidden_values' => $forbiddenValues]),
                 ], ['required' => true]));
                 $this->form->setWidget('resource', new sfWidgetFormSelect(['choices' => []]));
 
