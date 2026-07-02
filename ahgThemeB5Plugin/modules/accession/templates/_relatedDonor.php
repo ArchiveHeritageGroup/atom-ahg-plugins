@@ -208,4 +208,8 @@
   </div>
 </div>
 
+<?php // TomSelect library (JS + CSS) — donor-tom-select.js bails if it isn't loaded,
+      // which left the donor dropdown inert ("not filling"). ?>
+<link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/atom-framework/public/js/donor-tom-select.js?v=1"></script>
