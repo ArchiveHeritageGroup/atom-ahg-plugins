@@ -118,7 +118,14 @@ class AccessionEditAction extends AhgEditController
         if ($request->isMethod('post')) {
             $this->form->bind($request->getPostParameters());
             if ($this->form->isValid()) {
-                $this->relatedDonorComponent->processForm();
+                // Only process the donor relation when a donor was actually selected.
+                // The (locked) qt relatedDonorComponent parses the submitted value and
+                // calls getPrimaryContact() on the resulting resource without a null
+                // check, so an empty/no-donor submission crashed the whole save.
+                $relatedDonor = $this->request->getParameter('relatedDonor');
+                if (is_array($relatedDonor) && !empty($relatedDonor['resource'])) {
+                    $this->relatedDonorComponent->processForm();
+                }
 
                 $this->eventComponent->processForm();
 
