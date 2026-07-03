@@ -132,7 +132,8 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
             </div>
           </div>
 
-          <!-- Export destination: ZIP file or uncompressed dump to a folder/drive -->
+          <!-- Export destination: ZIP download, unzipped tree onto the operator's
+               own computer (File System Access API), or a server folder/drive. -->
           <div class="mb-4">
             <label class="form-label fw-bold"><?php echo __('Destination'); ?></label>
             <div class="btn-group d-block" role="group">
@@ -141,16 +142,24 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
                 <i class="bi bi-file-zip me-1"></i><?php echo __('ZIP file'); ?>
                 <br><small class="fw-normal"><?php echo __('Downloadable archive'); ?></small>
               </label>
+              <input type="radio" class="btn-check" name="destination" id="dest-local" value="local">
+              <label class="btn btn-outline-primary" for="dest-local">
+                <i class="bi bi-laptop me-1"></i><?php echo __('This computer'); ?>
+                <br><small class="fw-normal"><?php echo __('Unzipped folder on your PC / laptop / USB'); ?></small>
+              </label>
               <input type="radio" class="btn-check" name="destination" id="dest-folder" value="folder">
               <label class="btn btn-outline-primary" for="dest-folder">
-                <i class="bi bi-folder2-open me-1"></i><?php echo __('Folder / drive'); ?>
-                <br><small class="fw-normal"><?php echo __('Uncompressed — for large collections / USB'); ?></small>
+                <i class="bi bi-hdd-network me-1"></i><?php echo __('Server folder / drive'); ?>
+                <br><small class="fw-normal"><?php echo __('Uncompressed — for large collections / mounted server drive'); ?></small>
               </label>
+            </div>
+            <div id="destination-local-note" class="form-text mt-2" style="display:none;">
+              <i class="bi bi-info-circle me-1"></i><?php echo __('You will be asked to choose a folder or drive on this computer after the export is built; the catalogue is written there uncompressed so it runs straight off the drive (double-click index.html). Requires a Chromium browser (Chrome, Edge, Opera) — on other browsers it falls back to a ZIP download.'); ?>
             </div>
             <div id="destination-path-wrap" class="mt-2" style="display:none;">
               <input type="text" class="form-control" name="destination_path" id="destination-path"
                      placeholder="<?php echo __('Existing writable directory on the server, e.g. /mnt/usb/catalogue'); ?>">
-              <div class="form-text"><?php echo __('The bundle is written uncompressed straight to this path (no ZIP, no size cap). It must exist and be writable by the web server.'); ?></div>
+              <div class="form-text"><?php echo __('The bundle is written uncompressed straight to this path on the server (no ZIP, no size cap). It must exist and be writable by the web server.'); ?></div>
             </div>
           </div>
 
@@ -351,10 +360,14 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
         <div class="alert alert-success">
           <i class="bi bi-check-circle me-1"></i>
           <span id="result-message"></span>
+          <button type="button" id="result-save-local" class="btn btn-sm btn-primary ms-2" style="display:none;">
+            <i class="bi bi-laptop me-1"></i><?php echo __('Save to folder on this computer'); ?>
+          </button>
           <a id="result-download" href="#" class="btn btn-sm btn-success ms-2">
             <i class="bi bi-download me-1"></i><?php echo __('Download ZIP'); ?>
           </a>
         </div>
+        <div id="result-save-status" class="small text-muted mt-2" style="display:none;"></div>
       </div>
       <div id="progress-error" style="display:none;" class="mt-3">
         <div class="alert alert-danger">
@@ -436,6 +449,11 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
                 </td>
                 <td>
                   <?php if ($exp->status === 'completed'): ?>
+                    <?php if (($exp->destination ?? 'zip') === 'local'): ?>
+                      <button class="btn btn-sm btn-primary btn-save-local" data-id="<?php echo $exp->id; ?>" title="<?php echo __('Save to folder on this computer'); ?>">
+                        <i class="bi bi-laptop"></i>
+                      </button>
+                    <?php endif; ?>
                     <a href="/portable-export/download?id=<?php echo $exp->id; ?>" class="btn btn-sm btn-success" title="<?php echo __('Download'); ?>">
                       <i class="bi bi-download"></i>
                     </a>
@@ -504,6 +522,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
   var currentStep = 1;
   var totalSteps = 4;
   var currentExportId = null;
+  var currentDestination = 'zip';
   var pollInterval = null;
   var shareExportId = null;
 
@@ -580,14 +599,18 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
     });
   });
 
-  // Show the folder-path input only when the "Folder / drive" destination is chosen.
+  // Show the server-path input only for "Server folder / drive"; show the
+  // this-computer note only for "This computer".
   var destPathWrap = document.getElementById('destination-path-wrap');
   var destPathInput = document.getElementById('destination-path');
+  var destLocalNote = document.getElementById('destination-local-note');
   document.querySelectorAll('input[name="destination"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
       var isFolder = this.value === 'folder';
+      var isLocal = this.value === 'local';
       if (destPathWrap) destPathWrap.style.display = isFolder ? '' : 'none';
       if (destPathInput) destPathInput.required = isFolder;
+      if (destLocalNote) destLocalNote.style.display = isLocal ? '' : 'none';
     });
   });
 
@@ -697,6 +720,9 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
     btn.disabled = true;
     btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Starting...';
 
+    var destRadio = document.querySelector('input[name="destination"]:checked');
+    currentDestination = destRadio ? destRadio.value : 'zip';
+
     var data = new FormData(this);
     if (getSelectedMode() === 'archive') {
       // Collect selected entity types
@@ -769,7 +795,25 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           document.getElementById('result-message').textContent =
             'Export complete! ' + data.total_descriptions + ' descriptions, ' +
             data.total_objects + ' objects (' + sizeMB + ' MB)';
-          document.getElementById('result-download').href = '/portable-export/download?id=' + exportId;
+          var dlBtn = document.getElementById('result-download');
+          var saveBtn = document.getElementById('result-save-local');
+          dlBtn.href = '/portable-export/download?id=' + exportId;
+
+          // "This computer" destination: if the browser supports the File System
+          // Access API, offer to write the unzipped tree straight into a folder the
+          // operator picks; the ZIP download stays as a fallback/alternative.
+          if (currentDestination === 'local' && window.showDirectoryPicker) {
+            saveBtn.style.display = '';
+            saveBtn.disabled = false;
+            saveBtn.onclick = function() {
+              saveExportToLocalFolder(exportId,
+                document.getElementById('result-save-local'),
+                document.getElementById('result-save-status'));
+            };
+          } else {
+            saveBtn.style.display = 'none';
+          }
+
           document.getElementById('progress-result').style.display = '';
           resetStartButton();
         } else if (data.status === 'failed') {
@@ -788,6 +832,103 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
     btn.disabled = false;
     btn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Start Export';
   }
+
+  // ─── Save export to a local folder (File System Access API) ─────
+  // Writes the export's unzipped tree into a folder/drive the operator picks on
+  // their OWN computer, by pulling the server-side staging manifest and each file.
+  async function saveExportToLocalFolder(exportId, saveBtn, statusEl) {
+    saveBtn = saveBtn || document.getElementById('result-save-local');
+    statusEl = statusEl || document.getElementById('result-save-status');
+
+    if (!window.showDirectoryPicker) {
+      // Unsupported browser — fall back to the ZIP download.
+      window.location.href = '/portable-export/download?id=' + exportId;
+      return;
+    }
+
+    var dirHandle;
+    try {
+      dirHandle = await window.showDirectoryPicker({ id: 'ahg-portable-export', mode: 'readwrite' });
+    } catch (e) {
+      return; // operator cancelled the folder picker
+    }
+
+    saveBtn.disabled = true;
+    statusEl.style.display = '';
+    statusEl.className = 'small text-muted mt-2';
+    statusEl.textContent = 'Reading package…';
+
+    try {
+      var mres = await fetch('/portable-export/api/manifest?id=' + exportId);
+      var manifest = await mres.json();
+      if (!manifest.success) {
+        throw new Error(manifest.error || 'Could not read the package manifest');
+      }
+
+      // Recreate the package inside a named subfolder of the chosen directory.
+      var root = await dirHandle.getDirectoryHandle(manifest.folder, { create: true });
+      var dirCache = {};
+
+      async function dirFor(parts) {
+        var cur = root, key = '';
+        for (var i = 0; i < parts.length; i++) {
+          key += '/' + parts[i];
+          if (!dirCache[key]) {
+            cur = await cur.getDirectoryHandle(parts[i], { create: true });
+            dirCache[key] = cur;
+          } else {
+            cur = dirCache[key];
+          }
+        }
+        return cur;
+      }
+
+      var done = 0, total = manifest.count;
+      for (var i = 0; i < manifest.files.length; i++) {
+        var rel = manifest.files[i].path;
+        var parts = rel.split('/');
+        var name = parts.pop();
+        var targetDir = parts.length ? await dirFor(parts) : root;
+
+        var resp = await fetch('/portable-export/api/file?id=' + exportId + '&path=' + encodeURIComponent(rel));
+        if (!resp.ok) { throw new Error('Failed to fetch ' + rel); }
+        var blob = await resp.blob();
+
+        var fh = await targetDir.getFileHandle(name, { create: true });
+        var writable = await fh.createWritable();
+        await writable.write(blob);
+        await writable.close();
+
+        done++;
+        statusEl.textContent = 'Saving… ' + done + ' / ' + total + ' files';
+      }
+
+      statusEl.className = 'small text-success mt-2';
+      statusEl.innerHTML = '<i class="bi bi-check-circle me-1"></i>Saved ' + done +
+        ' file(s) to “' + manifest.folder + '” on this computer. Open <strong>index.html</strong> in that folder to browse the catalogue offline.';
+    } catch (err) {
+      statusEl.className = 'small text-danger mt-2';
+      statusEl.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i>Save failed: ' +
+        (err && err.message ? err.message : err) + '. You can still use the ZIP download.';
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  // Save-to-folder from a historical export row (destination = local).
+  document.querySelectorAll('.btn-save-local').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = this.getAttribute('data-id');
+      var cell = this.closest('td');
+      var statusEl = cell.querySelector('.local-save-status');
+      if (!statusEl) {
+        statusEl = document.createElement('div');
+        statusEl.className = 'local-save-status small text-muted mt-1';
+        cell.appendChild(statusEl);
+      }
+      saveExportToLocalFolder(id, this, statusEl);
+    });
+  });
 
   // ─── Delete Export ────────────────────────────────────────────
 

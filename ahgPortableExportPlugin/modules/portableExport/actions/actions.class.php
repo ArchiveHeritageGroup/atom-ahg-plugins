@@ -89,11 +89,17 @@ class portableExportActions extends sfActions
         $includeReferences = $request->getParameter('include_references', '1');
         $includeMasters = $request->getParameter('include_masters', '0');
 
-        // Export destination: 'zip' (downloadable ZIP) or 'folder' (uncompressed
-        // dump straight to an operator directory / mounted drive — for collections
-        // too large for a ZIP). Admin-only surface; the folder path is validated as
-        // an existing writable directory.
-        $destination = in_array($request->getParameter('destination', 'zip'), ['zip', 'folder'], true)
+        // Export destination:
+        //   'zip'    — downloadable ZIP (default)
+        //   'local'  — unzipped tree written into a folder/drive the operator picks
+        //              on their OWN PC/laptop, via the browser File System Access
+        //              API. Server-side this is identical to 'zip' (it builds the
+        //              staging tree AND a ZIP so unsupported browsers fall back to a
+        //              download); the client pulls the tree from api/manifest+api/file.
+        //   'folder' — uncompressed dump straight to a SERVER directory / mounted
+        //              drive — for collections too large for a ZIP.
+        // Admin-only surface; a server 'folder' path is validated as writable.
+        $destination = in_array($request->getParameter('destination', 'zip'), ['zip', 'local', 'folder'], true)
             ? $request->getParameter('destination', 'zip') : 'zip';
         $destinationPath = null;
         if ($destination === 'folder') {
@@ -306,6 +312,107 @@ class portableExportActions extends sfActions
         readfile($path);
 
         throw new sfStopException();
+    }
+
+    // ─── API: Local (this-computer) delivery ────────────────────────
+
+    /**
+     * List every file in a completed export's server-side staging tree, so the
+     * browser can recreate that tree inside a File System Access API-picked folder
+     * on the operator's own machine. Admin-only, JSON.
+     */
+    public function executeApiManifest(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+
+        $exportId = (int) $request->getParameter('id');
+        $export = DB::table('portable_export')->where('id', $exportId)->first();
+        if (!$export || $export->status !== 'completed') {
+            return $this->jsonResponse(['success' => false, 'error' => 'Export not found or not ready'], 404);
+        }
+
+        $dir = $this->localStagingDir($exportId);
+        if ($dir === null || !is_dir($dir)) {
+            return $this->jsonResponse(['success' => false, 'error' => 'No local package is available for this export'], 404);
+        }
+
+        $files = [];
+        try {
+            $it = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS)
+            );
+            foreach ($it as $f) {
+                if ($f->isFile()) {
+                    $rel = ltrim(str_replace('\\', '/', substr($f->getPathname(), strlen($dir))), '/');
+                    $files[] = ['path' => $rel, 'size' => $f->getSize()];
+                }
+            }
+        } catch (\Throwable $e) {
+            return $this->jsonResponse(['success' => false, 'error' => 'Could not read the package: ' . $e->getMessage()], 500);
+        }
+
+        return $this->jsonResponse([
+            'success' => true,
+            'folder' => preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $export->title) . '-' . $exportId,
+            'count' => count($files),
+            'total_size' => (int) $export->output_size,
+            'files' => $files,
+        ]);
+    }
+
+    /**
+     * Stream a single file from a completed export's staging tree by relative
+     * path. Admin-only. Path-traversal guarded: the resolved real path must sit
+     * inside the export's own staging directory.
+     */
+    public function executeApiFile(sfWebRequest $request)
+    {
+        $this->requireAdmin();
+
+        $exportId = (int) $request->getParameter('id');
+        $rel = ltrim(str_replace('\\', '/', (string) $request->getParameter('path', '')), '/');
+
+        $dir = $this->localStagingDir($exportId);
+        if ($dir === null || $rel === '' || strpos($rel, '..') !== false) {
+            $this->forward404('Invalid file request');
+        }
+
+        $full = realpath($dir . '/' . $rel);
+        if ($full === false || strpos($full, $dir . DIRECTORY_SEPARATOR) !== 0 || !is_file($full)) {
+            $this->forward404('File not found');
+        }
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType('application/octet-stream');
+        $response->setHttpHeader('Content-Length', (string) filesize($full));
+        $response->setHttpHeader('Cache-Control', 'no-cache, must-revalidate');
+        $response->sendHttpHeaders();
+
+        readfile($full);
+
+        throw new sfStopException();
+    }
+
+    /**
+     * Resolve an export's server-side staging directory, but ONLY when it lives
+     * under the plugin's exports base (downloads/portable-exports). Server 'folder'
+     * exports write to an arbitrary operator path and MUST NOT be reachable here —
+     * they resolve outside the base and return null. Returns a realpath or null.
+     */
+    protected function localStagingDir(int $exportId): ?string
+    {
+        $base = realpath(sfConfig::get('sf_root_dir') . '/downloads/portable-exports');
+        if ($base === false) {
+            return null;
+        }
+
+        $real = realpath($base . '/export-' . $exportId);
+        if ($real === false || strpos($real, $base . DIRECTORY_SEPARATOR) !== 0 || !is_dir($real)) {
+            return null;
+        }
+
+        return $real;
     }
 
     // ─── API: Delete Export ─────────────────────────────────────────

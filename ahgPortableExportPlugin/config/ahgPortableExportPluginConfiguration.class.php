@@ -61,6 +61,11 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
         $r->any('portable_export_api_token', '/portable-export/api/token', 'apiToken');
         $r->any('portable_export_api_estimate', '/portable-export/api/estimate', 'apiEstimate');
 
+        // Local (this-computer) delivery: browser writes the unzipped tree into a
+        // File System Access API-picked folder by pulling the manifest + each file.
+        $r->any('portable_export_api_manifest', '/portable-export/api/manifest', 'apiManifest');
+        $r->any('portable_export_api_file', '/portable-export/api/file', 'apiFile');
+
         // Download
         $r->any('portable_export_download', '/portable-export/download', 'download');
 
