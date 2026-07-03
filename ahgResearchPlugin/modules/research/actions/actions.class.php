@@ -8992,11 +8992,17 @@ class researchActions extends AhgController
             require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OfflineSyncService.php';
             $svc = new OfflineSyncService();
             $res = $svc->applyQueue((int) $r->id, $queue);
+
+            $applied = (int) ($res['applied'] ?? 0);
+            $conflicts = (int) ($res['conflicts'] ?? 0);
             $this->getUser()->setFlash('success', sprintf(
-                'Synced %d change(s) back into your research%s. Metadata suggestions are queued for curator review.',
-                $res['applied'] ?? 0,
-                ($res['conflicts'] ?? 0) ? (' (' . $res['conflicts'] . ' skipped)') : ''
+                'Synced %d change(s) back into your research. Metadata suggestions are queued for curator review.',
+                $applied
             ));
+            if ($conflicts > 0) {
+                $why = !empty($res['errors']) ? (': ' . implode('; ', $res['errors'])) : '.';
+                $this->getUser()->setFlash('error', $conflicts . ' change(s) could not be applied' . $why);
+            }
         }
 
         $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));

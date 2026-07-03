@@ -89,7 +89,12 @@ class OfflineSyncService
             }
         }
 
-        return ['applied' => $applied, 'conflicts' => $conflicts, 'log_id' => $logId];
+        return [
+            'applied' => $applied,
+            'conflicts' => $conflicts,
+            'log_id' => $logId,
+            'errors' => array_values(array_slice($errors, 0, 5)),
+        ];
     }
 
     protected function applyJournalEntry(int $researcherId, array $entry): void
@@ -215,15 +220,31 @@ class OfflineSyncService
         $atomRoot = rtrim((string) \sfConfig::get('sf_root_dir', '/usr/share/nginx/archive'), '/');
         $relDir = '/uploads/research-offline/' . $researcherId;
         $absDir = $atomRoot . $relDir;
+        $base = $atomRoot . '/uploads/research-offline';
+
+        // Guard: guarantee a WRITABLE attachment folder. A stray folder left owned
+        // by another user (e.g. a CLI task run as root) would otherwise make every
+        // file upload fail. Create it if missing; if it exists but the web server
+        // cannot write to it, fail with a clear, actionable message (which lands in
+        // the sync result + log) instead of a silent skip.
         if (!is_dir($absDir)) {
             @mkdir($absDir, 0775, true);
+        }
+        if (!is_dir($absDir)) {
+            throw new \RuntimeException('Attachment folder could not be created (' . $relDir
+                . '). Run: mkdir -p ' . $base . ' && chown -R www-data:www-data ' . $base);
+        }
+        if (!is_writable($absDir)) {
+            throw new \RuntimeException('Attachment folder is not writable by the web server ('
+                . $relDir . '). Fix ownership: chown -R www-data:www-data ' . $base);
         }
 
         $safeName = preg_replace('/[^A-Za-z0-9._-]/', '_', $name) ?: 'attachment';
         $safeName = date('YmdHis') . '_' . substr(md5($b64), 0, 8) . '_' . $safeName;
         $absPath = $absDir . '/' . $safeName;
-        if (file_put_contents($absPath, $binary) === false) {
-            throw new \RuntimeException('Could not write attachment "' . $name . '".');
+        if (@file_put_contents($absPath, $binary) === false) {
+            throw new \RuntimeException('Could not write attachment "' . $name . '" to ' . $relDir
+                . ' — check web-server write permissions (chown -R www-data:www-data ' . $base . ').');
         }
 
         $mime = '';
