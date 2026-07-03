@@ -206,6 +206,10 @@ class ExportPipelineService
 
         $packager = new ViewerPackager();
         $packager->package($outputDir, $config);
+
+        // Human-readable README for the recipient, at the package root, so it
+        // travels inside the ZIP / folder / USB drive alongside index.html.
+        $this->writeViewerReadme($outputDir, $export, $totalDescriptions, $totalObjects, $excluded, $branding);
         $this->updateProgress($exportId, 90);
 
         // Step 5: Finalise output (ZIP, or an uncompressed folder dump when the
@@ -450,6 +454,112 @@ class ExportPipelineService
         }
 
         return $size;
+    }
+
+    /**
+     * Write a plain-text README at the package root explaining, for whoever
+     * receives the CD/USB/ZIP, what the package is and how to use it. Plain text
+     * (README.txt) so it opens on any device with no software. Best-effort.
+     *
+     * @param object $export     portable_export row
+     * @param array  $excluded   disclosure gate counts {unpublished,icip,odrl,acl,redacted_objects}
+     * @param array  $branding   optional {title,subtitle,footer}
+     */
+    protected function writeViewerReadme(
+        string $outputDir,
+        $export,
+        int $totalDescriptions,
+        int $totalObjects,
+        array $excluded,
+        array $branding
+    ): void {
+        try {
+            $title = $branding['title'] ?? $export->title ?? 'Portable Catalogue';
+            $subtitle = $branding['subtitle'] ?? '';
+            $footer = $branding['footer'] ?? '';
+            $editable = ($export->mode ?? 'read_only') === 'editable';
+            $withheldTotal = $excluded['unpublished'] + $excluded['icip']
+                + $excluded['odrl'] + $excluded['acl'] + $excluded['redacted_objects'];
+
+            $bar = str_repeat('=', 70);
+            $L = [];
+            $L[] = $bar;
+            $L[] = '  ' . $title;
+            if ($subtitle !== '') {
+                $L[] = '  ' . $subtitle;
+            }
+            $L[] = '  Portable Catalogue — offline archive viewer';
+            $L[] = $bar;
+            $L[] = '';
+            $L[] = 'WHAT THIS IS';
+            $L[] = '------------';
+            $L[] = 'A self-contained copy of an archival catalogue that runs entirely in';
+            $L[] = 'your web browser. There is no installation, no server and no internet';
+            $L[] = 'connection required — everything it needs is in this folder.';
+            $L[] = '';
+            $L[] = 'HOW TO OPEN IT';
+            $L[] = '--------------';
+            $L[] = '1. Open the file named  index.html  (double-click it).';
+            $L[] = '2. It opens in your default web browser (Chrome, Firefox, Edge or';
+            $L[] = '   Safari — a recent version).';
+            $L[] = '3. Browse the hierarchy on the left, or use the search box to find';
+            $L[] = '   records. Click any record to see its full details and images.';
+            if ($editable) {
+                $L[] = '';
+                $L[] = 'This is an EDITABLE copy: you can add research notes and import your';
+                $L[] = 'own files, then use "Export Changes" to save a researcher-exchange';
+                $L[] = 'file that can be sent back to the archive.';
+            }
+            $L[] = '';
+            $L[] = 'TIP: to use it from a USB stick or CD, just copy this whole folder —';
+            $L[] = 'keep all the files and sub-folders together.';
+            $L[] = '';
+            $L[] = 'WHAT IS INSIDE';
+            $L[] = '--------------';
+            $L[] = '  index.html                 The viewer — start here';
+            $L[] = '  data/                      The catalogue records and search index';
+            $L[] = '  objects/                   Images and digital objects';
+            $L[] = '  assets/                    The viewer program (styles and scripts)';
+            $L[] = '  data/disclosure-summary.json  What was withheld and why (see below)';
+            $L[] = '';
+            $L[] = 'CONTENTS';
+            $L[] = '--------';
+            $L[] = '  Descriptions : ' . number_format($totalDescriptions);
+            $L[] = '  Digital objects: ' . number_format($totalObjects);
+            $L[] = '  Generated    : ' . date('d M Y H:i');
+            $L[] = '';
+            $L[] = 'ACCESS & CONFIDENTIALITY';
+            $L[] = '------------------------';
+            if ($withheldTotal > 0) {
+                $L[] = 'This package deliberately does NOT contain every record in the';
+                $L[] = 'archive. ' . number_format($withheldTotal) . ' record(s)/object(s) were withheld to honour';
+                $L[] = 'access rules — the person who created it could only include records';
+                $L[] = 'they are permitted to see, and the following are never exported:';
+                $L[] = '  - unpublished / draft records';
+                $L[] = '  - culturally-restricted (ICIP/TK) records';
+                $L[] = '  - records under access-policy or privacy restrictions';
+                $L[] = 'A full breakdown is in  data/disclosure-summary.json.';
+            } else {
+                $L[] = 'Records are included only where the person who created this package';
+                $L[] = 'is permitted to see them, and unpublished / culturally-restricted /';
+                $L[] = 'privacy-restricted records are never exported. See';
+                $L[] = 'data/disclosure-summary.json for details.';
+            }
+            $L[] = '';
+            $L[] = $bar;
+            if ($footer !== '') {
+                $L[] = '  ' . $footer;
+            }
+            $L[] = '  Produced with AtoM Heratio — Portable Export';
+            $L[] = '  The Archive and Heritage Group (Pty) Ltd';
+            $L[] = $bar;
+            $L[] = '';
+
+            file_put_contents($outputDir . '/README.txt', implode("\n", $L));
+        } catch (\Throwable $e) {
+            // best-effort — a missing README must never fail an export
+            error_log('portable-export: could not write viewer README: ' . $e->getMessage());
+        }
     }
 
     /**

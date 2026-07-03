@@ -39,11 +39,13 @@ This plugin satisfies the V2.3 Exit Export + Portability requirement, ensuring i
 
 ### What It Produces
 
-A ZIP archive containing a fully functional web application that runs in any modern browser without a server:
+A ZIP archive (or unzipped folder) containing a fully functional web application that runs in any modern browser without a server:
 
+- `README.txt` — Plain-language guide for the recipient: what the package is, how to open it, what's inside, and an access/confidentiality note
 - `index.html` — Main viewer entry point
 - `data/catalogue.json` — Description records with access points, dates, creators
 - `data/search-index.json` — Pre-built search index (FlexSearch)
+- `data/disclosure-summary.json` — What was withheld and why
 - `objects/` — Digital object files (thumbnails, references, optionally masters)
 
 ### Modes
