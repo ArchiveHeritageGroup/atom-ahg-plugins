@@ -415,11 +415,11 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
                     // #1389 — show how many records/objects the disclosure gate withheld.
                     $disc = !empty($exp->disclosure_summary) ? json_decode($exp->disclosure_summary, true) : null;
                     $w = $disc['withheld'] ?? [];
-                    $withheldTotal = ($w['unpublished'] ?? 0) + ($w['icip'] ?? 0) + ($w['odrl'] ?? 0) + ($w['redacted_objects'] ?? 0);
+                    $withheldTotal = ($w['unpublished'] ?? 0) + ($w['icip'] ?? 0) + ($w['odrl'] ?? 0) + ($w['acl'] ?? 0) + ($w['redacted_objects'] ?? 0);
                   ?>
                   <?php if ($withheldTotal > 0): ?>
                     <span class="badge bg-warning text-dark ms-1"
-                          title="Withheld from this offline package (confidentiality gates): <?php echo (int) ($w['unpublished'] ?? 0); ?> unpublished, <?php echo (int) ($w['icip'] ?? 0); ?> ICIP-restricted, <?php echo (int) ($w['odrl'] ?? 0); ?> ODRL-gated, <?php echo (int) ($w['redacted_objects'] ?? 0); ?> redacted object(s)">
+                          title="Withheld from this offline package (access &amp; confidentiality gates): <?php echo (int) ($w['acl'] ?? 0); ?> beyond exporter&#39;s view rights, <?php echo (int) ($w['unpublished'] ?? 0); ?> unpublished, <?php echo (int) ($w['icip'] ?? 0); ?> ICIP-restricted, <?php echo (int) ($w['odrl'] ?? 0); ?> ODRL-gated, <?php echo (int) ($w['redacted_objects'] ?? 0); ?> redacted object(s)">
                       <i class="fas fa-shield-halved me-1"></i><?php echo $withheldTotal; ?> withheld
                     </span>
                   <?php endif; ?>

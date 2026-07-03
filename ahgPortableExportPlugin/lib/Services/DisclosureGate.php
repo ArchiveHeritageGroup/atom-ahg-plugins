@@ -15,7 +15,13 @@ use Illuminate\Database\Capsule\Manager as DB;
  *     `portable_export_include_unpublished` setting is explicitly on;
  *   - ICIP/TK protocol-restricted records (icip_access_restriction), including
  *     whole subtrees flagged applies_to_descendants;
- *   - ODRL use-prohibited records (research_rights_policy prohibition on 'use').
+ *   - ODRL use-prohibited records (research_rights_policy prohibition on 'use');
+ *   - records the EXPORTING USER is not permitted to see (per-user ACL) — the
+ *     same deny-set that hides records from that user's search/browse:
+ *     security classification above clearance, donor-closed items, and active
+ *     full embargoes (honouring that user's embargo exceptions). Admins are
+ *     unrestricted. This makes an offline package role/security-scoped: a user
+ *     can only export what they themselves have view rights to.
  *
  * Each excluded id is counted once, in that precedence order.
  *
@@ -33,8 +39,39 @@ class DisclosureGate
     /** @var array<int,bool>|null */
     protected $odrl = null;
 
-    /** @var array{unpublished:int,icip:int,odrl:int,redacted_objects:int} */
-    protected $excluded = ['unpublished' => 0, 'icip' => 0, 'odrl' => 0, 'redacted_objects' => 0];
+    /** @var int[]|null per-user ACL deny-set (lazy) */
+    protected $aclRestricted = null;
+
+    /** @var bool the per-user ACL lookup threw — fail closed, withhold the whole scope */
+    protected $aclFailed = false;
+
+    /**
+     * User id whose view rights scope this export. 0 = anonymous (public
+     * baseline); a positive id = that specific user; null (only when the gate is
+     * built with no argument) = per-user ACL gating disabled.
+     *
+     * @var int|null
+     */
+    protected $aclUserId = null;
+
+    /** @var bool whether per-user ACL gating applies to this run */
+    protected $aclGating = false;
+
+    /** @var array{unpublished:int,icip:int,odrl:int,acl:int,redacted_objects:int} */
+    protected $excluded = ['unpublished' => 0, 'icip' => 0, 'odrl' => 0, 'acl' => 0, 'redacted_objects' => 0];
+
+    /**
+     * @param int|null $aclUserId user whose view rights bound this export (the
+     *                            export row's user_id): a positive id scopes to
+     *                            that user, 0 applies the anonymous/public
+     *                            baseline, null disables per-user ACL gating
+     *                            (legacy zero-arg construction only)
+     */
+    public function __construct(?int $aclUserId = null)
+    {
+        $this->aclUserId = $aclUserId;
+        $this->aclGating = ($aclUserId !== null);
+    }
 
     /**
      * Filter a list of IO ids down to those allowed into an offline package.
@@ -67,6 +104,7 @@ class DisclosureGate
 
         $icip = array_flip($this->icipRestrictedIds());
         $odrl = array_flip($this->odrlRestrictedIds());
+        $acl = array_flip($this->aclRestrictedIds());
 
         $kept = [];
         foreach ($ioIds as $id) {
@@ -80,6 +118,10 @@ class DisclosureGate
             }
             if (isset($odrl[$id])) {
                 $this->excluded['odrl']++;
+                continue;
+            }
+            if ($this->aclFailed || isset($acl[$id])) {
+                $this->excluded['acl']++;
                 continue;
             }
             $kept[] = $id;
@@ -99,11 +141,53 @@ class DisclosureGate
     }
 
     /**
-     * @return array{unpublished:int,icip:int,odrl:int,redacted_objects:int}
+     * @return array{unpublished:int,icip:int,odrl:int,acl:int,redacted_objects:int}
      */
     public function getExcluded(): array
     {
         return $this->excluded;
+    }
+
+    /**
+     * IO/object ids the exporting user is NOT permitted to see, per the same
+     * per-user deny-set that scopes their search/browse results (security
+     * classification above clearance, donor-closed items, active full embargoes,
+     * honouring that user's embargo exceptions). Admins get an empty set.
+     *
+     * Runs against the export row's stored user_id, so it is correct even though
+     * the export executes in a background task with no session. Fails CLOSED: if
+     * the ACL service is unavailable it withholds nothing extra only when no user
+     * is scoped; when a user IS scoped and the lookup throws, the whole scope is
+     * treated as restricted so nothing leaks.
+     *
+     * @return int[]
+     */
+    public function aclRestrictedIds(): array
+    {
+        if ($this->aclRestricted !== null) {
+            return $this->aclRestricted;
+        }
+
+        if (!$this->aclGating) {
+            return $this->aclRestricted = [];
+        }
+
+        // A positive id scopes to that user; 0 (anonymous) resolves to the public
+        // baseline, which SearchAccessFilterService expresses as a null user.
+        $lookupUser = ($this->aclUserId !== null && $this->aclUserId > 0) ? $this->aclUserId : null;
+
+        try {
+            $ids = \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                ->getRestrictedObjectIds($lookupUser);
+
+            return $this->aclRestricted = array_map('intval', $ids);
+        } catch (\Throwable $e) {
+            // Fail closed: a scoped user with a broken ACL lookup exports nothing
+            // (the filter loop treats the whole scope as ACL-restricted).
+            $this->aclFailed = true;
+
+            return $this->aclRestricted = [];
+        }
     }
 
     /**

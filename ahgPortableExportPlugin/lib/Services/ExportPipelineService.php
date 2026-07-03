@@ -101,7 +101,7 @@ class ExportPipelineService
         $extractor = new CatalogueExtractor($export->culture, function ($current, $total) use ($exportId) {
             $pct = 5 + (int) (($current / max($total, 1)) * 35);
             $this->updateProgress($exportId, min($pct, 40));
-        });
+        }, (int) $export->user_id);
 
         $itemIds = null;
         if ($export->scope_items) {
@@ -122,12 +122,14 @@ class ExportPipelineService
         // write it into the package so the recipient (and the operator, via the
         // stamped column) can see what was NOT exported.
         $excluded = $extractor->getDisclosureExcluded();
-        $withheldTotal = $excluded['unpublished'] + $excluded['icip'] + $excluded['odrl'] + $excluded['redacted_objects'];
+        $withheldTotal = $excluded['unpublished'] + $excluded['icip'] + $excluded['odrl'] + $excluded['acl'] + $excluded['redacted_objects'];
         $disclosure = [
             'generated_at' => date('c'),
             'records_included' => $totalDescriptions,
+            'exported_by_user_id' => (int) $export->user_id,
             'withheld' => $excluded,
-            'note' => 'Records/objects were excluded from this offline package to honour publication status, ICIP/TK cultural protocols, ODRL access policies, and PII redaction. Counts reflect what was NOT exported.',
+            'withheld_total' => $withheldTotal,
+            'note' => 'Records/objects were excluded from this offline package to honour the exporting user\'s view rights (security clearance, donor closure, embargo), publication status, ICIP/TK cultural protocols, ODRL access policies, and PII redaction. Counts reflect what was NOT exported.',
         ];
         $this->disclosureSummaryJson = json_encode($disclosure, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         file_put_contents(
@@ -284,7 +286,7 @@ class ExportPipelineService
         $archiveExtractor = new ArchiveExtractor($export->culture, function ($current, $total) use ($exportId) {
             $pct = 5 + (int) (($current / max($total, 1)) * 55);
             $this->updateProgress($exportId, min($pct, 60));
-        });
+        }, (int) $export->user_id);
 
         $entityFiles = $archiveExtractor->extract($exportId, $options, $outputDir);
         $this->updateProgress($exportId, 60);
@@ -295,11 +297,14 @@ class ExportPipelineService
         // #1389 — archive mode is gated too: record what was withheld and write the
         // disclosure summary into the package + stamp the column at completion.
         $excluded = $archiveExtractor->getDisclosureExcluded();
+        $withheldTotal = $excluded['unpublished'] + $excluded['icip'] + $excluded['odrl'] + $excluded['acl'] + $excluded['redacted_objects'];
         $disclosure = [
             'generated_at' => date('c'),
             'records_included' => $totalDescriptions,
+            'exported_by_user_id' => (int) $export->user_id,
             'withheld' => $excluded,
-            'note' => 'Records/objects were excluded from this offline package to honour publication status, ICIP/TK cultural protocols, ODRL access policies, and PII redaction. Counts reflect what was NOT exported.',
+            'withheld_total' => $withheldTotal,
+            'note' => 'Records/objects were excluded from this offline package to honour the exporting user\'s view rights (security clearance, donor closure, embargo), publication status, ICIP/TK cultural protocols, ODRL access policies, and PII redaction. Counts reflect what was NOT exported.',
         ];
         $this->disclosureSummaryJson = json_encode($disclosure, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         file_put_contents(

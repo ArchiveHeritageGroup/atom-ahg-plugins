@@ -21,11 +21,11 @@ class ArchiveExtractor
     /** @var DisclosureGate #1389 confidentiality gate for offline packages */
     protected $disclosureGate;
 
-    public function __construct(string $culture = 'en', ?callable $progressCallback = null)
+    public function __construct(string $culture = 'en', ?callable $progressCallback = null, ?int $aclUserId = null)
     {
         $this->culture = $culture;
         $this->progressCallback = $progressCallback;
-        $this->disclosureGate = new DisclosureGate();
+        $this->disclosureGate = new DisclosureGate($aclUserId);
     }
 
     /**
