@@ -927,28 +927,9 @@ class portableExportActions extends sfActions
      */
     protected function launchImportBackground(int $importId): void
     {
-        // Try queue dispatch first
-        try {
-            if (class_exists('\AtomFramework\Services\QueueService')) {
-                $queueService = new \AtomFramework\Services\QueueService();
-                $userId = $this->userId();
-                $queueService->dispatch(
-                    'portable:import',
-                    ['task' => 'portable:import', 'args' => '--import-id=' . $importId],
-                    'import',
-                    5,
-                    0,
-                    1,
-                    $userId
-                );
-
-                return;
-            }
-        } catch (\Throwable $e) {
-            // Queue unavailable, fall through to nohup
-        }
-
-        // Fallback: legacy nohup launch
+        // nohup launch (not QueueService) — the ahg_queue_job queue has no worker
+        // draining it on these instances, so a dispatched import would hang
+        // 'pending'. nohup runs it immediately and needs no worker.
         $atomRoot = sfConfig::get('sf_root_dir');
         $logDir = $atomRoot . '/downloads/portable-imports';
         @mkdir($logDir, 0755, true);
@@ -1004,28 +985,12 @@ class portableExportActions extends sfActions
      */
     protected function launchBackground(int $exportId): void
     {
-        // Try queue dispatch first
-        try {
-            if (class_exists('\AtomFramework\Services\QueueService')) {
-                $queueService = new \AtomFramework\Services\QueueService();
-                $userId = $this->userId();
-                $queueService->dispatch(
-                    'portable:export',
-                    ['task' => 'portable:export', 'args' => '--export-id=' . $exportId],
-                    'export',
-                    5,
-                    0,
-                    1,
-                    $userId
-                );
-
-                return;
-            }
-        } catch (\Throwable $e) {
-            // Queue unavailable, fall through to nohup
-        }
-
-        // Fallback: legacy nohup launch
+        // Launch via nohup — a detached CLI run that processes the job
+        // immediately and streams progress. We deliberately do NOT use
+        // QueueService here: on these instances the ahg_queue_job queue has no
+        // worker draining it, so a dispatched export would sit 'pending' forever
+        // (the "Extracting catalogue data… (hangs)" symptom). nohup needs no
+        // worker and is reliable wherever exec() is enabled.
         $atomRoot = sfConfig::get('sf_root_dir');
         $cmd = sprintf(
             'nohup php %s/symfony portable:export --export-id=%d > %s/downloads/portable-exports/export-%d.log 2>&1 &',

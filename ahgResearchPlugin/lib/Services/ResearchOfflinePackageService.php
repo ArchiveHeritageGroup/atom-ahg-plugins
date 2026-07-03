@@ -1,0 +1,317 @@
+<?php
+
+/**
+ * ResearchOfflinePackageService — build a self-contained, downloadable offline
+ * research package for a researcher.
+ *
+ * The researcher selects which of their own Collections / Projects / Favourites
+ * folders to take offline. We resolve those to information-object ids, scope them
+ * to what the researcher may see (per-user ACL deny-set + published only), and
+ * write a self-contained HTML viewer (runs from file:// on any device, no login,
+ * no server) that lets them add notes, sources, metadata suggestions and files,
+ * then "Save for sync" a researcher-sync.json. That file is uploaded back and
+ * consumed by OfflineSyncService::applyQueue().
+ *
+ * Built synchronously in the web request — no background job / queue (so it can
+ * never hang like the ahg_queue_job export queue did).
+ */
+
+use Illuminate\Database\Capsule\Manager as DB;
+
+class ResearchOfflinePackageService
+{
+    /**
+     * Resolve the selected sources to ACL-scoped, published IO ids, verifying the
+     * researcher owns each selected collection/project/folder.
+     *
+     * @param array $sources ['collection'=>int[], 'project'=>int[], 'favorites'=>int[]]
+     *
+     * @return int[]
+     */
+    public function resolveSelectedIds($researcher, int $userId, array $sources): array
+    {
+        $ids = [];
+
+        $collIds = array_map('intval', $sources['collection'] ?? []);
+        if ($collIds) {
+            $owned = DB::table('research_collection')->where('researcher_id', $researcher->id)
+                ->whereIn('id', $collIds)->pluck('id')->all();
+            if ($owned) {
+                foreach (DB::table('research_collection_item')->whereIn('collection_id', $owned)
+                    ->pluck('object_id') as $id) {
+                    $ids[(int) $id] = true;
+                }
+            }
+        }
+
+        $projIds = array_map('intval', $sources['project'] ?? []);
+        if ($projIds) {
+            $owned = DB::table('research_project')->where('owner_id', $researcher->id)
+                ->whereIn('id', $projIds)->pluck('id')->all();
+            if ($owned) {
+                foreach (DB::table('research_project_resource')->whereIn('project_id', $owned)
+                    ->whereIn('resource_type', ['object', 'archive_record'])->get() as $r) {
+                    $oid = (int) ($r->object_id ?: $r->resource_id);
+                    if ($oid) {
+                        $ids[$oid] = true;
+                    }
+                }
+            }
+        }
+
+        $folderIds = array_map('intval', $sources['favorites'] ?? []);
+        if ($folderIds) {
+            $owned = DB::table('favorites_folder')->where('user_id', $userId)
+                ->whereIn('id', $folderIds)->pluck('id')->all();
+            if ($owned) {
+                foreach (DB::table('favorites')->whereIn('folder_id', $owned)
+                    ->where('user_id', $userId)->where('object_type', 'information_object')
+                    ->pluck('archival_description_id') as $id) {
+                    $ids[(int) $id] = true;
+                }
+            }
+        }
+
+        $ids = array_values(array_filter(array_keys($ids)));
+        if (empty($ids)) {
+            return [];
+        }
+
+        // Per-user ACL deny-set (fail closed) + published only.
+        try {
+            $restricted = array_flip(array_map('intval',
+                \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                    ->getRestrictedObjectIds($userId)));
+            $ids = array_values(array_filter($ids, function ($id) use ($restricted) {
+                return !isset($restricted[$id]);
+            }));
+        } catch (\Throwable $e) {
+            return [];
+        }
+        if (empty($ids)) {
+            return [];
+        }
+
+        $published = array_flip(array_map('intval', DB::table('status')
+            ->whereIn('object_id', $ids)->where('type_id', 158)->where('status_id', 160)
+            ->pluck('object_id')->all()));
+
+        return array_values(array_filter($ids, function ($id) use ($published) {
+            return isset($published[$id]);
+        }));
+    }
+
+    /**
+     * Build record data (+ optional researcher notes) for the given ids.
+     *
+     * @return array<int,array>
+     */
+    public function buildRecords(array $ids, string $culture, $researcher, bool $includeNotes): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        $rows = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
+            })
+            ->leftJoin('slug', 'slug.object_id', '=', 'io.id')
+            ->whereIn('io.id', $ids)
+            ->select('io.id', 'io.identifier', 'slug.slug', 'i18n.title',
+                'i18n.scope_and_content', 'i18n.extent_and_medium',
+                'i18n.archival_history', 'i18n.acquisition', 'i18n.access_conditions')
+            ->get();
+
+        $notesByObj = [];
+        if ($includeNotes) {
+            $notesByObj = DB::table('research_annotation')
+                ->where('researcher_id', $researcher->id)
+                ->whereIn('object_id', $ids)
+                ->select('object_id', 'annotation_type', 'title', 'content')
+                ->get()->groupBy('object_id');
+        }
+
+        $records = [];
+        foreach ($rows as $r) {
+            $recNotes = [];
+            foreach ($notesByObj[$r->id] ?? [] as $n) {
+                $recNotes[] = ['type' => $n->annotation_type, 'title' => $n->title, 'content' => $n->content];
+            }
+            $records[] = [
+                'id' => (int) $r->id,
+                'slug' => $r->slug,
+                'title' => $r->title,
+                'identifier' => $r->identifier,
+                'scope_and_content' => $r->scope_and_content,
+                'extent_and_medium' => $r->extent_and_medium,
+                'archival_history' => $r->archival_history,
+                'acquisition' => $r->acquisition,
+                'access_conditions' => $r->access_conditions,
+                'notes' => $recNotes,
+            ];
+        }
+
+        return $records;
+    }
+
+    /**
+     * Build the package into a temp dir and return the ZIP path.
+     */
+    public function build($researcher, int $userId, array $sources, bool $includeNotes, string $culture = 'en'): array
+    {
+        $ids = $this->resolveSelectedIds($researcher, $userId, $sources);
+        $records = $this->buildRecords($ids, $culture, $researcher, $includeNotes);
+
+        $syncToken = bin2hex(random_bytes(16));
+        $researcherName = trim(($researcher->first_name ?? '') . ' ' . ($researcher->last_name ?? '')) ?: 'Researcher';
+        $pkg = [
+            'sync_token' => $syncToken,
+            'researcher' => $researcherName,
+            'generated_at' => date('c'),
+            'count' => count($records),
+        ];
+
+        $tmp = sys_get_temp_dir() . '/research-offline-' . $userId . '-' . substr($syncToken, 0, 8);
+        @mkdir($tmp . '/data', 0775, true);
+
+        file_put_contents($tmp . '/data.js',
+            'window.PKG=' . json_encode($pkg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';' . "\n" .
+            'window.RECORDS=' . json_encode($records, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';' . "\n");
+        file_put_contents($tmp . '/index.html', $this->viewerHtml($researcherName, count($records)));
+        file_put_contents($tmp . '/README.txt', $this->readme($researcherName, count($records)));
+
+        $zipPath = $tmp . '.zip';
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            throw new \RuntimeException('Could not create the offline package.');
+        }
+        foreach (['index.html', 'data.js', 'README.txt'] as $f) {
+            $zip->addFile($tmp . '/' . $f, $f);
+        }
+        $zip->close();
+
+        // Clean the working dir (keep the zip).
+        foreach (['index.html', 'data.js', 'README.txt'] as $f) {
+            @unlink($tmp . '/' . $f);
+        }
+        @rmdir($tmp . '/data');
+        @rmdir($tmp);
+
+        return ['zip' => $zipPath, 'count' => count($records)];
+    }
+
+    private function readme(string $researcher, int $count): string
+    {
+        $year = date('Y');
+
+        return <<<TXT
+================================================================================
+ Offline Research Package — {$researcher}
+================================================================================
+
+{$count} record(s). Runs in any web browser with NO internet or login.
+
+HOW TO USE
+  1. Unzip this folder (keep all files together — a USB stick works well).
+  2. Double-click  index.html .
+  3. Pick a record, then add Notes / Sources / Suggestions / Files under it.
+     Everything saves in this browser automatically.
+  4. When you are back online, click  "Save for sync"  to download a
+     researcher-sync.json file.
+  5. In Heratio, go to  Research > Work Offline  and UPLOAD that file to bring
+     your work back. Metadata suggestions are reviewed by a curator; your notes,
+     sources and files are added to your research.
+
+Only records you are permitted to see are in this package.
+
+Produced with Heratio — The Archive & Heritage Group — https://theahg.co.za
+Copyright (C) {$year} The Archive & Heritage Group. Catalogue content remains the
+property of its rights holders and originating repository.
+================================================================================
+TXT;
+    }
+
+    private function viewerHtml(string $researcher, int $count): string
+    {
+        $r = htmlspecialchars($researcher, ENT_QUOTES, 'UTF-8');
+        $body = <<<'HTML'
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><title>Offline Research</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7f7f7;color:#222}
+header{background:#234;color:#fff;padding:.9rem 1.2rem}header h1{margin:0;font-size:1.2rem}header .m{opacity:.8;font-size:.82rem}
+main{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 6.5rem)}
+.list{background:#fff;border-right:1px solid #ddd;overflow-y:auto;max-height:calc(100vh - 3.2rem)}
+.list input{width:100%;padding:.45rem;border:0;border-bottom:1px solid #eee}
+.list a{display:block;padding:.5rem .8rem;border-bottom:1px solid #f1f1f1;cursor:pointer;text-decoration:none;color:#222;font-size:.9rem}
+.list a.on{background:#eaf2f8;border-left:3px solid #58a}.list a small{display:block;color:#888}
+.detail{padding:1.2rem 1.6rem;overflow-y:auto;max-height:calc(100vh - 3.2rem)}
+.detail h2{margin-top:0;color:#234}dl{display:grid;grid-template-columns:150px 1fr;gap:.3rem 1rem}dt{font-weight:600;color:#456}dd{margin:0;white-space:pre-wrap}
+.tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin:.6rem 0}.tabs button{border:1px solid #ccd;background:#fff;padding:.25rem .6rem;border-radius:1rem;cursor:pointer;font-size:.82rem}.tabs button.on{background:#58a;color:#fff;border-color:#58a}
+.pane{display:none}.pane.on{display:block}.pane input,.pane textarea{width:100%;padding:.4rem;border:1px solid #ccc;border-radius:.25rem;margin-bottom:.35rem}
+.btn{padding:.35rem .8rem;background:#58a;color:#fff;border:0;border-radius:.25rem;cursor:pointer}
+.entry{background:#f6f8fa;border:1px solid #e2e6ea;border-radius:.25rem;padding:.35rem .5rem;margin-bottom:.3rem;font-size:.83rem;display:flex;justify-content:space-between}.entry .x{color:#a33;cursor:pointer;font-weight:700}
+.bar{position:sticky;bottom:0;background:#1f2a37;color:#fff;display:flex;align-items:center;gap:1rem;padding:.6rem 1.2rem}.bar .g{flex:1;font-size:.85rem;opacity:.9}
+.bar button{padding:.45rem 1rem;border:0;border-radius:.25rem;cursor:pointer;font-weight:600}.bar .s{background:#3a8;color:#fff}.bar .c{background:#556;color:#fff}
+.empty{padding:2rem;color:#888}
+</style></head><body>
+<header><h1>Offline Research Package</h1><div class="m" id="hdr"></div></header>
+<main>
+<aside class="list"><input id="q" placeholder="Search records"><div id="ios"></div></aside>
+<section class="detail" id="detail"><div class="empty">Select a record on the left.</div></section>
+</main>
+<div class="bar"><span class="g"><b>Working offline.</b> Add notes/sources/suggestions/files, then Save for sync and upload the file in Heratio &rsaquo; Research &rsaquo; Work Offline.</span><span id="cnt">0</span><button class="c" id="clr">Clear</button><button class="s" id="sv">Save for sync</button></div>
+<script src="data.js"></script>
+<script>
+(function(){
+  var PKG=window.PKG||{},RECS=window.RECORDS||[],byId={},cur=null;
+  var QK='hros:'+(PKG.sync_token||'x')+':';
+  document.getElementById('hdr').textContent=RECS.length+' record(s) — '+(PKG.researcher||'');
+  RECS.forEach(function(r){byId[r.id]=r;});
+  function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'})[c];});}
+  function getA(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return[];}}
+  function setA(k,v){if(v.length)localStorage.setItem(k,JSON.stringify(v));else localStorage.removeItem(k);count();}
+  function kN(id){return QK+'note:'+id;}function kS(id){return QK+'src:'+id;}function kG(id){return QK+'sug:'+id;}function kF(id){return QK+'file:'+id;}
+  function render(f){f=(f||'').toLowerCase();var el=document.getElementById('ios');var sh=RECS.filter(function(r){return !f||String(r.title||'').toLowerCase().indexOf(f)>-1||String(r.identifier||'').toLowerCase().indexOf(f)>-1;});el.innerHTML=sh.map(function(r){return '<a data-id="'+r.id+'"'+(cur==r.id?' class="on"':'')+'>'+esc(r.title||'Untitled')+(r.identifier?'<small>'+esc(r.identifier)+'</small>':'')+'</a>';}).join('')||'<div class="empty">No matches</div>';}
+  function ents(a,lab,kind){if(!a.length)return '<div style="font-size:.8rem;color:#999">None yet.</div>';return a.map(function(e,i){return '<div class="entry"><span>'+lab(e)+'</span><span class="x" data-k="'+kind+'" data-i="'+i+'">&times;</span></div>';}).join('');}
+  function show(id){var r=byId[id];if(!r){return;}cur=id;render(document.getElementById('q').value);
+    var fields=[['Identifier',r.identifier],['Scope and content',r.scope_and_content],['Extent and medium',r.extent_and_medium],['Archival history',r.archival_history],['Access conditions',r.access_conditions]];
+    var dl='<dl>'+fields.filter(function(p){return p[1];}).map(function(p){return '<dt>'+esc(p[0])+'</dt><dd>'+esc(p[1])+'</dd>';}).join('')+'</dl>';
+    var ex=(r.notes||[]).map(function(n){return '<div class="entry"><span><em>'+esc(n.type)+'</em>: '+esc(n.content)+'</span></div>';}).join('');
+    var srcs=getA(kS(id)),sugs=getA(kG(id)),files=getA(kF(id)),note=localStorage.getItem(kN(id))||'';
+    document.getElementById('detail').innerHTML='<h2>'+esc(r.title||'Untitled')+'</h2>'+dl+(ex?'<h4>Your existing notes</h4>'+ex:'')
+      +'<h4>Add offline work</h4><div class="tabs"><button data-t="n" class="on">Note</button><button data-t="s">Source ('+srcs.length+')</button><button data-t="g">Suggestion ('+sugs.length+')</button><button data-t="f">File ('+files.length+')</button></div>'
+      +'<div class="pane on" data-p="n"><textarea id="cn" rows="3" placeholder="Your note">'+esc(note)+'</textarea><button class="btn" id="cnb">Save note</button></div>'
+      +'<div class="pane" data-p="s"><input id="st" placeholder="Title"><input id="sa" placeholder="Author"><input id="sy" placeholder="Year"><input id="su" placeholder="URL/reference"><button class="btn" id="sb">Add source</button><div id="sl">'+ents(srcs,function(e){return esc((e.title||'')+(e.author?' — '+e.author:''));},'s')+'</div></div>'
+      +'<div class="pane" data-p="g"><input id="gf" placeholder="Field (e.g. Title, Dates)"><textarea id="gt" rows="2" placeholder="Suggested correction/addition"></textarea><button class="btn" id="gb">Add suggestion</button><div style="font-size:.78rem;color:#888">Reviewed by a curator before any change.</div><div id="gl">'+ents(sugs,function(e){return esc((e.field||'')+': '+(e.text||''));},'g')+'</div></div>'
+      +'<div class="pane" data-p="f"><input type="file" id="ff"><div style="font-size:.78rem;color:#888">Max 5 MB; embedded in your sync file.</div><div id="fl">'+ents(files,function(e){return esc(e.name+' ('+Math.round((e.size||0)/1024)+' KB)');},'f')+'</div></div>';
+    wire(r);}
+  function wire(r){var d=document.getElementById('detail');var id=r.id;
+    d.querySelectorAll('.tabs button').forEach(function(b){b.addEventListener('click',function(){d.querySelectorAll('.tabs button').forEach(function(x){x.classList.remove('on');});d.querySelectorAll('.pane').forEach(function(x){x.classList.remove('on');});b.classList.add('on');var p=d.querySelector('.pane[data-p="'+b.dataset.t+'"]');if(p)p.classList.add('on');});});
+    d.querySelector('#cnb').addEventListener('click',function(){var v=d.querySelector('#cn').value;if(v.trim())localStorage.setItem(kN(id),v);else localStorage.removeItem(kN(id));count();this.textContent='Saved';var t=this;setTimeout(function(){t.textContent='Save note';},1200);});
+    d.querySelector('#sb').addEventListener('click',function(){var t=d.querySelector('#st').value.trim();if(!t)return;var a=getA(kS(id));a.push({title:t,author:d.querySelector('#sa').value.trim(),year:d.querySelector('#sy').value.trim(),url:d.querySelector('#su').value.trim()});setA(kS(id),a);show(id);});
+    d.querySelector('#gb').addEventListener('click',function(){var f=d.querySelector('#gf').value.trim(),t=d.querySelector('#gt').value.trim();if(!f||!t)return;var a=getA(kG(id));a.push({field:f,text:t});setA(kG(id),a);show(id);});
+    d.querySelector('#ff').addEventListener('change',function(){var file=this.files&&this.files[0];if(!file)return;if(file.size>5*1024*1024){alert('Max 5 MB');this.value='';return;}var rd=new FileReader();rd.onload=function(){var a=getA(kF(id));a.push({name:file.name,type:file.type,size:file.size,data:rd.result});setA(kF(id),a);show(id);};rd.readAsDataURL(file);});
+    d.querySelectorAll('.entry .x').forEach(function(x){x.addEventListener('click',function(){var k=x.dataset.k,i=+x.dataset.i;var key=k=='s'?kS(id):(k=='g'?kG(id):kF(id));var a=getA(key);a.splice(i,1);setA(key,a);show(id);});});}
+  function collect(){var q=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf(QK)!==0)continue;var p=k.substring(QK.length).split(':');var kind=p[0],oid=+p[1];
+    if(kind=='note'){var t=localStorage.getItem(k)||'';if(t.trim())q.push({kind:'annotation',object_id:oid,content:t,annotation_type:'note'});}
+    else if(kind=='src'){getA(k).forEach(function(s){q.push({kind:'source',object_id:oid,title:s.title,author:s.author,year:s.year,url:s.url});});}
+    else if(kind=='sug'){getA(k).forEach(function(s){q.push({kind:'metadata_suggestion',object_id:oid,field:s.field,suggestion:s.text});});}
+    else if(kind=='file'){getA(k).forEach(function(f){q.push({kind:'file',object_id:oid,name:f.name,type:f.type,size:f.size,data:f.data});});}}
+    return q;}
+  function count(){document.getElementById('cnt').textContent=collect().length;}
+  document.getElementById('ios').addEventListener('click',function(e){var a=e.target.closest('a[data-id]');if(a)show(+a.dataset.id);});
+  document.getElementById('q').addEventListener('input',function(){render(this.value);});
+  document.getElementById('sv').addEventListener('click',function(){var q=collect();if(!q.length){alert('Nothing to save yet.');return;}
+    var payload={research_offline_sync:1,sync_token:PKG.sync_token,researcher:PKG.researcher,generated_at:new Date().toISOString(),queue:q};
+    var b=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='researcher-sync.json';document.body.appendChild(a);a.click();document.body.removeChild(a);});
+  document.getElementById('clr').addEventListener('click',function(){if(!confirm('Clear all your offline work in this package?'))return;var ks=[];for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k.indexOf(QK)===0)ks.push(k);}ks.forEach(function(k){localStorage.removeItem(k);});count();if(cur)show(cur);});
+  render('');count();
+})();
+</script></body></html>
+HTML;
+
+        return $body;
+    }
+}

@@ -198,10 +198,12 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // §2.5 ResearcherView JSON endpoint (lightweight GraphQL substitute)
         $research->any('research_researcher_view', '/research/researcher-view/:researcherId', 'researcherView', ['researcherId' => '\\d+']);
 
-        // §2.6 Mobile / PWA shell
+        // §2.6 Offline research — select sources, download a self-contained
+        // package, work offline, then upload the sync file back.
         $research->any('research_mobile_home', '/research/mobile', 'mobileHome');
-        // Offline data payload: the researcher's collected records (Collections +
-        // Favourites + Projects), ACL-scoped, for the PWA to cache + render offline.
+        $research->any('research_offline_build', '/research/offline/build', 'buildOfflinePackage');
+        $research->any('research_offline_sync_upload', '/research/offline/sync-upload', 'syncUpload');
+        // Legacy JSON payload endpoint (kept for the PWA quick-capture path).
         $research->any('research_offline_data', '/research/offline-data', 'offlineData');
 
         // §2.7 Offline sync endpoint

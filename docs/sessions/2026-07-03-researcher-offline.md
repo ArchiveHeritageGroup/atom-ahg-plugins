@@ -60,3 +60,13 @@ Applied to archive + archeology. `sw.js` bumped v1→v2 + precache `/research/of
   database/migration_researcher_offline.sql
 - ahgFavoritesPlugin: modules/favorites/templates/browseSuccess.php
 - /usr/share/nginx/archive/sw.js (root; synced to archaeology)
+
+## Follow-up: curator review queue (v3.79.57)
+Admin-gated `/research/metadata-suggestions` (new `executeMetadataSuggestions` +
+route + `metadataSuggestionsSuccess.php` + sidebar link under Administration). Lists
+`research_metadata_suggestion` rows with Open/Accepted/Rejected tabs + counts; each row
+shows record (linked), field, suggestion, researcher, date; Accept/Reject on open ones
+records `status` + `reviewed_by` + `reviewed_at`. Accept/reject records the DECISION
+ONLY — it never edits the live catalogue automatically (curator applies accepted changes
+manually). Verified: route 301/302 auth; list-query join renders; accept flips status +
+reviewer; cleanup 0 rows. Synced to archaeology (md5 MATCH), cc + restart.

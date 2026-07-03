@@ -21,6 +21,9 @@ class ArchiveExtractor
     /** @var DisclosureGate #1389 confidentiality gate for offline packages */
     protected $disclosureGate;
 
+    /** @var array<string,string> per-entity extraction errors (type => message) */
+    protected $extractionErrors = [];
+
     public function __construct(string $culture = 'en', ?callable $progressCallback = null, ?int $aclUserId = null)
     {
         $this->culture = $culture;
@@ -83,6 +86,7 @@ class ArchiveExtractor
         foreach ($entityTypes as $type) {
             $data = [];
 
+            try {
             switch ($type) {
                 case 'descriptions':
                     $data = $this->extractDescriptions($scopeType, $scopeIds, $repositoryId);
@@ -129,6 +133,13 @@ class ArchiveExtractor
                 case 'menus':
                     $data = $this->extractMenus();
                     break;
+            }
+            } catch (\Throwable $e) {
+                // One entity type's schema/query problem must not abort the whole
+                // archive export. Log it, write an empty file, and carry on.
+                error_log('portable-export archive: "' . $type . '" extraction failed: ' . $e->getMessage());
+                $this->extractionErrors[$type] = $e->getMessage();
+                $data = [];
             }
 
             $filePath = $outputDir . '/data/' . $type . '.json';
@@ -353,7 +364,17 @@ class ArchiveExtractor
 
     protected function extractRights(?array $scopeIds): array
     {
+        // The `rights` table has NO object_id (or act_id) column. Rights link to
+        // information objects via the `relation` table (QubitTerm::RIGHT_ID = 168):
+        // subject_id = IO, object_id = rights.id. Join through it and expose the
+        // linked IO id as object_id for the export.
+        $rightTypeId = defined('QubitTerm::RIGHT_ID') ? \QubitTerm::RIGHT_ID : 168;
+
         $query = DB::table('rights as r')
+            ->join('relation as rel', function ($join) use ($rightTypeId) {
+                $join->on('rel.object_id', '=', 'r.id')
+                    ->where('rel.type_id', '=', $rightTypeId);
+            })
             ->leftJoin('rights_i18n as ri', function ($join) {
                 $join->on('r.id', '=', 'ri.id')
                     ->where('ri.culture', '=', $this->culture);
@@ -361,17 +382,18 @@ class ArchiveExtractor
             ->leftJoin('object as o', 'r.id', '=', 'o.id');
 
         if ($scopeIds !== null) {
-            $this->applyIdFilter($query, 'r.object_id', $scopeIds);
+            $this->applyIdFilter($query, 'rel.subject_id', $scopeIds);
         }
 
         $rows = $query->select(
-            'r.id', 'r.object_id', 'r.basis_id', 'r.act_id',
+            'r.id', 'rel.subject_id as object_id', 'r.basis_id',
             'r.start_date', 'r.end_date', 'r.rights_holder_id',
-            'r.copyright_status_id',
-            'ri.rights_note', 'ri.copyright_note', 'ri.license_identifier',
-            'ri.license_terms', 'ri.license_note', 'ri.statute_jurisdiction',
-            'ri.statute_citation', 'ri.statute_determination_date',
-            'ri.statute_note',
+            'r.copyright_status_id', 'r.copyright_status_date',
+            'r.copyright_jurisdiction', 'r.statute_determination_date',
+            'r.statute_citation_id',
+            'ri.rights_note', 'ri.copyright_note', 'ri.identifier_value',
+            'ri.identifier_type', 'ri.identifier_role', 'ri.license_terms',
+            'ri.license_note', 'ri.statute_jurisdiction', 'ri.statute_note',
             'o.created_at', 'o.updated_at'
         )->get();
 
@@ -399,12 +421,13 @@ class ArchiveExtractor
         }
 
         $rows = $query->select(
-            'a.id', 'a.identifier', 'a.date', 'a.source_of_acquisition_id',
-            'a.location_information',
+            'a.id', 'a.identifier', 'a.date', 'a.acquisition_type_id',
+            'a.processing_priority_id', 'a.processing_status_id', 'a.resource_type_id',
             'ai.appraisal', 'ai.archival_history', 'ai.scope_and_content',
             'ai.physical_characteristics', 'ai.received_extent_units',
-            'ai.processing_notes', 'ai.title',
-            'o.created_at', 'o.updated_at'
+            'ai.processing_notes', 'ai.title', 'ai.source_of_acquisition',
+            'ai.location_information',
+            'a.created_at', 'a.updated_at'
         )->get();
 
         $result = [];

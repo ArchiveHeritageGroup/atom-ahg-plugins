@@ -8860,37 +8860,132 @@ class researchActions extends AhgController
             $this->forward404('Researcher profile required');
         }
         $this->researcher = $r;
+        $userId = (int) $this->getUser()->getAttribute('user_id');
 
-        $this->recentItems = DB::table('research_collection_item as rci')
-            ->join('research_collection as rc', 'rci.collection_id', '=', 'rc.id')
-            ->leftJoin('information_object_i18n as ioi', function ($join) {
-                $join->on('rci.object_id', '=', 'ioi.id')
-                     ->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+        // Selection lists: the researcher's own collections, projects and
+        // favourites folders (with item counts) to choose what to take offline.
+        $this->collections = DB::table('research_collection as c')
+            ->leftJoin('research_collection_item as ci', 'ci.collection_id', '=', 'c.id')
+            ->where('c.researcher_id', $r->id)
+            ->groupBy('c.id', 'c.name')
+            ->select('c.id', 'c.name', DB::raw('COUNT(ci.id) as item_count'))
+            ->orderBy('c.name')
+            ->get()->all();
+
+        $this->projects = DB::table('research_project as p')
+            ->leftJoin('research_project_resource as pr', function ($j) {
+                $j->on('pr.project_id', '=', 'p.id')->whereIn('pr.resource_type', ['object', 'archive_record']);
             })
-            ->leftJoin('slug', 'rci.object_id', '=', 'slug.object_id')
-            ->where('rc.researcher_id', $r->id)
-            ->select('rci.object_id', 'ioi.title', 'slug.slug', 'rc.name as collection_name', 'rci.created_at')
-            ->orderBy('rci.created_at', 'desc')
-            ->limit(50)
-            ->get()
-            ->all();
+            ->where('p.owner_id', $r->id)
+            ->groupBy('p.id', 'p.title')
+            ->select('p.id', 'p.title', DB::raw('COUNT(pr.id) as item_count'))
+            ->orderBy('p.title')
+            ->get()->all();
 
-        if ($request->isMethod('post') && $request->getParameter('quick_journal')) {
-            $body = trim((string) $request->getParameter('content'));
-            if ($body !== '') {
-                DB::table('research_journal_entry')->insert([
-                    'researcher_id'  => $r->id,
-                    'entry_date'     => date('Y-m-d'),
-                    'content'        => $body,
-                    'content_format' => 'text',
-                    'entry_type'     => 'manual',
-                    'created_at'     => date('Y-m-d H:i:s'),
-                    'updated_at'     => date('Y-m-d H:i:s'),
-                ]);
-                $this->getUser()->setFlash('success', 'Journal entry saved.');
+        $this->folders = DB::table('favorites_folder as f')
+            ->leftJoin('favorites as fav', function ($j) {
+                $j->on('fav.folder_id', '=', 'f.id')->where('fav.object_type', '=', 'information_object');
+            })
+            ->where('f.user_id', $userId)
+            ->groupBy('f.id', 'f.name')
+            ->select('f.id', 'f.name', DB::raw('COUNT(fav.id) as item_count'))
+            ->orderBy('f.name')
+            ->get()->all();
+    }
+
+    /**
+     * Build a downloadable offline research package from the selected sources and
+     * stream it as a ZIP. Synchronous (no background queue) so it can never hang.
+     */
+    public function executeBuildOfflinePackage($request)
+    {
+        $this->requireLogin();
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $r = $this->service->getResearcherByUserId($userId);
+        if (!$r) {
+            $this->forward404('Researcher profile required');
+        }
+
+        $sources = [
+            'collection' => (array) $request->getParameter('collection_ids', []),
+            'project'    => (array) $request->getParameter('project_ids', []),
+            'favorites'  => (array) $request->getParameter('folder_ids', []),
+        ];
+        $includeNotes = (bool) $request->getParameter('include_notes', false);
+
+        if (empty($sources['collection']) && empty($sources['project']) && empty($sources['favorites'])) {
+            $this->getUser()->setFlash('error', 'Select at least one collection, project or favourites folder.');
+            $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
+        }
+
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ResearchOfflinePackageService.php';
+        $svc = new ResearchOfflinePackageService();
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        try {
+            $result = $svc->build($r, $userId, $sources, $includeNotes, $culture);
+        } catch (\Throwable $e) {
+            $this->getUser()->setFlash('error', 'Could not build the package: ' . $e->getMessage());
+            $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
+        }
+
+        if (($result['count'] ?? 0) === 0) {
+            $this->getUser()->setFlash('error', 'No records you can access were found in the selected items.');
+            @unlink($result['zip']);
+            $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
+        }
+
+        $filename = 'research-offline-' . date('Ymd') . '.zip';
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType('application/zip');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $response->setHttpHeader('Content-Length', (string) filesize($result['zip']));
+        $response->sendHttpHeaders();
+        readfile($result['zip']);
+        @unlink($result['zip']);
+
+        throw new sfStopException();
+    }
+
+    /**
+     * Upload a researcher-sync.json produced offline and apply it via
+     * OfflineSyncService::applyQueue (notes/sources → annotations, suggestions →
+     * review queue, files → attachments).
+     */
+    public function executeSyncUpload($request)
+    {
+        $this->requireLogin();
+        $r = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$r) {
+            $this->forward404('Researcher profile required');
+        }
+
+        if ($request->isMethod('post')) {
+            $file = $request->getFiles('sync_file');
+            $tmp = $file['tmp_name'] ?? '';
+            if (!$tmp || !is_uploaded_file($tmp)) {
+                $this->getUser()->setFlash('error', 'Please choose a researcher-sync.json file to upload.');
                 $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
             }
+            $payload = json_decode((string) file_get_contents($tmp), true);
+            $queue = (is_array($payload) && !empty($payload['queue']) && is_array($payload['queue'])) ? $payload['queue'] : null;
+            if (!$queue) {
+                $this->getUser()->setFlash('error', 'That file does not look like a valid sync file (no changes found).');
+                $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
+            }
+
+            require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/OfflineSyncService.php';
+            $svc = new OfflineSyncService();
+            $res = $svc->applyQueue((int) $r->id, $queue);
+            $this->getUser()->setFlash('success', sprintf(
+                'Synced %d change(s) back into your research%s. Metadata suggestions are queued for curator review.',
+                $res['applied'] ?? 0,
+                ($res['conflicts'] ?? 0) ? (' (' . $res['conflicts'] . ' skipped)') : ''
+            ));
         }
+
+        $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
     }
 
     /**
