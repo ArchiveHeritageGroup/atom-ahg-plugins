@@ -171,6 +171,17 @@ class AccessionEditAction extends AhgEditController
                     // Log but don't block — data is already saved
                 }
 
+                // Redirect to the accession VIEW page. Use the explicit
+                // module/action/slug form (matches the accession_view_override
+                // route: /accession/:slug -> action index). The object form
+                // [$this->resource, 'module' => 'accession'] omits the action and
+                // is ambiguous across the three module=accession QubitResourceRoutes
+                // (index/edit/delete), so from within the edit action it could
+                // regenerate the /edit URL instead of routing back to the view.
+                $slug = $this->resource->slug ?? null;
+                if ($slug) {
+                    $this->redirect(['module' => 'accession', 'action' => 'index', 'slug' => $slug]);
+                }
                 $this->redirect([$this->resource, 'module' => 'accession']);
             }
         }
