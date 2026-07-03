@@ -118,12 +118,14 @@ class AccessionEditAction extends AhgEditController
         if ($request->isMethod('post')) {
             $this->form->bind($request->getPostParameters());
             if ($this->form->isValid()) {
-                // Only process the donor relation when a donor was actually selected.
-                // The (locked) qt relatedDonorComponent parses the submitted value and
-                // calls getPrimaryContact() on the resulting resource without a null
-                // check, so an empty/no-donor submission crashed the whole save.
+                // Only process the donor relation when a donor value was submitted
+                // AND it resolves to a real object. The (locked) qt relatedDonorComponent
+                // parses the submitted value and calls getPrimaryContact() on the result
+                // WITHOUT a null check, so both an empty submission and a non-resolving
+                // value (e.g. free text that isn't a valid donor URL) crashed the save.
                 $relatedDonor = $this->request->getParameter('relatedDonor');
-                if (is_array($relatedDonor) && !empty($relatedDonor['resource'])) {
+                $donorValue = is_array($relatedDonor) ? (string) ($relatedDonor['resource'] ?? '') : '';
+                if ($donorValue !== '' && $this->donorValueResolves($donorValue)) {
                     $this->relatedDonorComponent->processForm();
                 }
 
@@ -429,6 +431,22 @@ class AccessionEditAction extends AhgEditController
 
             default:
                 return parent::processField($field);
+        }
+    }
+
+    /**
+     * Whether a submitted donor "resource" value resolves to a real object, so the
+     * locked qt relatedDonorComponent's unguarded getPrimaryContact() call is safe.
+     * Mirrors how that component parses the value (routing->parse(Qubit::pathInfo)).
+     */
+    protected function donorValueResolves(string $value): bool
+    {
+        try {
+            $params = $this->context->routing->parse(Qubit::pathInfo($value));
+
+            return isset($params['_sf_route']) && $params['_sf_route']->resource !== null;
+        } catch (\Throwable $e) {
+            return false;
         }
     }
 }
