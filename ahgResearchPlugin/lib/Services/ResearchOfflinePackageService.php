@@ -49,11 +49,19 @@ class ResearchOfflinePackageService
             $owned = DB::table('research_project')->where('owner_id', $researcher->id)
                 ->whereIn('id', $projIds)->pluck('id')->all();
             if ($owned) {
+                // Project records come from research_project_resource AND the
+                // research_clipboard_project "add to project" table.
                 foreach (DB::table('research_project_resource')->whereIn('project_id', $owned)
                     ->whereIn('resource_type', ['object', 'archive_record'])->get() as $r) {
                     $oid = (int) ($r->object_id ?: $r->resource_id);
                     if ($oid) {
                         $ids[$oid] = true;
+                    }
+                }
+                foreach (DB::table('research_clipboard_project')->whereIn('project_id', $owned)
+                    ->pluck('object_id') as $oid) {
+                    if ($oid) {
+                        $ids[(int) $oid] = true;
                     }
                 }
             }
@@ -173,7 +181,11 @@ class ResearchOfflinePackageService
         ];
 
         $tmp = sys_get_temp_dir() . '/research-offline-' . $userId . '-' . substr($syncToken, 0, 8);
-        @mkdir($tmp . '/data', 0775, true);
+        @mkdir($tmp . '/objects', 0775, true);
+
+        // Copy thumbnails into the package (objects/) and set each record's
+        // relative 'thumbnail' path, so images show offline.
+        $thumbRel = $this->attachThumbnails($records, count($records) ? array_column($records, 'id') : [], $tmp);
 
         file_put_contents($tmp . '/data.js',
             'window.PKG=' . json_encode($pkg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';' . "\n" .
@@ -189,16 +201,77 @@ class ResearchOfflinePackageService
         foreach (['index.html', 'data.js', 'README.txt'] as $f) {
             $zip->addFile($tmp . '/' . $f, $f);
         }
+        foreach ($thumbRel as $rel) {
+            if (is_file($tmp . '/' . $rel)) {
+                $zip->addFile($tmp . '/' . $rel, $rel);
+            }
+        }
         $zip->close();
 
         // Clean the working dir (keep the zip).
         foreach (['index.html', 'data.js', 'README.txt'] as $f) {
             @unlink($tmp . '/' . $f);
         }
-        @rmdir($tmp . '/data');
+        foreach ($thumbRel as $rel) {
+            @unlink($tmp . '/' . $rel);
+        }
+        @rmdir($tmp . '/objects');
         @rmdir($tmp);
 
         return ['zip' => $zipPath, 'count' => count($records)];
+    }
+
+    /**
+     * Copy each record's thumbnail into {tmpDir}/objects/ and set its relative
+     * 'thumbnail' path, so images display offline. Thumb = digital_object usage
+     * 142 whose parent is the master (usage 140) of the IO; file lives at
+     * sf_root_dir + path + name. Returns the relative paths copied.
+     *
+     * @return string[]
+     */
+    private function attachThumbnails(array &$records, array $ids, string $tmpDir): array
+    {
+        foreach ($records as &$r0) {
+            $r0['thumbnail'] = null;
+        }
+        unset($r0);
+        if (empty($ids) || empty($records)) {
+            return [];
+        }
+
+        $atomRoot = rtrim((string) \sfConfig::get('sf_root_dir', '/usr/share/nginx/archive'), '/');
+
+        $masters = DB::table('digital_object')->whereIn('object_id', $ids)->where('usage_id', 140)
+            ->select('id', 'object_id')->get()->keyBy('object_id');
+        $masterIds = $masters->pluck('id')->all();
+        $thumbs = empty($masterIds) ? collect() : DB::table('digital_object')
+            ->whereIn('parent_id', $masterIds)->where('usage_id', 142)
+            ->select('parent_id', 'path', 'name')->get()->keyBy('parent_id');
+
+        $rel = [];
+        foreach ($records as &$rec) {
+            $oid = (int) $rec['id'];
+            if (!isset($masters[$oid])) {
+                continue;
+            }
+            $t = $thumbs[$masters[$oid]->id] ?? null;
+            if (!$t || empty($t->path) || empty($t->name)) {
+                continue;
+            }
+            $src = $atomRoot . $t->path . $t->name;
+            if (!is_file($src)) {
+                continue;
+            }
+            $ext = pathinfo($t->name, PATHINFO_EXTENSION) ?: 'jpg';
+            $dest = 'objects/' . $oid . '.' . preg_replace('/[^A-Za-z0-9]/', '', $ext);
+            if (@copy($src, $tmpDir . '/' . $dest)) {
+                $rec['thumbnail'] = $dest;
+                $rel[] = $dest;
+            }
+        }
+        unset($rec);
+
+        return $rel;
     }
 
     private function readme(string $researcher, int $count): string
@@ -280,7 +353,7 @@ main{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 6.5rem
     var dl='<dl>'+fields.filter(function(p){return p[1];}).map(function(p){return '<dt>'+esc(p[0])+'</dt><dd>'+esc(p[1])+'</dd>';}).join('')+'</dl>';
     var ex=(r.notes||[]).map(function(n){return '<div class="entry"><span><em>'+esc(n.type)+'</em>: '+esc(n.content)+'</span></div>';}).join('');
     var srcs=getA(kS(id)),sugs=getA(kG(id)),files=getA(kF(id)),note=localStorage.getItem(kN(id))||'';
-    document.getElementById('detail').innerHTML='<h2>'+esc(r.title||'Untitled')+'</h2>'+dl+(ex?'<h4>Your existing notes</h4>'+ex:'')
+    document.getElementById('detail').innerHTML='<h2>'+esc(r.title||'Untitled')+'</h2>'+(r.thumbnail?'<img src="'+esc(r.thumbnail)+'" alt="" style="max-width:220px;max-height:220px;float:right;margin:0 0 .6rem .8rem;border:1px solid #ddd;border-radius:.25rem;background:#fff;padding:.2rem">':'')+dl+(ex?'<h4>Your existing notes</h4>'+ex:'')
       +'<h4>Add offline work</h4><div class="tabs"><button data-t="n" class="on">Note</button><button data-t="s">Source ('+srcs.length+')</button><button data-t="g">Suggestion ('+sugs.length+')</button><button data-t="f">File ('+files.length+')</button></div>'
       +'<div class="pane on" data-p="n"><textarea id="cn" rows="3" placeholder="Your note">'+esc(note)+'</textarea><button class="btn" id="cnb">Save note</button></div>'
       +'<div class="pane" data-p="s"><input id="st" placeholder="Title"><input id="sa" placeholder="Author"><input id="sy" placeholder="Year"><input id="su" placeholder="URL/reference"><button class="btn" id="sb">Add source</button><div id="sl">'+ents(srcs,function(e){return esc((e.title||'')+(e.author?' — '+e.author:''));},'s')+'</div></div>'

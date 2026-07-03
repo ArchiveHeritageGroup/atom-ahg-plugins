@@ -8872,15 +8872,29 @@ class researchActions extends AhgController
             ->orderBy('c.name')
             ->get()->all();
 
-        $this->projects = DB::table('research_project as p')
-            ->leftJoin('research_project_resource as pr', function ($j) {
-                $j->on('pr.project_id', '=', 'p.id')->whereIn('pr.resource_type', ['object', 'archive_record']);
-            })
-            ->where('p.owner_id', $r->id)
-            ->groupBy('p.id', 'p.title')
-            ->select('p.id', 'p.title', DB::raw('COUNT(pr.id) as item_count'))
-            ->orderBy('p.title')
-            ->get()->all();
+        // A project's records come from TWO tables: research_project_resource
+        // (resource_type object/archive_record) AND research_clipboard_project
+        // (the "add to project" clipboard). Count the distinct union of both.
+        $projects = DB::table('research_project')->where('owner_id', $r->id)
+            ->orderBy('title')->get(['id', 'title']);
+        foreach ($projects as $p) {
+            $ids = [];
+            foreach (DB::table('research_project_resource')->where('project_id', $p->id)
+                ->whereIn('resource_type', ['object', 'archive_record'])->get() as $x) {
+                $o = (int) ($x->object_id ?: $x->resource_id);
+                if ($o) {
+                    $ids[$o] = true;
+                }
+            }
+            foreach (DB::table('research_clipboard_project')->where('project_id', $p->id)
+                ->pluck('object_id') as $o) {
+                if ($o) {
+                    $ids[(int) $o] = true;
+                }
+            }
+            $p->item_count = count($ids);
+        }
+        $this->projects = $projects->all();
 
         $this->folders = DB::table('favorites_folder as f')
             ->leftJoin('favorites as fav', function ($j) {

@@ -100,9 +100,10 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
                     <?php echo __('Finished working offline? In the package, click "Save for sync" to download a researcher-sync.json file, then upload it here. Your notes and sources are added to your research, files are attached, and metadata suggestions go to a curator for review.'); ?>
                 </p>
                 <form method="post" action="<?php echo $syncUrl; ?>" enctype="multipart/form-data">
-                    <div class="mb-2">
-                        <input type="file" name="sync_file" accept="application/json,.json" class="form-control" required>
+                    <div class="mb-1">
+                        <input type="file" name="sync_file" class="form-control" required>
                     </div>
+                    <div class="form-text mb-2"><?php echo __('Choose the <strong>researcher-sync.json</strong> file you downloaded from the package.'); ?></div>
                     <button type="submit" class="btn btn-success"><i class="fas fa-cloud-arrow-up me-1"></i><?php echo __('Upload &amp; sync'); ?></button>
                 </form>
             </div>
