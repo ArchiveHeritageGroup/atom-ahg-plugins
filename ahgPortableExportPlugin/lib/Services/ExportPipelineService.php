@@ -552,6 +552,14 @@ class ExportPipelineService
             }
             $L[] = '  Produced with AtoM Heratio — Portable Export';
             $L[] = '  The Archive and Heritage Group (Pty) Ltd';
+            $L[] = '  https://theahg.co.za';
+            $L[] = '';
+            $L[] = '  Copyright (c) ' . date('Y') . ' The Archive and Heritage Group (Pty) Ltd.';
+            $L[] = '  The AtoM Heratio Portable Export software is the property of';
+            $L[] = '  The Archive and Heritage Group (Pty) Ltd. Catalogue content remains';
+            $L[] = '  the property of its respective rights holders and the originating';
+            $L[] = '  institution, and may not be reproduced or redistributed without';
+            $L[] = '  their permission.';
             $L[] = $bar;
             $L[] = '';
 
