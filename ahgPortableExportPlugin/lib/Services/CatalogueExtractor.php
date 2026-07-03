@@ -19,10 +19,25 @@ class CatalogueExtractor
     /** @var callable|null Progress callback: fn(int $current, int $total) */
     protected $progressCallback;
 
+    /** @var DisclosureGate #1389 confidentiality gate for offline packages */
+    protected $disclosureGate;
+
     public function __construct(string $culture = 'en', ?callable $progressCallback = null)
     {
         $this->culture = $culture;
         $this->progressCallback = $progressCallback;
+        $this->disclosureGate = new DisclosureGate();
+    }
+
+    /**
+     * Excluded counts recorded by the #1389 disclosure gate during the last
+     * extract() (unpublished / icip / odrl / redacted_objects).
+     *
+     * @return array{unpublished:int,icip:int,odrl:int,redacted_objects:int}
+     */
+    public function getDisclosureExcluded(): array
+    {
+        return $this->disclosureGate->getExcluded();
     }
 
     /**
@@ -145,6 +160,16 @@ class CatalogueExtractor
         }
 
         $rows = $query->get();
+
+        // #1389 disclosure gate — remove records that must not enter an ungated
+        // offline package (unpublished / ICIP-TK / ODRL) BEFORE anything is built;
+        // over-inclusion into an offline bundle is unrecoverable. Excluded counts
+        // are read back by the build task into the export's disclosure_summary.
+        $keptSet = array_flip($this->disclosureGate->filter($rows->pluck('id')->all()));
+        $rows = $rows->filter(function ($r) use ($keptSet) {
+            return isset($keptSet[(int) $r->id]);
+        })->values();
+
         $total = count($rows);
         $descriptions = [];
 

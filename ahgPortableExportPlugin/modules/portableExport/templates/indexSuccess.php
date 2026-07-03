@@ -387,7 +387,21 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
                   ?>
                   <span class="badge <?php echo $badgeClass; ?>"><?php echo $exp->status; ?></span>
                 </td>
-                <td><?php echo number_format($exp->total_descriptions); ?></td>
+                <td>
+                  <?php echo number_format($exp->total_descriptions); ?>
+                  <?php
+                    // #1389 — show how many records/objects the disclosure gate withheld.
+                    $disc = !empty($exp->disclosure_summary) ? json_decode($exp->disclosure_summary, true) : null;
+                    $w = $disc['withheld'] ?? [];
+                    $withheldTotal = ($w['unpublished'] ?? 0) + ($w['icip'] ?? 0) + ($w['odrl'] ?? 0) + ($w['redacted_objects'] ?? 0);
+                  ?>
+                  <?php if ($withheldTotal > 0): ?>
+                    <span class="badge bg-warning text-dark ms-1"
+                          title="Withheld from this offline package (confidentiality gates): <?php echo (int) ($w['unpublished'] ?? 0); ?> unpublished, <?php echo (int) ($w['icip'] ?? 0); ?> ICIP-restricted, <?php echo (int) ($w['odrl'] ?? 0); ?> ODRL-gated, <?php echo (int) ($w['redacted_objects'] ?? 0); ?> redacted object(s)">
+                      <i class="fas fa-shield-halved me-1"></i><?php echo $withheldTotal; ?> withheld
+                    </span>
+                  <?php endif; ?>
+                </td>
                 <td><?php echo $exp->output_size ? round($exp->output_size / 1048576, 1) . ' MB' : '-'; ?></td>
                 <td>
                   <?php if (!empty($exp->expires_at)): ?>

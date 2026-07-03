@@ -157,22 +157,20 @@
           </button>
         </h2>
         <div id="io-collapse" class="accordion-collapse collapse" aria-labelledby="io-heading">
-          <div class="accordion-body">
+          <?php // Searchable lookup (TomSelect remote) mirroring the donor field —
+                // the legacy form-autocomplete never enhanced in the BS5 theme, so
+                // this was free text. The endpoint returns the same HTML the JS parses. ?>
+          <div class="accordion-body" data-io-remote-url="<?php echo url_for(['module' => 'informationobject', 'action' => 'autocomplete']); ?>">
             <?php
-                $extraInputs = '<input class="list" type="hidden" value="'
-                    .url_for(['module' => 'informationobject', 'action' => 'autocomplete'])
-                    .'">';
-                if (\AtomExtensions\Services\AclService::check(QubitInformationObject::getRoot(), 'create')) {
-                    $extraInputs .= '<input class="add" type="hidden" data-link-existing="true" value="'
-                        .url_for(['module' => 'informationobject', 'action' => 'add'])
-                        .' #title">';
-                }
                 echo render_field(
                     $form->informationObjects->label(sfConfig::get('app_ui_label_informationobject')),
                     null,
-                    ['class' => 'form-autocomplete', 'extraInputs' => $extraInputs]
+                    ['class' => 'form-select tom-remote-io']
                 );
             ?>
+            <link rel="stylesheet" href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js"></script>
+            <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/atom-framework/public/js/io-tom-select.js?v=1"></script>
           </div>
         </div>
       </div>

@@ -17,6 +17,9 @@ class ExportPipelineService
     /** @var string Plugin directory for require_once */
     protected $pluginDir;
 
+    /** @var string|null #1389 disclosure summary JSON for the current run */
+    protected $disclosureSummaryJson = null;
+
     public function __construct(?string $pluginDir = null)
     {
         $this->pluginDir = $pluginDir
@@ -32,6 +35,7 @@ class ExportPipelineService
         if (!$loaded) {
             $ahgDir = \sfConfig::get('sf_root_dir', '/usr/share/nginx/archive')
                 . '/atom-ahg-plugins/ahgPortableExportPlugin';
+            require_once $ahgDir . '/lib/Services/DisclosureGate.php';
             require_once $ahgDir . '/lib/Services/CatalogueExtractor.php';
             require_once $ahgDir . '/lib/Services/AssetCollector.php';
             require_once $ahgDir . '/lib/Services/SearchIndexBuilder.php';
@@ -113,6 +117,23 @@ class ExportPipelineService
 
         $descriptions = $catalogueData['descriptions'];
         $totalDescriptions = count($descriptions);
+
+        // #1389 — build the disclosure summary from what the gate withheld and
+        // write it into the package so the recipient (and the operator, via the
+        // stamped column) can see what was NOT exported.
+        $excluded = $extractor->getDisclosureExcluded();
+        $withheldTotal = $excluded['unpublished'] + $excluded['icip'] + $excluded['odrl'] + $excluded['redacted_objects'];
+        $disclosure = [
+            'generated_at' => date('c'),
+            'records_included' => $totalDescriptions,
+            'withheld' => $excluded,
+            'note' => 'Records/objects were excluded from this offline package to honour publication status, ICIP/TK cultural protocols, ODRL access policies, and PII redaction. Counts reflect what was NOT exported.',
+        ];
+        $this->disclosureSummaryJson = json_encode($disclosure, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        file_put_contents(
+            $outputDir . '/data/disclosure-summary.json',
+            json_encode($disclosure, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+        );
 
         // Write catalogue data as both JSON and JS (JS for file:// compatibility)
         $catalogueJson = json_encode($descriptions, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -201,8 +222,33 @@ class ExportPipelineService
             'completed_at' => date('Y-m-d H:i:s'),
         ]);
 
+        // #1389 — stamp the disclosure summary separately and tolerantly, so the
+        // export still completes on installations where migration_disclosure_summary.sql
+        // has not been applied yet (the column simply stays unpopulated).
+        $this->stampDisclosureSummary($exportId);
+
         // Insert notification for the user who started the export
         $this->notifyCompletion($export, $totalDescriptions, $totalObjects, $zipSize);
+    }
+
+    /**
+     * #1389 — persist the disclosure summary onto the export row if the column
+     * exists (added by migration_disclosure_summary.sql). No-op otherwise.
+     */
+    protected function stampDisclosureSummary(int $exportId): void
+    {
+        if ($this->disclosureSummaryJson === null) {
+            return;
+        }
+        try {
+            DB::table('portable_export')
+                ->where('id', $exportId)
+                ->update(['disclosure_summary' => $this->disclosureSummaryJson]);
+        } catch (\Throwable $e) {
+            // Column not migrated yet — the disclosure-summary.json is still in the
+            // package; the stamped column is a convenience for the operator view.
+            error_log('portable-export: disclosure_summary column not present yet: ' . $e->getMessage());
+        }
     }
 
     /**
