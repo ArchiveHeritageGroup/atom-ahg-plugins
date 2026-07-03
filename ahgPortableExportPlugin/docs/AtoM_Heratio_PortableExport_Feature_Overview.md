@@ -48,10 +48,20 @@ This plugin satisfies the exit/portability requirement — ensuring institutions
 - Editable mode for researcher notes and file import
 - Configurable branding (title, subtitle, footer)
 
+### Flexible Destinations
+- **ZIP file** — a downloadable archive (the default)
+- **This computer** — writes the **unzipped** catalogue straight into a folder/drive the operator picks on their own PC/laptop/USB via the browser File System Access API, so it runs directly off the drive (double-click `index.html`); automatically falls back to a ZIP download on non-Chromium browsers
+- **Server folder / drive** — writes the uncompressed bundle straight to a directory / mounted drive on the server (no ZIP, no size cap) for very large collections
+
+### Confidentiality & Access Control
+- **Confidentiality gate (global)** — automatically withholds unpublished descriptions (unless explicitly allowed), ICIP/TK culturally-restricted records (including descendant sub-trees), ODRL use-prohibited records, and PII-redacted objects
+- **Role/security scoping (per-user)** — a package contains only what the exporting user has view rights to; records above their security clearance, donor-closed, or under a full embargo are withheld (their embargo exceptions honoured; administrators unrestricted); **fails closed** on any access-check error
+- **Disclosure transparency** — every package embeds a `data/disclosure-summary.json` (per-category counts, exporting user, total withheld); the admin list shows a shield "N withheld" badge with a breakdown tooltip
+
 ### Shared Features
 - Export scopes: entire catalogue, specific fonds, by repository, custom (clipboard)
 - Background processing with progress tracking (via QueueService or nohup fallback)
-- Admin UI: 4-step export wizard + 3-step import wizard
+- Admin UI: 5-step export wizard + 3-step import wizard
 - Secure download tokens for sharing (time-limited, download-limited)
 - CLI commands for automation (export, import, verify, cleanup)
 - Automatic retention and cleanup
@@ -108,6 +118,7 @@ export-{id}/
     settings.json            # System + plugin settings
     users.json               # Users, ACL groups, permissions
     menus.json               # Navigation structure (MPTT)
+    disclosure-summary.json  # What was withheld (per-category counts, exporting user, total)
   objects/                   # Digital object files (if included)
 ```
 
@@ -131,6 +142,8 @@ export-{id}/
 | ISAD(G) | Full descriptive metadata preserved |
 | ISAAR(CPF) | Authority records with complete fields |
 | Data Portability | Full exit path — no vendor lock-in |
+| Access Control | Per-user view-rights scoping + confidentiality gate; withheld records logged per package |
+| ICIP / TK | Culturally-restricted records honoured (never exported without authority) |
 
 ---
 
@@ -139,11 +152,12 @@ export-{id}/
 ### Export Wizard
 Access via **Admin > Portable Export** (`/portable-export`).
 
-4-step wizard:
+5-step wizard:
 1. **Scope** — Select what to export (all, fonds, repository)
 2. **Content** — Choose export type (Viewer/Archive), entity types, digital objects
 3. **Configure** — Title, language, branding
-4. **Generate** — Review settings, start export, monitor progress
+4. **Destination** — ZIP file, This computer (local folder/drive), or Server folder/drive
+5. **Generate** — Review settings, start export, monitor progress; save-to-folder / download when done
 
 ### Import Wizard
 Access via `/portable-export/import` (or click "Import Archive" on the export page).

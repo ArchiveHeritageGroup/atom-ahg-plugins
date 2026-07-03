@@ -27,8 +27,11 @@ The Portable Export & Import plugin provides a complete exit/portability solutio
 - **Viewer Export** — Self-contained HTML/JS viewer for offline browsing (CD, USB, web download)
 - **Archive Export** — Structured JSON data covering 15 entity types with SHA-256 checksummed manifests
 - **Archive Import** — Re-import archive packages into fresh or existing instances with ID remapping
+- **Flexible destinations** — Download a ZIP, write the unzipped catalogue straight onto **your own PC/laptop/USB**, or dump it to a **server folder/drive** for very large collections
+- **Confidentiality gate** — Records that must not leave the building (unpublished, ICIP/TK culturally-restricted, ODRL-prohibited) are automatically withheld and counted
+- **Role/security scoping** — A user can only export records **they have view rights to**; anything above their security clearance, donor-closed, or embargoed is withheld
 
-This plugin satisfies the V2.3 Exit Export + Portability requirement, ensuring institutions can migrate their data between AtoM instances or preserve it in a standards-based, verifiable format.
+This plugin satisfies the V2.3 Exit Export + Portability requirement, ensuring institutions can migrate their data between AtoM instances or preserve it in a standards-based, verifiable format — while never letting an offline package disclose more than it should.
 
 ---
 
@@ -187,9 +190,28 @@ For archive mode, select which entity types to include and optionally run a dry-
 - **Language** — Primary culture for i18n text
 - **Branding** — Optional title, subtitle, footer (viewer mode)
 
-### Step 4: Generate
+### Step 4: Destination
+
+Choose where the finished package is delivered:
+
+| Destination | What happens | Best for |
+|-------------|--------------|----------|
+| **ZIP file** | A downloadable `.zip` is produced; click **Download ZIP** when the export completes | The default — sharing, archiving, any browser |
+| **This computer** | After the export builds, you are asked to pick a folder or drive **on your own PC/laptop/USB**; the catalogue is written there **uncompressed** so it runs straight off the drive (double-click `index.html`) | Burning to USB/external drives; no unzip step |
+| **Server folder / drive** | The catalogue is written uncompressed straight to a directory / mounted drive **on the server** (no ZIP, no size cap) | Very large collections that exceed the ZIP size limit |
+
+**"This computer" requires a Chromium-based browser** (Chrome, Edge, Opera), which
+provides the File System Access API used to write into the folder you pick. On other
+browsers (Firefox, Safari) the option automatically falls back to a **ZIP download**.
+
+**"Server folder / drive"** needs an existing directory that is writable by the web
+server (e.g. `/mnt/usb/catalogue`); the path is validated before the export starts.
+
+### Step 5: Generate
 
 Review all settings and click **Start Export**. Progress is displayed in real-time.
+When complete you will see a **Save to folder on this computer** button (for the "This
+computer" destination) and/or a **Download ZIP** button.
 
 ---
 
@@ -319,6 +341,51 @@ The command:
 
 ---
 
+## Confidentiality & Access Control
+
+An offline package leaves the building ungated — once written it cannot be recalled —
+so the plugin filters what may enter a package **before anything is written**, and
+fails closed if in doubt. Two independent layers apply to **both** viewer and archive
+exports.
+
+### 1. Confidentiality gate (global)
+
+Regardless of who is exporting, these records are automatically withheld:
+
+| Withheld | Rule |
+|----------|------|
+| **Unpublished descriptions** | Anything not in publication status *Published* — unless the **Include unpublished** setting is explicitly turned on |
+| **ICIP / TK restricted** | Records flagged with an Indigenous Cultural & Intellectual Property / Traditional Knowledge access restriction, including whole sub-trees where the restriction applies to descendants |
+| **ODRL prohibited** | Records carrying an ODRL *use* prohibition policy |
+| **Redacted objects** | Individual digital objects withheld for PII redaction |
+
+### 2. Role / security scoping (per-user)
+
+The export is scoped to **what the person who started it is allowed to see** — exactly
+the same records they see in search and browse. On top of the confidentiality gate, a
+record is withheld from *that user's* package when it is:
+
+- classified **above their security clearance**,
+- **donor-closed** (closure, permission-only, time-embargo, POPIA-restricted, legal hold), or
+- under an active **full embargo** (their own embargo exceptions are honoured).
+
+**Administrators** are unrestricted. If the access check cannot be evaluated for any
+reason, the export **fails closed** (withholds rather than risk disclosure).
+
+### What was withheld
+
+Every package records what it left out:
+
+- a **`data/disclosure-summary.json`** file inside the package (counts per category,
+  the exporting user, and the total withheld), and
+- a **shield "N withheld" badge** on the export in the admin list, whose tooltip breaks
+  the number down (beyond exporter's view rights / unpublished / ICIP / ODRL / redacted).
+
+A withheld count is normal and expected — it is the system honouring access rules, not
+an error.
+
+---
+
 ## Settings
 
 Configure defaults at **Admin > AHG Settings > Portable Export**:
@@ -332,6 +399,7 @@ Configure defaults at **Admin > AHG Settings > Portable Export**:
 | Include Thumbnails | true | Include thumbnails by default |
 | Include References | true | Include reference images by default |
 | Include Masters | false | Include master files by default |
+| Include Unpublished | false | When on, unpublished descriptions are **allowed** into packages (overrides the confidentiality gate's unpublished rule) |
 | Default Culture | en | Default export language |
 
 ---
@@ -349,6 +417,11 @@ Configure defaults at **Admin > AHG Settings > Portable Export**:
 | Import fails: checksum mismatch | Archive was corrupted during transfer; re-download or re-export |
 | Import skips all records | Expected in merge mode if records already exist; use replace for full re-import |
 | Imported users can't login | Imported users have random passwords; they must reset via admin or CLI |
+| "This computer" shows no **Save to folder** button | The browser lacks the File System Access API — use Chrome, Edge or Opera, or use the **Download ZIP** fallback |
+| "Save to folder" does nothing | You cancelled the folder picker, or the browser blocked it because there was no user click — click the **Save to folder** button directly |
+| Fewer records than expected in the package | The confidentiality gate and/or your view rights withheld some — check the **N withheld** badge / `data/disclosure-summary.json`. To include drafts, enable **Include unpublished** |
+| Unpublished records missing | Expected — enable **Include unpublished** in settings to allow them |
+| "Server folder / drive" rejected | The path must already exist and be writable by the web server; create it and set permissions, or use a different destination |
 
 ---
 
