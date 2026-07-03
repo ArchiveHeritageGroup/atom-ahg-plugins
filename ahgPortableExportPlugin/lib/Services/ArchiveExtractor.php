@@ -18,10 +18,25 @@ class ArchiveExtractor
     /** @var callable|null PHP forbids `callable` as a property type. */
     protected $progressCallback;
 
+    /** @var DisclosureGate #1389 confidentiality gate for offline packages */
+    protected $disclosureGate;
+
     public function __construct(string $culture = 'en', ?callable $progressCallback = null)
     {
         $this->culture = $culture;
         $this->progressCallback = $progressCallback;
+        $this->disclosureGate = new DisclosureGate();
+    }
+
+    /**
+     * Excluded counts recorded by the #1389 disclosure gate during the last
+     * extract() (unpublished / icip / odrl / redacted_objects).
+     *
+     * @return array{unpublished:int,icip:int,odrl:int,redacted_objects:int}
+     */
+    public function getDisclosureExcluded(): array
+    {
+        return $this->disclosureGate->getExcluded();
     }
 
     /**
@@ -52,6 +67,18 @@ class ArchiveExtractor
 
         // Resolve scope for scoped entity types
         $scopeIds = $this->resolveScopeIds($scopeType, $scopeSlug, $repositoryId, $scopeItems);
+
+        // #1389 disclosure gate — apply to archive-mode exports too. resolveScopeIds
+        // returns null for scope 'all' (no filter); resolve that to a concrete id
+        // list first so the gate can act, then remove records that must not enter an
+        // ungated offline package (unpublished / ICIP-TK / ODRL). From here on every
+        // scoped extractor filters by this gated id set.
+        if ($scopeIds === null) {
+            $scopeIds = DB::table('information_object')
+                ->where('id', '!=', 1)
+                ->pluck('id')->map('intval')->all();
+        }
+        $scopeIds = $this->disclosureGate->filter($scopeIds);
 
         foreach ($entityTypes as $type) {
             $data = [];
@@ -199,7 +226,7 @@ class ArchiveExtractor
         $rows = $query->select(
             'io.id', 'io.identifier', 'io.parent_id', 'io.lft', 'io.rgt',
             'io.level_of_description_id', 'io.repository_id', 'io.source_culture',
-            'io.description_status_id', 'io.level_of_detail_id',
+            'io.description_status_id', 'io.description_detail_id',
             'ioi.title', 'ioi.scope_and_content', 'ioi.extent_and_medium',
             'ioi.archival_history', 'ioi.acquisition', 'ioi.arrangement',
             'ioi.access_conditions', 'ioi.reproduction_conditions',

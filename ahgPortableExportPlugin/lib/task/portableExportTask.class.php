@@ -58,6 +58,7 @@ EOF;
         // Load services
         $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
         require_once $ahgDir . '/lib/Services/ExportPipelineService.php';
+        require_once $ahgDir . '/lib/Services/DisclosureGate.php';
         require_once $ahgDir . '/lib/Services/CatalogueExtractor.php';
         require_once $ahgDir . '/lib/Services/AssetCollector.php';
         require_once $ahgDir . '/lib/Services/SearchIndexBuilder.php';

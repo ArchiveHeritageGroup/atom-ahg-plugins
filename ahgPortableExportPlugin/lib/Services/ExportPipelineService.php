@@ -289,6 +289,21 @@ class ExportPipelineService
 
         // Calculate total descriptions from extracted data
         $totalDescriptions = $entityFiles['descriptions']['count'] ?? 0;
+
+        // #1389 — archive mode is gated too: record what was withheld and write the
+        // disclosure summary into the package + stamp the column at completion.
+        $excluded = $archiveExtractor->getDisclosureExcluded();
+        $disclosure = [
+            'generated_at' => date('c'),
+            'records_included' => $totalDescriptions,
+            'withheld' => $excluded,
+            'note' => 'Records/objects were excluded from this offline package to honour publication status, ICIP/TK cultural protocols, ODRL access policies, and PII redaction. Counts reflect what was NOT exported.',
+        ];
+        $this->disclosureSummaryJson = json_encode($disclosure, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        file_put_contents(
+            $outputDir . '/data/disclosure-summary.json',
+            json_encode($disclosure, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+        );
         $totalObjects = 0;
 
         // Step 2: Collect digital assets (60-80%)
@@ -336,6 +351,9 @@ class ExportPipelineService
             'output_size' => $zipSize,
             'completed_at' => date('Y-m-d H:i:s'),
         ]);
+
+        // #1389 — stamp the archive-mode disclosure summary (column-tolerant).
+        $this->stampDisclosureSummary($exportId);
 
         $this->notifyCompletion($export, $totalDescriptions, $totalObjects, $zipSize);
     }

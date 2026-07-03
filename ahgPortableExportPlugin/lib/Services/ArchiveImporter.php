@@ -752,7 +752,7 @@ class ArchiveImporter
                 'repository_id' => $repositoryId,
                 'source_culture' => $desc['source_culture'] ?? $this->culture,
                 'description_status_id' => $this->remapId($desc['description_status_id'] ?? null, 'term'),
-                'level_of_detail_id' => $this->remapId($desc['level_of_detail_id'] ?? null, 'term'),
+                'description_detail_id' => $this->remapId($desc['description_detail_id'] ?? $desc['level_of_detail_id'] ?? null, 'term'),
             ]);
 
             DB::table('information_object_i18n')->insert([
