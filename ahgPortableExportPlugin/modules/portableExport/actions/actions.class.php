@@ -89,6 +89,22 @@ class portableExportActions extends sfActions
         $includeReferences = $request->getParameter('include_references', '1');
         $includeMasters = $request->getParameter('include_masters', '0');
 
+        // Export destination: 'zip' (downloadable ZIP) or 'folder' (uncompressed
+        // dump straight to an operator directory / mounted drive — for collections
+        // too large for a ZIP). Admin-only surface; the folder path is validated as
+        // an existing writable directory.
+        $destination = in_array($request->getParameter('destination', 'zip'), ['zip', 'folder'], true)
+            ? $request->getParameter('destination', 'zip') : 'zip';
+        $destinationPath = null;
+        if ($destination === 'folder') {
+            $destinationPath = rtrim(trim((string) $request->getParameter('destination_path', '')), '/');
+            if ($destinationPath === '' || !is_dir($destinationPath) || !is_writable($destinationPath)) {
+                return $this->jsonResponse([
+                    'error' => 'Folder destination needs an existing, writable directory on the server (e.g. a mounted drive).',
+                ], 422);
+            }
+        }
+
         // Branding + archive entity types
         $branding = [];
         if ($request->getParameter('branding_title')) {
@@ -117,6 +133,8 @@ class portableExportActions extends sfActions
             'scope_slug' => $scopeSlug ?: null,
             'scope_repository_id' => $repositoryId ? (int) $repositoryId : null,
             'mode' => $mode,
+            'destination' => $destination,
+            'destination_path' => $destinationPath,
             'include_objects' => $includeObjects ? 1 : 0,
             'include_thumbnails' => $includeThumbnails ? 1 : 0,
             'include_references' => $includeReferences ? 1 : 0,
@@ -218,6 +236,13 @@ class portableExportActions extends sfActions
 
         if (!$export || $export->status !== 'completed' || !$export->output_path) {
             $this->forward404('Export not found or not ready');
+        }
+
+        // Folder-destination exports are an uncompressed directory on a drive —
+        // there is nothing to download; point the operator at the path instead.
+        if (($export->destination ?? 'zip') === 'folder') {
+            $this->getUser()->setFlash('info', 'This export was written to a folder on the server: ' . $export->output_path);
+            $this->redirect(['module' => 'portableExport', 'action' => 'index']);
         }
 
         if (!file_exists($export->output_path)) {

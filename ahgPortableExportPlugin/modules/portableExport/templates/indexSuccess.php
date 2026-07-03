@@ -132,6 +132,28 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
             </div>
           </div>
 
+          <!-- Export destination: ZIP file or uncompressed dump to a folder/drive -->
+          <div class="mb-4">
+            <label class="form-label fw-bold"><?php echo __('Destination'); ?></label>
+            <div class="btn-group d-block" role="group">
+              <input type="radio" class="btn-check" name="destination" id="dest-zip" value="zip" checked>
+              <label class="btn btn-outline-primary" for="dest-zip">
+                <i class="bi bi-file-zip me-1"></i><?php echo __('ZIP file'); ?>
+                <br><small class="fw-normal"><?php echo __('Downloadable archive'); ?></small>
+              </label>
+              <input type="radio" class="btn-check" name="destination" id="dest-folder" value="folder">
+              <label class="btn btn-outline-primary" for="dest-folder">
+                <i class="bi bi-folder2-open me-1"></i><?php echo __('Folder / drive'); ?>
+                <br><small class="fw-normal"><?php echo __('Uncompressed — for large collections / USB'); ?></small>
+              </label>
+            </div>
+            <div id="destination-path-wrap" class="mt-2" style="display:none;">
+              <input type="text" class="form-control" name="destination_path" id="destination-path"
+                     placeholder="<?php echo __('Existing writable directory on the server, e.g. /mnt/usb/catalogue'); ?>">
+              <div class="form-text"><?php echo __('The bundle is written uncompressed straight to this path (no ZIP, no size cap). It must exist and be writable by the web server.'); ?></div>
+            </div>
+          </div>
+
           <!-- Archive Entity Types (shown only for archive mode) -->
           <div id="archive-entity-types" style="display:none;" class="mb-4">
             <label class="form-label fw-bold"><?php echo __('Entity Types to Export'); ?></label>
@@ -555,6 +577,17 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
       archiveEntityPanel.style.display = isArchive ? '' : 'none';
       estimatePanel.style.display = isArchive ? '' : 'none';
       viewerObjOptions.style.display = isArchive ? 'none' : '';
+    });
+  });
+
+  // Show the folder-path input only when the "Folder / drive" destination is chosen.
+  var destPathWrap = document.getElementById('destination-path-wrap');
+  var destPathInput = document.getElementById('destination-path');
+  document.querySelectorAll('input[name="destination"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var isFolder = this.value === 'folder';
+      if (destPathWrap) destPathWrap.style.display = isFolder ? '' : 'none';
+      if (destPathInput) destPathInput.required = isFolder;
     });
   });
 

@@ -206,9 +206,11 @@ class ExportPipelineService
         $packager->package($outputDir, $config);
         $this->updateProgress($exportId, 90);
 
-        // Step 5: Create ZIP (90-100%)
-        $zipPath = $outputDir . '.zip';
-        $zipSize = $packager->createZip($outputDir, $zipPath);
+        // Step 5: Finalise output (ZIP, or an uncompressed folder dump when the
+        // destination is a folder/drive) (90-100%)
+        $final = $this->finaliseOutput($exportId, $outputDir, $packager);
+        $zipPath = $final['path'];
+        $zipSize = $final['size'];
         $this->updateProgress($exportId, 98);
 
         // Mark as completed
@@ -334,11 +336,13 @@ class ExportPipelineService
         $manifestBuilder->build($outputDir, $entityFiles, $options);
         $this->updateProgress($exportId, 90);
 
-        // Step 4: Create ZIP (90-100%)
-        $zipPath = $outputDir . '.zip';
+        // Step 4: Finalise output (ZIP, or an uncompressed folder dump when the
+        // destination is a folder/drive) (90-100%)
         $this->loadServices();
         $packager = new ViewerPackager();
-        $zipSize = $packager->createZip($outputDir, $zipPath);
+        $final = $this->finaliseOutput($exportId, $outputDir, $packager);
+        $zipPath = $final['path'];
+        $zipSize = $final['size'];
         $this->updateProgress($exportId, 98);
 
         // Mark as completed
@@ -373,11 +377,74 @@ class ExportPipelineService
      */
     public function resolveOutputDir(int $exportId): string
     {
+        $export = DB::table('portable_export')->where('id', $exportId)->first();
+
+        // Folder destination: build the bundle DIRECTLY on the operator-chosen
+        // directory / mounted drive (no temp staging, never zipped) — for
+        // collections too large for a ZIP.
+        if ($export
+            && ($export->destination ?? 'zip') === 'folder'
+            && !empty($export->destination_path)
+            && is_dir($export->destination_path)
+            && is_writable($export->destination_path)
+        ) {
+            $folderName = preg_replace('/[^A-Za-z0-9_-]/', '-', (string) $export->title) . '-' . $exportId;
+            $dir = rtrim($export->destination_path, '/') . '/' . $folderName;
+            @mkdir($dir, 0755, true);
+
+            return $dir;
+        }
+
         $baseDir = \sfConfig::get('sf_root_dir', '/usr/share/nginx/archive')
             . '/downloads/portable-exports';
         @mkdir($baseDir, 0755, true);
 
         return $baseDir . '/export-' . $exportId;
+    }
+
+    /**
+     * Finalise the output: for a 'folder' destination the bundle IS the built
+     * directory (no zip); otherwise create the downloadable ZIP. Returns
+     * ['path' => string, 'size' => int].
+     */
+    protected function finaliseOutput(int $exportId, string $outputDir, $packager): array
+    {
+        $export = DB::table('portable_export')->where('id', $exportId)->first();
+        $isFolder = $export
+            && ($export->destination ?? 'zip') === 'folder'
+            && !empty($export->destination_path);
+
+        if ($isFolder) {
+            return ['path' => $outputDir, 'size' => $this->directorySize($outputDir)];
+        }
+
+        $zipPath = $outputDir . '.zip';
+        $size = $packager->createZip($outputDir, $zipPath);
+
+        return ['path' => $zipPath, 'size' => $size];
+    }
+
+    /** Total byte size of a directory tree. */
+    protected function directorySize(string $dir): int
+    {
+        $size = 0;
+        if (!is_dir($dir)) {
+            return 0;
+        }
+        try {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
+            );
+            foreach ($it as $file) {
+                if ($file->isFile()) {
+                    $size += $file->getSize();
+                }
+            }
+        } catch (\Throwable $e) {
+            // best-effort
+        }
+
+        return $size;
     }
 
     /**
