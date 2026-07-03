@@ -66,6 +66,10 @@ $nonce = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
        class="list-group-item list-group-item-action <?php echo $active === 'collections' ? 'active' : ''; ?>">
         <i class="fas fa-layer-group me-2"></i><?php echo __('Evidence Sets'); ?>
     </a>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'mobileHome']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'offline' ? 'active' : ''; ?>">
+        <i class="fas fa-laptop me-2"></i><?php echo __('Work Offline'); ?>
+    </a>
 <?php if ($atLeast(2)): ?>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'journal']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'journal' ? 'active' : ''; ?>">

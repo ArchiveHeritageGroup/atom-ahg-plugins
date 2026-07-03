@@ -23,6 +23,7 @@
         'title' => $collection->name,
         'url' => '/research/collection/' . $collection->id,
     ]); ?>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'mobileHome']); ?>" class="btn btn-outline-secondary btn-sm me-1" title="<?php echo __('Browse and annotate your collected records offline'); ?>"><i class="fas fa-laptop me-1"></i><?php echo __('Take offline'); ?></a>
     <button type="button" class="btn btn-outline-primary btn-sm me-1" data-bs-toggle="modal" data-bs-target="#editCollectionModal"><i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?></button>
     <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteCollectionModal"><i class="fas fa-trash me-1"></i><?php echo __('Delete'); ?></button>
   </div>

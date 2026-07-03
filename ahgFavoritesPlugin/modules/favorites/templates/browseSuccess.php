@@ -94,6 +94,9 @@
               <p class="text-muted small mb-2"><?php echo esc_entities($currentFolder->description); ?></p>
             <?php endif; ?>
             <div class="d-flex gap-1 flex-wrap">
+              <a href="/index.php/research/mobile" class="btn btn-sm btn-outline-secondary" title="<?php echo __('Browse and annotate your collected records offline'); ?>">
+                <i class="fas fa-laptop"></i> <?php echo __('Take offline'); ?>
+              </a>
               <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editFolderModal">
                 <i class="fas fa-edit"></i> <?php echo __('Edit'); ?>
               </button>

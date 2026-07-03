@@ -8893,6 +8893,158 @@ class researchActions extends AhgController
         }
     }
 
+    /**
+     * The information-object ids this researcher has COLLECTED across all three
+     * sources (Collections, Favourites, Projects), scoped to what they are
+     * permitted to see: the per-user ACL deny-set is subtracted and unpublished
+     * records are dropped. Fails closed if the ACL lookup errors.
+     *
+     * @return int[]
+     */
+    protected function collectedOfflineIds($researcher, int $userId): array
+    {
+        $ids = [];
+
+        foreach (DB::table('research_collection_item as ci')
+            ->join('research_collection as c', 'c.id', '=', 'ci.collection_id')
+            ->where('c.researcher_id', $researcher->id)
+            ->pluck('ci.object_id') as $id) {
+            $ids[(int) $id] = true;
+        }
+
+        foreach (DB::table('favorites')
+            ->where('user_id', $userId)
+            ->where('object_type', 'information_object')
+            ->pluck('archival_description_id') as $id) {
+            $ids[(int) $id] = true;
+        }
+
+        foreach (DB::table('research_project_resource as pr')
+            ->join('research_project as p', 'p.id', '=', 'pr.project_id')
+            ->where('p.owner_id', $researcher->id)
+            ->whereIn('pr.resource_type', ['object', 'archive_record'])
+            ->get() as $r) {
+            $oid = (int) ($r->object_id ?: $r->resource_id);
+            if ($oid) {
+                $ids[$oid] = true;
+            }
+        }
+
+        $ids = array_values(array_filter(array_keys($ids)));
+        if (empty($ids)) {
+            return [];
+        }
+
+        // Per-user ACL: subtract the deny-set. Fail closed on error.
+        try {
+            $restricted = array_flip(array_map('intval',
+                \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                    ->getRestrictedObjectIds($userId)));
+            $ids = array_values(array_filter($ids, function ($id) use ($restricted) {
+                return !isset($restricted[$id]);
+            }));
+        } catch (\Throwable $e) {
+            return [];
+        }
+        if (empty($ids)) {
+            return [];
+        }
+
+        // Published only (status type 158 / status 160).
+        $published = array_flip(array_map('intval', DB::table('status')
+            ->whereIn('object_id', $ids)
+            ->where('type_id', 158)
+            ->where('status_id', 160)
+            ->pluck('object_id')
+            ->all()));
+
+        return array_values(array_filter($ids, function ($id) use ($published) {
+            return isset($published[$id]);
+        }));
+    }
+
+    /**
+     * JSON payload of the researcher's collected records + their own notes, for
+     * the offline PWA to cache and render with no connection.
+     */
+    public function executeOfflineData($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        $this->requireLogin();
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $researcher = $this->service->getResearcherByUserId($userId);
+        if (!$researcher) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Researcher profile required']));
+        }
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $ids = $this->collectedOfflineIds($researcher, $userId);
+
+        $records = [];
+        if (!empty($ids)) {
+            $rows = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as i18n', function ($j) use ($culture) {
+                    $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
+                })
+                ->leftJoin('slug', 'slug.object_id', '=', 'io.id')
+                ->whereIn('io.id', $ids)
+                ->select('io.id', 'io.identifier', 'slug.slug', 'i18n.title',
+                    'i18n.scope_and_content', 'i18n.extent_and_medium',
+                    'i18n.archival_history', 'i18n.acquisition', 'i18n.access_conditions')
+                ->get();
+
+            // Thumbnails: master (usage 140) -> thumb (usage 142, parent_id=master.id).
+            $masters = DB::table('digital_object')
+                ->whereIn('object_id', $ids)->where('usage_id', 140)
+                ->select('id', 'object_id')->get()->keyBy('object_id');
+            $masterIds = $masters->pluck('id')->all();
+            $thumbs = empty($masterIds) ? collect() : DB::table('digital_object')
+                ->whereIn('parent_id', $masterIds)->where('usage_id', 142)
+                ->select('parent_id', 'path', 'name')->get()->keyBy('parent_id');
+
+            // Researcher's own existing notes/annotations per record.
+            $notesByObj = DB::table('research_annotation')
+                ->where('researcher_id', $researcher->id)
+                ->whereIn('object_id', $ids)
+                ->select('object_id', 'annotation_type', 'title', 'content')
+                ->get()->groupBy('object_id');
+
+            foreach ($rows as $r) {
+                $thumbUrl = null;
+                if (isset($masters[$r->id])) {
+                    $t = $thumbs[$masters[$r->id]->id] ?? null;
+                    if ($t) {
+                        $thumbUrl = $t->path . $t->name;
+                    }
+                }
+                $recNotes = [];
+                foreach ($notesByObj[$r->id] ?? [] as $n) {
+                    $recNotes[] = ['type' => $n->annotation_type, 'title' => $n->title, 'content' => $n->content];
+                }
+                $records[] = [
+                    'id' => (int) $r->id,
+                    'slug' => $r->slug,
+                    'title' => $r->title,
+                    'identifier' => $r->identifier,
+                    'scope_and_content' => $r->scope_and_content,
+                    'extent_and_medium' => $r->extent_and_medium,
+                    'archival_history' => $r->archival_history,
+                    'acquisition' => $r->acquisition,
+                    'access_conditions' => $r->access_conditions,
+                    'thumbnail' => $thumbUrl,
+                    'notes' => $recNotes,
+                ];
+            }
+        }
+
+        return $this->renderText(json_encode([
+            'success' => true,
+            'count' => count($records),
+            'generated_at' => date('c'),
+            'records' => $records,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
     // =========================================================================
     // §2.7 OFFLINE SYNC ENDPOINT
     // =========================================================================

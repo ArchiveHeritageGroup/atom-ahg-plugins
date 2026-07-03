@@ -24,6 +24,9 @@
           'url' => '/research/project/' . $project->id,
       ]); ?>
       <?php if ($project->owner_id == $researcher->id): ?>
+        <a href="<?php echo url_for(['module' => 'research', 'action' => 'mobileHome']); ?>" class="btn btn-outline-secondary" title="<?php echo __('Browse and annotate your collected records offline'); ?>">
+            <i class="fas fa-laptop me-1"></i> <?php echo __('Take offline'); ?>
+        </a>
         <a href="<?php echo url_for(['module' => 'research', 'action' => 'shareProject', 'id' => $project->id]); ?>" class="btn btn-outline-success">
             <i class="fas fa-share-alt me-1"></i> <?php echo __('Share'); ?>
         </a>

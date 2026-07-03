@@ -200,6 +200,9 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
 
         // §2.6 Mobile / PWA shell
         $research->any('research_mobile_home', '/research/mobile', 'mobileHome');
+        // Offline data payload: the researcher's collected records (Collections +
+        // Favourites + Projects), ACL-scoped, for the PWA to cache + render offline.
+        $research->any('research_offline_data', '/research/offline-data', 'offlineData');
 
         // §2.7 Offline sync endpoint
         $research->any('research_offline_sync', '/research/sync/offline', 'offlineSync');
