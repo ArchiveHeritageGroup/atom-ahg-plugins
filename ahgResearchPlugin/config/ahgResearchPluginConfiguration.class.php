@@ -202,6 +202,7 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         // package, work offline, then upload the sync file back.
         $research->any('research_mobile_home', '/research/mobile', 'mobileHome');
         $research->any('research_offline_build', '/research/offline/build', 'buildOfflinePackage');
+        $research->any('research_offline_search', '/research/offline/search', 'offlineSearch');
         $research->any('research_offline_sync_upload', '/research/offline/sync-upload', 'syncUpload');
         // Legacy JSON payload endpoint (kept for the PWA quick-capture path).
         $research->any('research_offline_data', '/research/offline-data', 'offlineData');

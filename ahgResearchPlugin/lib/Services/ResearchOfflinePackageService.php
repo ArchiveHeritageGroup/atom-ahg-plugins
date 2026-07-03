@@ -97,6 +97,13 @@ class ResearchOfflinePackageService
             $groups[] = ['heading' => 'Favourites folders', 'name' => (string) $folder->name, 'ids' => $ids];
         }
 
+        // Individually picked records (from the search box). No ownership concept —
+        // the ACL filter in filterAllowed() keeps them to records the user may see.
+        $recIds = array_values(array_unique(array_filter(array_map('intval', $sources['records'] ?? []))));
+        if ($recIds) {
+            $groups[] = ['heading' => 'Search', 'name' => 'Records you added by search', 'ids' => $recIds];
+        }
+
         return $groups;
     }
 

@@ -38,10 +38,10 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
                 </p>
 
                 <?php if (!$hasAny): ?>
-                    <div class="alert alert-info small mb-0">
-                        <?php echo __('You have no collections, projects or favourites folders yet. Add records to a Collection, Project or Favourites folder first.'); ?>
+                    <div class="alert alert-info small">
+                        <?php echo __('You have no collections, projects or favourites folders yet — use the search below to add individual records.'); ?>
                     </div>
-                <?php else: ?>
+                <?php endif; ?>
                     <form method="post" action="<?php echo $buildUrl; ?>">
                         <?php
                         // Grouped like the left nav: a bold section header + its items.
@@ -68,6 +68,17 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
                             <?php endif; ?>
                         <?php endforeach; ?>
 
+                        <div class="list-group mb-3">
+                            <span class="list-group-item bg-light fw-bold text-uppercase small">
+                                <i class="fas fa-magnifying-glass me-1"></i><?php echo __('Search &amp; add records'); ?>
+                            </span>
+                            <div class="list-group-item">
+                                <input type="search" id="rec-search" class="form-control form-control-sm" autocomplete="off" placeholder="<?php echo __('Find a record by title or identifier'); ?>">
+                                <div id="rec-results" class="list-group list-group-flush mt-2"></div>
+                            </div>
+                            <div id="rec-selected"></div>
+                        </div>
+
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" name="include_notes" value="1" id="incnotes" checked>
                             <label class="form-check-label" for="incnotes"><?php echo __('Include my existing notes/annotations on those records'); ?></label>
@@ -75,7 +86,57 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
 
                         <button type="submit" class="btn btn-primary"><i class="fas fa-download me-1"></i><?php echo __('Download offline package'); ?></button>
                     </form>
-                <?php endif; ?>
+
+                    <?php $n = sfConfig::get('csp_nonce', ''); $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>
+                    <script <?php echo $nonceAttr; ?>>
+                    (function () {
+                        var searchUrl = <?php echo json_encode(url_for(['module' => 'research', 'action' => 'offlineSearch'])); ?>;
+                        var box = document.getElementById('rec-search');
+                        var results = document.getElementById('rec-results');
+                        var selected = document.getElementById('rec-selected');
+                        var picked = {};
+                        var timer = null;
+                        function esc(s) { return String(s == null ? '' : s).replace(/[<>&"]/g, function (c) { return ({ '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;' })[c]; }); }
+                        function renderResults(recs) {
+                            results.innerHTML = recs.map(function (r) {
+                                if (picked[r.id]) return '';
+                                return '<button type="button" class="list-group-item list-group-item-action py-1 rec-add" data-id="' + r.id + '" data-title="' + esc(r.title) + '">'
+                                    + '<i class="fas fa-plus text-success me-1"></i>' + esc(r.title)
+                                    + (r.identifier ? ' <span class="text-muted small">' + esc(r.identifier) + '</span>' : '') + '</button>';
+                            }).join('') || '<div class="text-muted small py-1">No matches.</div>';
+                        }
+                        function renderSelected() {
+                            var ids = Object.keys(picked);
+                            if (!ids.length) { selected.innerHTML = ''; return; }
+                            selected.innerHTML = '<span class="list-group-item bg-light fw-bold text-uppercase small"><i class="fas fa-check me-1"></i>Records added by search (' + ids.length + ')</span>'
+                                + ids.map(function (id) {
+                                    return '<label class="list-group-item d-flex align-items-center">'
+                                        + '<input type="hidden" name="record_ids[]" value="' + id + '">'
+                                        + '<span class="flex-grow-1">' + esc(picked[id]) + '</span>'
+                                        + '<span class="rec-del text-danger" data-id="' + id + '" style="cursor:pointer;font-weight:700">&times;</span></label>';
+                                }).join('');
+                        }
+                        box.addEventListener('input', function () {
+                            clearTimeout(timer);
+                            var q = this.value.trim();
+                            if (q.length < 2) { results.innerHTML = ''; return; }
+                            timer = setTimeout(function () {
+                                fetch(searchUrl + '?q=' + encodeURIComponent(q), { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                                    .then(function (r) { return r.json(); })
+                                    .then(function (d) { if (d && d.success) renderResults(d.records || []); })
+                                    .catch(function () {});
+                            }, 250);
+                        });
+                        results.addEventListener('click', function (e) {
+                            var b = e.target.closest('.rec-add'); if (!b) return;
+                            picked[b.dataset.id] = b.dataset.title; b.remove(); renderSelected();
+                        });
+                        selected.addEventListener('click', function (e) {
+                            var x = e.target.closest('.rec-del'); if (!x) return;
+                            delete picked[x.dataset.id]; renderSelected();
+                        });
+                    })();
+                    </script>
             </div>
         </div>
     </div>

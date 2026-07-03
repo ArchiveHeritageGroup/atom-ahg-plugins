@@ -8924,11 +8924,12 @@ class researchActions extends AhgController
             'collection' => (array) $request->getParameter('collection_ids', []),
             'project'    => (array) $request->getParameter('project_ids', []),
             'favorites'  => (array) $request->getParameter('folder_ids', []),
+            'records'    => (array) $request->getParameter('record_ids', []),
         ];
         $includeNotes = (bool) $request->getParameter('include_notes', false);
 
-        if (empty($sources['collection']) && empty($sources['project']) && empty($sources['favorites'])) {
-            $this->getUser()->setFlash('error', 'Select at least one collection, project or favourites folder.');
+        if (empty($sources['collection']) && empty($sources['project']) && empty($sources['favorites']) && empty($sources['records'])) {
+            $this->getUser()->setFlash('error', 'Select at least one collection, project, favourites folder or search result.');
             $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
         }
 
@@ -9006,6 +9007,78 @@ class researchActions extends AhgController
         }
 
         $this->redirect(url_for(['module' => 'research', 'action' => 'mobileHome']));
+    }
+
+    /**
+     * Search the catalogue for records to add to an offline package (JSON).
+     * Matches title/identifier, scoped to what the researcher may see (ACL deny-set
+     * + published). Lets researchers include individual records beyond their
+     * collections/projects/favourites.
+     */
+    public function executeOfflineSearch($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+        $this->requireLogin();
+        $userId = (int) $this->getUser()->getAttribute('user_id');
+        $r = $this->service->getResearcherByUserId($userId);
+        if (!$r) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Researcher profile required']));
+        }
+
+        $q = trim((string) $request->getParameter('q', ''));
+        if (mb_strlen($q) < 2) {
+            return $this->renderText(json_encode(['success' => true, 'records' => []]));
+        }
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $q) . '%';
+
+        $rows = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
+            })
+            ->leftJoin('slug', 'slug.object_id', '=', 'io.id')
+            ->where('io.id', '!=', 1)
+            ->where(function ($w) use ($like) {
+                $w->where('i18n.title', 'like', $like)->orWhere('io.identifier', 'like', $like);
+            })
+            ->select('io.id', 'io.identifier', 'i18n.title', 'slug.slug')
+            ->limit(40)->get();
+
+        $ids = $rows->pluck('id')->map(fn ($v) => (int) $v)->all();
+
+        // ACL deny-set + published only.
+        $allowed = [];
+        if (!empty($ids)) {
+            try {
+                $restricted = array_flip(array_map('intval',
+                    \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
+                        ->getRestrictedObjectIds($userId)));
+            } catch (\Throwable $e) {
+                $restricted = array_flip($ids); // fail closed
+            }
+            $published = array_flip(array_map('intval', DB::table('status')
+                ->whereIn('object_id', $ids)->where('type_id', 158)->where('status_id', 160)
+                ->pluck('object_id')->all()));
+            $allowed = array_filter(array_flip($ids), function ($_, $id) use ($restricted, $published) {
+                return !isset($restricted[$id]) && isset($published[$id]);
+            }, ARRAY_FILTER_USE_BOTH);
+        }
+
+        $records = [];
+        foreach ($rows as $row) {
+            if (!isset($allowed[(int) $row->id])) {
+                continue;
+            }
+            $records[] = [
+                'id' => (int) $row->id,
+                'title' => $row->title ?: ('#' . $row->id),
+                'identifier' => $row->identifier,
+                'slug' => $row->slug,
+            ];
+        }
+
+        return $this->renderText(json_encode(['success' => true, 'records' => $records], JSON_UNESCAPED_UNICODE));
     }
 
     /**
