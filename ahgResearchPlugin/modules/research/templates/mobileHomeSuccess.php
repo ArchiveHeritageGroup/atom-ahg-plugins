@@ -43,41 +43,30 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
                     </div>
                 <?php else: ?>
                     <form method="post" action="<?php echo $buildUrl; ?>">
-                        <?php if (!empty($collections)): ?>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold mb-1"><i class="fas fa-layer-group me-1"></i><?php echo __('Collections'); ?></label>
-                                <?php foreach ($collections as $c): ?>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="collection_ids[]" value="<?php echo (int) $c->id; ?>" id="c<?php echo (int) $c->id; ?>">
-                                        <label class="form-check-label" for="c<?php echo (int) $c->id; ?>"><?php echo htmlspecialchars($c->name); ?> <span class="text-muted small">(<?php echo (int) $c->item_count; ?>)</span></label>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($projects)): ?>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold mb-1"><i class="fas fa-project-diagram me-1"></i><?php echo __('Projects'); ?></label>
-                                <?php foreach ($projects as $p): ?>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="project_ids[]" value="<?php echo (int) $p->id; ?>" id="p<?php echo (int) $p->id; ?>">
-                                        <label class="form-check-label" for="p<?php echo (int) $p->id; ?>"><?php echo htmlspecialchars($p->title); ?> <span class="text-muted small">(<?php echo (int) $p->item_count; ?>)</span></label>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($folders)): ?>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold mb-1"><i class="fas fa-star me-1"></i><?php echo __('Favourites folders'); ?></label>
-                                <?php foreach ($folders as $f): ?>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="folder_ids[]" value="<?php echo (int) $f->id; ?>" id="f<?php echo (int) $f->id; ?>">
-                                        <label class="form-check-label" for="f<?php echo (int) $f->id; ?>"><?php echo htmlspecialchars($f->name); ?> <span class="text-muted small">(<?php echo (int) $f->item_count; ?>)</span></label>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
+                        <?php
+                        // Grouped like the left nav: a bold section header + its items.
+                        $groups = [
+                            ['label' => __('Collections'), 'icon' => 'fa-layer-group', 'field' => 'collection_ids', 'items' => $collections, 'name' => 'name'],
+                            ['label' => __('Projects'), 'icon' => 'fa-project-diagram', 'field' => 'project_ids', 'items' => $projects, 'name' => 'title'],
+                            ['label' => __('Favourites folders'), 'icon' => 'fa-star', 'field' => 'folder_ids', 'items' => $folders, 'name' => 'name'],
+                        ];
+                        ?>
+                        <?php foreach ($groups as $g): ?>
+                            <?php if (!empty($g['items'])): ?>
+                                <div class="list-group mb-3">
+                                    <span class="list-group-item bg-light fw-bold text-uppercase small">
+                                        <i class="fas <?php echo $g['icon']; ?> me-1"></i><?php echo $g['label']; ?>
+                                    </span>
+                                    <?php foreach ($g['items'] as $it): $nm = $g['name']; ?>
+                                        <label class="list-group-item d-flex align-items-center">
+                                            <input class="form-check-input me-2 mt-0" type="checkbox" name="<?php echo $g['field']; ?>[]" value="<?php echo (int) $it->id; ?>">
+                                            <span class="flex-grow-1"><?php echo htmlspecialchars($it->$nm); ?></span>
+                                            <span class="badge bg-secondary rounded-pill"><?php echo (int) $it->item_count; ?></span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
 
                         <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" name="include_notes" value="1" id="incnotes" checked>
