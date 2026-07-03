@@ -9045,6 +9045,65 @@ class researchActions extends AhgController
         ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
+    /**
+     * Curator review queue for metadata suggestions captured offline. Lists
+     * research_metadata_suggestion rows and lets a curator accept/reject them.
+     * Accept/reject records the decision only — it never edits the live catalogue
+     * automatically; the curator applies accepted changes to the record manually.
+     */
+    public function executeMetadataSuggestions($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+        }
+
+        if ($request->isMethod('post')) {
+            $id = (int) $request->getParameter('id');
+            $do = $request->getParameter('do');
+            if ($id && in_array($do, ['accept', 'reject'], true)) {
+                DB::table('research_metadata_suggestion')->where('id', $id)->update([
+                    'status'      => $do === 'accept' ? 'accepted' : 'rejected',
+                    'reviewed_by' => (int) $this->getUser()->getAttribute('user_id'),
+                    'reviewed_at' => date('Y-m-d H:i:s'),
+                ]);
+                $this->getUser()->setFlash('success', 'Suggestion ' . ($do === 'accept' ? 'accepted' : 'rejected') . '.');
+            }
+            $this->redirect(url_for([
+                'module' => 'research', 'action' => 'metadataSuggestions',
+                'status' => $request->getParameter('status', 'open'),
+            ]));
+        }
+
+        $status = $request->getParameter('status', 'open');
+        if (!in_array($status, ['open', 'accepted', 'rejected'], true)) {
+            $status = 'open';
+        }
+        $this->filterStatus = $status;
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $this->suggestions = DB::table('research_metadata_suggestion as ms')
+            ->leftJoin('information_object_i18n as i18n', function ($j) use ($culture) {
+                $j->on('ms.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
+            })
+            ->leftJoin('slug', 'slug.object_id', '=', 'ms.object_id')
+            ->leftJoin('research_researcher as r', 'r.id', '=', 'ms.researcher_id')
+            ->where('ms.status', $status)
+            ->select('ms.id', 'ms.object_id', 'ms.field', 'ms.suggestion', 'ms.status',
+                'ms.created_at', 'ms.reviewed_at', 'i18n.title as record_title',
+                'slug.slug as record_slug', 'r.first_name', 'r.last_name')
+            ->orderByDesc('ms.created_at')
+            ->limit(200)
+            ->get()
+            ->all();
+
+        $this->counts = [
+            'open'     => DB::table('research_metadata_suggestion')->where('status', 'open')->count(),
+            'accepted' => DB::table('research_metadata_suggestion')->where('status', 'accepted')->count(),
+            'rejected' => DB::table('research_metadata_suggestion')->where('status', 'rejected')->count(),
+        ];
+    }
+
     // =========================================================================
     // §2.7 OFFLINE SYNC ENDPOINT
     // =========================================================================

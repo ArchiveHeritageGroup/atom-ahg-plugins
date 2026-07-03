@@ -190,6 +190,10 @@ $nonce = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
 <?php if ($isAdmin): ?>
 <div class="list-group mb-4">
     <span class="list-group-item bg-light fw-bold text-uppercase small"><?php echo __('Administration'); ?></span>
+    <a href="<?php echo url_for(['module' => 'research', 'action' => 'metadataSuggestions']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'metadataSuggestions' ? 'active' : ''; ?>">
+        <i class="fas fa-lightbulb me-2"></i><?php echo __('Metadata Suggestions'); ?>
+    </a>
     <a href="<?php echo url_for(['module' => 'research', 'action' => 'researchers']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'researchers' ? 'active' : ''; ?>">
         <i class="fas fa-user-check me-2"></i><?php echo __('Manage Researchers'); ?>

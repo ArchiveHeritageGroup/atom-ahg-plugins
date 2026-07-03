@@ -206,6 +206,8 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
 
         // §2.7 Offline sync endpoint
         $research->any('research_offline_sync', '/research/sync/offline', 'offlineSync');
+        // Curator review queue for metadata suggestions captured offline
+        $research->any('research_metadata_suggestions', '/research/metadata-suggestions', 'metadataSuggestions');
         $research->any('research_annotations', '/research/annotations', 'annotations');
         $research->any('research_view_collection', '/research/collection/:id', 'viewCollection', ['id' => '\d+']);
         $research->any('research_collections', '/research/collections', 'collections');
