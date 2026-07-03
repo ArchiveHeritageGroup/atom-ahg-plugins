@@ -31,82 +31,98 @@ class ResearchOfflinePackageService
     public function resolveSelectedIds($researcher, int $userId, array $sources): array
     {
         $ids = [];
-
-        $collIds = array_map('intval', $sources['collection'] ?? []);
-        if ($collIds) {
-            $owned = DB::table('research_collection')->where('researcher_id', $researcher->id)
-                ->whereIn('id', $collIds)->pluck('id')->all();
-            if ($owned) {
-                foreach (DB::table('research_collection_item')->whereIn('collection_id', $owned)
-                    ->pluck('object_id') as $id) {
-                    $ids[(int) $id] = true;
-                }
+        foreach ($this->resolveGroups($researcher, $userId, $sources) as $g) {
+            foreach ($g['ids'] as $id) {
+                $ids[$id] = true;
             }
         }
 
-        $projIds = array_map('intval', $sources['project'] ?? []);
-        if ($projIds) {
-            $owned = DB::table('research_project')->where('owner_id', $researcher->id)
-                ->whereIn('id', $projIds)->pluck('id')->all();
-            if ($owned) {
-                // Project records come from research_project_resource AND the
-                // research_clipboard_project "add to project" table.
-                foreach (DB::table('research_project_resource')->whereIn('project_id', $owned)
-                    ->whereIn('resource_type', ['object', 'archive_record'])->get() as $r) {
-                    $oid = (int) ($r->object_id ?: $r->resource_id);
-                    if ($oid) {
-                        $ids[$oid] = true;
-                    }
-                }
-                foreach (DB::table('research_clipboard_project')->whereIn('project_id', $owned)
-                    ->pluck('object_id') as $oid) {
-                    if ($oid) {
-                        $ids[(int) $oid] = true;
-                    }
-                }
+        return $this->filterAllowed(array_keys($ids), $userId);
+    }
+
+    /**
+     * Resolve each selected source to its own group with member IO ids
+     * (ownership-checked, pre-ACL). Used to group records by source in the viewer.
+     *
+     * @return array<int,array{heading:string,name:string,ids:int[]}>
+     */
+    public function resolveGroups($researcher, int $userId, array $sources): array
+    {
+        $groups = [];
+
+        foreach (array_map('intval', $sources['collection'] ?? []) as $cid) {
+            $coll = DB::table('research_collection')->where('id', $cid)
+                ->where('researcher_id', $researcher->id)->first();
+            if (!$coll) {
+                continue;
             }
+            $ids = DB::table('research_collection_item')->where('collection_id', $cid)
+                ->pluck('object_id')->map(fn ($v) => (int) $v)->filter()->unique()->values()->all();
+            $groups[] = ['heading' => 'Collections', 'name' => (string) $coll->name, 'ids' => $ids];
         }
 
-        $folderIds = array_map('intval', $sources['favorites'] ?? []);
-        if ($folderIds) {
-            $owned = DB::table('favorites_folder')->where('user_id', $userId)
-                ->whereIn('id', $folderIds)->pluck('id')->all();
-            if ($owned) {
-                foreach (DB::table('favorites')->whereIn('folder_id', $owned)
-                    ->where('user_id', $userId)->where('object_type', 'information_object')
-                    ->pluck('archival_description_id') as $id) {
-                    $ids[(int) $id] = true;
+        foreach (array_map('intval', $sources['project'] ?? []) as $pid) {
+            $proj = DB::table('research_project')->where('id', $pid)
+                ->where('owner_id', $researcher->id)->first();
+            if (!$proj) {
+                continue;
+            }
+            // Project records come from research_project_resource AND research_clipboard_project.
+            $set = [];
+            foreach (DB::table('research_project_resource')->where('project_id', $pid)
+                ->whereIn('resource_type', ['object', 'archive_record'])->get() as $x) {
+                $o = (int) ($x->object_id ?: $x->resource_id);
+                if ($o) {
+                    $set[$o] = true;
                 }
             }
+            foreach (DB::table('research_clipboard_project')->where('project_id', $pid)
+                ->pluck('object_id') as $o) {
+                if ($o) {
+                    $set[(int) $o] = true;
+                }
+            }
+            $groups[] = ['heading' => 'Projects', 'name' => (string) $proj->title, 'ids' => array_keys($set)];
         }
 
-        $ids = array_values(array_filter(array_keys($ids)));
+        foreach (array_map('intval', $sources['favorites'] ?? []) as $fid) {
+            $folder = DB::table('favorites_folder')->where('id', $fid)
+                ->where('user_id', $userId)->first();
+            if (!$folder) {
+                continue;
+            }
+            $ids = DB::table('favorites')->where('folder_id', $fid)->where('user_id', $userId)
+                ->where('object_type', 'information_object')
+                ->pluck('archival_description_id')->map(fn ($v) => (int) $v)->filter()->unique()->values()->all();
+            $groups[] = ['heading' => 'Favourites folders', 'name' => (string) $folder->name, 'ids' => $ids];
+        }
+
+        return $groups;
+    }
+
+    /** Apply the per-user ACL deny-set (fail closed) + published-only filter. */
+    private function filterAllowed(array $ids, int $userId): array
+    {
+        $ids = array_values(array_filter(array_unique(array_map('intval', $ids))));
         if (empty($ids)) {
             return [];
         }
-
-        // Per-user ACL deny-set (fail closed) + published only.
         try {
             $restricted = array_flip(array_map('intval',
                 \AtomExtensions\Services\Search\SearchAccessFilterService::getInstance()
                     ->getRestrictedObjectIds($userId)));
-            $ids = array_values(array_filter($ids, function ($id) use ($restricted) {
-                return !isset($restricted[$id]);
-            }));
+            $ids = array_values(array_filter($ids, fn ($id) => !isset($restricted[$id])));
         } catch (\Throwable $e) {
             return [];
         }
         if (empty($ids)) {
             return [];
         }
-
         $published = array_flip(array_map('intval', DB::table('status')
             ->whereIn('object_id', $ids)->where('type_id', 158)->where('status_id', 160)
             ->pluck('object_id')->all()));
 
-        return array_values(array_filter($ids, function ($id) use ($published) {
-            return isset($published[$id]);
-        }));
+        return array_values(array_filter($ids, fn ($id) => isset($published[$id])));
     }
 
     /**
@@ -168,7 +184,27 @@ class ResearchOfflinePackageService
      */
     public function build($researcher, int $userId, array $sources, bool $includeNotes, string $culture = 'en'): array
     {
-        $ids = $this->resolveSelectedIds($researcher, $userId, $sources);
+        // Resolve per-source groups, then the allowed (ACL + published) id set.
+        $groups = $this->resolveGroups($researcher, $userId, $sources);
+        $allRaw = [];
+        foreach ($groups as $g) {
+            foreach ($g['ids'] as $id) {
+                $allRaw[$id] = true;
+            }
+        }
+        $allowed = array_flip($this->filterAllowed(array_keys($allRaw), $userId));
+
+        // Filter each group down to allowed records; drop empty groups. This is
+        // what the viewer uses to group records by their source in the left list.
+        $outGroups = [];
+        foreach ($groups as $g) {
+            $gi = array_values(array_filter($g['ids'], fn ($id) => isset($allowed[$id])));
+            if ($gi) {
+                $outGroups[] = ['heading' => $g['heading'], 'name' => $g['name'], 'ids' => array_map('intval', $gi)];
+            }
+        }
+
+        $ids = array_keys($allowed);
         $records = $this->buildRecords($ids, $culture, $researcher, $includeNotes);
 
         $syncToken = bin2hex(random_bytes(16));
@@ -189,6 +225,7 @@ class ResearchOfflinePackageService
 
         file_put_contents($tmp . '/data.js',
             'window.PKG=' . json_encode($pkg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';' . "\n" .
+            'window.GROUPS=' . json_encode($outGroups, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';' . "\n" .
             'window.RECORDS=' . json_encode($records, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';' . "\n");
         file_put_contents($tmp . '/index.html', $this->viewerHtml($researcherName, count($records)));
         file_put_contents($tmp . '/README.txt', $this->readme($researcherName, count($records)));
@@ -319,6 +356,10 @@ main{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 6.5rem
 .list input{width:100%;padding:.45rem;border:0;border-bottom:1px solid #eee}
 .list a{display:block;padding:.5rem .8rem;border-bottom:1px solid #f1f1f1;cursor:pointer;text-decoration:none;color:#222;font-size:.9rem}
 .list a.on{background:#eaf2f8;border-left:3px solid #58a}.list a small{display:block;color:#888}
+.ghead{padding:.4rem .8rem;background:#234;color:#fff;font-size:.7rem;text-transform:uppercase;letter-spacing:.03em;font-weight:700}
+.gname{padding:.35rem .8rem;background:#eef2f6;font-weight:600;font-size:.82rem;color:#345;border-bottom:1px solid #e3e8ee}
+.gc{color:#789;font-weight:400}
+.list a.gi{padding-left:1.5rem}
 .detail{padding:1.2rem 1.6rem;overflow-y:auto;max-height:calc(100vh - 3.2rem)}
 .detail h2{margin-top:0;color:#234}dl{display:grid;grid-template-columns:150px 1fr;gap:.3rem 1rem}dt{font-weight:600;color:#456}dd{margin:0;white-space:pre-wrap}
 .tabs{display:flex;gap:.3rem;flex-wrap:wrap;margin:.6rem 0}.tabs button{border:1px solid #ccd;background:#fff;padding:.25rem .6rem;border-radius:1rem;cursor:pointer;font-size:.82rem}.tabs button.on{background:#58a;color:#fff;border-color:#58a}
@@ -338,7 +379,7 @@ main{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 6.5rem
 <script src="data.js"></script>
 <script>
 (function(){
-  var PKG=window.PKG||{},RECS=window.RECORDS||[],byId={},cur=null;
+  var PKG=window.PKG||{},RECS=window.RECORDS||[],GROUPS=window.GROUPS||[],byId={},cur=null;
   var QK='hros:'+(PKG.sync_token||'x')+':';
   document.getElementById('hdr').textContent=RECS.length+' record(s) — '+(PKG.researcher||'');
   RECS.forEach(function(r){byId[r.id]=r;});
@@ -346,7 +387,24 @@ main{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 6.5rem
   function getA(k){try{return JSON.parse(localStorage.getItem(k)||'[]');}catch(e){return[];}}
   function setA(k,v){if(v.length)localStorage.setItem(k,JSON.stringify(v));else localStorage.removeItem(k);count();}
   function kN(id){return QK+'note:'+id;}function kS(id){return QK+'src:'+id;}function kG(id){return QK+'sug:'+id;}function kF(id){return QK+'file:'+id;}
-  function render(f){f=(f||'').toLowerCase();var el=document.getElementById('ios');var sh=RECS.filter(function(r){return !f||String(r.title||'').toLowerCase().indexOf(f)>-1||String(r.identifier||'').toLowerCase().indexOf(f)>-1;});el.innerHTML=sh.map(function(r){return '<a data-id="'+r.id+'"'+(cur==r.id?' class="on"':'')+'>'+esc(r.title||'Untitled')+(r.identifier?'<small>'+esc(r.identifier)+'</small>':'')+'</a>';}).join('')||'<div class="empty">No matches</div>';}
+  function match(r,f){return !f||String(r.title||'').toLowerCase().indexOf(f)>-1||String(r.identifier||'').toLowerCase().indexOf(f)>-1;}
+  function itemHtml(r){return '<a class="gi'+(cur==r.id?' on':'')+'" data-id="'+r.id+'">'+esc(r.title||'Untitled')+(r.identifier?'<small>'+esc(r.identifier)+'</small>':'')+'</a>';}
+  function render(f){
+    f=(f||'').toLowerCase();var el=document.getElementById('ios');
+    if(!GROUPS.length){ // flat fallback
+      var sh=RECS.filter(function(r){return match(r,f);});
+      el.innerHTML=sh.map(itemHtml).join('')||'<div class="empty">No matches</div>';return;
+    }
+    var html='',lastHeading='';
+    GROUPS.forEach(function(g){
+      var recs=g.ids.map(function(id){return byId[id];}).filter(function(r){return r&&match(r,f);});
+      if(f&&!recs.length)return;
+      if(g.heading!==lastHeading){html+='<div class="ghead">'+esc(g.heading)+'</div>';lastHeading=g.heading;}
+      html+='<div class="gname">'+esc(g.name)+' <span class="gc">('+g.ids.length+')</span></div>';
+      html+=recs.map(itemHtml).join('');
+    });
+    el.innerHTML=html||'<div class="empty">No matches</div>';
+  }
   function ents(a,lab,kind){if(!a.length)return '<div style="font-size:.8rem;color:#999">None yet.</div>';return a.map(function(e,i){return '<div class="entry"><span>'+lab(e)+'</span><span class="x" data-k="'+kind+'" data-i="'+i+'">&times;</span></div>';}).join('');}
   function show(id){var r=byId[id];if(!r){return;}cur=id;render(document.getElementById('q').value);
     var fields=[['Identifier',r.identifier],['Scope and content',r.scope_and_content],['Extent and medium',r.extent_and_medium],['Archival history',r.archival_history],['Access conditions',r.access_conditions]];
