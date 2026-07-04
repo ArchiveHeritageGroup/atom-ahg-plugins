@@ -331,16 +331,19 @@ class ResearchOfflinePackageService
 
 HOW TO USE
   1. Unzip this folder (keep all files together — a USB stick works well).
-  2. Double-click  index.html .
-  3. Pick a record, then add Notes / Sources / Suggestions / Files under it.
-     Everything saves in this browser automatically.
+  2. Double-click  index.html . It opens in any web browser; no internet or login.
+  3. The list on the left is grouped by source (your Collections / Projects /
+     Favourites). Pick a record, then add Notes / Sources / Suggestions / Files
+     under it. Attached files must be under 5 MB each. Everything saves in this
+     browser automatically; the search box filters the list.
   4. When you are back online, click  "Save for sync"  to download a
-     researcher-sync.json file.
+     researcher-sync.json file. Your attached files are embedded inside it, so it
+     is self-contained — you can upload it from any computer.
   5. In Heratio, go to  Research > Work Offline  and UPLOAD that file to bring
      your work back. Metadata suggestions are reviewed by a curator; your notes,
      sources and files are added to your research.
 
-Only records you are permitted to see are in this package.
+Only records you are permitted to see are in this package. Images are thumbnails.
 
 Produced with Heratio — The Archive & Heritage Group — https://theahg.co.za
 Copyright (C) {$year} The Archive & Heritage Group. Catalogue content remains the

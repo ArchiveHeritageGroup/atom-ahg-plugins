@@ -149,13 +149,30 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
                 <p class="text-muted small">
                     <?php echo __('Finished working offline? In the package, click "Save for sync" to download a researcher-sync.json file, then upload it here. Your notes and sources are added to your research, files are attached, and metadata suggestions go to a curator for review.'); ?>
                 </p>
-                <form method="post" action="<?php echo $syncUrl; ?>" enctype="multipart/form-data">
-                    <div class="mb-1">
-                        <input type="file" name="sync_file" class="form-control" required>
-                    </div>
-                    <div class="form-text mb-2"><?php echo __('Choose the <strong>researcher-sync.json</strong> file you downloaded from the package.'); ?></div>
-                    <button type="submit" class="btn btn-success"><i class="fas fa-cloud-arrow-up me-1"></i><?php echo __('Upload &amp; sync'); ?></button>
+                <form method="post" action="<?php echo $syncUrl; ?>" enctype="multipart/form-data" id="sync-form">
+                    <input type="file" name="sync_file" id="sync-file" accept=".json,application/json" class="d-none">
+                    <button type="button" class="btn btn-success" id="sync-pick"><i class="fas fa-cloud-arrow-up me-1"></i><?php echo __('Choose researcher-sync.json &amp; sync'); ?></button>
+                    <span id="sync-chosen" class="ms-2 small text-muted"></span>
+                    <div class="form-text mt-1"><?php echo __('Pick the <strong>researcher-sync.json</strong> file you downloaded; it uploads and syncs automatically.'); ?></div>
                 </form>
+                <?php $n2 = sfConfig::get('csp_nonce', ''); $nonceAttr2 = $n2 ? preg_replace('/^nonce=/', 'nonce="', $n2) . '"' : ''; ?>
+                <script <?php echo $nonceAttr2; ?>>
+                (function () {
+                    var pick = document.getElementById('sync-pick');
+                    var inp = document.getElementById('sync-file');
+                    var form = document.getElementById('sync-form');
+                    var chosen = document.getElementById('sync-chosen');
+                    if (!pick || !inp) return;
+                    pick.addEventListener('click', function () { inp.click(); });
+                    inp.addEventListener('change', function () {
+                        if (inp.files && inp.files.length) {
+                            chosen.textContent = inp.files[0].name + ' — syncing…';
+                            pick.disabled = true;
+                            form.submit();
+                        }
+                    });
+                })();
+                </script>
             </div>
         </div>
 
