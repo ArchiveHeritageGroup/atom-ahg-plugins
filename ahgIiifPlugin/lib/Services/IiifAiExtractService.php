@@ -199,8 +199,9 @@ class IiifAiExtractService
      */
     public function approve(int $extractId, string $targetField = 'scope_and_content'): array
     {
-        $allowed = ['scope_and_content', 'arrangement', 'physical_characteristics', 'archival_history', 'title'];
-        if (!in_array($targetField, $allowed, true)) {
+        $textFields = ['scope_and_content', 'arrangement', 'physical_characteristics', 'archival_history', 'title'];
+        $isSubjects = ($targetField === 'subject_access_points');
+        if (!$isSubjects && !in_array($targetField, $textFields, true)) {
             return ['success' => false, 'error' => "Invalid target field '{$targetField}'"];
         }
 
@@ -208,14 +209,57 @@ class IiifAiExtractService
         if (!$row) {
             return ['success' => false, 'error' => 'Extraction not found'];
         }
-        $text = trim((string) ($row->output_text ?? ''));
-        if ($text === '') {
-            return ['success' => false, 'error' => 'Extraction has no text to apply'];
-        }
 
         $io = \QubitInformationObject::getById((int) $row->object_id);
         if (!$io) {
             return ['success' => false, 'error' => 'Information object not found'];
+        }
+
+        // Subject-access-point write-back: turn a tags/entities extraction into
+        // Subjects-taxonomy terms and link them to the record. Uses the Propel
+        // nested-set-safe path (setTermRelationByName → QubitTerm::save computes
+        // lft/rgt), so browse stays correct with no rebuild step.
+        if ($isSubjects) {
+            $names = $this->extractTermNames($row);
+            if (empty($names)) {
+                return ['success' => false, 'error' => 'No usable terms (use a tags or entities extraction)'];
+            }
+
+            // Create/find each term (Propel, nested-set-safe) then link via a
+            // direct object_term_relation insert — the proven ahgAIPlugin path.
+            // Deliberately NOT $io->save(): that fires arOpenSearch indexing which
+            // throws when ES is down and would roll the relation back (orphan term).
+            $linked = [];
+            foreach ($names as $name) {
+                $termId = $this->findOrCreateSubjectTerm($name);
+                if ($termId !== null) {
+                    $this->linkTermToObject((int) $row->object_id, $termId);
+                    $linked[] = $name;
+                }
+            }
+
+            if (empty($linked)) {
+                return ['success' => false, 'error' => 'Failed to create or link any terms'];
+            }
+
+            DB::table('iiif_ai_extract')->where('id', $extractId)->update([
+                'status' => 'approved',
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            return [
+                'success' => true,
+                'object_id' => (int) $row->object_id,
+                'target_field' => $targetField,
+                'terms_linked' => count($linked),
+                'terms' => $linked,
+                'note' => 'Subject terms link in the DB immediately; run search:populate to reindex for ES search.',
+            ];
+        }
+
+        $text = trim((string) ($row->output_text ?? ''));
+        if ($text === '') {
+            return ['success' => false, 'error' => 'Extraction has no text to apply'];
         }
 
         // Qubit/Propel i18n setters are magic (__call) — call directly, as the
@@ -244,6 +288,185 @@ class IiifAiExtractService
         }
 
         return $out;
+    }
+
+    /**
+     * MCP tool manifest (tiny-iiif style) describing the IIIF AI Extract JSON
+     * endpoints as callable tools, so an external AI client / MCP wrapper can
+     * drive the manifest deterministically. Pure data — no DB access.
+     *
+     * @return array<string,mixed>
+     */
+    public function mcpToolManifest(string $baseUrl = ''): array
+    {
+        $base = rtrim($baseUrl, '/');
+        $tasks = array_keys(self::TASK_PROMPTS);
+
+        return [
+            'name' => 'ahg-iiif-ai-extract',
+            'description' => 'Region-scoped AI extraction over IIIF canvases (AtoM/Heratio ahgIiifPlugin).',
+            'version' => '1.0',
+            'auth' => 'Session cookie or configured auth; all tools require an authenticated user.',
+            'tools' => [
+                [
+                    'name' => 'iiif_manifest_canvases',
+                    'description' => 'List the image canvases of an information object with pixel dimensions and IIIF image base URLs.',
+                    'http' => ['method' => 'GET', 'path' => '/iiif/ai/canvases/object/{object_id}', 'url' => $base . '/iiif/ai/canvases/object/{object_id}'],
+                    'inputSchema' => [
+                        'type' => 'object',
+                        'required' => ['object_id'],
+                        'properties' => [
+                            'object_id' => ['type' => 'integer', 'description' => 'Information object id.'],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'iiif_region_extract',
+                    'description' => 'Run an AI extraction task on a canvas region (full canvas or IIIF x,y,w,h). Vision tasks use the AI gateway; transcribe uses OCR.',
+                    'http' => ['method' => 'POST', 'path' => '/iiif/ai/extract', 'url' => $base . '/iiif/ai/extract'],
+                    'inputSchema' => [
+                        'type' => 'object',
+                        'required' => ['object_id', 'task'],
+                        'properties' => [
+                            'object_id' => ['type' => 'integer'],
+                            'canvas_index' => ['type' => 'integer', 'default' => 0],
+                            'region' => ['type' => 'string', 'default' => 'full', 'description' => "'full' or 'x,y,w,h'."],
+                            'task' => ['type' => 'string', 'enum' => $tasks],
+                        ],
+                    ],
+                ],
+                [
+                    'name' => 'iiif_list_extractions',
+                    'description' => 'List stored AI extractions for an information object (newest first).',
+                    'http' => ['method' => 'GET', 'path' => '/iiif/ai/extract/object/{object_id}', 'url' => $base . '/iiif/ai/extract/object/{object_id}'],
+                    'inputSchema' => [
+                        'type' => 'object',
+                        'required' => ['object_id'],
+                        'properties' => [
+                            'object_id' => ['type' => 'integer'],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * Derive subject-term names from a tags/entities extraction row.
+     * entities → the "text" of each JSON entity; tags (or fallback) → the
+     * comma/semicolon/newline-split output text. Cleaned, deduped (CI), capped.
+     *
+     * @param object $row iiif_ai_extract row
+     * @return array<int,string>
+     */
+    private function extractTermNames(object $row): array
+    {
+        $names = [];
+
+        if (($row->task ?? '') === 'entities' && !empty($row->output_json)) {
+            $decoded = json_decode((string) $row->output_json, true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $e) {
+                    $t = is_array($e) ? ($e['text'] ?? '') : (is_string($e) ? $e : '');
+                    if ($t !== '') {
+                        $names[] = (string) $t;
+                    }
+                }
+            }
+        }
+
+        if (empty($names)) {
+            foreach (preg_split('/[,;\n]+/', (string) ($row->output_text ?? '')) as $p) {
+                $p = trim($p);
+                if ($p !== '') {
+                    $names[] = $p;
+                }
+            }
+        }
+
+        // Clean list markers/quotes, drop empties/over-long, dedupe case-insensitively, cap at 25.
+        $clean = [];
+        foreach ($names as $n) {
+            $n = trim($n, " \t\"'`-•*.");
+            $n = trim($n);
+            if ($n === '' || mb_strlen($n) > 100) {
+                continue;
+            }
+            $key = mb_strtolower($n);
+            if (!isset($clean[$key])) {
+                $clean[$key] = $n;
+            }
+            if (count($clean) >= 25) {
+                break;
+            }
+        }
+
+        return array_values($clean);
+    }
+
+    /**
+     * Find (case-insensitive) or create a term in the Subjects taxonomy.
+     * Creation uses Propel QubitTerm::save() so lft/rgt (nested set) is computed
+     * — browse stays correct with no rebuild step.
+     */
+    private function findOrCreateSubjectTerm(string $name): ?int
+    {
+        $find = function () use ($name) {
+            return DB::table('term')
+                ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+                ->where('term.taxonomy_id', \QubitTaxonomy::SUBJECT_ID)
+                ->whereRaw('LOWER(term_i18n.name) = ?', [mb_strtolower($name)])
+                ->value('term.id');
+        };
+
+        $existing = $find();
+        if ($existing) {
+            return (int) $existing;
+        }
+
+        // QubitTerm::save() inserts the term (with nested set) BEFORE its post-save
+        // search-index hook, which throws a TypeError when ES is unreachable (CLI).
+        // So swallow the throw and resolve the id by re-querying — the row persists.
+        try {
+            $term = new \QubitTerm();
+            $term->setTaxonomyId(\QubitTaxonomy::SUBJECT_ID);
+            $term->setName($name);
+            $term->setRoot();
+            $term->save();
+        } catch (\Throwable $e) {
+            // fall through to re-query
+        }
+
+        $id = $find();
+
+        return $id ? (int) $id : null;
+    }
+
+    /**
+     * Link a term to an object as an access point via a direct object_term_relation
+     * insert (dedup-guarded). Mirrors ahgAIPlugin's link helper; no IO save / no ES.
+     */
+    private function linkTermToObject(int $objectId, int $termId): void
+    {
+        $exists = DB::table('object_term_relation')
+            ->where('object_id', $objectId)
+            ->where('term_id', $termId)
+            ->exists();
+        if ($exists) {
+            return;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $relId = DB::table('object')->insertGetId([
+            'class_name' => 'QubitObjectTermRelation',
+            'created_at' => $now,
+            'updated_at' => $now,
+        ]);
+        DB::table('object_term_relation')->insert([
+            'id' => $relId,
+            'object_id' => $objectId,
+            'term_id' => $termId,
+        ]);
     }
 
     /** Reject a draft extraction. */

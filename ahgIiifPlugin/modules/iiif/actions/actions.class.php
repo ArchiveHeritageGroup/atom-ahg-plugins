@@ -1398,6 +1398,26 @@ class iiifActions extends AhgController
         ], JSON_UNESCAPED_SLASHES));
     }
 
+    /** GET /iiif/ai/mcp — tiny-iiif style MCP tool manifest for the extract endpoints. */
+    public function executeAiMcp($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $baseUrl = $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+
+        return $this->renderText(json_encode(
+            $this->aiExtractService()->mcpToolManifest($baseUrl),
+            JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT
+        ));
+    }
+
     /** GET /iiif/ai/extract/review/object/:id — admin review + approve/reject UI. */
     public function executeAiExtractReview($request)
     {

@@ -56,6 +56,9 @@
                     <div class="d-flex flex-wrap gap-2 align-items-center">
                         <label class="small text-muted mb-0"><?php echo __('Apply to') ?>:</label>
                         <select class="form-select form-select-sm w-auto ahg-target-field">
+                            <?php if (in_array($ex['task'], ['tags', 'entities'], true)): ?>
+                            <option value="subject_access_points"><?php echo __('subject access points') ?></option>
+                            <?php endif; ?>
                             <?php foreach ($targetFields as $f): ?>
                             <option value="<?php echo $f ?>"><?php echo $f ?></option>
                             <?php endforeach; ?>
