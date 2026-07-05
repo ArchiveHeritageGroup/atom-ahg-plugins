@@ -18,6 +18,9 @@ class iiifAiExtractTask extends sfBaseTask
             new sfCommandOption('region', null, sfCommandOption::PARAMETER_OPTIONAL, "IIIF region: 'full' or x,y,w,h", 'full'),
             new sfCommandOption('task', null, sfCommandOption::PARAMETER_OPTIONAL, 'caption|describe|transcribe|entities|tags', 'describe'),
             new sfCommandOption('all-canvases', null, sfCommandOption::PARAMETER_NONE, 'Run on every canvas of the object'),
+            new sfCommandOption('approve-id', null, sfCommandOption::PARAMETER_REQUIRED, 'Approve a stored extraction id → write to --apply-field'),
+            new sfCommandOption('reject-id', null, sfCommandOption::PARAMETER_REQUIRED, 'Reject a stored extraction id'),
+            new sfCommandOption('apply-field', null, sfCommandOption::PARAMETER_OPTIONAL, 'IO field for --approve-id', 'scope_and_content'),
         ]);
         $this->namespace = 'iiif';
         $this->name = 'ai-extract';
@@ -38,15 +41,29 @@ EOD;
         sfContext::createInstance($this->configuration);
         \AhgCore\Core\AhgDb::init();
 
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifAiExtractService.php';
+        $service = new \AhgIiif\Services\IiifAiExtractService();
+
+        // Approve / reject a stored extraction (admin/automation path) — no --object-id needed.
+        if (!empty($options['approve-id'])) {
+            $res = $service->approve((int) $options['approve-id'], (string) $options['apply-field']);
+            $this->logSection('iiif', 'approve #' . $options['approve-id'] . ': ' . json_encode($res));
+
+            return empty($res['success']) ? 1 : 0;
+        }
+        if (!empty($options['reject-id'])) {
+            $ok = $service->reject((int) $options['reject-id']);
+            $this->logSection('iiif', 'reject #' . $options['reject-id'] . ': ' . ($ok ? 'ok' : 'not found'));
+
+            return $ok ? 0 : 1;
+        }
+
         $objectId = (int) ($options['object-id'] ?? 0);
         if (!$objectId) {
             $this->logSection('iiif', 'Missing --object-id', null, 'ERROR');
 
             return 1;
         }
-
-        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifAiExtractService.php';
-        $service = new \AhgIiif\Services\IiifAiExtractService();
 
         $task = (string) $options['task'];
         $canvases = $service->listCanvases($objectId);

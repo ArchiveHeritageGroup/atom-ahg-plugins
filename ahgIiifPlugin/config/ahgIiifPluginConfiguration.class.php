@@ -129,6 +129,10 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $iiif->get('iiif_ai_canvases', '/iiif/ai/canvases/object/:id', 'aiCanvases', ['id' => '\d+']);
         $iiif->post('iiif_ai_extract', '/iiif/ai/extract', 'aiExtract');
         $iiif->get('iiif_ai_extract_list', '/iiif/ai/extract/object/:id', 'aiExtractList', ['id' => '\d+']);
+        // Phase 2 — admin review + approve/reject → write-back to IO field.
+        $iiif->get('iiif_ai_extract_review', '/iiif/ai/extract/review/object/:id', 'aiExtractReview', ['id' => '\d+']);
+        $iiif->post('iiif_ai_extract_approve', '/iiif/ai/extract/approve', 'aiExtractApprove');
+        $iiif->post('iiif_ai_extract_reject', '/iiif/ai/extract/reject', 'aiExtractReject');
 
         $iiif->register($routing);
 

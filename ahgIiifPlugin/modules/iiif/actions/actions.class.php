@@ -1398,4 +1398,106 @@ class iiifActions extends AhgController
         ], JSON_UNESCAPED_SLASHES));
     }
 
+    /** GET /iiif/ai/extract/review/object/:id — admin review + approve/reject UI. */
+    public function executeAiExtractReview($request)
+    {
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->forward($this->config('sf_secure_module'), $this->config('sf_secure_action'));
+        }
+
+        $this->objectId = (int) $request->getParameter('id');
+        $svc = $this->aiExtractService();
+        $extractions = $this->objectId ? $svc->listExtractions($this->objectId) : [];
+        $canvases = $this->objectId ? $svc->listCanvases($this->objectId) : [];
+
+        // Map canvas index → canvas so each extraction gets a region preview URL.
+        $byIndex = [];
+        foreach ($canvases as $c) {
+            $byIndex[$c['index']] = $c;
+        }
+        foreach ($extractions as &$ex) {
+            $canvas = $byIndex[(int) $ex['canvas_index']] ?? null;
+            $ex['preview_url'] = $canvas ? $svc->previewUrl($canvas, (string) $ex['region']) : null;
+        }
+        unset($ex);
+
+        $this->extractions = $extractions;
+        $this->targetFields = ['scope_and_content', 'arrangement', 'physical_characteristics', 'archival_history', 'title'];
+
+        // Object header (title + slug).
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+        $obj = \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->leftJoin('information_object_i18n as i18n', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
+            ->where('io.id', $this->objectId)
+            ->select('io.identifier', 'i18n.title', 's.slug')
+            ->first();
+        $this->objectTitle = $obj ? ($obj->title ?: $obj->identifier ?: ('#' . $this->objectId)) : ('#' . $this->objectId);
+        $this->objectSlug = $obj->slug ?? null;
+    }
+
+    /** POST /iiif/ai/extract/approve — write extraction to an IO field (admin). */
+    public function executeAiExtractApprove($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getResponse()->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Administrator access required']));
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            $data = [
+                'extract_id' => $request->getParameter('extract_id'),
+                'target_field' => $request->getParameter('target_field'),
+            ];
+        }
+
+        $extractId = (int) ($data['extract_id'] ?? 0);
+        if (!$extractId) {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'extract_id required']));
+        }
+
+        $result = $this->aiExtractService()->approve(
+            $extractId,
+            (string) ($data['target_field'] ?? 'scope_and_content')
+        );
+
+        if (empty($result['success'])) {
+            $this->getResponse()->setStatusCode(422);
+        }
+
+        return $this->renderText(json_encode($result, JSON_UNESCAPED_SLASHES));
+    }
+
+    /** POST /iiif/ai/extract/reject — mark extraction rejected (admin). */
+    public function executeAiExtractReject($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getResponse()->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Administrator access required']));
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $extractId = (int) (($data['extract_id'] ?? null) ?? $request->getParameter('extract_id'));
+        if (!$extractId) {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'extract_id required']));
+        }
+
+        $ok = $this->aiExtractService()->reject($extractId);
+
+        return $this->renderText(json_encode(['success' => $ok]));
+    }
+
 }

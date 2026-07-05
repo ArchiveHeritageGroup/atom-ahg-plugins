@@ -129,24 +129,37 @@ class IiifAiExtractService
             return $this->fail("Failed to fetch region image from Cantaloupe", $task, $region);
         }
 
-        $client = \AtomFramework\Services\AI\AiGatewayClient::fromSettings();
-        if (!$client->isConfigured()) {
-            return $this->fail('AI gateway API key not configured', $task, $region);
+        // 'transcribe' → accurate LOCAL OCR (Tesseract, no gateway — the gateway
+        // does not route an OCR endpoint and a small VLM hallucinates text).
+        // All other tasks → gateway vision model.
+        if ($task === 'transcribe') {
+            $text = $this->ocrRegion($bytes);
+            if ($text === null || $text === '') {
+                return $this->fail('OCR produced no text for this region', $task, $region);
+            }
+            $modelUsed = 'tesseract';
+            $json = null;
+        } else {
+            $client = \AtomFramework\Services\AI\AiGatewayClient::fromSettings();
+            if (!$client->isConfigured()) {
+                return $this->fail('AI gateway API key not configured', $task, $region);
+            }
+
+            $result = $client->visionGenerate(
+                self::TASK_PROMPTS[$task],
+                [base64_encode($bytes)],
+                $this->visionModel,
+                ['temperature' => 0.1, 'num_predict' => 512]
+            );
+
+            if (empty($result['success'])) {
+                return $this->fail($result['error'] ?? 'Vision model returned no text', $task, $region);
+            }
+
+            $text = trim((string) $result['text']);
+            $modelUsed = (string) ($result['model'] ?? $this->visionModel);
+            $json = ($task === 'entities') ? $this->tryDecodeJson($text) : null;
         }
-
-        $result = $client->visionGenerate(
-            self::TASK_PROMPTS[$task],
-            [base64_encode($bytes)],
-            $this->visionModel,
-            ['temperature' => 0.1, 'num_predict' => 512]
-        );
-
-        if (empty($result['success'])) {
-            return $this->fail($result['error'] ?? 'Vision model returned no text', $task, $region);
-        }
-
-        $text = trim((string) $result['text']);
-        $json = ($task === 'entities') ? $this->tryDecodeJson($text) : null;
 
         $now = date('Y-m-d H:i:s');
         $extractId = (int) DB::table('iiif_ai_extract')->insertGetId([
@@ -155,8 +168,8 @@ class IiifAiExtractService
             'canvas_index' => $canvasIndex,
             'region' => $region,
             'task' => $task,
-            'model' => (string) ($result['model'] ?? $this->visionModel),
-            'prompt' => self::TASK_PROMPTS[$task],
+            'model' => $modelUsed,
+            'prompt' => ($task === 'transcribe') ? null : self::TASK_PROMPTS[$task],
             'output_text' => $text,
             'output_json' => $json !== null ? json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null,
             'confidence' => null,
@@ -172,10 +185,74 @@ class IiifAiExtractService
             'extract_id' => $extractId,
             'task' => $task,
             'region' => $region,
-            'model' => (string) ($result['model'] ?? $this->visionModel),
+            'model' => $modelUsed,
             'text' => $text,
             'json' => $json,
         ];
+    }
+
+    /**
+     * Approve a draft extraction: write its text to an information-object i18n
+     * text field and mark the row approved. Mirrors aiSummarizeTask write-back.
+     *
+     * @return array{success:bool,error?:string,object_id?:int,target_field?:string}
+     */
+    public function approve(int $extractId, string $targetField = 'scope_and_content'): array
+    {
+        $allowed = ['scope_and_content', 'arrangement', 'physical_characteristics', 'archival_history', 'title'];
+        if (!in_array($targetField, $allowed, true)) {
+            return ['success' => false, 'error' => "Invalid target field '{$targetField}'"];
+        }
+
+        $row = DB::table('iiif_ai_extract')->where('id', $extractId)->first();
+        if (!$row) {
+            return ['success' => false, 'error' => 'Extraction not found'];
+        }
+        $text = trim((string) ($row->output_text ?? ''));
+        if ($text === '') {
+            return ['success' => false, 'error' => 'Extraction has no text to apply'];
+        }
+
+        $io = \QubitInformationObject::getById((int) $row->object_id);
+        if (!$io) {
+            return ['success' => false, 'error' => 'Information object not found'];
+        }
+
+        // Qubit/Propel i18n setters are magic (__call) — call directly, as the
+        // proven aiSummarizeTask write-back does (method_exists is false for them).
+        // The field write persists before the post-save search-index hook fires;
+        // catch \Throwable (arOpenSearch throws a TypeError when ES is unreachable
+        // or in a CLI context) so an indexing hiccup never loses the approval — a
+        // later `search:populate` reconciles the index.
+        $setter = 'set' . str_replace('_', '', ucwords($targetField, '_'));
+        $indexWarning = null;
+        try {
+            $io->$setter($text);
+            $io->save();
+        } catch (\Throwable $e) {
+            $indexWarning = 'field saved; search reindex failed (' . $e->getMessage() . ')';
+        }
+
+        DB::table('iiif_ai_extract')->where('id', $extractId)->update([
+            'status' => 'approved',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        $out = ['success' => true, 'object_id' => (int) $row->object_id, 'target_field' => $targetField];
+        if ($indexWarning !== null) {
+            $out['warning'] = $indexWarning;
+        }
+
+        return $out;
+    }
+
+    /** Reject a draft extraction. */
+    public function reject(int $extractId): bool
+    {
+        return DB::table('iiif_ai_extract')->where('id', $extractId)->update([
+            'status' => 'rejected',
+            'updated_at' => date('Y-m-d H:i:s'),
+        ]) > 0;
     }
 
     /**
@@ -249,6 +326,43 @@ class IiifAiExtractService
         }
 
         return (string) $body;
+    }
+
+    /** Local Tesseract OCR on region bytes — the accurate transcribe path (no gateway). */
+    private function ocrRegion(string $bytes): ?string
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'iiifocr_');
+        if ($tmp === false) {
+            return null;
+        }
+        $img = $tmp . '.jpg';
+        @rename($tmp, $img);
+        file_put_contents($img, $bytes);
+        $out = shell_exec('tesseract ' . escapeshellarg($img) . ' stdout 2>/dev/null');
+        @unlink($img);
+
+        $text = trim((string) $out);
+
+        return $text !== '' ? $text : null;
+    }
+
+    /**
+     * Public browser IIIF URL for a region preview, sized so it never upscales.
+     * Uses the public Cantaloupe path (default /iiif/2), resolved against the host.
+     */
+    public function previewUrl(array $canvas, string $region): string
+    {
+        $base = rtrim((string) \sfConfig::get('app_iiif_cantaloupe_url', '/iiif/2'), '/');
+        $region = $this->normaliseRegion($region);
+        if ($region === 'full') {
+            $w = (int) ($canvas['width'] ?? 0);
+        } else {
+            $parts = explode(',', $region);
+            $w = (int) ($parts[2] ?? 0);
+        }
+        $size = ($w > 512) ? '512,' : 'max';
+
+        return "{$base}/{$canvas['cantaloupe_id']}/{$region}/{$size}/0/default.jpg";
     }
 
     /** Validate a region token: 'full' or four comma-separated non-negative ints. */
