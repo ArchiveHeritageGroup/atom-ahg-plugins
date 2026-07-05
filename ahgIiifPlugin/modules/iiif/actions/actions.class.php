@@ -1283,4 +1283,119 @@ class iiifActions extends AhgController
         }
     }
 
+    // =====================================================================
+    // IIIF AI Extract (#220) — region-scoped VLM extraction over canvases.
+    // The two JSON endpoints below double as the MCP-tool surface
+    // (iiif_manifest_canvases, iiif_region_extract). AI routes via the gateway.
+    // =====================================================================
+
+    protected function aiExtractService(): \AhgIiif\Services\IiifAiExtractService
+    {
+        require_once $this->config('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services/IiifAiExtractService.php';
+
+        return new \AhgIiif\Services\IiifAiExtractService();
+    }
+
+    /** GET /iiif/ai/canvases/object/:id — list canvases (index, cantaloupe id, dims). */
+    public function executeAiCanvases($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $objectId = (int) $request->getParameter('id');
+        if (!$objectId) {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'Object ID required']));
+        }
+
+        $canvases = $this->aiExtractService()->listCanvases($objectId);
+
+        return $this->renderText(json_encode([
+            'object_id' => $objectId,
+            'count' => count($canvases),
+            'canvases' => $canvases,
+        ], JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * POST /iiif/ai/extract — run a VLM extraction task on a canvas region.
+     * Body (JSON): {object_id, canvas_index?, region?, task}
+     */
+    public function executeAiExtract($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            // Fall back to form/query params for convenience.
+            $data = [
+                'object_id' => $request->getParameter('object_id'),
+                'canvas_index' => $request->getParameter('canvas_index'),
+                'region' => $request->getParameter('region'),
+                'task' => $request->getParameter('task'),
+            ];
+        }
+
+        $objectId = (int) ($data['object_id'] ?? 0);
+        $task = (string) ($data['task'] ?? '');
+        if (!$objectId || $task === '') {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'object_id and task are required']));
+        }
+
+        $result = $this->aiExtractService()->extractRegion(
+            $objectId,
+            (int) ($data['canvas_index'] ?? 0),
+            (string) ($data['region'] ?? 'full'),
+            $task,
+            $this->getUser()->getAttribute('user_id')
+        );
+
+        if (empty($result['success'])) {
+            $this->getResponse()->setStatusCode(422);
+        }
+
+        return $this->renderText(json_encode($result, JSON_UNESCAPED_SLASHES));
+    }
+
+    /** GET /iiif/ai/extract/object/:id — stored extractions for an object. */
+    public function executeAiExtractList($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->getResponse()->setStatusCode(401);
+
+            return $this->renderText(json_encode(['error' => 'Authentication required']));
+        }
+
+        $objectId = (int) $request->getParameter('id');
+        if (!$objectId) {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'Object ID required']));
+        }
+
+        $rows = $this->aiExtractService()->listExtractions($objectId);
+
+        return $this->renderText(json_encode([
+            'object_id' => $objectId,
+            'count' => count($rows),
+            'extractions' => $rows,
+        ], JSON_UNESCAPED_SLASHES));
+    }
+
 }

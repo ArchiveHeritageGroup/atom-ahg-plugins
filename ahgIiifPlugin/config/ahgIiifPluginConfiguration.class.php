@@ -125,6 +125,11 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         $iiif->get('iiif_activity_page', '/iiif/activity/page/:n', 'activityPage', ['n' => '\d+']);
         $iiif->get('iiif_ocr_export', '/iiif/ocr/object/:id', 'ocrExport', ['id' => '\d+']);
 
+        // IIIF AI Extract (#220) — region-scoped VLM extraction (MCP-tool surface).
+        $iiif->get('iiif_ai_canvases', '/iiif/ai/canvases/object/:id', 'aiCanvases', ['id' => '\d+']);
+        $iiif->post('iiif_ai_extract', '/iiif/ai/extract', 'aiExtract');
+        $iiif->get('iiif_ai_extract_list', '/iiif/ai/extract/object/:id', 'aiExtractList', ['id' => '\d+']);
+
         $iiif->register($routing);
 
         // ===================
