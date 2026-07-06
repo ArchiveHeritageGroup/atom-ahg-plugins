@@ -45,11 +45,16 @@ class ahgUserManagePluginConfiguration extends sfPluginConfiguration
         $userManage->any('user_view_override', '/user/:slug', 'view');
         $userManage->any('user_delete_override', '/user/:slug/delete', 'delete');
         $userManage->any('user_edit_override', '/user/:slug/edit', 'edit');
+        $userManage->any('user_password_override', '/user/:slug/password', 'password');
 
         // Specific routes
         $userManage->any('user_add_override', '/user/add', 'edit');
         $userManage->any('user_list_override', '/user/list', 'browse');
         $userManage->any('user_index_override', '/user', 'browse');
+        // Self-service password change. The user menu links to /user/passwordEdit
+        // (no slug); route it to our self-aware password action, which defaults to
+        // the current user, so non-admins can change their own password.
+        $userManage->any('user_password_self_override', '/user/passwordEdit', 'password');
 
         $userManage->register($routing);
 
@@ -57,7 +62,9 @@ class ahgUserManagePluginConfiguration extends sfPluginConfiguration
         $userPassthrough = new \AtomFramework\Routing\RouteLoader('user');
         $userPassthrough->any('user_login_passthrough', '/user/login', 'login');
         $userPassthrough->any('user_logout_passthrough', '/user/logout', 'logout');
-        $userPassthrough->any('user_password_edit_passthrough', '/user/passwordEdit', 'passwordEdit');
+        // NOTE: /user/passwordEdit is handled by userManage/password above
+        // (self-aware); the base slug-less passthrough forwarded non-admins to
+        // the secure page, so it is intentionally not registered here.
         $userPassthrough->any('user_clipboard_passthrough', '/user/clipboard', 'clipboard');
         $userPassthrough->any('user_password_reset_passthrough', '/user/passwordReset', 'passwordReset');
 

@@ -146,11 +146,16 @@
 
 <?php slot('after-content'); ?>
   <ul class="actions mb-3 nav gap-2">
-    <li><?php echo link_to(__('Edit'), '@user_edit_override?slug=' . $userRecord['slug'], ['class' => 'btn atom-btn-outline-light']); ?></li>
-    <?php if (!$isSelf) { ?>
-      <li><?php echo link_to(__('Delete'), '@user_delete_override?slug=' . $userRecord['slug'], ['class' => 'btn atom-btn-outline-danger']); ?></li>
+    <?php if ($sf_user->isAdministrator()) { ?>
+      <li><?php echo link_to(__('Edit'), '@user_edit_override?slug=' . $userRecord['slug'], ['class' => 'btn atom-btn-outline-light']); ?></li>
+      <?php if (!$isSelf) { ?>
+        <li><?php echo link_to(__('Delete'), '@user_delete_override?slug=' . $userRecord['slug'], ['class' => 'btn atom-btn-outline-danger']); ?></li>
+      <?php } ?>
+      <li><?php echo link_to(__('Add new'), '@user_add_override', ['class' => 'btn atom-btn-outline-light']); ?></li>
+      <li><?php echo link_to(__('Return to user list'), '@user_list_override', ['class' => 'btn atom-btn-outline-light']); ?></li>
     <?php } ?>
-    <li><?php echo link_to(__('Add new'), '@user_add_override', ['class' => 'btn atom-btn-outline-light']); ?></li>
-    <li><?php echo link_to(__('Return to user list'), '@user_list_override', ['class' => 'btn atom-btn-outline-light']); ?></li>
+    <?php if ($sf_user->isAdministrator() || $isSelf) { ?>
+      <li><?php echo link_to(__('Change password'), '@user_password_override?slug=' . $userRecord['slug'], ['class' => 'btn atom-btn-outline-light']); ?></li>
+    <?php } ?>
   </ul>
 <?php end_slot(); ?>

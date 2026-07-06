@@ -69,13 +69,6 @@ class userManageActions extends AhgController
      */
     public function executeView($request)
     {
-        // Admin-only
-        if (!$this->getUser()->isAdministrator()) {
-            $this->forward('admin', 'secure');
-
-            return;
-        }
-
         $culture = $this->culture();
         $slug = $request->getParameter('slug');
 
@@ -84,11 +77,17 @@ class userManageActions extends AhgController
             $this->forward404();
         }
 
+        // Admins may view any profile; other users may view only their own
+        // (restores base AtoM user/index self-view behaviour).
+        $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
+        if (!$this->getUser()->isAdministrator() && !$this->isSelf) {
+            $this->forward('admin', 'secure');
+
+            return;
+        }
+
         $title = $this->userRecord['username'] ?: $this->context->i18n->__('Untitled');
         $this->response->setTitle("{$title} - {$this->response->getTitle()}");
-
-        // Check if viewing own profile
-        $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
 
         // Get API keys
         $this->restApiKey = \AhgUserManage\Services\UserCrudService::getApiKey($this->userRecord['id'], 'RestApiKey');
@@ -104,6 +103,62 @@ class userManageActions extends AhgController
                 $this->clearance = \AtomExtensions\Services\SecurityClearanceService::getUserClearance($this->userRecord['id']);
             } catch (\Exception $e) {
                 // Service not fully installed
+            }
+        }
+    }
+
+    /**
+     * Change a user's password. Admins may change any account's; other users
+     * may change ONLY their own, and must confirm their current password.
+     * (Restores the self-service password change base AtoM offered via
+     * user/passwordEdit, which this plugin's /user/:slug override shadowed.)
+     */
+    public function executePassword($request)
+    {
+        $slug = $request->getParameter('slug');
+        // No slug (e.g. the /user/passwordEdit menu link) → the current user's own account.
+        if ($slug) {
+            $this->userRecord = \AhgUserManage\Services\UserCrudService::getBySlug($slug);
+        } else {
+            $this->userRecord = \AhgUserManage\Services\UserCrudService::getById((int) $this->getUser()->getUserID());
+        }
+        if (!$this->userRecord) {
+            $this->forward404();
+        }
+
+        $isAdmin = $this->getUser()->isAdministrator();
+        $this->isSelf = ($this->userRecord['id'] == $this->getUser()->getUserID());
+        if (!$isAdmin && !$this->isSelf) {
+            $this->forward('admin', 'secure');
+
+            return;
+        }
+
+        $title = $this->userRecord['username'] ?: $this->context->i18n->__('Untitled');
+        $this->response->setTitle(__('Change password') . " - {$title} - " . $this->response->getTitle());
+        $this->errors = [];
+
+        if ($request->isMethod('post')) {
+            $current = (string) $request->getParameter('current_pw', '');
+            $new = (string) $request->getParameter('new_pw', '');
+            $confirm = (string) $request->getParameter('confirm_pw', '');
+
+            // Non-admins must confirm their current password.
+            if (!$isAdmin && !\AhgUserManage\Services\UserCrudService::verifyPassword((int) $this->userRecord['id'], $current)) {
+                $this->errors[] = __('Your current password is incorrect.');
+            }
+            if (strlen($new) < 8) {
+                $this->errors[] = __('New password must be at least 8 characters long.');
+            }
+            if ($new !== $confirm) {
+                $this->errors[] = __('Password confirmation does not match.');
+            }
+
+            if (empty($this->errors)) {
+                // Password-only update — update() leaves groups/profile untouched.
+                \AhgUserManage\Services\UserCrudService::update((int) $this->userRecord['id'], ['password' => $new]);
+                $this->getUser()->setFlash('notice', __('Password updated successfully.'));
+                $this->redirect('@user_view_override?slug=' . $this->userRecord['slug']);
             }
         }
     }
