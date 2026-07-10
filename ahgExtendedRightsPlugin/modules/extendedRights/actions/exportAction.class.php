@@ -28,6 +28,14 @@ class extendedRightsExportAction extends AhgController
         // offer a "Back to record" link alongside "Back to Dashboard".
         $this->record = $objectId ? QubitInformationObject::getById((int) $objectId) : null;
 
+        // Resolve the slug explicitly for the "Back to record" link. getById()
+        // hydrates a plain object (not a route-usable Qubit resource), so passing
+        // it to url_for([$record, ...]) crashes QubitRoute (stdClass-as-array).
+        // Build the link from an explicit slug instead.
+        $this->recordSlug = $objectId
+            ? \Illuminate\Database\Capsule\Manager::table('slug')->where('object_id', (int) $objectId)->value('slug')
+            : null;
+
         // Handle export request
         if ($objectId || $format === 'csv' || $format === 'json-ld') {
             if ($objectId) {
