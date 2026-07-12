@@ -114,7 +114,9 @@ class DisplayService
             })
             ->whereIn('df.code', $fieldCodes)
             ->select('df.*', 'dfi.name', 'dfi.help_text')
-            ->orderByRaw('FIELD(df.code, "' . implode('","', $fieldCodes) . '")')
+            // SECURITY: bind the codes as parameters rather than interpolating
+            // them into the FIELD() expression (SQLi hardening / defense-in-depth).
+            ->orderByRaw('FIELD(df.code, ' . implode(',', array_fill(0, count($fieldCodes), '?')) . ')', $fieldCodes)
             ->get()
             ->toArray();
     }

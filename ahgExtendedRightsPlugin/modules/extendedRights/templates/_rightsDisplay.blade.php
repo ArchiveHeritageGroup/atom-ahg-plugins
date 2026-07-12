@@ -40,20 +40,20 @@ $embargoType = $embargoTypes[$embargo->embargo_type ?? 'full'] ?? __('Access Res
 <!-- Rights Statement -->
 @if ($rights->rs_code)
 <h4 class="h5 mt-3 mb-2 text-muted">{{ __('Rights Statement') }}</h4>
-{!! render_show(__('Statement'), $rights->rs_name . ($rights->rs_uri ? ' <a href="' . $rights->rs_uri . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')) !!}
+{!! render_show(__('Statement'), e($rights->rs_name) . ($rights->rs_uri ? ' <a href="' . e($rights->rs_uri) . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')) !!}
 @endif
 
 <!-- Creative Commons -->
 @if ($rights->cc_code)
 <h4 class="h5 mt-3 mb-2 text-muted">{{ __('License') }}</h4>
-{!! render_show(__('License'), $rights->cc_name . ($rights->cc_uri ? ' <a href="' . $rights->cc_uri . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')) !!}
+{!! render_show(__('License'), e($rights->cc_name) . ($rights->cc_uri ? ' <a href="' . e($rights->cc_uri) . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')) !!}
 @endif
 
 <!-- TK Labels -->
 @if (!empty($rights->tk_labels) && count($rights->tk_labels) > 0)
 <h4 class="h5 mt-3 mb-2 text-muted">{{ __('Traditional Knowledge Labels') }}</h4>
 @foreach ($rights->tk_labels as $tk)
-{!! render_show($tk->category_name ?? __('TK Label'), $tk->name . ($tk->uri ? ' <a href="' . $tk->uri . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')) !!}
+{!! render_show(e($tk->category_name ?? __('TK Label')), e($tk->name) . ($tk->uri ? ' <a href="' . e($tk->uri) . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')) !!}
 @endforeach
 @endif
 

@@ -7,11 +7,11 @@
   <h1 class="mb-4"><i class="fas fa-layer-group me-2"></i><?php echo __('Batch Rights Assignment'); ?></h1>
 
   <?php if ($sf_user->hasFlash('notice')): ?>
-    <div class="alert alert-success"><?php echo $sf_user->getFlash('notice'); ?></div>
+    <div class="alert alert-success"><?php echo htmlspecialchars((string) $sf_user->getFlash('notice'), ENT_QUOTES, 'UTF-8'); ?></div>
   <?php endif; ?>
 
   <?php if ($sf_user->hasFlash('error')): ?>
-    <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
+    <div class="alert alert-danger"><?php echo htmlspecialchars((string) $sf_user->getFlash('error'), ENT_QUOTES, 'UTF-8'); ?></div>
   <?php endif; ?>
 
   <form method="post" id="batch-rights-form">

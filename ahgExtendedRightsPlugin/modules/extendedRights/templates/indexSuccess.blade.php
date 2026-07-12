@@ -14,11 +14,11 @@
     <h1>Extended Rights Management</h1>
 
     @if ($sf_user->hasFlash('notice'))
-      <div class="alert alert-success">{!! $sf_user->getFlash('notice') !!}</div>
+      <div class="alert alert-success">{{ $sf_user->getFlash('notice') }}</div>
     @endif
 
     @if ($sf_user->hasFlash('error'))
-      <div class="alert alert-danger">{!! $sf_user->getFlash('error') !!}</div>
+      <div class="alert alert-danger">{{ $sf_user->getFlash('error') }}</div>
     @endif
 
     <div class="row">

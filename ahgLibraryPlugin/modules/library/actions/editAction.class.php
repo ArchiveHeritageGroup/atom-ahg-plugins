@@ -88,7 +88,10 @@ class libraryEditAction extends AhgController
             $oldValues = $this->captureCurrentValues($this->resource->id);
         }
 
-        $this->resource->title = html_entity_decode($request->getParameter('title'), ENT_QUOTES, 'UTF-8');
+        // SECURITY: store the title as submitted — do NOT html_entity_decode it,
+        // which would turn escaped markup (e.g. &lt;script&gt;) back into live HTML
+        // and reintroduce a stored-XSS vector at render time.
+        $this->resource->title = $request->getParameter('title');
         $this->resource->identifier = $request->getParameter('identifier');
         $this->resource->levelOfDescriptionId = $request->getParameter('level_of_description_id');
         
