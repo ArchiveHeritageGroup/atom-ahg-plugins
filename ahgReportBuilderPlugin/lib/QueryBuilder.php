@@ -142,6 +142,23 @@ class QueryBuilder
             throw new \InvalidArgumentException('Query configuration must include a table');
         }
 
+        // SECURITY: restrict visual queries to tables exposed via
+        // DataSourceRegistry. Without this, a non-admin (checkAdminAccess admits
+        // contributor) could read ANY table — e.g. `user` password_hash/salt —
+        // by supplying an arbitrary table name.
+        if (!class_exists('DataSourceRegistry')) {
+            $regFile = \sfConfig::get('sf_plugins_dir') . '/ahgReportBuilderPlugin/lib/DataSourceRegistry.php';
+            if (is_file($regFile)) {
+                require_once $regFile;
+            }
+        }
+        $allowedTables = class_exists('DataSourceRegistry')
+            ? array_column(\DataSourceRegistry::getAll(), 'table')
+            : [];
+        if (!in_array($table, $allowedTables, true)) {
+            throw new \InvalidArgumentException('Table not permitted for reporting: ' . $table);
+        }
+
         $query = DB::table($table);
 
         // Apply joins

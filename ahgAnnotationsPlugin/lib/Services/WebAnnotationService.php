@@ -105,10 +105,15 @@ class WebAnnotationService
         return json_decode($row->body_json, true) ?: null;
     }
 
-    public function update(string $uuid, array $anno): ?array
+    public function update(string $uuid, array $anno, ?int $userId = null, bool $isAdmin = false): ?array
     {
         $row = DB::table(self::$table)->where('anno_uuid', $uuid)->first();
         if (!$row) {
+            return null;
+        }
+        // SECURITY: only the annotation's author (or an admin) may modify it —
+        // previously any authenticated user could overwrite any annotation by UUID.
+        if (!$isAdmin && $userId !== null && (int) ($row->created_by ?? 0) !== (int) $userId) {
             return null;
         }
         $now = gmdate('Y-m-d\TH:i:s\Z');
@@ -136,8 +141,17 @@ class WebAnnotationService
         return $doc;
     }
 
-    public function delete(string $uuid): bool
+    public function delete(string $uuid, ?int $userId = null, bool $isAdmin = false): bool
     {
+        $row = DB::table(self::$table)->where('anno_uuid', $uuid)->first();
+        if (!$row) {
+            return false;
+        }
+        // SECURITY: only the annotation's author (or an admin) may delete it.
+        if (!$isAdmin && $userId !== null && (int) ($row->created_by ?? 0) !== (int) $userId) {
+            return false;
+        }
+
         return DB::table(self::$table)->where('anno_uuid', $uuid)->delete() > 0;
     }
 

@@ -5,3 +5,26 @@ delete:
 edit:
   credentials: [[ contributor, editor, administrator, translator ]]
   is_secure: true
+
+# SECURITY: these report actions expose accessions (never public), unpublished
+# descriptions, repository PII and authority records; they previously had no
+# gate (app default is_secure:false = public). Require an editor/administrator.
+reportAccession:
+  credentials: [[ editor, administrator ]]
+  is_secure: true
+
+reportInformationObject:
+  credentials: [[ editor, administrator ]]
+  is_secure: true
+
+reportRepository:
+  credentials: [[ editor, administrator ]]
+  is_secure: true
+
+reportPhysicalStorage:
+  credentials: [[ editor, administrator ]]
+  is_secure: true
+
+reportAuthorityRecord:
+  credentials: [[ editor, administrator ]]
+  is_secure: true

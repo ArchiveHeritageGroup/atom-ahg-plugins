@@ -1,0 +1,19 @@
+# Public feedback submission (submit / general) stays open, but viewing or
+# managing feedback exposes submitter PII (name/email/phone) and must be
+# staff-only. Previously the module had NO security.yml — anyone could
+# enumerate /feedback/:id and read all submitters' PII.
+browse:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+view:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+edit:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+delete:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

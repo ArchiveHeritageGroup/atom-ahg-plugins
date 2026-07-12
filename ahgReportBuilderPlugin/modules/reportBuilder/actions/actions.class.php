@@ -597,6 +597,7 @@ class reportBuilderActions extends AhgController
      */
     public function executeApiData($request)
     {
+        $this->checkAdminAccess(); // SECURITY: was unauthenticated — exposed donor/DSAR/breach/security-log/clearance data
         $this->getResponse()->setContentType('application/json');
 
         try {
@@ -635,6 +636,7 @@ class reportBuilderActions extends AhgController
      */
     public function executeApiChartData($request)
     {
+        $this->checkAdminAccess(); // SECURITY: was unauthenticated
         $this->getResponse()->setContentType('application/json');
 
         try {
@@ -670,6 +672,7 @@ class reportBuilderActions extends AhgController
      */
     public function executeApiColumns($request)
     {
+        $this->checkAdminAccess(); // SECURITY: was unauthenticated
         $this->getResponse()->setContentType('application/json');
 
         $source = $request->getParameter('source');
@@ -735,6 +738,7 @@ class reportBuilderActions extends AhgController
      */
     public function executeWidget($request)
     {
+        $this->checkAdminAccess(); // SECURITY: was unauthenticated
         $widgetId = (int) $request->getParameter('id');
 
         $this->widget = DB::table('dashboard_widget as w')

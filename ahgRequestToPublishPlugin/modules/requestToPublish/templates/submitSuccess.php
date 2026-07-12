@@ -65,7 +65,7 @@
               <?php echo __('Planned Use') ?> <span class="text-danger">*</span>
             </label>
             <textarea name="rtp_planned_use" id="rtp_planned_use" class="form-control" rows="4" required
-                      placeholder="<?php echo __('Please describe how you intend to use the image(s)...') ?>"><?php echo $sf_request->getParameter('rtp_planned_use') ?></textarea>
+                      placeholder="<?php echo __('Please describe how you intend to use the image(s)...') ?>"><?php echo esc_specialchars($sf_request->getParameter('rtp_planned_use')) ?></textarea>
             <div class="form-text"><?php echo __('e.g., Publication in book, exhibition, documentary, academic research, etc.') ?></div>
           </div>
           <div class="col-12">
@@ -73,14 +73,14 @@
               <?php echo __('Motivation / Additional Information') ?>
             </label>
             <textarea name="rtp_motivation" id="rtp_motivation" class="form-control" rows="3"
-                      placeholder="<?php echo __('Any additional context or motivation for your request...') ?>"><?php echo $sf_request->getParameter('rtp_motivation') ?></textarea>
+                      placeholder="<?php echo __('Any additional context or motivation for your request...') ?>"><?php echo esc_specialchars($sf_request->getParameter('rtp_motivation')) ?></textarea>
           </div>
           <div class="col-md-6">
             <label for="rtp_need_image_by" class="form-label fw-semibold">
               <?php echo __('Need Image By') ?>
             </label>
             <input type="date" name="rtp_need_image_by" id="rtp_need_image_by" class="form-control"
-                   value="<?php echo $sf_request->getParameter('rtp_need_image_by') ?>">
+                   value="<?php echo esc_specialchars($sf_request->getParameter('rtp_need_image_by')) ?>">
             <div class="form-text"><?php echo __('When do you need the image(s)?') ?></div>
           </div>
         </div>

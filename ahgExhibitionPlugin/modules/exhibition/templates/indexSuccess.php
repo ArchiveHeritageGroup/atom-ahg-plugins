@@ -8,7 +8,7 @@
       <div class="card-header">
         <form method="get" action="<?php echo url_for(['module' => 'exhibition', 'action' => 'index']); ?>" class="row g-2 align-items-center">
           <div class="col-auto">
-            <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..." value="<?php echo $sf_request->getParameter('search'); ?>">
+            <input type="text" name="search" class="form-control form-control-sm" placeholder="Search..." value="<?php echo esc_specialchars($sf_request->getParameter('search')); ?>">
           </div>
           <div class="col-auto">
             <select name="status" class="form-select form-select-sm">

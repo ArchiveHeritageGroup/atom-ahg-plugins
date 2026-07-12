@@ -1,2 +1,14 @@
+# Public gallery display (index/browse/dashboard) stays open, but creating or
+# editing archival descriptions requires an editor. Previously the whole module
+# was is_secure:false, so anonymous users could create/overwrite
+# information_object records via gallery/add and gallery/edit.
 all:
   is_secure: false
+
+add:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+edit:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

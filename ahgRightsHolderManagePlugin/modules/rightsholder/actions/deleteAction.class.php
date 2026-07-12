@@ -27,6 +27,13 @@ class RightsHolderDeleteAction extends AhgController
 
         $this->resource = $this->getRoute()->resource;
 
+        // SECURITY: require delete authorization. This action previously had NO
+        // auth check at all (anonymous DELETE removed rights-holder authority
+        // records); editAction already gates with AclService::check.
+        if (!$this->resource || !\AtomExtensions\Services\AclService::check($this->resource, 'delete')) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+
         if ($request->isMethod('delete')) {
             $this->form->bind($request->getPostParameters());
 

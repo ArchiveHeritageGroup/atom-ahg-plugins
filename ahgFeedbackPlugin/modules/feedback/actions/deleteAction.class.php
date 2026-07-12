@@ -20,7 +20,9 @@ class feedbackDeleteAction extends AhgController
             $this->forward404();
         }
 
-        if ($request->isMethod('delete') || $request->getParameter('confirm')) {
+        // SECURITY: require a POST/DELETE — the previous `|| getParameter('confirm')`
+        // allowed a GET (e.g. a CSRF <img> tag) to delete feedback.
+        if ($request->isMethod('delete') || ($request->isMethod('post') && $request->getParameter('confirm'))) {
             // Dual-mode delete (WP18)
             if (class_exists('\\AtomFramework\\Services\\Delete\\EntityDeleteService')) {
                 \AtomFramework\Services\Delete\EntityDeleteService::delete($this->resource->id);

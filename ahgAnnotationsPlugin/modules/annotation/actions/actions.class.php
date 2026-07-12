@@ -115,7 +115,7 @@ class annotationActions extends AhgController
             if (!$this->getUser()->isAuthenticated()) {
                 return $this->jsonLd(['error' => 'Authentication required to write annotations'], 403);
             }
-            $doc = $this->svc()->update($uuid, $this->jsonBody($request));
+            $doc = $this->svc()->update($uuid, $this->jsonBody($request), (int) $this->getUser()->getAttribute('user_id'), $this->getUser()->isAdministrator());
             if ($doc === null) {
                 return $this->jsonLd(['error' => 'Annotation not found'], 404);
             }
@@ -126,7 +126,7 @@ class annotationActions extends AhgController
             if (!$this->getUser()->isAuthenticated()) {
                 return $this->jsonLd(['error' => 'Authentication required to write annotations'], 403);
             }
-            $ok = $this->svc()->delete($uuid);
+            $ok = $this->svc()->delete($uuid, (int) $this->getUser()->getAttribute('user_id'), $this->getUser()->isAdministrator());
             return $this->jsonLd(null, $ok ? 204 : 404);
         }
 
