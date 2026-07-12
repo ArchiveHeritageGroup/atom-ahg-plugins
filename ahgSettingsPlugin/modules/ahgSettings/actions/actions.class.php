@@ -9,6 +9,20 @@ use AtomFramework\Http\Controllers\AhgController;
  */
 class ahgSettingsActions extends AhgController
 {
+    /**
+     * SECURITY: the AHG settings panel is administrator-only (matches base
+     * AtoM's settings module, which requires the `administrator` credential).
+     * Gate the ENTIRE module here — several write handlers (ldap, security,
+     * permissions, global, oai, uploads, delete) previously had no auth check,
+     * so an anonymous POST could repoint authentication, clear the admin-IP
+     * allowlist or rewrite site permissions. boot() runs in preExecute() before
+     * any action, and requireAdmin() forwards non-admins to admin/secure.
+     */
+    public function boot(): void
+    {
+        $this->requireAdmin();
+    }
+
     private function executeSettingsAction($actionClass, $request)
     {
         $actionFile = $this->config('sf_plugins_dir') . '/ahgSettingsPlugin/modules/ahgSettings/actions/handlers/' . $actionClass . '.class.php';

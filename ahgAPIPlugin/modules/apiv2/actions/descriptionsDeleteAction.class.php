@@ -20,6 +20,15 @@ class apiv2DescriptionsDeleteAction extends AhgApiController
 
         $objectId = $slugRecord->object_id;
 
+        // SECURITY: enforce AtoM's per-object/role ACL. The session-user scope
+        // grant (read/write/delete) is authentication, NOT authorization —
+        // without this, any authenticated account (e.g. a self-registered
+        // researcher) could DELETE any description in any repository via the API.
+        $aclResource = \QubitInformationObject::getById((int) $objectId);
+        if (!\AtomExtensions\Services\AclService::check($aclResource, 'delete')) {
+            return $this->error(403, 'Forbidden', 'Not authorized to delete this description');
+        }
+
         // Check for children
         $io = DB::table('information_object')->where('id', $objectId)->first();
         $hasChildren = DB::table('information_object')

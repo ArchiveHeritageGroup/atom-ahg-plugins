@@ -239,6 +239,13 @@ class accessRequestActions extends AhgController
         $requestId = (int) $request->getParameter('id');
         $userId = $this->getUser()->getAttribute('user_id');
 
+        // SECURITY: only a designated approver may approve — previously ANY
+        // authenticated user could approve their own access request and thereby
+        // self-grant a security clearance (privilege escalation).
+        if (!\AtomExtensions\Services\AccessRequestService::isApprover($userId)) {
+            $this->forward404('Not authorised to approve access requests');
+        }
+
         if (!$request->isMethod('post')) {
             $this->redirect(['module' => 'accessRequest', 'action' => 'view', 'id' => $requestId]);
         }
@@ -267,6 +274,11 @@ class accessRequestActions extends AhgController
 
         $requestId = (int) $request->getParameter('id');
         $userId = $this->getUser()->getAttribute('user_id');
+
+        // SECURITY: only a designated approver may deny/decide requests.
+        if (!\AtomExtensions\Services\AccessRequestService::isApprover($userId)) {
+            $this->forward404('Not authorised to decide access requests');
+        }
 
         if (!$request->isMethod('post')) {
             $this->redirect(['module' => 'accessRequest', 'action' => 'view', 'id' => $requestId]);

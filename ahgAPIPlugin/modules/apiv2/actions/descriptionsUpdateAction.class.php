@@ -20,6 +20,14 @@ class apiv2DescriptionsUpdateAction extends AhgApiController
 
         $objectId = $slugRecord->object_id;
 
+        // SECURITY: enforce AtoM's per-object/role ACL. The session scope grant
+        // is authentication, not authorization — without this any authenticated
+        // account could overwrite any description (incl. publication status).
+        $aclResource = \QubitInformationObject::getById((int) $objectId);
+        if (!\AtomExtensions\Services\AclService::check($aclResource, 'update')) {
+            return $this->error(403, 'Forbidden', 'Not authorized to update this description');
+        }
+
         try {
             DB::beginTransaction();
 

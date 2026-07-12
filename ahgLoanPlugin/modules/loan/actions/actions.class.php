@@ -12,6 +12,17 @@ use AtomFramework\Http\Controllers\AhgController;
 class loanActions extends AhgController
 {
     /**
+     * SECURITY: require an authenticated user for every loan action (the whole
+     * module was previously unauthenticated — anonymous CRUD + document upload).
+     * The editor/administrator credential is enforced by
+     * modules/loan/config/security.yml; this is a defense-in-depth gate.
+     */
+    public function boot(): void
+    {
+        $this->requireAuth();
+    }
+
+    /**
      * Browse/list loans.
      */
     public function executeIndex($request)

@@ -27,6 +27,14 @@ class apiv2DescriptionsCreateAction extends AhgApiController
                 }
             }
 
+            // SECURITY: enforce create ACL (editors/contributors/admins only).
+            // The session scope grant is not authorization; without this any
+            // authenticated account could create published archival descriptions.
+            $aclParent = \QubitInformationObject::getById((int) $parentId);
+            if (!\AtomExtensions\Services\AclService::check($aclParent, 'create')) {
+                return $this->error(403, 'Forbidden', 'Not authorized to create descriptions');
+            }
+
             // Get parent for nested set
             $parentObj = DB::table('information_object')->where('id', $parentId)->first();
             

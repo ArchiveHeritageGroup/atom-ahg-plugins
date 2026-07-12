@@ -1,0 +1,5 @@
+# The AHG settings panel is administrator-only. Defense-in-depth alongside the
+# module-wide requireAdmin() gate in actions.class.php::boot().
+all:
+  is_secure:   true
+  credentials: administrator

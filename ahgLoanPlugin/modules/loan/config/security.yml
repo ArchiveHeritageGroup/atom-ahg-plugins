@@ -1,0 +1,7 @@
+# SECURITY: the loan module (add/edit/extend/return/add-object/upload-document/
+# transition) had NO auth check and no security.yml — anonymous CRUD + arbitrary
+# document upload, with writes falling back to user_id=1. Loan management is a
+# staff function; require an authenticated editor/administrator for every action.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
