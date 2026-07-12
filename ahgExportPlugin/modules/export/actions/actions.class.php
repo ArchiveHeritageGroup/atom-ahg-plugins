@@ -5,8 +5,15 @@ class exportActions extends AhgController
 {
     public function boot(): void
     {
-if (!$this->getUser()->isAuthenticated()) {
+        if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('user/login');
+        }
+
+        // SECURITY: export dumps full catalogue rows incl. unpublished records
+        // and repository contact PII — restrict to editors/administrators
+        // (was any authenticated user, e.g. a self-registered researcher).
+        if (!$this->getUser()->isAdministrator() && !$this->getUser()->hasCredential('editor')) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
         }
 
         // Load AhgDb for database access

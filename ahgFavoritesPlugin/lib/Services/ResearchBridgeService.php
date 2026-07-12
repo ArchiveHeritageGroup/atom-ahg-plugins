@@ -95,6 +95,13 @@ class ResearchBridgeService
             return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('You are not registered as a researcher.')];
         }
 
+        // SECURITY: the destination collection must belong to this researcher —
+        // collectionId comes from the request and was previously unchecked, so a
+        // user could inject items into another researcher's collection.
+        if ((int) DB::table('research_collection')->where('id', $collectionId)->value('researcher_id') !== (int) $researcherId) {
+            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Not authorized for that collection.')];
+        }
+
         $service = $this->getResearchService();
         $objectIds = $this->resolveFavoriteObjectIds($userId, $favoriteIds);
 
@@ -135,6 +142,14 @@ class ResearchBridgeService
             return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Research plugin not enabled.')];
         }
 
+        // SECURITY: require a registered researcher who OWNS the destination
+        // project (projectId came from the request unchecked).
+        $researcherId = $this->getResearcherId($userId);
+        if (!$researcherId
+            || (int) DB::table('research_project')->where('id', $projectId)->value('owner_id') !== (int) $researcherId) {
+            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Not authorized for that project.')];
+        }
+
         $service = $this->getProjectService();
         $objectIds = $this->resolveFavoriteObjectIds($userId, $favoriteIds);
 
@@ -168,6 +183,14 @@ class ResearchBridgeService
     {
         if (!$this->isResearchEnabled()) {
             return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Research plugin not enabled.')];
+        }
+
+        // SECURITY: require a registered researcher who OWNS the destination
+        // bibliography (bibliographyId came from the request unchecked).
+        $researcherId = $this->getResearcherId($userId);
+        if (!$researcherId
+            || (int) DB::table('research_bibliography')->where('id', $bibliographyId)->value('researcher_id') !== (int) $researcherId) {
+            return ['success' => false, 'added' => 0, 'skipped' => 0, 'message' => \__('Not authorized for that bibliography.')];
         }
 
         $service = $this->getBibliographyService();

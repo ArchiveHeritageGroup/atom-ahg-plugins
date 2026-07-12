@@ -399,7 +399,7 @@ class LlmService
 
         // Generate a new key based on some server constants
         // This is a fallback - for production, a proper key should be configured
-        $baseKey = 'ahg_llm_' . php_uname('n') . '_' . dirname(__FILE__);
+        $baseKey = 'ahg_llm_' . (\sfConfig::get('sf_app_secret') ?: \sfConfig::get('sf_secret_key') ?: php_uname('n')) . '_' . dirname(__FILE__); // SECURITY: bind fallback key to app secret, not just host+path
 
         return hash('sha256', $baseKey);
     }

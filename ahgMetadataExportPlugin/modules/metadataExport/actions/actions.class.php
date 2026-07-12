@@ -135,7 +135,7 @@ class metadataExportActions extends AhgController
             // Build options from request
             $options = [
                 'includeDigitalObjects' => $request->getParameter('include_digital_objects', true),
-                'includeDrafts' => $request->getParameter('include_drafts', false),
+                'includeDrafts' => ($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor')) ? $request->getParameter('include_drafts', false) : false, // SECURITY: drafts only for editors
                 'includeChildren' => $request->getParameter('include_children', true),
                 'maxDepth' => (int) $request->getParameter('max_depth', 0),
                 'prettyPrint' => true,
@@ -246,7 +246,7 @@ class metadataExportActions extends AhgController
             // Build options
             $options = [
                 'includeDigitalObjects' => $request->getParameter('include_digital_objects', true),
-                'includeDrafts' => $request->getParameter('include_drafts', false),
+                'includeDrafts' => ($this->getUser()->isAdministrator() || $this->getUser()->hasCredential('editor')) ? $request->getParameter('include_drafts', false) : false, // SECURITY: drafts only for editors
                 'includeChildren' => $request->getParameter('include_children', true),
                 'maxDepth' => (int) $request->getParameter('max_depth', 0),
                 'prettyPrint' => true,

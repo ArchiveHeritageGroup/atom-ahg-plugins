@@ -1117,7 +1117,8 @@ XML;
 
     protected function encryptionKey(): string
     {
-        $secret = sfConfig::get('sf_app_secret') ?: sfConfig::get('sf_secret_key') ?: 'fallback-not-secure';
+        $secret = sfConfig::get('sf_app_secret') ?: sfConfig::get('sf_secret_key');
+        if (empty($secret)) { throw new \RuntimeException('ORCID token encryption requires sf_app_secret to be configured'); } // SECURITY: fail closed, no literal fallback key
         return hash('sha256', (string) $secret, true);
     }
 }
