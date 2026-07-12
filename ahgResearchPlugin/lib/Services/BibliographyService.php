@@ -45,12 +45,22 @@ class BibliographyService
      * @param int $id The bibliography ID
      * @return object|null The bibliography or null
      */
-    public function getBibliography(int $id): ?object
+    public function getBibliography(int $id, ?int $researcherId = null): ?object
     {
-        $bibliography = DB::table('research_bibliography as b')
+        $query = DB::table('research_bibliography as b')
             ->leftJoin('research_researcher as r', 'b.researcher_id', '=', 'r.id')
             ->leftJoin('research_project as p', 'b.project_id', '=', 'p.id')
-            ->where('b.id', $id)
+            ->where('b.id', $id);
+
+        // SECURITY: when a researcher id is supplied, scope to that owner so a
+        // researcher cannot view/export/delete another researcher's bibliography
+        // by enumerating ids. (Callers already pass $researcher->id; this method
+        // previously ignored it.)
+        if ($researcherId !== null) {
+            $query->where('b.researcher_id', $researcherId);
+        }
+
+        $bibliography = $query
             ->select(
                 'b.*',
                 'r.first_name as researcher_first_name',

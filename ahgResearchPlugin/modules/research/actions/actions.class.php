@@ -2861,6 +2861,13 @@ class researchActions extends AhgController
         $bibliographyService = new BibliographyService();
 
         $bibliographyId = (int) $request->getParameter('id');
+
+        // SECURITY: verify the bibliography belongs to this researcher before
+        // exporting — previously any researcher could export another's by id.
+        if (!$bibliographyService->getBibliography($bibliographyId, $researcher->id)) {
+            $this->forward404();
+        }
+
         $format = $request->getParameter('format', 'ris');
 
         $mimeTypes = [
@@ -4259,6 +4266,16 @@ class researchActions extends AhgController
 
         $reportService = $this->loadReportService();
         $sectionId = (int) $request->getParameter('section_id');
+
+        // SECURITY: verify the section's report belongs to this researcher.
+        $secReportId = \Illuminate\Database\Capsule\Manager::table('research_report_section')->where('id', $sectionId)->value('report_id');
+        $secReport = $secReportId ? $reportService->getReport((int) $secReportId) : null;
+        $secResearcher = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$secReport || !$secResearcher
+            || (!$this->getUser()->isAdministrator() && (int) ($secReport->researcher_id ?? 0) !== (int) $secResearcher->id)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authorized']));
+        }
+
         $content = $this->service->sanitizeHtml($request->getParameter('content', ''));
 
         $reportService->updateSection($sectionId, [
@@ -4279,6 +4296,15 @@ class researchActions extends AhgController
 
         $reportService = $this->loadReportService();
         $reportId = (int) $request->getParameter('id');
+
+        // SECURITY: verify report ownership before reordering its sections.
+        $roReport = $reportService->getReport($reportId);
+        $roResearcher = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$roReport || !$roResearcher
+            || (!$this->getUser()->isAdministrator() && (int) ($roReport->researcher_id ?? 0) !== (int) $roResearcher->id)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authorized']));
+        }
+
         $sectionIds = $request->getParameter('sections', []);
 
         if (is_string($sectionIds)) {
@@ -4305,6 +4331,17 @@ class researchActions extends AhgController
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
 
         $id = (int) $request->getParameter('id');
+
+        // SECURITY: verify report ownership before export — previously any
+        // researcher could export another researcher's full report by id.
+        require_once $this->config('sf_plugins_dir') . '/ahgResearchPlugin/lib/Services/ReportService.php';
+        $reportOwnerCheck = (new ReportService())->getReport($id);
+        $exportResearcher = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$reportOwnerCheck || !$exportResearcher
+            || (!$this->getUser()->isAdministrator() && (int) ($reportOwnerCheck->researcher_id ?? 0) !== (int) $exportResearcher->id)) {
+            $this->forward404();
+        }
+
         $format = $request->getParameter('format', 'pdf');
         $exportService = $this->loadExportService();
 
@@ -5586,6 +5623,15 @@ class researchActions extends AhgController
         if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
         $hypothesisService = $this->loadHypothesisService();
         $id = (int) $request->getParameter('id');
+
+        // SECURITY: verify the current researcher owns this hypothesis —
+        // previously any researcher could update/delete/add-evidence by id.
+        $hypo = $hypothesisService->getHypothesis($id);
+        $hypoResearcher = $this->service->getResearcherByUserId($this->getUser()->getAttribute('user_id'));
+        if (!$hypo || !$hypoResearcher
+            || (!$this->getUser()->isAdministrator() && (int) ($hypo->researcher_id ?? 0) !== (int) $hypoResearcher->id)) {
+            $this->forward404();
+        }
 
         if ($request->isMethod('post')) {
             $formAction = $request->getParameter('form_action');
@@ -7202,6 +7248,21 @@ class researchActions extends AhgController
         }
 
         $odrlService = $this->loadOdrlService();
+
+        // SECURITY: only the policy's creator (or an admin) may delete it —
+        // otherwise any authenticated researcher could remove another dataset's
+        // ODRL policy and re-open restricted (POPIA/embargoed) downloads.
+        $policy = $odrlService->getPolicy($id);
+        if (!$policy) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'Policy not found']));
+        }
+        if (!$this->getUser()->isAdministrator()
+            && (int) ($policy->created_by ?? 0) !== (int) $this->getUser()->getAttribute('user_id')) {
+            $this->getResponse()->setStatusCode(403);
+            return $this->renderText(json_encode(['error' => 'Not authorized to modify this policy']));
+        }
+
         try {
             $deleted = $odrlService->deletePolicy($id);
             return $this->renderText(json_encode(['success' => $deleted]));
@@ -7246,9 +7307,22 @@ class researchActions extends AhgController
 
         $odrlService = $this->loadOdrlService();
 
+        // SECURITY: only the policy's creator (or an admin) may update it.
+        $policy = $odrlService->getPolicy($id);
+        if (!$policy) {
+            $this->getResponse()->setStatusCode(404);
+            return $this->renderText(json_encode(['error' => 'Policy not found']));
+        }
+        if (!$this->getUser()->isAdministrator()
+            && (int) ($policy->created_by ?? 0) !== (int) $this->getUser()->getAttribute('user_id')) {
+            $this->getResponse()->setStatusCode(403);
+            return $this->renderText(json_encode(['error' => 'Not authorized to modify this policy']));
+        }
+
         if ($request->isMethod('post')) {
             try {
                 $body = json_decode($request->getContent(), true) ?: [];
+                unset($body['created_by']); // do not allow reassigning ownership
                 $updated = $odrlService->updatePolicy($id, $body);
                 return $this->renderText(json_encode(['success' => $updated]));
             } catch (\Exception $e) {
