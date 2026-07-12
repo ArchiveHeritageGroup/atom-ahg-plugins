@@ -220,15 +220,31 @@ class donorAgreementAddAction extends AhgController
 
     protected function saveDocument($agreementId, $tmpName, $originalName, $size, $mimeType, $uploadDir, $docType, $description)
     {
+        // SECURITY: validate extension + size before storing the upload.
+        $validation = \AtomExtensions\Services\FileValidationService::validateUpload([
+            'name' => $originalName, 'tmp_name' => $tmpName, 'type' => $mimeType, 'size' => $size,
+        ]);
+        if (!$validation['valid']) {
+            return "Invalid document {$originalName}: " . implode(' ', $validation['errors']);
+        }
+
         // Generate unique filename
-        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        $ext = strtolower(pathinfo(\AtomExtensions\Services\FileValidationService::sanitizeFilename($originalName), PATHINFO_EXTENSION));
         $filename = date('Ymd_His') . '_' . uniqid() . '.' . $ext;
         $filepath = $uploadDir . '/' . $filename;
 
         if (!move_uploaded_file($tmpName, $filepath)) {
             return "Failed to move uploaded file: {$originalName}";
         }
-        
+
+        // SECURITY: post-move magic-byte MIME check — reject disguised payloads.
+        $mimeCheck = \AtomExtensions\Services\FileValidationService::validateMime($filepath);
+        if (!$mimeCheck['valid']) {
+            @unlink($filepath);
+
+            return "Invalid document {$originalName}: " . implode(' ', $mimeCheck['errors']);
+        }
+
         // Make file readable
         chmod($filepath, 0644);
 

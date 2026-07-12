@@ -591,10 +591,24 @@ class AccessionIntakeService
             mkdir($uploadDir, 0775, true);
         }
 
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        // SECURITY: validate extension + size before storing the upload.
+        $validation = \AtomExtensions\Services\FileValidationService::validateUpload($file);
+        if (!$validation['valid']) {
+            throw new \RuntimeException('Invalid attachment: ' . implode(' ', $validation['errors']));
+        }
+
+        $ext = strtolower(pathinfo(\AtomExtensions\Services\FileValidationService::sanitizeFilename($file['name']), PATHINFO_EXTENSION));
         $filename = uniqid('att_') . ($ext ? '.' . $ext : '');
 
         move_uploaded_file($file['tmp_name'], $uploadDir . '/' . $filename);
+
+        // SECURITY: post-move magic-byte MIME check — reject disguised payloads.
+        $mimeCheck = \AtomExtensions\Services\FileValidationService::validateMime($uploadDir . '/' . $filename);
+        if (!$mimeCheck['valid']) {
+            @unlink($uploadDir . '/' . $filename);
+
+            throw new \RuntimeException('Invalid attachment: ' . implode(' ', $mimeCheck['errors']));
+        }
 
         $id = DB::table('accession_attachment')->insertGetId([
             'accession_id' => $accessionId,

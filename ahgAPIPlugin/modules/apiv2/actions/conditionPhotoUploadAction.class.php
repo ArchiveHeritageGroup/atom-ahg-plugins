@@ -1,8 +1,13 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgApiController;
+use AtomExtensions\Services\FileValidationService;
+
 class apiv2ConditionPhotoUploadAction extends AhgApiController
 {
+    /** Photo endpoint — restrict to image formats only. */
+    private const PHOTO_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'tif', 'tiff', 'bmp', 'webp'];
+
     public function POST($request)
     {
         if (!$this->hasScope('write')) {
@@ -40,12 +45,26 @@ class apiv2ConditionPhotoUploadAction extends AhgApiController
             mkdir($uploadDir, 0755, true);
         }
 
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        // SECURITY: validate extension + size before touching the filesystem.
+        $validation = FileValidationService::validateUpload($file, ['allowed_extensions' => self::PHOTO_EXTENSIONS]);
+        if (!$validation['valid']) {
+            return $this->error(400, 'Invalid File', implode(' ', $validation['errors']));
+        }
+
+        $ext = strtolower(pathinfo(FileValidationService::sanitizeFilename($file['name']), PATHINFO_EXTENSION));
         $filename = uniqid('cond_') . '.' . $ext;
         $filepath = $uploadDir . '/' . $filename;
 
         if (!move_uploaded_file($file['tmp_name'], $filepath)) {
             return $this->error(500, 'Upload Failed', 'Could not save file');
+        }
+
+        // SECURITY: post-move magic-byte MIME check — reject disguised payloads.
+        $mimeCheck = FileValidationService::validateMime($filepath);
+        if (!$mimeCheck['valid']) {
+            @unlink($filepath);
+
+            return $this->error(400, 'Invalid File', implode(' ', $mimeCheck['errors']));
         }
 
         // Get image dimensions
@@ -88,8 +107,20 @@ class apiv2ConditionPhotoUploadAction extends AhgApiController
             $ext = $data['extension'] ?? 'jpg';
         }
 
-        $imageData = base64_decode($base64);
-        if (!$imageData) {
+        // SECURITY: allowlist the extension (image formats only) before decoding.
+        $ext = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string) $ext));
+        if (!in_array($ext, self::PHOTO_EXTENSIONS, true)) {
+            return $this->error(400, 'Invalid File', "Image extension '{$ext}' is not allowed");
+        }
+
+        // SECURITY: enforce the size cap on the encoded payload before decoding.
+        $sizeCheck = FileValidationService::validateBase64Size($base64);
+        if (!$sizeCheck['valid']) {
+            return $this->error(400, 'Invalid File', implode(' ', $sizeCheck['errors']));
+        }
+
+        $imageData = base64_decode($base64, true);
+        if (false === $imageData) {
             return $this->error(400, 'Bad Request', 'Invalid base64 data');
         }
 
@@ -103,6 +134,14 @@ class apiv2ConditionPhotoUploadAction extends AhgApiController
 
         if (file_put_contents($filepath, $imageData) === false) {
             return $this->error(500, 'Upload Failed', 'Could not save file');
+        }
+
+        // SECURITY: post-write magic-byte MIME check — reject disguised payloads.
+        $mimeCheck = FileValidationService::validateMime($filepath);
+        if (!$mimeCheck['valid']) {
+            @unlink($filepath);
+
+            return $this->error(400, 'Invalid File', implode(' ', $mimeCheck['errors']));
         }
 
         $size = @getimagesize($filepath);

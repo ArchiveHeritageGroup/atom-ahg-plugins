@@ -190,8 +190,15 @@ class ConditionAnnotationService
                 $photoType = 'detail'; // Default to detail
             }
 
+            // SECURITY: validate extension (images only) + size before storing.
+            $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'tif', 'tiff', 'bmp', 'webp'];
+            $validation = \AtomExtensions\Services\FileValidationService::validateUpload($file, ['allowed_extensions' => $imageExts]);
+            if (!$validation['valid']) {
+                throw new \Exception('Invalid photo: ' . implode(' ', $validation['errors']));
+            }
+
             // Generate filenames
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $ext = strtolower(pathinfo(\AtomExtensions\Services\FileValidationService::sanitizeFilename($file['name']), PATHINFO_EXTENSION));
             $filename = sprintf('condition_%d_%s.%s', $conditionCheckId, uniqid(), $ext);
             $uploadDir = $this->getUploadPath();
 
@@ -205,6 +212,14 @@ class ConditionAnnotationService
             if (!move_uploaded_file($file['tmp_name'], $filepath)) {
                 $this->logger->error('Failed to move uploaded file', ['filepath' => $filepath]);
                 throw new \Exception('Failed to move uploaded file');
+            }
+
+            // SECURITY: post-move magic-byte MIME check — reject disguised payloads.
+            $mimeCheck = \AtomExtensions\Services\FileValidationService::validateMime($filepath);
+            if (!$mimeCheck['valid']) {
+                @unlink($filepath);
+
+                throw new \Exception('Invalid photo: ' . implode(' ', $mimeCheck['errors']));
             }
 
             // Get image dimensions

@@ -281,19 +281,25 @@ class donorAgreementActions extends AhgController
             } elseif (isset($_FILES['agreement_logo']) && $_FILES['agreement_logo']['error'] === UPLOAD_ERR_OK) {
                 // Upload new logo
                 $file = $_FILES['agreement_logo'];
-                $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
-                if (in_array($file['type'], $allowedTypes)) {
+                // SECURITY: validate by extension allowlist (images only) + size,
+                // not the client-supplied MIME which is trivially spoofed.
+                $logoExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                $validation = \AtomExtensions\Services\FileValidationService::validateUpload($file, ['allowed_extensions' => $logoExts]);
+
+                if ($validation['valid']) {
                     $uploadDir = $this->config('sf_root_dir') . '/uploads/agreements/logos';
                     if (!is_dir($uploadDir)) {
                         mkdir($uploadDir, 0755, true);
                     }
 
-                    $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+                    $ext = strtolower(pathinfo(\AtomExtensions\Services\FileValidationService::sanitizeFilename($file['name']), PATHINFO_EXTENSION));
                     $filename = 'logo_' . uniqid() . '.' . $ext;
                     $destPath = $uploadDir . '/' . $filename;
 
-                    if (move_uploaded_file($file['tmp_name'], $destPath)) {
+                    // SECURITY: reject if the moved file's magic bytes are not an image.
+                    if (move_uploaded_file($file['tmp_name'], $destPath)
+                        && \AtomExtensions\Services\FileValidationService::validateMime($destPath)['valid']) {
                         // Remove old logo if exists
                         if ($id) {
                             $existing = DB::table('donor_agreement')->where('id', $id)->first();

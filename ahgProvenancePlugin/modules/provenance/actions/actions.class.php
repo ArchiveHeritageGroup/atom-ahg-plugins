@@ -293,11 +293,31 @@ class provenanceActions extends AhgController
                 $mimeType = $_FILES['doc_file']['type'][$i];
                 $fileSize = $_FILES['doc_file']['size'][$i];
 
-                $ext = pathinfo($originalFilename, PATHINFO_EXTENSION);
+                // SECURITY: validate extension + size before storing, then a
+                // post-move magic-byte MIME check. Skip files that fail.
+                $fileArr = [
+                    'name' => $originalFilename,
+                    'tmp_name' => $_FILES['doc_file']['tmp_name'][$i],
+                    'type' => $mimeType,
+                    'size' => $fileSize,
+                ];
+                $validation = \AtomExtensions\Services\FileValidationService::validateUpload($fileArr);
+                if (!$validation['valid']) {
+                    continue;
+                }
+
+                $ext = strtolower(pathinfo(\AtomExtensions\Services\FileValidationService::sanitizeFilename($originalFilename), PATHINFO_EXTENSION));
                 $filename = uniqid('prov_') . '.' . $ext;
                 $filePath = '/uploads/provenance/' . $filename;
 
                 move_uploaded_file($_FILES['doc_file']['tmp_name'][$i], $uploadDir . '/' . $filename);
+
+                $mimeCheck = \AtomExtensions\Services\FileValidationService::validateMime($uploadDir . '/' . $filename);
+                if (!$mimeCheck['valid']) {
+                    @unlink($uploadDir . '/' . $filename);
+
+                    continue;
+                }
             }
 
             $docData = [

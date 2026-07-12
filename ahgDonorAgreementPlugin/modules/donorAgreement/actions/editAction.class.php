@@ -306,14 +306,30 @@ class donorAgreementEditAction extends AhgController
 
     protected function saveDocument($agreementId, $tmpName, $originalName, $size, $mimeType, $uploadDir, $docType, $description)
     {
-        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        // SECURITY: validate extension + size before storing the upload.
+        $validation = \AtomExtensions\Services\FileValidationService::validateUpload([
+            'name' => $originalName, 'tmp_name' => $tmpName, 'type' => $mimeType, 'size' => $size,
+        ]);
+        if (!$validation['valid']) {
+            return false;
+        }
+
+        $ext = strtolower(pathinfo(\AtomExtensions\Services\FileValidationService::sanitizeFilename($originalName), PATHINFO_EXTENSION));
         $filename = date('Ymd_His') . '_' . uniqid() . '.' . $ext;
         $filepath = $uploadDir . '/' . $filename;
 
         if (!move_uploaded_file($tmpName, $filepath)) {
             return false;
         }
-        
+
+        // SECURITY: post-move magic-byte MIME check — reject disguised payloads.
+        $mimeCheck = \AtomExtensions\Services\FileValidationService::validateMime($filepath);
+        if (!$mimeCheck['valid']) {
+            @unlink($filepath);
+
+            return false;
+        }
+
         chmod($filepath, 0644);
 
         try {
