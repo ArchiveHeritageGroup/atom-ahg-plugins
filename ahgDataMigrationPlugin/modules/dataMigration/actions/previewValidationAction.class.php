@@ -12,7 +12,7 @@ class previewValidationAction extends AhgController
     public function execute($request)
     {
         // Check user authentication
-        if (!$this->getUser()->isAuthenticated()) {
+        if (!$this->getUser()->isAdministrator()) {
             $this->getResponse()->setStatusCode(403);
 
             return $this->renderText(json_encode(['error' => 'Not authenticated']));

@@ -565,6 +565,7 @@ class securityClearanceActions extends AhgController
         $userId = (int) $this->getUser()->getAttribute('user_id');
         $code = trim($request->getParameter('code', ''));
         $returnUrl = $request->getParameter('return', '/');
+        $returnUrl = (is_string($returnUrl) && preg_match('#^/(?!/)#', $returnUrl)) ? $returnUrl : '/'; // SECURITY: open-redirect guard
 
         $verified = false;
 
@@ -633,6 +634,7 @@ class securityClearanceActions extends AhgController
         $userId = (int) $this->getUser()->getAttribute('user_id');
         $code = trim($request->getParameter('code', ''));
         $returnUrl = $request->getParameter('return', '/');
+        $returnUrl = (is_string($returnUrl) && preg_match('#^/(?!/)#', $returnUrl)) ? $returnUrl : '/'; // SECURITY: open-redirect guard
 
         if (\AtomFramework\Core\Security\TotpService::verifyCode($userId, $code)) {
             \AtomFramework\Core\Security\TotpService::confirmEnrollment($userId);

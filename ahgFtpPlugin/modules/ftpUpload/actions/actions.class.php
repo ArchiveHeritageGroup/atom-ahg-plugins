@@ -8,6 +8,17 @@ class ftpUploadActions extends AhgController
     /** Chunk size must match JS: 10 MB */
     const CHUNK_SIZE = 10 * 1024 * 1024;
 
+    /**
+     * SECURITY: the FTP/SFTP store (upload / delete / clearAll) is an
+     * administrator facility — gate the whole module. It previously only
+     * required login, so any authenticated user could drive it (clearAll
+     * mass-deletes the upload folder).
+     */
+    public function boot(): void
+    {
+        $this->requireAdmin();
+    }
+
     /** Temp directory for chunk assembly */
     const CHUNK_DIR = '/tmp/ahg_ftp_chunks';
 

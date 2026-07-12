@@ -44,12 +44,14 @@ class emailDeliveryActions extends AhgController
         }
 
         // Optional shared secret: set app_email_webhook_secret in config.php to enforce.
+        // SECURITY: fail closed — require the shared secret to be BOTH configured
+        // and matched. Previously an empty secret (the default) skipped the check
+        // entirely, so anyone could POST bounces and suppress arbitrary addresses
+        // (blocking password-reset / notification mail).
         $secret = \sfConfig::get('app_email_webhook_secret', '');
-        if ($secret !== '') {
-            $given = $request->getHttpHeader('X-Webhook-Secret') ?: $request->getParameter('secret', '');
-            if (!hash_equals($secret, (string) $given)) {
-                return $this->renderJsonError('Unauthorized', 401);
-            }
+        $given = $request->getHttpHeader('X-Webhook-Secret') ?: $request->getParameter('secret', '');
+        if ($secret === '' || !hash_equals($secret, (string) $given)) {
+            return $this->renderJsonError('Unauthorized', 401);
         }
 
         $raw = $request->getContent();

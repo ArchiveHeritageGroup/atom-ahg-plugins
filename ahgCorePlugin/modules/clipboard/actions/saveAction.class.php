@@ -109,13 +109,13 @@ class ClipboardSaveAction extends sfAction
 
     private function generatePassword()
     {
-        $passwordLength = 7;
-        $alphabet = '0123456789';
+        $passwordLength = 12;
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'; // SECURITY: alnum, not 7-digit numeric
         $alphabetSize = strlen($alphabet);
 
         $password = '';
         for ($i = 0; $i < $passwordLength; ++$i) {
-            $password .= $alphabet[mt_rand(0, $alphabetSize - 1)];
+            $password .= $alphabet[random_int(0, $alphabetSize - 1)];
         }
 
         return $password;

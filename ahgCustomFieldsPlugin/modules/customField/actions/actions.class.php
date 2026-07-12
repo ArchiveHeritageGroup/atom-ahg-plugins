@@ -73,6 +73,14 @@ class customFieldActions extends AhgController
             return $this->jsonResponse(['success' => false, 'error' => 'Missing entity_type or object_id.']);
         }
 
+        // SECURITY: require update authorization on the target object — previously
+        // any authenticated user could write custom-field values on ANY object
+        // (incl. records they cannot edit) by supplying an arbitrary object_id.
+        $aclObj = \QubitObject::getById($objectId);
+        if (!$aclObj || !\AtomExtensions\Services\AclService::check($aclObj, 'update')) {
+            return $this->jsonResponse(['success' => false, 'error' => 'Not authorized to edit this record.']);
+        }
+
         if (!is_array($fieldValues)) {
             $fieldValues = [];
         }

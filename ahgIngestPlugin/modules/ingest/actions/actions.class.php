@@ -1057,6 +1057,11 @@ class ingestActions extends sfActions
             $this->forward404();
         }
 
+        // SECURITY: only the session owner may download its manifest (record data
+        // + stored file paths). Cancel/Rollback/Commit/Preview already enforce
+        // this; downloadManifest previously did not.
+        $this->requireSessionOwner($session);
+
         $job = $commitSvc->getJobBySession($id);
         if (!$job || !$job->manifest_path || !file_exists($job->manifest_path)) {
             $this->forward404();

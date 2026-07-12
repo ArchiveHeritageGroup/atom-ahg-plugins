@@ -98,7 +98,10 @@ class UserLoginAction extends sfAction
                         // Can be read by reverse proxies to allow users to bypass caching
                         setcookie('atom_authenticated', '1', ['path' => '/', 'secure' => true, 'samesite' => 'strict']);
 
-                        if (null !== $next = $this->form->getValue('next')) {
+                        // SECURITY: only redirect to a local path (open-redirect
+                        // guard) — reject absolute URLs and scheme-relative `//host`.
+                        $next = (string) $this->form->getValue('next');
+                        if ('' !== $next && preg_match('#^/(?!/)#', $next)) {
                             $this->redirect($next);
                         }
 

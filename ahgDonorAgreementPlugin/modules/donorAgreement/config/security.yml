@@ -1,8 +1,13 @@
+# SECURITY: these autocompletes enumerated draft/unpublished record identifiers
+# to anonymous users (is_secure:false). Donor-agreement management is a staff
+# function — require an authenticated editor/contributor.
 autocompleteRecords:
-  is_secure: false
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
 
 autocompleteAccessions:
-  is_secure: false
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
 
 all:
   is_secure: true
