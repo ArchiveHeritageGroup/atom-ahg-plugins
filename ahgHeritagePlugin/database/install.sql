@@ -1268,13 +1268,21 @@ INSERT IGNORE INTO heritage_explore_category (institution_id, code, name, descri
 (NULL, 'trending', 'Trending', 'Popular items this week', 'What people are viewing', 'bi-graph-up', 'custom', 'trending', 'carousel', 6, 1);
 
 -- Default timeline periods (South African focused with international context)
-INSERT IGNORE INTO heritage_timeline_period (institution_id, name, short_name, start_year, end_year, description, display_order, show_on_landing) VALUES
-(NULL, 'Ancient World', 'Ancient', -5000, 499, 'Ancient civilisations, classical antiquity, and the foundations of recorded history - from early writing systems to the fall of Rome', 1, 1),
-(NULL, 'Medieval Period', 'Medieval', 500, 1499, 'The Middle Ages across Europe, Asia, and Africa - feudalism, the Islamic Golden Age, Crusades, and early Renaissance', 2, 1),
-(NULL, 'Early Modern Era', '1500-1799', 1500, 1799, 'Age of exploration, colonisation, the Reformation, Scientific Revolution, and the Enlightenment', 3, 1),
-(NULL, '19th Century', '1800s', 1800, 1899, 'Industrial Revolution, nationalism, abolition movements, and the reshaping of global empires', 4, 1),
-(NULL, 'World Wars and Upheaval', '1900-1945', 1900, 1945, 'Two World Wars, the fall of empires, the Great Depression, and the birth of modern geopolitics', 5, 1),
-(NULL, 'Modern and Contemporary', '1946-Present', 1946, NULL, 'Cold War, decolonisation, civil rights, the digital revolution, and the contemporary world', 6, 1);
+-- Idempotent seed: insert the global (institution_id IS NULL) defaults ONLY when
+-- none exist yet, so re-running install.sql on an existing database cannot
+-- duplicate them. The previous `INSERT IGNORE ... VALUES` was ineffective here -
+-- the table has no UNIQUE key on the natural identifier (only an AUTO_INCREMENT
+-- id), so IGNORE never matched and every re-run appended another 6 rows.
+INSERT INTO heritage_timeline_period (institution_id, name, short_name, start_year, end_year, description, display_order, show_on_landing)
+SELECT * FROM (
+    SELECT NULL AS institution_id, 'Ancient World' AS name, 'Ancient' AS short_name, -5000 AS start_year, 499 AS end_year, 'Ancient civilisations, classical antiquity, and the foundations of recorded history - from early writing systems to the fall of Rome' AS description, 1 AS display_order, 1 AS show_on_landing
+    UNION ALL SELECT NULL, 'Medieval Period', 'Medieval', 500, 1499, 'The Middle Ages across Europe, Asia, and Africa - feudalism, the Islamic Golden Age, Crusades, and early Renaissance', 2, 1
+    UNION ALL SELECT NULL, 'Early Modern Era', '1500-1799', 1500, 1799, 'Age of exploration, colonisation, the Reformation, Scientific Revolution, and the Enlightenment', 3, 1
+    UNION ALL SELECT NULL, '19th Century', '1800s', 1800, 1899, 'Industrial Revolution, nationalism, abolition movements, and the reshaping of global empires', 4, 1
+    UNION ALL SELECT NULL, 'World Wars and Upheaval', '1900-1945', 1900, 1945, 'Two World Wars, the fall of empires, the Great Depression, and the birth of modern geopolitics', 5, 1
+    UNION ALL SELECT NULL, 'Modern and Contemporary', '1946-Present', 1946, NULL, 'Cold War, decolonisation, civil rights, the digital revolution, and the contemporary world', 6, 1
+) AS seed
+WHERE NOT EXISTS (SELECT 1 FROM heritage_timeline_period WHERE institution_id IS NULL);
 
 -- =============================================================================
 -- KNOWLEDGE GRAPH TABLES
