@@ -26,6 +26,7 @@ if (!class_exists('sfContext', false) || !\sfContext::hasInstance()) {
 }
 
 use AtomFramework\Services\Write\WriteServiceFactory;
+use AtomFramework\Services\Write\SectorRecordWriteService;
 use Illuminate\Database\Capsule\Manager as DB;
 
 $ts = (string) time();
@@ -130,20 +131,34 @@ try {
 // by source_standard; the sector extension tables (library_item, dam_iptc_metadata,
 // etc.) are populated by the sector edit forms, not by a create service, so this
 // covers the sector-typed base record create/delete.
-foreach (['library' => 'Library', 'museum' => 'Museum', 'gallery' => 'Gallery', 'dam' => 'DAM'] as $std => $label) {
+// Full CRUD via SectorRecordWriteService: create with a sector extension field,
+// verify it, update it, verify the change, delete, verify BOTH the extension and
+// the information object are gone.
+$sectorTests = [
+    'library' => ['label' => 'Library', 'field' => 'call_number', 'create' => ['call_number' => 'ZZ-CN-1'],           'update' => ['call_number' => 'ZZ-CN-2']],
+    'dam'     => ['label' => 'DAM',     'field' => 'headline',    'create' => ['headline' => 'ZZ-HL-1'],              'update' => ['headline' => 'ZZ-HL-2']],
+    'museum'  => ['label' => 'Museum',  'field' => 'work_type',   'create' => ['work_type' => 'ZZ-WT-1', 'materials' => ['bronze']], 'update' => ['work_type' => 'ZZ-WT-2']],
+    'gallery' => ['label' => 'Gallery', 'field' => 'work_type',   'create' => ['work_type' => 'ZZ-WT-1'],             'update' => ['work_type' => 'ZZ-WT-2']],
+];
+$sectorSvc = new SectorRecordWriteService();
+foreach ($sectorTests as $sector => $t) {
+    $f = $t['field'];
     try {
-        $svc = WriteServiceFactory::informationObject();
-        $name = "{$MARK}-{$label}";
-        $id = (int) $svc->createInformationObject(['title' => $name, 'source_standard' => $std]);
+        $id = $sectorSvc->create($sector, "{$MARK}-{$t['label']}", $t['create']);
         $createdIoIds[] = $id;
-        $stdSet = DB::table('information_object')->where('id', $id)->value('source_standard') === $std;
-        $exists = DB::table('information_object')->where('id', $id)->exists() && $stdSet;
-        \QubitInformationObject::getById($id)->delete();
-        $gone = !DB::table('information_object')->where('id', $id)->exists();
-        if ($gone) { array_pop($createdIoIds); }
-        ok($results, "Sector:{$label}", $exists && $gone, "created id={$id}; source_standard=".($stdSet ? $std : 'NOT SET').", deleted=".($gone ? 'yes' : 'NO'));
+        $c = $sectorSvc->read($id, $sector);
+        $createdOk = is_array($c) && (($c[$f] ?? null) === $t['create'][$f]);
+        $sectorSvc->update($id, $sector, $t['update']);
+        $u = $sectorSvc->read($id, $sector);
+        $updatedOk = is_array($u) && (($u[$f] ?? null) === $t['update'][$f]);
+        $sectorSvc->delete($id, $sector);
+        $extGone = null === $sectorSvc->read($id, $sector);
+        $ioGone = !DB::table('information_object')->where('id', $id)->exists();
+        if ($ioGone) { array_pop($createdIoIds); }
+        ok($results, "Sector:{$t['label']}", $createdOk && $updatedOk && $extGone && $ioGone,
+            "id={$id}; create ".($createdOk?'ok':'FAIL').", update ".($updatedOk?'ok':'FAIL').", ext-deleted ".($extGone?'ok':'FAIL').", io-deleted ".($ioGone?'ok':'FAIL'));
     } catch (\Throwable $e) {
-        ok($results, "Sector:{$label}", false, 'EXCEPTION: '.$e->getMessage());
+        ok($results, "Sector:{$t['label']}", false, 'EXCEPTION: '.$e->getMessage());
     }
 }
 
