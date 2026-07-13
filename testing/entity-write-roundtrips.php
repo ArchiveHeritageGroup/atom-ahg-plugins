@@ -125,6 +125,28 @@ try {
     ok($results, 'InformationObject', false, 'EXCEPTION: '.$e->getMessage());
 }
 
+// ---- GLAM SECTORS (IO typed by source_standard / QubitInformationObject delete)
+// Library / Museum / Gallery / DAM records are Information Objects distinguished
+// by source_standard; the sector extension tables (library_item, dam_iptc_metadata,
+// etc.) are populated by the sector edit forms, not by a create service, so this
+// covers the sector-typed base record create/delete.
+foreach (['library' => 'Library', 'museum' => 'Museum', 'gallery' => 'Gallery', 'dam' => 'DAM'] as $std => $label) {
+    try {
+        $svc = WriteServiceFactory::informationObject();
+        $name = "{$MARK}-{$label}";
+        $id = (int) $svc->createInformationObject(['title' => $name, 'source_standard' => $std]);
+        $createdIoIds[] = $id;
+        $stdSet = DB::table('information_object')->where('id', $id)->value('source_standard') === $std;
+        $exists = DB::table('information_object')->where('id', $id)->exists() && $stdSet;
+        \QubitInformationObject::getById($id)->delete();
+        $gone = !DB::table('information_object')->where('id', $id)->exists();
+        if ($gone) { array_pop($createdIoIds); }
+        ok($results, "Sector:{$label}", $exists && $gone, "created id={$id}; source_standard=".($stdSet ? $std : 'NOT SET').", deleted=".($gone ? 'yes' : 'NO'));
+    } catch (\Throwable $e) {
+        ok($results, "Sector:{$label}", false, 'EXCEPTION: '.$e->getMessage());
+    }
+}
+
 // ---- Safety sweep: remove any ZZ-TEST-* records that leaked -----------------
 foreach (array_unique($createdIoIds) as $iid) {
     try { \QubitInformationObject::getById($iid)?->delete(); } catch (\Throwable $e) {}
