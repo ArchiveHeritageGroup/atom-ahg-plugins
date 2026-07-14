@@ -107,10 +107,11 @@ if (!class_exists('RightsService')) {
      */
     protected function processForm(sfWebRequest $request, ?int $rightId = null): void
     {
-        // CSRF check
-        if (!$this->getUser()->getAttribute('_csrf_token') === $request->getParameter('_csrf_token')) {
-            throw new sfException('CSRF token mismatch');
-        }
+        // CSRF is enforced framework-wide by AhgController::enforceCsrf() (M12 /
+        // CsrfService). The previous inline check here was a no-op - an operator-
+        // precedence bug (`!$a === $b`) AND a session `_csrf_token` attribute that
+        // was never set - so it never protected anything. Removed in favour of the
+        // real framework enforcement rather than a check that gives false assurance.
 
         $data = [
             'id' => $rightId,

@@ -98,7 +98,7 @@ if (sendEmailBtn) sendEmailBtn.addEventListener('click', function() {
   fetch('/security/2fa/send-email', {
     method: 'POST',
     headers: {
-      'X-CSRF-TOKEN': document.querySelector('input[name="_csrf_token"]').value
+      'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') || {}).content || ''
     }
   })
   .then(function(r) { return r.json(); })
