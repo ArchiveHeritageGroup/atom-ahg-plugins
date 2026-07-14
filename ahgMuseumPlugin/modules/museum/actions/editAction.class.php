@@ -584,6 +584,18 @@ class museumEditAction extends AhgController
         // Save CCO template
         $this->saveProperty($resourceId, 'ccoTemplate', $this->templateId);
 
+        // CONSISTENCY (split-brain fix): mirror the mapped fields into the canonical
+        // museum_metadata table that reports/facets/exports read, so museum-module
+        // edits are no longer invisible to those readers. Additive + best-effort.
+        if (class_exists('\AtomFramework\Services\Write\SectorRecordWriteService')) {
+            try {
+                (new \AtomFramework\Services\Write\SectorRecordWriteService())
+                    ->syncMuseumMetadata((int) $resourceId, is_array($this->ccoData) ? $this->ccoData : []);
+            } catch (\Throwable $e) {
+                error_log('museum ccoData->museum_metadata sync failed: '.$e->getMessage());
+            }
+        }
+
         // Handle creator
         if (!empty($this->ccoData['creator'])) {
             $this->saveCreator($resourceId, $this->ccoData['creator']);
