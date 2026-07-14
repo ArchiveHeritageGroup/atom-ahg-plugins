@@ -594,8 +594,11 @@ class museumEditAction extends AhgController
             $this->updateInformationObject($resourceId);
         }
 
-        // Save CCO-specific data using Laravel
-        $this->saveProperty($resourceId, 'ccoData', json_encode($this->ccoData));
+        // Step 4 (ccoData retirement): the record's fields now persist in the
+        // canonical museum_metadata table (via syncMuseumMetadata below), the
+        // information object (title/identifier/scope&content) and the ccoTemplate
+        // property - so the ccoData JSON blob is no longer written. Existing ccoData
+        // rows are left untouched as a read-only archive.
 
         // Save CCO template
         $this->saveProperty($resourceId, 'ccoTemplate', $this->templateId);
