@@ -54,6 +54,22 @@ class ccoEditAction extends InformationObjectEditAction
 
     public function execute($request)
     {
+        // RETIRED: the cco editor is superseded by the canonical museum editor
+        // (/museum/edit/:slug), which reads and writes the single-source-of-truth
+        // museum_metadata table. Redirect any remaining cco/edit links + bookmarks
+        // there so museum records have one editor. The cco module's provenance
+        // routes remain active and are unaffected by this.
+        $slug = $request->getParameter('slug');
+        if (!$slug) {
+            $id = $request->getParameter('id');
+            if ($id) {
+                $slug = DB::table('slug')->where('object_id', (int) $id)->value('slug');
+            }
+        }
+        if ($slug) {
+            $this->redirect('/museum/edit/'.$slug);
+        }
+
         parent::execute($request);
 
         // Load actors for creator dropdown
