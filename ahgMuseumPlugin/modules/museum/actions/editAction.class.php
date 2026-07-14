@@ -372,6 +372,22 @@ class museumEditAction extends AhgController
             $data = json_decode($property->value, true) ?: [];
         }
 
+        // CONSISTENCY (Step 3b): overlay the canonical museum_metadata values for the
+        // mapped fields, so the form shows the same data reports/facets/exports read.
+        // This makes the save-side sync authoritative-safe - the form never presents a
+        // stale ccoData placeholder for a field the canonical table has real data for.
+        if (class_exists('\AtomFramework\Services\Write\SectorRecordWriteService')) {
+            try {
+                $overrides = (new \AtomFramework\Services\Write\SectorRecordWriteService())
+                    ->museumFormOverridesFromMetadata((int) $resourceId);
+                foreach ($overrides as $k => $v) {
+                    $data[$k] = $v;
+                }
+            } catch (\Throwable $e) {
+                error_log('museum_metadata->form overlay failed: '.$e->getMessage());
+            }
+        }
+
         // Load standard AtoM fields
         $info = DB::table('information_object')
             ->where('id', $resourceId)
