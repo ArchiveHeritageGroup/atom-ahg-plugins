@@ -135,6 +135,33 @@ class sfIsaarPluginEditAction extends AhgActorEditController
         $this->relatedAuthorityRecordComponent->processForm();
         $this->occupationsComponent->processForm();
 
-        return parent::processForm();
+        $result = parent::processForm();
+
+        // Persist the authority-record public-visibility control (draft/embargo).
+        // These inputs live in the edit template (not the sfForm), so read them
+        // straight from the request after the actor itself has been saved.
+        if (isset($this->resource->id) && $this->resource->id > 0) {
+            $status = $this->request->getParameter('publicationStatus', 'published');
+            $embargo = $this->request->getParameter('embargoUntil');
+            $reason = $this->request->getParameter('visibilityReason');
+
+            $userId = null;
+            try {
+                $uid = (int) $this->context->getUser()->getAttribute('user_id');
+                $userId = $uid > 0 ? $uid : null;
+            } catch (\Throwable $e) {
+                $userId = null;
+            }
+
+            \AhgActorManage\Services\ActorVisibilityService::setStatus(
+                (int) $this->resource->id,
+                'draft' === $status ? 'draft' : 'published',
+                $embargo,
+                $reason,
+                $userId
+            );
+        }
+
+        return $result;
     }
 }

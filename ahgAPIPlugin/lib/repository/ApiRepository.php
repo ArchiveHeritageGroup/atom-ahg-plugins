@@ -448,6 +448,14 @@ public function getAuthorities(array $params = []): array
                 'et.name as entity_type'
             ]);
 
+        // Never disseminate draft/embargoed authority records via the public API.
+        if (class_exists('\AhgActorManage\Services\ActorVisibilityService')) {
+            $hidden = \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds();
+            if (!empty($hidden)) {
+                $query->whereNotIn('a.id', $hidden);
+            }
+        }
+
         $total = $query->count();
         $results = $query->orderBy('ai.authorized_form_of_name', 'asc')
                          ->skip($skip)->take($limit)->get();
@@ -484,6 +492,12 @@ public function getAuthorities(array $params = []): array
             ->first();
 
         if (!$row) {
+            return null;
+        }
+
+        // Draft/embargoed authority records are not exposed via the public API.
+        if (class_exists('\AhgActorManage\Services\ActorVisibilityService')
+            && \AhgActorManage\Services\ActorVisibilityService::isHiddenFromPublic((int) $row->id)) {
             return null;
         }
 

@@ -8,6 +8,18 @@
 
   <h1><?php echo render_title($resource); ?></h1>
 
+  <?php
+    // Staff-only status badge (the public never reaches a hidden record's page).
+    if (class_exists('\AhgActorManage\Services\ActorVisibilityService') && isset($resource->id)) {
+        $__v = \AhgActorManage\Services\ActorVisibilityService::getStatus((int) $resource->id);
+        if ('draft' === ($__v['status'] ?? 'published')) { ?>
+          <span class="badge bg-warning text-dark mb-2"><i class="fas fa-eye-slash me-1"></i><?php echo __('Draft - hidden from the public'); ?></span>
+        <?php } elseif (!empty($__v['embargo_until'])) { ?>
+          <span class="badge bg-warning text-dark mb-2"><i class="fas fa-clock me-1"></i><?php echo __('Embargoed until %1% - hidden from the public', ['%1%' => $__v['embargo_until']]); ?></span>
+        <?php }
+    }
+  ?>
+
   <?php if (isset($errorSchema)) { ?>
     <div class="alert alert-danger" role="alert">
       <ul class="<?php echo render_b5_show_list_css_classes(); ?>">

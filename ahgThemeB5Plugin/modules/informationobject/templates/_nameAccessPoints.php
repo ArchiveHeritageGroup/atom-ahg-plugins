@@ -46,6 +46,24 @@ foreach ($nameAccessPoints as $nap) {
     }
 }
 
+// Hide draft/embargoed authority records from anonymous users (GDPR / POPIA).
+// Staff still see every linked name. Single choke point for sidebar + body.
+if (class_exists('\AhgActorManage\Services\ActorVisibilityService')) {
+    $__authed = false;
+    try {
+        $__authed = sfContext::getInstance()->getUser()->isAuthenticated();
+    } catch (\Throwable $e) {
+    }
+    if (!$__authed) {
+        $__hidden = \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds();
+        if (!empty($__hidden)) {
+            $allActors = array_values(array_filter($allActors, function ($a) use ($__hidden) {
+                return !in_array((int) ($a->id ?? 0), $__hidden, true);
+            }));
+        }
+    }
+}
+
 if (empty($allActors)) {
     return;
 }

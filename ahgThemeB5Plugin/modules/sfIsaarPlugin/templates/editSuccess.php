@@ -114,6 +114,43 @@
           </div>
         </div>
       </div>
+      <?php
+          $__vis = \AhgActorManage\Services\ActorVisibilityService::getStatus(isset($resource->id) ? (int) $resource->id : 0);
+          $__visStatus = $__vis['status'] ?? 'published';
+          $__visEmbargo = $__vis['embargo_until'] ?? '';
+          $__visReason = $__vis['reason'] ?? '';
+      ?>
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="visibility-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#visibility-collapse" aria-expanded="false" aria-controls="visibility-collapse">
+            <?php echo __('Public access'); ?>
+            <?php if ('draft' === $__visStatus || !empty($__visEmbargo)) { ?>
+              <span class="badge bg-warning text-dark ms-2"><?php echo 'draft' === $__visStatus ? __('Draft - hidden') : __('Embargoed'); ?></span>
+            <?php } ?>
+          </button>
+        </h2>
+        <div id="visibility-collapse" class="accordion-collapse collapse" aria-labelledby="visibility-heading">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label class="form-label" for="publicationStatus"><?php echo __('Publication status'); ?></label>
+              <select class="form-select" id="publicationStatus" name="publicationStatus">
+                <option value="published"<?php echo 'draft' !== $__visStatus ? ' selected' : ''; ?>><?php echo __('Published (visible to the public)'); ?></option>
+                <option value="draft"<?php echo 'draft' === $__visStatus ? ' selected' : ''; ?>><?php echo __('Draft (hidden from the public)'); ?></option>
+              </select>
+              <div class="form-text"><?php echo __('Draft authority records are hidden from all public pages, browse, search, autocomplete and exports. Staff always see them. Use this for records of living individuals (GDPR / POPIA).'); ?></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="embargoUntil"><?php echo __('Embargo until (optional)'); ?></label>
+              <input type="date" class="form-control" id="embargoUntil" name="embargoUntil" value="<?php echo esc_entities($__visEmbargo); ?>">
+              <div class="form-text"><?php echo __('If set, the record stays hidden from the public until this date, then becomes visible automatically. Leave blank for none.'); ?></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="visibilityReason"><?php echo __('Reason (optional)'); ?></label>
+              <input type="text" class="form-control" id="visibilityReason" name="visibilityReason" maxlength="255" value="<?php echo esc_entities($__visReason); ?>">
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="accordion-item">
         <h2 class="accordion-header" id="relationships-heading">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#relationships-collapse" aria-expanded="false" aria-controls="relationships-collapse">

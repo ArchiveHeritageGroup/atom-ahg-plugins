@@ -1,5 +1,10 @@
 <?php $actorsShown = []; ?>
 <?php foreach ($ancestor->getCreators() as $item) { ?>
+  <?php // Hide draft/embargoed creators from anonymous users (GDPR / POPIA).
+        if (class_exists('\AhgActorManage\Services\ActorVisibilityService')
+            && !\AhgActorManage\Services\ActorVisibilityService::isVisibleToCurrentUser((int) $item->id)) {
+      continue;
+  } ?>
   <?php if (!isset($actorsShown[$item->id])) { ?>
     <div class="field <?php echo render_b5_show_field_css_classes(); ?>">
       <?php echo render_b5_show_label(__('Name of creator')); ?>

@@ -182,6 +182,16 @@ class ActorBrowseService
             }
         }
 
+        // Hide authority records that are draft or under an active embargo from
+        // anonymous users (GDPR / POPIA - e.g. living individuals). Authenticated
+        // staff always see them. Filters by document _id (= actor id).
+        if (!isset($params['_authenticated']) || !$params['_authenticated']) {
+            $hiddenIds = ActorVisibilityService::getHiddenActorIds();
+            if (!empty($hiddenIds)) {
+                $mustNot[] = ['ids' => ['values' => array_map('strval', $hiddenIds)]];
+            }
+        }
+
         // Build the bool query
         $boolQuery = [];
         if (!empty($must)) {
@@ -721,6 +731,14 @@ class ActorBrowseService
             ],
         ];
 
+        // Suppress draft/embargoed authority records for anonymous users.
+        if (!$this->currentUserIsAuthenticated()) {
+            $hiddenIds = ActorVisibilityService::getHiddenActorIds();
+            if (!empty($hiddenIds)) {
+                $body['query']['bool']['must_not'][] = ['ids' => ['values' => array_map('strval', $hiddenIds)]];
+            }
+        }
+
         $response = $this->esRequest('/_search', $body);
 
         $results = [];
@@ -763,13 +781,23 @@ class ActorBrowseService
     protected function autocompleteFromDb(string $query, int $limit): array
     {
         try {
-            $rows = DB::table('actor')
+            $q = DB::table('actor')
                 ->join('actor_i18n', 'actor.id', '=', 'actor_i18n.id')
                 ->join('object', 'actor.id', '=', 'object.id')
                 ->join('slug', 'actor.id', '=', 'slug.object_id')
                 ->where('actor_i18n.culture', $this->culture)
                 ->where('actor_i18n.authorized_form_of_name', 'LIKE', $query . '%')
-                ->where('object.class_name', 'QubitActor')
+                ->where('object.class_name', 'QubitActor');
+
+            // Suppress draft/embargoed authority records for anonymous users.
+            if (!$this->currentUserIsAuthenticated()) {
+                $hiddenIds = ActorVisibilityService::getHiddenActorIds();
+                if (!empty($hiddenIds)) {
+                    $q->whereNotIn('actor.id', $hiddenIds);
+                }
+            }
+
+            $rows = $q
                 ->orderBy('actor_i18n.authorized_form_of_name')
                 ->limit($limit)
                 ->select([
@@ -962,6 +990,19 @@ class ActorBrowseService
         }
 
         return $this->resolveTermNames(array_unique($ids));
+    }
+
+    /**
+     * Whether the current request is from an authenticated (staff) user.
+     * Anonymous users get draft/embargoed authority records suppressed.
+     */
+    protected function currentUserIsAuthenticated(): bool
+    {
+        try {
+            return \sfContext::getInstance()->getUser()->isAuthenticated();
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**
