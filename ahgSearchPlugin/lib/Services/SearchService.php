@@ -100,6 +100,15 @@ class SearchService
                 }
             }
 
+            // Hide draft/embargoed authority records from anonymous users.
+            $mustNot = [];
+            if ($key === 'actors') {
+                $actorHidden = $this->hiddenActorIdsForPublic();
+                if (!empty($actorHidden)) {
+                    $mustNot[] = ['ids' => ['values' => $actorHidden]];
+                }
+            }
+
             // Optional semantic expansion
             $should = [];
             if (!empty($options['semanticTerms'])) {
@@ -111,6 +120,9 @@ class SearchService
             $boolQuery = ['must' => $must];
             if (!empty($should)) {
                 $boolQuery['should'] = $should;
+            }
+            if (!empty($mustNot)) {
+                $boolQuery['must_not'] = $mustNot;
             }
 
             $body = [
@@ -349,6 +361,29 @@ class SearchService
     /**
      * Build ACL draft filter for ES queries.
      */
+    /**
+     * Actor ids to hide from anonymous users (draft/embargoed authority records).
+     * Empty for authenticated staff, or when the visibility plugin is absent.
+     *
+     * @return string[] actor ids as strings (for an ES ids query)
+     */
+    protected function hiddenActorIdsForPublic(): array
+    {
+        try {
+            if (\sfContext::getInstance()->getUser()->isAuthenticated()) {
+                return [];
+            }
+        } catch (\Throwable $e) {
+            // treat as anonymous
+        }
+
+        if (!class_exists('\AhgActorManage\Services\ActorVisibilityService')) {
+            return [];
+        }
+
+        return array_map('strval', \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds());
+    }
+
     protected function buildDraftFilter(): ?array
     {
         $repositoryViewDrafts = AclService::getRepositoryAccess('viewDraft');

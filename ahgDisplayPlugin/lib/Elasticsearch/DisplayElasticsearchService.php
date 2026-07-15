@@ -141,7 +141,10 @@ class DisplayElasticsearchService
                 if ($event->actor_name) {
                     $display['creator'] = $event->actor_name;
                     $display['creator_keyword'] = $event->actor_name;
-                    
+                    // Carry the creator's actor id so the read side can suppress
+                    // draft/embargoed authority records from anonymous users.
+                    $display['creator_id'] = (int) ($event->actor_id ?? 0);
+
                     // Map to domain-specific field
                     if ($objectType === 'gallery') {
                         $display['artist'] = $event->actor_name;

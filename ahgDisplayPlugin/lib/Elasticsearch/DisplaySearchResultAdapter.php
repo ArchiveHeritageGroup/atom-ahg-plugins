@@ -119,7 +119,7 @@ class DisplaySearchResultAdapter
             ];
         }
         
-        if (!empty($hit['creator'])) {
+        if (!empty($hit['creator']) && !$this->creatorHiddenForPublic($hit)) {
             $fields['identity']['creator'] = [
                 'code' => 'creator',
                 'label' => $this->getCreatorLabel($hit['object_type'] ?? 'archive'),
@@ -160,6 +160,30 @@ class DisplaySearchResultAdapter
         return $fields;
     }
     
+    /**
+     * Whether this hit's creator is a draft/embargoed authority record that must
+     * be hidden from anonymous users (GDPR / POPIA). Needs `creator_id` in the
+     * display doc (added at index time) - un-reindexed docs simply skip the check.
+     */
+    protected function creatorHiddenForPublic(array $hit): bool
+    {
+        $creatorId = (int) ($hit['creator_id'] ?? 0);
+        if ($creatorId <= 0) {
+            return false;
+        }
+
+        try {
+            if (\sfContext::getInstance()->getUser()->isAuthenticated()) {
+                return false;
+            }
+        } catch (\Throwable $e) {
+            // treat as anonymous
+        }
+
+        return class_exists('\AhgActorManage\Services\ActorVisibilityService')
+            && \AhgActorManage\Services\ActorVisibilityService::isHiddenFromPublic($creatorId);
+    }
+
     /**
      * Get creator label based on object type
      */

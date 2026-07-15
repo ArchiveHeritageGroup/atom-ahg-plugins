@@ -139,8 +139,36 @@
         </span>
       <?php } ?>
 
+      <?php
+          // Hide the creation line when its creator is a draft/embargoed authority
+          // record and the viewer is anonymous (GDPR / POPIA). Fail-safe: if any
+          // listed creator is hidden, suppress the whole line.
+          $creatorHiddenForPublic = false;
+          if (class_exists('\AhgActorManage\Services\ActorVisibilityService') && isset($doc['creators'])) {
+              try {
+                  $anon = !sfContext::getInstance()->getUser()->isAuthenticated();
+              } catch (\Throwable $e) {
+                  $anon = true;
+              }
+              if ($anon) {
+                  $rawCreators = $doc['creators'];
+                  if (is_object($rawCreators) && method_exists($rawCreators, 'getRawValue')) {
+                      $rawCreators = $rawCreators->getRawValue();
+                  }
+                  $hiddenActorIds = \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds();
+                  foreach ((array) $rawCreators as $c) {
+                      $cid = is_array($c) ? ($c['id'] ?? null) : (is_object($c) ? ($c->id ?? null) : null);
+                      if (null !== $cid && in_array((int) $cid, $hiddenActorIds, true)) {
+                          $creatorHiddenForPublic = true;
+                          break;
+                      }
+                  }
+              }
+          }
+      ?>
       <?php if (
-          isset($doc['creators'])
+          !$creatorHiddenForPublic
+          && isset($doc['creators'])
           && null !== $creationDetails = get_search_creation_details($doc, $culture)
       ) { ?>
         <span class="text-muted">
