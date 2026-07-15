@@ -10,37 +10,93 @@ use AhgDisplay\Services\DisplayService;
 
 class DisplayElasticsearchService
 {
-    protected $client;
     protected $index;
     protected $displayService;
     protected $culture;
+    protected $esHost;
+    protected $esPort;
 
-    // ES 7 no longer uses types - just index
     const INDEX_NAME = 'atom';
 
     public function __construct(?string $culture = null)
     {
         $this->culture = $culture ?? sfContext::getInstance()->getUser()->getCulture() ?? 'en';
-        $this->index = sfConfig::get('app_elasticsearch_index', self::INDEX_NAME);
+
+        // Target the information-object OpenSearch index for this instance
+        // (e.g. archive_qubitinformationobject). This stack is OpenSearch-over-curl;
+        // the display fields live on the IO index, mirroring ActorBrowseService.
+        $prefix = sfConfig::get('app_opensearch_index_name', '');
+        if (empty($prefix)) {
+            try {
+                $prefix = DB::connection()->getDatabaseName();
+            } catch (\Throwable $e) {
+                $prefix = sfConfig::get('app_elasticsearch_index', self::INDEX_NAME);
+            }
+        }
+        $this->index = $prefix . '_qubitinformationobject';
+
+        $this->esHost = sfConfig::get('app_opensearch_host', 'localhost');
+        $this->esPort = (int) sfConfig::get('app_opensearch_port', 9200);
 
         require_once sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Services/DisplayService.php';
         $this->displayService = new DisplayService();
     }
-    
+
     /**
-     * Get Elasticsearch client (ES 7 compatible)
+     * Direct curl request to OpenSearch. Returns decoded JSON or null on failure.
+     * $body is JSON-encoded; for _bulk pass a pre-built ndjson string via esBulk().
      */
-    protected function getClient()
+    protected function esRequest(string $method, string $path, ?array $body = null): ?array
     {
-        if (!$this->client) {
-            $hosts = sfConfig::get('app_elasticsearch_hosts', ['127.0.0.1:9200']);
-            
-            // ES 7 client builder
-            $this->client = \Elasticsearch\ClientBuilder::create()
-                ->setHosts($hosts)
-                ->build();
+        $url = sprintf('http://%s:%d%s', $this->esHost, $this->esPort, $path);
+        $ch = curl_init($url);
+        $opts = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CUSTOMREQUEST => $method,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        ];
+        if (null !== $body) {
+            $opts[CURLOPT_POSTFIELDS] = json_encode($body);
         }
-        return $this->client;
+        curl_setopt_array($ch, $opts);
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if (false === $resp || $code < 200 || $code >= 300) {
+            error_log(sprintf('DisplayES: %s %s -> HTTP %d: %s', $method, $url, $code, substr((string) $resp, 0, 300)));
+            return null;
+        }
+
+        return json_decode($resp, true);
+    }
+
+    /**
+     * Execute an OpenSearch _bulk request from a pre-built ndjson body.
+     */
+    protected function esBulk(string $ndjson): ?array
+    {
+        $url = sprintf('http://%s:%d/_bulk', $this->esHost, $this->esPort);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $ndjson,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/x-ndjson'],
+            CURLOPT_TIMEOUT => 120,
+        ]);
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if (false === $resp || $code < 200 || $code >= 300) {
+            error_log(sprintf('DisplayES: _bulk -> HTTP %d: %s', $code, substr((string) $resp, 0, 300)));
+            return null;
+        }
+
+        return json_decode($resp, true);
     }
     
     // =========================================================================
@@ -55,20 +111,11 @@ class DisplayElasticsearchService
     {
         $displayMapping = require sfConfig::get('sf_plugins_dir') . '/ahgDisplayPlugin/lib/Elasticsearch/displayMapping.php';
         
-        try {
-            // ES 7: Update mapping without type
-            $response = $this->getClient()->indices()->putMapping([
-                'index' => $this->index,
-                'body' => [
-                    'properties' => $displayMapping,
-                ],
-            ]);
-            
-            return $response['acknowledged'] ?? false;
-        } catch (\Exception $e) {
-            error_log('DisplayES: Failed to update mapping: ' . $e->getMessage());
-            return false;
-        }
+        $response = $this->esRequest('PUT', '/' . $this->index . '/_mapping', [
+            'properties' => $displayMapping,
+        ]);
+
+        return (bool) ($response['acknowledged'] ?? false);
     }
     
     /**
@@ -76,13 +123,10 @@ class DisplayElasticsearchService
      */
     public function hasDisplayMapping(): bool
     {
-        try {
-            $mapping = $this->getClient()->indices()->getMapping(['index' => $this->index]);
-            $properties = $mapping[$this->index]['mappings']['properties'] ?? [];
-            return isset($properties['display_object_type']);
-        } catch (\Exception $e) {
-            return false;
-        }
+        $mapping = $this->esRequest('GET', '/' . $this->index . '/_mapping');
+        $properties = $mapping[$this->index]['mappings']['properties'] ?? [];
+
+        return isset($properties['display_object_type']);
     }
     
     // =========================================================================
@@ -96,13 +140,13 @@ class DisplayElasticsearchService
     {
         $data = [];
         
-        // Get object type
-        $objectType = $this->displayService->getObjectType($objectId);
+        // Get object type (archive/museum/gallery/library/dam) via the detector
+        $objectType = \DisplayTypeDetector::detect($objectId);
         $data['display_object_type'] = $objectType;
         $data['display_domain'] = $objectType;
-        
+
         // Get profile
-        $profile = $this->displayService->getProfile($objectId);
+        $profile = \DisplayTypeDetector::getProfile($objectId);
         $data['display_profile'] = $profile->code ?? null;
         
         // Get extended level
@@ -210,7 +254,7 @@ class DisplayElasticsearchService
         // Hierarchy info
         $display['child_count'] = $this->getChildCount($objectId);
         
-        $ancestors = $this->displayService->getAncestors($objectId);
+        $ancestors = $this->getAncestorsData($objectId);
         if (!empty($ancestors)) {
             $display['ancestor_ids'] = array_column($ancestors, 'id');
             $display['ancestor_slugs'] = array_column($ancestors, 'slug');
@@ -241,6 +285,16 @@ class DisplayElasticsearchService
         $displayData = $this->getIndexData($objectId);
         return array_merge($existingBody, $displayData);
     }
+
+    /**
+     * Partial-update a single IO document's display fields via OpenSearch _update.
+     */
+    public function updateDocument(int $objectId, array $doc): bool
+    {
+        $resp = $this->esRequest('POST', '/' . $this->index . '/_update/' . $objectId, ['doc' => $doc]);
+
+        return null !== $resp;
+    }
     
     /**
      * Bulk update display data for existing index
@@ -262,33 +316,23 @@ class DisplayElasticsearchService
             
             if (empty($objects)) break;
             
-            $bulkParams = ['body' => []];
-            
+            $ndjson = '';
             foreach ($objects as $objectId) {
                 $displayData = $this->getIndexData($objectId);
-                
-                // ES 7: Partial update
-                $bulkParams['body'][] = [
-                    'update' => [
-                        '_index' => $this->index,
-                        '_id' => $objectId,
-                    ],
-                ];
-                $bulkParams['body'][] = [
-                    'doc' => $displayData,
-                    'doc_as_upsert' => false,
-                ];
+                // Partial update: adds the display.* fields to the existing IO doc,
+                // leaving all base-AtoM fields untouched.
+                $ndjson .= json_encode(['update' => ['_index' => $this->index, '_id' => (string) $objectId]]) . "\n";
+                $ndjson .= json_encode(['doc' => $displayData, 'doc_as_upsert' => false]) . "\n";
             }
-            
-            try {
-                $response = $this->getClient()->bulk($bulkParams);
+
+            $response = $this->esBulk($ndjson);
+            if (null !== $response) {
                 $processed += count($objects);
-                
                 if ($progressCallback) {
                     $progressCallback($processed, $total);
                 }
-            } catch (\Exception $e) {
-                error_log('DisplayES: Bulk update failed at offset ' . $offset . ': ' . $e->getMessage());
+            } else {
+                error_log('DisplayES: Bulk update failed at offset ' . $offset);
             }
             
             $offset += $batchSize;
@@ -450,22 +494,17 @@ class DisplayElasticsearchService
             ];
         }
         
-        try {
-            $response = $this->getClient()->search([
-                'index' => $this->index,
-                'body' => $body,
-            ]);
-            
-            return $this->formatSearchResults($response, $params);
-        } catch (\Exception $e) {
-            error_log('DisplayES: Search failed: ' . $e->getMessage());
+        $response = $this->esRequest('POST', '/' . $this->index . '/_search', $body);
+        if (null === $response) {
             return [
                 'total' => 0,
                 'hits' => [],
                 'aggregations' => [],
-                'error' => $e->getMessage(),
+                'error' => 'search request failed',
             ];
         }
+
+        return $this->formatSearchResults($response, $params);
     }
     
     /**
@@ -500,6 +539,7 @@ class DisplayElasticsearchService
                 'profile' => $source['display_profile'] ?? null,
                 'level' => $display['level'] ?? null,
                 'creator' => $display['creator'] ?? $display['artist'] ?? $display['author'] ?? null,
+                'creator_id' => $display['creator_id'] ?? null,
                 'date' => $display['date_display'] ?? null,
                 'description' => isset($display['description']) 
                     ? substr($display['description'], 0, 300) . '...' 
@@ -586,22 +626,18 @@ class DisplayElasticsearchService
             '_source' => ['slug', 'display.title', 'display.identifier', 'display_object_type'],
         ];
         
-        try {
-            $response = $this->getClient()->search([
-                'index' => $this->index,
-                'body' => $body,
-            ]);
-            
-            return array_map(fn($hit) => [
-                'id' => $hit['_id'],
-                'slug' => $hit['_source']['slug'] ?? null,
-                'title' => $hit['_source']['display']['title'] ?? 'Untitled',
-                'identifier' => $hit['_source']['display']['identifier'] ?? null,
-                'type' => $hit['_source']['display_object_type'] ?? 'archive',
-            ], $response['hits']['hits']);
-        } catch (\Exception $e) {
+        $response = $this->esRequest('POST', '/' . $this->index . '/_search', $body);
+        if (null === $response || !isset($response['hits']['hits'])) {
             return [];
         }
+
+        return array_map(fn($hit) => [
+            'id' => $hit['_id'],
+            'slug' => $hit['_source']['slug'] ?? null,
+            'title' => $hit['_source']['display']['title'] ?? 'Untitled',
+            'identifier' => $hit['_source']['display']['identifier'] ?? null,
+            'type' => $hit['_source']['display_object_type'] ?? 'archive',
+        ], $response['hits']['hits']);
     }
     
     // =========================================================================
@@ -711,6 +747,35 @@ class DisplayElasticsearchService
         return DB::table('information_object')
             ->where('parent_id', $objectId)
             ->count();
+    }
+
+    /**
+     * Ancestor chain (root-first) for hierarchy facets: [{id, slug, title}, ...].
+     * Walks parent_id up to the root; capped to avoid pathological loops.
+     */
+    protected function getAncestorsData(int $objectId): array
+    {
+        $ancestors = [];
+        $guard = 0;
+        $current = (int) (DB::table('information_object')->where('id', $objectId)->value('parent_id') ?? 0);
+
+        while ($current > 1 && $guard++ < 50) {
+            $row = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as i', function ($j) {
+                    $j->on('io.id', '=', 'i.id')->where('i.culture', '=', $this->culture);
+                })
+                ->leftJoin('slug as s', 's.object_id', '=', 'io.id')
+                ->where('io.id', $current)
+                ->select('io.id', 'io.parent_id', 's.slug', 'i.title')
+                ->first();
+            if (!$row) {
+                break;
+            }
+            $ancestors[] = (object) ['id' => (int) $row->id, 'slug' => $row->slug, 'title' => $row->title];
+            $current = (int) ($row->parent_id ?? 0);
+        }
+
+        return array_reverse($ancestors); // root-first
     }
     
     protected function mapLevelToCode(?string $levelName): ?string

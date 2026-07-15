@@ -6,6 +6,12 @@
  */
 
 return [
+    // Combined autocomplete field (copy_to target for display.* fields below).
+    // Must exist because the IO index root mapping is dynamic:strict.
+    'autocomplete' => [
+        'type' => 'text',
+    ],
+
     // Display object type (archive, museum, gallery, library, dam)
     'display_object_type' => [
         'type' => 'keyword',
@@ -44,6 +50,7 @@ return [
             // Creator/dates
             'creator' => ['type' => 'text', 'copy_to' => 'autocomplete'],
             'creator_keyword' => ['type' => 'keyword'],
+            'creator_id' => ['type' => 'long'], // for authority-record visibility filtering
             'date_display' => ['type' => 'text'],
             'date_start' => ['type' => 'date', 'format' => 'yyyy-MM-dd||yyyy-MM||yyyy||epoch_millis'],
             'date_end' => ['type' => 'date', 'format' => 'yyyy-MM-dd||yyyy-MM||yyyy||epoch_millis'],

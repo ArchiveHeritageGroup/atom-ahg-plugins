@@ -74,28 +74,13 @@ class DisplayElasticsearchListener
     public static function onObjectTypeChange(int $objectId, string $newType, bool $recursive = false)
     {
         $service = self::getService();
-        
-        // Get ES client
-        $hosts = sfConfig::get('app_elasticsearch_hosts', ['127.0.0.1:9200']);
-        $client = \Elasticsearch\ClientBuilder::create()->setHosts($hosts)->build();
-        $index = sfConfig::get('app_elasticsearch_index', 'atom');
-        
-        // Update single document
-        try {
-            $client->update([
-                'index' => $index,
-                'id' => $objectId,
-                'body' => [
-                    'doc' => [
-                        'display_object_type' => $newType,
-                        'display_domain' => $newType,
-                    ],
-                ],
-            ]);
-        } catch (\Exception $e) {
-            error_log('DisplayES: Failed to update object type in ES: ' . $e->getMessage());
-        }
-        
+
+        // Partial-update the single document's display type via OpenSearch (curl).
+        $service->updateDocument($objectId, [
+            'display_object_type' => $newType,
+            'display_domain' => $newType,
+        ]);
+
         // Handle recursive update
         if ($recursive) {
             $children = \Illuminate\Database\Capsule\Manager::table('information_object')
