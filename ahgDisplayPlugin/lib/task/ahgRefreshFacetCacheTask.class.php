@@ -145,6 +145,29 @@ EOF;
         $this->logSection('facet-cache', "    Added {$count} entries");
     }
 
+    /**
+     * SQL fragment excluding draft/embargoed authority records for the given
+     * actor-table alias, or '' when the visibility table is absent. Only applied
+     * to the guest (published-only) facet variants.
+     */
+    protected function hiddenActorClause($conn, string $alias): string
+    {
+        static $exists = null;
+        if (null === $exists) {
+            try {
+                $exists = (bool) $conn->query("SHOW TABLES LIKE 'ahg_actor_visibility'")->fetchColumn();
+            } catch (\Throwable $e) {
+                $exists = false;
+            }
+        }
+        if (!$exists) {
+            return '';
+        }
+
+        return " AND {$alias}.id NOT IN (SELECT actor_id FROM ahg_actor_visibility"
+            . " WHERE status = 'draft' OR (embargo_until IS NOT NULL AND embargo_until > CURDATE()))";
+    }
+
     protected function refreshRepositoryFacet($conn, $facetType, $pubTypeId, $pubStatusId, $publishedOnly)
     {
         $this->logSection('facet-cache', "  Refreshing {$facetType} facet...");
@@ -152,6 +175,7 @@ EOF;
         $statusJoin = $publishedOnly
             ? "INNER JOIN status s ON s.object_id = io.id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
             : "";
+        $visClause = $publishedOnly ? $this->hiddenActorClause($conn, 'r') : '';
 
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
@@ -161,6 +185,7 @@ EOF;
             {$statusJoin}
             LEFT JOIN actor_i18n ai ON r.id = ai.id AND ai.culture = 'en'
             WHERE io.id > 1
+            {$visClause}
             GROUP BY r.id, ai.authorized_form_of_name
             HAVING COUNT(*) > 0
         ";
@@ -185,6 +210,7 @@ EOF;
         $statusJoin = $publishedOnly
             ? "INNER JOIN status s ON s.object_id = e.object_id AND s.type_id = :pub_type_id AND s.status_id = :pub_status_id"
             : "";
+        $visClause = $publishedOnly ? $this->hiddenActorClause($conn, 'a') : '';
 
         $sql = "
             INSERT INTO display_facet_cache (facet_type, term_id, term_name, count)
@@ -194,6 +220,7 @@ EOF;
             {$statusJoin}
             LEFT JOIN actor_i18n ai ON a.id = ai.id AND ai.culture = 'en'
             WHERE e.actor_id IS NOT NULL
+            {$visClause}
             GROUP BY a.id, ai.authorized_form_of_name
             HAVING COUNT(DISTINCT e.object_id) > 0
         ";

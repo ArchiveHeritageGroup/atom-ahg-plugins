@@ -45,15 +45,26 @@ try {
 // Get repositories
 $repositories = [];
 try {
-    $repositories = \Illuminate\Database\Capsule\Manager::table('repository')
+    $repoQuery = \Illuminate\Database\Capsule\Manager::table('repository')
         ->join('actor_i18n', 'repository.id', '=', 'actor_i18n.id')
         ->where('actor_i18n.culture', 'en')
         ->whereNotNull('actor_i18n.authorized_form_of_name')
         ->where('actor_i18n.authorized_form_of_name', '!=', '')
         ->orderBy('actor_i18n.authorized_form_of_name')
-        ->select('repository.id', 'actor_i18n.authorized_form_of_name as name')
-        ->get()
-        ->toArray();
+        ->select('repository.id', 'actor_i18n.authorized_form_of_name as name');
+
+    // Hide draft/embargoed authority records (repositories are actors) from guests.
+    $repoAuthed = false;
+    try { $repoAuthed = $sf_user->isAuthenticated(); } catch (\Throwable $e) {
+    }
+    if (!$repoAuthed && class_exists('\AhgActorManage\Services\ActorVisibilityService')) {
+        $repoHidden = \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds();
+        if (!empty($repoHidden)) {
+            $repoQuery->whereNotIn('repository.id', $repoHidden);
+        }
+    }
+
+    $repositories = $repoQuery->get()->toArray();
 } catch (Exception $e) {
     error_log("Repository query error: " . $e->getMessage());
 }

@@ -704,16 +704,38 @@ class DynamicFacetService
     // Per-facet count methods
     // =========================================================================
 
+    /**
+     * Authority-record ids hidden from guests (draft/embargoed). Empty for
+     * authenticated staff or when the visibility plugin is absent.
+     */
+    private function hiddenActorIdsForGuest(): array
+    {
+        if ($this->isAuthenticated) {
+            return [];
+        }
+        if (!class_exists('\AhgActorManage\Services\ActorVisibilityService')) {
+            return [];
+        }
+
+        return \AhgActorManage\Services\ActorVisibilityService::getHiddenActorIds();
+    }
+
     private function getCreatorCounts(): array
     {
-        $query = $this->buildBaseQuery('creator');
-
-        return $query
+        $query = $this->buildBaseQuery('creator')
             ->join('event as ev', 'io.id', '=', 'ev.object_id')
             ->join('actor_i18n as ai', function ($j) {
                 $j->on('ev.actor_id', '=', 'ai.id')->where('ai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
-            ->whereNotNull('ev.actor_id')
+            ->whereNotNull('ev.actor_id');
+
+        // Hide draft/embargoed authority records from guests (GDPR / POPIA).
+        $hidden = $this->hiddenActorIdsForGuest();
+        if (!empty($hidden)) {
+            $query->whereNotIn('ev.actor_id', $hidden);
+        }
+
+        return $query
             ->select('ev.actor_id as id', 'ai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT io.id) as count'))
             ->groupBy('ev.actor_id', 'ai.authorized_form_of_name')
             ->orderByDesc('count')
@@ -779,14 +801,20 @@ class DynamicFacetService
 
     private function getRepositoryCounts(): array
     {
-        $query = $this->buildBaseQuery('repository');
-
-        return $query
+        $query = $this->buildBaseQuery('repository')
             ->join('repository as r', 'io.repository_id', '=', 'r.id')
             ->join('actor_i18n as rai', function ($j) {
                 $j->on('r.id', '=', 'rai.id')->where('rai.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
             })
-            ->whereNotNull('io.repository_id')
+            ->whereNotNull('io.repository_id');
+
+        // Hide draft/embargoed authority records (repositories are actors too).
+        $hidden = $this->hiddenActorIdsForGuest();
+        if (!empty($hidden)) {
+            $query->whereNotIn('r.id', $hidden);
+        }
+
+        return $query
             ->select('r.id', 'rai.authorized_form_of_name as name', DB::raw('COUNT(DISTINCT io.id) as count'))
             ->groupBy('r.id', 'rai.authorized_form_of_name')
             ->orderByDesc('count')
