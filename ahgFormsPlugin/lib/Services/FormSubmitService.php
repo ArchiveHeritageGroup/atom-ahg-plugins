@@ -42,6 +42,8 @@ class FormSubmitService
         $entityData = [];   // target_column => transformed value (IO or accession + i18n)
         $properties = [];   // [['name' => ..., 'value' => ...], ...]
         $notes = [];        // [['type_id' => ..., 'content' => ...], ...]
+        $events = [];       // [event_type_id => ['date' => .., 'start_date' => .., 'end_date' => .., 'actor' => ..]]
+        $termRels = [];     // [taxonomy_id => [value, value, ...]] for object_term_relation
         $unmapped = [];
 
         foreach ($mappedFields as $row) {
@@ -60,8 +62,35 @@ class FormSubmitService
 
             $table = $row->target_table;
             if (in_array($table, self::IO_TABLES, true) || in_array($table, self::ACCESSION_TABLES, true)) {
-                // Skip empty values on create so DB defaults/NULL apply cleanly.
-                $entityData[$row->target_column] = $value;
+                // term_id transformation resolves a select value to a term FK id
+                // (e.g. levelOfDescription 'fonds' -> level_of_description_id 236).
+                if ('term_id' === $row->transformation) {
+                    $termId = $this->resolveTermId($value, $row->transformation_config);
+                    if (null === $termId) {
+                        if (null !== $value && '' !== $value) {
+                            $unmapped[] = $row->field_name;
+                        }
+                        continue;
+                    }
+                    $entityData[$row->target_column] = $termId;
+                } else {
+                    // Skip empty values on create so DB defaults/NULL apply cleanly.
+                    $entityData[$row->target_column] = $value;
+                }
+            } elseif ('event' === $table) {
+                // target_column = role (date|start_date|end_date|actor);
+                // target_type_id = event type (default creation, 111).
+                if (null !== $value && '' !== $value) {
+                    $etype = (int) ($row->target_type_id ?: 111);
+                    $events[$etype][$row->target_column] = $value;
+                }
+            } elseif ('object_term_relation' === $table) {
+                // target_type_id = taxonomy id to resolve term(s) within (subjects/places).
+                if (null !== $value && '' !== $value && null !== $row->target_type_id) {
+                    foreach ($this->splitMulti($value) as $v) {
+                        $termRels[(int) $row->target_type_id][] = $v;
+                    }
+                }
             } elseif ('property' === $table) {
                 $properties[] = ['name' => $row->target_column, 'value' => (string) $value];
             } elseif ('note' === $table) {
@@ -79,9 +108,11 @@ class FormSubmitService
             $savedId = $this->saveAccession($objectId, $entityData, $culture);
         } else {
             $savedId = $this->saveInformationObject($objectId, $entityData, $culture);
-            // property/note records attach to the IO object id
+            // property/note/event/term-relation records attach to the IO object id
             $this->writeProperties($savedId, $properties, $culture);
             $this->writeNotes($savedId, $notes, $culture);
+            $this->writeEvents($savedId, $events, $culture);
+            $this->writeTermRelations($savedId, $termRels, $culture);
         }
 
         $this->logSubmission($templateId, $type, $savedId, $isCreate ? 'create' : 'update', $values);
@@ -227,6 +258,182 @@ class FormSubmitService
                 'content' => $note['content'],
             ]);
         }
+    }
+
+    /**
+     * Resolve a select value to a term id within the configured taxonomy.
+     * Config: {"taxonomy_id": N}. Numeric values are treated as term ids
+     * (verified in the taxonomy); otherwise matched against term_i18n.name by a
+     * normalised comparison (lowercase, spaces/underscores/hyphens collapsed).
+     * Returns null when unresolvable (caller reports the field unmapped).
+     */
+    private function resolveTermId($value, ?string $config): ?int
+    {
+        if (null === $value || '' === (string) $value) {
+            return null;
+        }
+        $cfg = $config ? json_decode($config, true) : [];
+        $taxonomyId = (int) ($cfg['taxonomy_id'] ?? 0);
+        if ($taxonomyId <= 0) {
+            return null;
+        }
+
+        if (ctype_digit((string) $value)) {
+            $ok = DB::table('term')->where('id', (int) $value)->where('taxonomy_id', $taxonomyId)->exists();
+
+            return $ok ? (int) $value : null;
+        }
+
+        $norm = $this->normaliseTermKey((string) $value);
+        $rows = DB::table('term as t')
+            ->join('term_i18n as ti', 't.id', '=', 'ti.id')
+            ->where('t.taxonomy_id', $taxonomyId)
+            ->whereNotNull('ti.name')
+            ->select('t.id', 'ti.name')
+            ->get();
+        foreach ($rows as $r) {
+            if ($this->normaliseTermKey($r->name) === $norm) {
+                return (int) $r->id;
+            }
+        }
+
+        return null;
+    }
+
+    private function normaliseTermKey(string $s): string
+    {
+        return preg_replace('/[\s_\-]+/', '', mb_strtolower(trim($s)));
+    }
+
+    /**
+     * Create events (object -> event -> event_i18n) for the IO. Each entry groups
+     * the parts of one event type: date (display), start_date, end_date and actor
+     * (creator, create-or-linked by name).
+     */
+    private function writeEvents(int $objectId, array $events, string $culture): void
+    {
+        foreach ($events as $typeId => $parts) {
+            $date = $parts['date'] ?? null;
+            $startDate = $this->toIsoDate($parts['start_date'] ?? $date);
+            $endDate = $this->toIsoDate($parts['end_date'] ?? null);
+            $actorId = isset($parts['actor']) ? $this->resolveOrCreateActor((string) $parts['actor'], $culture) : null;
+
+            if (null === $date && null === $startDate && null === $endDate && null === $actorId) {
+                continue;
+            }
+
+            $now = date('Y-m-d H:i:s');
+            $eventId = DB::table('object')->insertGetId([
+                'class_name' => 'QubitEvent',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+            DB::table('event')->insert([
+                'id' => $eventId,
+                'object_id' => $objectId,
+                'type_id' => (int) $typeId,
+                'actor_id' => $actorId,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'source_culture' => $culture,
+            ]);
+            if (null !== $date && '' !== (string) $date) {
+                DB::table('event_i18n')->insert([
+                    'id' => $eventId,
+                    'culture' => $culture,
+                    'date' => (string) $date,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Link the IO to existing terms (object -> object_term_relation), resolved by
+     * name within each taxonomy. Unresolvable terms are skipped - no vocabulary
+     * is created on submit.
+     */
+    private function writeTermRelations(int $objectId, array $termRels, string $culture): void
+    {
+        foreach ($termRels as $taxonomyId => $vals) {
+            foreach (array_unique($vals) as $val) {
+                $termId = $this->resolveTermId($val, json_encode(['taxonomy_id' => (int) $taxonomyId]));
+                if (null === $termId) {
+                    continue;
+                }
+                if (DB::table('object_term_relation')->where('object_id', $objectId)->where('term_id', $termId)->exists()) {
+                    continue;
+                }
+                $now = date('Y-m-d H:i:s');
+                $relId = DB::table('object')->insertGetId([
+                    'class_name' => 'QubitObjectTermRelation',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+                DB::table('object_term_relation')->insert([
+                    'id' => $relId,
+                    'object_id' => $objectId,
+                    'term_id' => $termId,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Resolve an actor by authorized form of name, creating one if absent.
+     * Numeric values are treated as an actor id. Returns null if empty/failed.
+     */
+    private function resolveOrCreateActor(string $value, string $culture): ?int
+    {
+        $value = trim($value);
+        if ('' === $value) {
+            return null;
+        }
+        if (ctype_digit($value)) {
+            return DB::table('actor')->where('id', (int) $value)->exists() ? (int) $value : null;
+        }
+
+        $existing = DB::table('actor as a')
+            ->join('actor_i18n as ai', 'a.id', '=', 'ai.id')
+            ->where('ai.authorized_form_of_name', $value)
+            ->value('a.id');
+        if ($existing) {
+            return (int) $existing;
+        }
+
+        try {
+            return (int) WriteServiceFactory::actor()->createActor(['authorizedFormOfName' => $value], $culture);
+        } catch (\Throwable $e) {
+            error_log('FormSubmitService::resolveOrCreateActor failed for "' . $value . '": ' . $e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Normalise a value to an ISO date (Y-m-d) or null for event start/end.
+     */
+    private function toIsoDate($value): ?string
+    {
+        if (null === $value || '' === trim((string) $value)) {
+            return null;
+        }
+        $ts = strtotime((string) $value);
+
+        return $ts ? date('Y-m-d', $ts) : null;
+    }
+
+    /**
+     * Split a multi-value string (pipe-joined by normaliseValue, or comma list)
+     * into individual trimmed values.
+     */
+    private function splitMulti($value): array
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map('trim', array_map('strval', $value))));
+        }
+        $parts = preg_split('/[|,]/', (string) $value);
+
+        return array_values(array_filter(array_map('trim', $parts), fn ($v) => '' !== $v));
     }
 
     /**

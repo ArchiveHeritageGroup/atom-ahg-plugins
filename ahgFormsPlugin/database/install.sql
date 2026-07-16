@@ -444,3 +444,33 @@ INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, targe
 SELECT id, 'property', 'photo.color_mode', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'colorMode';
 INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
 SELECT id, 'property', 'photo.process', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'process';
+
+-- Structural field mappings (#234, 2026-07-16): level/status term-FKs,
+-- creation events (date+creator), subject term relations. Needs FormSubmitService
+-- event/term_id/object_term_relation resolvers (plugins v3.79.95+).
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'information_object', 'level_of_description_id', NULL, 'term_id', '{"taxonomy_id":34}', 0 FROM ahg_form_field WHERE template_id = @isadg_minimal_id AND field_name = 'levelOfDescription';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'date', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @isadg_minimal_id AND field_name = 'date';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'actor', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @isadg_minimal_id AND field_name = 'creators';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'information_object', 'level_of_description_id', NULL, 'term_id', '{"taxonomy_id":34}', 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'levelOfDescription';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'date', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'date';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'actor', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'creators';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'actor', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'creator';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'date', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'date';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'object_term_relation', 'term', 35, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'subject';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'accession', 'processing_status_id', NULL, 'term_id', '{"taxonomy_id":79}', 0 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'processingStatus';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'date', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'dateCreated';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'event', 'actor', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'photographer';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'object_term_relation', 'term', 35, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'subjects';
