@@ -330,3 +330,117 @@ WHERE field_name = 'process';
 
 UPDATE ahg_form_field SET options_json = '[{"value":"copyrighted","label":"Copyrighted"},{"value":"public_domain","label":"Public Domain"},{"value":"unknown","label":"Unknown"},{"value":"orphan_work","label":"Orphan Work"}]'
 WHERE field_name = 'copyright';
+
+-- ---------------------------------------------------------------------------
+-- Field mappings for templates 2-5 (added 2026-07-16). Templates were seeded
+-- without mappings; without these a submit creates nothing. Structural fields
+-- (dates/creators/subjects/term-selects) stay unmapped by design.
+-- ---------------------------------------------------------------------------
+-- template 2
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object', 'identifier', NULL, 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'identifier';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'title', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'title';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'extent_and_medium', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'extentAndMedium';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'archival_history', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'archivalHistory';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'acquisition', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'acquisition';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'scope_and_content', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'scopeAndContent';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'appraisal', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'appraisal';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'accruals', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'accruals';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'arrangement', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'arrangement';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'access_conditions', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'accessConditions';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'reproduction_conditions', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'reproductionConditions';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'physical_characteristics', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'physicalCharacteristics';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'finding_aids', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'findingAids';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'location_of_originals', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'locationOfOriginals';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'location_of_copies', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'locationOfCopies';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'related_units_of_description', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'relatedUnits';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'rules', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'rules';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'sources', NULL, 1 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'sources';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object', 'description_identifier', NULL, 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'descriptionIdentifier';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'note', 'content', 120, 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'publicationNote';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'note', 'content', 125, 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'generalNote';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'note', 'content', 124, 0 FROM ahg_form_field WHERE template_id = @isadg_full_id AND field_name = 'archivistNote';
+-- template 3
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'title', NULL, 1 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'title';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'scope_and_content', NULL, 1 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'description';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object', 'identifier', NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'identifier';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'reproduction_conditions', NULL, 1 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'rights';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'dc.publisher', NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'publisher';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'dc.format', NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'format';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'dc.source', NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'source';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'dc.relation', NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'relation';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'dc.coverage', NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'coverage';
+-- template 4
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession', 'identifier', NULL, 0 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'accessionNumber';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession', 'date', NULL, 0 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'accessionDate';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession_i18n', 'title', NULL, 1 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'title';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession_i18n', 'scope_and_content', NULL, 1 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'scopeAndContent';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession_i18n', 'appraisal', NULL, 1 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'appraisal';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession_i18n', 'physical_characteristics', NULL, 1 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'physicalCondition';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession_i18n', 'processing_notes', NULL, 1 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'processingNotes';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession_i18n', 'source_of_acquisition', NULL, 1 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'donorName';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'accession_i18n', 'received_extent_units', NULL, 1 FROM ahg_form_field WHERE template_id = @accession_id AND field_name = 'receivedExtentNumber';
+-- template 5
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'title', NULL, 1 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'title';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object', 'identifier', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'identifier';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'scope_and_content', NULL, 1 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'description';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'physical_characteristics', NULL, 1 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'dimensions';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'access_conditions', NULL, 1 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'accessRestrictions';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'information_object_i18n', 'reproduction_conditions', NULL, 1 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'useRestrictions';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'note', 'content', 288, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'condition';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'photo.location', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'location';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'photo.geo_coordinates', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'geoCoordinates';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'photo.copyright_holder', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'copyrightHolder';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'photo.color_mode', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'colorMode';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, is_i18n)
+SELECT id, 'property', 'photo.process', NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'process';
