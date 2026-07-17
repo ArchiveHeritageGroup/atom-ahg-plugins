@@ -157,6 +157,18 @@ class ahgMultiTenantPluginConfiguration extends sfPluginConfiguration
             return;
         }
 
+        // Fresh-install safety: only enforce host-based tenant routing once at
+        // least one active tenant has a domain/subdomain configured. With none
+        // set up, enabling the plugin must NOT turn the primary/admin site into
+        // a "Tenant Not Found" 404 - enforcement begins when tenants exist.
+        try {
+            if (!\AhgMultiTenant\Models\Tenant::hasRoutableTenant()) {
+                return;
+            }
+        } catch (\Exception $e) {
+            return;
+        }
+
         $resolver = \AhgMultiTenant\Services\TenantResolver::class;
         $details = $resolver::getResolutionDetails();
 

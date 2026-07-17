@@ -280,7 +280,49 @@ class TenantResolver
             return true;
         }
 
+        // Always exclude the instance's own site host (from siteBaseUrl). The
+        // primary/admin site is never a tenant, so enabling multi-tenancy must
+        // not turn it into a "Tenant Not Found" 404 - even once tenants exist.
+        $siteHost = self::getSiteHost();
+        if ($siteHost && ($host === $siteHost || $host === 'www.' . $siteHost)) {
+            return true;
+        }
+
         return false;
+    }
+
+    /**
+     * Get the instance's own site host from the AtoM siteBaseUrl setting.
+     *
+     * @return string|null Normalized host, or null if not configured
+     */
+    public static function getSiteHost(): ?string
+    {
+        $url = \sfConfig::get('app_siteBaseUrl');
+
+        if (empty($url)) {
+            try {
+                $url = DB::table('setting')
+                    ->join('setting_i18n', 'setting.id', '=', 'setting_i18n.id')
+                    ->where('setting.name', 'siteBaseUrl')
+                    ->value('setting_i18n.value');
+            } catch (\Exception $e) {
+                $url = null;
+            }
+        }
+
+        if (empty($url)) {
+            return null;
+        }
+
+        // Accept a bare host or a full URL
+        if (false === strpos($url, '://')) {
+            $url = 'http://' . ltrim($url, '/');
+        }
+
+        $host = parse_url($url, PHP_URL_HOST);
+
+        return $host ? self::normalizeHost($host) : null;
     }
 
     /**

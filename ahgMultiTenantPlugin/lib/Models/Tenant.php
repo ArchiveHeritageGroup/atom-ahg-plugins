@@ -178,6 +178,30 @@ class Tenant
     }
 
     /**
+     * Whether any active tenant is configured for host-based routing
+     * (has a custom domain or subdomain).
+     *
+     * Used to gate domain-routing enforcement: with none configured,
+     * multi-tenancy is not set up, so enabling the plugin must not turn the
+     * primary/admin site into a "Tenant Not Found" 404.
+     *
+     * @return bool
+     */
+    public static function hasRoutableTenant(): bool
+    {
+        try {
+            return DB::table(self::$table)
+                ->where('status', self::STATUS_ACTIVE)
+                ->where(function ($q) {
+                    $q->whereNotNull('domain')->orWhereNotNull('subdomain');
+                })
+                ->exists();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
      * Create a Tenant from a database row
      *
      * @param object $row
