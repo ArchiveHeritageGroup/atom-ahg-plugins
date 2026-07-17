@@ -221,7 +221,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50013 SQL SECURITY INVOKER */
 /*!50001 VIEW `ric_queue_status` AS select `ric_sync_queue`.`status` AS `status`,count(0) AS `count`,min(`ric_sync_queue`.`scheduled_at`) AS `oldest`,max(`ric_sync_queue`.`scheduled_at`) AS `newest` from `ric_sync_queue` group by `ric_sync_queue`.`status` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -239,7 +239,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50013 SQL SECURITY INVOKER */
 /*!50001 VIEW `ric_recent_operations` AS select `ric_sync_log`.`id` AS `id`,`ric_sync_log`.`operation` AS `operation`,`ric_sync_log`.`entity_type` AS `entity_type`,`ric_sync_log`.`entity_id` AS `entity_id`,`ric_sync_log`.`ric_uri` AS `ric_uri`,`ric_sync_log`.`status` AS `status`,`ric_sync_log`.`triples_affected` AS `triples_affected`,`ric_sync_log`.`details` AS `details`,`ric_sync_log`.`error_message` AS `error_message`,`ric_sync_log`.`execution_time_ms` AS `execution_time_ms`,`ric_sync_log`.`triggered_by` AS `triggered_by`,`ric_sync_log`.`user_id` AS `user_id`,`ric_sync_log`.`batch_id` AS `batch_id`,`ric_sync_log`.`created_at` AS `created_at` from `ric_sync_log` order by `ric_sync_log`.`created_at` desc limit 100 */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
@@ -257,7 +257,7 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_results     = utf8mb4 */;
 /*!50001 SET collation_connection      = utf8mb4_0900_ai_ci */;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50013 SQL SECURITY INVOKER */
 /*!50001 VIEW `ric_sync_summary` AS select `ric_sync_status`.`entity_type` AS `entity_type`,`ric_sync_status`.`sync_status` AS `sync_status`,count(0) AS `count`,max(`ric_sync_status`.`last_synced_at`) AS `last_sync`,sum((case when (`ric_sync_status`.`retry_count` > 0) then 1 else 0 end)) AS `with_retries` from `ric_sync_status` group by `ric_sync_status`.`entity_type`,`ric_sync_status`.`sync_status` */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
