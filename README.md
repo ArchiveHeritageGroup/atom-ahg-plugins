@@ -137,8 +137,9 @@ AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Li
 ### Prerequisites
 
 - AtoM 2.10+ installed
-- PHP 8.1+
+- PHP 8.3 (tested/supported version; the framework's dependencies require PHP >= 8.2)
 - MySQL 8.0+
+- Elasticsearch 7.10 (for AtoM 2.10)
 - [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework)
 
 ### Quick Install
@@ -148,14 +149,20 @@ git clone https://github.com/ArchiveHeritageGroup/atom-framework.git
 git clone https://github.com/ArchiveHeritageGroup/atom-ahg-plugins.git
 
 cd atom-framework
-composer install
+composer install --no-dev
 bash bin/install
 ```
 
+Run `bin/install` as the user that owns the AtoM tree (e.g. `sudo -u www-data bash bin/install`); it reads the database credentials from `<atom-root>/config/config.php`.
+
 ### Enable Plugins
+The core plugins (theme, security, display, settings, audit, backup) are enabled
+automatically by `bin/install`. To add optional plugins, run these from the
+`atom-framework` directory (where `bin/atom` lives):
 ```bash
-php bin/atom extension:discover
-php bin/atom extension:enable ahgLibraryPlugin
+php bin/atom extension:discover                    # list available extensions
+php bin/atom extension:install ahgLibraryPlugin    # install AND enable a plugin
+php bin/atom extension:disable ahgLibraryPlugin    # disable it again
 ```
 
 ---
@@ -164,7 +171,7 @@ php bin/atom extension:enable ahgLibraryPlugin
 
 | Version | AtoM | PHP |
 |---------|------|-----|
-| 2.x | 2.10+ | 8.1+ |
+| 2.x | 2.10+ | 8.3 |
 | 1.x | 2.8-2.9 | 7.4+ |
 
 ---
