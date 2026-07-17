@@ -9,8 +9,8 @@ SELECT 'QubitTerm', NOW(), NOW() FROM DUAL WHERE @library_exists = 0;
 
 SET @library_id = LAST_INSERT_ID();
 
-INSERT INTO term (id, taxonomy_id, code, source_culture)
-SELECT @library_id, 70, 'library', 'en' FROM DUAL WHERE @library_exists = 0 AND @library_id > 0;
+INSERT INTO term (id, taxonomy_id, code, source_culture, parent_id)
+SELECT @library_id, 70, 'library', 'en', 110 FROM DUAL WHERE @library_exists = 0 AND @library_id > 0;
 
 INSERT INTO term_i18n (id, culture, name)
 SELECT @library_id, 'en', 'Library (MARC-inspired)' FROM DUAL WHERE @library_exists = 0 AND @library_id > 0;

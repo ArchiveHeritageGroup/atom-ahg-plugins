@@ -170,6 +170,8 @@ Run these from the AtoM root after installing/enabling plugins:
 ```bash
 sudo -u www-data php symfony cc                      # clear the Symfony cache
 sudo -u www-data php symfony display:auto-detect     # assign GLAM display types
+sudo -u www-data php symfony propel:build-nested-set # rebuild the term tree (plugins add taxonomy terms)
+sudo -u www-data php symfony propel:generate-slugs   # backfill slugs for plugin-added terms (search needs them)
 sudo -u www-data php symfony search:populate         # (re)build the search index
 sudo -u www-data php symfony ahg:refresh-facet-cache # build the GLAM browse facet cache
 sudo systemctl restart php8.3-fpm nginx

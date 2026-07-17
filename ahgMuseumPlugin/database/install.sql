@@ -13,8 +13,8 @@ SELECT 'QubitTerm', NOW(), NOW() FROM DUAL WHERE @museum_exists = 0;
 SET @museum_id = LAST_INSERT_ID();
 
 -- Create term only if we just created an object
-INSERT INTO term (id, taxonomy_id, code, source_culture)
-SELECT @museum_id, 70, 'museum', 'en' FROM DUAL WHERE @museum_exists = 0 AND @museum_id > 0;
+INSERT INTO term (id, taxonomy_id, code, source_culture, parent_id)
+SELECT @museum_id, 70, 'museum', 'en', 110 FROM DUAL WHERE @museum_exists = 0 AND @museum_id > 0;
 
 -- Create term_i18n only if we just created a term
 INSERT INTO term_i18n (id, culture, name)
