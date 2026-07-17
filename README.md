@@ -165,6 +165,22 @@ php bin/atom extension:install ahgLibraryPlugin    # install AND enable a plugin
 php bin/atom extension:disable ahgLibraryPlugin    # disable it again
 ```
 
+### Post-install (required)
+Run these from the AtoM root after installing/enabling plugins:
+```bash
+sudo -u www-data php symfony cc                      # clear the Symfony cache
+sudo -u www-data php symfony display:auto-detect     # assign GLAM display types
+sudo -u www-data php symfony search:populate         # (re)build the search index
+sudo -u www-data php symfony ahg:refresh-facet-cache # build the GLAM browse facet cache
+sudo systemctl restart php8.3-fpm nginx
+```
+Without `display:auto-detect` + `ahg:refresh-facet-cache` the GLAM Browse
+interface and its facets render empty even though the catalogue is indexed.
+
+> **Note:** `ahgMultiTenantPlugin` is disabled by default and should stay off
+> unless you configure tenant→domain mappings - it routes requests by hostname
+> and returns "Tenant Not Found" for any host it doesn't recognise.
+
 ---
 
 ## Version Compatibility
