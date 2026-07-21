@@ -144,29 +144,23 @@ class museumEditAction extends AhgController
         if ($request->isMethod('post')) {
             $this->form->bind($request->getPostParameters());
 
-            if ($this->form->isValid()) {
+            if ($request->getParameter('switch_template')) {
+                // Template switch: re-render the form with the newly selected
+                // template, keeping the entered values. It MUST NOT persist a
+                // record - saving on every template change was creating a
+                // duplicate information_object each time (junk %Y-%m-%d/#i rows).
+                // Falls through to the normal render below.
                 $this->processForm();
+            } elseif ($this->form->isValid()) {
+                $this->processForm();
+                $this->saveRecord();
 
-                // Validate against template
-                $validation = ahgCCOTemplates::validateRecord($templateId, $this->ccoData);
-
-                if (true) { // Always save for now
-                    $this->saveRecord();
-                    if ($request->getParameter('switch_template')) { 
-                        // Stay on edit page with new template
-                        $this->redirect('/index.php/ahgMuseumPlugin/edit?template=' . $this->templateId . '&id=' . $this->resource->id);
-                    } else {
-                        // Redirect to view page using slug
-                        $slug = $this->resource->slug ?? null;
-                        if ($slug) {
-                            $this->redirect('/index.php/' . $slug);
-                        } else {
-                            $this->redirect('/index.php/informationobject/index/id/' . $this->resource->id);
-                        }
-                    }
+                // Redirect to the view page using slug
+                $slug = $this->resource->slug ?? null;
+                if ($slug) {
+                    $this->redirect('/index.php/' . $slug);
                 } else {
-                    $this->validationErrors = $validation['errors'];
-                    $this->validationWarnings = $validation['warnings'];
+                    $this->redirect('/index.php/informationobject/index/id/' . $this->resource->id);
                 }
             }
         }
@@ -1276,18 +1270,26 @@ class museumEditAction extends AhgController
     protected static function applyMask(string $mask, int $counter): string
     {
         $result = $mask;
+
+        // %...%-wrapped tokens (e.g. %Y%, %m%, %04i%, %i%)
         $result = str_replace('%Y%', date('Y'), $result);
         $result = str_replace('%y%', date('y'), $result);
         $result = str_replace('%m%', date('m'), $result);
         $result = str_replace('%d%', date('d'), $result);
-
-        // Handle padded counters: %04i%, %06i%, etc.
         $result = preg_replace_callback('/%0?(\d+)i%/', function ($m) use ($counter) {
             return str_pad((string) $counter, (int) $m[1], '0', STR_PAD_LEFT);
         }, $result);
-
-        // Simple counter %i%
         $result = str_replace('%i%', (string) $counter, $result);
+
+        // Bare strftime-style date tokens (e.g. %Y-%m-%d) - run AFTER the %...%
+        // forms so an already-substituted value is not touched again.
+        $result = str_replace(['%Y', '%y', '%m', '%d'], [date('Y'), date('y'), date('m'), date('d')], $result);
+
+        // Hash counter tokens (e.g. #i, #04i)
+        $result = preg_replace_callback('/#0?(\d+)i/', function ($m) use ($counter) {
+            return str_pad((string) $counter, (int) $m[1], '0', STR_PAD_LEFT);
+        }, $result);
+        $result = str_replace('#i', (string) $counter, $result);
 
         return $result;
     }
