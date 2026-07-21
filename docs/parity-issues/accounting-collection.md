@@ -2,7 +2,7 @@ PSIS-parity epic from the 2026-05-31 two-way audit (see docs/HERATIO_PSIS_PARITY
 
 **Domain:** accounting-collection — current parity ≈ **68%**.
 
-Heratio accounting-collection achieves 68% parity with PSIS/AtoM. Major gaps: (1) IPSAS CLI reporting (medium), (2) Insurance/Impairment service methods (high), (3) Heritage Accounting plugin entirely missing (high), (4) AI provenance inference (medium), (5) Vendor CRUD service (medium). Database schemas identical. Spectrum and Loan near-parity.
+Heratio accounting-collection achieves 68% parity with PSIS/AtoM. Major gaps: (1) IPSAS CLI reporting (medium), (2) Insurance/Impairment service methods (high), (3) Heritage Accounting plugin entirely missing (high), (4) AI provenance inference (medium), (5) Vendor CRUD service (medium). Database schemas identical. Collections Procedures and Loan near-parity.
 
 ### High-severity gaps (PSIS missing)
 - **Create Insurance Policy** — `ahg-ipsas` → `ahgIPSASPlugin`. AtoM IPSASService.createInsurance(); Heratio method missing.

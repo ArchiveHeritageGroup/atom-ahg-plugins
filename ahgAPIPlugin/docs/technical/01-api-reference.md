@@ -508,7 +508,7 @@ POST /batch
 
 ## Conditions
 
-SPECTRUM-compliant condition assessments.
+Collections Procedures-compliant condition assessments.
 
 ### List Conditions
 

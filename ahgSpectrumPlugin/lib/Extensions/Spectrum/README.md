@@ -1,6 +1,6 @@
-# Spectrum Extension
+# Collections Procedures Extension
 
-Spectrum Collections Management extension for AtoM Framework v2.
+Collections Procedures Collections Management extension for AtoM Framework v2.
 
 ## Features
 

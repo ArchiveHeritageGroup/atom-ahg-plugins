@@ -1,19 +1,19 @@
 # ahgSpectrumPlugin v2.0.0
 
-Comprehensive Spectrum Collections Management Plugin for AtoM.
+Comprehensive Collections Procedures Collections Management Plugin for AtoM.
 
 ## Overview
 
-This merged plugin combines core Spectrum functionality with enhanced features for complete collections management compliance.
+This merged plugin combines core Collections Procedures functionality with enhanced features for complete collections management compliance.
 
 ## Features
 
-### Core Spectrum Features
+### Core Collections Procedures Features
 - **Compliance Dashboard** - Per-procedure overview showing objects with missing steps
 - **Procedure Event Logging** - First-class events linked to objects with full audit trail
-- **PDF/CSV Export** - Export Spectrum histories for audits and inspections
+- **PDF/CSV Export** - Export Collections Procedures histories for audits and inspections
 - **Configurable Templates** - Procedure templates customizable per institution
-- **Workflow Management** - Track object status through Spectrum procedures
+- **Workflow Management** - Track object status through Collections Procedures
 
 ### Enhanced Features
 - **Condition Photography** - Document object conditions with photos

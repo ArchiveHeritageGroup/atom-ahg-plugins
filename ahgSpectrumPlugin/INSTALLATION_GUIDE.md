@@ -1,8 +1,8 @@
-# AtoM Spectrum Enhancements - Installation Guide
+# AtoM Collections Procedures Enhancements - Installation Guide
 
 ## Overview
 
-This package contains four major enhancements for AtoM's Spectrum plugin:
+This package contains four major enhancements for AtoM's Collections Procedures plugin:
 
 1. **Condition Report Photos** - Attach and manage photos for condition checks
 2. **Enhanced Media Player** - Advanced video/audio playback with custom controls
@@ -159,7 +159,7 @@ Or navigate to: **Admin > AHG Settings**
 | Section | Description |
 |---------|-------------|
 | General | Theme colors, logo, branding |
-| Spectrum | Collections management defaults |
+| Collections Procedures | Collections management defaults |
 | Media | Video/audio player settings |
 | Photos | Upload limits, thumbnail sizes |
 | Data Protection | POPIA/GDPR compliance settings |
@@ -172,7 +172,7 @@ Or navigate to: **Admin > AHG Settings**
 
 ### Adding Photos to a Condition Check
 
-1. Navigate to an object's Spectrum page
+1. Navigate to an object's Collections Procedures page
 2. Click on an existing condition check or create a new one
 3. Click **"Manage Photos"** button
 4. Drag & drop photos or click to browse

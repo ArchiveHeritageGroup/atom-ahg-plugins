@@ -52,7 +52,7 @@ AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Li
 | **GLAM Sector Support** | | |
 | Archives | ✅ | ✅ Enhanced |
 | Libraries | Partial | ✅ Full |
-| Museums (Spectrum 5.0) | ❌ | ✅ |
+| Museums (Collections Procedures) | ❌ | ✅ |
 | Galleries (CCO) | ❌ | ✅ |
 | Digital Asset Management | ❌ | ✅ |
 | **Heritage & Finance** | | |
@@ -105,7 +105,7 @@ AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Li
 | Plugin | Description |
 |--------|-------------|
 | **ahgLibraryPlugin** | Library catalog features |
-| **ahgMuseumPlugin** | Museum/Spectrum 5.0 support |
+| **ahgMuseumPlugin** | Museum/Collections Procedures support |
 | **ahgGalleryPlugin** | Gallery/CCO features |
 
 ### Feature Plugins

@@ -247,7 +247,7 @@ PSIS/AtoM achieves ~65% feature parity with Heratio reference implementation acr
 
 ## accounting-collection — 68%
 
-Heratio accounting-collection achieves 68% parity with PSIS/AtoM. Major gaps: (1) IPSAS CLI reporting (medium), (2) Insurance/Impairment service methods (high), (3) Heritage Accounting plugin entirely missing (high), (4) AI provenance inference (medium), (5) Vendor CRUD service (medium). Database schemas identical. Spectrum and Loan near-parity.
+Heratio accounting-collection achieves 68% parity with PSIS/AtoM. Major gaps: (1) IPSAS CLI reporting (medium), (2) Insurance/Impairment service methods (high), (3) Heritage Accounting plugin entirely missing (high), (4) AI provenance inference (medium), (5) Vendor CRUD service (medium). Database schemas identical. Collections Procedures and Loan near-parity.
 
 **PSIS missing (Heratio-only):**
 
@@ -382,7 +382,7 @@ The api-integration domain shows 75% parity between Heratio and PSIS/AtoM. Herat
 
 - [medium] Full GraphQL Schema Builder with Type System — _ahgGraphQLPlugin/lib/GraphQL/Schema/SchemaBuilder.php + Types/*_: AtoM uses graphql-core library with proper ObjectType/InterfaceType/ConnectionTypes; Heratio GraphqlController hand-parses queries with regex patterns, no schema builder
 - [low] GraphQL Query Complexity & Depth Analysis — _ahgGraphQLPlugin/lib/GraphQL/Security/ComplexityAnalyzer.php + DepthLimitRule.php_: AtoM enforces query complexity limits and depth restrictions; Heratio has no equivalent security layer
-- [low] Spectrum Collections Events Feed (timeline) — _ahgSpectrumPlugin (inferred from SpectrumApiController reference)_: Heratio SpectrumApiController exists but is partially implemented; AtoM Spectrum integration is complete
+- [low] Collections Procedures Collections Events Feed (timeline) — _ahgSpectrumPlugin (inferred from SpectrumApiController reference)_: Heratio SpectrumApiController exists but is partially implemented; AtoM Collections Procedures integration is complete
 
 **Divergent:**
 

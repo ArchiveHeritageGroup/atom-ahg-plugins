@@ -199,7 +199,7 @@ const results = await client.batch.execute([
 ]);
 ```
 
-### Conditions (SPECTRUM)
+### Conditions (COLLECTIONS PROCEDURES)
 
 ```typescript
 // List condition assessments

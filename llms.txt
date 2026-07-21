@@ -13,7 +13,7 @@
 - **ahgDisplayPlugin** - Display profiles and viewing modes
 
 ### GLAM Sectors
-- **ahgMuseumPlugin** - Museum cataloging with CCO, Spectrum 5.0 support
+- **ahgMuseumPlugin** - Museum cataloging with CCO, Collections Procedures support
 - **ahgLibraryPlugin** - Library cataloging with RDA/MARC
 - **ahgGalleryPlugin** - Visual arts and gallery cataloging
 - **ahgDAMPlugin** - Digital Asset Management

@@ -190,7 +190,7 @@ results = client.batch.execute([
 ])
 ```
 
-### Conditions (SPECTRUM)
+### Conditions (COLLECTIONS PROCEDURES)
 
 ```python
 # List condition assessments

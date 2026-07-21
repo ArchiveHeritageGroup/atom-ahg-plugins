@@ -55,7 +55,7 @@ The AtoM AHG API provides access to:
 - **Batch**: Execute up to 100 operations per request
 
 ### GLAM/DAM Extensions
-- **Conditions**: SPECTRUM-compliant condition assessments
+- **Conditions**: Collections Procedures-compliant condition assessments
 - **Assets**: Heritage asset management (GRAP 103/IPSAS 45)
 - **Valuations**: Asset valuation tracking
 

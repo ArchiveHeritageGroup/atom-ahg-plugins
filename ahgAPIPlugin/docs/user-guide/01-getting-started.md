@@ -10,7 +10,7 @@ The AtoM AHG API provides programmatic access to archival records, museum collec
 - **Authorities**: Name records (persons, organizations, families)
 - **Repositories**: Holding institutions
 - **Search**: Full-text and faceted search
-- **Conditions**: SPECTRUM-compliant condition assessments
+- **Conditions**: Collections Procedures-compliant condition assessments
 - **Assets**: GRAP 103/IPSAS 45 heritage asset management
 - **Privacy**: GDPR/POPIA compliance (DSARs, breaches)
 - **Batch Operations**: Up to 100 operations per request

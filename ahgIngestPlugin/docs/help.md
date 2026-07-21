@@ -28,7 +28,7 @@
 
 The Data Ingest plugin provides an OAIS-aligned 6-step batch ingestion pipeline for AtoM Heratio. It supports importing:
 
-- **Archival Descriptions** — ISAD(G), RAD, DACS, Dublin Core, MODS, SPECTRUM, CCO records
+- **Archival Descriptions** — ISAD(G), RAD, DACS, Dublin Core, MODS, COLLECTIONS PROCEDURES, CCO records
 - **Accessions** — Accession records with donors, events, and extended fields
 
 Data sources include CSV files, ZIP archives with digital objects, EAD XML, and server directories.

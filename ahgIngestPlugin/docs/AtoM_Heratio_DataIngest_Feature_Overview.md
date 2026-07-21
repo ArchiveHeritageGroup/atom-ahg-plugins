@@ -15,7 +15,7 @@ The Data Ingest plugin provides an OAIS-aligned 6-step batch ingestion pipeline 
 ## Key Features
 
 ### Multi-Standard Description Import
-- 7 descriptive standards: ISAD(G), RAD, DACS, Dublin Core, MODS, SPECTRUM 5.1, CCO
+- 7 descriptive standards: ISAD(G), RAD, DACS, Dublin Core, MODS, COLLECTIONS PROCEDURES, CCO
 - Auto-detection of CSV encoding and delimiter
 - Column auto-mapping with intelligent header matching
 - Saved mapping profiles for repeated imports
@@ -86,7 +86,7 @@ php symfony ingest:commit --session-id=456
 
 - OAIS-aligned ingestion pipeline
 - NARSSA transfer workflow support
-- ISAD(G) / RAD / DACS / Dublin Core / MODS / SPECTRUM 5.1 / CCO standards
+- ISAD(G) / RAD / DACS / Dublin Core / MODS / COLLECTIONS PROCEDURES / CCO standards
 - SHA-256 checksums for digital object integrity
 - Full audit trail integration
 - Compatible with POPIA/NARSSA archival requirements

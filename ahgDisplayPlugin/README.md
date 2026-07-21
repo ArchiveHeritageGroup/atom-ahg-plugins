@@ -58,7 +58,7 @@ php symfony display:reindex --batch=100
 | Type | Default Layout | Field Focus | ES Facets |
 |------|---------------|-------------|-----------|
 | Archive | Hierarchy | ISAD(G) fields | Level, Subject |
-| Museum | Detail | Spectrum fields | Classification, Material |
+| Museum | Detail | Collections Procedures fields | Classification, Material |
 | Gallery | Gallery | VRA fields | Artist, Medium |
 | Library | List | Bibliographic | Author, Publisher |
 | DAM | Grid | Technical fields | Media type, Date |
