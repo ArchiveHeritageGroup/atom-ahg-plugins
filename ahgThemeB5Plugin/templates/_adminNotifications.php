@@ -24,27 +24,12 @@ $hasSpectrum = $routing->hasRouteName('spectrum_my_tasks');
 $spectrumTaskCount = 0;
 if ($isAuthenticated && $hasSpectrum) {
     try {
-        // Collect all final states from all procedures
-        $allFinalStates = [];
-        $configs = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_config')
-            ->where('is_active', 1)
-            ->get();
-        foreach ($configs as $config) {
-            $finalStates = ahgSpectrumWorkflowService::getFinalStates($config->procedure_type);
-            $allFinalStates = array_merge($allFinalStates, $finalStates);
-        }
-        $allFinalStates = array_unique($allFinalStates);
-
-        $query = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
-            ->where('assigned_to', $userId);
-
-        if (!empty($allFinalStates)) {
-            $query->whereNotIn('current_state', $allFinalStates);
-        }
-
-        $spectrumTaskCount = $query->count();
+        // Judged per procedure against the workflow config - a flat union of every
+        // procedure's final states would hide open tasks, since 'approved' ends a
+        // valuation but sits mid-flow in an acquisition.
+        $spectrumTaskCount = ahgSpectrumWorkflowService::countOpenTasksForUser($userId);
     } catch (Exception $e) {
-        // Table may not exist
+        // Plugin or table may not be present.
     }
 }
 

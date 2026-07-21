@@ -439,17 +439,6 @@ class ahgSpectrumNotificationService
             return [];
         }
 
-        // Collect all final states from all procedures
-        $allFinalStates = [];
-        $configs = DB::table('spectrum_workflow_config')
-            ->where('is_active', 1)
-            ->get();
-        foreach ($configs as $config) {
-            $finalStates = ahgSpectrumWorkflowService::getFinalStates($config->procedure_type);
-            $allFinalStates = array_merge($allFinalStates, $finalStates);
-        }
-        $allFinalStates = array_unique($allFinalStates);
-
         $query = DB::table('spectrum_workflow_state as sws')
             ->select([
                 'sws.*',
@@ -465,13 +454,17 @@ class ahgSpectrumNotificationService
             ->leftJoin('slug', 'io.id', '=', 'slug.object_id')
             ->where('sws.assigned_to', $userId);
 
-        // Exclude all final states
-        if (!empty($allFinalStates)) {
-            $query->whereNotIn('sws.current_state', $allFinalStates);
-        }
+        // Filter per procedure, not against a union of every procedure's final
+        // states: 'approved' ends a valuation but sits mid-flow in an acquisition,
+        // so a union would hide open tasks.
+        $tasks = $query->orderBy('sws.assigned_at', 'desc')->get();
 
-        return $query->orderBy('sws.assigned_at', 'desc')
-            ->get()
-            ->toArray();
+        return array_values(array_filter(
+            $tasks->toArray(),
+            static fn ($task) => ahgSpectrumWorkflowService::isOpenState(
+                (string) $task->procedure_type,
+                $task->current_state
+            )
+        ));
     }
 }

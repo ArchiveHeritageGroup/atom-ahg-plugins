@@ -722,6 +722,95 @@ class ahgSpectrumWorkflowService
     }
 
     /**
+     * Final states for every active procedure, keyed by procedure type.
+     *
+     * One query for all configs, memoised per request. Callers that need to judge
+     * many workflow rows at once (task counts, task lists) should use this rather
+     * than calling isFinalState() per row, which queries the config each time.
+     *
+     * Note this is deliberately a per-procedure map, NOT a flat union of every
+     * final state: six states are final in one procedure and mid-workflow in
+     * another (e.g. 'approved' ends a valuation but sits mid-flow in an
+     * acquisition), so a union either hides open tasks or counts closed ones.
+     *
+     * @return array<string, string[]> procedure_type => final state names
+     */
+    public static function getFinalStatesMap(): array
+    {
+        static $map = null;
+
+        if (null !== $map) {
+            return $map;
+        }
+
+        $map = [];
+        foreach (DB::table('spectrum_workflow_config')->where('is_active', 1)->get() as $config) {
+            $configData = json_decode($config->config_json, true);
+            $states = $configData['states'] ?? [];
+            $transitions = $configData['transitions'] ?? [];
+
+            $statesWithOutgoing = [];
+            foreach ($transitions as $transKey => $transition) {
+                if ('restart' === $transKey) {
+                    continue; // Restart reopens the workflow; the state is still logically final.
+                }
+                $statesWithOutgoing = array_merge($statesWithOutgoing, $transition['from'] ?? []);
+            }
+
+            $map[$config->procedure_type] = array_values(array_diff($states, array_unique($statesWithOutgoing)));
+        }
+
+        return $map;
+    }
+
+    /**
+     * Is this workflow row still open (i.e. not sitting at a final state)?
+     *
+     * @param string $procedureType Procedure the row belongs to
+     * @param string $state         The row's current_state
+     */
+    public static function isOpenState(string $procedureType, ?string $state): bool
+    {
+        if (null === $state || '' === $state) {
+            return true;
+        }
+
+        $map = self::getFinalStatesMap();
+
+        // Unknown procedure (config removed or never seeded): fall back to the
+        // conventional final states rather than reporting everything as open.
+        $finalStates = $map[$procedureType] ?? ['completed', 'resolved'];
+
+        return !in_array($state, $finalStates, true);
+    }
+
+    /**
+     * Count a user's still-open workflow tasks.
+     *
+     * @param int|null $userId
+     */
+    public static function countOpenTasksForUser(?int $userId): int
+    {
+        if (empty($userId)) {
+            return 0;
+        }
+
+        $rows = DB::table('spectrum_workflow_state')
+            ->where('assigned_to', $userId)
+            ->select('procedure_type', 'current_state')
+            ->get();
+
+        $open = 0;
+        foreach ($rows as $row) {
+            if (self::isOpenState((string) $row->procedure_type, $row->current_state)) {
+                ++$open;
+            }
+        }
+
+        return $open;
+    }
+
+    /**
      * Get property from database
      */
     protected static function getProperty(int $objectId, string $name): ?object

@@ -45,16 +45,15 @@ if ($isAuthenticated && $hasResearch && $isAdmin) {
     }
 }
 
-// Get Spectrum task count for current user (exclude terminal states)
+// Get open task count for current user. Each procedure declares its own final
+// state (a location movement ends at 'verified', a loan-in at 'returned'), so the
+// count must be judged per procedure against the workflow config - a hardcoded
+// list here counted finished work as outstanding.
 if ($isAuthenticated && $hasSpectrum) {
     try {
-        $terminalStates = ['completed', 'resolved', 'disposed', 'reported'];
-        $spectrumTaskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
-            ->where('assigned_to', $userId)
-            ->whereNotIn('current_state', $terminalStates)
-            ->count();
+        $spectrumTaskCount = ahgSpectrumWorkflowService::countOpenTasksForUser($userId);
     } catch (Exception $e) {
-        // Table may not exist
+        // Plugin or table may not be present.
     }
 }
 ?>
