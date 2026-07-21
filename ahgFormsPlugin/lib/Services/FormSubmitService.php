@@ -24,6 +24,9 @@ class FormSubmitService
     private const IO_TABLES = ['information_object', 'information_object_i18n'];
     private const ACCESSION_TABLES = ['accession', 'accession_i18n'];
 
+    /** QubitTerm::NAME_ACCESS_POINT_ID - default relation type for actor_relation */
+    private const NAME_ACCESS_POINT_ID = 161;
+
     /**
      * Persist a form submission.
      *
@@ -43,7 +46,8 @@ class FormSubmitService
         $properties = [];   // [['name' => ..., 'value' => ...], ...]
         $notes = [];        // [['type_id' => ..., 'content' => ...], ...]
         $events = [];       // [event_type_id => ['date' => .., 'start_date' => .., 'end_date' => .., 'actor' => ..]]
-        $termRels = [];     // [taxonomy_id => [value, value, ...]] for object_term_relation
+        $termRels = [];     // [taxonomy_id => [['value' => .., 'field' => ..], ...]] for object_term_relation
+        $actorRels = [];    // [relation_type_id => [['value' => .., 'field' => .., 'create' => bool], ...]]
         $unmapped = [];
 
         foreach ($mappedFields as $row) {
@@ -88,7 +92,22 @@ class FormSubmitService
                 // target_type_id = taxonomy id to resolve term(s) within (subjects/places).
                 if (null !== $value && '' !== $value && null !== $row->target_type_id) {
                     foreach ($this->splitMulti($value) as $v) {
-                        $termRels[(int) $row->target_type_id][] = $v;
+                        $termRels[(int) $row->target_type_id][] = ['value' => $v, 'field' => $row->field_name];
+                    }
+                }
+            } elseif ('actor_relation' === $table) {
+                // Name access points (and other actor relations): target_type_id is
+                // the relation type term, default name access point (161).
+                if (null !== $value && '' !== $value) {
+                    $rtype = (int) ($row->target_type_id ?: self::NAME_ACCESS_POINT_ID);
+                    $cfg = $row->transformation_config ? json_decode($row->transformation_config, true) : [];
+                    foreach ($this->splitMulti($value) as $v) {
+                        $actorRels[$rtype][] = [
+                            'value' => $v,
+                            'field' => $row->field_name,
+                            // Create-or-link by default; {"create":false} links existing actors only.
+                            'create' => false !== ($cfg['create'] ?? true),
+                        ];
                     }
                 }
             } elseif ('property' === $table) {
@@ -108,11 +127,17 @@ class FormSubmitService
             $savedId = $this->saveAccession($objectId, $entityData, $culture);
         } else {
             $savedId = $this->saveInformationObject($objectId, $entityData, $culture);
-            // property/note/event/term-relation records attach to the IO object id
+            // property/note/event/term+actor-relation records attach to the IO object id
             $this->writeProperties($savedId, $properties, $culture);
             $this->writeNotes($savedId, $notes, $culture);
             $this->writeEvents($savedId, $events, $culture);
-            $this->writeTermRelations($savedId, $termRels, $culture);
+            // Values that don't resolve to an existing term/actor are reported, not
+            // dropped silently - the base record is still created either way.
+            $unmapped = array_merge(
+                $unmapped,
+                $this->writeTermRelations($savedId, $termRels, $culture),
+                $this->writeActorRelations($savedId, $actorRels, $culture)
+            );
         }
 
         $this->logSubmission($templateId, $type, $savedId, $isCreate ? 'create' : 'update', $values);
@@ -316,7 +341,7 @@ class FormSubmitService
             $date = $parts['date'] ?? null;
             $startDate = $this->toIsoDate($parts['start_date'] ?? $date);
             $endDate = $this->toIsoDate($parts['end_date'] ?? null);
-            $actorId = isset($parts['actor']) ? $this->resolveOrCreateActor((string) $parts['actor'], $culture) : null;
+            $actorId = isset($parts['actor']) ? $this->resolveActor((string) $parts['actor'], $culture) : null;
 
             if (null === $date && null === $startDate && null === $endDate && null === $actorId) {
                 continue;
@@ -351,13 +376,20 @@ class FormSubmitService
      * Link the IO to existing terms (object -> object_term_relation), resolved by
      * name within each taxonomy. Unresolvable terms are skipped - no vocabulary
      * is created on submit.
+     *
+     * @return array field names whose value could not be resolved
      */
-    private function writeTermRelations(int $objectId, array $termRels, string $culture): void
+    private function writeTermRelations(int $objectId, array $termRels, string $culture): array
     {
-        foreach ($termRels as $taxonomyId => $vals) {
-            foreach (array_unique($vals) as $val) {
+        $unresolved = [];
+
+        foreach ($termRels as $taxonomyId => $items) {
+            foreach ($this->uniqueByValue($items) as $item) {
+                $val = $item['value'];
                 $termId = $this->resolveTermId($val, json_encode(['taxonomy_id' => (int) $taxonomyId]));
                 if (null === $termId) {
+                    $unresolved[] = $item['field'];
+
                     continue;
                 }
                 if (DB::table('object_term_relation')->where('object_id', $objectId)->where('term_id', $termId)->exists()) {
@@ -376,13 +408,96 @@ class FormSubmitService
                 ]);
             }
         }
+
+        return $unresolved;
     }
 
     /**
-     * Resolve an actor by authorized form of name, creating one if absent.
+     * Link the IO to actors via the relation table - name access points and any
+     * other actor relation type (relation.subject_id = IO, relation.object_id =
+     * actor, relation.type_id = the relation term).
+     *
+     * Mirrors base AtoM: an actor already attached to this description through an
+     * event (creator, accumulator, ...) is NOT duplicated as a name access point.
+     *
+     * @return array field names whose value could not be resolved
+     */
+    private function writeActorRelations(int $objectId, array $actorRels, string $culture): array
+    {
+        $unresolved = [];
+
+        foreach ($actorRels as $typeId => $items) {
+            foreach ($this->uniqueByValue($items) as $item) {
+                $actorId = $this->resolveActor((string) $item['value'], $culture, $item['create']);
+                if (null === $actorId) {
+                    $unresolved[] = $item['field'];
+
+                    continue;
+                }
+
+                // Already a creator/accumulator on this description - the event
+                // relation already names them, so skip the access point.
+                if (
+                    self::NAME_ACCESS_POINT_ID === (int) $typeId
+                    && DB::table('event')->where('object_id', $objectId)->where('actor_id', $actorId)->exists()
+                ) {
+                    continue;
+                }
+
+                $exists = DB::table('relation')
+                    ->where('subject_id', $objectId)
+                    ->where('object_id', $actorId)
+                    ->where('type_id', (int) $typeId)
+                    ->exists();
+                if ($exists) {
+                    continue;
+                }
+
+                $now = date('Y-m-d H:i:s');
+                $relId = DB::table('object')->insertGetId([
+                    'class_name' => 'QubitRelation',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+                DB::table('relation')->insert([
+                    'id' => $relId,
+                    'subject_id' => $objectId,
+                    'object_id' => $actorId,
+                    'type_id' => (int) $typeId,
+                    'source_culture' => $culture,
+                ]);
+            }
+        }
+
+        return $unresolved;
+    }
+
+    /**
+     * De-duplicate ['value' => ..., ...] entries on their value, preserving the
+     * first occurrence (which carries the field name used for reporting).
+     */
+    private function uniqueByValue(array $items): array
+    {
+        $seen = [];
+        $out = [];
+        foreach ($items as $item) {
+            $key = mb_strtolower(trim((string) $item['value']));
+            if ('' === $key || isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $out[] = $item;
+        }
+
+        return $out;
+    }
+
+    /**
+     * Resolve an actor by authorized form of name, creating one if absent (unless
+     * $create is false, which restricts the mapping to existing authority records).
      * Numeric values are treated as an actor id. Returns null if empty/failed.
      */
-    private function resolveOrCreateActor(string $value, string $culture): ?int
+    private function resolveActor(string $value, string $culture, bool $create = true): ?int
     {
         $value = trim($value);
         if ('' === $value) {
@@ -400,10 +515,14 @@ class FormSubmitService
             return (int) $existing;
         }
 
+        if (!$create) {
+            return null;
+        }
+
         try {
             return (int) WriteServiceFactory::actor()->createActor(['authorizedFormOfName' => $value], $culture);
         } catch (\Throwable $e) {
-            error_log('FormSubmitService::resolveOrCreateActor failed for "' . $value . '": ' . $e->getMessage());
+            error_log('FormSubmitService::resolveActor failed for "' . $value . '": ' . $e->getMessage());
 
             return null;
         }

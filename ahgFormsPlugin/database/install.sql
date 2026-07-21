@@ -474,3 +474,10 @@ INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, targe
 SELECT id, 'event', 'actor', 111, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'photographer';
 INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
 SELECT id, 'object_term_relation', 'term', 35, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'subjects';
+
+-- actor_relation resolver: name access points (relation type 161).
+-- relation.subject_id = description, relation.object_id = actor.
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'actor_relation', 'actor', 161, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @dc_simple_id AND field_name = 'contributor';
+INSERT INTO ahg_form_field_mapping (field_id, target_table, target_column, target_type_id, transformation, transformation_config, is_i18n)
+SELECT id, 'actor_relation', 'actor', 161, NULL, NULL, 0 FROM ahg_form_field WHERE template_id = @photo_id AND field_name = 'personsDepicted';
