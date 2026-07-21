@@ -59,14 +59,14 @@ if ($users->isEmpty()) {
 ?>
 
 <?php slot('title'); ?>
-<h1><?php echo __('Spectrum Workflow'); ?>: <?php echo esc_entities($resource->title ?? $resource->slug); ?></h1>
+<h1><?php echo __('Collections Procedures Workflow'); ?>: <?php echo esc_entities($resource->title ?? $resource->slug); ?></h1>
 <?php end_slot(); ?>
 
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>"><?php echo __('Home'); ?></a></li>
     <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>"><?php echo esc_entities($resource->title ?? $resource->slug); ?></a></li>
-    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><?php echo __('Spectrum'); ?></a></li>
+    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><?php echo __('Collections Procedures'); ?></a></li>
     <li class="breadcrumb-item active"><?php echo __('Workflow'); ?></li>
   </ol>
 </nav>

@@ -34,7 +34,7 @@
 
   <?php if (!empty($spectrumLabel)): ?>
     <p class="mb-2">
-      <span class="badge bg-info text-dark"><i class="fas fa-university me-1"></i><?php echo __('Spectrum:') ?> <?php echo esc_entities($spectrumLabel) ?></span>
+      <span class="badge bg-info text-dark"><i class="fas fa-university me-1"></i><?php echo __('Collections Procedures:') ?> <?php echo esc_entities($spectrumLabel) ?></span>
     </p>
   <?php endif ?>
 

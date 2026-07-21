@@ -24,7 +24,7 @@
                     <label for="sector" class="form-label"><?php echo __('Sector') ?></label>
                     <select class="form-select" id="sector" name="sector">
                         <option value="archive" <?php echo 'archive' === $sector ? 'selected' : '' ?>><?php echo __('Archives (ISAD-G)') ?></option>
-                        <option value="museum" <?php echo 'museum' === $sector ? 'selected' : '' ?>><?php echo __('Museum (Spectrum)') ?></option>
+                        <option value="museum" <?php echo 'museum' === $sector ? 'selected' : '' ?>><?php echo __('Museum (Collections Procedures)') ?></option>
                         <option value="library" <?php echo 'library' === $sector ? 'selected' : '' ?>><?php echo __('Library (MARC/RDA)') ?></option>
                         <option value="gallery" <?php echo 'gallery' === $sector ? 'selected' : '' ?>><?php echo __('Gallery (CCO)') ?></option>
                         <option value="dam" <?php echo 'dam' === $sector ? 'selected' : '' ?>><?php echo __('Digital Assets (DC)') ?></option>

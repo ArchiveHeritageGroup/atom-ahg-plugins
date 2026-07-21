@@ -113,7 +113,7 @@ if ($resource && ($hasCondition || $hasSpectrum || $hasResearch)):
     <li><a href="<?php echo url_for(['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?>"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition assessment'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
-    <li><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum data'); ?></a></li>
+    <li><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Collections Procedures data'); ?></a></li>
     <li><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resource->slug]); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Workflow Status'); ?></a></li>
     <?php endif; ?>
     <?php if (isLibraryPluginActive('ahgProvenancePlugin')): ?>

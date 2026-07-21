@@ -1,11 +1,11 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}">Spectrum</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}">Collections Procedures</a></li>
         <li class="breadcrumb-item active">Export</li>
     </ol>
 </nav>
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2 mb-0"><i class="fas fa-download text-primary me-2"></i>Spectrum Data Export</h1>
+    <h1 class="h2 mb-0"><i class="fas fa-download text-primary me-2"></i>Collections Procedures Data Export</h1>
     <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-1"></i>Back</a>
 </div>
 

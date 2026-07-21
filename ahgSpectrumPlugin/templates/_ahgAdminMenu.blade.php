@@ -20,12 +20,12 @@
         <li class="dropdown-header">{{ __('Collections Management') }}</li>
         <li>
             <a href="{{ url_for(['module' => 'settings', 'action' => 'ahgSettings', 'section' => 'spectrum']) }}">
-                <i class="fas fa-archive fa-fw"></i> {{ __('Spectrum Settings') }}
+                <i class="fas fa-archive fa-fw"></i> {{ __('Collections Procedures Settings') }}
             </a>
         </li>
         <li>
             <a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}">
-                <i class="fas fa-tachometer-alt fa-fw"></i> {{ __('Spectrum Dashboard') }}
+                <i class="fas fa-tachometer-alt fa-fw"></i> {{ __('Collections Procedures Dashboard') }}
             </a>
         </li>
         <li>

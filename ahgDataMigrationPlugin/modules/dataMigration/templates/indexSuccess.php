@@ -164,7 +164,7 @@
                       <option value="mods">MODS (Library)</option>
                       <option value="marc">MARC XML (Library)</option>
                       <option value="lido">LIDO (Museum)</option>
-                      <option value="spectrum">Spectrum CSV</option>
+                      <option value="spectrum">Collections Procedures CSV</option>
                     </optgroup>
                     <optgroup label="Generic">
                       <option value="generic_csv">Generic CSV</option>
@@ -205,7 +205,7 @@
                   <select name="target_type" id="targetType" class="form-select">
                     <option value="archives">Archives (ISAD-G)</option>
                     <option value="library">Library</option>
-                    <option value="museum">Museum (Spectrum)</option>
+                    <option value="museum">Museum (Collections Procedures)</option>
                     <option value="gallery">Gallery (CCO)</option>
                     <option value="dam">Digital Assets (DAM)</option>
                     <option value="accession">Accession Records</option>

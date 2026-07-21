@@ -52,7 +52,7 @@
   <div class="d-flex align-items-center mb-3">
     <i class="fas fa-3x fa-layer-group me-3 text-primary"></i>
     <div>
-      <h1 class="mb-0"><?php echo __('Spectrum Data'); ?></h1>
+      <h1 class="mb-0"><?php echo __('Collections Procedures Data'); ?></h1>
       <span class="text-muted"><?php echo esc_entities($resource->title ?? $resource->slug); ?></span>
     </div>
   </div>
@@ -64,17 +64,17 @@
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>"><?php echo __('Home'); ?></a></li>
     <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>"><?php echo esc_entities($resource->title ?? $resource->slug); ?></a></li>
-    <li class="breadcrumb-item active"><?php echo __('Spectrum Data'); ?></li>
+    <li class="breadcrumb-item active"><?php echo __('Collections Procedures Data'); ?></li>
   </ol>
 </nav>
 
 <!-- Spectrum 5.1 Procedures Grid -->
 <div class="card mb-4">
   <div class="card-header bg-success text-white">
-    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i><?php echo __('Spectrum 5.1 Procedures'); ?></h5>
+    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i><?php echo __('Collections Procedures Procedures'); ?></h5>
   </div>
   <div class="card-body">
-    <p class="text-muted mb-4"><?php echo __('Manage collections management procedures according to Spectrum 5.1 standard.'); ?></p>
+    <p class="text-muted mb-4"><?php echo __('Manage collections management procedures according to Collections Procedures standard.'); ?></p>
     
     <div class="row g-3">
       <?php

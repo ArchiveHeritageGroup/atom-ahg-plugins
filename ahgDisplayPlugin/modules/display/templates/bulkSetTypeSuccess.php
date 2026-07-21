@@ -69,7 +69,7 @@
                 <p>Object types determine how records are displayed:</p>
                 <ul class="small">
                     <li><strong>Archive:</strong> ISAD(G) hierarchical view</li>
-                    <li><strong>Museum:</strong> Spectrum object records</li>
+                    <li><strong>Museum:</strong> Collections Procedures object records</li>
                     <li><strong>Gallery:</strong> Artwork/artist focus</li>
                     <li><strong>Book Collection:</strong> Bibliographic view</li>
                     <li><strong>Photo Archive:</strong> Visual grid/lightbox</li>

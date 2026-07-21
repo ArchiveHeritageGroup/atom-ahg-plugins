@@ -472,7 +472,7 @@ $rawResource = sfOutputEscaper::unescape($resource);
             <?php endif; ?>
             <?php if (checkPluginEnabled('ahgSpectrumPlugin')): ?>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum data'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Collections Procedures data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $resource->slug]); ?>"><i class="fas fa-tasks me-2"></i><?php echo __('Workflow Status'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resource->slug]); ?>"><i class="fas fa-barcode me-2"></i><?php echo __('Generate barcode label'); ?></a></li>
             <?php endif; ?>

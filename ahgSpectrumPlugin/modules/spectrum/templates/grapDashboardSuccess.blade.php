@@ -4,7 +4,7 @@
 <div class="sidebar-content">
     <h4>{{ __('Heritage Assets') }}</h4>
     <ul class="list-unstyled">
-        <li><a href="{{ url_for('@spectrum_index?slug=' . $resource->slug) }}"><i class="fas fa-arrow-left me-2"></i>{{ __('Back to Spectrum') }}</a></li>
+        <li><a href="{{ url_for('@spectrum_index?slug=' . $resource->slug) }}"><i class="fas fa-arrow-left me-2"></i>{{ __('Back to Collections Procedures') }}</a></li>
         <li><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}"><i class="fas fa-layer-group me-2"></i>{{ __('Collections Dashboard') }}</a></li>
     </ul>
     <hr>

@@ -71,8 +71,8 @@
             </a>
             <a href="<?php echo url_for('dataMigration/sectorExport?sector=museum') ?>"
                class="list-group-item list-group-item-action <?php echo 'museum' === $sector ? 'active' : '' ?>">
-                <i class="bi bi-bank me-2"></i> <?php echo __('Museum (Spectrum)') ?>
-                <small class="text-muted d-block"><?php echo __('Export with Spectrum 5.0 compliant columns') ?></small>
+                <i class="bi bi-bank me-2"></i> <?php echo __('Museum (Collections Procedures)') ?>
+                <small class="text-muted d-block"><?php echo __('Export with Collections Procedures compliant columns') ?></small>
             </a>
             <a href="<?php echo url_for('dataMigration/sectorExport?sector=library') ?>"
                class="list-group-item list-group-item-action <?php echo 'library' === $sector ? 'active' : '' ?>">

@@ -224,8 +224,8 @@ if ($isAdmin && $hasResearcher) {
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']); ?>"><i class="fas fa-tachometer-alt fa-fw me-1"></i><?php echo __('Dashboard'); ?></a></li>
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']); ?>"><i class="fas fa-cogs fa-fw me-1"></i><?php echo __('Workflows & diagrams'); ?></a></li>
     <?php if ($hasSpectrumCompliance): ?>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']); ?>"><i class="fas fa-university fa-fw me-1"></i><?php echo __('Spectrum compliance'); ?></a></li>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumChain']); ?>"><i class="fas fa-link fa-fw me-1"></i><?php echo __('Spectrum chain rules'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']); ?>"><i class="fas fa-university fa-fw me-1"></i><?php echo __('Collections Procedures compliance'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumChain']); ?>"><i class="fas fa-link fa-fw me-1"></i><?php echo __('Collections Procedures chain rules'); ?></a></li>
     <?php endif; ?>
     <?php endif; ?>
 

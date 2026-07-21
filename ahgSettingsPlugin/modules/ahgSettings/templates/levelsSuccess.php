@@ -157,7 +157,7 @@
 
                 <?php if (in_array('museum', $sf_data->getRaw('availableSectors'))): ?>
                 <dt><i class="fas fa-landmark me-1"></i> <?php echo __('Museum'); ?></dt>
-                <dd class="text-muted"><?php echo __('Object-based descriptions (CCO/CDWA, Spectrum)'); ?></dd>
+                <dd class="text-muted"><?php echo __('Object-based descriptions (CCO/CDWA, Collections Procedures)'); ?></dd>
                 <?php endif; ?>
 
                 <?php if (in_array('library', $sf_data->getRaw('availableSectors'))): ?>

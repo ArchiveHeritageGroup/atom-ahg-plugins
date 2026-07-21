@@ -1,13 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
 
 <?php slot('title'); ?>
-<h1><i class="fas fa-building me-2"></i><?php echo __('General Spectrum Procedures'); ?></h1>
+<h1><i class="fas fa-building me-2"></i><?php echo __('General Collections Procedures'); ?></h1>
 <?php end_slot(); ?>
 
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>"><?php echo __('Home'); ?></a></li>
-    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><?php echo __('Spectrum Dashboard'); ?></a></li>
+    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><?php echo __('Collections Procedures Dashboard'); ?></a></li>
     <li class="breadcrumb-item active"><?php echo __('General Procedures'); ?></li>
   </ol>
 </nav>

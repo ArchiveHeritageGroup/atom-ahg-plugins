@@ -2,7 +2,7 @@
 
 @section('sidebar')
 <div class="sidebar-content">
-    <h4>{{ __('Spectrum Reports') }}</h4>
+    <h4>{{ __('Collections Procedures Reports') }}</h4>
     <ul class="list-unstyled">
         <li><a href="{{ url_for(['module' => 'spectrumReports', 'action' => 'objectEntry']) }}"><i class="fas fa-sign-in-alt me-2"></i>{{ __('Object Entry') }}</a></li>
         <li><a href="{{ url_for(['module' => 'spectrumReports', 'action' => 'loans']) }}"><i class="fas fa-exchange-alt me-2"></i>{{ __('Loans') }}</a></li>
@@ -18,7 +18,7 @@
 @endsection
 
 @section('title')
-<h1><i class="fas fa-clipboard-list"></i> {{ __('Spectrum Reports Dashboard') }}</h1>
+<h1><i class="fas fa-clipboard-list"></i> {{ __('Collections Procedures Reports Dashboard') }}</h1>
 @endsection
 
 @section('content')

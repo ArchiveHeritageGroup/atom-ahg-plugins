@@ -230,7 +230,7 @@ $metadataSources = [
                     <tr>
                         <th style="width: 20%;">Metadata Source</th>
                         <th style="width: 26%;">Archives (ISAD)</th>
-                        <th style="width: 27%;">Museum (Spectrum)</th>
+                        <th style="width: 27%;">Museum (Collections Procedures)</th>
                         <th style="width: 27%;">DAM</th>
                     </tr>
                 </thead>

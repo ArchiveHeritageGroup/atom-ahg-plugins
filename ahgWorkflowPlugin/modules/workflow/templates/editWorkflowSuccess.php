@@ -106,19 +106,19 @@
                             </div>
                         </div>
 
-                        <?php /* Spectrum#A — procedure dropdown */ ?>
+                        <?php /* Collections Procedures#A — procedure dropdown */ ?>
                         <div class="mb-3">
                             <label for="spectrum_procedure" class="form-label">
-                                <i class="fas fa-university me-1"></i><?php echo __('Spectrum procedure') ?>
+                                <i class="fas fa-university me-1"></i><?php echo __('Collections Procedure') ?>
                                 <span class="badge bg-secondary ms-1"><?php echo __('Optional') ?></span>
                             </label>
                             <select class="form-select" id="spectrum_procedure" name="spectrum_procedure">
-                                <option value=""><?php echo __('— Not a Spectrum procedure —') ?></option>
+                                <option value=""><?php echo __('— Not a Collections Procedure —') ?></option>
                                 <?php foreach (($spectrumProcedures ?? []) as $code => $label): ?>
                                     <option value="<?php echo esc_entities($code) ?>" <?php echo (($workflow->spectrum_procedure ?? '') === $code) ? 'selected' : '' ?>><?php echo esc_entities(__($label)) ?></option>
                                 <?php endforeach ?>
                             </select>
-                            <small class="text-muted"><?php echo __('Tag this workflow if it implements one of the 21 Spectrum 5.1 procedures.') ?></small>
+                            <small class="text-muted"><?php echo __('Tag this workflow if it implements one of the 21 Collections Procedures procedures.') ?></small>
                         </div>
 
                         <button type="submit" class="btn btn-primary">

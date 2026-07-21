@@ -71,7 +71,7 @@ INSERT INTO numbering_scheme (name, sector, pattern, description, is_default, is
 ('Library Barcode', 'library', '3{SEQ:12}', 'Barcode-style numbering', 0, 1),
 ('Library Call Number', 'library', '{PREFIX}/{YEAR}/{SEQ:4}', 'Call number style with year', 0, 1),
 
-('Museum Object Number', 'museum', '{YEAR}.{SEQ:4}', 'Spectrum standard object numbering', 1, 1),
+('Museum Object Number', 'museum', '{YEAR}.{SEQ:4}', 'Collections Procedures object numbering', 1, 1),
 ('Museum Department', 'museum', '{DEPT}-{YEAR}-{SEQ:4}', 'Department-prefixed numbering', 0, 1),
 ('Museum Accession Lot', 'museum', '{YEAR}/{SEQ:3}/{ITEM}', 'Accession lot and item numbering', 0, 1),
 

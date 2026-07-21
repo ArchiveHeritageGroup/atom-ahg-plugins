@@ -40,7 +40,7 @@ if (empty($groupFields)) continue;
                     <th>Source Table</th>
                     <th>Source Column</th>
                     <th>ISAD</th>
-                    <th>Spectrum</th>
+                    <th>Collections Procedures</th>
                     <th>DC</th>
                 </tr>
             </thead>

@@ -148,10 +148,10 @@ INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`
 -- SEED DATA: Spectrum Procedure Status
 -- ============================================================
 INSERT IGNORE INTO `ahg_dropdown` (`taxonomy`, `taxonomy_label`, `code`, `label`, `color`, `sort_order`, `is_default`) VALUES
-('spectrum_procedure_status', 'Spectrum Procedure Status', 'not_started', 'Not Started', '#9e9e9e', 10, 1),
-('spectrum_procedure_status', 'Spectrum Procedure Status', 'in_progress', 'In Progress', '#2196f3', 20, 0),
-('spectrum_procedure_status', 'Spectrum Procedure Status', 'completed', 'Completed', '#4caf50', 30, 0),
-('spectrum_procedure_status', 'Spectrum Procedure Status', 'on_hold', 'On Hold', '#ff9800', 40, 0);
+('spectrum_procedure_status', 'Collections Procedure Status', 'not_started', 'Not Started', '#9e9e9e', 10, 1),
+('spectrum_procedure_status', 'Collections Procedure Status', 'in_progress', 'In Progress', '#2196f3', 20, 0),
+('spectrum_procedure_status', 'Collections Procedure Status', 'completed', 'Completed', '#4caf50', 30, 0),
+('spectrum_procedure_status', 'Collections Procedure Status', 'on_hold', 'On Hold', '#ff9800', 40, 0);
 
 -- ============================================================
 -- SEED DATA: Rights Basis

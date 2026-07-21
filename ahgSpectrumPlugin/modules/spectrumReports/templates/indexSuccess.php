@@ -2,7 +2,7 @@
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
-    <h4><?php echo __('Spectrum Reports'); ?></h4>
+    <h4><?php echo __('Collections Procedures Reports'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'spectrumReports', 'action' => 'objectEntry']); ?>"><i class="fas fa-sign-in-alt me-2"></i><?php echo __('Object Entry'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'spectrumReports', 'action' => 'loans']); ?>"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Loans'); ?></a></li>
@@ -18,7 +18,7 @@
 <?php end_slot(); ?>
 
 <?php slot('title'); ?>
-<h1><i class="fas fa-clipboard-list"></i> <?php echo __('Spectrum Reports Dashboard'); ?></h1>
+<h1><i class="fas fa-clipboard-list"></i> <?php echo __('Collections Procedures Reports Dashboard'); ?></h1>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>

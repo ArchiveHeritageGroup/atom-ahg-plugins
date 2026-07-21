@@ -72,7 +72,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
           <h6 class="text-muted mb-1">🎯 Target Sector (for CSV)</h6>
           <select id="targetSector" class="form-select form-select-sm">
             <option value="archives" <?php echo ($targetType === "archives") ? "selected" : "" ?>>Archives (ISAD-G)</option>
-            <option value="museum" <?php echo ($targetType === "museum") ? "selected" : "" ?>>Museum (Spectrum)</option>
+            <option value="museum" <?php echo ($targetType === "museum") ? "selected" : "" ?>>Museum (Collections Procedures)</option>
             <option value="library" <?php echo ($targetType === "library") ? "selected" : "" ?>>Library (MARC)</option>
             <option value="gallery" <?php echo ($targetType === "gallery") ? "selected" : "" ?>>Gallery (CCO)</option>
             <option value="dam" <?php echo ($targetType === "dam") ? "selected" : "" ?>>DAM (Dublin Core)</option>
@@ -469,7 +469,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
               <select id="mappingTargetType" class="form-select">
                 <option value="archives" <?php echo ($targetType === "archives") ? "selected" : "" ?>>Archives (ISAD-G)</option>
                 <option value="library">Library</option>
-                <option value="museum" <?php echo ($targetType === "museum") ? "selected" : "" ?>>Museum (Spectrum)</option>
+                <option value="museum" <?php echo ($targetType === "museum") ? "selected" : "" ?>>Museum (Collections Procedures)</option>
                 <option value="gallery" <?php echo ($targetType === "gallery") ? "selected" : "" ?>>Gallery (CCO)</option>
                 <option value="dam">Digital Assets (DAM)</option>
               </select>

@@ -1,7 +1,7 @@
 <?php decorate_with('layout_1col'); ?>
 
 <?php slot('title'); ?>
-<h1><i class="fas fa-tasks me-2"></i><?php echo __('Spectrum Workflow Dashboard'); ?></h1>
+<h1><i class="fas fa-tasks me-2"></i><?php echo __('Collections Procedures Workflow Dashboard'); ?></h1>
 <?php end_slot(); ?>
 
 <div class="row">

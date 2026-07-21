@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="fas fa-tasks me-2"></i>{{ __('Spectrum Workflow Dashboard') }}</h1>
+<h1><i class="fas fa-tasks me-2"></i>{{ __('Collections Procedures Workflow Dashboard') }}</h1>
 @endsection
 
 @section('content')

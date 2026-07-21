@@ -1,4 +1,4 @@
-<?php /* Spectrum Phase C3 — per-object panel partial (PSIS port).
+<?php /* Collections Procedures Phase C3 — per-object panel partial (PSIS port).
 
   Embed from any IO-view template via:
 
@@ -21,7 +21,7 @@
 
   <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="fas fa-university me-2"></i><strong><?php echo __('Spectrum compliance') ?></strong></span>
+      <span><i class="fas fa-university me-2"></i><strong><?php echo __('Collections Procedures compliance') ?></strong></span>
       <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']) ?>" class="text-decoration-none small">
         <?php echo __('Collection dashboard') ?> <i class="fas fa-external-link-alt"></i>
       </a>

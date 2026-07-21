@@ -1,7 +1,7 @@
-<?php /* Spectrum Phase C2 — cross-procedure chain rules admin (PSIS port) */ ?>
+<?php /* Collections Procedures Phase C2 — cross-procedure chain rules admin (PSIS port) */ ?>
 <div class="container-fluid px-4 py-3 spectrum chain-rules">
   <div class="d-flex flex-wrap align-items-baseline mb-3 gap-2">
-    <h1 class="mb-0 flex-grow-1"><i class="fas fa-link me-2"></i><?php echo __('Spectrum chain rules') ?></h1>
+    <h1 class="mb-0 flex-grow-1"><i class="fas fa-link me-2"></i><?php echo __('Collections Procedures chain rules') ?></h1>
     <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']) ?>" class="btn btn-outline-secondary">
       <i class="fas fa-arrow-left me-1"></i><?php echo __('Compliance dashboard') ?>
     </a>

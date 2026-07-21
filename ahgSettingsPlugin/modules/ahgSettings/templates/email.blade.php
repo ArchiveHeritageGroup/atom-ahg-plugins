@@ -216,7 +216,7 @@
     <ul class="list-group list-group-flush">
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <div>
-          <i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Spectrum Email Notifications') }}
+          <i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Collections Procedures Email Notifications') }}
           <br><small class="text-muted">{{ __('Task assignments and state transitions') }}</small>
         </div>
         <a href="{{ url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'spectrum']) }}" class="btn btn-sm btn-outline-primary">{{ __('Configure') }}</a>

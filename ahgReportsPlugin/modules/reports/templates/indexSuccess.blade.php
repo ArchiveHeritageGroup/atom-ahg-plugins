@@ -259,7 +259,7 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'threeDReports', 'action' => 'index']) }}"><i class="fas fa-cube me-2 text-muted"></i>{{ __("3D Object Reports") }}</a></li>
                     @endif
                     @if ($hasSpectrum)
-                    <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrumReports', 'action' => 'index']) }}"><i class="fas fa-clipboard-list me-2 text-muted"></i>{{ __("Spectrum Reports") }}</a></li>
+                    <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrumReports', 'action' => 'index']) }}"><i class="fas fa-clipboard-list me-2 text-muted"></i>{{ __("Collections Procedures Reports") }}</a></li>
                     @endif
                 </ul>
             </div>
@@ -273,7 +273,7 @@ $canManage = $isAdmin || $isEditor;
                 </div>
                 <ul class="list-group list-group-flush">
                     @if ($hasSpectrum)
-                    <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}"><i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Spectrum Workflow') }}</a></li>
+                    <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}"><i class="fas fa-layer-group me-2 text-muted"></i>{{ __('Collections Procedures Workflow') }}</a></li>
                     @endif
                     @if ($hasWorkflow)
                     <li class="list-group-item"><a href="/workflow"><i class="fas fa-tasks me-2 text-muted"></i>{{ __('Approval Workflow') }}</a></li>
@@ -327,7 +327,7 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'grapCompliance', 'action' => 'nationalTreasuryReport']) }}"><i class="fas fa-balance-scale me-2 text-muted"></i>{{ __('GRAP 103 National Treasury Report') }}</a></li>
                     @endif
                     @if ($hasSpectrum)
-                    <li class="list-group-item"><a href="/spectrum/export"><i class="fas fa-history me-2 text-muted"></i>{{ __('Spectrum History Export') }}</a></li>
+                    <li class="list-group-item"><a href="/spectrum/export"><i class="fas fa-history me-2 text-muted"></i>{{ __('Collections Procedures History Export') }}</a></li>
                     @endif
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'export', 'action' => 'csv']) }}"><i class="fas fa-file-csv me-2 text-muted"></i>{{ __('CSV Export') }}</a></li>
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'export', 'action' => 'ead']) }}"><i class="fas fa-file-code me-2 text-muted"></i>{{ __('EAD Export') }}</a></li>
@@ -357,11 +357,11 @@ $canManage = $isAdmin || $isEditor;
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header text-white" style="background-color: #0d6efd !important;">
-                    <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>{{ __('Spectrum Workflow') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>{{ __('Collections Procedures Workflow') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}"><i class="fas fa-tachometer-alt me-2 text-muted"></i>{{ __('Spectrum Dashboard') }}</a></li>
-                    <li class="list-group-item"><a href="{{ url_for('@spectrum_my_tasks') }}"><i class="fas fa-clipboard-list me-2 text-muted"></i>{{ __('My Spectrum Tasks') }}</a></li>
+                    <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}"><i class="fas fa-tachometer-alt me-2 text-muted"></i>{{ __('Collections Procedures Dashboard') }}</a></li>
+                    <li class="list-group-item"><a href="{{ url_for('@spectrum_my_tasks') }}"><i class="fas fa-clipboard-list me-2 text-muted"></i>{{ __('My Collections Procedures Tasks') }}</a></li>
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'workflows']) }}"><i class="fas fa-sitemap me-2 text-muted"></i>{{ __('Workflow Configurations') }}</a></li>
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'notifications']) }}"><i class="fas fa-bell me-2 text-muted"></i>{{ __('Notifications') }}</a></li>
                 </ul>
@@ -420,7 +420,7 @@ $canManage = $isAdmin || $isEditor;
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>{{ __('Condition (Spectrum 5.1)') }}</h5>
+                    <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>{{ __('Condition (Collections Procedures)') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">

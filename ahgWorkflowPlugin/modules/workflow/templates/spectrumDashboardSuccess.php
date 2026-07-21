@@ -1,4 +1,4 @@
-<?php /* Spectrum Phase C1 — collection-wide compliance dashboard (PSIS port) */ ?>
+<?php /* Collections Procedures Phase C1 — collection-wide compliance dashboard (PSIS port) */ ?>
 <?php $n = sfConfig::get('csp_nonce', ''); $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
 <style <?php echo $nonceAttr; ?>>
   .spectrum-heatmap-row:hover { background: #f8f9fa; }
@@ -14,7 +14,7 @@
 
 <div class="container-fluid px-4 py-3 spectrum compliance-dashboard">
   <div class="d-flex flex-wrap align-items-baseline mb-3 gap-2">
-    <h1 class="mb-0 flex-grow-1"><i class="fas fa-university me-2"></i><?php echo __('Spectrum compliance dashboard') ?></h1>
+    <h1 class="mb-0 flex-grow-1"><i class="fas fa-university me-2"></i><?php echo __('Collections Procedures compliance dashboard') ?></h1>
     <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumExportCsv', 'overdue_days' => $overdueDays]) ?>" class="btn btn-outline-success">
       <i class="fas fa-file-csv me-1"></i><?php echo __('Export CSV') ?>
     </a>
@@ -40,7 +40,7 @@
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th><?php echo __('Spectrum procedure') ?></th>
+              <th><?php echo __('Collections Procedure') ?></th>
               <th class="status-cell"><?php echo __('Not started') ?></th>
               <th class="status-cell"><?php echo __('In progress') ?></th>
               <th class="status-cell"><?php echo __('Completed') ?></th>

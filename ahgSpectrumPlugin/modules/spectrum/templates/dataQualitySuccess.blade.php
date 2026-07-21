@@ -1,6 +1,6 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}">Spectrum</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}">Collections Procedures</a></li>
         <li class="breadcrumb-item active">Data Quality</li>
     </ol>
 </nav>

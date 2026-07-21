@@ -253,7 +253,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?>"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition assessment'); ?></a></li>
       <?php endif; ?>
       <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
-      <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Spectrum data'); ?></a></li>
+      <li class="list-group-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Collections Procedures data'); ?></a></li>
       <?php endif; ?>
       <?php if (ahg_is_plugin_enabled('ahgHeritageAccountingPlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'grap', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-file-invoice-dollar me-2"></i><?php echo __('GRAP data'); ?></a></li>
@@ -752,7 +752,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
             <?php endif; ?>
             <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('View Spectrum data'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('View Collections Procedures data'); ?></a></li>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resource->slug]); ?>"><i class="fas fa-barcode me-2"></i><?php echo __('Generate label'); ?></a></li>
             <?php endif; ?>
             <?php if (ahg_is_plugin_enabled('ahgProvenancePlugin')): ?>

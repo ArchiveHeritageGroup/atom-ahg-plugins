@@ -160,7 +160,7 @@ $photoTypes = [
     </div>
     
     <div class="footer">
-        <p>Generated: <?php echo date('j F Y H:i') ?> | Spectrum 5.0 Condition Check Report</p>
+        <p>Generated: <?php echo date('j F Y H:i') ?> | Collections Procedures Condition Check Report</p>
     </div>
 </body>
 </html>

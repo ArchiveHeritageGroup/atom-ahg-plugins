@@ -242,7 +242,7 @@ function cco_get_repository($resource): ?object
             <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
             <hr class="dropdown-divider">
             <a class="dropdown-item" href="<?php echo cco_url($resource, 'spectrum', 'index'); ?>">
-                <?php echo __('View Spectrum data'); ?>
+                <?php echo __('View Collections Procedures data'); ?>
             </a>
             <a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'barcode', 'slug' => $resource->slug, 'type' => 'label']); ?>">
                 <?php echo __('Generate label'); ?>

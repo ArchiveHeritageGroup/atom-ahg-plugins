@@ -2,7 +2,7 @@
 
 <div class="mb-3">
   <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index']); ?>" class="btn btn-outline-secondary btn-sm">
-    <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Spectrum'); ?>
+    <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Collections Procedures'); ?>
   </a>
 </div>
 

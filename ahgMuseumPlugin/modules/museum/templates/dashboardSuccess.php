@@ -5,7 +5,7 @@
   <div class="row mb-4">
     <div class="col-12">
       <h1><i class="fas fa-landmark me-2"></i><?php echo __('Museum Management'); ?></h1>
-      <p class="lead text-muted"><?php echo __('Manage museum objects using CCO/Spectrum cataloguing standards'); ?></p>
+      <p class="lead text-muted"><?php echo __('Manage museum objects using CCO/Collections Procedures cataloguing standards'); ?></p>
     </div>
   </div>
 

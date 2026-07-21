@@ -96,7 +96,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
                                     'rad'   => ['label' => 'RAD', 'sectors' => 'archive'],
                                     'dacs'  => ['label' => 'DACS', 'sectors' => 'archive'],
                                     'mods'  => ['label' => 'MODS', 'sectors' => 'library'],
-                                    'spectrum' => ['label' => 'SPECTRUM', 'sectors' => 'museum'],
+                                    'spectrum' => ['label' => 'COLLECTIONS PROCEDURES', 'sectors' => 'museum'],
                                     'cco'   => ['label' => 'CCO', 'sectors' => 'gallery'],
                                 ] as $val => $info): ?>
                                     <option value="<?php echo $val ?>"

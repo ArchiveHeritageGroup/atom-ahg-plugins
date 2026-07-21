@@ -53,7 +53,7 @@ $users = DB::table('user')
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage'); ?>"><?php echo __('Home'); ?></a></li>
-    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><?php echo __('Spectrum Dashboard'); ?></a></li>
+    <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><?php echo __('Collections Procedures Dashboard'); ?></a></li>
     <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'general']); ?>"><?php echo __('General Procedures'); ?></a></li>
     <li class="breadcrumb-item active"><?php echo __('Workflow'); ?></li>
   </ol>

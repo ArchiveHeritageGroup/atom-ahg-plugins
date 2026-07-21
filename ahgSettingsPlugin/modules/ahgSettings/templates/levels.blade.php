@@ -156,7 +156,7 @@
 
                 @if (in_array('museum', $availableSectors))
                 <dt><i class="fas fa-landmark me-1"></i> {{ __('Museum') }}</dt>
-                <dd class="text-muted">{{ __('Object-based descriptions (CCO/CDWA, Spectrum)') }}</dd>
+                <dd class="text-muted">{{ __('Object-based descriptions (CCO/CDWA, Collections Procedures)') }}</dd>
                 @endif
 
                 @if (in_array('library', $availableSectors))

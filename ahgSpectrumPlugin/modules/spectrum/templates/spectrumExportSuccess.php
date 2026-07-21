@@ -1,7 +1,7 @@
 <?php use_helper('Text'); ?>
-<h1 class="h3 mb-4"><i class="fas fa-download me-2"></i><?php echo __('Spectrum History Export'); ?></h1>
+<h1 class="h3 mb-4"><i class="fas fa-download me-2"></i><?php echo __('Collections Procedures History Export'); ?></h1>
 
-<p class="text-muted mb-4">Export Spectrum procedure histories for audit and compliance purposes.</p>
+<p class="text-muted mb-4">Export Collections Procedure histories for audit and compliance purposes.</p>
 
 <div class="row">
 <?php foreach ($exportTypes as $type => $label): ?>

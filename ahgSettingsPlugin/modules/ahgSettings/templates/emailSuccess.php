@@ -175,7 +175,7 @@
     <ul class="list-group list-group-flush">
       <li class="list-group-item d-flex justify-content-between align-items-center">
         <div>
-          <i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Spectrum Email Notifications'); ?>
+          <i class="fas fa-layer-group me-2 text-muted"></i><?php echo __('Collections Procedures Email Notifications'); ?>
           <br><small class="text-muted"><?php echo __('Task assignments and state transitions'); ?></small>
         </div>
         <a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'section', 'section' => 'spectrum']); ?>" class="btn btn-sm btn-outline-primary"><?php echo __('Configure'); ?></a>

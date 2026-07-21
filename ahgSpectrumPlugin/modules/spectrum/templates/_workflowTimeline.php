@@ -47,7 +47,7 @@ foreach ($statuses as $procId => $procStatus) {
     <!-- Progress Summary -->
     <div class="workflow-progress">
         <div class="progress-header">
-            <h4><i class="fa fa-tasks"></i> <?php echo __('Spectrum Workflow'); ?></h4>
+            <h4><i class="fa fa-tasks"></i> <?php echo __('Collections Procedures Workflow'); ?></h4>
             <span class="progress-percent"><?php echo $progress['percentComplete']; ?>%</span>
         </div>
         

@@ -18,13 +18,13 @@
             <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'createWorkflow']) ?>" class="btn btn-primary">
                 <i class="fas fa-plus me-1"></i>Create Workflow
             </a>
-            <?php /* Spectrum#B — install seed pack */ ?>
-            <form method="post" action="<?php echo url_for(['module' => 'workflow', 'action' => 'installSpectrumPack']) ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Install the Spectrum 5.1 procedure starter pack? Tick Overwrite first to RESET existing seeded steps.') ?>');">
-                <label class="me-1 small text-muted" title="<?php echo __('When ticked, existing Spectrum workflows have their steps replaced with the seed defaults.') ?>">
+            <?php /* Collections Procedures#B — install seed pack */ ?>
+            <form method="post" action="<?php echo url_for(['module' => 'workflow', 'action' => 'installSpectrumPack']) ?>" class="d-inline" onsubmit="return confirm('<?php echo __('Install the Collections Procedures procedure starter pack? Tick Overwrite first to RESET existing seeded steps.') ?>');">
+                <label class="me-1 small text-muted" title="<?php echo __('When ticked, existing Collections Procedures workflows have their steps replaced with the seed defaults.') ?>">
                     <input type="checkbox" name="overwrite" value="1"> <?php echo __('Overwrite') ?>
                 </label>
                 <button type="submit" class="btn btn-outline-info">
-                    <i class="fas fa-university me-1"></i><?php echo __('Install Spectrum pack') ?>
+                    <i class="fas fa-university me-1"></i><?php echo __('Install Collections Procedures pack') ?>
                 </button>
             </form>
             <a href="<?php echo url_for(['module' => 'workflow', 'action' => 'dashboard']) ?>" class="btn btn-outline-secondary">
@@ -33,11 +33,11 @@
         </div>
     </div>
 
-    <?php /* Spectrum#A — filter UI */ ?>
+    <?php /* Collections Procedures#A — filter UI */ ?>
     <?php if (!empty($spectrumProcedures ?? [])): ?>
         <form method="get" action="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="d-flex flex-wrap gap-2 align-items-end mb-3">
             <div class="flex-grow-1" style="max-width: 28rem;">
-                <label for="spectrum" class="form-label small mb-1"><?php echo __('Filter by Spectrum 5.1 procedure') ?></label>
+                <label for="spectrum" class="form-label small mb-1"><?php echo __('Filter by Collections Procedures procedure') ?></label>
                 <select name="spectrum" id="spectrum" class="form-select form-select-sm" onchange="this.form.submit()">
                     <option value=""><?php echo __('All workflows') ?></option>
                     <?php foreach ($spectrumProcedures as $code => $label): ?>
@@ -81,7 +81,7 @@
                         <th>Name</th>
                         <th>Scope</th>
                         <th>Trigger</th>
-                        <th><?php echo __('Spectrum') ?></th>
+                        <th><?php echo __('Collections Procedures') ?></th>
                         <th>Status</th>
                         <th>Default</th>
                         <th>Actions</th>

@@ -32,12 +32,12 @@
         <li class="dropdown-header"><?php echo __('Collections Management'); ?></li>
         <li>
             <a href="<?php echo url_for(['module' => 'settings', 'action' => 'ahgSettings', 'section' => 'spectrum']); ?>">
-                <i class="fas fa-archive fa-fw"></i> <?php echo __('Spectrum Settings'); ?>
+                <i class="fas fa-archive fa-fw"></i> <?php echo __('Collections Procedures Settings'); ?>
             </a>
         </li>
         <li>
             <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>">
-                <i class="fas fa-tachometer-alt fa-fw"></i> <?php echo __('Spectrum Dashboard'); ?>
+                <i class="fas fa-tachometer-alt fa-fw"></i> <?php echo __('Collections Procedures Dashboard'); ?>
             </a>
         </li>
         <li>

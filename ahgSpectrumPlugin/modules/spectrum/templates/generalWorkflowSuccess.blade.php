@@ -56,7 +56,7 @@ $users = DB::table('user')
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{{ url_for('@homepage') }}">{{ __('Home') }}</a></li>
-    <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}">{{ __('Spectrum Dashboard') }}</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'dashboard']) }}">{{ __('Collections Procedures Dashboard') }}</a></li>
     <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'general']) }}">{{ __('General Procedures') }}</a></li>
     <li class="breadcrumb-item active">{{ __('Workflow') }}</li>
   </ol>

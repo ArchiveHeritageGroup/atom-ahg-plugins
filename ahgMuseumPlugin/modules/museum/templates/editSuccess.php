@@ -591,7 +591,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <?php if (!empty($fieldDef['spectrumEquiv'])): ?>
                   <p class="help-spectrum">
                     <i class="fa fa-exchange"></i>
-                    <?php echo __('Spectrum equivalent: %field%', ['%field%' => $fieldDef['spectrumEquiv']]); ?>
+                    <?php echo __('Collections Procedures equivalent: %field%', ['%field%' => $fieldDef['spectrumEquiv']]); ?>
                   </p>
                 <?php endif; ?>
               </div>

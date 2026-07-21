@@ -2,7 +2,7 @@
 
 class ahgMuseumPluginConfiguration extends sfPluginConfiguration
 {
-    public static $summary = 'AHG Museum Plugin - CCO/Spectrum museum object cataloguing';
+    public static $summary = 'AHG Museum Plugin - CCO/Collections Procedures museum object cataloguing';
     public static $version = '1.1.0';
 
     public function initialize()

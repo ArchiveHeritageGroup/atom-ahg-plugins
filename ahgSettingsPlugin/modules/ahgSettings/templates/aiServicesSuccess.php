@@ -339,7 +339,7 @@ $settings = $rawSettings;
                         Library (MARC/Dublin Core)
                     </option>
                     <option value="museum" <?php echo ($settings['translation_sector'] ?? 'archives') === 'museum' ? 'selected' : '' ?>>
-                        Museum (SPECTRUM)
+                        Museum (COLLECTIONS PROCEDURES)
                     </option>
                     <option value="gallery" <?php echo ($settings['translation_sector'] ?? 'archives') === 'gallery' ? 'selected' : '' ?>>
                         Gallery (Art Collection)

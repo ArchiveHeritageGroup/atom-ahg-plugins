@@ -61,7 +61,7 @@ if (isset($resource)) {
     <li><?php echo link_to(__('Condition assessment'), '@condition_check_by_slug?slug=' . $resourceSlug); ?></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
-    <li><?php echo link_to(__('Spectrum data'), '@spectrum_index?slug=' . $resourceSlug); ?></li>
+    <li><?php echo link_to(__('Collections Procedures data'), '@spectrum_index?slug=' . $resourceSlug); ?></li>
     <?php endif; ?>
     <?php if ($hasGrap): ?>
     <li><a href="/index.php/heritage/add?io_id=<?php echo $resource->id; ?>"><?php echo __('Heritage Assets'); ?></a></li>

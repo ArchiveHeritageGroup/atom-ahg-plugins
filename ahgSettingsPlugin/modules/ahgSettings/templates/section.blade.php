@@ -303,11 +303,11 @@
                                     <legend>{{ __('Collections Management') }}</legend>
 
                                     <div class="form-group row">
-                                        <label class="col-sm-3 col-form-label">{{ __('Enable Spectrum') }}</label>
+                                        <label class="col-sm-3 col-form-label">{{ __('Enable Collections Procedures') }}</label>
                                         <div class="col-sm-9">
                                             <div class="custom-control custom-switch">
                                                 <input type="checkbox" class="custom-control-input" id="spectrum_enabled" name="settings[spectrum_enabled]" value="true" {{ ($settings['spectrum_enabled'] ?? 'true') === 'true' ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="spectrum_enabled">{{ __('Enable Spectrum collections management') }}</label>
+                                                <label class="custom-control-label" for="spectrum_enabled">{{ __('Enable Collections Procedures collections management') }}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -1035,7 +1035,7 @@
                                     <legend>{{ __('Field Mapping') }}</legend>
                                     <p class="text-muted">{{ __('Configure where extracted metadata is saved:') }}</p>
                                     <table class="table table-sm table-bordered">
-                                        <thead class="thead-dark"><tr><th style="width:20%">Metadata Source</th><th style="width:26%">Archives (ISAD)</th><th style="width:27%">Museum (Spectrum)</th><th style="width:27%">DAM</th></tr></thead>
+                                        <thead class="thead-dark"><tr><th style="width:20%">Metadata Source</th><th style="width:26%">Archives (ISAD)</th><th style="width:27%">Museum (Collections Procedures)</th><th style="width:27%">DAM</th></tr></thead>
                                         <tbody>
                                             <tr>
                                                 <td><i class="fas fa-heading text-muted"></i> Title</td>
@@ -1429,7 +1429,7 @@
                                             <div class="col-md-6">
                                                 <label for="ingest_default_standard" class="form-label">{{ __('Default descriptive standard') }}</label>
                                                 <select class="form-select" id="ingest_default_standard" name="settings[ingest_default_standard]">
-                                                    @foreach (['isadg' => 'ISAD(G)', 'dc' => 'Dublin Core', 'rad' => 'RAD', 'dacs' => 'DACS', 'spectrum' => 'SPECTRUM', 'cco' => 'CCO'] as $val => $label)
+                                                    @foreach (['isadg' => 'ISAD(G)', 'dc' => 'Dublin Core', 'rad' => 'RAD', 'dacs' => 'DACS', 'spectrum' => 'COLLECTIONS PROCEDURES', 'cco' => 'CCO'] as $val => $label)
                                                         <option value="{{ $val }}" {{ ($settings['ingest_default_standard'] ?? 'isadg') === $val ? 'selected' : '' }}>{{ $label }}</option>
                                                     @endforeach
                                                 </select>

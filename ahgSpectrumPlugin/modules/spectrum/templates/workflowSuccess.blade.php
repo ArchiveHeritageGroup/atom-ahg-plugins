@@ -60,7 +60,7 @@ if ($users->isEmpty()) {
 @endphp
 
 @section('title')
-<h1>{{ __('Spectrum Workflow') }}: {{ $resource->title ?? $resource->slug }}</h1>
+<h1>{{ __('Collections Procedures Workflow') }}: {{ $resource->title ?? $resource->slug }}</h1>
 @endsection
 
 @section('content')
@@ -69,7 +69,7 @@ if ($users->isEmpty()) {
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{{ url_for('@homepage') }}">{{ __('Home') }}</a></li>
     <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]) }}">{{ $resource->title ?? $resource->slug }}</a></li>
-    <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]) }}">{{ __('Spectrum') }}</a></li>
+    <li class="breadcrumb-item"><a href="{{ url_for(['module' => 'spectrum', 'action' => 'index', 'slug' => $resource->slug]) }}">{{ __('Collections Procedures') }}</a></li>
     <li class="breadcrumb-item active">{{ __('Workflow') }}</li>
   </ol>
 </nav>

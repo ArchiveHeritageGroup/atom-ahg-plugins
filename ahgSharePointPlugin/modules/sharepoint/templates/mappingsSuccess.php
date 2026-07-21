@@ -13,7 +13,7 @@ $standardsBySector = [
         ['mods', 'MODS'], ['dc', 'Dublin Core'], ['isadg', 'ISAD(G)'],
     ],
     'museum' => [
-        ['spectrum', 'SPECTRUM'], ['dc', 'Dublin Core'],
+        ['spectrum', 'COLLECTIONS PROCEDURES'], ['dc', 'Dublin Core'],
     ],
     'gallery' => [
         ['cco', 'CCO'], ['dc', 'Dublin Core'],
