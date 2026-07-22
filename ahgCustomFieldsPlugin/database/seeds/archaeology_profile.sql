@@ -187,3 +187,38 @@ SELECT @browse, 'browseFindSearch', 'customFields/search', @rgt, @rgt + 1, 'en',
 
 INSERT INTO `menu_i18n` (`id`, `culture`, `label`)
 SELECT LAST_INSERT_ID(), 'en', 'Find search' FROM DUAL WHERE @exists = 0;
+
+-- ----------------------------------------------------------------------------
+-- ISAD element labels, registered in the ui_label scope.
+--
+-- Values are the standard ISAD wording, so nothing changes visually until an
+-- administrator edits them at Admin > Interface labels. The point is that the
+-- element names become configurable at all - ahg_label() in the theme reads
+-- app_ui_label_<key> and falls back to the ISAD term when unset.
+--
+-- ISAD names the documentary record; archaeology names the material. An
+-- archaeologist reads "Extent and medium" and expects material and dimensions.
+-- Rename presentation only - do NOT point a renamed label at a field that means
+-- something else. ISAD's Date is when the record was written, not the age of
+-- the layer; stratigraphic date belongs in the Phase vocabulary.
+-- ----------------------------------------------------------------------------
+INSERT INTO `setting` (`name`, `scope`, `editable`, `deleteable`, `source_culture`)
+SELECT * FROM (
+  SELECT 'isad_scope_and_content' AS n, 'ui_label' AS s, 1 AS e, 0 AS d, 'en' AS c UNION ALL
+  SELECT 'isad_extent_and_medium', 'ui_label', 1, 0, 'en' UNION ALL
+  SELECT 'isad_archival_history',  'ui_label', 1, 0, 'en'
+) x WHERE NOT EXISTS (
+  SELECT 1 FROM `setting` s2 WHERE s2.`name` = x.n AND s2.`scope` = 'ui_label'
+);
+
+INSERT IGNORE INTO `setting_i18n` (`id`, `culture`, `value`)
+SELECT s.id, l.name,
+  CASE s.name
+    WHEN 'isad_scope_and_content' THEN 'Scope and content'
+    WHEN 'isad_extent_and_medium' THEN 'Extent and medium'
+    WHEN 'isad_archival_history'  THEN 'Archival history'
+  END
+FROM `setting` s
+  JOIN `setting` l ON l.scope = 'i18n_languages'
+WHERE s.scope = 'ui_label'
+  AND s.name IN ('isad_scope_and_content','isad_extent_and_medium','isad_archival_history');

@@ -1,3 +1,4 @@
+<?php use_helper('AhgLabel') ?>
 <?php decorate_with('layout_3col'); ?>
 <?php echo "<!-- DEBUG: This is ISAD module -->\n"; ?>
 <?php
@@ -227,7 +228,7 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
 
   <?php echo render_show(__('Level of description'), render_value_inline($resource->levelOfDescription), ['fieldLabel' => 'levelOfDescription']); ?>
 
-  <?php echo render_show(__('Extent and medium'), render_value($resource->getCleanExtentAndMedium(['cultureFallback' => true])), ['fieldLabel' => 'extentAndMedium']); ?>
+  <?php echo render_show(ahg_label('isad_extent_and_medium', 'Extent and medium'), render_value($resource->getCleanExtentAndMedium(['cultureFallback' => true])), ['fieldLabel' => 'extentAndMedium']); ?>
 </section> <!-- /section#identityArea -->
 
 <section id="contextArea" class="border-bottom">
@@ -258,7 +259,7 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
   </div>
 
   <?php if (check_field_visibility('app_element_visibility_isad_archival_history')) { ?>
-    <?php echo render_show(__('Archival history'), render_value(pii_filter($resource->id, $resource->getArchivalHistory(['cultureFallback' => true]))), ['fieldLabel' => 'archivalHistory']); ?>
+    <?php echo render_show(ahg_label('isad_archival_history', 'Archival history'), render_value(pii_filter($resource->id, $resource->getArchivalHistory(['cultureFallback' => true]))), ['fieldLabel' => 'archivalHistory']); ?>
   <?php } ?>
 
   <?php if (check_field_visibility('app_element_visibility_isad_immediate_source')) { ?>
@@ -278,7 +279,7 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
     ); ?>
   <?php } ?>
 
-  <?php echo render_show(__('Scope and content'), render_value(pii_filter($resource->id, $resource->getScopeAndContent(['cultureFallback' => true]))), ['fieldLabel' => 'scopeAndContent']); ?>
+  <?php echo render_show(ahg_label('isad_scope_and_content', 'Scope and content'), render_value(pii_filter($resource->id, $resource->getScopeAndContent(['cultureFallback' => true]))), ['fieldLabel' => 'scopeAndContent']); ?>
 
   <?php if (check_field_visibility('app_element_visibility_isad_appraisal_destruction')) { ?>
     <?php echo render_show(__('Appraisal, destruction and scheduling'), render_value($resource->getAppraisal(['cultureFallback' => true])), ['fieldLabel' => 'appraisalDestructionAndScheduling']); ?>
