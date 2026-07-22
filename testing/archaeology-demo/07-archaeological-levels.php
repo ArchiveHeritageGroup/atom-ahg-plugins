@@ -36,7 +36,9 @@ function levelTerm(string $name): int
     }
     $now = date('Y-m-d H:i:s');
     $id = DB::table('object')->insertGetId(['class_name' => 'QubitTerm', 'created_at' => $now, 'updated_at' => $now]);
-    DB::table('term')->insert(['id' => $id, 'taxonomy_id' => 34, 'source_culture' => 'en']);
+    // parent_id = 110 (QubitTerm::ROOT_ID) so the term joins the taxonomy
+    // nested set and appears in the Add-new level dropdown, not only on records.
+    DB::table('term')->insert(['id' => $id, 'taxonomy_id' => 34, 'parent_id' => 110, 'source_culture' => 'en']);
     DB::table('term_i18n')->insert(['id' => $id, 'culture' => 'en', 'name' => $name]);
     $base = strtolower($name);
     $slug = $base; $i = 2;
@@ -115,6 +117,8 @@ try {
 
     DB::connection()->commit();
     printf("\n  COMMITTED: %d record(s) re-levelled\n", $moved);
+    echo "  NOTE: run  php symfony propel:build-nested-set  so new level terms\n";
+    echo "        (Site/Trench/Context) appear in the Add-new dropdown.\n";
 } catch (Throwable $e) {
     DB::connection()->rollBack();
     echo "\n  ROLLED BACK: " . $e->getMessage() . "\n";

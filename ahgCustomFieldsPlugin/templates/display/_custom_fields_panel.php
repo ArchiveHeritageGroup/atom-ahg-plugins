@@ -31,28 +31,18 @@ if (empty($html)) {
 ?>
 
 <?php
-// Unique per entity so several panels on one page cannot collide.
-$cfPanelId = 'cf-panel-' . preg_replace('/[^a-z0-9]+/i', '-', $entityType) . '-' . $objectId;
+// Render as a standard ISAD descriptive area, not a Bootstrap card, so the
+// heading matches every other section on the page ("Notes area", "Content and
+// structure area", ...). render_b5_section_heading is the same helper those
+// sections use, so the look is identical rather than merely similar. The plain
+// heading has no collapse toggle - neither do the standard sections.
 ?>
-<section class="card mb-3">
-    <div class="card-header p-0">
-        <?php // Open by default. This panel returns early when the record has no
-              // values, so if it renders at all there IS data - and starting
-              // collapsed hid real content and made populated records look empty.
-              // The toggle stays, for collapsing a long panel out of the way. ?>
-        <button class="btn btn-link w-100 text-start text-decoration-none d-flex align-items-center justify-content-between p-3"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#<?php echo $cfPanelId; ?>"
-                aria-expanded="true"
-                aria-controls="<?php echo $cfPanelId; ?>">
-            <span class="h5 mb-0"><i class="bi bi-input-cursor-text"></i> <?php echo __('Additional Fields'); ?></span>
-            <i class="bi bi-chevron-down cf-panel-chevron" aria-hidden="true"></i>
-        </button>
-    </div>
-    <div id="<?php echo $cfPanelId; ?>" class="collapse show">
-        <div class="card-body">
-            <?php echo $html; ?>
-        </div>
-    </div>
+<section id="additionalFieldsArea" class="border-bottom">
+    <?php if (function_exists('render_b5_section_heading')): ?>
+        <?php echo render_b5_section_heading(__('Additional Fields')); ?>
+    <?php else: ?>
+        <h2 class="h5 mb-0 atom-section-header"><div class="d-flex p-3 border-bottom text-primary"><?php echo __('Additional Fields'); ?></div></h2>
+    <?php endif; ?>
+
+    <?php echo $html; ?>
 </section>
