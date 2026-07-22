@@ -111,6 +111,11 @@ class conditionActions extends AhgController
 
         // Get photo URL helper
         $this->service = $service;
+
+        // AI condition scanning and training-data contribution are only offered
+        // when the AI condition plugin is active. Without it the AI buttons lead
+        // nowhere, so the template hides them.
+        $this->aiEnabled = in_array('ahgAiConditionPlugin', sfProjectConfiguration::getActive()->getPlugins(), true);
     }
 
     /**

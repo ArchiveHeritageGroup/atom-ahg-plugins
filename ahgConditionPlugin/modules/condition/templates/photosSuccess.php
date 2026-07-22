@@ -158,6 +158,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                                                 title="<?php echo __('Annotate'); ?>">
                                             <i class="fas fa-draw-polygon"></i>
                                         </button>
+                                        <?php if ($aiEnabled): ?>
                                         <button class="btn btn-outline-success"
                                                 data-action="ai-scan"
                                                 data-photo-id="<?php echo $photo->id; ?>"
@@ -165,13 +166,14 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                                                 title="<?php echo __('AI Scan'); ?>">
                                             <i class="fas fa-robot"></i>
                                         </button>
+                                        <?php endif; ?>
                                         <?php
                                         $hasAnnotations = false;
                                         if ($photo->annotations) {
                                             $annData = json_decode(html_entity_decode($photo->annotations), true);
                                             $hasAnnotations = !empty($annData);
                                         }
-                                        if ($hasAnnotations): ?>
+                                        if ($aiEnabled && $hasAnnotations): ?>
                                         <button class="btn btn-outline-warning"
                                                 data-action="contribute-training"
                                                 data-photo-id="<?php echo $photo->id; ?>"
@@ -229,6 +231,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
 <script src="/plugins/ahgConditionPlugin/web/js/condition-photos.js?v=<?php echo time(); ?>"></script>
 
 <!-- AI Scan Result Modal -->
+<?php if ($aiEnabled): ?>
 <div class="modal fade" id="aiScanModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -252,6 +255,7 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- Minimal inline config (CSP nonce applied) -->
 <script <?php echo $nonceAttr; ?>>
