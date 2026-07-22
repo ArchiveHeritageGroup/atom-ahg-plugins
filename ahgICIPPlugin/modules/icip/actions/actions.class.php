@@ -333,7 +333,7 @@ class icipActions extends AhgController
 
             // Redirect back to object or list
             if ($this->object) {
-                $this->redirect('object/' . $this->object->slug . '/icip');
+                $this->redirect('/' . $this->object->slug);
             }
             $this->redirect('icip/consent');
         }
@@ -905,7 +905,7 @@ class icipActions extends AhgController
             ahgICIPService::updateObjectSummary($this->object->id);
 
             $this->getUser()->setFlash('notice', 'Consent record added.');
-            $this->redirect('object/' . $slug . '/icip');
+            $this->redirect('/' . $slug);
         }
     }
 
@@ -967,7 +967,7 @@ class icipActions extends AhgController
             }
 
             ahgICIPService::updateObjectSummary($this->object->id);
-            $this->redirect('object/' . $slug . '/icip/notices');
+            $this->redirect('/' . $slug);
         }
     }
 
@@ -1028,7 +1028,7 @@ class icipActions extends AhgController
             }
 
             ahgICIPService::updateObjectSummary($this->object->id);
-            $this->redirect('object/' . $slug . '/icip/labels');
+            $this->redirect('/' . $slug);
         }
     }
 
@@ -1087,7 +1087,7 @@ class icipActions extends AhgController
             }
 
             ahgICIPService::updateObjectSummary($this->object->id);
-            $this->redirect('object/' . $slug . '/icip/restrictions');
+            $this->redirect('/' . $slug);
         }
     }
 
