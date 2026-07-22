@@ -76,3 +76,28 @@ clean.
   `url_for('@sahra_*')` resolves.
 - Not yet done: fold `sahra:install-menu` into `bin/install`; email notifications on stage
   transitions; PSIS enablement (if wanted).
+
+## Follow-ups (v3.80.1)
+
+- **Email notifications** on every workflow transition (best-effort via AhgCore EmailService,
+  fallback `mail()` with the **default-culture** siteTitle sender - reusing the culture lesson):
+  submit -> supervisor; endorse/reject -> applicant; lodge -> SAHRA reviewers + applicant;
+  issue -> applicant + supervisor; decline -> applicant. Toggleable via `email_notifications`
+  config. Wrapped so email never breaks the workflow.
+- **Per-instance settings gate** (`sahra_enabled`, default OFF). The plugin ships in the shared
+  AtoM/Heratio codebase, so instances outside SA (e.g. Australia) get the code but not the
+  feature. Gate enforced by `preExecute()` in the actions (404 unless enabled; config/reviewer
+  admin pages exempt so it can be switched on) and by `setFeatureEnabled()` which adds/removes
+  the nav links via nested-set surgery (integrity-checked). Master toggle on `/sahra/config`.
+  `sahra:install-menu` now delegates to `setFeatureEnabled(true)`.
+
+## Deployment state (2026-07-22)
+
+- **Wits (archaeology):** plugin enabled, feature ON, 2 nav links (Manage + user menu). Live.
+- **PSIS (archive):** plugin enabled, feature ON, 1 nav link (Manage only - PSIS has no
+  `quickLinks` menu; researcher hub reachable at `/sahra/my-applications`). Live.
+- **Other jurisdictions:** feature OFF by default; nothing shows until an admin ticks the
+  switch in `/sahra/config`.
+
+Verified in rollback: `setFeatureEnabled(true/false)` adds/removes menu links with nested-set
+integrity preserved (net-zero). Releases: v3.80.0 (plugin), v3.80.1 (email + gate).
