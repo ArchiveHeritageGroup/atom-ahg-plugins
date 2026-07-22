@@ -101,3 +101,30 @@ clean.
 
 Verified in rollback: `setFeatureEnabled(true/false)` adds/removes menu links with nested-set
 integrity preserved (net-zero). Releases: v3.80.0 (plugin), v3.80.1 (email + gate).
+
+## Round 2 (v3.80.3 -> v3.81.0): entry point, sites, documents
+
+- **Menu security fix (v3.80.3):** added `modules/sahra/config/security.yml` - the theme's
+  `_mainMenu.php` renders a menu child only if `$child->checkUserAccess()` ->
+  `myUser::checkModuleActionAccess()` loads `modules/<mod>/config/security.yml`; with no
+  file, `$this->security` carries over from the previously-checked item -> non-deterministic
+  nav visibility. Now explicit (index: administrator; myapplications: any authed; all: secure).
+- **Entry point moved to the Research dashboard (v3.81.0):** researchers apply from `/research`
+  ("Heritage Permits" quick action, gated on the feature). The two top-nav links (Manage +
+  quickLinks) were removed; `setFeatureEnabled()` no longer manages menu; `removeMenuLinks()`
+  cleans up legacy rows. Fixed a pre-existing duplicate "Book Visit" button on the research
+  dashboard. (Edits ahgResearchPlugin - a stable plugin - per Johan's direction.)
+- **Site + dig areas:** permit links to ONE site (`information_object`, `linked_object_id`,
+  type-ahead) + MANY dig areas (its child records, `sahra_permit_area`). New JSON routes
+  `/sahra/apply/search-sites` + `/sahra/apply/site-areas`; JS loads the site's descendants as
+  checkboxes. Shown on the permit view with a link to the site record (via `slug` table).
+- **Documents:** `sahra_permit_document` + upload/download/delete. Files stored under
+  `sf_upload_dir/sahra/<permit_id>/` (uploads/ is in php-fpm ReadWritePaths + writable),
+  random stored names, allowed-ext + size cap (`max_upload_mb`, default 25). Auth-checked
+  streaming download; applicant/admin delete. Upload on the application form (multipart) and
+  the permit page. `storeUploadedDocuments()` normalises the PHP `$_FILES` multi-file shape.
+- **Label:** "Supervising professor" -> "Supervisor" everywhere user-facing.
+
+Tables now (7): sahra_permit, sahra_permit_area, sahra_permit_document, sahra_permit_log,
+sahra_permit_report, sahra_reviewer, sahra_config. Verified: site search + dig-area load +
+create-with-areas (rollback), uploads writable, routes respond, lint clean. Live Wits + PSIS.
