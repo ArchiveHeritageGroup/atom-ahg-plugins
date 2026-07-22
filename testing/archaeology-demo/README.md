@@ -63,6 +63,14 @@ php 04-seed-storage.php --apply
 # 6. rebuild
 sudo -u www-data php symfony propel:build-nested-set
 sudo -u www-data php symfony search:populate
+
+# Facets ("Narrow your results by:") read a pre-computed cache, NOT live
+# aggregations. Without these two the browse facet sidebar is EMPTY however
+# much data exists: auto-detect assigns each record its GLAM type, then the
+# facet cache is rebuilt from the current data.
+sudo -u www-data php symfony display:auto-detect
+sudo -u www-data php symfony ahg:refresh-facet-cache
+
 sudo -u www-data php symfony cc && sudo systemctl reload php8.3-fpm
 ```
 
