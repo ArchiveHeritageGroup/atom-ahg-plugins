@@ -97,18 +97,30 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
               <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'archive', 'showAdvanced' => '1']); ?>" class="btn <?php echo $currentType === 'archive' ? 'btn-success' : 'btn-outline-success'; ?>">
                 <i class="fas fa-archive me-1"></i><?php echo __('Archive'); ?>
               </a>
+              <?php // Only show a sector when its plugin is enabled - a disabled sector has no
+                    // data and its filter would return nothing. NB: use getPlugins() here, not
+                    // isPluginActive() (that helper is not loaded in this module's context). ?>
+              <?php $enabledPlugins = sfProjectConfiguration::getActive()->getPlugins(); ?>
+              <?php if (in_array('ahgLibraryPlugin', $enabledPlugins)): ?>
               <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'library', 'showAdvanced' => '1']); ?>" class="btn <?php echo $currentType === 'library' ? 'btn-info text-white' : 'btn-outline-info'; ?>">
                 <i class="fas fa-book me-1"></i><?php echo __('Library'); ?>
               </a>
+              <?php endif; ?>
+              <?php if (in_array('ahgMuseumPlugin', $enabledPlugins)): ?>
               <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'museum', 'showAdvanced' => '1']); ?>" class="btn <?php echo $currentType === 'museum' ? 'btn-warning' : 'btn-outline-warning'; ?>">
                 <i class="fas fa-landmark me-1"></i><?php echo __('Museum'); ?>
               </a>
+              <?php endif; ?>
+              <?php if (in_array('ahgGalleryPlugin', $enabledPlugins)): ?>
               <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'gallery', 'showAdvanced' => '1']); ?>" class="btn <?php echo $currentType === 'gallery' ? 'btn-danger' : 'btn-outline-danger'; ?>">
                 <i class="fas fa-palette me-1"></i><?php echo __('Gallery'); ?>
               </a>
+              <?php endif; ?>
+              <?php if (in_array('ahgDAMPlugin', $enabledPlugins)): ?>
               <a href="<?php echo url_for(['module' => 'display', 'action' => 'browse', 'type' => 'dam', 'showAdvanced' => '1']); ?>" class="btn <?php echo $currentType === 'dam' ? 'btn-primary' : 'btn-outline-primary'; ?>">
                 <i class="fas fa-images me-1"></i><?php echo __('Photos'); ?>
               </a>
+              <?php endif; ?>
             </div>
           </div>
 

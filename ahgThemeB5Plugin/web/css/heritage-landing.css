@@ -250,7 +250,7 @@ body:has(.heritage-landing) .container-xxl {
 .heritage-suggested-searches a:visited,
 .heritage-suggested-searches a:hover,
 .heritage-suggested-searches a:focus {
-    color: #fff;
+    color: #fff !important;
 }
 
 /* Scroll Indicator */

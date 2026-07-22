@@ -61,9 +61,24 @@ class MenuMainMenuComponent extends sfComponent
 
     private function userCanCreate()
     {
-        return QubitAcl::check(QubitInformationObject::getById(QubitInformationObject::ROOT_ID), 'create')
-            || QubitAcl::check(QubitActor::getById(QubitActor::ROOT_ID), 'create')
-            || QubitAcl::check(QubitRepository::getById(QubitRepository::ROOT_ID), 'create')
-            || QubitAcl::check(QubitTerm::getById(QubitTerm::ROOT_ID), 'create');
+        // Guard against missing root objects. QubitXxx::getById(ROOT_ID) can return
+        // null on instances where a root sentinel is absent, and QubitAcl::check(null)
+        // then calls get_class(null) - a PHP 8 TypeError. Thrown here (during the
+        // header/main-menu render) it halts output AFTER the top nav is already sent,
+        // so the error page can't render and everything below the nav goes blank.
+        // Admins short-circuit before this (hasGroup); anonymous users are denied
+        // earlier in the ACL; only authenticated non-admins hit it. Skip null roots.
+        foreach ([
+            QubitInformationObject::getById(QubitInformationObject::ROOT_ID),
+            QubitActor::getById(QubitActor::ROOT_ID),
+            QubitRepository::getById(QubitRepository::ROOT_ID),
+            QubitTerm::getById(QubitTerm::ROOT_ID),
+        ] as $root) {
+            if (null !== $root && QubitAcl::check($root, 'create')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

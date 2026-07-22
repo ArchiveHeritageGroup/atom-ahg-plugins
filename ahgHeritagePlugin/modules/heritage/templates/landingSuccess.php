@@ -56,7 +56,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 <?php end_slot(); ?>
 
 <?php slot('pre'); ?>
-<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/heritage-landing.css">
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/heritage-landing.css?v=<?php echo @filemtime(sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin/web/css/heritage-landing.css') ?: '1'; ?>">
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 :root {
     --heritage-primary: <?php echo $primaryColor; ?>;
