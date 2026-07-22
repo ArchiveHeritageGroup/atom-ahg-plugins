@@ -908,10 +908,20 @@ class AccessRequestService
     private static function sendEmail(string $to, string $subject, string $body): bool
     {
         try {
+            // Use the site's default culture for the sender name; without a culture
+            // filter the query grabbed whatever row came first (e.g. Afrikaans).
+            $defaultCulture = class_exists('\sfConfig') ? \sfConfig::get('sf_default_culture', 'en') : 'en';
             $siteTitle = DB::table('setting_i18n')
                 ->join('setting', 'setting_i18n.id', '=', 'setting.id')
                 ->where('setting.name', 'siteTitle')
-                ->value('setting_i18n.value') ?? 'Archive';
+                ->where('setting_i18n.culture', $defaultCulture)
+                ->value('setting_i18n.value');
+            if (!$siteTitle) {
+                $siteTitle = DB::table('setting_i18n')
+                    ->join('setting', 'setting_i18n.id', '=', 'setting.id')
+                    ->where('setting.name', 'siteTitle')
+                    ->value('setting_i18n.value') ?? 'Archive';
+            }
 
             $headers = [
                 'MIME-Version: 1.0',

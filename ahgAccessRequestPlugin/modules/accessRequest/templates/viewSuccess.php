@@ -76,23 +76,39 @@
               </div>
             </div>
           <?php elseif (!empty($accessRequest->scopes)): ?>
+            <?php
+                $scopeTypeLabels = [
+                    'single' => 'Specific item',
+                    'with_children' => 'Collection (item and all its children)',
+                    'repository_all' => 'All holdings of a repository',
+                    'all' => 'The entire archive',
+                ];
+                $scopeTypeLabel = $scopeTypeLabels[$accessRequest->scope_type] ?? ucfirst(str_replace('_', ' ', (string) $accessRequest->scope_type));
+            ?>
             <div class="mb-3">
-              <h6 class="text-muted">Requested Access To</h6>
-              <div class="list-group">
-                <?php foreach ($accessRequest->scopes as $scope): ?>
-                  <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong><?php echo htmlspecialchars($scope->object_title ?? 'Unknown'); ?></strong>
-                        <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $scope->object_type)); ?></span>
+              <h6 class="text-muted">Requested Access</h6>
+              <p class="mb-2"><span class="badge bg-info text-dark fs-6"><?php echo htmlspecialchars($scopeTypeLabel); ?></span></p>
+              <?php if ($accessRequest->scope_type === 'all'): ?>
+                <div class="alert alert-secondary mb-0 py-2">
+                  <i class="fas fa-globe me-1"></i> Access to all holdings across every repository.
+                </div>
+              <?php else: ?>
+                <div class="list-group">
+                  <?php foreach ($accessRequest->scopes as $scope): ?>
+                    <div class="list-group-item">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong><?php echo htmlspecialchars($scope->object_title ?? 'Unknown'); ?></strong>
+                          <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $scope->object_type)); ?></span>
+                        </div>
+                        <?php if ($scope->include_descendants): ?>
+                          <span class="badge bg-info">Including all children</span>
+                        <?php endif; ?>
                       </div>
-                      <?php if ($scope->include_descendants): ?>
-                        <span class="badge bg-info">Including all children</span>
-                      <?php endif; ?>
                     </div>
-                  </div>
-                <?php endforeach; ?>
-              </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
             </div>
           <?php endif; ?>
 

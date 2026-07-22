@@ -76,7 +76,7 @@
                 <thead class="table-light">
                   <tr>
                     <th>User</th>
-                    <th>Current → Requested</th>
+                    <th>Requested</th>
                     <th>Urgency</th>
                     <th>Reason</th>
                     <th>Submitted</th>
@@ -91,9 +91,26 @@
                         <br><small class="text-muted"><?php echo htmlspecialchars($req->email); ?></small>
                       </td>
                       <td>
-                        <span class="badge bg-secondary"><?php echo $req->current_classification ?? 'None'; ?></span>
-                        <i class="fas fa-arrow-right mx-1"></i>
-                        <span class="badge bg-primary"><?php echo htmlspecialchars($req->requested_classification); ?></span>
+                        <?php if ($req->request_type === 'clearance'): ?>
+                          <span class="badge bg-secondary"><?php echo $req->current_classification ?? 'None'; ?></span>
+                          <i class="fas fa-arrow-right mx-1"></i>
+                          <span class="badge bg-primary"><?php echo htmlspecialchars((string) $req->requested_classification); ?></span>
+                        <?php else: ?>
+                          <?php
+                              $scopeLabels = [
+                                  'single' => 'Specific item',
+                                  'with_children' => 'Collection (item + children)',
+                                  'repository_all' => 'All holdings of repository',
+                                  'all' => 'Entire archive',
+                              ];
+                              $scopeLabel = $scopeLabels[$req->scope_type] ?? ucfirst(str_replace('_', ' ', (string) $req->scope_type));
+                              $scopeObj = (!empty($req->scopes) && isset($req->scopes[0])) ? $req->scopes[0] : null;
+                          ?>
+                          <span class="badge bg-info text-dark"><?php echo htmlspecialchars($scopeLabel); ?></span>
+                          <?php if ($req->scope_type !== 'all' && $scopeObj && !empty($scopeObj->object_title)): ?>
+                            <div class="small mt-1"><i class="fas fa-file-alt me-1 text-muted"></i><?php echo htmlspecialchars($scopeObj->object_title); ?></div>
+                          <?php endif; ?>
+                        <?php endif; ?>
                       </td>
                       <td>
                         <span class="badge bg-<?php 
