@@ -128,3 +128,39 @@ integrity preserved (net-zero). Releases: v3.80.0 (plugin), v3.80.1 (email + gat
 Tables now (7): sahra_permit, sahra_permit_area, sahra_permit_document, sahra_permit_log,
 sahra_permit_report, sahra_reviewer, sahra_config. Verified: site search + dig-area load +
 create-with-areas (rollback), uploads writable, routes respond, lint clean. Live Wits + PSIS.
+
+## Round 3 (v3.81.2-4): assets, reviewer accounts, create-crash fix
+
+- **Assets (v3.81.2/3):** the site type-ahead did nothing because (a) the plugin config loaded
+  JS from `/plugins/<p>/js/x.js` (404 - must be `/plugins/<p>/web/js/x.js`) AND (b) this theme
+  NEVER calls `include_javascripts()`, so `$response->addJavascript()` is silently dropped.
+  Fix: include `sahra.js`/`.css` with a direct `<script>/<link>` in the templates that need
+  them (applicationCreateSuccess, permitViewSuccess), after the form. Also added a "+ Add
+  another document" button (multiple upload rows).
+- **Create white-screen (v3.81.4):** `executeCreate` called
+  `storeUploadedDocuments($id, $files, ...)` but the signature is `($files, $permitId, ...)` -
+  args swapped -> TypeError on EVERY application submit (the record was already inserted, so
+  attempts show up in My applications; only the confirmation was lost). Fixed the arg order.
+- **Create SAHRA reviewer accounts (v3.81.4):** new form in Settings ("Create a new SAHRA
+  reviewer account": full name/username/email/password/authority) -> `executeReviewerCreate`
+  reuses `AhgUserManage\Services\UserCrudService::create()` (object/actor/i18n/slug + Argon2id
+  password + group 99 authenticated ONLY - no admin/editor) then `addReviewer()`. Least
+  privilege. Also fixed `executePermitView` to allow SAHRA reviewers to view a permit (they
+  could see /sahra/review but were denied opening the permit to decide).
+
+Route `/sahra/config/reviewer/create` (in the `preExecute` whitelist so it's reachable to
+enable). Verified: create-flow no longer TypeErrors; UserCrudService path confirmed (CLI test
+only blocked by QubitActor not being in the bare-bootstrap autoloader - fine in web context).
+
+## Round 4 (v3.81.5): in-app supervisor/reviewer notification
+
+Email notifications confirmed working (msmtp -> Gmail relay at OS level; SAHRA's mail()
+fallback uses it since EmailService::isEnabled()/smtp_enabled is unset). Added an IN-APP
+indicator in the theme user menu (`ahgThemeB5Plugin/modules/menu/templates/_userMenu.mod_standard.php`,
+following the existing access-request/research/spectrum badge pattern):
+- Top-bar badge on the user-menu toggle = count of heritage-permit actions awaiting the user
+  (`$sahraTotal` = pending endorsements as nominated supervisor + submitted_to_sahra reviews
+  for reviewers/admins).
+- Profile dropdown "Heritage permits" section: "To endorse (N)" -> /sahra/approvals,
+  "SAHRA review (N)" -> /sahra/review. Only shown when N>0. Gated on `isFeatureEnabled()` and
+  wrapped in try/catch so it never breaks the (site-wide) user menu.

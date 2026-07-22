@@ -56,6 +56,31 @@ if ($isAuthenticated && $hasSpectrum) {
         // Plugin or table may not be present.
     }
 }
+
+// SAHRA / NHRA heritage permits - actions awaiting this user.
+$hasSahra = $routing->hasRouteName('sahra_my');
+$sahraEndorseCount = 0; // pending endorsements where the user is the nominated supervisor
+$sahraReviewCount = 0;  // applications lodged and awaiting a SAHRA decision (reviewers)
+if ($isAuthenticated && $hasSahra) {
+    try {
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgSAHRAPlugin/lib/Services/SahraPermitService.php';
+        $sahraSvc = new \AhgSAHRA\Services\SahraPermitService();
+        if ($sahraSvc->isFeatureEnabled()) {
+            $sahraEndorseCount = \Illuminate\Database\Capsule\Manager::table('sahra_permit')
+                ->where('status', 'pending_supervisor')
+                ->where('supervisor_user_id', $userId)
+                ->count();
+            if ($isAdmin || $sahraSvc->isSahraReviewer($userId)) {
+                $sahraReviewCount = \Illuminate\Database\Capsule\Manager::table('sahra_permit')
+                    ->where('status', 'submitted_to_sahra')
+                    ->count();
+            }
+        }
+    } catch (Exception $e) {
+        // Plugin/table may not be present.
+    }
+}
+$sahraTotal = $sahraEndorseCount + $sahraReviewCount;
 ?>
 
 <?php if ($showLogin): ?>
@@ -105,8 +130,13 @@ if ($isAuthenticated && $hasSpectrum) {
 <?php elseif ($isAuthenticated): ?>
 <!-- User menu for authenticated users -->
 <div class="dropdown my-2">
-  <button class="btn btn-sm atom-btn-secondary dropdown-toggle" type="button" id="user-menu" data-bs-toggle="dropdown" aria-expanded="false">
+  <button class="btn btn-sm atom-btn-secondary dropdown-toggle position-relative" type="button" id="user-menu" data-bs-toggle="dropdown" aria-expanded="false">
     <i class="fas fa-user-circle me-1"></i><?php echo $sf_user->user->username; ?>
+    <?php if (!empty($sahraTotal) && $sahraTotal > 0): ?>
+      <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" title="<?php echo __('Heritage permit actions awaiting you'); ?>">
+        <?php echo $sahraTotal; ?><span class="visually-hidden"><?php echo __('pending heritage permit actions'); ?></span>
+      </span>
+    <?php endif; ?>
   </button>
   <ul class="dropdown-menu dropdown-menu-lg-end mt-2" aria-labelledby="user-menu">
 
@@ -186,6 +216,28 @@ if ($isAuthenticated && $hasSpectrum) {
     <li>
       <a class="dropdown-item" href="<?php echo url_for('@access_request_approvers'); ?>">
         <i class="fas fa-user-shield me-2"></i><?php echo __('Manage Approvers'); ?>
+      </a>
+    </li>
+    <?php endif; ?>
+    <?php endif; ?>
+
+    <!-- SAHRA heritage permits -->
+    <?php if ($hasSahra && $sahraTotal > 0): ?>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header"><i class="fas fa-landmark me-1"></i><?php echo __('Heritage permits'); ?></h6></li>
+    <?php if ($sahraEndorseCount > 0): ?>
+    <li>
+      <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@sahra_approvals'); ?>">
+        <span><i class="fas fa-user-check me-2"></i><?php echo __('To endorse'); ?></span>
+        <span class="badge bg-warning text-dark"><?php echo $sahraEndorseCount; ?></span>
+      </a>
+    </li>
+    <?php endif; ?>
+    <?php if ($sahraReviewCount > 0): ?>
+    <li>
+      <a class="dropdown-item d-flex justify-content-between align-items-center" href="<?php echo url_for('@sahra_review'); ?>">
+        <span><i class="fas fa-stamp me-2"></i><?php echo __('SAHRA review'); ?></span>
+        <span class="badge bg-danger"><?php echo $sahraReviewCount; ?></span>
       </a>
     </li>
     <?php endif; ?>
