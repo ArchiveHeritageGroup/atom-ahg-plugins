@@ -268,7 +268,7 @@ try {
         foreach ($site['trenches'] as [$tName, $tDesc, $contexts]) {
             $trenchId = description([
                 'identifier' => $site['id'] . '-T' . $tName, 'title' => 'Trench ' . $tName,
-                'level' => $lvl['Subseries'], 'repository' => $repoId, 'scope' => $tDesc . '.',
+                'level' => $lvl['Subseries'], 'parent' => $siteId, 'repository' => $repoId, 'scope' => $tDesc . '.',
             ]);
             $counts['descriptions']++;
 
@@ -285,7 +285,7 @@ try {
                 $ctxId = description([
                     'identifier' => $site['id'] . '-' . $ctxNum,
                     'title' => 'Context ' . $ctxNum . ' - ' . strtolower($ctxTitle),
-                    'level' => $lvl['File'], 'repository' => $repoId,
+                    'level' => $lvl['File'], 'parent' => $trenchId, 'repository' => $repoId,
                     'scope' => ucfirst($ctxTitle) . '. Recorded on a single-context sheet.',
                     'terms' => [termId('Context type', $ctxType), termId('Phase', $phase)],
                 ]);

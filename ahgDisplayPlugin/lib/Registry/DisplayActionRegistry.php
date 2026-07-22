@@ -377,10 +377,21 @@ class DisplayActionRegistry
             return '';
         }
 
+        // Expose any vars the panel declares in extension.json as local
+        // variables, so one template can serve several panels (e.g. the ICIP
+        // template renders a badge or a full panel depending on {"mode": ...}).
+        // Reserved names are never overwritten.
+        if (!empty($panel['vars']) && is_array($panel['vars'])) {
+            extract(
+                array_diff_key($panel['vars'], ['panel' => 1, 'resource' => 1, 'templatePath' => 1]),
+                EXTR_SKIP
+            );
+        }
+
         ob_start();
         try {
             include $templatePath;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             error_log("DisplayActionRegistry: Error rendering panel template: " . $e->getMessage());
         }
         return ob_get_clean();
