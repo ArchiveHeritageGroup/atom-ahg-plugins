@@ -593,7 +593,7 @@ class AccessRequestService
         try {
             $request = DB::table('access_request')->where('id', $requestId)->first();
 
-            if (!$request || $request->status !== 'pending' || $request->user_id !== $userId) {
+            if (!$request || $request->status !== 'pending' || (int) $request->user_id !== $userId) {
                 return false;
             }
 

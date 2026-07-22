@@ -299,7 +299,9 @@ class accessRequestActions extends AhgController
             $this->forward404('Request not found');
         }
 
-        $isOwner = $this->accessRequest->user_id === $userId;
+        // Cast both sides: the DB returns user_id as a string, getAttribute() an int,
+        // so a strict === wrongly denied requesters access to their own request.
+        $isOwner = (int) $this->accessRequest->user_id === (int) $userId;
         $isApprover = \AtomExtensions\Services\AccessRequestService::isApprover($userId);
 
         if (!$isOwner && !$isApprover) {
