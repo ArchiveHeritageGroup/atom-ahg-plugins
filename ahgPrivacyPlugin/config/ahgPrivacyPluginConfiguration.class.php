@@ -60,7 +60,7 @@ class ahgPrivacyPluginConfiguration extends sfPluginConfiguration
     <!-- Visual Redaction Editor Assets -->
     <link rel="stylesheet" href="{$pluginPath}/css/redaction-annotator.css">
     <!-- PDF.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="/plugins/ahgIiifPlugin/web/js/vendor/pdf.min.js"></script>
     <!-- Fabric.js -->
     <script src="/plugins/ahgCorePlugin/web/js/vendor/fabric.min.js"></script>
 HTML;

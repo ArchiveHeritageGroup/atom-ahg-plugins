@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo __('External Research Access'); ?> - <?php echo sfConfig::get('app_ui_label', 'AtoM'); ?></title>
   <link href="/plugins/ahgThemeB5Plugin/web/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="/plugins/ahgThemeB5Plugin/web/dist/css/fontawesome-all.min.css" rel="stylesheet">
   <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     body { background-color: #f8f9fa; }
     .external-header { background: linear-gradient(135deg, #0d6efd, #6610f2); color: #fff; }

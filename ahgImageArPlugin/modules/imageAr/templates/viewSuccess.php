@@ -41,6 +41,6 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
 
 <script <?php echo $nonceAttr ?> type="application/json" id="ar-data"><?php echo json_encode(['url' => $item['image_url'], 'title' => $item['title']], JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
 <script <?php echo $nonceAttr ?> type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+{ "imports": { "three": "/plugins/ahgImageArPlugin/web/vendor/npm/three@0.160.0/build/three.module.js" } }
 </script>
 <script <?php echo $nonceAttr ?> type="module" src="/plugins/ahgImageArPlugin/web/js/image-ar.js"></script>

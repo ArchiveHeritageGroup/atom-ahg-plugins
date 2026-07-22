@@ -17,7 +17,7 @@
  *   - Page is PUBLIC (no requireAuth); the sensor card only renders when $sensor is set (logged-in staff).
  *   - @csrf / csrf_token() dropped: PSIS write actions authorise via session and read the JSON body.
  *   - Carbon ...->diffForHumans() replaced with a tiny inline relative-time helper.
- *   - Chart.js@4.4.1 from cdn.jsdelivr.net with the CSP nonce.
+ *   - Chart.js@4.4.1 vendored locally (served from 'self') with the CSP nonce.
  */
 $n = sfConfig::get('csp_nonce', '');
 $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';

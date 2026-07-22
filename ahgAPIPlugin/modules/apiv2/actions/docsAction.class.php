@@ -22,11 +22,11 @@ class apiv2DocsAction extends AhgApiController
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AtoM Heratio API — v2 reference</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+  <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/swagger-ui.css">
 </head>
 <body>
   <div id="swagger-ui"></div>
-  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="/plugins/ahgThemeB5Plugin/web/js/swagger-ui-bundle.js"></script>
   <script{$nonce}>
     window.onload = function () {
       window.ui = SwaggerUIBundle({

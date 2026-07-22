@@ -45,7 +45,7 @@
   <!-- Bootstrap 5 CSS -->
   <link href="/plugins/ahgThemeB5Plugin/web/css/bootstrap.min.css" rel="stylesheet" <?php echo $na; ?>>
   <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" <?php echo $na; ?>>
+  <link href="/plugins/ahgThemeB5Plugin/web/dist/css/fontawesome-all.min.css" rel="stylesheet" <?php echo $na; ?>>
   <!-- Registry CSS -->
   <link href="/plugins/ahgRegistryPlugin/css/registry.css" rel="stylesheet" <?php echo $na; ?>>
 

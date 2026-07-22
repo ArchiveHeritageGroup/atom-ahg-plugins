@@ -239,9 +239,9 @@ $typeColors = [
 
 <?php if ($docInfo && $docInfo['is_pdf']): ?>
 <!-- Load PDF.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="/plugins/ahgIiifPlugin/web/js/vendor/pdf.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/plugins/ahgIiifPlugin/web/js/vendor/pdf.worker.min.js';
 </script>
 
 <!-- Load NER PDF Overlay CSS -->

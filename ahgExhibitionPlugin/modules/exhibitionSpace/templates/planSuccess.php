@@ -17,7 +17,7 @@
  *     Blade @auth blocks are still guarded with $isAuth to stay a 1:1 structural replica.
  *   - Corridor object search uses the existing JSON endpoint /api/autocomplete/glam (ahgAPIPlugin),
  *     which returns [{id,label,value,...}] — TomSelect mapped to labelField 'label', query param 'q'.
- *   - konva + tom-select loaded from cdn.jsdelivr.net (CSP-allowed) with the CSP nonce.
+ *   - konva + tom-select vendored locally (served from 'self') with the CSP nonce.
  */
 $n = sfConfig::get('csp_nonce', '');
 $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';

@@ -231,17 +231,17 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
     </div>
 
     <?php // three.js r137: last release with the non-module examples/js globals (PointerLockControls etc.) + WebP textures. ?>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/build/three.min.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/loaders/GLTFLoader.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/loaders/DRACOLoader.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/loaders/OBJLoader.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/loaders/STLLoader.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/loaders/PLYLoader.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/loaders/PCDLoader.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/controls/PointerLockControls.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/controls/OrbitControls.js"></script>
-    <script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/three@0.137.5/examples/js/webxr/VRButton.js"></script>
-    <script<?php echo $nonce ?> src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/build/three.min.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/loaders/GLTFLoader.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/loaders/DRACOLoader.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/loaders/OBJLoader.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/loaders/STLLoader.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/loaders/PLYLoader.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/loaders/PCDLoader.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/controls/PointerLockControls.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/controls/OrbitControls.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgExhibitionPlugin/web/vendor/npm/three@0.137.5/examples/js/webxr/VRButton.js"></script>
+    <script<?php echo $nonce ?> src="/plugins/ahgIiifPlugin/web/js/vendor/pdf.min.js"></script>
     <script<?php echo $nonce ?> type="application/json" id="exh-wt-config"><?php echo json_encode($wtConfig, $jsonFlags) ?></script>
     <script<?php echo $nonce ?>>
       try { window.EXH_WT = JSON.parse(document.getElementById('exh-wt-config').textContent); } catch (e) { window.EXH_WT = {}; }
