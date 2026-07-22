@@ -116,3 +116,20 @@ a rollback probe that the grant loop now accepts the int include_descendants.
 **Lesson:** in a `strict_types=1` file, always cast DB row values (which come back as
 strings/ints) to the callee's declared scalar types, and catch `\Throwable` (not just
 `\Exception`) around DB transactions so TypeErrors don't escape as fatals.
+
+## Follow-up fix 3 (v3.79.156) - requester cannot view/cancel own request
+
+A requester was denied viewing their own submitted request ("You are not authorized to view
+this request"). `executeView` used `$this->accessRequest->user_id === $userId` and
+`cancelRequest` used `$request->user_id !== $userId`. In a live web session
+`getAttribute('user_id')` is a **string**, but the DB `user_id` is an **int**, so the strict
+comparison failed the owner check and redirected them away. The my-requests *list* kept
+working (masking it) because `getUserRequests()` filters via a SQL `WHERE` (loose match).
+
+Fix: compare as ints on both sides in `executeView` and `cancelRequest`. The owner is not an
+approver, so `canApprove` stays false and they get a proper read-only view (no approve/deny
+buttons).
+
+**Lesson:** never strict-compare a session attribute (string) against a DB column value
+(int) - cast both to int. A working SQL-based list filter can hide a broken PHP `===` owner
+check on the detail page.
