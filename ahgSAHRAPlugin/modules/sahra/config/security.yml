@@ -1,0 +1,19 @@
+# Security configuration for the SAHRA module (NHRA heritage permits).
+#
+# The action code self-gates further (preExecute feature flag +
+# checkAdmin/checkDecider/requireAuth); this file makes checkUserAccess()
+# deterministic for menu rendering and enforces login at the filter level.
+
+all:
+  is_secure: true
+  credentials: []
+
+# "SAHRA permits" (Manage dropdown) -> staff dashboard
+index:
+  is_secure: true
+  credentials: [administrator]
+
+# "Heritage permits" (user menu) -> any authenticated researcher
+myapplications:
+  is_secure: true
+  credentials: []
