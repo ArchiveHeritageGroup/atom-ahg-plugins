@@ -50,11 +50,12 @@ if (!$resourceId) return;
   <div id="ric-fullscreen-graph" style="width:100%; height:100%;"></div>
 </div>
 
-<!-- RiC Explorer dependencies from CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://unpkg.com/three-spritetext@1.8.2/dist/three-spritetext.min.js"></script>
-<script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+<!-- RiC Explorer dependencies - vendored locally (were CDN: cytoscape 3.28.1,
+     three r128, three-spritetext 1.8.2, 3d-force-graph 1.73.3; exact versions). -->
+<script src="/plugins/ahgRicExplorerPlugin/web/js/cytoscape.min.js"></script>
+<script src="/plugins/ahgRicExplorerPlugin/web/js/three.min.js"></script>
+<script src="/plugins/ahgRicExplorerPlugin/web/js/three-spritetext.min.js"></script>
+<script src="/plugins/ahgRicExplorerPlugin/web/js/3d-force-graph.min.js"></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 (function() {

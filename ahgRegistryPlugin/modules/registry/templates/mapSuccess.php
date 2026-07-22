@@ -48,8 +48,8 @@
 
 </div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" <?php echo $na; ?>></script>
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/leaflet.min.css" />
+<script src="/plugins/ahgThemeB5Plugin/web/js/leaflet.min.js" <?php echo $na; ?>></script>
 
 <script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function() {

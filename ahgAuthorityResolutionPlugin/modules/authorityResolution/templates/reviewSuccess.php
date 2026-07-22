@@ -418,8 +418,8 @@
 
 <!-- Leaflet (CDN, no host modifications) for map previews on PLACE candidates -->
 <?php if (!empty($placeCoords)): ?>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"<?php echo $nonceAttr; ?>></script>
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/leaflet.min.css" />
+<script src="/plugins/ahgThemeB5Plugin/web/js/leaflet.min.js"<?php echo $nonceAttr; ?>></script>
 <?php endif; ?>
 
 <script<?php echo $nonceAttr; ?>>
