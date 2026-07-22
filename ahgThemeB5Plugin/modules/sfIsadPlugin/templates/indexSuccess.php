@@ -119,6 +119,12 @@ function pii_filter($objectId, $content) {
 
 <?php end_slot(); ?>
 
+<?php // Descriptive panels declared 'before-media' render here, above the digital
+      // object viewer. On mobile the viewer fills the top of the screen, so a
+      // panel placed after it is a long scroll away; a find's own measurements
+      // and description belong beside the record, ahead of its photograph. ?>
+<?php ahg_render_display_panels($resource, 'before-media'); ?>
+
 <?php use_helper('informationobject', 'DigitalObjectViewer'); ?>
 <?php if (0 < count($resource->digitalObjectsRelatedByobjectId)) { // Multiple digital objects ?>
 	<?php foreach ($resource->digitalObjectsRelatedByobjectId as $obj) { ?>

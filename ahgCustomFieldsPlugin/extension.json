@@ -28,7 +28,7 @@
       "contexts": [
         "informationobject"
       ],
-      "position": "after-content",
+      "position": "before-media",
       "weight": 30
     },
     {
