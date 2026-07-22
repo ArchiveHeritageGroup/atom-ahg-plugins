@@ -59,8 +59,9 @@
         </div>
       <?php endif; ?>
 
-      <!-- TK Labels -->
-      <?php if ($primary->tkLabels && count($primary->tkLabels) > 0): ?>
+      <!-- TK Labels - hidden when ICIP is enabled (consolidated under Indigenous cultural & IP) -->
+      <?php if ($primary->tkLabels && count($primary->tkLabels) > 0
+          && !in_array('ahgICIPPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
         <div class="field mb-3">
           <h5><?php echo __('Traditional Knowledge Labels'); ?></h5>
           <div class="tk-labels-grid">

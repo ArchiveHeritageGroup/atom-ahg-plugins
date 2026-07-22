@@ -73,6 +73,7 @@
       </div>
     </div>
 
+    <?php if (!in_array('ahgICIPPlugin', sfProjectConfiguration::getActive()->getPlugins())): // TK Labels consolidated under "Indigenous cultural & IP" (ICIP) ?>
     <div class="col-md-6">
       <!-- TK Labels -->
       <div class="card mb-4">
@@ -100,6 +101,7 @@
         </div>
       </div>
     </div>
+    <?php endif; // TK Labels consolidated under ICIP ?>
   </div>
 
   <div class="mb-4">

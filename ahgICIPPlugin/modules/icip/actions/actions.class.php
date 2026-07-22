@@ -20,10 +20,22 @@ class icipActions extends AhgController
 // Public actions that don't require authentication
         $publicActions = ['acknowledge', 'apiSummary', 'apiCheckAccess'];
 
-        if (!in_array($this->getActionName(), $publicActions)) {
-            if (!$this->getUser()->isAuthenticated()) {
-                $this->redirect('user/login');
-            }
+        if (in_array($this->getActionName(), $publicActions)) {
+            return;
+        }
+
+        if (!$this->getUser()->isAuthenticated()) {
+            $this->redirect('user/login');
+
+            return;
+        }
+
+        // ICIP is staff cultural-governance management (notices, TK labels, consent,
+        // access restrictions). Only editor/administrator may reach these actions -
+        // researchers and other authenticated users see ICIP read-only via the
+        // record-view badge/panel, never the management screens.
+        if (!$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->forward('admin', 'secure');
         }
     }
 

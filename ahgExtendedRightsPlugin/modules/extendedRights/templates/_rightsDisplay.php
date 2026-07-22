@@ -49,8 +49,11 @@ $embargoType = $embargoTypes[$embargo->embargo_type ?? 'full'] ?? __('Access Res
 <?php echo render_show(__('License'), $rights->cc_name . ($rights->cc_uri ? ' <a href="' . $rights->cc_uri . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')); ?>
 <?php endif; ?>
 
-<!-- TK Labels -->
-<?php if (!empty($rights->tk_labels) && count($rights->tk_labels) > 0): ?>
+<!-- TK Labels - hidden when ahgICIPPlugin is enabled: TK Labels are consolidated
+     under "Indigenous cultural & IP" (ICIP owns them). Falls back to showing here
+     only if ICIP is absent. -->
+<?php if (!empty($rights->tk_labels) && count($rights->tk_labels) > 0
+    && !in_array('ahgICIPPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
 <h4 class="h5 mt-3 mb-2 text-muted"><?php echo __('Traditional Knowledge Labels'); ?></h4>
 <?php foreach ($rights->tk_labels as $tk): ?>
 <?php echo render_show($tk->category_name ?? __('TK Label'), $tk->name . ($tk->uri ? ' <a href="' . $tk->uri . '" target="_blank"><i class="fas fa-external-link-alt"></i></a>' : '')); ?>
