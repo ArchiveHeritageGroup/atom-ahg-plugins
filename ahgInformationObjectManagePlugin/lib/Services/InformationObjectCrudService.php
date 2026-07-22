@@ -1036,21 +1036,76 @@ class InformationObjectCrudService
 
             $actorId = !empty($eventData['actorId']) ? (int) $eventData['actorId'] : null;
 
+            // Normalize start/end so a non-YYYY-MM-DD value (circa, a range, free text)
+            // never reaches the DATE columns and 500s. AtoM's model: circa dates and
+            // ranges live in the free-text display `date`; start/end are optional
+            // structured dates. Unparseable input is preserved as the display date.
+            $startRaw = trim((string) ($eventData['startDate'] ?? ''));
+            $endRaw = trim((string) ($eventData['endDate'] ?? ''));
+            $start = self::normalizeEventDate($startRaw);
+            $end = self::normalizeEventDate($endRaw);
+            $displayDate = $eventData['date'] ?? null;
+
+            // "YYYY-YYYY" / "YYYY to YYYY" typed as a range -> structured start+end.
+            if (null === $start && preg_match('/^(\d{4})\s*(?:-|–|—|to)\s*(\d{4})$/u', $startRaw, $rm)) {
+                $start = $rm[1] . '-01-01';
+                $end = $end ?? ($rm[2] . '-12-31');
+                if (empty($displayDate)) {
+                    $displayDate = $startRaw;
+                }
+            }
+            // Preserve any other free text (e.g. "circa 1900") so it is not dropped.
+            if (empty($displayDate)) {
+                if ('' !== $startRaw && null === $start) {
+                    $displayDate = $startRaw;
+                } elseif ('' !== $endRaw && null === $end) {
+                    $displayDate = $endRaw;
+                }
+            }
+
             EventService::save(
                 [
                     'type_id' => $typeId,
                     'object_id' => $objectId,
                     'actor_id' => $actorId,
-                    'start_date' => !empty($eventData['startDate']) ? $eventData['startDate'] : null,
-                    'end_date' => !empty($eventData['endDate']) ? $eventData['endDate'] : null,
+                    'start_date' => $start,
+                    'end_date' => $end,
                     'source_culture' => $culture,
                 ],
                 $culture,
                 [
-                    'date' => $eventData['date'] ?? null,
+                    'date' => $displayDate,
                 ]
             );
         }
+    }
+
+    /**
+     * Normalize a user-entered date to a valid Y-m-d for the start_date/end_date DATE
+     * columns, or null when it is not a structured single date (circa, ranges, free
+     * text) - which prevents invalid values from reaching the DB and 500ing the save.
+     * Accepts YYYY-MM-DD, YYYYMMDD, YYYY-MM (-> -01), and YYYY (-> -01-01).
+     */
+    protected static function normalizeEventDate($value): ?string
+    {
+        $v = trim((string) $value);
+        if ('' === $v) {
+            return null;
+        }
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $v, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+            return $v;
+        }
+        if (preg_match('/^(\d{4})(\d{2})(\d{2})$/', $v, $m) && checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+            return $m[1] . '-' . $m[2] . '-' . $m[3];
+        }
+        if (preg_match('/^(\d{4})-(\d{2})$/', $v, $m) && (int) $m[2] >= 1 && (int) $m[2] <= 12) {
+            return $m[1] . '-' . $m[2] . '-01';
+        }
+        if (preg_match('/^(\d{4})$/', $v)) {
+            return $v . '-01-01';
+        }
+
+        return null;
     }
 
     /**
