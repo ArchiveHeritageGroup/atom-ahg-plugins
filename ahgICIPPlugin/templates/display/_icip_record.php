@@ -115,17 +115,26 @@ if ('badge' === $mode) {
 }
 
 // ---------------------------------------------------------------- PANEL mode
-// Rendered as a standard ISAD area so its heading matches the rest of the page.
-$heading = __('Indigenous cultural and intellectual property');
+// Rendered to match the Rights section's look and feel: an h5 section-title with
+// an icon on the left and a manage action on the right.
+$heading = __('Indigenous cultural & IP');
+$slug = $resource->slug ?? null;
+$canManage = isset($sf_user) && $sf_user->isAuthenticated();
 ?>
-<section id="icipArea" class="border-bottom">
-    <?php if (function_exists('render_b5_section_heading')): ?>
-        <?php echo render_b5_section_heading($heading); ?>
-    <?php else: ?>
-        <h2 class="h5 mb-0 atom-section-header"><div class="d-flex p-3 border-bottom text-primary"><?php echo $esc($heading); ?></div></h2>
-    <?php endif; ?>
+<section class="field-section icip-section mb-4" id="icipArea">
+    <h5 class="section-title border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
+        <span>
+            <i class="fas fa-hands text-muted me-2"></i><?php echo $esc($heading); ?>
+        </span>
+        <?php if ($canManage && $slug): ?>
+            <a href="<?php echo url_for('/object/' . $slug . '/icip'); ?>"
+               class="btn btn-sm btn-outline-primary d-print-none">
+                <i class="fas fa-cog me-1"></i><?php echo __('Manage'); ?>
+            </a>
+        <?php endif; ?>
+    </h5>
 
-    <div class="p-3">
+    <div>
         <?php if (count($tkLabels)): ?>
             <div class="mb-3">
                 <div class="text-muted small text-uppercase mb-1"><?php echo __('Traditional knowledge labels'); ?></div>
