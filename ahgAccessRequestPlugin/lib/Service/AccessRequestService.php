@@ -53,12 +53,14 @@ class AccessRequestService
         string $reason,
         ?string $justification = null,
         string $urgency = 'normal',
-        string $accessLevel = 'view'
+        string $accessLevel = 'view',
+        ?string $scopeTypeOverride = null,
+        ?string $requestTypeOverride = null
     ): ?int {
         // Determine request type from scopes
         $requestType = 'object';
         $scopeType = 'single';
-        
+
         if (count($scopes) === 1) {
             $scope = $scopes[0];
             if ($scope['object_type'] === 'repository') {
@@ -70,6 +72,15 @@ class AccessRequestService
             } else {
                 $scopeType = $scope['include_descendants'] ? 'with_children' : 'single';
             }
+        }
+
+        // Allow callers to force the stored type (e.g. the "entire archive"
+        // request, which grants on the tree root but should read as "all").
+        if ($requestTypeOverride !== null) {
+            $requestType = $requestTypeOverride;
+        }
+        if ($scopeTypeOverride !== null) {
+            $scopeType = $scopeTypeOverride;
         }
 
         return self::createRequest($userId, [
@@ -170,12 +181,22 @@ class AccessRequestService
                 return $obj->title ?? null;
                 
             case 'repository':
-                $obj = DB::table('repository_i18n')
+                // A repository extends actor, so its authorised name lives in
+                // actor_i18n (repository_i18n has no name column). Fall back to
+                // any culture if the current one is missing.
+                $name = DB::table('actor_i18n')
                     ->where('id', $objectId)
                     ->where('culture', CultureHelper::getCulture())
-                    ->first();
-                return $obj->authorized_form_of_name ?? null;
-                
+                    ->value('authorized_form_of_name');
+                if (!$name) {
+                    $name = DB::table('actor_i18n')
+                        ->where('id', $objectId)
+                        ->whereNotNull('authorized_form_of_name')
+                        ->where('authorized_form_of_name', '!=', '')
+                        ->value('authorized_form_of_name');
+                }
+                return $name ?: null;
+
             case 'actor':
                 $obj = DB::table('actor_i18n')
                     ->where('id', $objectId)
@@ -981,6 +1002,71 @@ class AccessRequestService
             ->where('ars.object_type', $objectType)
             ->where('ars.object_id', $objectId)
             ->exists();
+    }
+
+    /**
+     * Type-ahead search over information objects, for the request-access
+     * "specific item" / "collection" pickers. Title LIKE, current culture,
+     * excludes the tree root, returns id/title/identifier/child count.
+     */
+    public static function searchInformationObjects(string $term, int $limit = 15): array
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < 2) {
+            return [];
+        }
+
+        $culture = CultureHelper::getCulture();
+
+        $rows = DB::table('information_object as io')
+            ->join('information_object_i18n as ioi', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'ioi.id')->where('ioi.culture', '=', $culture);
+            })
+            ->where('io.id', '>', 1)
+            ->where('ioi.title', 'like', '%' . $term . '%')
+            ->orderByRaw('CASE WHEN ioi.title LIKE ? THEN 0 ELSE 1 END', [$term . '%'])
+            ->orderBy('ioi.title')
+            ->limit($limit)
+            ->get(['io.id', 'io.identifier', 'io.lft', 'io.rgt', 'ioi.title']);
+
+        $out = [];
+        foreach ($rows as $r) {
+            $children = DB::table('information_object')
+                ->where('lft', '>', $r->lft)
+                ->where('rgt', '<', $r->rgt)
+                ->count();
+            $out[] = [
+                'id' => (int) $r->id,
+                'title' => $r->title ?? '(untitled)',
+                'identifier' => $r->identifier,
+                'children' => $children,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * List repositories (id + display name) for the "all holdings of a
+     * repository" picker. Culture fallback so every repo shows a name.
+     */
+    public static function getRepositoriesList(): array
+    {
+        $out = [];
+        $ids = DB::table('repository')->pluck('id');
+        foreach ($ids as $id) {
+            // getObjectTitle('repository', ...) reads actor_i18n with culture fallback.
+            $title = self::getObjectTitle('repository', (int) $id);
+            // Skip nameless / placeholder repositories (e.g. the phantom root
+            // repository) - they are not meaningful "all holdings" targets.
+            if (!$title) {
+                continue;
+            }
+            $out[] = ['id' => (int) $id, 'name' => $title];
+        }
+        usort($out, fn ($a, $b) => strcasecmp($a['name'], $b['name']));
+
+        return $out;
     }
 
     protected static function logAudit(string $action, string $entityType, int $entityId, array $oldValues, array $newValues, ?string $title = null): void

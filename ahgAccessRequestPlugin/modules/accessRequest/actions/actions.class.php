@@ -27,6 +27,25 @@ class accessRequestActions extends AhgController
             ->where('status', 'pending')
             ->where('request_type', 'clearance')
             ->first();
+
+        // Repositories for the "all holdings of a repository" scope option.
+        $this->repositories = \AtomExtensions\Services\AccessRequestService::getRepositoriesList();
+    }
+
+    /**
+     * JSON type-ahead for the specific-item / collection scope pickers.
+     */
+    public function executeSearchObjects($request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->renderJson([]);
+        }
+
+        $term = (string) $request->getParameter('q', '');
+
+        return $this->renderJson(
+            \AtomExtensions\Services\AccessRequestService::searchInformationObjects($term)
+        );
     }
 
     /**
@@ -72,19 +91,85 @@ class accessRequestActions extends AhgController
 
         if ($request->isMethod('post')) {
             $userId = $this->getUser()->getAttribute('user_id');
-            $classificationId = (int) $request->getParameter('classification_id');
-            $reason = trim($request->getParameter('reason'));
-            $justification = trim($request->getParameter('justification'));
+            $scope = $request->getParameter('scope', 'clearance');
+            $reason = trim((string) $request->getParameter('reason'));
+            $justification = trim((string) $request->getParameter('justification'));
             $urgency = $request->getParameter('urgency', 'normal');
+            $accessLevel = $request->getParameter('access_level', 'view');
 
-            if (empty($classificationId) || empty($reason)) {
-                $this->getUser()->setFlash('error', 'Please fill in all required fields.');
+            if (empty($reason)) {
+                $this->getUser()->setFlash('error', 'Please provide a reason for your request.');
                 $this->redirect('security/request-access');
             }
 
-            $requestId = \AtomExtensions\Services\AccessRequestService::createClearanceRequest(
-                $userId, $classificationId, $reason, $justification, $urgency
-            );
+            $svc = \AtomExtensions\Services\AccessRequestService::class;
+            $requestId = null;
+
+            switch ($scope) {
+                case 'clearance':
+                    $classificationId = (int) $request->getParameter('classification_id');
+                    if (empty($classificationId)) {
+                        $this->getUser()->setFlash('error', 'Please select a clearance level.');
+                        $this->redirect('security/request-access');
+                    }
+                    $requestId = $svc::createClearanceRequest($userId, $classificationId, $reason, $justification, $urgency);
+                    break;
+
+                case 'item':
+                case 'collection':
+                    $objectId = (int) $request->getParameter('object_id');
+                    if (empty($objectId)) {
+                        $this->getUser()->setFlash('error', 'Please choose a record to request access to.');
+                        $this->redirect('security/request-access');
+                    }
+                    $requestId = $svc::createObjectAccessRequest(
+                        $userId,
+                        [[
+                            'object_type' => 'information_object',
+                            'object_id' => $objectId,
+                            'include_descendants' => ($scope === 'collection'),
+                        ]],
+                        $reason, $justification, $urgency, $accessLevel
+                    );
+                    break;
+
+                case 'repository':
+                    $repoId = (int) $request->getParameter('repository_id');
+                    if (empty($repoId)) {
+                        $this->getUser()->setFlash('error', 'Please choose a repository.');
+                        $this->redirect('security/request-access');
+                    }
+                    $requestId = $svc::createObjectAccessRequest(
+                        $userId,
+                        [[
+                            'object_type' => 'repository',
+                            'object_id' => $repoId,
+                            'include_descendants' => true,
+                        ]],
+                        $reason, $justification, $urgency, $accessLevel
+                    );
+                    break;
+
+                case 'all':
+                    // Entire archive: grant on the tree root (id 1) with descendants.
+                    // hasObjectAccess() treats the root as an ancestor of every record,
+                    // so this effectively grants access across all holdings.
+                    $requestId = $svc::createObjectAccessRequest(
+                        $userId,
+                        [[
+                            'object_type' => 'information_object',
+                            'object_id' => 1,
+                            'include_descendants' => true,
+                        ]],
+                        $reason, $justification, $urgency, $accessLevel,
+                        'all', 'object'
+                    );
+                    break;
+
+                default:
+                    $this->getUser()->setFlash('error', 'Unknown request scope.');
+                    $this->redirect('security/request-access');
+            }
 
             if ($requestId) {
                 $this->getUser()->setFlash('success', 'Your access request has been submitted.');

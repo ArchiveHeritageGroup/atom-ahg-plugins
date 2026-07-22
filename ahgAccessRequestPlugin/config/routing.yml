@@ -17,6 +17,10 @@ access_request_create:
   url: /security/request-access/create
   param: { module: accessRequest, action: create }
 
+access_request_search_objects:
+  url: /security/request-access/search-objects
+  param: { module: accessRequest, action: searchObjects }
+
 access_request_object:
   url: /security/request-object
   param: { module: accessRequest, action: requestObject }
