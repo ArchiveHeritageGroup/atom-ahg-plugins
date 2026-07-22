@@ -36,19 +36,21 @@ $cfPanelId = 'cf-panel-' . preg_replace('/[^a-z0-9]+/i', '-', $entityType) . '-'
 ?>
 <section class="card mb-3">
     <div class="card-header p-0">
-        <?php // Collapsed by default: this is supplementary detail, and an
-              // always-open panel pushes the standard areas down the page. ?>
-        <button class="btn btn-link w-100 text-start text-decoration-none d-flex align-items-center justify-content-between p-3 collapsed"
+        <?php // Open by default. This panel returns early when the record has no
+              // values, so if it renders at all there IS data - and starting
+              // collapsed hid real content and made populated records look empty.
+              // The toggle stays, for collapsing a long panel out of the way. ?>
+        <button class="btn btn-link w-100 text-start text-decoration-none d-flex align-items-center justify-content-between p-3"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target="#<?php echo $cfPanelId; ?>"
-                aria-expanded="false"
+                aria-expanded="true"
                 aria-controls="<?php echo $cfPanelId; ?>">
             <span class="h5 mb-0"><i class="bi bi-input-cursor-text"></i> <?php echo __('Additional Fields'); ?></span>
             <i class="bi bi-chevron-down cf-panel-chevron" aria-hidden="true"></i>
         </button>
     </div>
-    <div id="<?php echo $cfPanelId; ?>" class="collapse">
+    <div id="<?php echo $cfPanelId; ?>" class="collapse show">
         <div class="card-body">
             <?php echo $html; ?>
         </div>
