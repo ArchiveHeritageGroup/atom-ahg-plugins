@@ -101,6 +101,12 @@ function saveGlamSearch() {
   var isPublic = document.getElementById('glam-save-search-public').checked ? 1 : 0;
   var isGlobal = document.getElementById('glam-save-search-global')?.checked ? 1 : 0;
   var params = window.location.search.substring(1);
+  var ahgCsrf = <?php echo json_encode(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '')); ?>;
+
+  function closeSaveModal() {
+    var modal = bootstrap.Modal.getInstance(document.getElementById('saveGlamSearchModal'));
+    if (modal) modal.hide();
+  }
 
   var xhr = new XMLHttpRequest();
   xhr.open('POST', '/index.php/searchEnhancement/saveSearch', true);
@@ -110,8 +116,7 @@ function saveGlamSearch() {
       try {
         var result = JSON.parse(xhr.responseText);
         if (result.success) {
-          var modal = bootstrap.Modal.getInstance(document.getElementById('saveGlamSearchModal'));
-          if (modal) modal.hide();
+          closeSaveModal();
           alert('Search saved!');
           location.reload();
         } else {
@@ -120,9 +125,18 @@ function saveGlamSearch() {
       } catch(e) {
         alert('Error: ' + e.message);
       }
+    } else {
+      // Non-200 (e.g. auth/route/CSRF): surface it and dismiss so the modal
+      // never sits stuck with no feedback.
+      closeSaveModal();
+      alert('Could not save search (HTTP ' + xhr.status + ').');
     }
   };
-  xhr.send('name=' + encodeURIComponent(name) + '&notify=' + notify + '&is_public=' + isPublic + '&is_global=' + isGlobal + '&search_params=' + encodeURIComponent(params) + '&entity_type=informationobject');
+  xhr.onerror = function() {
+    closeSaveModal();
+    alert('Network error saving search.');
+  };
+  xhr.send('name=' + encodeURIComponent(name) + '&notify=' + notify + '&is_public=' + isPublic + '&is_global=' + isGlobal + '&search_params=' + encodeURIComponent(params) + '&entity_type=informationobject&_ahg_csrf_token=' + encodeURIComponent(ahgCsrf));
 }
 </script>
 <?php endif; ?>

@@ -13,6 +13,9 @@
 
   <?php echo $form->renderFormTag(url_for([$resource, 'module' => 'repository', 'action' => 'editTheme'])); ?>
 
+    <?php // M12 CSRF: AHG CsrfService validates _ahg_csrf_token (distinct from base AtoM's _csrf_token). ?>
+    <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '')); ?>">
+
     <?php echo $form->renderHiddenFields(); ?>
 
     <div class="accordion mb-3">
