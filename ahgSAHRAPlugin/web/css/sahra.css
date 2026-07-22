@@ -1,0 +1,8 @@
+/* ahgSAHRAPlugin - SAHRA / NHRA heritage permits */
+.sahra-step-circle {
+    width: 38px;
+    height: 38px;
+}
+#content .container dl.row dt {
+    font-weight: 600;
+}
