@@ -151,4 +151,51 @@ class customFieldActions extends AhgController
             return $this->jsonResponse(['success' => false, 'error' => $e->getMessage()]);
         }
     }
+
+    /**
+     * Faceted search over custom field values.
+     *
+     * SQL-backed rather than index-backed: AtoM here runs arOpenSearchPlugin,
+     * whose IO mapping is `dynamic: strict` and which dispatches no indexing
+     * event, so putting these fields in the search index would mean forking two
+     * base AtoM files. See CustomFieldSearchService for the reasoning.
+     */
+    public function executeSearch($request)
+    {
+        $pluginDir = sfConfig::get('sf_plugins_dir') . '/ahgCustomFieldsPlugin';
+        require_once $pluginDir . '/lib/Service/CustomFieldSearchService.php';
+
+        $service = new \AhgCustomFieldsPlugin\Service\CustomFieldSearchService();
+
+        $this->fields = $service->getFilterableFields();
+        $this->service = $service;
+
+        // Taxonomies whose terms are attached to records, offered as filters.
+        $this->termTaxonomies = \Illuminate\Database\Capsule\Manager::table('taxonomy_i18n as ti')
+            ->where('ti.culture', 'en')
+            ->whereExists(function ($q) {
+                $q->select(\Illuminate\Database\Capsule\Manager::raw(1))
+                    ->from('term as t')
+                    ->join('object_term_relation as otr', 'otr.term_id', '=', 't.id')
+                    ->whereColumn('t.taxonomy_id', 'ti.id');
+            })
+            ->orderBy('ti.name')
+            ->select('ti.id', 'ti.name')
+            ->get();
+
+        $this->filters = (array) $request->getParameter('cf', []);
+        $this->termIds = array_filter((array) $request->getParameter('term', []));
+        $this->keywords = trim((string) $request->getParameter('q', ''));
+        $this->submitted = $request->hasParameter('cf') || $request->hasParameter('term') || '' !== $this->keywords;
+
+        $this->results = [];
+        $this->total = 0;
+
+        if ($this->submitted) {
+            $found = $service->search($this->filters, $this->termIds, $this->keywords);
+            $this->results = $found['results'];
+            $this->total = $found['total'];
+        }
+    }
+
 }

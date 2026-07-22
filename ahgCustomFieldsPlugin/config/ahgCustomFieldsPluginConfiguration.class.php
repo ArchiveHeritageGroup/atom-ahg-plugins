@@ -38,6 +38,7 @@ class ahgCustomFieldsPluginConfiguration extends sfPluginConfiguration
         // Entity value routes
         $router2 = new \AtomFramework\Routing\RouteLoader('customField');
 
+        $router2->any('custom_field_search', '/customFields/search', 'search');
         $router2->any('custom_field_save_values', '/customFields/save', 'saveValues');
         $router2->any('custom_field_get_values', '/customFields/get/:entityType/:objectId', 'getValues', [
             'entityType' => '[a-z]+',
