@@ -294,3 +294,6 @@
     </div>
   </div>
 </div>
+
+<link rel="stylesheet" href="/plugins/ahgSAHRAPlugin/web/css/sahra.css">
+<script src="/plugins/ahgSAHRAPlugin/web/js/sahra.js"></script>
