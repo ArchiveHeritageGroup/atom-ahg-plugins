@@ -43,3 +43,5 @@ node_modules/
 Thumbs.db
 !/testing/
 !/.github/
+__pycache__/
+*.pyc
