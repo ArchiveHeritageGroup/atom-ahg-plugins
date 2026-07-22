@@ -128,7 +128,16 @@ if ($discoveryMode) {
 }
 
 function buildUrl($fp, $add = [], $remove = [], $keepPage = false) {
-    $params = array_merge(['module' => 'display', 'action' => 'browse'], array_filter($fp), $add);
+    // Drop only unset filters. A bare array_filter() also discards '0', which
+    // silently lost topLevel=0 ("do not restrict to top level") from every
+    // pagination and facet link - page 2 reverted to top-level only and all
+    // item-level records disappeared. Any filter whose valid value is 0 or '0'
+    // was affected, not just topLevel.
+    $active = array_filter(
+        $fp,
+        static fn ($v) => null !== $v && '' !== $v && [] !== $v
+    );
+    $params = array_merge(['module' => 'display', 'action' => 'browse'], $active, $add);
     foreach ($remove as $key) { unset($params[$key]); }
     if (!$keepPage && !isset($add['page'])) { unset($params['page']); }
     return url_for($params);
