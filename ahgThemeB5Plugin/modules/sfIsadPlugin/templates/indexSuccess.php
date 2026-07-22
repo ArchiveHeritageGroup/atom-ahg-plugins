@@ -1,4 +1,38 @@
 <?php use_helper('AhgLabel') ?>
+<?php
+// Renders plugin display panels declared for a given position.
+//
+// Panels are declared in each plugin's extension.json and collected by
+// ahgDisplayPlugin's DisplayActionRegistry. Nothing in the stack rendered them
+// before this, so every declared panel was invisible.
+//
+// Two anchor points exist because position matters on mobile: descriptive
+// panels belong beside the description, while administrative ones (versions,
+// audit) belong at the end. On a phone everything stacks into one column, so a
+// panel rendered last sits two-thirds down a very long page.
+if (!function_exists('ahg_render_display_panels')) {
+    function ahg_render_display_panels($resource, string $position): void
+    {
+        if (!class_exists('\AhgDisplay\Registry\DisplayActionRegistry')) {
+            return;
+        }
+        $registry = '\AhgDisplay\Registry\DisplayActionRegistry';
+        try {
+            foreach ($registry::getPanelsForContext('informationobject', $position, $resource) as $panel) {
+                $html = $registry::renderPanel($panel, $resource);
+                if ('' === trim((string) $html)) {
+                    continue;   // panel had nothing for this record
+                }
+                echo '<div id="panel-' . htmlspecialchars($panel['id'] ?? 'plugin', ENT_QUOTES, 'UTF-8') . '">';
+                echo $html;
+                echo '</div>';
+            }
+        } catch (Throwable $e) {
+            error_log('ahgThemeB5Plugin: display panel rendering failed: ' . $e->getMessage());
+        }
+    }
+}
+?>
 <?php decorate_with('layout_3col'); ?>
 <?php echo "<!-- DEBUG: This is ISAD module -->\n"; ?>
 <?php
@@ -290,6 +324,8 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
   <?php echo render_show(__('System of arrangement'), render_value($resource->getArrangement(['cultureFallback' => true])), ['fieldLabel' => 'systemOfArrangement']); ?>
 </section> <!-- /section#contentAndStructureArea -->
 
+<?php ahg_render_display_panels($resource, 'after-content'); ?>
+
 <section id="conditionsOfAccessAndUseArea" class="border-bottom">
 
   <?php if (check_field_visibility('app_element_visibility_isad_conditions_of_access_use_area')) { ?>
@@ -529,34 +565,7 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
 
 <?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())) { include_component('ricExplorer', 'ricPanel', ['resource' => $resource]); } ?>
 
-<!-- PLUGIN DISPLAY PANELS
-     Any enabled plugin may declare `display_panels` in its extension.json;
-     ahgDisplayPlugin's DisplayActionRegistry collects them. Nothing rendered
-     them before this, so every declared panel was invisible - this is the
-     generic join, not a custom-fields-specific hook. Panels position themselves
-     via `position`, and each is responsible for returning '' when it has
-     nothing to show. Fails soft: if the display plugin is absent the block is
-     skipped entirely. -->
-<?php if (class_exists('\AhgDisplay\Registry\DisplayActionRegistry')): ?>
-  <?php
-      $panelRegistry = '\AhgDisplay\Registry\DisplayActionRegistry';
-      try {
-          foreach ($panelRegistry::getPanelsForContext('informationobject', 'below-content', $resource) as $panel) {
-              $html = $panelRegistry::renderPanel($panel, $resource);
-              if ('' === trim((string) $html)) {
-                  continue;   // panel had nothing for this record
-              }
-              // The panel template owns its own heading and chrome - adding one
-              // here duplicated it. Wrap only, do not decorate.
-              echo '<div id="panel-' . htmlspecialchars($panel['id'] ?? 'plugin', ENT_QUOTES, 'UTF-8') . '">';
-              echo $html;
-              echo '</div>';
-          }
-      } catch (Throwable $e) {
-          error_log('ahgThemeB5Plugin: display panel rendering failed: ' . $e->getMessage());
-      }
-  ?>
-<?php endif ?>
+<?php ahg_render_display_panels($resource, 'below-content'); ?>
 
 </div><!-- /TTS Content Area -->
 
