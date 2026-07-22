@@ -543,3 +543,17 @@ function scanForPii(objectId) {
 <?php if (isPluginActive('ahgResearchPlugin')): ?>
 <?php include_partial('informationobject/researchToolsContextMenu', ['resource' => $resource]); ?>
 <?php endif; ?>
+
+<?php // Indigenous cultural & IP - manage cultural notices, TK labels, consent
+      // and access restrictions for this record. Staff only. The object-icip
+      // actions (executeObjectNotices etc.) already handle the writes; this is
+      // the link into them from the record. ?>
+<?php if (isPluginActive('ahgICIPPlugin') && $sf_user->isAuthenticated() && isset($resource->slug)): ?>
+<section class="mb-3">
+  <h2 class="h6 text-uppercase text-muted"><?php echo __('Indigenous cultural & IP'); ?></h2>
+  <ul class="list-unstyled mb-0">
+    <li><a href="<?php echo url_for('/object/' . $resource->slug . '/icip'); ?>" class="text-decoration-none">
+      <i class="fas fa-hands me-1"></i><?php echo __('Manage cultural notices & labels'); ?></a></li>
+  </ul>
+</section>
+<?php endif; ?>
