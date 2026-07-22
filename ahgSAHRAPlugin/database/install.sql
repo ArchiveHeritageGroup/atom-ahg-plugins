@@ -102,6 +102,35 @@ CREATE TABLE IF NOT EXISTS sahra_permit_report (
     CONSTRAINT sahra_permit_report_ibfk_1 FOREIGN KEY (permit_id) REFERENCES sahra_permit (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ---------- Dig areas covered by a permit ----------
+-- A permit is linked to ONE site (sahra_permit.linked_object_id) plus any
+-- number of dig areas, which are information_object descendants of that site.
+CREATE TABLE IF NOT EXISTS sahra_permit_area (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    permit_id BIGINT UNSIGNED NOT NULL,
+    object_id INT UNSIGNED NOT NULL COMMENT 'information_object - a dig area (child of the site)',
+    object_title VARCHAR(500) DEFAULT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_permit (permit_id),
+    INDEX idx_object (object_id),
+    CONSTRAINT sahra_permit_area_ibfk_1 FOREIGN KEY (permit_id) REFERENCES sahra_permit (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------- Supporting documents attached to a permit ----------
+CREATE TABLE IF NOT EXISTS sahra_permit_document (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    permit_id BIGINT UNSIGNED NOT NULL,
+    doc_type VARCHAR(40) NOT NULL DEFAULT 'supporting' COMMENT 'application, supporting, method_statement, cv, permit_certificate, report, correspondence, other',
+    original_name VARCHAR(255) NOT NULL,
+    stored_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(120) DEFAULT NULL,
+    size_bytes BIGINT UNSIGNED DEFAULT 0,
+    uploaded_by INT UNSIGNED DEFAULT NULL,
+    created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_permit (permit_id),
+    CONSTRAINT sahra_permit_document_ibfk_1 FOREIGN KEY (permit_id) REFERENCES sahra_permit (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ---------- SAHRA reviewers (officials who decide in-system) ----------
 -- Users designated as SAHRA reviewers may issue or decline permit
 -- applications directly on this instance ("SAHRA approves from their side").

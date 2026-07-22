@@ -27,7 +27,7 @@ class sahraInstallMenuTask extends sfBaseTask
 
         $this->namespace = 'sahra';
         $this->name = 'install-menu';
-        $this->briefDescription = 'Enable SAHRA permits + add nav links (idempotent)';
+        $this->briefDescription = 'Enable SAHRA permits (entry point = Research dashboard)';
     }
 
     public function execute($arguments = [], $options = [])
@@ -41,7 +41,8 @@ class sahraInstallMenuTask extends sfBaseTask
 
         $svc = new \AhgSAHRA\Services\SahraPermitService();
         $svc->setFeatureEnabled(true);
+        $svc->removeMenuLinks(); // entry point is the Research dashboard now
 
-        $this->logSection('sahra', 'SAHRA heritage permits enabled and nav links added. Clear cache + reload php-fpm to show them.');
+        $this->logSection('sahra', 'SAHRA heritage permits enabled. Entry point: the Research dashboard (/research). Clear cache + reload php-fpm.');
     }
 }

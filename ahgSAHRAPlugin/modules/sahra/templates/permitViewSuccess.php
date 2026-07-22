@@ -53,8 +53,25 @@
             <dt class="col-sm-3">Issuing authority</dt><dd class="col-sm-9"><?php echo htmlspecialchars($p->issuing_authority); ?></dd>
             <dt class="col-sm-3">Applicant</dt><dd class="col-sm-9"><?php echo htmlspecialchars($p->applicant_name ?? $p->applicant_username ?? '-'); ?><?php echo $p->applicant_email ? ' &lt;' . htmlspecialchars($p->applicant_email) . '&gt;' : ''; ?><?php echo $p->institution ? ' - ' . htmlspecialchars($p->institution) : ''; ?></dd>
             <dt class="col-sm-3">Supervisor</dt><dd class="col-sm-9"><?php echo htmlspecialchars($p->supervisor_name ?? $p->supervisor_username ?? '-'); ?></dd>
-            <?php if ($p->site_name || $p->site_location || $p->province): ?>
-              <dt class="col-sm-3">Site</dt><dd class="col-sm-9"><?php echo htmlspecialchars(trim(implode(' - ', array_filter([$p->site_name, $p->site_location, $p->province])))); ?></dd>
+            <?php if ($p->site_name || $p->site_location || $p->province || $p->linked_object_id): ?>
+              <dt class="col-sm-3">Site</dt>
+              <dd class="col-sm-9">
+                <?php if ($p->linked_object_id && !empty($siteSlug)): ?>
+                  <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $siteSlug]); ?>"><?php echo htmlspecialchars($p->site_name ?? ('Record #' . $p->linked_object_id)); ?></a>
+                <?php elseif ($p->site_name): ?>
+                  <?php echo htmlspecialchars($p->site_name); ?>
+                <?php endif; ?>
+                <?php $extra = array_filter([$p->site_location, $p->province]); ?>
+                <?php if ($extra): ?><span class="text-muted"> - <?php echo htmlspecialchars(implode(' - ', $extra)); ?></span><?php endif; ?>
+              </dd>
+              <?php if (!empty($areas)): ?>
+                <dt class="col-sm-3">Dig areas</dt>
+                <dd class="col-sm-9">
+                  <?php foreach ($areas as $a): ?>
+                    <span class="badge bg-light text-dark border me-1 mb-1"><i class="fas fa-map-pin me-1 text-muted"></i><?php echo htmlspecialchars($a->object_title ?? ('#' . $a->object_id)); ?></span>
+                  <?php endforeach; ?>
+                </dd>
+              <?php endif; ?>
             <?php endif; ?>
             <?php if ($p->start_date || $p->end_date): ?>
               <dt class="col-sm-3">Validity</dt><dd class="col-sm-9"><?php echo $p->start_date ? date('j M Y', strtotime($p->start_date)) : '?'; ?> &ndash; <?php echo $p->end_date ? date('j M Y', strtotime($p->end_date)) : '?'; ?></dd>
@@ -210,6 +227,52 @@
           </div>
         </form>
       <?php endif; ?>
+
+      <!-- documents -->
+      <div class="card mb-4">
+        <div class="card-header"><strong><i class="fas fa-paperclip me-1"></i> Documents</strong></div>
+        <div class="card-body">
+          <?php if (empty($documents)): ?>
+            <p class="text-muted mb-3">No documents attached.</p>
+          <?php else: ?>
+            <ul class="list-group mb-3">
+              <?php foreach ($documents as $d): ?>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <a href="<?php echo url_for(['module' => 'sahra', 'action' => 'documentDownload', 'id' => $d->id]); ?>"><i class="fas fa-file me-1"></i><?php echo htmlspecialchars($d->original_name); ?></a>
+                    <small class="text-muted ms-2"><?php echo ucfirst(str_replace('_', ' ', $d->doc_type)); ?> &middot; <?php echo number_format(max(1, $d->size_bytes / 1024), 0); ?> KB</small>
+                  </div>
+                  <?php if ($isApplicant || $sf_user->hasCredential('administrator')): ?>
+                    <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'documentDelete', 'id' => $d->id]); ?>" class="d-inline">
+                      <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this document?');"><i class="fas fa-trash"></i></button>
+                    </form>
+                  <?php endif; ?>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php endif; ?>
+
+          <?php if ($canUpload): ?>
+            <form method="post" action="<?php echo url_for(['module' => 'sahra', 'action' => 'documentUpload', 'id' => $p->id]); ?>" enctype="multipart/form-data" class="row g-2 align-items-end">
+              <div class="col-md-4">
+                <label class="form-label mb-0 small">Type</label>
+                <select name="doc_type" class="form-select form-select-sm">
+                  <option value="supporting">Supporting</option>
+                  <option value="application">Application form</option>
+                  <option value="method_statement">Method statement</option>
+                  <option value="cv">CV</option>
+                  <option value="permit_certificate">Permit certificate</option>
+                  <option value="report">Report</option>
+                  <option value="correspondence">Correspondence</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="col-md-6"><input type="file" name="documents[]" class="form-control form-control-sm" multiple required></div>
+              <div class="col-md-2"><button class="btn btn-sm btn-primary w-100"><i class="fas fa-upload me-1"></i>Upload</button></div>
+            </form>
+          <?php endif; ?>
+        </div>
+      </div>
 
       <!-- workflow log -->
       <?php if (!empty($log)): ?>

@@ -17,6 +17,8 @@
     "tables": [
         "sahra_config",
         "sahra_permit",
+        "sahra_permit_area",
+        "sahra_permit_document",
         "sahra_permit_log",
         "sahra_permit_report",
         "sahra_reviewer"

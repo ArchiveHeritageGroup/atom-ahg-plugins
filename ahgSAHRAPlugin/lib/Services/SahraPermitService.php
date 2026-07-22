@@ -67,6 +67,205 @@ class SahraPermitService
     }
 
     // ---------------------------------------------------------------
+    // Sites & dig areas (information_object linkage)
+    //
+    // A permit is linked to ONE site (sahra_permit.linked_object_id) plus any
+    // number of dig areas, which are information_object descendants of the site.
+    // ---------------------------------------------------------------
+
+    private function currentCulture(): string
+    {
+        if (class_exists('\sfContext') && \sfContext::hasInstance()) {
+            $u = \sfContext::getInstance()->getUser();
+            if ($u && method_exists($u, 'getCulture') && $u->getCulture()) {
+                return $u->getCulture();
+            }
+        }
+        return class_exists('\sfConfig') ? (\sfConfig::get('sf_default_culture', 'en') ?: 'en') : 'en';
+    }
+
+    public function ioTitle(int $id): ?string
+    {
+        $t = DB::table('information_object_i18n')->where('id', $id)->where('culture', $this->currentCulture())->value('title');
+        if (!$t) {
+            $t = DB::table('information_object_i18n')->where('id', $id)->whereNotNull('title')->where('title', '!=', '')->value('title');
+        }
+        return $t;
+    }
+
+    /** Type-ahead over information objects, for choosing the permit's site. */
+    public function searchSites(string $term, int $limit = 15): array
+    {
+        $term = trim($term);
+        if (mb_strlen($term) < 2) {
+            return [];
+        }
+        $culture = $this->currentCulture();
+        $rows = DB::table('information_object as io')
+            ->join('information_object_i18n as i', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'i.id')->where('i.culture', '=', $culture);
+            })
+            ->where('io.id', '>', 1)
+            ->where('i.title', 'like', '%' . $term . '%')
+            ->orderByRaw('CASE WHEN i.title LIKE ? THEN 0 ELSE 1 END', [$term . '%'])
+            ->orderBy('i.title')
+            ->limit($limit)
+            ->get(['io.id', 'io.identifier', 'io.lft', 'io.rgt', 'i.title']);
+        $out = [];
+        foreach ($rows as $r) {
+            $children = DB::table('information_object')->where('lft', '>', $r->lft)->where('rgt', '<', $r->rgt)->count();
+            $out[] = ['id' => (int) $r->id, 'title' => $r->title ?? '(untitled)', 'identifier' => $r->identifier, 'children' => $children];
+        }
+        return $out;
+    }
+
+    /** Descendants of a site - candidate dig areas. */
+    public function getSiteAreas(int $siteId, int $limit = 500): array
+    {
+        $site = DB::table('information_object')->where('id', $siteId)->first();
+        if (!$site) {
+            return [];
+        }
+        $culture = $this->currentCulture();
+        $rows = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i', function ($j) use ($culture) {
+                $j->on('io.id', '=', 'i.id')->where('i.culture', '=', $culture);
+            })
+            ->where('io.lft', '>', $site->lft)
+            ->where('io.rgt', '<', $site->rgt)
+            ->orderBy('io.lft')
+            ->limit($limit)
+            ->get(['io.id', 'io.identifier', 'i.title']);
+        $out = [];
+        foreach ($rows as $r) {
+            $out[] = ['id' => (int) $r->id, 'title' => $r->title ?? '(untitled)', 'identifier' => $r->identifier];
+        }
+        return $out;
+    }
+
+    public function getAreas(int $permitId): array
+    {
+        return DB::table('sahra_permit_area')->where('permit_id', $permitId)->orderBy('id')->get()->all();
+    }
+
+    // ---------------------------------------------------------------
+    // Documents (supporting files attached to a permit)
+    // ---------------------------------------------------------------
+
+    private const ALLOWED_DOC_EXT = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'zip', 'csv', 'txt', 'odt', 'ods'];
+
+    private function storageDir(int $permitId): string
+    {
+        $base = class_exists('\sfConfig') ? \sfConfig::get('sf_upload_dir') : null;
+        if (!$base) {
+            $base = sys_get_temp_dir();
+        }
+        return rtrim($base, '/') . '/sahra/' . $permitId;
+    }
+
+    public function documentPath(object $doc): string
+    {
+        return $this->storageDir((int) $doc->permit_id) . '/' . $doc->stored_name;
+    }
+
+    /**
+     * Store uploaded files (PHP $_FILES-style structure from
+     * sfWebRequest::getFiles()). Returns the number stored.
+     */
+    public function storeUploadedDocuments($files, int $permitId, ?int $userId, string $type = 'supporting'): int
+    {
+        if (empty($files) || !isset($files['name'])) {
+            return 0;
+        }
+
+        $items = [];
+        if (is_array($files['name'])) {
+            foreach ($files['name'] as $i => $name) {
+                if ((int) ($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+                    $items[] = [
+                        'name' => $name,
+                        'type' => $files['type'][$i] ?? null,
+                        'tmp_name' => $files['tmp_name'][$i],
+                        'size' => (int) ($files['size'][$i] ?? 0),
+                    ];
+                }
+            }
+        } elseif ((int) ($files['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+            $items[] = ['name' => $files['name'], 'type' => $files['type'] ?? null, 'tmp_name' => $files['tmp_name'], 'size' => (int) ($files['size'] ?? 0)];
+        }
+
+        $stored = 0;
+        foreach ($items as $f) {
+            if ($this->storeOneDocument($permitId, $f, $userId, $type)) {
+                $stored++;
+            }
+        }
+        return $stored;
+    }
+
+    private function storeOneDocument(int $permitId, array $f, ?int $userId, string $type): bool
+    {
+        $orig = trim((string) $f['name']);
+        $tmp = (string) $f['tmp_name'];
+        $size = (int) $f['size'];
+        if ($orig === '' || $tmp === '' || !is_uploaded_file($tmp)) {
+            return false;
+        }
+        $maxMb = (int) $this->getConfig('max_upload_mb', 25);
+        if ($size <= 0 || $size > $maxMb * 1024 * 1024) {
+            return false;
+        }
+        $ext = strtolower(pathinfo($orig, PATHINFO_EXTENSION));
+        if (!in_array($ext, self::ALLOWED_DOC_EXT, true)) {
+            return false;
+        }
+        $dir = $this->storageDir($permitId);
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+            return false;
+        }
+        $storedName = bin2hex(random_bytes(16)) . '.' . $ext;
+        if (!@move_uploaded_file($tmp, $dir . '/' . $storedName)) {
+            return false;
+        }
+        DB::table('sahra_permit_document')->insert([
+            'permit_id' => $permitId,
+            'doc_type' => $type,
+            'original_name' => mb_substr($orig, 0, 255),
+            'stored_name' => $storedName,
+            'mime_type' => $f['type'] ? mb_substr((string) $f['type'], 0, 120) : null,
+            'size_bytes' => $size,
+            'uploaded_by' => $userId,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+        $this->logAction($permitId, 'updated', $userId, null, null, 'Document uploaded: ' . $orig);
+        return true;
+    }
+
+    public function getDocuments(int $permitId): array
+    {
+        return DB::table('sahra_permit_document')->where('permit_id', $permitId)->orderByDesc('id')->get()->all();
+    }
+
+    public function getDocument(int $id)
+    {
+        return DB::table('sahra_permit_document')->where('id', $id)->first();
+    }
+
+    public function deleteDocument(int $id): bool
+    {
+        $doc = $this->getDocument($id);
+        if (!$doc) {
+            return false;
+        }
+        $path = $this->documentPath($doc);
+        if (is_file($path)) {
+            @unlink($path);
+        }
+        DB::table('sahra_permit_document')->where('id', $id)->delete();
+        return true;
+    }
+
+    // ---------------------------------------------------------------
     // Feature gate (per-instance / per-jurisdiction)
     //
     // The plugin ships in the shared AtoM/Heratio codebase, so instances in
@@ -74,64 +273,26 @@ class SahraPermitService
     // SAHRA feature. It stays dormant until an admin switches it on here.
     // ---------------------------------------------------------------
 
-    /** Nav links this feature owns: [parentMenuName, menuName, path, label]. */
-    private const MENU_LINKS = [
-        ['manage', 'sahraPermits', 'sahra/index', 'SAHRA permits'],
-        ['quickLinks', 'sahraMyPermits', 'sahra/my-applications', 'Heritage permits'],
-    ];
+    /**
+     * Legacy top-nav links. The researcher entry point now lives in the
+     * Research dashboard (/research), so these top-nav links are removed.
+     */
+    private const LEGACY_MENU_NAMES = ['sahraPermits', 'sahraMyPermits'];
 
     public function isFeatureEnabled(): bool
     {
         return (string) $this->getConfig('sahra_enabled', '0') === '1';
     }
 
-    /** Toggle the feature and add/remove its nav links to match. */
     public function setFeatureEnabled(bool $on): void
     {
         $this->setConfig('sahra_enabled', $on ? '1' : '0');
-        if ($on) {
-            $this->addMenuLinks();
-        } else {
-            $this->removeMenuLinks();
-        }
     }
 
-    /** Idempotent nested-set insert of this feature's nav links. */
-    public function addMenuLinks(): void
-    {
-        foreach (self::MENU_LINKS as [$parentName, $name, $path, $label]) {
-            if (DB::table('menu')->where('name', $name)->exists()) {
-                continue;
-            }
-            $parent = DB::table('menu')->where('name', $parentName)->first();
-            if (!$parent) {
-                continue;
-            }
-            $r = (int) $parent->rgt;
-            $now = date('Y-m-d H:i:s');
-            DB::transaction(function () use ($parent, $r, $now, $name, $path, $label) {
-                DB::update('UPDATE menu SET rgt = rgt + 2 WHERE rgt >= ?', [$r]);
-                DB::update('UPDATE menu SET lft = lft + 2 WHERE lft >= ?', [$r]);
-                $id = DB::table('menu')->insertGetId([
-                    'parent_id' => (int) $parent->id,
-                    'name' => $name,
-                    'path' => $path,
-                    'lft' => $r,
-                    'rgt' => $r + 1,
-                    'source_culture' => 'en',
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ]);
-                DB::table('menu_i18n')->insert(['id' => $id, 'culture' => 'en', 'label' => $label]);
-                $this->assertMenuIntegrity();
-            });
-        }
-    }
-
-    /** Remove this feature's nav links, closing the nested-set gap. */
+    /** Remove the legacy top-nav links, closing the nested-set gap. */
     public function removeMenuLinks(): void
     {
-        foreach (self::MENU_LINKS as [, $name]) {
+        foreach (self::LEGACY_MENU_NAMES as $name) {
             $node = DB::table('menu')->where('name', $name)->first();
             if (!$node) {
                 continue;
@@ -228,6 +389,22 @@ class SahraPermitService
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
 
+        // Dig areas (child records of the chosen site)
+        if (!empty($data['dig_area_ids']) && is_array($data['dig_area_ids'])) {
+            foreach ($data['dig_area_ids'] as $areaId) {
+                $areaId = (int) $areaId;
+                if (!$areaId) {
+                    continue;
+                }
+                DB::table('sahra_permit_area')->insert([
+                    'permit_id' => $id,
+                    'object_id' => $areaId,
+                    'object_title' => $this->ioTitle($areaId),
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+        }
+
         $this->logAction($id, $status === 'draft' ? 'created' : 'submitted', (int) $data['applicant_user_id'], null, $status, 'Application created');
 
         if ($status === 'pending_supervisor' && !empty($data['supervisor_user_id'])) {
@@ -237,7 +414,7 @@ class SahraPermitService
                     $this->userEmail((int) $data['supervisor_user_id']),
                     'SAHRA permit application awaiting your endorsement',
                     $this->emailBody($p, 'Application awaiting your endorsement',
-                        'A researcher has submitted a SAHRA / NHRA heritage permit application and nominated you as supervising professor. Please review and endorse or return it.')
+                        'A researcher has submitted a SAHRA / NHRA heritage permit application and nominated you as supervisor. Please review and endorse or return it.')
                 );
             }
         }
@@ -370,7 +547,7 @@ class SahraPermitService
         $this->logAction($id, 'endorsed', $userId, $p->status, 'supervisor_approved', $notes);
         $this->notify($this->applicantEmail($p), 'Your SAHRA permit application was endorsed',
             $this->emailBody($p, 'Application endorsed',
-                'Your supervising professor has endorsed your application. It is now with the heritage coordinator to lodge with SAHRA.'));
+                'Your supervisor has endorsed your application. It is now with the heritage coordinator to lodge with SAHRA.'));
         return true;
     }
 
@@ -390,7 +567,7 @@ class SahraPermitService
         $this->logAction($id, 'rejected', $userId, $p->status, 'supervisor_rejected', $notes);
         $this->notify($this->applicantEmail($p), 'Your SAHRA permit application was returned',
             $this->emailBody($p, 'Application returned by your supervisor',
-                'Your supervising professor has returned your application' . ($notes ? ' with the note: "' . htmlspecialchars($notes) . '"' : '') . '. Please review and resubmit.'));
+                'Your supervisor has returned your application' . ($notes ? ' with the note: "' . htmlspecialchars($notes) . '"' : '') . '. Please review and resubmit.'));
         return true;
     }
 

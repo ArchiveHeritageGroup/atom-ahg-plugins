@@ -17,11 +17,13 @@
         </div>
         <div class="card-body">
           <p class="text-muted">
-            Complete this application and submit it to your supervising professor for endorsement. Once endorsed,
+            Complete this application and submit it to your supervisor for endorsement. Once endorsed,
             the archive's heritage coordinator lodges it with SAHRA (or the relevant provincial authority).
           </p>
 
-          <form method="post" action="<?php echo url_for('@sahra_create'); ?>">
+          <form method="post" action="<?php echo url_for('@sahra_create'); ?>" enctype="multipart/form-data"
+                data-search-url="<?php echo url_for('@sahra_search_sites'); ?>"
+                data-areas-url="<?php echo url_for('@sahra_site_areas'); ?>">
 
             <h6 class="text-uppercase text-muted mt-2">The work</h6>
             <div class="mb-3">
@@ -53,16 +55,31 @@
               <textarea name="project_description" class="form-control" rows="4" placeholder="Nature of the fieldwork, methods, and the material to be excavated, collected, disturbed or exported..."></textarea>
             </div>
 
-            <div class="row">
-              <div class="col-md-5 mb-3">
-                <label class="form-label">Site name</label>
-                <input type="text" name="site_name" class="form-control">
+            <!-- Site (catalogue record) + its dig areas -->
+            <div class="mb-3 position-relative">
+              <label class="form-label">Site (archaeological record)</label>
+              <input type="text" class="form-control" id="sahra-site-search" autocomplete="off" placeholder="Type at least 2 characters of the site title...">
+              <input type="hidden" name="site_object_id" id="sahra-site-id">
+              <input type="hidden" name="site_name" id="sahra-site-name">
+              <div id="sahra-site-results" class="list-group position-absolute w-100 shadow-sm d-none" style="z-index:1000; max-height:280px; overflow-y:auto;"></div>
+              <div id="sahra-site-chosen" class="form-text mt-2 d-none">
+                <i class="fas fa-check-circle text-success me-1"></i><span id="sahra-site-chosen-title"></span>
+                <button type="button" class="btn btn-link btn-sm p-0 ms-1" id="sahra-site-clear">change</button>
               </div>
-              <div class="col-md-4 mb-3">
+              <small class="form-text text-muted">Link the permit to the site record; its dig areas (child records) load below.</small>
+            </div>
+
+            <div id="sahra-areas-wrap" class="mb-3 d-none">
+              <label class="form-label">Dig areas covered <small class="text-muted fw-normal">(child records of the site)</small></label>
+              <div id="sahra-areas" class="border rounded p-2" style="max-height:220px; overflow-y:auto;"></div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
                 <label class="form-label">Site location / coordinates</label>
                 <input type="text" name="site_location" class="form-control">
               </div>
-              <div class="col-md-3 mb-3">
+              <div class="col-md-6 mb-3">
                 <label class="form-label">Province</label>
                 <input type="text" name="province" class="form-control">
               </div>
@@ -97,7 +114,7 @@
                 <input type="text" name="institution" class="form-control">
               </div>
               <div class="col-md-6 mb-3">
-                <label class="form-label">Supervising professor <span class="text-danger">*</span></label>
+                <label class="form-label">Supervisor <span class="text-danger">*</span></label>
                 <select name="supervisor_user_id" class="form-select" required>
                   <option value="">-- Select supervisor --</option>
                   <?php foreach ($supervisors as $s): ?>
@@ -106,6 +123,12 @@
                 </select>
                 <small class="form-text text-muted">Your supervisor endorses the application before it goes to SAHRA.</small>
               </div>
+            </div>
+
+            <h6 class="text-uppercase text-muted mt-3">Supporting documents</h6>
+            <div class="mb-3">
+              <input type="file" name="documents[]" class="form-control" multiple>
+              <small class="form-text text-muted">Attach the SAHRA application form, method statement, CVs, existing permits, etc. (PDF / Word / Excel / images / zip, up to 25 MB each). You can add more after submitting.</small>
             </div>
 
             <div class="d-flex justify-content-between mt-3">

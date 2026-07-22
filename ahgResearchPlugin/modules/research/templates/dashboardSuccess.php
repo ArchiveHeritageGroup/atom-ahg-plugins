@@ -98,10 +98,23 @@
 <div class="row mb-4">
   <div class="col">
     <div class="d-flex flex-wrap gap-2">
-      <a href="<?php echo url_for(['module' => 'research', 'action' => 'book']); ?>" class="btn btn-outline-primary"><i class="fas fa-calendar-plus me-1"></i><?php echo __('Book Visit'); ?></a>
       <a href="<?php echo url_for(['module' => 'research', 'action' => 'journalNew']); ?>" class="btn btn-outline-success"><i class="fas fa-pen-fancy me-1"></i><?php echo __('New Journal Entry'); ?></a>
       <a href="<?php echo url_for(['module' => 'research', 'action' => 'newReport']); ?>" class="btn btn-outline-info"><i class="fas fa-file-alt me-1"></i><?php echo __('New Report'); ?></a>
       <a href="<?php echo url_for(['module' => 'research', 'action' => 'annotations']); ?>" class="btn btn-outline-warning"><i class="fas fa-sticky-note me-1"></i><?php echo __('My Notes'); ?></a>
+      <?php
+        // SAHRA/NHRA heritage permits - only when the (gated) plugin is enabled on this instance.
+        $__sahraOn = in_array('ahgSAHRAPlugin', sfProjectConfiguration::getActive()->getPlugins());
+        if ($__sahraOn) {
+            try {
+                $__sahraOn = (string) \Illuminate\Database\Capsule\Manager::table('sahra_config')->where('config_key', 'sahra_enabled')->value('config_value') === '1';
+            } catch (\Throwable $__e) {
+                $__sahraOn = false;
+            }
+        }
+      ?>
+      <?php if ($__sahraOn): ?>
+        <a href="<?php echo url_for('@sahra_my'); ?>" class="btn btn-outline-dark"><i class="fas fa-landmark me-1"></i><?php echo __('Heritage Permits'); ?></a>
+      <?php endif; ?>
     </div>
   </div>
 </div>

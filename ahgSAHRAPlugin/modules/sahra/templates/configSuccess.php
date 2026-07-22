@@ -14,7 +14,8 @@
             </div>
             <small class="text-muted d-block mt-1">
               This plugin ships with the software everywhere. Leave it <strong>off</strong> for instances outside South Africa
-              (e.g. Australia); the feature and its menu links stay hidden until switched on here.
+              (e.g. Australia); the feature and its Research-dashboard entry stay hidden until switched on here.
+              Researchers apply from the <strong>Research dashboard</strong> (/research).
             </small>
           </div>
         </div>

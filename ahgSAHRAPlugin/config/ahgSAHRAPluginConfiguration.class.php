@@ -68,6 +68,13 @@ class ahgSAHRAPluginConfiguration extends sfPluginConfiguration
         $sahra->any('sahra_apply', '/sahra/apply', 'applicationCreate');
         $sahra->any('sahra_create', '/sahra/apply/create', 'create');
         $sahra->any('sahra_my', '/sahra/my-applications', 'myApplications');
+        $sahra->any('sahra_search_sites', '/sahra/apply/search-sites', 'searchSites');
+        $sahra->any('sahra_site_areas', '/sahra/apply/site-areas', 'siteAreas');
+
+        // Documents
+        $sahra->any('sahra_document_upload', '/sahra/permit/:id/document/upload', 'documentUpload', ['id' => '\d+']);
+        $sahra->any('sahra_document_download', '/sahra/document/:id/download', 'documentDownload', ['id' => '\d+']);
+        $sahra->any('sahra_document_delete', '/sahra/document/:id/delete', 'documentDelete', ['id' => '\d+']);
 
         // Supervisor (professor) endorsement queue + decisions
         $sahra->any('sahra_approvals', '/sahra/approvals', 'pendingApprovals');

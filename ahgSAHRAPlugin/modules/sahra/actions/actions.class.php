@@ -125,6 +125,14 @@ class sahraActions extends AhgController
             $supervisorName = $sup->username ?? null;
         }
 
+        // Site (an information_object) + its dig areas (child records).
+        $siteObjectId = (int) $request->getParameter('site_object_id');
+        $siteName = trim((string) $request->getParameter('site_name')) ?: null;
+        if ($siteObjectId && !$siteName) {
+            $siteName = $this->getService()->ioTitle($siteObjectId);
+        }
+        $digAreaIds = (array) $request->getParameter('dig_area_ids', []);
+
         $id = $this->getService()->createApplication([
             'applicant_user_id' => $this->userId(),
             'applicant_name' => trim((string) $request->getParameter('applicant_name')) ?: null,
@@ -136,16 +144,35 @@ class sahraActions extends AhgController
             'issuing_authority' => $request->getParameter('issuing_authority', 'SAHRA'),
             'project_title' => $projectTitle,
             'project_description' => trim((string) $request->getParameter('project_description')) ?: null,
-            'site_name' => trim((string) $request->getParameter('site_name')) ?: null,
+            'linked_object_id' => $siteObjectId ?: null,
+            'site_name' => $siteName,
             'site_location' => trim((string) $request->getParameter('site_location')) ?: null,
             'province' => trim((string) $request->getParameter('province')) ?: null,
+            'dig_area_ids' => $digAreaIds,
             'start_date' => $request->getParameter('start_date') ?: null,
             'end_date' => $request->getParameter('end_date') ?: null,
             'status' => 'pending_supervisor',
         ]);
 
+        // Any files uploaded with the application.
+        $this->getService()->storeUploadedDocuments($id, $request->getFiles('documents'), $this->userId(), 'application');
+
         $this->getUser()->setFlash('success', 'Application submitted for supervisor endorsement.');
         $this->redirect(['module' => 'sahra', 'action' => 'permitView', 'id' => $id]);
+    }
+
+    // --- site / dig-area type-ahead (JSON) ---------------------------
+
+    public function executeSearchSites($request)
+    {
+        $this->requireAuth();
+        return $this->renderJson($this->getService()->searchSites((string) $request->getParameter('q', '')));
+    }
+
+    public function executeSiteAreas($request)
+    {
+        $this->requireAuth();
+        return $this->renderJson($this->getService()->getSiteAreas((int) $request->getParameter('site_id')));
     }
 
     public function executeMyApplications($request)
@@ -180,9 +207,96 @@ class sahraActions extends AhgController
         $this->canSubmit = $this->permit->status === 'supervisor_approved' && $this->isAdmin();
         $this->canDecide = $this->permit->status === 'submitted_to_sahra' && $this->isDecider();
         $this->isSahraReviewer = $this->getService()->isSahraReviewer($uid);
+        // Anyone who can see the permit and has a stake in it may attach documents.
+        $this->canUpload = $isApplicant || $isSupervisor || $this->isDecider() || $this->getUser()->hasCredential('editor');
         $this->log = $service->getPermitLog($id);
         $this->reports = $service->getReports($id);
+        $this->areas = $service->getAreas($id);
+        $this->documents = $service->getDocuments($id);
+        $this->siteSlug = $this->permit->linked_object_id
+            ? \Illuminate\Database\Capsule\Manager::table('slug')->where('object_id', $this->permit->linked_object_id)->value('slug')
+            : null;
         $this->sections = \AhgSAHRA\Services\SahraPermitService::SECTIONS;
+    }
+
+    // --- documents ---------------------------------------------------
+
+    protected function loadPermitOrDeny(int $id)
+    {
+        $permit = $this->getService()->getPermit($id);
+        if (!$permit) {
+            $this->forward404('Permit not found');
+        }
+        $uid = $this->userId();
+        $ok = (int) $permit->applicant_user_id === $uid
+            || (int) $permit->supervisor_user_id === $uid
+            || $this->isDecider()
+            || $this->getUser()->hasCredential('editor');
+        if (!$ok) {
+            $this->forward404('Not authorised');
+        }
+        return $permit;
+    }
+
+    public function executeDocumentUpload($request)
+    {
+        $this->requireAuth();
+        $id = (int) $request->getParameter('id');
+        $this->loadPermitOrDeny($id);
+        if ($request->isMethod('post')) {
+            $n = $this->getService()->storeUploadedDocuments(
+                $request->getFiles('documents'),
+                $id,
+                $this->userId(),
+                $request->getParameter('doc_type', 'supporting')
+            );
+            $this->getUser()->setFlash($n ? 'success' : 'error', $n ? ($n . ' document(s) uploaded.') : 'No document uploaded (check file type / size).');
+        }
+        $this->redirect(['module' => 'sahra', 'action' => 'permitView', 'id' => $id]);
+    }
+
+    public function executeDocumentDownload($request)
+    {
+        $this->requireAuth();
+        $doc = $this->getService()->getDocument((int) $request->getParameter('id'));
+        if (!$doc) {
+            $this->forward404('Document not found');
+        }
+        $this->loadPermitOrDeny((int) $doc->permit_id);
+
+        $path = $this->getService()->documentPath($doc);
+        if (!is_file($path)) {
+            $this->forward404('File missing');
+        }
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType($doc->mime_type ?: 'application/octet-stream');
+        $response->setHttpHeader('Content-Disposition', 'attachment; filename="' . addslashes($doc->original_name) . '"');
+        $response->setHttpHeader('Content-Length', (string) filesize($path));
+        $response->sendHttpHeaders();
+        readfile($path);
+
+        return sfView::NONE;
+    }
+
+    public function executeDocumentDelete($request)
+    {
+        $this->requireAuth();
+        $doc = $this->getService()->getDocument((int) $request->getParameter('id'));
+        if (!$doc) {
+            $this->forward404('Document not found');
+        }
+        $permit = $this->loadPermitOrDeny((int) $doc->permit_id);
+        // Only the applicant or an admin may delete.
+        if ((int) $permit->applicant_user_id !== $this->userId() && !$this->isAdmin()) {
+            $this->forward404('Not authorised to delete this document');
+        }
+        if ($request->isMethod('post')) {
+            $this->getService()->deleteDocument((int) $doc->id);
+            $this->getUser()->setFlash('success', 'Document removed.');
+        }
+        $this->redirect(['module' => 'sahra', 'action' => 'permitView', 'id' => (int) $doc->permit_id]);
     }
 
     // --- supervisor endorsement --------------------------------------

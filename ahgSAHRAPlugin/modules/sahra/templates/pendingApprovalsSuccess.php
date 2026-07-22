@@ -2,7 +2,7 @@
 
 <div class="container">
   <h1 class="h3 mb-1"><i class="fas fa-user-check me-2"></i>Applications awaiting my endorsement</h1>
-  <p class="text-muted">As a supervising professor, review and endorse (or return) these SAHRA permit applications.</p>
+  <p class="text-muted">As a supervisor, review and endorse (or return) these SAHRA permit applications.</p>
 
   <?php if (empty($permits)): ?>
     <div class="card"><div class="card-body text-center text-muted py-5">
