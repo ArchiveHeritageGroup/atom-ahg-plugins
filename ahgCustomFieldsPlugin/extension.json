@@ -28,7 +28,7 @@
       "contexts": [
         "informationobject"
       ],
-      "position": "before-media",
+      "position": "before-notes",
       "weight": 30
     },
     {

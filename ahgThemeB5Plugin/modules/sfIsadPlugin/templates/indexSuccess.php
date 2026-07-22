@@ -119,10 +119,6 @@ function pii_filter($objectId, $content) {
 
 <?php end_slot(); ?>
 
-<?php // Descriptive panels declared 'before-media' render here, above the digital
-      // object viewer. On mobile the viewer fills the top of the screen, so a
-      // panel placed after it is a long scroll away; a find's own measurements
-      // and description belong beside the record, ahead of its photograph. ?>
 <?php ahg_render_display_panels($resource, 'before-media'); ?>
 
 <?php use_helper('informationobject', 'DigitalObjectViewer'); ?>
@@ -400,6 +396,11 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
     <?php echo render_show(__('Publication note'), render_value($item->getContent(['cultureFallback' => true])), ['fieldLabel' => 'publicationNote']); ?>
   <?php } ?>
 </section> <!-- /section#alliedMaterialsArea -->
+
+<?php // Descriptive plugin panels (Additional Fields) render here, immediately
+      // before the Notes area, so a find's structured detail reads as part of
+      // the description rather than being buried after it. ?>
+<?php ahg_render_display_panels($resource, 'before-notes'); ?>
 
 <section id="notesArea" class="border-bottom">
 
