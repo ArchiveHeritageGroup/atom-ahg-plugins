@@ -117,6 +117,17 @@ class CustomFieldService
      */
     protected function saveSingleValue(object $def, int $objectId, $rawValue): void
     {
+        // An empty field is an absent value, not a stored blank. Persisting one
+        // row per definition regardless left 22 empty rows on every saved record
+        // and made "has this been catalogued?" unanswerable. Clear instead, so a
+        // value that is blanked out is removed rather than kept as an empty row.
+        if (!in_array($def->field_type, ['boolean'], true)
+            && (null === $rawValue || (!is_array($rawValue) && '' === trim((string) $rawValue)))) {
+            $this->valRepo->deleteByDefinitionAndObject((int) $def->id, $objectId);
+
+            return;
+        }
+
         $valueData = $this->buildValueData($def, $rawValue);
         $this->valRepo->upsertValue((int) $def->id, $objectId, $valueData, 0);
     }

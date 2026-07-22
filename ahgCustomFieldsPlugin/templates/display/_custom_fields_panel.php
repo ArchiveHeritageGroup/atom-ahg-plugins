@@ -30,11 +30,27 @@ if (empty($html)) {
 }
 ?>
 
+<?php
+// Unique per entity so several panels on one page cannot collide.
+$cfPanelId = 'cf-panel-' . preg_replace('/[^a-z0-9]+/i', '-', $entityType) . '-' . $objectId;
+?>
 <section class="card mb-3">
-    <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-input-cursor-text"></i> Additional Fields</h5>
+    <div class="card-header p-0">
+        <?php // Collapsed by default: this is supplementary detail, and an
+              // always-open panel pushes the standard areas down the page. ?>
+        <button class="btn btn-link w-100 text-start text-decoration-none d-flex align-items-center justify-content-between p-3 collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#<?php echo $cfPanelId; ?>"
+                aria-expanded="false"
+                aria-controls="<?php echo $cfPanelId; ?>">
+            <span class="h5 mb-0"><i class="bi bi-input-cursor-text"></i> <?php echo __('Additional Fields'); ?></span>
+            <i class="bi bi-chevron-down cf-panel-chevron" aria-hidden="true"></i>
+        </button>
     </div>
-    <div class="card-body">
-        <?php echo $html; ?>
+    <div id="<?php echo $cfPanelId; ?>" class="collapse">
+        <div class="card-body">
+            <?php echo $html; ?>
+        </div>
     </div>
 </section>

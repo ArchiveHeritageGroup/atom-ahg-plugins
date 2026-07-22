@@ -411,6 +411,17 @@
       <?php if (in_array('ahgSecurityClearancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
       <?php include_partial('securityClearance/securityFieldset', ['resource' => $resource]); ?>
       <?php endif; ?>
+
+      <?php // Admin-defined custom fields. The partial renders nothing when no
+            // field definitions exist for this entity type, and carries its own
+            // save handler - it POSTs to /customFields/save when this form is
+            // submitted, so no change to the ISAD form handling is needed.
+            // Only on an existing record: values key off the object id. ?>
+      <?php if (isset($resource->id) && $resource->id
+                && in_array('ahgCustomFieldsPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+      <?php include_partial('customField/editFields', ['entityType' => 'informationobject', 'objectId' => $resource->id]); ?>
+      <?php endif; ?>
+
       <?php echo get_partial('informationobject/adminInfo', ['form' => $form, 'resource' => $resource]); ?>
 
     </div>

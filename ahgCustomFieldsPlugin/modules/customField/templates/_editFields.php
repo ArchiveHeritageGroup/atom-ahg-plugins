@@ -24,17 +24,28 @@ if (empty($html)) {
 $saveUrl = $saveUrl ?? url_for(['module' => 'customField', 'action' => 'saveValues']);
 ?>
 
+<?php $cfEditId = 'cf-edit-' . preg_replace('/[^a-z0-9]+/i', '-', $entityType) . '-' . (int) $objectId; ?>
 <section class="card mb-3 cf-edit-section">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="bi bi-input-cursor-text"></i> Additional Fields</h5>
-        <button type="button" class="btn btn-sm btn-outline-success cf-save-fields-btn" style="display:none">
-            <i class="bi bi-check-circle"></i> Save Fields
+    <div class="card-header d-flex justify-content-between align-items-center p-0">
+        <?php // Collapsed by default, matching the view panel. The toggle and the
+              // save button are siblings - a button cannot be nested in a button. ?>
+        <button class="btn btn-link text-start text-decoration-none d-flex align-items-center gap-2 p-3 flex-grow-1 collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#<?php echo $cfEditId; ?>"
+                aria-expanded="false"
+                aria-controls="<?php echo $cfEditId; ?>">
+            <i class="bi bi-input-cursor-text"></i>
+            <span class="h5 mb-0"><?php echo __('Additional Fields'); ?></span>
+            <i class="bi bi-chevron-down ms-auto" aria-hidden="true"></i>
         </button>
     </div>
-    <div class="card-body">
-        <input type="hidden" name="entity_type" value="<?php echo htmlspecialchars($entityType); ?>">
-        <input type="hidden" name="object_id" value="<?php echo (int) $objectId; ?>">
-        <?php echo $html; ?>
+    <div id="<?php echo $cfEditId; ?>" class="collapse">
+        <div class="card-body">
+            <input type="hidden" name="entity_type" value="<?php echo htmlspecialchars($entityType); ?>">
+            <input type="hidden" name="object_id" value="<?php echo (int) $objectId; ?>">
+            <?php echo $html; ?>
+        </div>
     </div>
 </section>
 
@@ -97,29 +108,43 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     };
 
-    // Show standalone save button if present
-    var saveBtn = section.querySelector('.cf-save-fields-btn');
-    if (saveBtn) {
-        saveBtn.style.display = '';
-        saveBtn.addEventListener('click', function() {
-            this.disabled = true;
-            this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
-            var btn = this;
-            window.cfSaveFields().then(function(data) {
-                btn.disabled = false;
-                btn.innerHTML = data.success
-                    ? '<i class="bi bi-check-circle"></i> Saved!'
-                    : '<i class="bi bi-check-circle"></i> Save Fields';
-                if (data.success) {
-                    setTimeout(function() {
-                        btn.innerHTML = '<i class="bi bi-check-circle"></i> Save Fields';
-                    }, 2000);
-                }
-            }).catch(function() {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-check-circle"></i> Save Fields';
-            });
-        });
+    // Save with the record's own Save button - there is no separate one.
+    //
+    // The values POST to their own endpoint, so the record form must wait for
+    // that request before navigating away, or the field values are lost. The
+    // first submit is intercepted, the fields are saved, then the form is
+    // submitted for real.
+    var form = section.closest('form');
+    if (!form) {
+        return;   // no parent form (unlikely) - nothing sensible to hook
     }
+
+    var passedThrough = false;
+
+    form.addEventListener('submit', function(e) {
+        if (passedThrough) {
+            return;   // our own re-submit: let it go
+        }
+        e.preventDefault();
+        passedThrough = true;
+
+        // form.submit() does not carry the clicked button's name/value, which
+        // AtoM uses to distinguish Save from Save-and-continue. Preserve it.
+        var submitter = e.submitter;
+        if (submitter && submitter.name) {
+            var carry = document.createElement('input');
+            carry.type = 'hidden';
+            carry.name = submitter.name;
+            carry.value = submitter.value || '';
+            form.appendChild(carry);
+        }
+
+        // Save the fields first, then submit regardless of the outcome - a
+        // failed custom-field save must not block saving the record itself.
+        // cfSaveFields() already alerts the user if it fails.
+        window.cfSaveFields()
+            .catch(function () { /* reported inside cfSaveFields */ })
+            .then(function () { form.submit(); });
+    });
 });
 </script>

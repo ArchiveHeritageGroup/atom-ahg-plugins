@@ -528,6 +528,35 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
 
 <?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())) { include_component('ricExplorer', 'ricPanel', ['resource' => $resource]); } ?>
 
+<!-- PLUGIN DISPLAY PANELS
+     Any enabled plugin may declare `display_panels` in its extension.json;
+     ahgDisplayPlugin's DisplayActionRegistry collects them. Nothing rendered
+     them before this, so every declared panel was invisible - this is the
+     generic join, not a custom-fields-specific hook. Panels position themselves
+     via `position`, and each is responsible for returning '' when it has
+     nothing to show. Fails soft: if the display plugin is absent the block is
+     skipped entirely. -->
+<?php if (class_exists('\AhgDisplay\Registry\DisplayActionRegistry')): ?>
+  <?php
+      $panelRegistry = '\AhgDisplay\Registry\DisplayActionRegistry';
+      try {
+          foreach ($panelRegistry::getPanelsForContext('informationobject', 'below-content', $resource) as $panel) {
+              $html = $panelRegistry::renderPanel($panel, $resource);
+              if ('' === trim((string) $html)) {
+                  continue;   // panel had nothing for this record
+              }
+              // The panel template owns its own heading and chrome - adding one
+              // here duplicated it. Wrap only, do not decorate.
+              echo '<div id="panel-' . htmlspecialchars($panel['id'] ?? 'plugin', ENT_QUOTES, 'UTF-8') . '">';
+              echo $html;
+              echo '</div>';
+          }
+      } catch (Throwable $e) {
+          error_log('ahgThemeB5Plugin: display panel rendering failed: ' . $e->getMessage());
+      }
+  ?>
+<?php endif ?>
+
 </div><!-- /TTS Content Area -->
 
 <?php slot('after-content'); ?>
