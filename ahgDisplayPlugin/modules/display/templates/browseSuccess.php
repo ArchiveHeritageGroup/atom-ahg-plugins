@@ -507,7 +507,7 @@ function getItemUrl($obj) {
 .table-resizable th .resize-handle:hover, .table-resizable th .resize-handle.resizing { background: rgba(29, 106, 82, 0.3); }
 .table-resizable th.resizing { user-select: none; }
 /* GLAM Browse utilities */
-.glam-filter-header { background-color: #1d6a52; }
+.glam-filter-header { background-color: var(--bs-primary, #1d6a52); }
 .cursor-pointer { cursor: pointer; }
 .facet-link { max-width: 180px; }
 .browse-table { font-size: 0.95rem; }

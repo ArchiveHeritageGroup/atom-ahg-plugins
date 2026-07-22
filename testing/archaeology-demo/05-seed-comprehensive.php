@@ -387,3 +387,7 @@ try {
     echo '  ROLLED BACK: ' . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n";
     exit(1);
 }
+
+// Keep browse facets ("Narrow your results by:") current after this seed.
+require __DIR__ . '/_refresh_facets.php';
+refresh_demo_facets();

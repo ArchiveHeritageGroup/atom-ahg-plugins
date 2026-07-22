@@ -340,3 +340,7 @@ printf("  repositories : %d\n", DB::table('repository')->count());
 printf("  accessions   : %d\n", DB::table('accession')->count());
 printf("  taxonomies   : %d\n", DB::table('taxonomy')->count());
 printf("  terms        : %d\n", DB::table('term')->count());
+
+// Keep browse facets ("Narrow your results by:") current after this seed.
+require __DIR__ . '/_refresh_facets.php';
+refresh_demo_facets();

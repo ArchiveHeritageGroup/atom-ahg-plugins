@@ -226,6 +226,9 @@ body:has(.heritage-landing) .container-xxl {
     text-decoration: none;
     margin: 0 0.5rem;
     padding: 0.25rem 0.75rem;
+    /* 50% transparent fill so the chips are visible, not see-through, over the
+       hero image, while keeping the white label readable. */
+    background: rgba(0, 0, 0, 0.5);
     border: 1px solid rgba(255,255,255,0.4);
     border-radius: 50px;
     display: inline-block;
