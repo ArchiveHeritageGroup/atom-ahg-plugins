@@ -12,6 +12,30 @@ function pii_filter($objectId, $content) {
 }
 ?>
 
+<?php
+// Full-embargo enforcement (see sfIsadPlugin/indexSuccess.php). A full embargo blocks the
+// whole record for users who cannot access it; staff bypass. Render a notice and stop
+// before any record content is output.
+if (isset($resource) && class_exists('\ahgExtendedRightsPlugin\Services\EmbargoService')) {
+    try {
+        $__embargoBlocked = !(new \ahgExtendedRightsPlugin\Services\EmbargoService())
+            ->canAccessRecord((int) $resource->id, $sf_user);
+    } catch (\Throwable $__e) {
+        $__embargoBlocked = false;
+    }
+    if (!empty($__embargoBlocked)) {
+        slot('title'); echo __('Access restricted'); end_slot();
+        slot('sidebar'); end_slot();
+        ?>
+        <div class="alert alert-warning my-4" role="alert">
+          <h4 class="alert-heading"><i class="fas fa-lock me-2"></i><?php echo __('This record is under embargo'); ?></h4>
+          <p class="mb-0"><?php echo __('Access to this record is currently restricted. Please contact the repository for more information.'); ?></p>
+        </div>
+        <?php
+        return;
+    }
+}
+?>
 <?php slot('sidebar'); ?>
   <?php include_component('informationobject', 'contextMenu'); ?>
 <?php end_slot(); ?>
