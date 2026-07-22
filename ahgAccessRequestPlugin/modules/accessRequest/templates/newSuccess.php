@@ -17,9 +17,7 @@
           <h4 class="mb-0"><i class="fas fa-key me-2"></i>Request Access</h4>
         </div>
         <div class="card-body">
-          <?php if ($sf_user->hasFlash('error')): ?>
-            <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-          <?php endif; ?>
+          <?php /* Flash messages render globally via the theme layout (get_partial('alerts')); not repeated here. */ ?>
 
           <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>

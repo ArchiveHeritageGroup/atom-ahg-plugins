@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `access_request` (
   `request_type` VARCHAR(64) COMMENT 'clearance, object, repository, authority, researcher' DEFAULT 'clearance',
   `scope_type` VARCHAR(70) COMMENT 'single, with_children, collection, repository_all, renewal' DEFAULT 'single',
   `user_id` int unsigned NOT NULL,
-  `requested_classification_id` int unsigned NOT NULL,
+  `requested_classification_id` int unsigned DEFAULT NULL COMMENT 'clearance requests only; NULL for object/collection/repository/all scopes',
   `current_classification_id` int unsigned DEFAULT NULL,
   `reason` text NOT NULL,
   `justification` text,

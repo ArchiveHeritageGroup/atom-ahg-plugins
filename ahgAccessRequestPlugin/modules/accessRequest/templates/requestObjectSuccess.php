@@ -11,9 +11,7 @@
         </ol>
       </nav>
 
-      <?php if ($sf_user->hasFlash('error')): ?>
-        <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
-      <?php endif; ?>
+      <?php /* Flash messages render globally via the theme layout (get_partial('alerts')); not repeated here. */ ?>
 
       <div class="card">
         <div class="card-header bg-primary text-white">
