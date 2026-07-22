@@ -270,7 +270,7 @@ $chartMetrics = ['lux' => __('Light (lux)'), 'temp_c' => __('Temperature (C)'), 
     </div></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"<?php echo $nonce ?>></script>
+  <script src="/plugins/ahgThemeB5Plugin/web/js/chart.umd.min.js"<?php echo $nonce ?>></script>
   <script<?php echo $nonce ?>>
   (function () {
     var DATA = <?php echo json_encode($data, $JSON) ?>;

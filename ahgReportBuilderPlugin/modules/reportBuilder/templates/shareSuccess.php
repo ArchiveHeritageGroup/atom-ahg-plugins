@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($report->name ?? 'Shared Report'); ?> - AtoM Report Builder</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    <link href="/plugins/ahgThemeB5Plugin/web/css/bootstrap.min.css" rel="stylesheet"
           <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
     <link href="/plugins/ahgThemeB5Plugin/web/css/bootstrap-icons.min.css" rel="stylesheet"
           <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
@@ -200,7 +200,7 @@ if ($rawShare) {
 </footer>
 <?php endif; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+<script src="/plugins/ahgThemeB5Plugin/web/js/bootstrap.bundle.min.js"
         <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php
 // Render charts if Chart.js data is available
@@ -215,7 +215,7 @@ if (!empty($rawSections)) {
 }
 if (!empty($chartSections)):
 ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"
+<script src="/plugins/ahgThemeB5Plugin/web/js/chart.umd.min.js"
         <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {

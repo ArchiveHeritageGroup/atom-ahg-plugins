@@ -171,7 +171,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" <?php echo $nonceAttr; ?>></script>
+<script src="/plugins/ahgThemeB5Plugin/web/js/chart.umd.min.js" <?php echo $nonceAttr; ?>></script>
 <script <?php echo $nonceAttr; ?>>
 (function () {
   if (typeof Chart === 'undefined') return;

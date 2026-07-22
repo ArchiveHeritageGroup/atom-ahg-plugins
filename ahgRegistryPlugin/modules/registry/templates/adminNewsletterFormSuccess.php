@@ -109,8 +109,8 @@
 </div>
 
 <!-- Quill.js Rich Text Editor -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
-<script <?php echo $na; ?> src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/quill.snow.css">
+<script <?php echo $na; ?> src="/plugins/ahgThemeB5Plugin/web/js/quill.js"></script>
 <script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var quill = new Quill('#editor-container', {

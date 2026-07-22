@@ -74,7 +74,7 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
     ? $levelsBySector[$currentType] 
     : $levelsBySector[''];
 ?>
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<link href="/plugins/ahgThemeB5Plugin/web/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
 <div class="accordion mb-3" id="glamAdvancedSearchAccordion">
   <div class="accordion-item">
@@ -352,7 +352,7 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/web/js/tom-select.complete.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     var repoSelect = document.getElementById('repo-select');

@@ -63,7 +63,7 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
                     <div class="markdown-body" id="studio-body">
                         <pre class="bg-light p-3"><?php echo htmlspecialchars($body); ?></pre>
                     </div>
-                    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" <?php echo $nonceAttr; ?>></script>
+                    <script src="/plugins/ahgThemeB5Plugin/web/js/mermaid.min.js" <?php echo $nonceAttr; ?>></script>
                     <script <?php echo $nonceAttr; ?>>mermaid.initialize({ startOnLoad: true });</script>
                 <?php elseif ($artefact->output_type === 'spreadsheet'): ?>
                     <div class="markdown-body" id="studio-body">

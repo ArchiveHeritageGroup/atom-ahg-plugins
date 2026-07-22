@@ -75,7 +75,7 @@ require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlu
     </table>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/web/js/chart.umd.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 var historyData = <?php echo json_encode(array_map(function($h) {
     return ['date' => date('M d, Y', strtotime($h->assessed_at)), 'score' => (float) $h->score, 'damages' => (int) $h->damage_count];

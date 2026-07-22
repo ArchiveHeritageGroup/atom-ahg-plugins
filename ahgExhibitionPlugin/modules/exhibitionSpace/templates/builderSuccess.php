@@ -244,9 +244,9 @@ $bootData = [
   </div>
 </div>
 
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-<script<?php echo $nonce ?> src="https://cdn.jsdelivr.net/npm/konva@9.3.6/konva.min.js"></script>
+<link href="/plugins/ahgThemeB5Plugin/web/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script<?php echo $nonce ?> src="/plugins/ahgThemeB5Plugin/web/js/tom-select.complete.min.js"></script>
+<script<?php echo $nonce ?> src="/plugins/ahgThemeB5Plugin/web/js/konva.min.js"></script>
 <script<?php echo $nonce ?> type="application/json" id="exhibBuilderData"><?php echo json_encode($bootData, $JSON) ?></script>
 <script<?php echo $nonce ?>>
 (function () {

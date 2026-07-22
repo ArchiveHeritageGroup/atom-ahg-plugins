@@ -144,8 +144,8 @@
 </div>
 
 <?php $n = sfConfig::get('csp_nonce', ''); $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/styles/choices.min.css">
-<script src="https://cdn.jsdelivr.net/npm/choices.js@10.2.0/public/assets/scripts/choices.min.js" <?php echo $na; ?>></script>
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/choices.min.css">
+<script src="/plugins/ahgThemeB5Plugin/web/js/choices.min.js" <?php echo $na; ?>></script>
 <script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function () {
   var el = document.getElementById('cf-roles');

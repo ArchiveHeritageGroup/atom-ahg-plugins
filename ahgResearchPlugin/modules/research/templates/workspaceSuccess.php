@@ -273,7 +273,7 @@ $canUseFeatures = $researcher->status === 'approved' && (!$researcher->expires_a
 
 <!-- Chart.js (activity sparkline) -->
 <?php if (isset($weeklyActivity)): ?>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/plugins/ahgThemeB5Plugin/web/js/chart.umd.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   <?php
