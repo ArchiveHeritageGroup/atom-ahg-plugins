@@ -13,9 +13,12 @@
 
   <?php echo $form->renderFormTag(url_for([$resource, 'module' => 'repository', 'action' => 'editTheme'])); ?>
 
-    <?php // M12 CSRF: AHG CsrfService validates _ahg_csrf_token (distinct from base AtoM's _csrf_token). ?>
-    <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '')); ?>">
-
+    <?php // NB: do NOT add the M12 _ahg_csrf_token field here - this is a base-AtoM
+          // Symfony form with strict field validation (rejects unknown fields as
+          // "Unexpected extra form field"), and its action is locked base code that
+          // cannot set allow_extra_fields. The form is already CSRF-protected by base
+          // AtoM's own _csrf_token in renderHiddenFields; the M12 log-mode "missing"
+          // note for this endpoint is harmless. ?>
     <?php echo $form->renderHiddenFields(); ?>
 
     <div class="accordion mb-3">
