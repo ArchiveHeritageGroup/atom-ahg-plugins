@@ -167,3 +167,23 @@ SELECT s.id, l.name, v.value FROM `setting` s
   JOIN `setting_i18n` v ON v.id = s.id AND v.culture = 'en'
   JOIN `setting` l ON l.scope = 'i18n_languages'
   WHERE s.name = 'siteBaseUrl';
+
+-- ----------------------------------------------------------------------------
+-- Browse menu entry for the find search.
+--
+-- `menu` is a nested set, so a slot must be opened under Browse before the row
+-- is inserted - writing arbitrary lft/rgt corrupts site-wide navigation.
+-- ----------------------------------------------------------------------------
+SET @browse := (SELECT id FROM `menu` WHERE `name` = 'browse' LIMIT 1);
+SET @exists := (SELECT COUNT(*) FROM `menu` WHERE `name` = 'browseFindSearch');
+SET @rgt := (SELECT rgt FROM `menu` WHERE id = @browse);
+
+UPDATE `menu` SET rgt = rgt + 2 WHERE @exists = 0 AND rgt >= @rgt;
+UPDATE `menu` SET lft = lft + 2 WHERE @exists = 0 AND lft > @rgt;
+
+INSERT INTO `menu` (`parent_id`, `name`, `path`, `lft`, `rgt`, `source_culture`, `created_at`, `updated_at`)
+SELECT @browse, 'browseFindSearch', 'customFields/search', @rgt, @rgt + 1, 'en', NOW(), NOW()
+  FROM DUAL WHERE @exists = 0;
+
+INSERT INTO `menu_i18n` (`id`, `culture`, `label`)
+SELECT LAST_INSERT_ID(), 'en', 'Find search' FROM DUAL WHERE @exists = 0;
