@@ -127,8 +127,14 @@
 
             <h6 class="text-uppercase text-muted mt-3">Supporting documents</h6>
             <div class="mb-3">
-              <input type="file" name="documents[]" class="form-control" multiple>
-              <small class="form-text text-muted">Attach the SAHRA application form, method statement, CVs, existing permits, etc. (PDF / Word / Excel / images / zip, up to 25 MB each). You can add more after submitting.</small>
+              <div id="sahra-doc-inputs">
+                <div class="input-group mb-2 sahra-doc-row">
+                  <input type="file" name="documents[]" class="form-control" multiple>
+                  <button type="button" class="btn btn-outline-secondary sahra-doc-remove" title="Remove"><i class="fas fa-times"></i></button>
+                </div>
+              </div>
+              <button type="button" id="sahra-doc-add" class="btn btn-sm btn-outline-secondary"><i class="fas fa-plus me-1"></i>Add another document</button>
+              <small class="form-text text-muted d-block mt-1">Attach the SAHRA application form, method statement, CVs, existing permits, etc. (PDF / Word / Excel / images / zip, up to 25 MB each). Each field can also select several files at once. You can add more after submitting.</small>
             </div>
 
             <div class="d-flex justify-content-between mt-3">

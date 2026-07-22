@@ -38,8 +38,8 @@ class ahgSAHRAPluginConfiguration extends sfPluginConfiguration
         $context = $event->getSubject();
         $response = $context->getResponse();
         if ('sahra' === $context->getModuleName()) {
-            $response->addStylesheet('/plugins/ahgSAHRAPlugin/css/sahra.css', 'last');
-            $response->addJavascript('/plugins/ahgSAHRAPlugin/js/sahra.js', 'last');
+            $response->addStylesheet('/plugins/ahgSAHRAPlugin/web/css/sahra.css', 'last');
+            $response->addJavascript('/plugins/ahgSAHRAPlugin/web/js/sahra.js', 'last');
         }
     }
 

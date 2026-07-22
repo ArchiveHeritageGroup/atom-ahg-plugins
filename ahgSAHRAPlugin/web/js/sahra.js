@@ -102,6 +102,26 @@
     });
   }
 
+  // Application form: add/remove supporting-document upload rows.
+  var docAdd = document.getElementById('sahra-doc-add');
+  var docInputs = document.getElementById('sahra-doc-inputs');
+  if (docAdd && docInputs) {
+    docAdd.addEventListener('click', function () {
+      var row = docInputs.querySelector('.sahra-doc-row');
+      if (!row) return;
+      var clone = row.cloneNode(true);
+      var input = clone.querySelector('input[type=file]');
+      if (input) input.value = '';
+      docInputs.appendChild(clone);
+    });
+    docInputs.addEventListener('click', function (e) {
+      var btn = e.target.closest('.sahra-doc-remove');
+      if (btn && docInputs.querySelectorAll('.sahra-doc-row').length > 1) {
+        btn.closest('.sahra-doc-row').remove();
+      }
+    });
+  }
+
   // Decision form: show the "issued" fields only when outcome = issued.
   document.querySelectorAll('form[data-sahra-decision]').forEach(function (form) {
     var issuedBlock = form.querySelector('[data-decision-issued]');
