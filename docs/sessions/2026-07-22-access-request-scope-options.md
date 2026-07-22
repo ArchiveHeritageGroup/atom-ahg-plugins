@@ -133,3 +133,22 @@ buttons).
 **Lesson:** never strict-compare a session attribute (string) against a DB column value
 (int) - cast both to int. A working SQL-based list filter can hide a broken PHP `===` owner
 check on the detail page.
+
+## Follow-up fix 4 (v3.79.158) - approver scope visibility + Afrikaans email header
+
+1. **Approvers couldn't see the request scope.** The pending list's "Current -> Requested"
+   column only rendered classification badges (null for object requests), so object/
+   collection/repository/all requests showed nothing. `getPendingRequests()` already loaded
+   `$req->scopes`; the template just didn't render them. Fixed: pending list now shows a
+   scope label (Specific item / Collection / All holdings of repository / Entire archive)
+   plus the target title; the view page shows a clear scope summary with a dedicated
+   "entire archive" callout instead of dumping the raw tree root (object_id 1).
+
+2. **Notification email sender name was Afrikaans.** `sendEmail()` selected `siteTitle`
+   with no culture filter and grabbed the `af` row ("Wits Argeologiese Versameling").
+   `siteTitle` exists per-culture (af + en). Fixed to select the site's default culture
+   (`sf_default_culture`, effectively `en`) -> "Wits Archaeological Collection", falling
+   back to any culture then "Archive".
+
+**Lesson:** any `setting_i18n` lookup (siteTitle etc.) MUST filter by culture - an unfiltered
+`->value()` returns an arbitrary culture row and can surface the wrong language.
