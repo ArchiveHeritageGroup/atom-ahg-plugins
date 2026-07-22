@@ -174,12 +174,22 @@ class SahraPermitService
      */
     public function storeUploadedDocuments($files, int $permitId, ?int $userId, string $type = 'supporting'): int
     {
-        if (empty($files) || !isset($files['name'])) {
+        if (empty($files) || !is_array($files)) {
             return 0;
         }
 
         $items = [];
-        if (is_array($files['name'])) {
+
+        if (isset($files[0]) && is_array($files[0])) {
+            // sfWebRequest::getFiles() normalises multi-file uploads to a list of
+            // file-arrays: [0 => ['name'=>..,'tmp_name'=>..,'error'=>..,'size'=>..], ...]
+            foreach ($files as $f) {
+                if (is_array($f) && isset($f['name']) && (int) ($f['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+                    $items[] = $f;
+                }
+            }
+        } elseif (isset($files['name']) && is_array($files['name'])) {
+            // Raw PHP $_FILES multi-file shape: ['name'=>[...], 'tmp_name'=>[...], ...]
             foreach ($files['name'] as $i => $name) {
                 if ((int) ($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
                     $items[] = [
@@ -190,8 +200,11 @@ class SahraPermitService
                     ];
                 }
             }
-        } elseif ((int) ($files['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
-            $items[] = ['name' => $files['name'], 'type' => $files['type'] ?? null, 'tmp_name' => $files['tmp_name'], 'size' => (int) ($files['size'] ?? 0)];
+        } elseif (isset($files['name'])) {
+            // Raw single-file shape.
+            if ((int) ($files['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+                $items[] = ['name' => $files['name'], 'type' => $files['type'] ?? null, 'tmp_name' => $files['tmp_name'], 'size' => (int) ($files['size'] ?? 0)];
+            }
         }
 
         $stored = 0;
