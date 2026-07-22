@@ -22,7 +22,7 @@ class sahraActions extends AhgController
      */
     public function preExecute()
     {
-        $always = ['config', 'reviewerAdd', 'reviewerRemove'];
+        $always = ['config', 'reviewerAdd', 'reviewerRemove', 'reviewerCreate'];
         if (in_array($this->getActionName(), $always, true)) {
             return;
         }
@@ -155,7 +155,7 @@ class sahraActions extends AhgController
         ]);
 
         // Any files uploaded with the application.
-        $this->getService()->storeUploadedDocuments($id, $request->getFiles('documents'), $this->userId(), 'application');
+        $this->getService()->storeUploadedDocuments($request->getFiles('documents'), $id, $this->userId(), 'application');
 
         $this->getUser()->setFlash('success', 'Application submitted for supervisor endorsement.');
         $this->redirect(['module' => 'sahra', 'action' => 'permitView', 'id' => $id]);
@@ -197,7 +197,7 @@ class sahraActions extends AhgController
         $uid = $this->userId();
         $isApplicant = (int) $this->permit->applicant_user_id === $uid;
         $isSupervisor = (int) $this->permit->supervisor_user_id === $uid;
-        if (!$isApplicant && !$isSupervisor && !$this->isAdmin() && !$this->getUser()->hasCredential('editor')) {
+        if (!$isApplicant && !$isSupervisor && !$this->isAdmin() && !$this->getUser()->hasCredential('editor') && !$this->getService()->isSahraReviewer($uid)) {
             $this->getUser()->setFlash('error', 'You are not authorised to view this permit.');
             $this->redirect('@sahra_my');
         }
@@ -533,6 +533,60 @@ class sahraActions extends AhgController
         $userId = (int) $request->getParameter('id');
         $this->getService()->removeReviewer($userId);
         $this->getUser()->setFlash('success', 'SAHRA reviewer removed.');
+        $this->redirect('@sahra_config');
+    }
+
+    /**
+     * Create a least-privilege user account for a SAHRA official and designate
+     * them a reviewer in one step. Reuses ahgUserManage's UserCrudService so
+     * the account (object/actor/i18n/slug + Argon2id password + group 99) is
+     * built correctly. No editor/admin group - reviewer access only.
+     */
+    public function executeReviewerCreate($request)
+    {
+        $this->checkAdmin();
+        if (!$request->isMethod('post')) {
+            $this->redirect('@sahra_config');
+        }
+
+        $svcFile = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgUserManagePlugin/lib/Services/UserCrudService.php';
+        if (!class_exists('\AhgUserManage\Services\UserCrudService') && file_exists($svcFile)) {
+            require_once $svcFile;
+        }
+        if (!class_exists('\AhgUserManage\Services\UserCrudService')) {
+            $this->getUser()->setFlash('error', 'User management service unavailable - enable ahgUserManagePlugin.');
+            $this->redirect('@sahra_config');
+        }
+
+        $username = trim((string) $request->getParameter('username'));
+        $email = trim((string) $request->getParameter('email'));
+        $fullName = trim((string) $request->getParameter('full_name'));
+        $authority = trim((string) $request->getParameter('authority')) ?: 'SAHRA';
+        $password = (string) $request->getParameter('password');
+
+        if ($username === '' || $email === '' || $password === '') {
+            $this->getUser()->setFlash('error', 'Username, email and password are required.');
+            $this->redirect('@sahra_config');
+        }
+        if (\AhgUserManage\Services\UserCrudService::usernameExists($username)) {
+            $this->getUser()->setFlash('error', 'That username already exists.');
+            $this->redirect('@sahra_config');
+        }
+        if (\AhgUserManage\Services\UserCrudService::emailExists($email)) {
+            $this->getUser()->setFlash('error', 'That email address is already in use.');
+            $this->redirect('@sahra_config');
+        }
+
+        $newId = \AhgUserManage\Services\UserCrudService::create([
+            'username' => $username,
+            'email' => $email,
+            'password' => $password,
+            'authorizedFormOfName' => $fullName ?: $username,
+            'active' => 1,
+        ]);
+        $this->getService()->addReviewer((int) $newId, $authority, $this->userId());
+
+        $this->getUser()->setFlash('success', 'SAHRA reviewer account created for "' . $username . '" (' . $authority . ').');
         $this->redirect('@sahra_config');
     }
 

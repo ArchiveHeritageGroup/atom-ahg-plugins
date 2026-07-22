@@ -103,6 +103,7 @@ class ahgSAHRAPluginConfiguration extends sfPluginConfiguration
         $sahra->any('sahra_reports', '/sahra/reports', 'reports');
         $sahra->any('sahra_config', '/sahra/config', 'config');
         $sahra->any('sahra_reviewer_add', '/sahra/config/reviewer/add', 'reviewerAdd');
+        $sahra->any('sahra_reviewer_create', '/sahra/config/reviewer/create', 'reviewerCreate');
         $sahra->any('sahra_reviewer_remove', '/sahra/config/reviewer/:id/remove', 'reviewerRemove', ['id' => '\d+']);
 
         $sahra->register($routing);

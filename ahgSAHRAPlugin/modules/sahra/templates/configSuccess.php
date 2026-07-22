@@ -100,6 +100,40 @@
             </div>
             <div class="col-md-2"><button class="btn btn-sm btn-primary w-100"><i class="fas fa-user-plus me-1"></i> Add</button></div>
           </form>
+
+          <hr>
+          <h6 class="mb-1"><i class="fas fa-id-badge me-1"></i> Create a new SAHRA reviewer account</h6>
+          <p class="text-muted small mb-2">For an official who does not yet have an account. This creates a least-privilege account (reviewer access only - no admin) and designates them a reviewer in one step.</p>
+          <form method="post" action="<?php echo url_for('@sahra_reviewer_create'); ?>" class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label mb-0 small">Full name</label>
+              <input type="text" name="full_name" class="form-control form-control-sm" placeholder="e.g. Dr Jane Doe">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label mb-0 small">Username <span class="text-danger">*</span></label>
+              <input type="text" name="username" class="form-control form-control-sm" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label mb-0 small">Email <span class="text-danger">*</span></label>
+              <input type="email" name="email" class="form-control form-control-sm" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label mb-0 small">Password <span class="text-danger">*</span></label>
+              <input type="text" name="password" class="form-control form-control-sm" required autocomplete="off">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label mb-0 small">Acts for</label>
+              <select name="authority" class="form-select form-select-sm">
+                <?php foreach ($authorities as $a): ?>
+                  <option value="<?php echo htmlspecialchars($a); ?>"><?php echo htmlspecialchars($a); ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-12 mt-2">
+              <button class="btn btn-sm btn-success"><i class="fas fa-user-plus me-1"></i> Create reviewer account</button>
+              <small class="text-muted ms-2">Share the password with the official; they can change it after logging in.</small>
+            </div>
+          </form>
         </div>
       </div>
     </div>
