@@ -27,6 +27,10 @@
 
   <form method="post" action="<?php echo $isNew ? url_for('@user_add_override') : url_for('@user_edit_override?slug=' . $userRecord['slug']); ?>" id="editForm" autocomplete="off">
 
+    <?php // M12 CSRF: the AHG CsrfService validates a token named _ahg_csrf_token,
+          // deliberately distinct from base AtoM's own _csrf_token (in renderHiddenFields). ?>
+    <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '')); ?>">
+
     <?php echo $form->renderHiddenFields(); ?>
 
     <div class="accordion mb-3">

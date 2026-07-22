@@ -153,6 +153,31 @@ class displayActions extends AhgController
         $this->subjectSearchFilter = $request->getParameter("subjectSearch");
         $this->placeSearchFilter = $request->getParameter("placeSearch");
         $this->genreSearchFilter = $request->getParameter("genreSearch");
+
+        // Custom-field ("Additional Fields") search: read any cf_<field_key> param
+        // for a searchable custom field. Prefixed cf_ so keys never collide with the
+        // browse's own params. Applied as a whereExists on custom_field_value below.
+        $this->customFieldFilters = [];
+        if (in_array('ahgCustomFieldsPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+            try {
+                $cfDefs = DB::table('custom_field_definition')
+                    ->where('is_searchable', 1)->where('is_active', 1)
+                    ->where('entity_type', 'informationobject')
+                    ->get(['id', 'field_key', 'field_type']);
+                foreach ($cfDefs as $def) {
+                    $val = $request->getParameter('cf_' . $def->field_key);
+                    if (null !== $val && '' !== $val) {
+                        $this->customFieldFilters[] = ['def_id' => (int) $def->id, 'type' => $def->field_type, 'value' => $val];
+                    }
+                }
+            } catch (\Throwable $e) { /* custom_field_definition absent - skip */ }
+        }
+        // Custom fields live on nested find-level records, so a custom-field search
+        // must span all levels - override the default top-level-only scope.
+        if (!empty($this->customFieldFilters)) {
+            $this->topLevelOnly = '0';
+        }
+
         $this->repoFilter = $request->getParameter('repo');
         $this->startDateFilter = $request->getParameter('startDate');
         $this->endDateFilter = $request->getParameter('endDate');
@@ -775,6 +800,25 @@ class displayActions extends AhgController
                     ->whereRaw("otr.object_id = io.id")
                     ->where("t.taxonomy_id", 78)
                     ->where("ti.name", "like", "%".$this->genreSearchFilter."%");
+            });
+        }
+
+        // Custom-field ("Additional Fields") filters - one whereExists per selected field.
+        foreach (($this->customFieldFilters ?? []) as $cf) {
+            $query->whereExists(function($sub) use ($cf) {
+                $sub->select(DB::raw(1))
+                    ->from("custom_field_value as cfv")
+                    ->whereRaw("cfv.object_id = io.id")
+                    ->where("cfv.field_definition_id", $cf['def_id']);
+                if ('number' === $cf['type']) {
+                    $sub->where("cfv.value_number", $cf['value']);
+                } elseif ('dropdown' === $cf['type']) {
+                    $sub->where("cfv.value_dropdown", $cf['value']);
+                } elseif ('boolean' === $cf['type']) {
+                    $sub->where("cfv.value_boolean", (int) (bool) $cf['value']);
+                } else {
+                    $sub->where("cfv.value_text", "like", "%".$cf['value']."%");
+                }
             });
         }
 

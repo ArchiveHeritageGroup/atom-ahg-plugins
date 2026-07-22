@@ -245,6 +245,19 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
                       'placeSearch' => __('Place'),
                       'genreSearch' => __('Genre'),
                   ];
+                  // Append searchable custom "Additional Fields", prefixed cf_ so the
+                  // submitted param never collides with the browse's own field names.
+                  // The browse action applies these as whereExists on custom_field_value.
+                  if (in_array('ahgCustomFieldsPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+                      try {
+                          foreach (\Illuminate\Database\Capsule\Manager::table('custom_field_definition')
+                              ->where('is_searchable', 1)->where('is_active', 1)
+                              ->where('entity_type', 'informationobject')
+                              ->orderBy('sort_order')->get(['field_key', 'field_label']) as $cf) {
+                              $fieldSearchOptions['cf_' . $cf->field_key] = $cf->field_label;
+                          }
+                      } catch (\Throwable $e) { /* custom_field_definition absent - skip */ }
+                  }
                   $activeFieldSearches = [];
                   foreach ($fieldSearchOptions as $key => $label) {
                       if ($key && !empty($params[$key])) {
