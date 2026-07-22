@@ -1,3 +1,19 @@
+<?php
+// AtoM escaping wraps action variables in sfOutputEscaper decorators. Object
+// property reads survive that, but native array functions (array_slice below)
+// reject the decorator. Unwrap the action variables to plain values, and let
+// the template htmlspecialchars() as it already does.
+$object = $sf_data->getRaw('object');
+$summary = $sf_data->getRaw('summary');
+$consents = $sf_data->getRaw('consents');
+$notices = $sf_data->getRaw('notices');
+$labels = $sf_data->getRaw('labels');
+$restrictions = $sf_data->getRaw('restrictions');
+$consultations = $sf_data->getRaw('consultations');
+$statusOptions = $sf_data->getRaw('statusOptions');
+$scopeOptions = $sf_data->getRaw('scopeOptions');
+$restrictionTypes = $sf_data->getRaw('restrictionTypes');
+?>
 <?php // Title in the theme's title slot, with a Font Awesome icon, so the page
       // header looks like every other page rather than a raw Bootstrap heading. ?>
 <?php slot('title'); ?>
