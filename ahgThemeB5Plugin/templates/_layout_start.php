@@ -51,6 +51,11 @@ CSRFJS;
         $bundleErrors[] = 'ahgThemeB5Plugin.bundle.*.css not found in '.$distPath.'/css/';
     }
 
+    // Bootstrap Icons (bi-*) - vendored locally and loaded globally so bi-* icons
+    // render on every page (was CDN-only, so bi-* was blank on pages that did not
+    // pull the CDN stylesheet, e.g. the record-view context menu).
+    echo '<link href="/plugins/ahgThemeB5Plugin/web/css/bootstrap-icons.min.css" rel="stylesheet">';
+
     // Log errors if any bundles are missing
     if (!empty($bundleErrors)) {
         error_log('ahgThemeB5Plugin: Bundle loading errors - '.implode('; ', $bundleErrors));
