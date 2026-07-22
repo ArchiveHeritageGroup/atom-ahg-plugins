@@ -6,6 +6,19 @@
       <h1 class="h3 mb-3"><i class="fas fa-cog me-2"></i>SAHRA permit settings</h1>
 
       <form method="post" action="<?php echo url_for('@sahra_config'); ?>">
+        <div class="card border-<?php echo $featureEnabled ? 'success' : 'warning'; ?> mb-3">
+          <div class="card-body">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="sahra_enabled" name="sahra_enabled" value="1"<?php echo $featureEnabled ? ' checked' : ''; ?>>
+              <label class="form-check-label fw-bold" for="sahra_enabled">Enable SAHRA / NHRA heritage permits on this instance</label>
+            </div>
+            <small class="text-muted d-block mt-1">
+              This plugin ships with the software everywhere. Leave it <strong>off</strong> for instances outside South Africa
+              (e.g. Australia); the feature and its menu links stay hidden until switched on here.
+            </small>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-body">
             <div class="mb-3">

@@ -67,6 +67,99 @@ class SahraPermitService
     }
 
     // ---------------------------------------------------------------
+    // Feature gate (per-instance / per-jurisdiction)
+    //
+    // The plugin ships in the shared AtoM/Heratio codebase, so instances in
+    // other jurisdictions (e.g. Australia) have the code but must not see the
+    // SAHRA feature. It stays dormant until an admin switches it on here.
+    // ---------------------------------------------------------------
+
+    /** Nav links this feature owns: [parentMenuName, menuName, path, label]. */
+    private const MENU_LINKS = [
+        ['manage', 'sahraPermits', 'sahra/index', 'SAHRA permits'],
+        ['quickLinks', 'sahraMyPermits', 'sahra/my-applications', 'Heritage permits'],
+    ];
+
+    public function isFeatureEnabled(): bool
+    {
+        return (string) $this->getConfig('sahra_enabled', '0') === '1';
+    }
+
+    /** Toggle the feature and add/remove its nav links to match. */
+    public function setFeatureEnabled(bool $on): void
+    {
+        $this->setConfig('sahra_enabled', $on ? '1' : '0');
+        if ($on) {
+            $this->addMenuLinks();
+        } else {
+            $this->removeMenuLinks();
+        }
+    }
+
+    /** Idempotent nested-set insert of this feature's nav links. */
+    public function addMenuLinks(): void
+    {
+        foreach (self::MENU_LINKS as [$parentName, $name, $path, $label]) {
+            if (DB::table('menu')->where('name', $name)->exists()) {
+                continue;
+            }
+            $parent = DB::table('menu')->where('name', $parentName)->first();
+            if (!$parent) {
+                continue;
+            }
+            $r = (int) $parent->rgt;
+            $now = date('Y-m-d H:i:s');
+            DB::transaction(function () use ($parent, $r, $now, $name, $path, $label) {
+                DB::update('UPDATE menu SET rgt = rgt + 2 WHERE rgt >= ?', [$r]);
+                DB::update('UPDATE menu SET lft = lft + 2 WHERE lft >= ?', [$r]);
+                $id = DB::table('menu')->insertGetId([
+                    'parent_id' => (int) $parent->id,
+                    'name' => $name,
+                    'path' => $path,
+                    'lft' => $r,
+                    'rgt' => $r + 1,
+                    'source_culture' => 'en',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+                DB::table('menu_i18n')->insert(['id' => $id, 'culture' => 'en', 'label' => $label]);
+                $this->assertMenuIntegrity();
+            });
+        }
+    }
+
+    /** Remove this feature's nav links, closing the nested-set gap. */
+    public function removeMenuLinks(): void
+    {
+        foreach (self::MENU_LINKS as [, $name]) {
+            $node = DB::table('menu')->where('name', $name)->first();
+            if (!$node) {
+                continue;
+            }
+            $lft = (int) $node->lft;
+            $rgt = (int) $node->rgt;
+            $width = $rgt - $lft + 1;
+            DB::transaction(function () use ($node, $lft, $rgt, $width) {
+                DB::table('menu_i18n')->where('id', $node->id)->delete();
+                DB::table('menu')->where('id', $node->id)->delete();
+                DB::update('UPDATE menu SET lft = lft - ? WHERE lft > ?', [$width, $rgt]);
+                DB::update('UPDATE menu SET rgt = rgt - ? WHERE rgt > ?', [$width, $rgt]);
+                $this->assertMenuIntegrity();
+            });
+        }
+    }
+
+    private function assertMenuIntegrity(): void
+    {
+        $agg = DB::table('menu')->selectRaw('COUNT(*) n, MIN(lft) mn, MAX(rgt) mx')->first();
+        $bad = (int) DB::table('menu')->whereRaw('rgt <= lft')->count();
+        $expected = (int) (((int) $agg->mx - (int) $agg->mn + 1) / 2);
+        if ((int) $agg->n !== $expected || $bad > 0) {
+            throw new \RuntimeException('menu nested-set integrity check failed (n=' . $agg->n . ' expected=' . $expected . ' bad=' . $bad . ')');
+        }
+    }
+
+    // ---------------------------------------------------------------
     // Dashboard
     // ---------------------------------------------------------------
 
@@ -136,6 +229,18 @@ class SahraPermitService
         ]);
 
         $this->logAction($id, $status === 'draft' ? 'created' : 'submitted', (int) $data['applicant_user_id'], null, $status, 'Application created');
+
+        if ($status === 'pending_supervisor' && !empty($data['supervisor_user_id'])) {
+            $p = $this->getPermit($id);
+            if ($p) {
+                $this->notify(
+                    $this->userEmail((int) $data['supervisor_user_id']),
+                    'SAHRA permit application awaiting your endorsement',
+                    $this->emailBody($p, 'Application awaiting your endorsement',
+                        'A researcher has submitted a SAHRA / NHRA heritage permit application and nominated you as supervising professor. Please review and endorse or return it.')
+                );
+            }
+        }
 
         return $id;
     }
@@ -263,6 +368,9 @@ class SahraPermitService
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
         $this->logAction($id, 'endorsed', $userId, $p->status, 'supervisor_approved', $notes);
+        $this->notify($this->applicantEmail($p), 'Your SAHRA permit application was endorsed',
+            $this->emailBody($p, 'Application endorsed',
+                'Your supervising professor has endorsed your application. It is now with the heritage coordinator to lodge with SAHRA.'));
         return true;
     }
 
@@ -280,6 +388,9 @@ class SahraPermitService
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
         $this->logAction($id, 'rejected', $userId, $p->status, 'supervisor_rejected', $notes);
+        $this->notify($this->applicantEmail($p), 'Your SAHRA permit application was returned',
+            $this->emailBody($p, 'Application returned by your supervisor',
+                'Your supervising professor has returned your application' . ($notes ? ' with the note: "' . htmlspecialchars($notes) . '"' : '') . '. Please review and resubmit.'));
         return true;
     }
 
@@ -298,6 +409,12 @@ class SahraPermitService
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
         $this->logAction($id, 'sent_to_sahra', $userId, $p->status, 'submitted_to_sahra', $reference ? "SAHRA ref: {$reference}" : $notes);
+        $this->notifyReviewers($p, 'New SAHRA permit application to review',
+            'New application lodged for SAHRA decision',
+            'An endorsed heritage permit application has been lodged and awaits your decision (issue or decline).');
+        $this->notify($this->applicantEmail($p), 'Your SAHRA permit application was lodged with SAHRA',
+            $this->emailBody($p, 'Application lodged with SAHRA',
+                'Your application has been submitted to ' . htmlspecialchars($p->issuing_authority) . ' for a decision.'));
         return true;
     }
 
@@ -336,6 +453,15 @@ class SahraPermitService
             }
             DB::table('sahra_permit')->where('id', $id)->update($update);
             $this->logAction($id, 'issued', $userId, $p->status, 'active', 'Permit ' . ($data['sahra_permit_number'] ?? '') . ' issued');
+            $permitNo = $data['sahra_permit_number'] ?? '';
+            $this->notify($this->applicantEmail($p), 'Your SAHRA heritage permit has been issued',
+                $this->emailBody($p, 'Permit issued',
+                    'Good news - ' . htmlspecialchars($p->issuing_authority) . ' has issued your heritage permit'
+                    . ($permitNo ? ' (number <strong>' . htmlspecialchars($permitNo) . '</strong>)' : '')
+                    . '. Please review the conditions and validity period.'));
+            $this->notify($this->userEmail((int) $p->supervisor_user_id), 'SAHRA permit issued for your student',
+                $this->emailBody($p, 'Permit issued',
+                    'A heritage permit you endorsed has been issued by ' . htmlspecialchars($p->issuing_authority) . '.'));
             return true;
         }
 
@@ -346,6 +472,10 @@ class SahraPermitService
             'updated_at' => date('Y-m-d H:i:s'),
         ]);
         $this->logAction($id, 'sahra_rejected', $userId, $p->status, 'sahra_rejected', $data['sahra_notes'] ?? null);
+        $this->notify($this->applicantEmail($p), 'Decision on your SAHRA permit application',
+            $this->emailBody($p, 'Application declined',
+                htmlspecialchars($p->issuing_authority) . ' has declined this application'
+                . (!empty($data['sahra_notes']) ? ': "' . htmlspecialchars($data['sahra_notes']) . '"' : '') . '.'));
         return true;
     }
 
@@ -470,6 +600,99 @@ class SahraPermitService
         }
 
         return count($overdue);
+    }
+
+    // ---------------------------------------------------------------
+    // Email notifications (best-effort; never break the workflow)
+    // ---------------------------------------------------------------
+
+    public function emailEnabled(): bool
+    {
+        return (string) $this->getConfig('email_notifications', '1') !== '0';
+    }
+
+    private function siteTitle(): string
+    {
+        $culture = class_exists('\sfConfig') ? \sfConfig::get('sf_default_culture', 'en') : 'en';
+        $t = DB::table('setting_i18n')->join('setting', 'setting_i18n.id', '=', 'setting.id')
+            ->where('setting.name', 'siteTitle')->where('setting_i18n.culture', $culture)->value('setting_i18n.value');
+        if (!$t) {
+            $t = DB::table('setting_i18n')->join('setting', 'setting_i18n.id', '=', 'setting.id')
+                ->where('setting.name', 'siteTitle')->value('setting_i18n.value');
+        }
+        return $t ?: 'Archive';
+    }
+
+    private function permitUrl(int $id): string
+    {
+        $base = class_exists('\sfConfig') ? rtrim((string) \sfConfig::get('app_siteBaseUrl', ''), '/') : '';
+        return $base . '/index.php/sahra/permit/' . $id;
+    }
+
+    public function userEmail(?int $userId): ?string
+    {
+        if (!$userId) {
+            return null;
+        }
+        return DB::table('user')->where('id', $userId)->value('email');
+    }
+
+    private function applicantEmail(object $p): ?string
+    {
+        return $p->applicant_email ?: $this->userEmail((int) $p->applicant_user_id);
+    }
+
+    private function notify(?string $to, string $subject, string $bodyHtml): void
+    {
+        if (!$to || !$this->emailEnabled()) {
+            return;
+        }
+        try {
+            $svcPath = (class_exists('\sfConfig') ? \sfConfig::get('sf_plugins_dir', '') : '') . '/ahgCorePlugin/lib/Services/EmailService.php';
+            if (!class_exists('\AhgCore\Services\EmailService') && $svcPath && file_exists($svcPath)) {
+                require_once $svcPath;
+            }
+            if (class_exists('\AhgCore\Services\EmailService') && \AhgCore\Services\EmailService::isEnabled()) {
+                \AhgCore\Services\EmailService::send($to, $subject, $bodyHtml);
+                return;
+            }
+            $headers = [
+                'MIME-Version: 1.0',
+                'Content-type: text/html; charset=UTF-8',
+                'From: ' . $this->siteTitle() . ' <noreply@theahg.co.za>',
+            ];
+            @mail($to, $subject, $bodyHtml, implode("\r\n", $headers));
+        } catch (\Throwable $e) {
+            // best effort
+        }
+    }
+
+    private function emailBody(object $p, string $heading, string $message): string
+    {
+        $site = htmlspecialchars($this->siteTitle());
+        $ref = htmlspecialchars($p->application_ref);
+        $title = htmlspecialchars($p->project_title);
+        $url = $this->permitUrl((int) $p->id);
+        return "<html><body style='font-family:Arial,sans-serif;'>"
+            . "<h2>{$heading}</h2>"
+            . "<p>{$message}</p>"
+            . "<table style='border-collapse:collapse;'>"
+            . "<tr><td style='padding:4px 12px 4px 0;'><strong>Reference</strong></td><td>{$ref}</td></tr>"
+            . "<tr><td style='padding:4px 12px 4px 0;'><strong>Project</strong></td><td>{$title}</td></tr>"
+            . "</table>"
+            . "<p><a href='{$url}' style='background:#10373E;color:#fff;padding:8px 16px;text-decoration:none;'>View application</a></p>"
+            . "<p style='color:#888;font-size:12px;'>{$site} - SAHRA / NHRA heritage permits</p>"
+            . "</body></html>";
+    }
+
+    /** Notify all active SAHRA reviewers (used when an application is lodged). */
+    private function notifyReviewers(object $p, string $subject, string $heading, string $message): void
+    {
+        foreach ($this->getReviewers() as $rev) {
+            if (!empty($rev->email)) {
+                $this->notify($rev->email, $subject, $this->emailBody($p, $heading, $message));
+            }
+        }
     }
 
     // ---------------------------------------------------------------

@@ -15,6 +15,22 @@ class sahraActions extends AhgController
         return new \AhgSAHRA\Services\SahraPermitService();
     }
 
+    /**
+     * Feature gate: the plugin ships in the shared codebase, so it stays
+     * dormant unless an admin has switched it on for this instance. The
+     * config/reviewer-admin actions stay reachable so it can be enabled.
+     */
+    public function preExecute()
+    {
+        $always = ['config', 'reviewerAdd', 'reviewerRemove'];
+        if (in_array($this->getActionName(), $always, true)) {
+            return;
+        }
+        if (!$this->getService()->isFeatureEnabled()) {
+            $this->forward404('Heritage permits are not enabled on this instance.');
+        }
+    }
+
     // --- auth helpers -------------------------------------------------
 
     protected function requireAuth(): void
@@ -358,6 +374,8 @@ class sahraActions extends AhgController
         $this->checkAdmin();
         $service = $this->getService();
         if ($request->isMethod('post')) {
+            // Master feature gate (also adds/removes the nav links).
+            $service->setFeatureEnabled((bool) $request->getParameter('sahra_enabled'));
             foreach (['permit_validity_months', 'default_authority', 'authorities', 'expiry_warning_days', 'application_prefix'] as $key) {
                 $val = $request->getParameter($key);
                 if ($val !== null) {
@@ -367,6 +385,7 @@ class sahraActions extends AhgController
             $this->getUser()->setFlash('success', 'Settings saved.');
             $this->redirect('@sahra_config');
         }
+        $this->featureEnabled = $service->isFeatureEnabled();
         $this->config = [
             'permit_validity_months' => $service->getConfig('permit_validity_months', 36),
             'default_authority' => $service->getConfig('default_authority', 'SAHRA'),
