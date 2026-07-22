@@ -1,21 +1,21 @@
+<?php // Title in the theme's title slot, with a Font Awesome icon, so the page
+      // header looks like every other page rather than a raw Bootstrap heading. ?>
+<?php slot('title'); ?>
+  <h1><i class="fas fa-hands me-2"></i><?php echo __('Indigenous cultural & IP'); ?></h1>
+<?php end_slot(); ?>
+
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="<?php echo url_for([$object, 'module' => 'informationobject']) ?>"><?php echo htmlspecialchars($object->title ?? $object->identifier ?? 'Record') ?></a></li>
-            <li class="breadcrumb-item active">ICIP</li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? $object->identifier ?? 'Record') ?></a></li>
+            <li class="breadcrumb-item active"><?php echo __('Indigenous cultural & IP'); ?></li>
         </ol>
     </nav>
 
     <div class="d-flex justify-content-between align-items-start mb-4">
-        <div>
-            <h1>
-                <i class="bi bi-shield-check me-2"></i>
-                ICIP Information
-            </h1>
-            <p class="text-muted mb-0"><?php echo htmlspecialchars($object->title ?? 'Untitled') ?></p>
-        </div>
-        <a href="<?php echo url_for([$object, 'module' => 'informationobject']) ?>" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Back to Record
+        <p class="text-muted mb-0"><?php echo htmlspecialchars($object->title ?? 'Untitled') ?></p>
+        <a href="<?php echo url_for('/' . $object->slug) ?>" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> <?php echo __('Back to record'); ?>
         </a>
     </div>
 
@@ -30,7 +30,7 @@
     <?php if ($summary && $summary->has_icip_content): ?>
         <div class="card mb-4 border-warning">
             <div class="card-header bg-warning text-dark">
-                <i class="bi bi-exclamation-triangle me-2"></i>
+                <i class="fas fa-exclamation-triangle me-2"></i>
                 <strong>This record has ICIP content</strong>
             </div>
             <div class="card-body">
@@ -54,13 +54,13 @@
                 </div>
                 <?php if ($summary->requires_acknowledgement): ?>
                     <div class="alert alert-warning mt-3 mb-0">
-                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <i class="fas fa-exclamation-circle me-2"></i>
                         This record requires user acknowledgement before viewing.
                     </div>
                 <?php endif ?>
                 <?php if ($summary->blocks_access): ?>
                     <div class="alert alert-danger mt-3 mb-0">
-                        <i class="bi bi-lock me-2"></i>
+                        <i class="fas fa-lock me-2"></i>
                         Access to this record is blocked by cultural notices.
                     </div>
                 <?php endif ?>
@@ -68,7 +68,7 @@
         </div>
     <?php else: ?>
         <div class="alert alert-secondary">
-            <i class="bi bi-info-circle me-2"></i>
+            <i class="fas fa-info-circle me-2"></i>
             No ICIP content has been recorded for this item yet.
         </div>
     <?php endif ?>
@@ -112,7 +112,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Consent Status</h5>
                     <a href="<?php echo url_for('@icip_object_consent?slug=' . $object->slug) ?>" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i> Add Consent
+                        <i class="fas fa-plus-circle me-1"></i> Add Consent
                     </a>
                 </div>
                 <div class="card-body">
@@ -166,7 +166,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Cultural Notices</h5>
                     <a href="<?php echo url_for('@icip_object_notices?slug=' . $object->slug) ?>" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i> Add Notice
+                        <i class="fas fa-plus-circle me-1"></i> Add Notice
                     </a>
                 </div>
                 <div class="card-body">
@@ -208,7 +208,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">TK Labels</h5>
                     <a href="<?php echo url_for('@icip_object_labels?slug=' . $object->slug) ?>" class="btn btn-sm btn-primary">
-                        <i class="bi bi-plus-circle me-1"></i> Add Label
+                        <i class="fas fa-plus-circle me-1"></i> Add Label
                     </a>
                 </div>
                 <div class="card-body">
@@ -244,7 +244,7 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Restrictions</h5>
                     <a href="<?php echo url_for('@icip_object_restrictions?slug=' . $object->slug) ?>" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-pencil"></i>
+                        <i class="fas fa-pencil-alt"></i>
                     </a>
                 </div>
                 <div class="card-body">
@@ -254,7 +254,7 @@
                         <ul class="list-unstyled mb-0">
                             <?php foreach ($restrictions as $restriction): ?>
                                 <li class="mb-2">
-                                    <i class="bi bi-lock-fill text-danger me-2"></i>
+                                    <i class="fas fa-lock text-danger me-2"></i>
                                     <?php echo $restrictionTypes[$restriction->restriction_type] ?? ucwords(str_replace('_', ' ', $restriction->restriction_type)) ?>
                                     <?php if ($restriction->override_security_clearance): ?>
                                         <span class="badge bg-danger ms-1" title="Overrides security clearance">Override</span>
@@ -300,10 +300,10 @@
                 </div>
                 <div class="card-body">
                     <a href="<?php echo url_for('@icip_consultation_add') ?>?object_id=<?php echo $object->id ?>" class="btn btn-outline-primary w-100 mb-2">
-                        <i class="bi bi-chat-dots me-1"></i> Log Consultation
+                        <i class="fas fa-comment-dots me-1"></i> Log Consultation
                     </a>
                     <a href="<?php echo url_for('@icip_consent_add') ?>?object_id=<?php echo $object->id ?>" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-file-earmark-check me-1"></i> Add Consent Record
+                        <i class="fas fa-file-circle-check me-1"></i> Add Consent Record
                     </a>
                 </div>
             </div>

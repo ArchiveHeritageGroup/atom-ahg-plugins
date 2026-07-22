@@ -16,7 +16,7 @@
         <div class="alert alert-info">
             <i class="bi bi-archive me-2"></i>
             <strong>Record:</strong>
-            <a href="<?php echo url_for([$object, 'module' => 'informationobject']) ?>"><?php echo htmlspecialchars($object->title ?? $object->identifier ?? 'Untitled') ?></a>
+            <a href="<?php echo url_for('/' . $object->slug) ?>"><?php echo htmlspecialchars($object->title ?? $object->identifier ?? 'Untitled') ?></a>
         </div>
     <?php endif ?>
 
