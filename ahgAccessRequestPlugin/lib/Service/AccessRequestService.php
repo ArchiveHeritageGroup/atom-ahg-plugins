@@ -157,7 +157,7 @@ class AccessRequestService
 
             return $requestId;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             self::getLogger()->error('Failed to create access request', [
                 'error' => $e->getMessage(),
@@ -334,11 +334,14 @@ class AccessRequestService
                     ->get();
 
                 foreach ($scopes as $scope) {
+                    // Cast DB values to the declared types - this file uses
+                    // strict_types=1, so passing the int include_descendants (0/1)
+                    // into the bool parameter would throw a TypeError.
                     self::grantObjectAccess(
-                        $request->user_id,
-                        $scope->object_type,
-                        $scope->object_id,
-                        $scope->include_descendants,
+                        (int) $request->user_id,
+                        (string) $scope->object_type,
+                        (int) $scope->object_id,
+                        (bool) $scope->include_descendants,
                         $approverId,
                         $requestId,
                         $expiresAt,
@@ -362,7 +365,7 @@ class AccessRequestService
 
             return true;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             self::getLogger()->error('Failed to approve request', [
                 'error' => $e->getMessage(),

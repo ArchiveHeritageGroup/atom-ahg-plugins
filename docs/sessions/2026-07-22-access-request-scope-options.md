@@ -76,3 +76,43 @@ filtered out of the dropdown (12 named repos remain).
   it was in scope (don't-over-gate rule).
 - Related: [[full_embargo_detail_view_enforcement]] (embargo hides records; access requests
   are how a user asks for them back).
+
+## Follow-up fixes (v3.79.154)
+
+Two bugs surfaced on first live use of the new scopes:
+
+1. **Object-scope requests failed** ("Failed to create request. You may already have a
+   pending request."). Root cause: `access_request.requested_classification_id` was
+   `NOT NULL`, but item/collection/repository/all requests carry no classification, so the
+   insert violated the constraint and `createRequest()` returned null - falling through to
+   the generic error. Fix: `ALTER TABLE access_request MODIFY requested_classification_id
+   INT UNSIGNED NULL` on both DBs (archive + archeology); FK left intact; `install.sql`
+   updated for fresh installs. Rollback probe confirms an object/all request now inserts
+   cleanly. Clearance requests still set the column.
+
+2. **Double flash notification.** Every theme layout renders flashes globally via
+   `get_partial('alerts')` (ahgThemeB5Plugin `_alerts.php`), but three accessRequest
+   templates (myRequests, new, requestObject) also rendered their own flash blocks - so
+   every message showed twice. Removed the per-template blocks.
+
+## Follow-up fix 2 (v3.79.155) - white screen on Approve
+
+Approving an object-scope request white-screened. Real error (php-fpm log):
+`grantObjectAccess(): Argument #4 ($includeDescendants) must be of type bool, int given,
+called ... AccessRequestService.php:337`. The file declares `strict_types=1`, and
+`approveRequest()` passed `$scope->include_descendants` (int 0/1 from the DB) straight into
+the `bool` parameter → **TypeError**. Latent forever, but only reachable now that object
+requests can be created (previous NOT NULL fix). The TypeError is an `\Error`, not caught by
+the method's `catch (\Exception)`, so it propagated as an uncaught fatal (white screen);
+the transaction was undone by MySQL's connection-close rollback, so request #8 stayed
+`pending` (no half-approve, no stray grant).
+
+Fix: cast the DB values at the call site - `(int) user_id`, `(string) object_type`,
+`(int) object_id`, `(bool) include_descendants`. Also broadened the `createRequest()` and
+`approveRequest()` transaction catches from `\Exception` to `\Throwable` so any future
+`\Error` rolls back cleanly and returns a graceful failure instead of a fatal. Verified with
+a rollback probe that the grant loop now accepts the int include_descendants.
+
+**Lesson:** in a `strict_types=1` file, always cast DB row values (which come back as
+strings/ints) to the callee's declared scalar types, and catch `\Throwable` (not just
+`\Exception`) around DB transactions so TypeErrors don't escape as fatals.
