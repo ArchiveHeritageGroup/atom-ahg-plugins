@@ -5,6 +5,14 @@
 
 <?php slot('content') ?>
 
+<?php if (!empty($currentObjectId) && !empty($filterObjectSlug)): ?>
+<div class="mb-3">
+    <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $filterObjectSlug]); ?>" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to record'); ?>
+    </a>
+</div>
+<?php endif; ?>
+
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">

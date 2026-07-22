@@ -65,8 +65,12 @@ function levelId(string $name): ?int {
 function actorId(string $name, string $history = '', int $entityType = PERSON): int {
     $existing = DB::table('actor_i18n')->where('authorized_form_of_name', $name)->value('id');
     if ($existing) { return (int) $existing; }
+    // parent_id MUST be the actor root, not null: a null-parent actor is treated as
+    // "the root" by the repository/actor view action and 404s its own detail page.
+    static $rootId = null;
+    if (null === $rootId) { $rootId = (int) (DB::table('actor')->whereNull('parent_id')->min('id') ?: 3); }
     $id = newObject('QubitActor');
-    DB::table('actor')->insert(['id' => $id, 'parent_id' => null, 'entity_type_id' => $entityType, 'source_culture' => 'en']);
+    DB::table('actor')->insert(['id' => $id, 'parent_id' => $rootId, 'entity_type_id' => $entityType, 'source_culture' => 'en']);
     DB::table('actor_i18n')->insert(['id' => $id, 'culture' => 'en', 'authorized_form_of_name' => $name, 'history' => $history]);
     DB::table('slug')->insert(['object_id' => $id, 'slug' => uniqueSlug(slugify($name))]);
     return $id;

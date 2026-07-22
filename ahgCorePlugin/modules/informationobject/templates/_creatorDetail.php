@@ -6,10 +6,13 @@
       <div class="<?php echo render_b5_show_value_css_classes(); ?>">
 
         <div class="creator">
+          <?php // 'module' => 'actor' is required: without it url_for([$item]) resolves
+                // against the current (informationobject) module and falls back to
+                // /informationobject/add instead of the actor's own page. ?>
           <?php if (0 < count($resource->getCreators())) { ?>
-            <?php echo link_to(render_title($item), [$item]); ?>
+            <?php echo link_to(render_title($item), [$item, 'module' => 'actor']); ?>
           <?php } else { ?>
-            <?php echo link_to(render_title($item), [$item], ['title' => __('Inherited from %1%', ['%1%' => $ancestor])]); ?>
+            <?php echo link_to(render_title($item), [$item, 'module' => 'actor'], ['title' => __('Inherited from %1%', ['%1%' => $ancestor])]); ?>
           <?php } ?>
         </div>
 

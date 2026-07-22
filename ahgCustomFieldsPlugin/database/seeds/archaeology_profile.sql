@@ -108,6 +108,22 @@ INSERT IGNORE INTO `custom_field_definition`
   ('lithic_type', 'Lithic type', 'dropdown', 'informationobject', 'Material detail', 'arch_lithic_type', 0, 1, 1, 1, 0, 'Lithics.', 210, 1),
   ('bead_series', 'Bead series', 'dropdown', 'informationobject', 'Material detail', 'arch_bead_series', 0, 1, 1, 1, 0, 'Beads.', 220, 1);
 
+-- Site location (GPS). is_visible_public = 0 on EVERY field: precise coordinates
+-- of archaeological sites are restricted (looting risk), so the raw numbers are
+-- never shown to guests through the custom-field panel. The Site Location map
+-- panel (ahgCustomFieldsPlugin/templates/display/_site_location_map.php) renders
+-- exact coordinates to authenticated staff and a generalised location to the
+-- public, honouring the `location_sensitive` flag (treated as ON unless a record
+-- explicitly sets it off). Belongs on Site-level records; empty elsewhere.
+INSERT IGNORE INTO `custom_field_definition`
+  (`field_key`, `field_label`, `field_type`, `entity_type`, `field_group`,
+   `dropdown_taxonomy`, `is_required`, `is_searchable`, `is_visible_public`,
+   `is_visible_edit`, `is_repeatable`, `help_text`, `sort_order`, `is_active`) VALUES
+  ('site_latitude', 'Latitude', 'number', 'informationobject', 'Location', NULL, 0, 0, 0, 1, 0, 'Decimal degrees, e.g. -29.0123 (south is negative). Precise coordinates are shown to staff only.', 300, 1),
+  ('site_longitude', 'Longitude', 'number', 'informationobject', 'Location', NULL, 0, 0, 0, 1, 0, 'Decimal degrees, e.g. 30.8456 (east is positive).', 310, 1),
+  ('coordinate_datum', 'Datum / CRS', 'text', 'informationobject', 'Location', NULL, 0, 0, 0, 1, 0, 'Geodetic datum, e.g. WGS84 (default), Cape (Clarke 1880) or Hartebeesthoek94. Legacy SA data is often Cape datum - recording it avoids ~200 m shifts.', 320, 1),
+  ('location_sensitive', 'Restrict precise location', 'boolean', 'informationobject', 'Location', NULL, 0, 0, 0, 1, 0, 'When on (the default), the public sees only a generalised location; staff see exact coordinates. Turn off only for sites whose exact position is already public (e.g. a gazetted monument).', 330, 1);
+
 -- Archaeology UI labels. Two separate layers: `setting` scope ui_label holds
 -- the singular noun, `menu_i18n` holds the plural used in the Browse menu.
 -- Changing only the settings leaves 'Archival descriptions' in the menu.

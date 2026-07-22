@@ -221,8 +221,11 @@ try {
     // entity_type_id 131 = corporate body (132 is PERSON - a repository typed as
     // a person renders wrongly and breaks authority-record behaviour).
     $repoId = newObject('QubitRepository');
+    // parent_id MUST be the actor root (not null): a null-parent repository is
+    // treated as "the root" by the repository view action and 404s its own page.
+    $actorRootId = (int) (DB::table('actor')->whereNull('parent_id')->min('id') ?: 3);
     DB::table('actor')->insert([
-        'id' => $repoId, 'parent_id' => null, 'entity_type_id' => 131, 'source_culture' => 'en',
+        'id' => $repoId, 'parent_id' => $actorRootId, 'entity_type_id' => 131, 'source_culture' => 'en',
     ]);
     DB::table('actor_i18n')->insert([
         'id' => $repoId, 'culture' => 'en',

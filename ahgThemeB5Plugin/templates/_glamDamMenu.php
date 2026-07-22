@@ -54,7 +54,7 @@ $isAdmin = $sf_user->isAdministrator();
     <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'index']); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Collections Procedures'); ?></a></li>
     <?php endif; ?>
     <?php if (ahg_is_plugin_enabled('ahgProvenancePlugin')): ?>
-    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'cco', 'action' => 'index']); ?>"><i class="fas fa-history fa-fw me-2"></i><?php echo __('Provenance (CCO)'); ?></a></li>
+    <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'provenance', 'action' => 'index']); ?>"><i class="fas fa-history fa-fw me-2"></i><?php echo __('Provenance'); ?></a></li>
     <?php endif; ?>
     
     <?php if ($isAdmin): ?>

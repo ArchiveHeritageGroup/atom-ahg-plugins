@@ -22,6 +22,16 @@
   "load_order": 45,
   "display_panels": [
     {
+      "id": "site_location_map_io",
+      "label": "Site location",
+      "template": "ahgCustomFieldsPlugin/templates/display/_site_location_map.php",
+      "contexts": [
+        "informationobject"
+      ],
+      "position": "after-content",
+      "weight": 10
+    },
+    {
       "id": "custom_fields_io",
       "label": "Additional Fields",
       "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",

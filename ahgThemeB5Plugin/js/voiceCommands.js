@@ -220,24 +220,32 @@ class AHGVoiceCommands {
    * Can be re-enabled via typed command "enable voice" (right-click) or page reload after enableVoice().
    */
   disableVoice() {
+    // Set the flag FIRST so the speak() gate suppresses any queued/in-flight
+    // speech immediately - no 2s window where it keeps talking.
+    this._voiceDisabled = true;
+    try { sessionStorage.setItem('ahg_voice_disabled', '1'); } catch (e) { /* ignore */ }
+    try { sessionStorage.setItem('ahg_voice_active', '0'); } catch (e) { /* ignore */ }
+    try { sessionStorage.setItem('ahg_voice_continuous', '0'); } catch (e) { /* ignore */ }
+    this._continuousMode = false;
+
+    // Kill any utterance already talking (e.g. the page-context announcement).
+    if (this.synthesis) { try { this.synthesis.cancel(); } catch (e) { /* ignore */ } }
     if (this.isListening) {
       try { this.recognition.stop(); } catch (e) { /* ignore */ }
       this.isListening = false;
     }
-    this.speak('Voice commands disabled. Right-click the mic and type enable voice to re-enable.');
-    var self = this;
-    setTimeout(function() {
-      document.querySelectorAll('.voice-ui').forEach(function(el) { el.style.display = 'none'; });
-      // Keep floating btn visible but dimmed so user can right-click to re-enable
-      if (self.floatingBtn) {
-        self.floatingBtn.style.display = 'flex';
-        self.floatingBtn.style.opacity = '0.3';
-        self.floatingBtn.title = 'Voice disabled — right-click to type "enable voice"';
-      }
-      self._voiceDisabled = true;
-      try { sessionStorage.setItem('ahg_voice_disabled', '1'); } catch (e) { /* ignore */ }
-      self._updateUI(false);
-    }, 2000);
+
+    // Confirm via a silent toast (deliberately NOT spoken - the point is silence).
+    this.showToast('Voice disabled for this session — right-click the mic and type "enable voice" to re-enable', 'warning');
+
+    document.querySelectorAll('.voice-ui').forEach(function(el) { el.style.display = 'none'; });
+    // Keep floating btn visible but dimmed so user can right-click to re-enable
+    if (this.floatingBtn) {
+      this.floatingBtn.style.display = 'flex';
+      this.floatingBtn.style.opacity = '0.3';
+      this.floatingBtn.title = 'Voice disabled — right-click to type "enable voice"';
+    }
+    this._updateUI(false);
   }
 
   /**
@@ -687,6 +695,16 @@ class AHGVoiceCommands {
    */
   speak(text) {
     if (!this.synthesis) return;
+
+    // Hard stop: when voice is disabled for the session, never speak, and kill
+    // anything already in flight. This is the single choke point for ALL speech
+    // (page-context announcements, mouseover read-aloud, command feedback), so
+    // gating it here guarantees "disable" actually silences everything, on this
+    // page and on every subsequent page load.
+    if (this._voiceDisabled) {
+      try { this.synthesis.cancel(); } catch (e) { /* ignore */ }
+      return;
+    }
 
     // Cancel any current speech
     this.synthesis.cancel();

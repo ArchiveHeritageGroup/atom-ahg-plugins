@@ -247,7 +247,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
     </div>
     <ul class="list-group list-group-flush">
       <?php if (ahg_is_plugin_enabled('ahgProvenancePlugin')): ?>
-      <li class="list-group-item"><a href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
+      <li class="list-group-item"><a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
       <?php endif; ?>
       <?php if (ahg_is_plugin_enabled('ahgConditionPlugin')): ?>
       <li class="list-group-item"><a href="<?php echo url_for(['module' => 'condition', 'action' => 'conditionCheck', 'slug' => $resource->slug]); ?>"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition assessment'); ?></a></li>
@@ -756,7 +756,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'spectrum', 'action' => 'label', 'slug' => $resource->slug]); ?>"><i class="fas fa-barcode me-2"></i><?php echo __('Generate label'); ?></a></li>
             <?php endif; ?>
             <?php if (ahg_is_plugin_enabled('ahgProvenancePlugin')): ?>
-            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'cco', 'action' => 'provenance', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]); ?>"><i class="fas fa-sitemap me-2"></i><?php echo __('Provenance'); ?></a></li>
             <?php endif; ?>
             <?php if (ahg_is_plugin_enabled('ahgSpectrumPlugin')): ?>
             <li><hr class="dropdown-divider"></li>

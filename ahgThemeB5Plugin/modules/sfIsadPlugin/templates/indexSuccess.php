@@ -545,6 +545,18 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
   </div> <!-- /section#rightsArea -->
 
 <?php } ?>
+
+<!-- PROVENANCE AREA (positioned above digital object metadata) -->
+<?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+<?php $provenanceHtml = get_component('provenance', 'provenanceDisplay', ['objectId' => $resource->id]); ?>
+<?php if ('' !== trim((string) $provenanceHtml)): // hide the whole section (heading included) when no provenance is recorded ?>
+<section id="provenanceArea" class="border-bottom">
+  <?php echo render_b5_section_heading(__('Provenance & Chain of Custody'), false, null, ['anchor' => 'provenance-collapse']); ?>
+  <?php echo $provenanceHtml; ?>
+</section> <!-- /section#provenanceArea -->
+<?php endif ?>
+<?php endif ?>
+
   <div class="digitalObjectMetadata">
 	<?php echo get_component('digitalobject', 'metadata', ['resource' => $resource->digitalObjectsRelatedByobjectId[0], 'object' => $resource]); ?>
   </div>
@@ -561,14 +573,6 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
   <?php include_partial('informationobject/extendedRightsArea', ['resource' => $resource]); ?>
 
 </section> <!-- /section#accessionArea -->
-
-<!-- PROVENANCE AREA -->
-<?php if (in_array('ahgProvenancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
-<section id="provenanceArea" class="border-bottom">
-  <?php echo render_b5_section_heading(__('Provenance & Chain of Custody'), false, null, ['anchor' => 'provenance-collapse']); ?>
-  <?php include_component('provenance', 'provenanceDisplay', ['objectId' => $resource->id]); ?>
-</section> <!-- /section#provenanceArea -->
-<?php endif ?>
 
 <?php if (in_array('ahgRicExplorerPlugin', sfProjectConfiguration::getActive()->getPlugins())) { include_component('ricExplorer', 'ricPanel', ['resource' => $resource]); } ?>
 

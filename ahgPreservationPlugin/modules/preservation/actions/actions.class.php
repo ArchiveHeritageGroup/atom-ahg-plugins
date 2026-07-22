@@ -873,9 +873,12 @@ class preservationActions extends AhgController
             $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
             $this->filterObject = DB::table('information_object_i18n')
                 ->where('id', $objectId)->where('culture', $culture)->first();
+            // Slug for the "Back to record" button.
+            $this->filterObjectSlug = DB::table('slug')->where('object_id', $objectId)->value('slug');
         } else {
             $this->packages = $this->service->getPackages($type, $status, 50);
             $this->filterObject = null;
+            $this->filterObjectSlug = null;
         }
 
         $this->stats = $this->service->getPackageStatistics();

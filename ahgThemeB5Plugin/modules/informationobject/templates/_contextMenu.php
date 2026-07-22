@@ -53,24 +53,24 @@ if (isset($resource)) {
 ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Collections Management'); ?></h4>
-  <ul>
+  <ul class="list-unstyled">
     <?php if ($hasCco): ?>
-    <li><?php echo link_to(__('Provenance'), ['module' => 'cco', 'action' => 'provenance', 'slug' => $resourceSlug]); ?></li>
+    <li><a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resourceSlug]); ?>"><i class="fas fa-sitemap fa-fw me-2"></i><?php echo __('Provenance'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasCondition): ?>
-    <li><?php echo link_to(__('Condition assessment'), '@condition_check_by_slug?slug=' . $resourceSlug); ?></li>
+    <li><a href="<?php echo url_for('@condition_check_by_slug?slug=' . $resourceSlug); ?>"><i class="fas fa-clipboard-check fa-fw me-2"></i><?php echo __('Condition assessment'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasSpectrum): ?>
-    <li><?php echo link_to(__('Collections Procedures data'), '@spectrum_index?slug=' . $resourceSlug); ?></li>
+    <li><a href="<?php echo url_for('@spectrum_index?slug=' . $resourceSlug); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Collections Procedures data'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasGrap): ?>
-    <li><a href="/index.php/heritage/add?io_id=<?php echo $resource->id; ?>"><?php echo __('Heritage Assets'); ?></a></li>
+    <li><a href="/index.php/heritage/add?io_id=<?php echo $resource->id; ?>"><i class="fas fa-landmark fa-fw me-2"></i><?php echo __('Heritage Assets'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasOais): ?>
-    <li><a href="/admin/preservation/packages/?object_id=<?php echo $resource->id; ?>"><?php echo __('Digital Preservation (OAIS)'); ?></a></li>
+    <li><a href="/admin/preservation/packages/?object_id=<?php echo $resource->id; ?>"><i class="fas fa-archive fa-fw me-2"></i><?php echo __('Preservation Packages'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasResearch): ?>
-    <li><?php echo link_to(__('Cite this Record'), ['module' => 'research', 'action' => 'cite', 'slug' => $resourceSlug]); ?></li>
+    <li><a href="<?php echo url_for(['module' => 'research', 'action' => 'cite', 'slug' => $resourceSlug]); ?>"><i class="fas fa-quote-right fa-fw me-2"></i><?php echo __('Cite this Record'); ?></a></li>
     <?php endif; ?>
   </ul>
 </section>
@@ -104,7 +104,7 @@ if (isset($resource)) {
 ?>
 <section class="sidebar-widget">
   <h4><?php echo __('AI Tools'); ?></h4>
-  <ul>
+  <ul class="list-unstyled">
     <li>
       <a href="#" id="nerExtractBtn" data-object-id="<?php echo $resource->id; ?>">
         <i class="bi bi-cpu me-1"></i><?php echo __('Extract Entities (NER)'); ?>
@@ -512,23 +512,23 @@ function scanForPii(objectId) {
 <?php if (isset($resource) && $sf_user->isAuthenticated() && isPluginActive('ahgPrivacyPlugin')): ?>
 <section class="sidebar-widget">
   <h4><?php echo __('Privacy & PII'); ?></h4>
-  <ul>
+  <ul class="list-unstyled">
     <?php // "Scan for PII" runs AI NER (ahgNerService) — only show when the AI plugin is enabled. ?>
     <?php if (isPluginActive('ahgAIPlugin')): ?>
     <li>
       <a href="#" id="piiScanBtn" data-object-id="<?php echo $resource->id; ?>">
-        <i class="bi bi-shield-exclamation me-1"></i><?php echo __('Scan for PII'); ?>
+        <i class="fas fa-user-shield fa-fw me-2"></i><?php echo __('Scan for PII'); ?>
       </a>
     </li>
     <?php endif; ?>
     <?php if ($resource->digitalObjectsRelatedByobjectId->count() > 0): ?>
     <li>
-      <?php echo link_to('<i class="bi bi-eraser me-1"></i>' . __('Visual Redaction'), ['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resource->id]); ?>
+      <?php echo link_to('<i class="fas fa-eraser fa-fw me-2"></i>' . __('Visual Redaction'), ['module' => 'privacyAdmin', 'action' => 'visualRedactionEditor', 'id' => $resource->id]); ?>
     </li>
     <?php endif; ?>
     <li>
       <a href="/privacy">
-        <i class="bi bi-clipboard-check me-1"></i><?php echo __('Privacy Dashboard'); ?>
+        <i class="fas fa-shield-alt fa-fw me-2"></i><?php echo __('Privacy Dashboard'); ?>
       </a>
     </li>
   </ul>
@@ -549,10 +549,10 @@ function scanForPii(objectId) {
       // actions (executeObjectNotices etc.) already handle the writes; this is
       // the link into them from the record. ?>
 <?php if (isPluginActive('ahgICIPPlugin') && $sf_user->isAuthenticated() && isset($resource->slug)): ?>
-<section class="mb-3">
-  <h2 class="h6 text-uppercase text-muted"><?php echo __('Indigenous cultural & IP'); ?></h2>
-  <ul class="list-unstyled mb-0">
-    <li><a href="<?php echo url_for('/object/' . $resource->slug . '/icip'); ?>" class="text-decoration-none">
+<section class="sidebar-section">
+  <h4><?php echo __('Indigenous cultural & IP'); ?></h4>
+  <ul class="list-unstyled">
+    <li><a href="<?php echo url_for('/object/' . $resource->slug . '/icip'); ?>">
       <i class="fas fa-hands me-1"></i><?php echo __('Manage cultural notices & labels'); ?></a></li>
   </ul>
 </section>

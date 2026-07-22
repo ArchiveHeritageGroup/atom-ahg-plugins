@@ -218,9 +218,9 @@ class AhgSettingsIndexAction extends AhgController
 
         if ($hasSpectrum) {
             $this->sections['spectrum'] = [
-                'label' => 'Spectrum / Collections',
+                'label' => 'Collections Procedures',
                 'icon' => 'fa-archive',
-                'description' => 'Museum collections management settings',
+                'description' => 'Collections procedures and management settings',
                 'url' => 'admin/ahg-settings/section?section=spectrum'
             ];
         }

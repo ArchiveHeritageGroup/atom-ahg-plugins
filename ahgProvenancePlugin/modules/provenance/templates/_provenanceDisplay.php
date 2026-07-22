@@ -1,8 +1,9 @@
 <?php
 // Unified, sector-agnostic provenance panel. Included by every sector view
-// (archive/sfIsad, museum, library, dam, gallery, …). Does NOT self-hide when
-// empty: authenticated users always get an "Add provenance" entry point so the
-// feature works on ALL sectors, not just Museum.
+// (archive/sfIsad, museum, library, dam, gallery, …). Self-hides when empty
+// (outputs nothing), so the record view can drop the whole section rather than
+// show an empty "no provenance recorded" block. "Add provenance" stays reachable
+// from the left context menu on every sector.
 $io = QubitInformationObject::getById($objectId);
 $slug = $io ? $io->slug : null;
 $canEdit = $sf_user->isAuthenticated();
@@ -70,15 +71,6 @@ $canEdit = $sf_user->isAuthenticated();
     <?php endif ?>
   </div>
 </div>
-<?php elseif ($canEdit && $slug): ?>
-<!-- Empty state: discoverable entry point on every sector (fixes "provenance wanted museum") -->
-<div class="card mb-3 provenance-display">
-  <div class="card-body text-center text-muted py-4">
-    <i class="bi bi-clock-history fs-3 d-block mb-2"></i>
-    <p class="mb-3"><?php echo __('No provenance or chain of custody has been recorded for this record yet.') ?></p>
-    <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $slug]) ?>" class="btn btn-sm btn-primary">
-      <i class="bi bi-plus-lg me-1"></i><?php echo __('Add provenance') ?>
-    </a>
-  </div>
-</div>
 <?php endif ?>
+<?php // When no provenance is recorded, render NOTHING - the record view hides the
+      // whole section, and "Add provenance" is reachable from the left context menu. ?>

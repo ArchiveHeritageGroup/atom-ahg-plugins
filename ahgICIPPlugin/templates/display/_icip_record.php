@@ -84,6 +84,32 @@ if (!$hasAny) {
 
 $esc = static fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 
+// Machine restriction_type values -> human-readable labels. Closure (not a named
+// function) because this template is included twice per page (badge + panel).
+// Unknown values fall back to Title Case of the raw value.
+$restrictionLabel = static function ($type) {
+    $map = [
+        'community_permission_required' => 'Community permission required',
+        'secret_sacred' => 'Secret / sacred',
+        'sacred' => 'Sacred',
+        'sacred_site' => 'Sacred site',
+        'gender_restricted' => 'Gender restricted',
+        'men_only' => 'Men only',
+        'women_only' => 'Women only',
+        'initiated_only' => 'Initiated persons only',
+        'ceremonial_use_only' => 'Ceremonial use only',
+        'seasonal_restriction' => 'Seasonal restriction',
+        'seasonal' => 'Seasonal restriction',
+        'no_public_access' => 'No public access',
+        'restricted_access' => 'Restricted access',
+        'attribution_required' => 'Attribution required',
+        'traditional_knowledge' => 'Traditional knowledge',
+    ];
+    $key = (string) $type;
+
+    return __($map[$key] ?? ucwords(str_replace('_', ' ', $key)));
+};
+
 // ---------------------------------------------------------------- BADGE mode
 if ('badge' === $mode) {
     if (!count($notices) && !count($restrictions)) {
@@ -104,7 +130,7 @@ if ('badge' === $mode) {
     foreach ($restrictions as $r) {
         echo '<div class="alert alert-warning d-flex align-items-start mb-2" role="alert">';
         echo '<i class="fas fa-lock me-2 mt-1" aria-hidden="true"></i>';
-        echo '<div><strong>' . $esc(__('Access restriction')) . ': ' . $esc($r->restriction_type) . '</strong>';
+        echo '<div><strong>' . $esc(__('Access restriction')) . ': ' . $esc($restrictionLabel($r->restriction_type)) . '</strong>';
         if ($r->custom_restriction_text) {
             echo '<div class="small">' . $esc($r->custom_restriction_text) . '</div>';
         }
@@ -115,24 +141,20 @@ if ('badge' === $mode) {
 }
 
 // ---------------------------------------------------------------- PANEL mode
-// Rendered to match the Rights section's look and feel: an h5 section-title with
-// an icon on the left and a manage action on the right.
+// Rendered to match the "Additional Fields" section: render_b5_section_heading
+// (the same helper the standard ISAD areas use) with NO icon and no card, so the
+// header is identical to every other section on the page. The Manage action moves
+// to the foot of the body so the heading stays clean.
 $heading = __('Indigenous cultural & IP');
 $slug = $resource->slug ?? null;
 $canManage = isset($sf_user) && $sf_user->isAuthenticated();
 ?>
-<section class="field-section icip-section mb-4" id="icipArea">
-    <h5 class="section-title border-bottom pb-2 mb-3 d-flex justify-content-between align-items-center">
-        <span>
-            <i class="fas fa-hands text-muted me-2"></i><?php echo $esc($heading); ?>
-        </span>
-        <?php if ($canManage && $slug): ?>
-            <a href="<?php echo url_for('/object/' . $slug . '/icip'); ?>"
-               class="btn btn-sm btn-outline-primary d-print-none">
-                <i class="fas fa-cog me-1"></i><?php echo __('Manage'); ?>
-            </a>
-        <?php endif; ?>
-    </h5>
+<section id="icipArea" class="border-bottom">
+    <?php if (function_exists('render_b5_section_heading')): ?>
+        <?php echo render_b5_section_heading($heading); ?>
+    <?php else: ?>
+        <h2 class="h5 mb-0 atom-section-header"><div class="d-flex p-3 border-bottom text-primary"><?php echo $esc($heading); ?></div></h2>
+    <?php endif; ?>
 
     <div>
         <?php if (count($tkLabels)): ?>
@@ -163,7 +185,7 @@ $canManage = isset($sf_user) && $sf_user->isAuthenticated();
             <div class="mb-0">
                 <div class="text-muted small text-uppercase mb-1"><?php echo __('Access restrictions'); ?></div>
                 <?php foreach ($restrictions as $r): ?>
-                    <div class="small"><i class="fas fa-lock me-1"></i><?php echo $esc($r->restriction_type); ?></div>
+                    <div class="small"><i class="fas fa-lock me-1"></i><?php echo $esc($restrictionLabel($r->restriction_type)); ?></div>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

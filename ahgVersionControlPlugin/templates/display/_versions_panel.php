@@ -45,7 +45,9 @@ try {
 }
 
 if ($totalCount === 0) {
-    echo '<p class="text-muted">' . __('No versions captured yet.') . '</p>';
+    // Nothing captured yet: render NOTHING so the panel (and its header) is
+    // hidden entirely. ahg_render_display_panels skips any panel whose output is
+    // empty, so returning without echoing removes the whole "Versions" section.
     return;
 }
 

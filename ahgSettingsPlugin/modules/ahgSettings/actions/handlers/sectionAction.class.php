@@ -11,7 +11,7 @@ class AhgSettingsSectionAction extends AhgController
         'multi_tenant' => ['label' => 'Multi-Tenancy', 'icon' => 'fa-building', 'description' => 'Repository-based multi-tenancy with user hierarchy'],
         'metadata' => ['label' => 'Metadata Extraction', 'icon' => 'fa-database'],
         'iiif' => ['label' => 'IIIF Viewer', 'icon' => 'fa-images'],
-        'spectrum' => ['label' => 'Spectrum / Collections', 'icon' => 'fa-archive'],
+        'spectrum' => ['label' => 'Collections Procedures', 'icon' => 'fa-archive'],
         'data_protection' => ['label' => 'Data Protection', 'icon' => 'fa-shield-alt'],
         'faces' => ['label' => 'Face Detection', 'icon' => 'fa-user-circle'],
         'media' => ['label' => 'Media Player', 'icon' => 'fa-play-circle'],

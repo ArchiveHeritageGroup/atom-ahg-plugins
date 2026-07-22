@@ -113,9 +113,12 @@ class conditionActions extends AhgController
         $this->service = $service;
 
         // AI condition scanning and training-data contribution are only offered
-        // when the AI condition plugin is active. Without it the AI buttons lead
-        // nowhere, so the template hides them.
-        $this->aiEnabled = in_array('ahgAiConditionPlugin', sfProjectConfiguration::getActive()->getPlugins(), true);
+        // when BOTH the AI condition plugin is active AND the AI gateway key is
+        // configured. Without the key every scan fails with "AI gateway API key
+        // not configured", so showing the button leads nowhere - hide it. This is
+        // the same isConfigured() check visionGenerate() makes before it errors.
+        $this->aiEnabled = in_array('ahgAiConditionPlugin', sfProjectConfiguration::getActive()->getPlugins(), true)
+            && \AtomFramework\Services\AI\AiGatewayClient::fromSettings()->isConfigured();
     }
 
     /**
