@@ -56,10 +56,26 @@ class TermRelationService
             return $existing;
         }
 
-        return DB::table('object_term_relation')->insertGetId([
+        // object_term_relation.id is a QubitObject id and is NOT auto_increment,
+        // so a bare insert fails under MySQL STRICT mode ("Field 'id' doesn't have
+        // a default value"). Create the base `object` row first (its id IS
+        // auto_increment), then the relation with that id - the way base AtoM
+        // persists a QubitObjectTermRelation. Without this, subject/place/genre
+        // access points never saved from any AHG manage form.
+        $newId = DB::table('object')->insertGetId([
+            'class_name' => 'QubitObjectTermRelation',
+            'created_at' => DB::raw('NOW()'),
+            'updated_at' => DB::raw('NOW()'),
+            'serial_number' => 0,
+        ]);
+
+        DB::table('object_term_relation')->insert([
+            'id' => $newId,
             'object_id' => $objectId,
             'term_id' => $termId,
         ]);
+
+        return $newId;
     }
 
     /**

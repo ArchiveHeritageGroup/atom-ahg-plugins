@@ -86,7 +86,20 @@ class RelationService
                 $baseData['source_culture'] = $culture ?? 'en';
             }
 
-            $id = DB::table('relation')->insertGetId($baseData);
+            // relation.id is a QubitObject id and is NOT auto_increment, so a bare
+            // insert fails under MySQL STRICT mode. Create the base `object` row
+            // first (auto_increment id), then the relation with that id - same
+            // class of bug as TermRelationService::addRelation. Without this, name
+            // access points / related-material relations never saved from AHG forms.
+            $newId = DB::table('object')->insertGetId([
+                'class_name' => 'QubitRelation',
+                'created_at' => DB::raw('NOW()'),
+                'updated_at' => DB::raw('NOW()'),
+                'serial_number' => 0,
+            ]);
+            $baseData['id'] = $newId;
+            DB::table('relation')->insert($baseData);
+            $id = $newId;
         }
 
         // Save i18n if provided
