@@ -29,7 +29,6 @@ class IoFormHelper
      */
     private const TERM_NAME_PATTERNS = [
         'Records in Context' => 'ric',
-        'RiC'     => 'ric',
         'ISAD'    => 'isad',
         'Dublin'  => 'dc',
         'MODS'    => 'mods',

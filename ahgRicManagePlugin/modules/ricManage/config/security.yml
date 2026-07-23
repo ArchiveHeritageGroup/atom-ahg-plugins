@@ -1,10 +1,6 @@
+# get/export are public reads; edit/save enforce editor-or-administrator in code
+# (RicManageService via hasGroup checks), matching ioManage/dcManage which ship
+# no credential restriction here. A `credentials: [editor]` block would wrongly
+# 403 an administrator, who does not hold the literal 'editor' credential.
 all:
   is_secure: false
-
-save:
-  is_secure: true
-  credentials: [editor]
-
-edit:
-  is_secure: true
-  credentials: [editor]

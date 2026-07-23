@@ -47,12 +47,11 @@
     }
     flag.value = 'edit';
 
-    // requestSubmit runs native validation and fires the submit event, so the
-    // theme's CSRF shim injects the token. Fall back to submit() where needed.
-    if (typeof form.requestSubmit === 'function') {
-      form.requestSubmit();
-    } else {
-      form.submit();
-    }
+    // Use submit() (not requestSubmit) so a required field left empty - or hidden
+    // inside a collapsed accordion, where the browser can't show its validation
+    // bubble - does not SILENTLY block the switch. The server validates and
+    // re-renders with errors if needed. The theme CSRF shim patches
+    // HTMLFormElement.prototype.submit, so the token is still injected.
+    form.submit();
   });
 })();

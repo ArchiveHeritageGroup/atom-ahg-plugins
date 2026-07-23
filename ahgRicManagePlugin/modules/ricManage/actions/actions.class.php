@@ -92,8 +92,9 @@ class ricManageActions extends AhgController
      */
     public function executeSave($request)
     {
-        if (!$this->getUser()->isAuthenticated()
-            || !$this->getUser()->hasCredential('editor')) {
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))) {
             return $this->json(['success' => false, 'error' => 'Not authorised'], 403);
         }
 
