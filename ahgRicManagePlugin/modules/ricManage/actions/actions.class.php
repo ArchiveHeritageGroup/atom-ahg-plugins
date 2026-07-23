@@ -46,21 +46,13 @@ class ricManageActions extends AhgController
             : ['entity_type' => 'Record', 'properties' => array_fill_keys(array_keys(\AhgRicManage\Services\RicManageService::PROPERTY_FIELDS), '')];
 
         if ($request->isMethod('post')) {
-            // Persist RiC metadata before handlePost (which redirects). New
-            // records have no id yet - their RiC metadata is captured on the
-            // next edit, once the record exists.
-            if ($objectId) {
-                try {
-                    $svc->saveRecordMeta(
-                        $objectId,
-                        (string) $request->getParameter('ricEntityType', 'Record'),
-                        (array) $request->getParameter('ricProps', [])
-                    );
-                } catch (\Throwable $e) {
-                    // Non-fatal: the IO save still proceeds.
-                }
-            }
-
+            // NB: RiC metadata is NOT saved here. Any ric_record_meta write in the
+            // same request silently voids handlePost's information-object update
+            // (a Propel/Illuminate shared-transaction interaction that persisted
+            // even on a separate PDO). The RiC edit form instead saves the RiC
+            // metadata via a prior AJAX POST to /ricManage/save (its own request)
+            // before submitting the IO fields here. So this action only runs the
+            // standard IO save.
             \IoFormHelper::handlePost($this, $request, $culture);
         }
     }

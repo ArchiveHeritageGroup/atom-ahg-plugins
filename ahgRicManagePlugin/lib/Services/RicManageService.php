@@ -37,6 +37,16 @@ class RicManageService
         'provenance_note' => 'Provenance note',
     ];
 
+    /** RiC property key -> RiC-O predicate. Single source of truth for the export
+     *  and the form/panel labels. */
+    public const PROPERTY_PREDICATES = [
+        'ric_identifier' => 'rico:hasOrHadIdentifier',
+        'scope' => 'rico:scope',
+        'authenticity_note' => 'rico:authenticityNote',
+        'integrity_note' => 'rico:integrityNote',
+        'provenance_note' => 'rico:history',
+    ];
+
     /**
      * Get a record's RiC metadata, with defaults when none is stored yet.
      *
@@ -85,14 +95,32 @@ class RicManageService
             }
         }
 
-        DB::table('ric_record_meta')->updateOrInsert(
-            ['object_id' => $objectId],
-            [
-                'entity_type' => $entityType,
-                'ric_data' => empty($clean) ? null : json_encode($clean, JSON_UNESCAPED_UNICODE),
-                'updated_at' => DB::raw('NOW()'),
-            ]
-        );
+        $ricData = empty($clean) ? null : json_encode($clean, JSON_UNESCAPED_UNICODE);
+
+        // Write on a DEDICATED PDO connection, isolated from the shared
+        // Illuminate/Propel connection. Writing ric_record_meta on the shared
+        // connection mid-request silently voided the information-object update
+        // that runs inside handlePost's DB::transaction (title/access points were
+        // lost). A separate connection commits independently and cannot interfere.
+        $cfg = DB::connection()->getConfig();
+        $dsn = 'mysql:host=' . ($cfg['host'] ?? '127.0.0.1')
+            . (!empty($cfg['port']) ? ';port=' . $cfg['port'] : '')
+            . ';dbname=' . $cfg['database']
+            . ';charset=' . ($cfg['charset'] ?? 'utf8mb4');
+        $pdo = new \PDO($dsn, $cfg['username'] ?? 'root', (string) ($cfg['password'] ?? ''), [
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+        ]);
+
+        $check = $pdo->prepare('SELECT id FROM ric_record_meta WHERE object_id = ?');
+        $check->execute([$objectId]);
+        if ($check->fetchColumn()) {
+            $pdo->prepare('UPDATE ric_record_meta SET entity_type = ?, ric_data = ?, updated_at = NOW() WHERE object_id = ?')
+                ->execute([$entityType, $ricData, $objectId]);
+        } else {
+            $pdo->prepare('INSERT INTO ric_record_meta (object_id, entity_type, ric_data, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())')
+                ->execute([$objectId, $entityType, $ricData]);
+        }
+        $pdo = null;
     }
 
     /**
@@ -149,14 +177,7 @@ class RicManageService
             'rico:name' => $this->ioTitle($objectId, $culture),
         ];
 
-        $propMap = [
-            'ric_identifier' => 'rico:hasOrHadIdentifier',
-            'scope' => 'rico:scope',
-            'authenticity_note' => 'rico:authenticityNote',
-            'integrity_note' => 'rico:integrityNote',
-            'provenance_note' => 'rico:history',
-        ];
-        foreach ($propMap as $key => $predicate) {
+        foreach (self::PROPERTY_PREDICATES as $key => $predicate) {
             if (!empty($meta['properties'][$key])) {
                 $doc[$predicate] = $meta['properties'][$key];
             }
@@ -172,6 +193,14 @@ class RicManageService
         $places = $this->getAccessPointNames($objectId, self::TAXONOMY_PLACE, $culture);
         if (!empty($places)) {
             $doc['rico:hasOrHadSpatialCoverage'] = $places;
+        }
+        $genres = $this->getAccessPointNames($objectId, self::TAXONOMY_GENRE, $culture);
+        if (!empty($genres)) {
+            $doc['rico:hasDocumentaryFormType'] = $genres;
+        }
+        $names = $this->getNameAccessPointNames($objectId, $culture);
+        if (!empty($names)) {
+            $doc['rico:isAssociatedWith'] = $names;
         }
         $holder = $this->getRepositoryName($objectId, $culture);
         if (null !== $holder) {
@@ -194,9 +223,26 @@ class RicManageService
         return $doc;
     }
 
-    /** Subject/place access-point term names for a record (taxonomy 35 = subjects, 42 = places). */
+    /** Access-point taxonomies + the name-access-point relation type. */
     public const TAXONOMY_SUBJECT = 35;
     public const TAXONOMY_PLACE = 42;
+    public const TAXONOMY_GENRE = 78;
+    public const RELATION_NAME_ACCESS_POINT = 161;
+
+    /** Name access points (actors linked via relation type 161). @return array<int,string> */
+    public function getNameAccessPointNames(int $objectId, string $culture = 'en'): array
+    {
+        return DB::table('relation as r')
+            ->leftJoin('actor_i18n as ai', function ($j) use ($culture) {
+                $j->on('ai.id', '=', 'r.object_id')->where('ai.culture', '=', $culture);
+            })
+            ->where('r.subject_id', $objectId)
+            ->where('r.type_id', self::RELATION_NAME_ACCESS_POINT)
+            ->pluck('ai.authorized_form_of_name')
+            ->filter()
+            ->values()
+            ->all();
+    }
 
     /**
      * Access-point term names for a record in a given taxonomy.

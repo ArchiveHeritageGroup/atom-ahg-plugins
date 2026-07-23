@@ -112,7 +112,7 @@
           <div class="accordion-body">
 
             <div class="mb-3">
-              <label for="ricEntityType" class="form-label"><?php echo __('RiC-O entity type'); ?></label>
+              <label for="ricEntityType" class="form-label"><?php echo __('RiC-O entity type'); ?> <span class="badge bg-light text-dark">rdf:type</span></label>
               <select class="form-select" id="ricEntityType" name="ricEntityType">
                 <?php foreach ($rawEntityTypes as $val => $label) { ?>
                   <option value="<?php echo esc_specialchars($val); ?>" <?php echo ($val === ($rawRicMeta['entity_type'] ?? 'Record')) ? 'selected' : ''; ?>>
@@ -124,8 +124,9 @@
             </div>
 
             <?php foreach ($rawPropFields as $key => $label) { ?>
+              <?php $ricPred = \AhgRicManage\Services\RicManageService::PROPERTY_PREDICATES[$key] ?? ''; ?>
               <div class="mb-3">
-                <label for="ricProps_<?php echo esc_specialchars($key); ?>" class="form-label"><?php echo esc_specialchars(__($label)); ?></label>
+                <label for="ricProps_<?php echo esc_specialchars($key); ?>" class="form-label"><?php echo esc_specialchars(__($label)); ?><?php if ($ricPred) { ?> <span class="badge bg-light text-dark"><?php echo esc_specialchars($ricPred); ?></span><?php } ?></label>
                 <textarea class="form-control" id="ricProps_<?php echo esc_specialchars($key); ?>" name="ricProps[<?php echo esc_specialchars($key); ?>]" rows="2"><?php echo esc_specialchars($rawRicMeta['properties'][$key] ?? ''); ?></textarea>
               </div>
             <?php } ?>
@@ -175,6 +176,41 @@
               </div>
               <div class="input-group input-group-sm mt-1">
                 <input type="text" class="form-control term-autocomplete-add" data-taxonomy="42" data-target="ric-place-ap-list" data-name="placeAccessPointIds[]" placeholder="<?php echo __('Type to add place...'); ?>">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><?php echo __('Genres'); ?> <span class="badge bg-light text-dark">rico:hasDocumentaryFormType</span></label>
+              <?php $rawGenreAPs = $rawIo['genreAccessPoints'] ?? []; ?>
+              <div id="ric-genre-ap-list">
+                <?php foreach ($rawGenreAPs as $gap) { ?>
+                  <div class="input-group input-group-sm mb-1">
+                    <input type="text" class="form-control" value="<?php echo esc_specialchars($gap->term_name ?? ''); ?>" readonly>
+                    <input type="hidden" name="genreAccessPointIds[]" value="<?php echo (int) ($gap->term_id ?? 0); ?>">
+                    <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
+                  </div>
+                <?php } ?>
+              </div>
+              <div class="input-group input-group-sm mt-1">
+                <input type="text" class="form-control term-autocomplete-add" data-taxonomy="78" data-target="ric-genre-ap-list" data-name="genreAccessPointIds[]" placeholder="<?php echo __('Type to add genre...'); ?>">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><?php echo __('Name access points'); ?> <span class="badge bg-light text-dark">rico:isAssociatedWith</span></label>
+              <?php $rawNameAPs = $rawIo['nameAccessPoints'] ?? []; ?>
+              <div id="ric-name-ap-list">
+                <?php foreach ($rawNameAPs as $nIdx => $nap) { ?>
+                  <div class="input-group input-group-sm mb-1">
+                    <input type="text" class="form-control" value="<?php echo esc_specialchars($nap->actor_name ?? ''); ?>" readonly>
+                    <input type="hidden" name="nameAccessPoints[<?php echo $nIdx; ?>][actorId]" value="<?php echo (int) ($nap->actor_id ?? 0); ?>">
+                    <input type="hidden" name="nameAccessPoints[<?php echo $nIdx; ?>][actorName]" value="<?php echo esc_specialchars($nap->actor_name ?? ''); ?>">
+                    <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
+                  </div>
+                <?php } ?>
+              </div>
+              <div class="input-group input-group-sm mt-1">
+                <input type="text" class="form-control actor-autocomplete-add" id="ric-name-ap-add" data-target="ric-name-ap-list" placeholder="<?php echo __('Type to add name...'); ?>">
               </div>
             </div>
 
@@ -263,6 +299,7 @@
 (function () {
   var TERM_AC_URL = '<?php echo url_for('@io_term_autocomplete'); ?>';
   var REPO_AC_URL = '<?php echo url_for('@io_repository_autocomplete'); ?>';
+  var ACTOR_AC_URL = '<?php echo url_for('@io_actor_autocomplete'); ?>';
 
   function escHtml(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
@@ -305,7 +342,8 @@
   document.addEventListener('click', function (e) {
     if (!e.target.closest('.ric-ac-dropdown')
         && !e.target.classList.contains('term-autocomplete-add')
-        && !e.target.classList.contains('repository-autocomplete')) {
+        && !e.target.classList.contains('repository-autocomplete')
+        && !e.target.classList.contains('actor-autocomplete-add')) {
       removeDropdowns();
     }
   });
@@ -341,6 +379,26 @@
       });
   });
 
+  // Name access points (actors) -> rico:isAssociatedWith
+  var nameList = document.getElementById('ric-name-ap-list');
+  var nameAdd = document.getElementById('ric-name-ap-add');
+  if (nameAdd && nameList) {
+    var nameIdx = nameList.querySelectorAll('.input-group').length;
+    setupAutocomplete(nameAdd,
+      function (q) { return ACTOR_AC_URL + '?query=' + encodeURIComponent(q) + '&limit=10'; },
+      function (item) {
+        var row = document.createElement('div');
+        row.className = 'input-group input-group-sm mb-1';
+        row.innerHTML = '<input type="text" class="form-control" value="' + escHtml(item.name) + '" readonly>'
+          + '<input type="hidden" name="nameAccessPoints[' + nameIdx + '][actorId]" value="' + item.id + '">'
+          + '<input type="hidden" name="nameAccessPoints[' + nameIdx + '][actorName]" value="' + escHtml(item.name) + '">'
+          + '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>';
+        nameList.appendChild(row);
+        nameIdx++;
+        nameAdd.value = '';
+      });
+  }
+
   // Remove an access-point row
   document.addEventListener('click', function (e) {
     if (e.target.classList.contains('btn-remove-ap')) {
@@ -348,6 +406,30 @@
       if (g) { g.remove(); }
     }
   });
+
+  // Save the RiC metadata (entity type + properties) via its OWN request before
+  // the IO fields submit. Writing ric_record_meta inside the IO update's request
+  // silently voids that update, so it must be a separate POST (/ricManage/save).
+  var editForm = document.getElementById('editForm');
+  var ricObjId = <?php echo (int) ($rawIo['id'] ?? 0); ?>;
+  var etSel = document.getElementById('ricEntityType');
+  if (editForm && ricObjId && etSel) {
+    editForm.addEventListener('submit', function (e) {
+      if (editForm.dataset.ricSaved === '1') { return; } // 2nd pass - let it go
+      e.preventDefault();
+      var fd = new FormData();
+      fd.append('object_id', ricObjId);
+      fd.append('entity_type', etSel.value);
+      document.querySelectorAll('[name^="ricProps["]').forEach(function (el) {
+        var m = el.name.match(/^ricProps\[(.+)\]$/);
+        if (m) { fd.append('properties[' + m[1] + ']', el.value); }
+      });
+      var go = function () { editForm.dataset.ricSaved = '1'; editForm.submit(); };
+      fetch('<?php echo url_for('@ric_save'); ?>', {
+        method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd
+      }).then(go).catch(go);
+    });
+  }
 })();
 </script>
 

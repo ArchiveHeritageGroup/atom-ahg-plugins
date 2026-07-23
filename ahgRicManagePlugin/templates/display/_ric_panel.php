@@ -37,8 +37,10 @@ $culture = sfContext::getInstance()->getUser()->getCulture() ?: 'en';
 $svc = new \AhgRicManage\Services\RicManageService();
 $meta = $svc->getRecordMeta($objectId);
 $relations = $svc->getTypedRelations($objectId, $culture);
-$canEdit = sfContext::getInstance()->getUser()->isAuthenticated()
-    && sfContext::getInstance()->getUser()->hasCredential('editor');
+$__ricUser = sfContext::getInstance()->getUser();
+$canEdit = $__ricUser->isAuthenticated()
+    && ($__ricUser->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID)
+        || $__ricUser->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID));
 
 $entityTypes = \AhgRicManage\Services\RicManageService::ENTITY_TYPES;
 $propFields = \AhgRicManage\Services\RicManageService::PROPERTY_FIELDS;
@@ -46,6 +48,8 @@ $propFields = \AhgRicManage\Services\RicManageService::PROPERTY_FIELDS;
 $ricHolder = $svc->getRepositoryName($objectId, $culture);
 $ricSubjects = $svc->getAccessPointNames($objectId, \AhgRicManage\Services\RicManageService::TAXONOMY_SUBJECT, $culture);
 $ricPlaces = $svc->getAccessPointNames($objectId, \AhgRicManage\Services\RicManageService::TAXONOMY_PLACE, $culture);
+$ricGenres = $svc->getAccessPointNames($objectId, \AhgRicManage\Services\RicManageService::TAXONOMY_GENRE, $culture);
+$ricNames = $svc->getNameAccessPointNames($objectId, $culture);
 $esc = fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 $ricExplorerOn = in_array('ahgRicExplorerPlugin', (array) sfConfig::get('sf_enabled_modules', []), true)
     || function_exists('ahg_ric_explorer_link'); // best-effort
@@ -96,6 +100,20 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
             </div>
         <?php endif; ?>
 
+        <?php if (!empty($ricGenres)): ?>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold"><?php echo $esc(__('Genres')); ?> <span class="badge bg-light text-dark">rico:hasDocumentaryFormType</span></div>
+                <div class="col-md-9"><?php echo $esc(implode(', ', $ricGenres)); ?></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($ricNames)): ?>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold"><?php echo $esc(__('Name access points')); ?> <span class="badge bg-light text-dark">rico:isAssociatedWith</span></div>
+                <div class="col-md-9"><?php echo $esc(implode(', ', $ricNames)); ?></div>
+            </div>
+        <?php endif; ?>
+
         <?php if (!empty($relations)): ?>
             <div class="row mb-2">
                 <div class="col-md-3 fw-bold"><?php echo $esc(__('Typed RiC relations')); ?></div>
@@ -127,6 +145,9 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
             <?php endif; ?>
             <?php if ($canEdit): ?>
                 <button type="button" class="btn btn-sm btn-outline-primary" id="ric-edit-btn"><?php echo $esc(__('Edit RiC')); ?></button>
+                <a class="btn btn-sm btn-outline-success" href="<?php echo $esc('/index.php/informationobject/add?standard=ric&parent=' . $objectId); ?>">
+                    <i class="fas fa-plus me-1" aria-hidden="true"></i><?php echo $esc(__('Create RiC child')); ?>
+                </a>
             <?php endif; ?>
         </div>
     </div>
