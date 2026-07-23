@@ -54,7 +54,7 @@
           <div class="accordion-body">
 
             <div class="mb-3">
-              <label for="identifier" class="form-label"><?php echo __('Identifier'); ?></label>
+              <label for="identifier" class="form-label"><?php echo __('Identifier'); ?> <span class="badge bg-light text-dark">rico:hasOrHadIdentifier</span></label>
               <input type="text" class="form-control" id="identifier" name="identifier"
                      value="<?php echo esc_specialchars($rawIo['identifier'] ?? ''); ?>">
             </div>
@@ -63,6 +63,7 @@
               <label for="title" class="form-label">
                 <?php echo __('Title'); ?>
                 <span class="form-required" title="<?php echo __('This is a mandatory field.'); ?>">*</span>
+                <span class="badge bg-light text-dark">rico:name</span>
               </label>
               <input type="text" class="form-control" id="title" name="title"
                      value="<?php echo esc_specialchars($rawIo['title'] ?? ''); ?>" required>
@@ -70,8 +71,9 @@
 
             <div class="mb-3">
               <label for="levelOfDescriptionId" class="form-label">
-                <?php echo __('Level of description'); ?>
+                <?php echo __('Level / RecordSet type'); ?>
                 <span class="form-required" title="<?php echo __('This is a mandatory field.'); ?>">*</span>
+                <span class="badge bg-light text-dark">rico:hasRecordSetType</span>
               </label>
               <select class="form-select" id="levelOfDescriptionId" name="levelOfDescriptionId" required>
                 <option value=""><?php echo __('- Select -'); ?></option>
@@ -84,12 +86,12 @@
             </div>
 
             <div class="mb-3">
-              <label for="extentAndMedium" class="form-label"><?php echo __('Extent and medium'); ?></label>
+              <label for="extentAndMedium" class="form-label"><?php echo __('Extent and medium'); ?> <span class="badge bg-light text-dark">rico:hasInstantiation</span></label>
               <textarea class="form-control" id="extentAndMedium" name="extentAndMedium" rows="2"><?php echo esc_specialchars($rawIo['extentAndMedium'] ?? ''); ?></textarea>
             </div>
 
             <div class="mb-3">
-              <label for="repositoryName" class="form-label"><?php echo __('Repository'); ?></label>
+              <label for="repositoryName" class="form-label"><?php echo __('Repository / holder'); ?> <span class="badge bg-light text-dark">rico:hasOrHadHolder</span></label>
               <input type="text" class="form-control repository-autocomplete" id="repositoryName" name="repositoryName"
                      value="<?php echo esc_specialchars($rawIo['repositoryName'] ?? ''); ?>" placeholder="<?php echo __('Type to search repositories...'); ?>">
               <input type="hidden" id="repositoryId" name="repositoryId" value="<?php echo (int) ($rawIo['repositoryId'] ?? 0); ?>">
@@ -195,12 +197,12 @@
           <div class="accordion-body">
 
             <div class="mb-3">
-              <label for="scopeAndContent" class="form-label"><?php echo __('Scope and content'); ?></label>
+              <label for="scopeAndContent" class="form-label"><?php echo __('Scope and content'); ?> <span class="badge bg-light text-dark">rico:descriptiveNote</span></label>
               <textarea class="form-control" id="scopeAndContent" name="scopeAndContent" rows="4"><?php echo esc_specialchars($rawIo['scopeAndContent'] ?? ''); ?></textarea>
             </div>
 
             <div class="mb-3">
-              <label for="accessConditions" class="form-label"><?php echo __('Conditions governing access'); ?></label>
+              <label for="accessConditions" class="form-label"><?php echo __('Conditions governing access'); ?> <span class="badge bg-light text-dark">rico:conditionsOfUse</span></label>
               <textarea class="form-control" id="accessConditions" name="accessConditions" rows="3"><?php echo esc_specialchars($rawIo['accessConditions'] ?? ''); ?></textarea>
             </div>
 

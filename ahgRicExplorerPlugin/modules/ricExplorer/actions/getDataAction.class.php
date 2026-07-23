@@ -276,7 +276,50 @@ SPARQL;
                 $edges[] = ['source' => $actorUri, 'target' => $recordUri];
             }
         }
-        
+
+        $culture = \AtomExtensions\Helpers\CultureHelper::getCulture();
+
+        // Subjects -> rico:hasOrHadSubject ; Places -> rico:hasOrHadSpatialCoverage
+        $accessPoints = [
+            35 => ['uriType' => 'concept', 'nodeType' => 'Concept', 'edge' => 'Has Or Had Subject'],
+            42 => ['uriType' => 'place', 'nodeType' => 'Place', 'edge' => 'Has Or Had Spatial Coverage'],
+        ];
+        foreach ($accessPoints as $taxonomyId => $cfg) {
+            $terms = DB::table('object_term_relation as otr')
+                ->join('term as t', 't.id', '=', 'otr.term_id')
+                ->leftJoin('term_i18n as ti', function ($j) use ($culture) {
+                    $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', $culture);
+                })
+                ->where('otr.object_id', $recordId)
+                ->where('t.taxonomy_id', $taxonomyId)
+                ->select('t.id as term_id', 'ti.name')
+                ->get();
+            foreach ($terms as $term) {
+                $uri = $this->buildRecordUri($cfg['uriType'], $term->term_id);
+                $nodes[] = [
+                    'id' => $uri,
+                    'label' => $term->name ?: ($cfg['nodeType'] . ' ' . $term->term_id),
+                    'type' => $cfg['nodeType'],
+                ];
+                $edges[] = ['source' => $recordUri, 'target' => $uri, 'label' => $cfg['edge']];
+            }
+        }
+
+        // Holder (repository) -> rico:hasOrHadHolder
+        if (!empty($record->repository_id)) {
+            $repoName = DB::table('actor_i18n')->where('id', $record->repository_id)->where('culture', $culture)->value('authorized_form_of_name');
+            if (empty($repoName)) {
+                $repoName = DB::table('actor_i18n')->where('id', $record->repository_id)->value('authorized_form_of_name');
+            }
+            $repoUri = $this->buildRecordUri('corporatebody', $record->repository_id);
+            $nodes[] = [
+                'id' => $repoUri,
+                'label' => $repoName ?: ('Repository ' . $record->repository_id),
+                'type' => 'CorporateBody',
+            ];
+            $edges[] = ['source' => $recordUri, 'target' => $repoUri, 'label' => 'Has Or Had Holder'];
+        }
+
         $nodes = $this->enrichNodesWithSlugs($nodes);
 
         return ['nodes' => $nodes, 'edges' => $edges];

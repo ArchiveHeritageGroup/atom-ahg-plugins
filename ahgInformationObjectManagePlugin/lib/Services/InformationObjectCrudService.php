@@ -726,14 +726,29 @@ class InformationObjectCrudService
     /**
      * Get levels of description terms.
      */
-    public static function getLevelsOfDescription(string $culture = 'en'): array
+    public static function getLevelsOfDescription(string $culture = 'en', ?string $sector = null, ?int $ensureId = null): array
     {
-        return DB::table('term')
+        $query = DB::table('term')
             ->leftJoin('term_i18n', function ($join) use ($culture) {
                 $join->on('term.id', '=', 'term_i18n.id')
                      ->where('term_i18n.culture', '=', $culture);
             })
-            ->where('term.taxonomy_id', self::TAXONOMY_LEVELS_OF_DESCRIPTION)
+            ->where('term.taxonomy_id', self::TAXONOMY_LEVELS_OF_DESCRIPTION);
+
+        // Filter to the levels configured for this sector (level_of_description_sector).
+        // Always keep the record's current level so editing never drops it. If the
+        // sector has no configured levels, fall through to all levels.
+        if (null !== $sector) {
+            $ids = DB::table('level_of_description_sector')->where('sector', $sector)->pluck('term_id')->all();
+            if (!empty($ids)) {
+                if ($ensureId) {
+                    $ids[] = $ensureId;
+                }
+                $query->whereIn('term.id', $ids);
+            }
+        }
+
+        return $query
             ->select(['term.id', 'term_i18n.name'])
             ->orderBy('term_i18n.name')
             ->get()

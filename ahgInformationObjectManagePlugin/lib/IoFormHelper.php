@@ -169,7 +169,22 @@ class IoFormHelper
     {
         $svc = '\\AhgInformationObjectManage\\Services\\InformationObjectCrudService';
 
-        $action->levels = $svc::getLevelsOfDescription($culture);
+        // Filter the level-of-description options to the record's sector, derived
+        // from its display standard (display_standard_sector). Sector standards
+        // (museum/library/gallery/dam) get their own levels; archive standards
+        // (ISAD/RAD/DACS/MODS/DC/RiC) get the archive levels. Unknown -> archive.
+        $sector = 'archive';
+        $dsId = isset($action->io['displayStandardId']) ? (int) $action->io['displayStandardId'] : 0;
+        if ($dsId) {
+            $mapped = \Illuminate\Database\Capsule\Manager::table('display_standard_sector')
+                ->where('term_id', $dsId)
+                ->value('sector');
+            if ($mapped) {
+                $sector = $mapped;
+            }
+        }
+        $currentLevel = isset($action->io['levelOfDescriptionId']) ? (int) $action->io['levelOfDescriptionId'] : null;
+        $action->levels = $svc::getLevelsOfDescription($culture, $sector, $currentLevel);
         $action->descriptionStatuses = $svc::getDescriptionStatuses($culture);
         $action->descriptionDetails = $svc::getDescriptionDetails($culture);
         $action->eventTypes = $svc::getEventTypes($culture);
