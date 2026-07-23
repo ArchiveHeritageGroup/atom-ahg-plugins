@@ -228,10 +228,18 @@ class IoFormHelper
                 . ' - ' . $action->getResponse()->getTitle()
             );
 
-            // For new records, check URL param or global default
+            // For new records, honour ?standardId (a template term id, used by the
+            // descriptive-standard switcher on the add form) or ?standard (a code),
+            // else the global default. Pre-select the display-standard dropdown so
+            // the reloaded add form shows the chosen standard.
+            $urlStandardId = (int) $request->getParameter('standardId', 0);
             $urlStandard = $request->getParameter('standard', null);
-            if ($urlStandard && isset(self::getStandardIds()[$urlStandard])) {
+            if ($urlStandardId && isset(self::getIdToStandard()[$urlStandardId])) {
+                $standard = self::getIdToStandard()[$urlStandardId];
+                $action->io['displayStandardId'] = $urlStandardId;
+            } elseif ($urlStandard && isset(self::getStandardIds()[$urlStandard])) {
                 $standard = $urlStandard;
+                $action->io['displayStandardId'] = self::getStandardIds()[$urlStandard];
             } else {
                 $standard = self::detectStandard(null, $culture);
             }

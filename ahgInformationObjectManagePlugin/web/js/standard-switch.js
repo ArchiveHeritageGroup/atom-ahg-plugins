@@ -25,9 +25,34 @@
 
   var previousValue = sel.value;
 
+  // The add form posts to /informationobject/add (no slug); the edit form to
+  // /informationobject/<slug>/edit. New records can't be saved empty, so on the
+  // add form we just RELOAD into the chosen standard rather than submit.
+  var action = (form.getAttribute('action') || '').split('?')[0];
+  var isAddForm = /\/informationobject\/add$/.test(action);
+
   sel.addEventListener('change', function () {
     var opt = sel.options[sel.selectedIndex];
     var label = opt ? opt.text.trim() : '';
+
+    if (isAddForm) {
+      var selectedId = sel.value;
+      if (!selectedId) {
+        return; // "- Use global default -" : leave the form as it is
+      }
+      if (!window.confirm('Switch to "' + label + '"?\n\nThe form will reload with that standard\'s fields.')) {
+        sel.value = previousValue;
+        return;
+      }
+      var url = action + '?standardId=' + encodeURIComponent(selectedId);
+      var parent = form.querySelector('input[name="parentId"]');
+      if (parent && parent.value && parent.value !== '0') {
+        url += '&parent=' + encodeURIComponent(parent.value);
+      }
+      window.location = url;
+      return;
+    }
+
     var message =
       'Switch the descriptive standard to "' + label + '"?\n\n' +
       'Your current changes will be saved and the form will reload with that ' +
