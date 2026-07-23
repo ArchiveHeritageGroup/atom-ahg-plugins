@@ -155,6 +155,18 @@ class IiifViewerService
             return null;
         }
 
+        // Content-aware invalidation. The stored cache_key is a signature of the
+        // object's digital objects (id + checksum). If it no longer matches the
+        // current signature - because an image was added, replaced, or removed -
+        // treat this as a cache MISS so the manifest is regenerated against the
+        // current master image. Otherwise a replaced image keeps serving the old
+        // (often now-deleted) Cantaloupe path until the 24h expiry, showing a
+        // blank/stale image on the record page.
+        $currentSignature = $this->buildCacheSignature($objectId, $cultureKey);
+        if (!empty($row->cache_key) && !hash_equals((string) $row->cache_key, $currentSignature)) {
+            return null;
+        }
+
         return [
             'manifest_json' => $row->manifest_json,
             'page_count' => $row->page_count,
@@ -211,12 +223,16 @@ class IiifViewerService
      */
     private function buildCacheSignature(int $objectId, string $culture): string
     {
-        $doIds = DB::table('digital_object')
+        // Include each digital object's checksum, not just its id, so that
+        // replacing an image in place (same row id, new file/checksum) also
+        // changes the signature and invalidates the cached manifest.
+        $parts = DB::table('digital_object')
             ->where('object_id', $objectId)
             ->orderBy('id')
-            ->pluck('id')
+            ->get(['id', 'checksum'])
+            ->map(fn ($r) => $r->id . ':' . (string) $r->checksum)
             ->implode(',');
 
-        return hash('sha256', "{$objectId}:{$culture}:{$doIds}");
+        return hash('sha256', "{$objectId}:{$culture}:{$parts}");
     }
 }
