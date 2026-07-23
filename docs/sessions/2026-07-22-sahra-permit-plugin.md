@@ -164,3 +164,15 @@ following the existing access-request/research/spectrum badge pattern):
 - Profile dropdown "Heritage permits" section: "To endorse (N)" -> /sahra/approvals,
   "SAHRA review (N)" -> /sahra/review. Only shown when N>0. Gated on `isFeatureEnabled()` and
   wrapped in try/catch so it never breaks the (site-wide) user menu.
+
+## Round 5 (v3.81.6): document uploads never stored
+
+Uploaded documents silently failed to store (0 rows across all permits, no error logged).
+Root cause: `sfWebRequest::getFiles('documents')` runs `fixPhpFilesArray`, which normalises a
+`documents[]` multi-file upload into a LIST of file-arrays: `[0 => ['name'=>..,'tmp_name'=>..,
+'error'=>..,'size'=>..], 1 => [...]]` - NOT the raw PHP `$_FILES` shape
+(`['name'=>[...], 'tmp_name'=>[...]]`). `storeUploadedDocuments` checked `!isset($files['name'])`
+and bailed with 0 for the Symfony shape. Fixed to detect `isset($files[0]) && is_array($files[0])`
+(Symfony list) as well as the raw single/multi `$_FILES` shapes. Affected BOTH the application-form
+and permit-page upload paths. **Lesson: in Symfony 1.x always consume `getFiles()` as a list of
+per-file arrays, not raw `$_FILES`.**

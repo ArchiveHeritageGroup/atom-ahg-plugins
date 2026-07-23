@@ -289,9 +289,24 @@ function render_iiif_viewer($resource, $options = [])
         'default_zoom' => (int) get_iiif_setting('default_zoom', 1),
     ], $options);
     
-    // Build manifest URL
+    // Build manifest URL. Cache-bust it with the current master digital object's
+    // id + checksum so that replacing/updating the image shows immediately - the
+    // manifest URL is otherwise stable, so the browser serves a cached manifest
+    // that still points at the OLD image until a manual hard refresh.
     $manifestUrl = $baseUrl . '/iiif/manifest/' . $slug;
-    
+    try {
+        $__doVer = \Illuminate\Database\Capsule\Manager::table('digital_object')
+            ->where('object_id', $objectId)
+            ->orderBy('id')
+            ->first(['id', 'checksum']);
+        if ($__doVer) {
+            $manifestUrl .= (false === strpos($manifestUrl, '?') ? '?' : '&')
+                . 'v=' . $__doVer->id . '-' . substr((string) $__doVer->checksum, 0, 12);
+        }
+    } catch (\Throwable $__e) {
+        // best effort - fall back to the unversioned URL
+    }
+
     // Determine content type flags
     $hasPdf = stripos($mimeType, 'pdf') !== false;
     $hasAudio = stripos($mimeType, 'audio') !== false;
