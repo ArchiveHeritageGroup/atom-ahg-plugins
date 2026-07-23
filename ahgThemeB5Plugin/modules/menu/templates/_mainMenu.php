@@ -22,6 +22,7 @@ $hasLibrary = checkPluginEnabled('ahgLibraryPlugin');
 $hasMuseum = checkPluginEnabled('ahgMuseumPlugin');
 $hasGallery = checkPluginEnabled('ahgGalleryPlugin');
 $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin');
+$hasRic = checkPluginEnabled('ahgRicManagePlugin');
 ?>
 <?php foreach ([$addMenu, $manageMenu, $importMenu, $adminMenu] as $menu) { ?>
   <?php $menuName = $menu ? $menu->getName() : ''; ?>
@@ -76,9 +77,12 @@ $hasDam = checkPluginEnabled('arDAMPlugin') || checkPluginEnabled('ahgDAMPlugin'
 
         <?php // Inject sector-specific items for Add menu ?>
         <?php if ('add' == $menu->getName()): ?>
-          <?php if ($hasLibrary || $hasMuseum || $hasGallery || $hasDam): ?>
+          <?php if ($hasLibrary || $hasMuseum || $hasGallery || $hasDam || $hasRic): ?>
             <li><hr class="dropdown-divider"></li>
             <li><h6 class="dropdown-header"><?php echo __('Sector Items'); ?></h6></li>
+          <?php endif; ?>
+          <?php if ($hasRic): ?>
+            <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'ricManage', 'action' => 'add']); ?>"><i class="fas fa-project-diagram fa-fw me-2"></i><?php echo __('Records in Context (RiC)'); ?></a></li>
           <?php endif; ?>
           <?php if ($hasMuseum): ?>
             <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'museum', 'action' => 'add']); ?>"><i class="fas fa-university fa-fw me-2"></i><?php echo __('Museum object'); ?></a></li>

@@ -58,6 +58,18 @@ class ricManageActions extends AhgController
     }
 
     /**
+     * /ric/add - the clean "add a RiC record" entry point (Add menu). Forwards to
+     * the shared IO add form with standard=ric preset, which dispatches to the RiC
+     * add form. Accepts ?parent=<id> to create it under a given record.
+     */
+    public function executeAdd($request)
+    {
+        $request->setParameter('standard', 'ric');
+
+        $this->forward('ioManage', 'edit');
+    }
+
+    /**
      * GET /ricManage/get/:objectId - return the record's RiC metadata + relations.
      */
     public function executeGet($request)
