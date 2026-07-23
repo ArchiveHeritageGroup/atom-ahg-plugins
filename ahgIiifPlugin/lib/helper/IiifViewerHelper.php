@@ -753,6 +753,13 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
     $fullscreen = $opts['enable_fullscreen'] ?? true;
     $defaultZoom = $opts['default_zoom'] ?? 1;
 
+    // The stored setting documents "1 = fit to viewer", but OpenSeadragon's
+    // defaultZoomLevel uses 0 for fit and 1 for an absolute 1:1 zoom - which opens
+    // the image larger than the viewport, spilling past the edge (and looking blank
+    // when it lands on a corner). Map the "fit" intent (<= 1) to OSD's 0; only
+    // values above 1 request a real zoom-in.
+    $osdZoomLevel = ((int) $defaultZoom <= 1) ? 0 : (int) $defaultZoom;
+
     $osdConfig = json_encode([
         'showNavigator' => true,
         'navigatorPosition' => 'BOTTOM_RIGHT',
@@ -760,7 +767,7 @@ function ahg_iiif_render_viewer_javascript($viewerId, $objectId, $manifestUrl, $
         'showFlipControl' => true,
         'showZoomControl' => (bool) $showZoom,
         'showFullPageControl' => (bool) $fullscreen,
-        'defaultZoomLevel' => (int) $defaultZoom,
+        'defaultZoomLevel' => $osdZoomLevel,
         'gestureSettingsMouse' => ['scrollToZoom' => true],
     ]);
     
