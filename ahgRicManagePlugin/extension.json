@@ -1,0 +1,44 @@
+{
+    "name": "Records in Context (RiC) Cataloguing",
+    "machine_name": "ahgRicManagePlugin",
+    "version": "1.0.0",
+    "description": "Adds Records in Context (RiC-O) as a selectable descriptive standard. A record captured as RiC keeps its RiC-O entity type, record-centric RiC properties, and typed RiC relations, all sourced from MySQL. Record-centric now, extensible to further RiC entity types later.",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "dependents": [],
+    "optional": {
+        "extensions": [
+            "ahgRicExplorerPlugin"
+        ]
+    },
+    "tables": [
+        "ric_record_meta"
+    ],
+    "shared_tables": [
+        "ric_relation_meta",
+        "ric_sync_config"
+    ],
+    "helpers": [],
+    "category": "metadata",
+    "load_order": 60,
+    "display_panels": [
+        {
+            "id": "ric_record_panel_io",
+            "label": "Records in Context (RiC)",
+            "template": "ahgRicManagePlugin/templates/display/_ric_panel.php",
+            "contexts": [
+                "informationobject"
+            ],
+            "position": "before-notes",
+            "weight": 25
+        }
+    ]
+}

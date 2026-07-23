@@ -1,0 +1,6 @@
+all:
+  is_secure: false
+
+save:
+  is_secure: true
+  credentials: [editor]

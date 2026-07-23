@@ -82,6 +82,76 @@ class iiifActions extends AhgController
     /**
      * Generate IIIF Presentation API 2.1 manifest
      */
+    /**
+     * Whether the current user may be served the MASTER digital object.
+     *
+     * Mirrors base AtoM's rule (QubitObject::getDigitalObjectPublicUrl /
+     * getDigitalObjectUrl): the master is served only when it is accessible via
+     * URL AND the user holds the 'readMaster' ACL permission on the record.
+     * Authentication alone is NOT enough - 'readMaster' is granted to editors /
+     * contributors, not to plain authenticated researchers or anonymous users.
+     * Fails closed (serve the reference) on any error.
+     */
+    protected function userCanReadMaster(int $objectId): bool
+    {
+        try {
+            $resource = \QubitInformationObject::getById($objectId);
+            if (null === $resource) {
+                return false;
+            }
+
+            $do = $resource->getDigitalObject();
+            if (null !== $do && !$do->masterAccessibleViaUrl()) {
+                return false;
+            }
+
+            return \QubitAcl::check($resource, 'readMaster');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Swap each master digital object for its reference derivative (usage 141,
+     * thumbnail 142 as a fallback) when the user cannot read the master. A master
+     * with no derivative is dropped rather than exposed. When $canMaster is true
+     * the masters are returned unchanged.
+     *
+     * @param array<int,array<string,mixed>> $digitalObjects masters (object_id set)
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    protected function applyMasterAccess(array $digitalObjects, bool $canMaster): array
+    {
+        if ($canMaster) {
+            return $digitalObjects;
+        }
+
+        $db = \Illuminate\Database\Capsule\Manager::class;
+        $out = [];
+        foreach ($digitalObjects as $do) {
+            $child = $db::table('digital_object')
+                ->where('parent_id', $do['id'])
+                ->whereIn('usage_id', [141, 142])
+                ->orderByRaw('FIELD(usage_id, 141, 142)')
+                ->select('id', 'name', 'path', 'mime_type', 'byte_size')
+                ->first();
+
+            if ($child) {
+                $child = (array) $child;
+                $do['id'] = $child['id'];
+                $do['name'] = $child['name'];
+                $do['path'] = $child['path'];
+                $do['mime_type'] = $child['mime_type'];
+                $do['byte_size'] = $child['byte_size'];
+                $out[] = $do;
+            }
+            // No derivative + no master access -> omit; never expose the master.
+        }
+
+        return $out;
+    }
+
     protected function generateManifest(array $params)
     {
         $this->getResponse()->setContentType('application/json');
@@ -143,10 +213,17 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Object not found']));
         }
 
-        // Check manifest cache
+        // Access control: only 'readMaster' users get the original; everyone else
+        // (anonymous or authenticated-without-readMaster) gets the reference. Cache
+        // each tier separately and mark the response private.
+        $canMaster = $this->userCanReadMaster((int) $object['id']);
+        $tier = 'v2-' . ($canMaster ? 'master' : 'ref');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
+
+        // Check manifest cache (per access tier)
         $viewerService = new \AhgIiif\Services\IiifViewerService();
         if (!$forceRefresh) {
-            $cached = $viewerService->getCachedManifest((int) $object['id'], $culture);
+            $cached = $viewerService->getCachedManifest((int) $object['id'], $culture, $tier);
             if ($cached) {
                 return $this->renderText($cached['manifest_json']);
             }
@@ -164,6 +241,12 @@ class iiifActions extends AhgController
         if (empty($digitalObjects)) {
             $this->getResponse()->setStatusCode(404);
             return $this->renderText(json_encode(['error' => 'No digital objects found']));
+        }
+
+        // Serve the reference derivative instead of the master when unauthorised.
+        $digitalObjects = $this->applyMasterAccess($digitalObjects, $canMaster);
+        if (empty($digitalObjects)) {
+            return $this->renderText(json_encode(['error' => 'No accessible representation']));
         }
 
         // Build URLs
@@ -370,7 +453,7 @@ class iiifActions extends AhgController
         // Cache the manifest
         $manifestJson = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         try {
-            $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, $totalPageCount);
+            $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, $totalPageCount, $tier);
         } catch (\Exception $e) {
             // Cache write failure is non-fatal
         }
@@ -439,10 +522,19 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'Object not found']));
         }
 
-        // Check v3 manifest cache
+        // Access control: only users with the 'readMaster' ACL permission (and a
+        // master that is URL-accessible) get the original; everyone else -
+        // anonymous or authenticated-without-readMaster - is served the reference
+        // derivative. Cache each access tier separately and mark the response
+        // private so a public request can never receive a staff-cached master.
+        $canMaster = $this->userCanReadMaster((int) $object['id']);
+        $tier = 'v3-' . ($canMaster ? 'master' : 'ref');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'private, no-cache');
+
+        // Check v3 manifest cache (per access tier)
         $viewerService = new \AhgIiif\Services\IiifViewerService();
         if (!$forceRefresh) {
-            $cached = $viewerService->getCachedManifest((int) $object['id'], $culture, 'v3');
+            $cached = $viewerService->getCachedManifest((int) $object['id'], $culture, $tier);
             if ($cached) {
                 $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
 
@@ -463,6 +555,12 @@ class iiifActions extends AhgController
             return $this->renderText(json_encode(['error' => 'No digital objects found']));
         }
 
+        // Serve the reference derivative instead of the master when unauthorised.
+        $digitalObjects = $this->applyMasterAccess($digitalObjects, $canMaster);
+        if (empty($digitalObjects)) {
+            return $this->renderText(json_encode(['error' => 'No accessible representation']));
+        }
+
         // Use cached page count if available
         $cachedPageCount = $viewerService->getPageCount((int) $object['id']);
 
@@ -474,7 +572,7 @@ class iiifActions extends AhgController
         // Cache the v3 manifest
         $manifestJson = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         try {
-            $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, null, 'v3');
+            $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, null, $tier);
         } catch (\Exception $e) {
             // Cache write failure is non-fatal
         }
