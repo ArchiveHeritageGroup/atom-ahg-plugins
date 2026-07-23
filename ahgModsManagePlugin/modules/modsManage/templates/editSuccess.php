@@ -696,4 +696,6 @@
 })();
 </script>
 
+<script src="/plugins/ahgInformationObjectManagePlugin/web/js/standard-switch.js"></script>
+
 <?php end_slot(); ?>

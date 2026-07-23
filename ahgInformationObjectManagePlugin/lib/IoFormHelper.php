@@ -714,16 +714,22 @@ class IoFormHelper
         if (empty($action->errors)) {
             $data = self::extractFormData($request);
 
+            // When the descriptive standard was changed on the form, the client
+            // posts _afterSave=edit so we return to the edit page instead of the
+            // record view - the edit action then re-dispatches to the newly
+            // selected standard's field set, prefilled with the saved values.
+            $returnToEdit = 'edit' === $request->getParameter('_afterSave');
+
             if ($action->isNew) {
                 $newId = $svc::create($data, $culture);
                 $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
-                $action->redirect('/' . $newSlug);
+                $action->redirect($returnToEdit ? '/informationobject/' . $newSlug . '/edit' : '/' . $newSlug);
 
                 return true;
             }
 
             $svc::update($action->io['id'], $data, $culture);
-            $action->redirect('/' . $action->io['slug']);
+            $action->redirect($returnToEdit ? '/informationobject/' . $action->io['slug'] . '/edit' : '/' . $action->io['slug']);
 
             return true;
         }
