@@ -42,6 +42,10 @@ $canEdit = sfContext::getInstance()->getUser()->isAuthenticated()
 
 $entityTypes = \AhgRicManage\Services\RicManageService::ENTITY_TYPES;
 $propFields = \AhgRicManage\Services\RicManageService::PROPERTY_FIELDS;
+// RiC-O relations derived from the record's access points / repository.
+$ricHolder = $svc->getRepositoryName($objectId, $culture);
+$ricSubjects = $svc->getAccessPointNames($objectId, \AhgRicManage\Services\RicManageService::TAXONOMY_SUBJECT, $culture);
+$ricPlaces = $svc->getAccessPointNames($objectId, \AhgRicManage\Services\RicManageService::TAXONOMY_PLACE, $culture);
 $esc = fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 $ricExplorerOn = in_array('ahgRicExplorerPlugin', (array) sfConfig::get('sf_enabled_modules', []), true)
     || function_exists('ahg_ric_explorer_link'); // best-effort
@@ -70,6 +74,27 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
                 </div>
             <?php endif; ?>
         <?php endforeach; ?>
+
+        <?php if (!empty($ricHolder)): ?>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold"><?php echo $esc(__('Holder')); ?> <span class="badge bg-light text-dark">rico:hasOrHadHolder</span></div>
+                <div class="col-md-9"><?php echo $esc($ricHolder); ?></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($ricSubjects)): ?>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold"><?php echo $esc(__('Subjects')); ?> <span class="badge bg-light text-dark">rico:hasOrHadSubject</span></div>
+                <div class="col-md-9"><?php echo $esc(implode(', ', $ricSubjects)); ?></div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($ricPlaces)): ?>
+            <div class="row mb-2">
+                <div class="col-md-3 fw-bold"><?php echo $esc(__('Places')); ?> <span class="badge bg-light text-dark">rico:hasOrHadSpatialCoverage</span></div>
+                <div class="col-md-9"><?php echo $esc(implode(', ', $ricPlaces)); ?></div>
+            </div>
+        <?php endif; ?>
 
         <?php if (!empty($relations)): ?>
             <div class="row mb-2">

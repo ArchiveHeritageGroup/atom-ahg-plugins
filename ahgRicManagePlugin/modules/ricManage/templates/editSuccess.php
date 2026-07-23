@@ -132,6 +132,58 @@
         </div>
       </div>
 
+      <!-- RiC relations / access points -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="ric-ap-heading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ric-ap-collapse" aria-expanded="false" aria-controls="ric-ap-collapse">
+            <?php echo __('RiC relations'); ?>
+          </button>
+        </h2>
+        <div id="ric-ap-collapse" class="accordion-collapse collapse" aria-labelledby="ric-ap-heading">
+          <div class="accordion-body">
+
+            <div class="mb-3">
+              <label class="form-label"><?php echo __('Subjects'); ?> <span class="badge bg-light text-dark">rico:hasOrHadSubject</span></label>
+              <?php $rawSubjectAPs = $rawIo['subjectAccessPoints'] ?? []; ?>
+              <div id="ric-subject-ap-list">
+                <?php foreach ($rawSubjectAPs as $sap) { ?>
+                  <div class="input-group input-group-sm mb-1">
+                    <input type="text" class="form-control" value="<?php echo esc_specialchars($sap->term_name ?? ''); ?>" readonly>
+                    <input type="hidden" name="subjectAccessPointIds[]" value="<?php echo (int) ($sap->term_id ?? 0); ?>">
+                    <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
+                  </div>
+                <?php } ?>
+              </div>
+              <div class="input-group input-group-sm mt-1">
+                <input type="text" class="form-control term-autocomplete-add" data-taxonomy="35" data-target="ric-subject-ap-list" data-name="subjectAccessPointIds[]" placeholder="<?php echo __('Type to add subject...'); ?>">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label"><?php echo __('Places'); ?> <span class="badge bg-light text-dark">rico:hasOrHadSpatialCoverage</span></label>
+              <?php $rawPlaceAPs = $rawIo['placeAccessPoints'] ?? []; ?>
+              <div id="ric-place-ap-list">
+                <?php foreach ($rawPlaceAPs as $pap) { ?>
+                  <div class="input-group input-group-sm mb-1">
+                    <input type="text" class="form-control" value="<?php echo esc_specialchars($pap->term_name ?? ''); ?>" readonly>
+                    <input type="hidden" name="placeAccessPointIds[]" value="<?php echo (int) ($pap->term_id ?? 0); ?>">
+                    <button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>
+                  </div>
+                <?php } ?>
+              </div>
+              <div class="input-group input-group-sm mt-1">
+                <input type="text" class="form-control term-autocomplete-add" data-taxonomy="42" data-target="ric-place-ap-list" data-name="placeAccessPointIds[]" placeholder="<?php echo __('Type to add place...'); ?>">
+              </div>
+            </div>
+
+            <p class="form-text text-muted small mb-0">
+              <?php echo __('The holder (rico:hasOrHadHolder) is the Repository set in the Identity area.'); ?>
+            </p>
+
+          </div>
+        </div>
+      </div>
+
       <!-- Content area -->
       <div class="accordion-item">
         <h2 class="accordion-header" id="ric-content-heading">
@@ -203,6 +255,99 @@
     </ul>
 
   </form>
+
+<?php $n = sfConfig::get('csp_nonce', ''); ?>
+<script <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>>
+(function () {
+  var TERM_AC_URL = '<?php echo url_for('@io_term_autocomplete'); ?>';
+  var REPO_AC_URL = '<?php echo url_for('@io_repository_autocomplete'); ?>';
+
+  function escHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function removeDropdowns() {
+    document.querySelectorAll('.ric-ac-dropdown').forEach(function (d) { d.remove(); });
+  }
+  function showDropdown(input, results, onSelect) {
+    removeDropdowns();
+    var dd = document.createElement('div');
+    dd.className = 'list-group position-absolute ric-ac-dropdown';
+    dd.style.zIndex = 1080;
+    dd.style.width = input.offsetWidth + 'px';
+    results.forEach(function (item) {
+      var a = document.createElement('button');
+      a.type = 'button';
+      a.className = 'list-group-item list-group-item-action py-1';
+      a.textContent = item.name;
+      a.addEventListener('click', function () { onSelect(item); removeDropdowns(); });
+      dd.appendChild(a);
+    });
+    input.parentNode.style.position = 'relative';
+    input.parentNode.appendChild(dd);
+  }
+  function setupAutocomplete(input, buildUrl, onSelect) {
+    var t = null;
+    input.addEventListener('input', function () {
+      clearTimeout(t);
+      var q = input.value.trim();
+      if (q.length < 2) { removeDropdowns(); return; }
+      t = setTimeout(function () {
+        fetch(buildUrl(q)).then(function (r) { return r.json(); }).then(function (res) {
+          if (res && res.length) { showDropdown(input, res, onSelect); } else { removeDropdowns(); }
+        }).catch(removeDropdowns);
+      }, 300);
+    });
+  }
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.ric-ac-dropdown')
+        && !e.target.classList.contains('term-autocomplete-add')
+        && !e.target.classList.contains('repository-autocomplete')) {
+      removeDropdowns();
+    }
+  });
+
+  // Repository -> rico:hasOrHadHolder
+  var repo = document.getElementById('repositoryName');
+  if (repo) {
+    setupAutocomplete(repo,
+      function (q) { return REPO_AC_URL + '?query=' + encodeURIComponent(q) + '&limit=10'; },
+      function (item) {
+        repo.value = item.name;
+        var h = document.getElementById('repositoryId'); if (h) { h.value = item.id; }
+      });
+  }
+
+  // Subject (35) / place (42) access points -> rico:hasOrHadSubject / spatial
+  document.querySelectorAll('.term-autocomplete-add').forEach(function (input) {
+    var tax = input.getAttribute('data-taxonomy');
+    var target = input.getAttribute('data-target');
+    var name = input.getAttribute('data-name');
+    setupAutocomplete(input,
+      function (q) { return TERM_AC_URL + '?taxonomy=' + tax + '&query=' + encodeURIComponent(q) + '&limit=10'; },
+      function (item) {
+        var list = document.getElementById(target);
+        if (!list) { return; }
+        var row = document.createElement('div');
+        row.className = 'input-group input-group-sm mb-1';
+        row.innerHTML = '<input type="text" class="form-control" value="' + escHtml(item.name) + '" readonly>'
+          + '<input type="hidden" name="' + name + '" value="' + item.id + '">'
+          + '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __('Remove'); ?></button>';
+        list.appendChild(row);
+        input.value = '';
+      });
+  });
+
+  // Remove an access-point row
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('btn-remove-ap')) {
+      var g = e.target.closest('.input-group');
+      if (g) { g.remove(); }
+    }
+  });
+})();
+</script>
 
 <script src="/plugins/ahgInformationObjectManagePlugin/web/js/standard-switch.js"></script>
 

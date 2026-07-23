@@ -162,6 +162,22 @@ class RicManageService
             }
         }
 
+        // Subjects -> rico:hasOrHadSubject, repository -> rico:hasOrHadHolder,
+        // places -> rico:hasOrHadSpatialCoverage. Derived from the record's
+        // existing access points / repository so the RiC-O output is complete.
+        $subjects = $this->getAccessPointNames($objectId, self::TAXONOMY_SUBJECT, $culture);
+        if (!empty($subjects)) {
+            $doc['rico:hasOrHadSubject'] = $subjects;
+        }
+        $places = $this->getAccessPointNames($objectId, self::TAXONOMY_PLACE, $culture);
+        if (!empty($places)) {
+            $doc['rico:hasOrHadSpatialCoverage'] = $places;
+        }
+        $holder = $this->getRepositoryName($objectId, $culture);
+        if (null !== $holder) {
+            $doc['rico:hasOrHadHolder'] = $holder;
+        }
+
         $relations = [];
         foreach ($this->getTypedRelations($objectId, $culture) as $rel) {
             $targetSlug = $rel['target_slug'];
@@ -176,6 +192,46 @@ class RicManageService
         }
 
         return $doc;
+    }
+
+    /** Subject/place access-point term names for a record (taxonomy 35 = subjects, 42 = places). */
+    public const TAXONOMY_SUBJECT = 35;
+    public const TAXONOMY_PLACE = 42;
+
+    /**
+     * Access-point term names for a record in a given taxonomy.
+     *
+     * @return array<int,string>
+     */
+    public function getAccessPointNames(int $objectId, int $taxonomyId, string $culture = 'en'): array
+    {
+        return DB::table('object_term_relation as otr')
+            ->join('term as t', 't.id', '=', 'otr.term_id')
+            ->leftJoin('term_i18n as ti', function ($j) use ($culture) {
+                $j->on('ti.id', '=', 't.id')->where('ti.culture', '=', $culture);
+            })
+            ->where('otr.object_id', $objectId)
+            ->where('t.taxonomy_id', $taxonomyId)
+            ->pluck('ti.name')
+            ->filter()
+            ->values()
+            ->all();
+    }
+
+    /** The record's holding repository name (rico:hasOrHadHolder), or null. */
+    public function getRepositoryName(int $objectId, string $culture = 'en'): ?string
+    {
+        $repoId = DB::table('information_object')->where('id', $objectId)->value('repository_id');
+        if (!$repoId) {
+            return null;
+        }
+
+        $name = DB::table('actor_i18n')->where('id', $repoId)->where('culture', $culture)->value('authorized_form_of_name');
+        if (empty($name)) {
+            $name = DB::table('actor_i18n')->where('id', $repoId)->value('authorized_form_of_name');
+        }
+
+        return $name ? (string) $name : null;
     }
 
     /** Resolve an information object's title (culture fallback to any, then slug). */
