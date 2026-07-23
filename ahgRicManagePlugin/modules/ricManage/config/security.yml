@@ -4,3 +4,7 @@ all:
 save:
   is_secure: true
   credentials: [editor]
+
+edit:
+  is_secure: true
+  credentials: [editor]

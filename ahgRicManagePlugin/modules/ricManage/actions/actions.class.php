@@ -12,6 +12,60 @@ use AtomFramework\Http\Controllers\AhgController;
 class ricManageActions extends AhgController
 {
     /**
+     * Edit/create a Records in Context (RiC) description.
+     *
+     * Reached via forward() from ioManage::executeEdit when the RiC standard is
+     * detected (IoFormHelper::MODULE_MAP['ric'] = 'ricManage'). Renders the RiC
+     * edit form (archival fields + RiC-specific fields) and, on POST, persists
+     * the RiC metadata (entity type + properties) alongside the shared IO save.
+     */
+    public function executeEdit($request)
+    {
+        $culture = $this->culture();
+        $this->form = new sfForm();
+        $this->form->getValidatorSchema()->setOption('allow_extra_fields', true);
+
+        // ACL - require editor/admin (forward() creates a fresh action instance).
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))
+        ) {
+            \AtomExtensions\Services\AclService::forwardUnauthorized();
+        }
+
+        \IoFormHelper::loadIoData($this, $request, $culture);
+        \IoFormHelper::loadDropdowns($this, $culture);
+
+        // RiC-specific data for the form.
+        $svc = new \AhgRicManage\Services\RicManageService();
+        $objectId = !empty($this->io['id']) ? (int) $this->io['id'] : 0;
+        $this->ricEntityTypes = \AhgRicManage\Services\RicManageService::ENTITY_TYPES;
+        $this->ricPropFields = \AhgRicManage\Services\RicManageService::PROPERTY_FIELDS;
+        $this->ricMeta = $objectId
+            ? $svc->getRecordMeta($objectId)
+            : ['entity_type' => 'Record', 'properties' => array_fill_keys(array_keys(\AhgRicManage\Services\RicManageService::PROPERTY_FIELDS), '')];
+
+        if ($request->isMethod('post')) {
+            // Persist RiC metadata before handlePost (which redirects). New
+            // records have no id yet - their RiC metadata is captured on the
+            // next edit, once the record exists.
+            if ($objectId) {
+                try {
+                    $svc->saveRecordMeta(
+                        $objectId,
+                        (string) $request->getParameter('ricEntityType', 'Record'),
+                        (array) $request->getParameter('ricProps', [])
+                    );
+                } catch (\Throwable $e) {
+                    // Non-fatal: the IO save still proceeds.
+                }
+            }
+
+            \IoFormHelper::handlePost($this, $request, $culture);
+        }
+    }
+
+    /**
      * GET /ricManage/get/:objectId - return the record's RiC metadata + relations.
      */
     public function executeGet($request)

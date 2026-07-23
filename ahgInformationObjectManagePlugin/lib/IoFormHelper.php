@@ -16,6 +16,7 @@ class IoFormHelper
         'rad'     => 'radManage',
         'mods'    => 'modsManage',
         'dacs'    => 'dacsManage',
+        'ric'     => 'ricManage',
         'museum'  => 'museum',
         'library' => 'library',
         'gallery' => 'gallery',
@@ -27,6 +28,8 @@ class IoFormHelper
      * Term name patterns → standard code. Used for dynamic detection.
      */
     private const TERM_NAME_PATTERNS = [
+        'Records in Context' => 'ric',
+        'RiC'     => 'ric',
         'ISAD'    => 'isad',
         'Dublin'  => 'dc',
         'MODS'    => 'mods',
