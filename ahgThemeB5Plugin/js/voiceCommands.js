@@ -1792,7 +1792,7 @@ class AHGVoiceCommands {
     if (slug) formData.append('slug', slug);
     if (csrfToken) formData.append('csrf_token', csrfToken);
 
-    fetch('/index.php/ahgVoice/describeImage', {
+    fetch('/ahgVoice/describeImage', {
       method: 'POST',
       body: formData,
       credentials: 'same-origin'
@@ -1981,7 +1981,7 @@ class AHGVoiceCommands {
     if (force) formData.append('force', '1');
     if (csrfToken) formData.append('csrf_token', csrfToken);
 
-    fetch('/index.php/ahgVoice/describeObject', {
+    fetch('/ahgVoice/describeObject', {
       method: 'POST',
       body: formData,
       credentials: 'same-origin'
@@ -2079,7 +2079,7 @@ class AHGVoiceCommands {
     var csrfToken = (csrfMeta && csrfMeta.content) || (csrfInput && csrfInput.value) || '';
     if (csrfToken) formData.append('csrf_token', csrfToken);
 
-    fetch('/index.php/ahgVoice/saveDescription', {
+    fetch('/ahgVoice/saveDescription', {
       method: 'POST',
       body: formData,
       credentials: 'same-origin'
@@ -2388,7 +2388,7 @@ class AHGVoiceCommands {
 
   _loadSettings() {
     var self = this;
-    fetch('/index.php/ahgVoice/getSettings', { credentials: 'same-origin' })
+    fetch('/ahgVoice/getSettings', { credentials: 'same-origin' })
     .then(function(r) { return r.json(); })
     .then(function(data) {
         if (!data.success) return;
