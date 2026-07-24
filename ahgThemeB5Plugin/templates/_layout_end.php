@@ -33,16 +33,20 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<?php // Voice Commands CSS ?>
-<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/voiceCommands.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<?php // Voice Commands - only load the UI, styles and engine when the feature
+      // is switched on (Admin > AHG Settings > Voice AI). Otherwise nothing
+      // loads, so there is no mic icon and no speech/listening at all. The
+      // client-side getSettings self-disable was unreliable (the engine could
+      // start before it ran), so gate it server-side. ?>
+<?php if (\AtomExtensions\Services\AhgSettingsService::getBool('voice_enabled', false)) { ?>
+  <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/css/voiceCommands.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
-<?php // Voice Commands UI (partial) ?>
-<?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_voiceCommands.php'); ?>
+  <?php include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/templates/_voiceCommands.php'); ?>
 
-<?php // Voice Commands JS ?>
-<script src="/plugins/ahgThemeB5Plugin/js/voiceCommandRegistry.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
-<script src="/plugins/ahgThemeB5Plugin/js/voiceCommandTranslations.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
-<script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+  <script src="/plugins/ahgThemeB5Plugin/js/voiceCommandRegistry.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+  <script src="/plugins/ahgThemeB5Plugin/js/voiceCommandTranslations.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+  <script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<?php } ?>
 
 </body>
 </html>
