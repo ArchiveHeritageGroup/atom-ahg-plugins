@@ -28,23 +28,26 @@ class RicManageService
         'Instantiation' => 'Instantiation',
     ];
 
-    /** Record-centric RiC property keys -> human label. Extend here as needed. */
+    /**
+     * Record-centric RiC property keys -> human label.
+     *
+     * Only the RiC-O concepts that ISAD(G) has NO home for live here. Identifier
+     * (rico:hasOrHadIdentifier), scope (rico:scope) and provenance/history
+     * (rico:history) used to be captured here too, but they duplicated the ISAD
+     * Identifier, Scope and content, and Archival history fields on the same
+     * form. Those are now derived from the archival fields on export (see
+     * exportRicO) so nothing is captured twice.
+     */
     public const PROPERTY_FIELDS = [
-        'ric_identifier' => 'RiC identifier',
-        'scope' => 'Scope',
         'authenticity_note' => 'Authenticity note',
         'integrity_note' => 'Integrity note',
-        'provenance_note' => 'Provenance note',
     ];
 
     /** RiC property key -> RiC-O predicate. Single source of truth for the export
      *  and the form/panel labels. */
     public const PROPERTY_PREDICATES = [
-        'ric_identifier' => 'rico:hasOrHadIdentifier',
-        'scope' => 'rico:scope',
         'authenticity_note' => 'rico:authenticityNote',
         'integrity_note' => 'rico:integrityNote',
-        'provenance_note' => 'rico:history',
     ];
 
     /**
@@ -180,6 +183,29 @@ class RicManageService
         foreach (self::PROPERTY_PREDICATES as $key => $predicate) {
             if (!empty($meta['properties'][$key])) {
                 $doc[$predicate] = $meta['properties'][$key];
+            }
+        }
+
+        // Identifier / scope / provenance are expressed in RiC-O from the record's
+        // own ISAD(G) fields (Identifier, Scope and content, Archival history)
+        // rather than from a duplicate RiC field. Same for the other archival
+        // fields that map to entity-mediated RiC-O constructs below.
+        $io = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i', function ($j) use ($culture) {
+                $j->on('i.id', '=', 'io.id')->where('i.culture', '=', $culture);
+            })
+            ->where('io.id', $objectId)
+            ->select('io.identifier', 'i.scope_and_content', 'i.archival_history')
+            ->first();
+        if ($io) {
+            if (!empty($io->identifier)) {
+                $doc['rico:hasOrHadIdentifier'] = $io->identifier;
+            }
+            if (!empty($io->scope_and_content)) {
+                $doc['rico:scope'] = $io->scope_and_content;
+            }
+            if (!empty($io->archival_history)) {
+                $doc['rico:history'] = $io->archival_history;
             }
         }
 

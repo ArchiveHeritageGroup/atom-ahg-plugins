@@ -1293,6 +1293,68 @@
   }
 
 })();
+
+  // --- RiC-O field labelling -------------------------------------------------
+  // Annotate every archival (ISAD) field with its RiC-O equivalent, so the whole
+  // capture screen shows how it maps to Records in Context - not just the RiC
+  // section. Entity-mediated fields (extent, physical characteristics, dates,
+  // creators, originals/copies) are marked honestly: in RiC-O their value lives
+  // on a related Instantiation or Activity, not directly on the record, so the
+  // badge carries a "via ..." note rather than pretending it is a flat property.
+  (function () {
+    var byFor = {
+      identifier: 'rico:hasOrHadIdentifier',
+      title: 'rico:name',
+      levelOfDescriptionId: 'rico:hasRecordSetType',
+      extentAndMedium: 'rico:hasExtent | via Instantiation',
+      repositoryName: 'rico:hasOrHadHolder',
+      archivalHistory: 'rico:history',
+      acquisition: 'rico:hasOrHadAcquisitionActivity',
+      scopeAndContent: 'rico:scope',
+      appraisal: 'rico:hasOrHadAppraisalActivity',
+      accruals: 'rico:accrualStatus',
+      arrangement: 'rico:structure',
+      accessConditions: 'rico:conditionsOfAccess',
+      reproductionConditions: 'rico:conditionsOfUse',
+      languageNotes: 'rico:descriptiveNote',
+      physicalCharacteristics: 'rico:physicalCharacteristics | via Instantiation',
+      findingAids: 'rico:hasInstantiation | finding aid',
+      locationOfOriginals: 'rico:hasOrHadInstantiation',
+      locationOfCopies: 'rico:hasDerivedInstantiation',
+      relatedUnitsOfDescription: 'rico:isAssociatedWithRecordResource'
+    };
+    var byText = {
+      'Alternative identifier(s)': 'rico:hasOrHadIdentifier',
+      'Date(s)': 'rico:hasBeginningDate / rico:hasEndDate | via Activity',
+      'Name of creator(s)': 'rico:hasCreator',
+      'Language(s) of material': 'rico:hasOrHadLanguage',
+      'Script(s) of material': 'rico:hasOrHadScript | via Instantiation'
+    };
+    function badge(lab, val) {
+      if (!lab || lab.querySelector('.rico-auto-badge')) { return; }
+      var parts = val.split(' | ');
+      lab.appendChild(document.createTextNode(' '));
+      var b = document.createElement('span');
+      b.className = 'badge bg-light text-dark rico-auto-badge ms-1';
+      b.style.fontWeight = 'normal';
+      b.textContent = parts[0];
+      lab.appendChild(b);
+      if (parts[1]) {
+        var n = document.createElement('span');
+        n.className = 'text-muted small ms-1 rico-auto-badge';
+        n.textContent = parts[1];
+        lab.appendChild(n);
+      }
+    }
+    var form = document.getElementById('editForm');
+    if (!form) { return; }
+    form.querySelectorAll('label.form-label').forEach(function (lab) {
+      var f = lab.getAttribute('for');
+      if (f && byFor[f]) { badge(lab, byFor[f]); return; }
+      var txt = (lab.textContent || '').replace(/\*/g, '').trim();
+      if (byText[txt]) { badge(lab, byText[txt]); }
+    });
+  })();
 </script>
 
 <script src="/plugins/ahgInformationObjectManagePlugin/web/js/standard-switch.js"></script>
