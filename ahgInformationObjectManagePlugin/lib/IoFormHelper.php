@@ -257,6 +257,14 @@ class IoFormHelper
                 $action->io['displayStandardId'] = self::getStandardIds()[$urlStandard];
             } else {
                 $standard = self::detectStandard(null, $culture);
+                // Plain "Add" (no ?standard/?standardId, e.g. a child of a RiC
+                // record): default the dropdown to the GLOBAL default standard
+                // (the `informationobject` setting, normally ISAD) rather than
+                // inheriting the parent's standard or leaving it unselected.
+                $ids = self::getStandardIds();
+                if (isset($ids[$standard])) {
+                    $action->io['displayStandardId'] = $ids[$standard];
+                }
             }
         }
 
