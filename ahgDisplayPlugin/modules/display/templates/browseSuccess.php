@@ -165,7 +165,7 @@ function getItemUrl($obj) {
       </span>
     </div>
     <!-- Semantic Search Button -->
-    <button type="button" class="btn btn-primary ms-3" id="openSemanticSearchBtn" onclick="openSemanticModal();">
+    <button type="button" class="btn btn-primary ms-3" id="openSemanticSearchBtn">
       <i class="fas fa-brain me-1"></i>
       <span class="d-none d-md-inline"><?php echo __('Semantic Search'); ?></span>
       <span class="d-md-none"><?php echo __('Search'); ?></span>
@@ -197,6 +197,21 @@ function getItemUrl($obj) {
       backdrop.style.display = 'none';
     }, 150);
     document.body.classList.remove('modal-open');
+  }
+  // Wire the open/close buttons here rather than with inline onclick= handlers,
+  // which CSP (script-src without unsafe-inline) blocks - that is why the modal
+  // buttons did nothing in the console errors.
+  function wireSemanticButtons() {
+    var openBtn = document.getElementById('openSemanticSearchBtn');
+    if (openBtn) { openBtn.addEventListener('click', openSemanticModal); }
+    document.querySelectorAll('.js-close-semantic').forEach(function(b) {
+      b.addEventListener('click', closeSemanticModal);
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireSemanticButtons);
+  } else {
+    wireSemanticButtons();
   }
   </script>
 <?php end_slot(); ?>
@@ -501,6 +516,13 @@ function getItemUrl($obj) {
 
 <?php slot('before-content'); ?>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+/* Semantic-search modal backdrop: hidden by default via this (nonce'd) stylesheet.
+   It must NOT rely on an inline style="display:none" attribute - CSP style-src
+   drops inline style attributes, which left this transparent full-screen backdrop
+   (position:fixed, z-index:1050) covering the page and swallowing every click, so
+   browse loaded but was completely unresponsive. The open/close JS toggles
+   element.style.display (a CSSOM write, which CSP does allow) over this rule. */
+#semanticSearchBackdrop { display: none; }
 /* Resizable table columns */
 .table-resizable th { position: relative; min-width: 50px; }
 .table-resizable th .resize-handle { position: absolute; right: 0; top: 0; bottom: 0; width: 8px; cursor: col-resize; background: transparent; z-index: 10; }
@@ -969,7 +991,7 @@ function getItemUrl($obj) {
   <?php endif ?>
 
   <!-- Semantic Search Modal -->
-  <div class="modal-backdrop fade" id="semanticSearchBackdrop" style="display:none;"></div>
+  <div class="modal-backdrop fade" id="semanticSearchBackdrop"></div>
 <div class="modal fade" id="semanticSearchModal" tabindex="-1" aria-labelledby="semanticSearchModalLabel" aria-hidden="true" aria-modal="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -977,7 +999,7 @@ function getItemUrl($obj) {
         <h5 class="modal-title" id="semanticSearchModalLabel">
           <i class="fas fa-brain me-2"></i><?php echo __('Semantic Search'); ?>
         </h5>
-        <button type="button" class="btn-close btn-close-white" onclick="closeSemanticModal();" aria-label="<?php echo __('Close'); ?>"></button>
+        <button type="button" class="btn-close btn-close-white js-close-semantic" aria-label="<?php echo __('Close'); ?>"></button>
       </div>
       <form id="semantic-search-form" action="<?php echo url_for(['module' => 'display', 'action' => 'browse']); ?>" method="get">
         <div class="modal-body">
@@ -1044,7 +1066,7 @@ function getItemUrl($obj) {
           <input type="hidden" name="limit" value="<?php echo (int)$limit; ?>">
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeSemanticModal();">
+          <button type="button" class="btn btn-secondary js-close-semantic">
             <i class="fas fa-times me-1"></i><?php echo __('Cancel'); ?>
           </button>
           <button type="submit" class="btn btn-primary">
