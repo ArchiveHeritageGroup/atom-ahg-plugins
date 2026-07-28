@@ -752,6 +752,17 @@
       </div>
     </div>
 
+    <?php // Admin-defined custom / "Additional Fields" (ahgCustomFieldsPlugin).
+          // Renders nothing when no field definitions exist for the entity type,
+          // and carries its own AJAX save to /customFields/save on form submit.
+          // Only for an existing record (values key off the object id). Restored
+          // here because record editing now routes to this AHG form instead of
+          // the base ISAD edit form that used to include it. ?>
+    <?php if (!$isNew && !empty($rawIo['id'])
+              && in_array('ahgCustomFieldsPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+      <?php include_partial('customField/editFields', ['entityType' => 'informationobject', 'objectId' => (int) $rawIo['id']]); ?>
+    <?php endif; ?>
+
     <ul class="actions mb-3 nav gap-2">
       <?php if (!$isNew) { ?>
         <li><?php echo link_to(__('Cancel'), '/' . $rawIo['slug'], ['class' => 'btn atom-btn-outline-light', 'role' => 'button']); ?></li>
