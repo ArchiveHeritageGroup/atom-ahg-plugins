@@ -755,6 +755,7 @@ class IoFormHelper
 
             if ($action->isNew) {
                 $newId = $svc::create($data, $culture);
+                self::saveSecurityClassification($request, $action, (int) $newId);
                 $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
                 $action->redirect($returnToEdit ? '/informationobject/' . $newSlug . '/edit' : '/' . $newSlug);
 
@@ -762,6 +763,9 @@ class IoFormHelper
             }
 
             $svc::update($action->io['id'], $data, $culture);
+            // After the IO save has committed (update() runs its own transaction),
+            // persist the security classification if the fieldset was on the form.
+            self::saveSecurityClassification($request, $action, (int) $action->io['id']);
             $action->redirect($returnToEdit ? '/informationobject/' . $action->io['slug'] . '/edit' : '/' . $action->io['slug']);
 
             return true;
@@ -770,6 +774,46 @@ class IoFormHelper
         self::repopulateFromRequest($action, $request);
 
         return false;
+    }
+
+    /**
+     * Persist the security classification posted by the securityClearance fieldset,
+     * when ahgSecurityClearancePlugin is active and the fieldset was on the form.
+     *
+     * Called after the information-object save has committed (never inside its
+     * transaction) so it cannot void that write. An empty classification on an
+     * already-classified record declassifies it. Watermark fields on the same
+     * fieldset are not handled here (out of scope - they never saved via the
+     * edit form on the base ISAD form either).
+     */
+    private static function saveSecurityClassification(sfWebRequest $request, sfActions $action, int $objectId): void
+    {
+        if ($objectId <= 0
+            || !\in_array('ahgSecurityClearancePlugin', \sfProjectConfiguration::getActive()->getPlugins())
+            || !$request->hasParameter('security_classification_id')) {
+            return;
+        }
+
+        $svc = '\\AtomExtensions\\Services\\SecurityClearanceService';
+        if (!\class_exists($svc)) {
+            return;
+        }
+
+        $classificationId = (int) $request->getParameter('security_classification_id');
+        $userId = (int) $action->getUser()->getUserId();
+
+        if ($classificationId > 0) {
+            $svc::classifyObject($objectId, $classificationId, [
+                'reason' => $request->getParameter('security_reason') ?: null,
+                'review_date' => $request->getParameter('security_review_date') ?: null,
+                'declassify_date' => $request->getParameter('security_declassify_date') ?: null,
+                'handling_instructions' => $request->getParameter('security_handling_instructions') ?: null,
+                'inherit_to_children' => $request->getParameter('security_inherit_to_children') ? 1 : 0,
+            ], $userId);
+        } elseif (null !== $svc::getObjectClassification($objectId)) {
+            // "- none -" chosen on a currently-classified record: declassify.
+            $svc::declassifyObject($objectId, null, $userId, 'Cleared via edit form');
+        }
     }
 
     /**

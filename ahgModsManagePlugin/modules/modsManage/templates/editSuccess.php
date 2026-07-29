@@ -381,6 +381,16 @@
       </div>
     </div>
 
+    <?php // Security classification (ahgSecurityClearancePlugin). Renders for an
+          // existing record when the plugin is active; the classification is
+          // persisted by IoFormHelper::handlePost from the security_* params.
+          // Restored here because editing now routes to this AHG form instead of
+          // the base ISAD edit form that used to include it. ?>
+    <?php if (!$isNew && !empty($rawIo['id'])
+              && in_array('ahgSecurityClearancePlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
+      <?php include_partial('securityClearance/securityFieldset', ['resource' => (object) ['id' => (int) $rawIo['id']]]); ?>
+    <?php endif; ?>
+
     <?php // Admin-defined custom / "Additional Fields" (ahgCustomFieldsPlugin).
           // Renders nothing when no field definitions exist for the entity type,
           // and carries its own AJAX save to /customFields/save on form submit.
