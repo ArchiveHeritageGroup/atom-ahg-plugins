@@ -34,6 +34,10 @@ class ahgRicManagePluginConfiguration extends sfPluginConfiguration
         // AJAX read/write of a record's RiC metadata (entity type + properties).
         $router->any('ric_get', '/ricManage/get/:objectId', 'get', ['objectId' => '\d+']);
         $router->any('ric_save', '/ricManage/save', 'save');
+        // Create/delete typed RiC relations from the panel (v1.1).
+        $router->any('ric_save_relation', '/ricManage/saveRelation', 'saveRelation');
+        $router->any('ric_delete_relation', '/ricManage/deleteRelation', 'deleteRelation');
+        $router->any('ric_search_targets', '/ricManage/searchTargets', 'searchTargets');
         // RiC-O JSON-LD export for a single record (MySQL-sourced).
         $router->any('ric_export', '/ricManage/export/:objectId', 'export', ['objectId' => '\d+']);
 

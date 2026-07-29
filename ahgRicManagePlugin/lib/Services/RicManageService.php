@@ -138,7 +138,7 @@ class RicManageService
             ->where(function ($q) use ($objectId) {
                 $q->where('r.subject_id', $objectId)->orWhere('r.object_id', $objectId);
             })
-            ->select('r.id', 'r.subject_id', 'r.object_id', 'm.rico_predicate', 'm.inverse_predicate', 'm.dropdown_code')
+            ->select('r.id', 'r.subject_id', 'r.object_id', 'm.rico_predicate', 'm.inverse_predicate', 'm.dropdown_code', 'm.certainty', 'm.evidence')
             ->get();
 
         $out = [];
@@ -150,11 +150,151 @@ class RicManageService
                 : (string) ($row->inverse_predicate ?: $row->rico_predicate);
 
             $out[] = [
+                'relation_id' => (int) $row->id,
                 'predicate' => $predicate,
+                'code' => (string) $row->dropdown_code,
                 'direction' => $outgoing ? 'outgoing' : 'incoming',
+                'certainty' => $row->certainty,
+                'evidence' => $row->evidence,
                 'target_id' => $targetId,
                 'target_title' => $this->ioTitle($targetId, $culture),
                 'target_slug' => $this->ioSlug($targetId),
+            ];
+        }
+
+        return $out;
+    }
+
+    /** relation.type_id used for RiC IO-to-IO relations (the "Converse term" term). */
+    public const RIC_RELATION_TYPE_ID = 177;
+
+    /**
+     * The RiC-O relation types (ahg_dropdown taxonomy ric_relation_type), with the
+     * predicate/inverse/domain/range decoded from each row's metadata JSON. Drives
+     * both the capture dropdown and saveRelation().
+     *
+     * @return array<int,array<string,?string>>
+     */
+    public function getRelationTypes(): array
+    {
+        $rows = DB::table('ahg_dropdown')
+            ->where('taxonomy', 'ric_relation_type')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->get(['code', 'label', 'metadata']);
+
+        $out = [];
+        foreach ($rows as $r) {
+            $meta = json_decode((string) ($r->metadata ?: '{}'), true) ?: [];
+            $out[] = [
+                'code' => (string) $r->code,
+                'label' => (string) $r->label,
+                'predicate' => (string) ($meta['predicate'] ?? ''),
+                'inverse' => (string) ($meta['inverse'] ?? ''),
+                'domain' => $meta['domain'] ?? null,
+                'range' => $meta['range'] ?? null,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Create a typed RiC relation: a base `relation` row (subject -> target) plus
+     * the ric_relation_meta sidecar carrying the RiC-O predicate. The relation row
+     * is written through RelationService::save(), which creates the base `object`
+     * row first (relation.id is a non-auto_increment QubitObject id under STRICT
+     * mode). Runs in its own AJAX request, so it never collides with a form save's
+     * transaction.
+     *
+     * @return array{success:bool,error?:string,relation_id?:int}
+     */
+    public function saveRelation(int $subjectId, int $targetId, string $code, ?string $certainty, ?string $evidence, string $culture = 'en'): array
+    {
+        if ($subjectId <= 0 || $targetId <= 0) {
+            return ['success' => false, 'error' => 'Missing subject or target record'];
+        }
+        if ($subjectId === $targetId) {
+            return ['success' => false, 'error' => 'A record cannot relate to itself'];
+        }
+
+        $type = null;
+        foreach ($this->getRelationTypes() as $t) {
+            if ($t['code'] === $code) {
+                $type = $t;
+                break;
+            }
+        }
+        if (null === $type) {
+            return ['success' => false, 'error' => 'Unknown RiC relation type'];
+        }
+
+        try {
+            $relationId = (int) \AhgCore\Services\RelationService::save([
+                'subject_id' => $subjectId,
+                'object_id' => $targetId,
+                'type_id' => self::RIC_RELATION_TYPE_ID,
+            ], $culture);
+
+            DB::table('ric_relation_meta')->insert([
+                'relation_id' => $relationId,
+                'rico_predicate' => $type['predicate'],
+                'inverse_predicate' => $type['inverse'] ?: null,
+                'domain_class' => $type['domain'],
+                'range_class' => $type['range'],
+                'dropdown_code' => $code,
+                'certainty' => $certainty ?: null,
+                'evidence' => $evidence ?: null,
+            ]);
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => 'Save failed: ' . $e->getMessage()];
+        }
+
+        return ['success' => true, 'relation_id' => $relationId];
+    }
+
+    /** Delete a typed RiC relation (its sidecar meta + the base relation row). */
+    public function deleteRelation(int $relationId): void
+    {
+        if ($relationId <= 0) {
+            return;
+        }
+        DB::table('ric_relation_meta')->where('relation_id', $relationId)->delete();
+        \AhgCore\Services\RelationService::delete($relationId);
+    }
+
+    /**
+     * Title search for information objects to use as a relation target. MySQL
+     * (title LIKE) rather than Elasticsearch so it is self-contained and returns
+     * a known shape. Excludes the current record and the root.
+     *
+     * @return array<int,array{id:int,title:string,slug:string}>
+     */
+    public function searchTargets(int $excludeId, string $q, string $culture = 'en', int $limit = 12): array
+    {
+        $q = trim($q);
+        if (mb_strlen($q) < 2) {
+            return [];
+        }
+
+        $rows = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as i', function ($j) use ($culture) {
+                $j->on('i.id', '=', 'io.id')->where('i.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 's.object_id', '=', 'io.id')
+            ->where('io.id', '>', 1)
+            ->where('io.id', '!=', $excludeId)
+            ->where('i.title', 'like', '%' . $q . '%')
+            ->orderBy('i.title')
+            ->limit($limit)
+            ->get(['io.id', 'i.title', 's.slug']);
+
+        $out = [];
+        foreach ($rows as $r) {
+            $out[] = [
+                'id' => (int) $r->id,
+                'title' => (string) ($r->title ?: ('#' . $r->id)),
+                'slug' => (string) $r->slug,
             ];
         }
 

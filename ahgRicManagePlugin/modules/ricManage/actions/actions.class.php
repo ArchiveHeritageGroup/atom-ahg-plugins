@@ -121,6 +121,91 @@ class ricManageActions extends AhgController
     }
 
     /**
+     * POST /ricManage/saveRelation - create a typed RiC relation from the panel.
+     * Params: object_id (subject), target_id, relation_type (dropdown code),
+     * certainty, evidence.
+     */
+    public function executeSaveRelation($request)
+    {
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))) {
+            return $this->json(['success' => false, 'error' => 'Not authorised'], 403);
+        }
+
+        $subjectId = (int) $request->getPostParameter('object_id');
+        $targetId = (int) $request->getPostParameter('target_id');
+        $code = (string) $request->getPostParameter('relation_type');
+        if ($subjectId <= 0 || $targetId <= 0 || '' === $code) {
+            return $this->json(['success' => false, 'error' => 'Missing record, target or relation type']);
+        }
+
+        $culture = $this->getUser()->getCulture() ?: 'en';
+        $svc = new \AhgRicManage\Services\RicManageService();
+        $result = $svc->saveRelation(
+            $subjectId,
+            $targetId,
+            $code,
+            $request->getPostParameter('certainty'),
+            $request->getPostParameter('evidence'),
+            $culture
+        );
+
+        return $this->json($result);
+    }
+
+    /**
+     * POST /ricManage/deleteRelation - remove a typed RiC relation. Param: relation_id.
+     */
+    public function executeDeleteRelation($request)
+    {
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))) {
+            return $this->json(['success' => false, 'error' => 'Not authorised'], 403);
+        }
+
+        $relationId = (int) $request->getPostParameter('relation_id');
+        if ($relationId <= 0) {
+            return $this->json(['success' => false, 'error' => 'Missing relation id']);
+        }
+
+        try {
+            $svc = new \AhgRicManage\Services\RicManageService();
+            $svc->deleteRelation($relationId);
+        } catch (\Throwable $e) {
+            return $this->json(['success' => false, 'error' => 'Delete failed: ' . $e->getMessage()]);
+        }
+
+        return $this->json(['success' => true]);
+    }
+
+    /**
+     * GET /ricManage/searchTargets?object_id=&q= - title search for relation
+     * targets (information objects). Editor-gated; returns [{id,title,slug}].
+     */
+    public function executeSearchTargets($request)
+    {
+        $user = $this->getUser();
+        if (!$user->isAuthenticated()
+            || !($user->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID) || $user->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID))) {
+            return $this->json(['success' => false, 'error' => 'Not authorised'], 403);
+        }
+
+        $culture = $this->getUser()->getCulture() ?: 'en';
+        $svc = new \AhgRicManage\Services\RicManageService();
+
+        return $this->json([
+            'success' => true,
+            'results' => $svc->searchTargets(
+                (int) $request->getParameter('object_id'),
+                (string) $request->getParameter('q', ''),
+                $culture
+            ),
+        ]);
+    }
+
+    /**
      * GET /ricManage/export/:objectId - RiC-O JSON-LD for one record.
      */
     public function executeExport($request)

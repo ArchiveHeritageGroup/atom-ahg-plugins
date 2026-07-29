@@ -41,6 +41,8 @@ $__ricUser = sfContext::getInstance()->getUser();
 $canEdit = $__ricUser->isAuthenticated()
     && ($__ricUser->hasGroup(\AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID)
         || $__ricUser->hasGroup(\AtomExtensions\Constants\AclConstants::EDITOR_ID));
+// RiC-O relation types (for the editor-only add-relation form).
+$relationTypes = $canEdit ? $svc->getRelationTypes() : [];
 
 $entityTypes = \AhgRicManage\Services\RicManageService::ENTITY_TYPES;
 $propFields = \AhgRicManage\Services\RicManageService::PROPERTY_FIELDS;
@@ -114,22 +116,47 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
             </div>
         <?php endif; ?>
 
-        <?php if (!empty($relations)): ?>
+        <?php if (!empty($relations) || $canEdit): ?>
             <div class="row mb-2">
                 <div class="col-md-3 fw-bold"><?php echo $esc(__('Typed RiC relations')); ?></div>
                 <div class="col-md-9">
-                    <ul class="list-unstyled mb-0">
+                    <ul class="list-unstyled mb-0" id="ric-relations-list">
                         <?php foreach ($relations as $rel): ?>
-                            <li>
+                            <li class="mb-1" data-relation-id="<?php echo (int) $rel['relation_id']; ?>">
                                 <span class="badge bg-secondary"><?php echo $esc($rel['predicate']); ?></span>
                                 <?php if (!empty($rel['target_slug'])): ?>
                                     <a href="<?php echo $esc('/index.php/' . $rel['target_slug']); ?>"><?php echo $esc($rel['target_title']); ?></a>
                                 <?php else: ?>
                                     <?php echo $esc($rel['target_title']); ?>
                                 <?php endif; ?>
+                                <?php if ('incoming' === $rel['direction']): ?><span class="text-muted small">(<?php echo $esc(__('incoming')); ?>)</span><?php endif; ?>
+                                <?php if ($canEdit): ?>
+                                    <button type="button" class="btn btn-sm btn-link text-danger p-0 ms-1 ric-rel-del" data-relation-id="<?php echo (int) $rel['relation_id']; ?>" title="<?php echo $esc(__('Remove relation')); ?>"><i class="fas fa-times" aria-hidden="true"></i></button>
+                                <?php endif; ?>
                             </li>
                         <?php endforeach; ?>
                     </ul>
+                    <?php if ($canEdit): ?>
+                        <div class="ric-rel-add border-top mt-2 pt-2">
+                            <div class="row g-1 align-items-start">
+                                <div class="col-sm-4">
+                                    <select class="form-select form-select-sm" id="ric-rel-type" aria-label="<?php echo $esc(__('RiC relation type')); ?>">
+                                        <?php foreach ($relationTypes as $rt): ?>
+                                            <option value="<?php echo $esc($rt['code']); ?>"><?php echo $esc($rt['label']); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-sm-5 position-relative">
+                                    <input type="text" class="form-control form-control-sm" id="ric-rel-target" autocomplete="off" placeholder="<?php echo $esc(__('Search for a target record...')); ?>">
+                                    <input type="hidden" id="ric-rel-target-id" value="">
+                                </div>
+                                <div class="col-sm-3">
+                                    <button type="button" class="btn btn-sm btn-outline-success w-100" id="ric-rel-add-btn"><i class="fas fa-plus me-1" aria-hidden="true"></i><?php echo $esc(__('Add')); ?></button>
+                                </div>
+                            </div>
+                            <div class="small text-danger mt-1 d-none" id="ric-rel-error"></div>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
         <?php endif; ?>
@@ -202,6 +229,82 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
                     }).catch(function () { status.textContent = '<?php echo $esc(__('Save failed')); ?>'; });
                 });
             }
+
+            // --- Typed RiC relations: target search, add, delete (v1.1) ---
+            var relObjId = <?php echo (int) $objectId; ?>;
+            var relTarget = document.getElementById('ric-rel-target');
+            var relTargetId = document.getElementById('ric-rel-target-id');
+            var relType = document.getElementById('ric-rel-type');
+            var relAddBtn = document.getElementById('ric-rel-add-btn');
+            var relError = document.getElementById('ric-rel-error');
+            function relErr(m) { if (relError) { relError.textContent = m || ''; relError.classList.toggle('d-none', !m); } }
+
+            if (relTarget) {
+                var acTimer = null, acBox = null;
+                var closeAc = function () { if (acBox) { acBox.remove(); acBox = null; } };
+                relTarget.addEventListener('input', function () {
+                    relTargetId.value = '';
+                    clearTimeout(acTimer);
+                    var q = relTarget.value.trim();
+                    if (q.length < 2) { closeAc(); return; }
+                    acTimer = setTimeout(function () {
+                        fetch('<?php echo $esc(url_for('@ric_search_targets')); ?>?object_id=' + relObjId + '&q=' + encodeURIComponent(q), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(function (r) { return r.json(); })
+                            .then(function (d) {
+                                closeAc();
+                                if (!d || !d.results || !d.results.length) { return; }
+                                acBox = document.createElement('div');
+                                acBox.className = 'list-group position-absolute w-100 shadow-sm';
+                                acBox.style.zIndex = '1050';
+                                d.results.forEach(function (it) {
+                                    var a = document.createElement('a');
+                                    a.href = '#';
+                                    a.className = 'list-group-item list-group-item-action py-1 small';
+                                    a.textContent = it.title;
+                                    a.addEventListener('click', function (e) {
+                                        e.preventDefault();
+                                        relTarget.value = it.title;
+                                        relTargetId.value = it.id;
+                                        closeAc();
+                                    });
+                                    acBox.appendChild(a);
+                                });
+                                relTarget.parentNode.appendChild(acBox);
+                            }).catch(closeAc);
+                    }, 300);
+                });
+                document.addEventListener('click', function (e) { if (acBox && !relTarget.parentNode.contains(e.target)) { closeAc(); } });
+            }
+
+            if (relAddBtn) {
+                relAddBtn.addEventListener('click', function () {
+                    relErr('');
+                    if (!relTargetId.value) { relErr('<?php echo $esc(__('Choose a target record from the list.')); ?>'); return; }
+                    var fd = new FormData();
+                    fd.append('object_id', relObjId);
+                    fd.append('target_id', relTargetId.value);
+                    fd.append('relation_type', relType.value);
+                    relAddBtn.disabled = true;
+                    fetch('<?php echo $esc(url_for('@ric_save_relation')); ?>', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
+                        .then(function (r) { return r.json(); })
+                        .then(function (d) {
+                            if (d && d.success) { window.location.reload(); }
+                            else { relAddBtn.disabled = false; relErr((d && d.error) ? d.error : '<?php echo $esc(__('Add failed')); ?>'); }
+                        }).catch(function () { relAddBtn.disabled = false; relErr('<?php echo $esc(__('Add failed')); ?>'); });
+                });
+            }
+
+            document.querySelectorAll('.ric-rel-del').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    if (!window.confirm('<?php echo $esc(__('Remove this RiC relation?')); ?>')) { return; }
+                    var fd = new FormData();
+                    fd.append('relation_id', btn.getAttribute('data-relation-id'));
+                    fetch('<?php echo $esc(url_for('@ric_delete_relation')); ?>', { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd })
+                        .then(function (r) { return r.json(); })
+                        .then(function (d) { if (d && d.success) { window.location.reload(); } })
+                        .catch(function () {});
+                });
+            });
         })();
         </script>
     <?php endif; ?>
