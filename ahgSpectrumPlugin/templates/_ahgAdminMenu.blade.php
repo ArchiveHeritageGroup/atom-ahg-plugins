@@ -32,17 +32,14 @@
             <a href="{{ url_for(['module' => 'spectrum', 'action' => 'myTasks']) }}">
                 <i class="fas fa-clipboard-list fa-fw"></i> {{ __('My Tasks') }}
                 @php
-                // Show count badge if user is authenticated (exclude completed tasks)
+                // Open-task badge. Counted via the shared per-procedure helper
+                // so this matches the My Tasks page and the dashboard tile.
                 if ($sf_user->isAuthenticated()) {
-                    $userId = $sf_user->getAttribute('user_id');
-                    if ($userId) {
-                        $taskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
-                            ->where('assigned_to', $userId)
-                            ->where('current_state', '!=', 'completed')
-                            ->count();
-                        if ($taskCount > 0) {
-                            echo '<span class="badge bg-primary ms-1">' . $taskCount . '</span>';
-                        }
+                    $taskCount = ahgSpectrumWorkflowService::countOpenTasks(
+                        (int) $sf_user->getAttribute('user_id')
+                    );
+                    if ($taskCount > 0) {
+                        echo '<span class="badge bg-primary ms-1">' . $taskCount . '</span>';
                     }
                 }
                 @endphp

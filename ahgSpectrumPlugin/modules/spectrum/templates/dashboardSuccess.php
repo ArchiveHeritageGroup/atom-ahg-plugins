@@ -39,18 +39,14 @@
                 <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'myTasks']); ?>" class="btn btn-outline-primary w-100 mb-2">
                     <i class="fas fa-clipboard-list me-1"></i><?php echo __('My Tasks'); ?>
                     <?php
+                    // Counted via the shared per-procedure helper so this tile,
+                    // the admin-menu badge and the My Tasks page always agree.
                     if ($sf_user->isAuthenticated()) {
-                        $userId = $sf_user->getAttribute('user_id');
-                        if ($userId) {
-                            // Exclude all final states (completed, resolved, etc.)
-                            $finalStates = ['completed', 'resolved', 'closed', 'cancelled', 'rejected'];
-                            $taskCount = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_state')
-                                ->where('assigned_to', $userId)
-                                ->whereNotIn('current_state', $finalStates)
-                                ->count();
-                            if ($taskCount > 0) {
-                                echo '<span class="badge bg-danger ms-1">' . $taskCount . '</span>';
-                            }
+                        $taskCount = ahgSpectrumWorkflowService::countOpenTasks(
+                            (int) $sf_user->getAttribute('user_id')
+                        );
+                        if ($taskCount > 0) {
+                            echo '<span class="badge bg-danger ms-1">' . $taskCount . '</span>';
                         }
                     }
                     ?>

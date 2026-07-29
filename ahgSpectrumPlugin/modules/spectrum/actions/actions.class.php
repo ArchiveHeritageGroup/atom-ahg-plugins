@@ -706,19 +706,15 @@ class spectrumActions extends AhgController
         $culture = $this->culture();
         $procedureTypeFilter = $request->getParameter('procedure_type');
 
-        // Get workflow configs for state labels and per-procedure final states
+        // Get workflow configs for state labels. The open-task filtering itself
+        // lives in ahgSpectrumWorkflowService so the page, the dashboard tile
+        // and the admin-menu badge all count tasks the same way.
         $this->workflowConfigs = [];
-        $finalStatesByProcedure = [];
         $configs = DB::table('spectrum_workflow_config')
             ->where('is_active', 1)
             ->get();
         foreach ($configs as $config) {
-            $configData = json_decode($config->config_json, true);
-            $this->workflowConfigs[$config->procedure_type] = $configData;
-            $finalStates = ahgSpectrumWorkflowService::getFinalStates($config->procedure_type);
-            if (!empty($finalStates)) {
-                $finalStatesByProcedure[$config->procedure_type] = $finalStates;
-            }
+            $this->workflowConfigs[$config->procedure_type] = json_decode($config->config_json, true);
         }
 
         // Build query for assigned tasks (excluding final states per procedure)
@@ -741,8 +737,11 @@ class spectrumActions extends AhgController
             ->leftJoin('user as assigner', 'sws.assigned_by', '=', 'assigner.id')
             ->where('sws.assigned_to', $userId);
 
-        // Exclude final states per procedure (avoids cross-procedure collisions)
-        // e.g. "documented" is final for disposal but intermediate for object_entry
+        // Exclude final states per procedure (avoids cross-procedure collisions:
+        // "documented" is final for disposal but intermediate for object_entry).
+        // Uses the same map as the dashboard tile and admin-menu badge, so all
+        // three surfaces agree on what counts as an open task.
+        $finalStatesByProcedure = ahgSpectrumWorkflowService::getFinalStatesMap();
         if (!empty($finalStatesByProcedure)) {
             $query->where(function ($q) use ($finalStatesByProcedure) {
                 foreach ($finalStatesByProcedure as $proc => $finals) {
