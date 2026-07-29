@@ -342,3 +342,35 @@ section {
   color: #212529 !important;
   background-color: #fff !important;
 }
+
+/* Record-view image carousel: light grey panel (was bg-secondary) + readable dark caption text.
+   Ported from the Wits Archaeology instance (#257) - applies everywhere via CSS overrides on the
+   carousel markup, so the base _imageflow.php template stays mainline. */
+#atom-digital-object-carousel .accordion-body.bg-secondary {
+  background-color: #e9ecef !important; /* light grey */
+}
+#atom-digital-object-carousel #atom-slider-title a,
+#atom-digital-object-carousel .accordion-body .text-white {
+  color: #212529 !important;
+}
+/* The "view" button uses atom-btn-outline-light in the mainline template, which is low-contrast on
+   the light-grey panel - darken it within the carousel (the archaeology template had hard-coded
+   atom-btn-outline-dark; this keeps the template unforked). */
+#atom-digital-object-carousel .btn.atom-btn-outline-light {
+  color: #212529 !important;
+  border-color: #6c757d !important;
+}
+#atom-digital-object-carousel .btn.atom-btn-outline-light:hover {
+  color: #fff !important;
+  background-color: #6c757d !important;
+}
+/* Image carousel slide indicators: inactive dot was white (#fff) - invisible on the light-grey panel.
+   Make it grey; keep active orange. */
+#atom-digital-object-carousel .slick-dots li button .slick-dot-icon {
+  color: #6c757d !important;
+  opacity: 0.5 !important;
+}
+#atom-digital-object-carousel .slick-dots li.slick-active button .slick-dot-icon {
+  color: #c44e00 !important;
+  opacity: 1 !important;
+}
