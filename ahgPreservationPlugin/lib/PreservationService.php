@@ -2768,6 +2768,73 @@ class PreservationService
     }
 
     /**
+     * Add every master digital object under an archival description (the collection
+     * and all its descendants, via the nested set) to a draft package in one pass.
+     * Idempotent - objects already in the package are skipped, so it can be re-run
+     * as the collection grows.
+     *
+     * @return array{success:bool,added:int,total:int,skipped:int,errors:int,error?:string}
+     */
+    public function addObjectsFromCollection(int $packageId, int $informationObjectId): array
+    {
+        $package = $this->getPackage($packageId);
+        if (!$package) {
+            throw new Exception("Package not found: {$packageId}");
+        }
+
+        if ('draft' !== $package->status) {
+            return ['success' => false, 'error' => 'Objects can only be added to draft packages.', 'added' => 0, 'total' => 0, 'skipped' => 0, 'errors' => 0];
+        }
+
+        // Master digital objects (usage_id 140) attached to the collection root or
+        // any descendant description (root.lft <= node.lft, node.rgt <= root.rgt).
+        $doIds = DB::table('information_object as root')
+            ->join('information_object as node', function ($j) {
+                $j->on('node.lft', '>=', 'root.lft')->on('node.rgt', '<=', 'root.rgt');
+            })
+            ->join('digital_object as do', function ($j) {
+                $j->on('do.object_id', '=', 'node.id')->where('do.usage_id', '=', 140);
+            })
+            ->where('root.id', $informationObjectId)
+            ->distinct()
+            ->pluck('do.id')
+            ->all();
+
+        if (empty($doIds)) {
+            return ['success' => true, 'added' => 0, 'total' => 0, 'skipped' => 0, 'errors' => 0, 'error' => 'No master digital objects found under that collection.'];
+        }
+
+        $existing = DB::table('preservation_package_object')
+            ->where('package_id', $packageId)
+            ->pluck('digital_object_id')
+            ->all();
+        $existingSet = array_flip($existing);
+
+        $added = 0;
+        $errors = 0;
+        foreach ($doIds as $doId) {
+            $doId = (int) $doId;
+            if (isset($existingSet[$doId])) {
+                continue;
+            }
+            try {
+                $this->addObjectToPackage($packageId, $doId);
+                ++$added;
+            } catch (Exception $e) {
+                ++$errors;
+            }
+        }
+
+        return [
+            'success' => true,
+            'added' => $added,
+            'total' => count($doIds),
+            'skipped' => count($doIds) - $added - $errors,
+            'errors' => $errors,
+        ];
+    }
+
+    /**
      * Remove an object from a package
      */
     public function removeObjectFromPackage(int $packageId, int $digitalObjectId): bool

@@ -186,6 +186,19 @@
                     <div class="form-text"><?php echo __('Search a description by title or file name and pick it - or type a numeric digital object ID directly.'); ?></div>
                 </div>
 
+                <div class="mb-3 border-top pt-3">
+                    <label class="form-label"><?php echo __('Add all objects from a collection'); ?></label>
+                    <div class="input-group position-relative">
+                        <input type="text" id="collImportSearch" class="form-control" autocomplete="off" placeholder="<?php echo __('Search a collection/description by title or reference...'); ?>">
+                        <input type="hidden" id="collImportId" value="">
+                        <button type="button" class="btn btn-outline-primary" onclick="addCollectionObjects()">
+                            <i class="bi bi-collection me-1"></i><?php echo __('Add all'); ?>
+                        </button>
+                        <div id="collImportResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
+                    </div>
+                    <div class="form-text"><?php echo __('Pulls every master digital object under the chosen description and its child records into this package.'); ?></div>
+                </div>
+
                 <?php if (!empty($objects)): ?>
                 <div class="table-responsive">
                     <table class="table table-sm table-hover">
@@ -665,6 +678,91 @@ function buildExportPackage() {
         if (!results.contains(e.target) && e.target !== input) hideResults();
     });
 })();
+
+// Add-all-from-collection: autocomplete on descriptions, then bulk-add every
+// master digital object under the chosen collection.
+(function () {
+    var input = document.getElementById('collImportSearch');
+    var hidden = document.getElementById('collImportId');
+    var results = document.getElementById('collImportResults');
+    if (!input || !hidden || !results) return;
+    var timer = null;
+
+    function hide() { results.innerHTML = ''; }
+
+    input.addEventListener('input', function () {
+        hidden.value = '';
+        var q = input.value.trim();
+        clearTimeout(timer);
+        if (q.length < 2) { hide(); return; }
+        timer = setTimeout(function () {
+            fetch('<?php echo url_for(['module' => 'preservation', 'action' => 'apiSearchDescriptions']); ?>?q=' + encodeURIComponent(q))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    results.innerHTML = '';
+                    (data.results || []).forEach(function (row) {
+                        var a = document.createElement('a');
+                        a.href = '#';
+                        a.className = 'list-group-item list-group-item-action';
+                        var meta = [row.reference, row.level].filter(Boolean).join(' - ');
+                        a.innerHTML = '<span>' + (row.title || '(untitled)') + '</span>' +
+                            (meta ? '<small class="text-muted d-block">' + meta + '</small>' : '');
+                        a.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            hidden.value = row.id;
+                            input.value = row.title || ('#' + row.id);
+                            hide();
+                        });
+                        results.appendChild(a);
+                    });
+                });
+        }, 250);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!results.contains(e.target) && e.target !== input) hide();
+    });
+})();
+
+function addCollectionObjects() {
+    var ioId = document.getElementById('collImportId').value;
+    if (!ioId) {
+        alert('Pick a collection/description from the search list first.');
+        return;
+    }
+    var btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Adding...';
+
+    fetch('<?php echo url_for(['module' => 'preservation', 'action' => 'apiPackageAddCollection']); ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `package_id=${packageId}&information_object_id=${encodeURIComponent(ioId)}`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            if (data.added > 0) {
+                alert('Added ' + data.added + ' object(s) from the collection' +
+                      (data.skipped > 0 ? ' (' + data.skipped + ' already in the package)' : '') + '.');
+                location.reload();
+            } else {
+                alert(data.error || 'No new objects to add - everything under that collection is already in the package.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-collection me-1"></i>Add all';
+            }
+        } else {
+            alert('Error: ' + (data.error || 'unknown'));
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-collection me-1"></i>Add all';
+        }
+    })
+    .catch(e => {
+        alert('Error: ' + e);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-collection me-1"></i>Add all';
+    });
+}
 
 function formatBytes(bytes) {
     if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';

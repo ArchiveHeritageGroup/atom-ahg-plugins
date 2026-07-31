@@ -59,6 +59,7 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
         $preservation->any('preservation_api_search_descriptions', '/api/preservation/descriptions/search', 'apiSearchDescriptions');
         $preservation->any('preservation_api_package_build_export', '/api/preservation/package/build-export', 'apiPackageBuildExport');
         $preservation->any('preservation_api_package_add_object', '/api/preservation/package/add-object', 'apiPackageAddObject');
+        $preservation->any('preservation_api_package_add_collection', '/api/preservation/package/add-collection', 'apiPackageAddCollection');
         $preservation->any('preservation_api_package_remove_object', '/api/preservation/package/remove-object', 'apiPackageRemoveObject');
         $preservation->any('preservation_api_package_build', '/api/preservation/package/build', 'apiPackageBuild');
         $preservation->any('preservation_api_package_validate', '/api/preservation/package/validate', 'apiPackageValidate');

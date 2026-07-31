@@ -1121,6 +1121,37 @@ class preservationActions extends AhgController
     }
 
     /**
+     * API: add every master digital object under a linked collection (archival
+     * description + descendants) to a draft package in one call.
+     */
+    public function executeApiPackageAddCollection($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        $packageId = (int) $request->getParameter('package_id');
+        $ioId = (int) $request->getParameter('information_object_id');
+
+        if (!$packageId || !$ioId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'package_id and information_object_id are required',
+            ]));
+        }
+
+        try {
+            $result = $this->service->addObjectsFromCollection($packageId, $ioId);
+
+            return $this->renderText(json_encode($result));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
+    }
+
+    /**
      * API: build (if needed) and export a package in one call, so the caller
      * lands with an immediately downloadable archive.
      */

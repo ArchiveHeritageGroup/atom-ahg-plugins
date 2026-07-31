@@ -72,3 +72,18 @@ Export / buildOnSave / collectionSearch; descriptions search returns real rows
 (sanitised, e.g. "Test SIP Package" -> `Test_SIP_Package.zip`) instead of the internal
 UUID, keeping the archive's real extension and adding an RFC 5987 `filename*` UTF-8
 variant for accented/non-Latin titles. Verified: package 5 downloads as `feedback.zip`.
+
+### Add all objects from a collection (empty-package "cannot download")
+Reported: two empty AIP drafts (boat3, boat test) with 0 objects "cannot download" -
+correct, an empty package has nothing to build/export. Added a bulk-add path so a
+package can be filled from a collection in one action:
+- `PreservationService::addObjectsFromCollection($packageId, $ioId)` - walks the
+  archival description + all descendants via the nested set (`node.lft>=root.lft AND
+  node.rgt<=root.rgt`), pulls every master digital object (usage_id=140), idempotent
+  (skips objects already in the package). Draft-only.
+- action `apiPackageAddCollection` + route `/api/preservation/package/add-collection`.
+- packageEdit: "Add all objects from a collection" widget (description autocomplete via
+  apiSearchDescriptions + "Add all" button) in the draft-only Add Objects card.
+Verified: package 6 <- "Egyptian Boat" (io 905228) added 1 object (0->1), build-export
+-> 21 MB zip containing egyptian_boat_from_ancient_lives.glb + BagIt manifests,
+downloads as boat_test.zip; no CsrfViolation logged (X-CSRF-TOKEN header path).
