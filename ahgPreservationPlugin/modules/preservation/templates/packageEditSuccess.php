@@ -135,13 +135,15 @@
             <div class="card-body">
                 <div class="mb-3">
                     <label class="form-label"><?php echo __('Add Digital Object'); ?></label>
-                    <div class="input-group">
-                        <input type="number" id="objectIdInput" class="form-control" placeholder="<?php echo __('Enter digital object ID'); ?>">
+                    <div class="input-group position-relative">
+                        <input type="text" id="objectSearchInput" class="form-control" autocomplete="off" placeholder="<?php echo __('Search by title or file name...'); ?>">
+                        <input type="hidden" id="objectIdInput" value="">
                         <button type="button" class="btn btn-outline-primary" onclick="addObject()">
                             <i class="bi bi-plus-lg me-1"></i><?php echo __('Add'); ?>
                         </button>
+                        <div id="objectSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
                     </div>
-                    <div class="form-text"><?php echo __('Enter the ID of a digital object to add to this package'); ?></div>
+                    <div class="form-text"><?php echo __('Search a description by title or file name and pick it - or type a numeric digital object ID directly.'); ?></div>
                 </div>
 
                 <?php if (!empty($objects)): ?>
@@ -334,9 +336,12 @@ function formatBytes($bytes) {
 const packageId = <?php echo $package->id; ?>;
 
 function addObject() {
-    const objectId = document.getElementById('objectIdInput').value;
+    let objectId = document.getElementById('objectIdInput').value;
+    const raw = document.getElementById('objectSearchInput').value.trim();
+    // Fallback: allow typing a bare numeric ID without selecting from the lookup.
+    if (!objectId && /^\d+$/.test(raw)) { objectId = raw; }
     if (!objectId) {
-        alert('Please enter an object ID');
+        alert('Search for and select a digital object, or type its numeric ID');
         return;
     }
 
@@ -354,6 +359,49 @@ function addObject() {
         }
     });
 }
+
+// Digital-object lookup: search by description title or file name, show File + Format.
+(function () {
+    var input = document.getElementById('objectSearchInput');
+    var idField = document.getElementById('objectIdInput');
+    var box = document.getElementById('objectSearchResults');
+    if (!input || !box) { return; }
+    var timer = null;
+    function esc(s) { var d = document.createElement('div'); d.textContent = (s == null ? '' : s); return d.innerHTML; }
+    input.addEventListener('input', function () {
+        idField.value = '';               // typing invalidates any prior selection
+        clearTimeout(timer);
+        var q = input.value.trim();
+        if (q.length < 2) { box.innerHTML = ''; return; }
+        timer = setTimeout(function () {
+            fetch('<?php echo url_for(['module' => 'preservation', 'action' => 'apiSearchObjects']); ?>?q=' + encodeURIComponent(q))
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    box.innerHTML = '';
+                    var results = (d && d.results) || [];
+                    if (!results.length) { return; }
+                    results.forEach(function (it) {
+                        var a = document.createElement('a');
+                        a.href = '#';
+                        a.className = 'list-group-item list-group-item-action py-1 small';
+                        a.innerHTML = '<strong>#' + it.id + '</strong> ' + esc(it.title) +
+                            ' <span class="text-muted">- ' + esc(it.filename) + ' [' + esc(it.format) + ']</span>';
+                        a.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            idField.value = it.id;
+                            input.value = '#' + it.id + '  ' + it.title;
+                            box.innerHTML = '';
+                        });
+                        box.appendChild(a);
+                    });
+                })
+                .catch(function () { box.innerHTML = ''; });
+        }, 300);
+    });
+    document.addEventListener('click', function (e) {
+        if (!input.parentNode.contains(e.target)) { box.innerHTML = ''; }
+    });
+})();
 
 function removeObject(objectId) {
     if (!confirm('Remove this object from the package?')) return;

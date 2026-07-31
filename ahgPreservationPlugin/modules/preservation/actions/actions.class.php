@@ -991,6 +991,51 @@ class preservationActions extends AhgController
     /**
      * API: Add object to package
      */
+    /**
+     * API: search master digital objects by description title or file name, for
+     * the package "Add Digital Object" lookup. Returns [{id,title,filename,format}].
+     */
+    public function executeApiSearchObjects($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        $q = trim((string) $request->getParameter('q', ''));
+        if (mb_strlen($q) < 2) {
+            return $this->renderText(json_encode(['results' => []]));
+        }
+
+        $rows = DB::table('digital_object as do')
+            ->leftJoin('information_object as io', 'do.object_id', '=', 'io.id')
+            ->leftJoin('information_object_i18n as ioi', function ($j) {
+                $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', 'en');
+            })
+            ->leftJoin('preservation_object_format as pof', 'pof.digital_object_id', '=', 'do.id')
+            ->leftJoin('preservation_format as pf', 'pf.id', '=', 'pof.format_id')
+            ->where('do.usage_id', 140)
+            ->where(function ($w) use ($q) {
+                $w->where('ioi.title', 'like', '%' . $q . '%')
+                  ->orWhere('do.name', 'like', '%' . $q . '%');
+            })
+            ->groupBy('do.id')
+            ->select('do.id', 'ioi.title', 'do.name as filename', DB::raw('COALESCE(pof.format_name, pf.format_name) as format'))
+            ->orderBy('ioi.title')
+            ->limit(15)
+            ->get();
+
+        $results = [];
+        foreach ($rows as $r) {
+            $results[] = [
+                'id' => (int) $r->id,
+                'title' => (string) ($r->title ?: '(untitled)'),
+                'filename' => (string) $r->filename,
+                'format' => (string) ($r->format ?: '-'),
+            ];
+        }
+
+        return $this->renderText(json_encode(['results' => $results]));
+    }
+
     public function executeApiPackageAddObject($request)
     {
         $this->checkAdminAccess();
@@ -1240,8 +1285,18 @@ class preservationActions extends AhgController
         $packageId = (int) $request->getParameter('id');
         $package = $this->service->getPackage($packageId);
 
-        if (!$package || !$package->export_path || !file_exists($package->export_path)) {
-            $this->forward404('Package export not found');
+        if (!$package) {
+            $this->forward404('Package not found');
+        }
+
+        // The export archive is written once at export time and may later be
+        // cleaned off disk (temp housekeeping, restore, etc.). When that happens
+        // the package can still read as "exported", so a bare 404 leaves the user
+        // with no idea why the download failed. Explain it and send them back to
+        // the package where the Export button lets them regenerate it.
+        if (!$package->export_path || !file_exists($package->export_path)) {
+            $this->getUser()->setFlash('error', 'The export archive for this package is no longer available on disk. Please re-export the package to download it again.');
+            $this->redirect(['module' => 'preservation', 'action' => 'packageView', 'id' => $packageId]);
         }
 
         $filename = basename($package->export_path);

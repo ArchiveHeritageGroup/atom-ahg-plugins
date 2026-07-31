@@ -55,6 +55,7 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
         $preservation->any('preservation_package_download', '/admin/preservation/package/:id/download', 'packageDownload', ['id' => '\d+']);
 
         // Package API routes
+        $preservation->any('preservation_api_search_objects', '/api/preservation/objects/search', 'apiSearchObjects');
         $preservation->any('preservation_api_package_add_object', '/api/preservation/package/add-object', 'apiPackageAddObject');
         $preservation->any('preservation_api_package_remove_object', '/api/preservation/package/remove-object', 'apiPackageRemoveObject');
         $preservation->any('preservation_api_package_build', '/api/preservation/package/build', 'apiPackageBuild');
