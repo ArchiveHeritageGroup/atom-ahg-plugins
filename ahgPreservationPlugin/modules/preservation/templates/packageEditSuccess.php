@@ -113,6 +113,46 @@
                                placeholder="<?php echo __('e.g., Permanent, 10 years, etc.'); ?>">
                     </div>
 
+                    <hr>
+
+                    <div class="mb-3">
+                        <label class="form-label"><?php echo __('Parent Package'); ?></label>
+                        <select name="parent_package_id" class="form-select">
+                            <option value=""><?php echo __('- None (top-level package) -'); ?></option>
+                            <?php foreach ($allPackages as $p): ?>
+                            <option value="<?php echo (int) $p->id; ?>" <?php echo ($package && $package->parent_package_id == $p->id) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($p->name).' ('.strtoupper($p->package_type).' / '.ucfirst($p->status).')'; ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text"><?php echo __('Nest this package under a parent - e.g. a SIP or DIP under its AIP.'); ?></div>
+                    </div>
+
+                    <div class="mb-3 position-relative">
+                        <label class="form-label"><?php echo __('Linked Collection / Description'); ?></label>
+                        <input type="hidden" name="information_object_id" id="collectionId" value="<?php echo (int) ($package->information_object_id ?? 0) ?: ''; ?>">
+                        <div class="input-group">
+                            <input type="text" id="collectionSearch" class="form-control" autocomplete="off"
+                                   value="<?php echo htmlspecialchars($linkedDescription ?? ''); ?>"
+                                   placeholder="<?php echo __('Search archival descriptions by title or reference...'); ?>">
+                            <button type="button" class="btn btn-outline-secondary" id="collectionClear" title="<?php echo __('Clear'); ?>">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                        <div id="collectionResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1000;"></div>
+                        <div class="form-text"><?php echo __('The archival collection this package represents (its child descriptions).'); ?></div>
+                    </div>
+
+                    <?php if ($package): ?>
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" name="build_on_save" id="buildOnSave" value="1">
+                        <label class="form-check-label" for="buildOnSave">
+                            <?php echo __('Build &amp; export on save'); ?>
+                            <span class="text-muted d-block small"><?php echo __('Package and export immediately so the download is ready after saving (requires at least one object).'); ?></span>
+                        </label>
+                    </div>
+                    <?php endif; ?>
+
                     <div class="d-flex justify-content-between">
                         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-1"></i><?php echo __('Cancel'); ?>
@@ -231,8 +271,16 @@
                 <i class="bi bi-lightning me-2"></i><?php echo __('Actions'); ?>
             </div>
             <div class="card-body">
+                <?php if ($package->object_count > 0): ?>
+                <button type="button" class="btn btn-success w-100 mb-2" onclick="buildExportPackage()">
+                    <i class="bi bi-lightning-charge me-1"></i><?php echo __('Build &amp; Export'); ?>
+                </button>
+                <div class="form-text mb-2"><?php echo __('One step: builds and exports so the download is ready.'); ?></div>
+                <hr>
+                <?php endif; ?>
+
                 <?php if ('draft' === $package->status && $package->object_count > 0): ?>
-                <button type="button" class="btn btn-success w-100 mb-2" onclick="buildPackage()">
+                <button type="button" class="btn btn-outline-success w-100 mb-2" onclick="buildPackage()">
                     <i class="bi bi-hammer me-1"></i><?php echo __('Build Package'); ?>
                 </button>
                 <?php endif; ?>
@@ -532,6 +580,91 @@ function deletePackage() {
         }
     });
 }
+
+// One-click build + export: packages (if needed) then exports, landing with a
+// ready download. Also re-exports a package whose archive was cleaned off disk.
+function buildExportPackage() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Building &amp; exporting...';
+
+    fetch('<?php echo url_for(['module' => 'preservation', 'action' => 'apiPackageBuildExport']); ?>', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `package_id=${packageId}&format=zip`
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('Package built and exported.\nSize: ' + formatBytes(data.size) + '\nThe download is now available.');
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>Build & Export';
+        }
+    })
+    .catch(e => {
+        alert('Error: ' + e);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>Build & Export';
+    });
+}
+
+// Collection (archival description) lookup for the Linked Collection field.
+(function () {
+    var input = document.getElementById('collectionSearch');
+    var hidden = document.getElementById('collectionId');
+    var results = document.getElementById('collectionResults');
+    var clearBtn = document.getElementById('collectionClear');
+    if (!input || !hidden || !results) return;
+    var timer = null;
+
+    function hideResults() { results.innerHTML = ''; }
+
+    input.addEventListener('input', function () {
+        // Typing a new query invalidates any previously chosen collection.
+        hidden.value = '';
+        var q = input.value.trim();
+        clearTimeout(timer);
+        if (q.length < 2) { hideResults(); return; }
+        timer = setTimeout(function () {
+            fetch('<?php echo url_for(['module' => 'preservation', 'action' => 'apiSearchDescriptions']); ?>?q=' + encodeURIComponent(q))
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    results.innerHTML = '';
+                    (data.results || []).forEach(function (row) {
+                        var a = document.createElement('a');
+                        a.href = '#';
+                        a.className = 'list-group-item list-group-item-action';
+                        var meta = [row.reference, row.level].filter(Boolean).join(' - ');
+                        a.innerHTML = '<span>' + (row.title || '(untitled)') + '</span>' +
+                            (meta ? '<small class="text-muted d-block">' + meta + '</small>' : '');
+                        a.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            hidden.value = row.id;
+                            input.value = row.title || ('#' + row.id);
+                            hideResults();
+                        });
+                        results.appendChild(a);
+                    });
+                });
+        }, 250);
+    });
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            hidden.value = '';
+            input.value = '';
+            hideResults();
+            input.focus();
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!results.contains(e.target) && e.target !== input) hideResults();
+    });
+})();
 
 function formatBytes(bytes) {
     if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';

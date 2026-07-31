@@ -909,6 +909,28 @@ class preservationActions extends AhgController
             $this->events = [];
         }
 
+        // Existing packages selectable as a parent (exclude self), for the
+        // parent/child hierarchy selector on the form.
+        $this->allPackages = DB::table('preservation_package')
+            ->when($id, function ($q) use ($id) {
+                $q->where('id', '!=', $id);
+            })
+            ->orderBy('name')
+            ->select('id', 'name', 'package_type', 'status')
+            ->get();
+
+        // Title of the currently-linked collection (archival description), if set,
+        // so the lookup field can show it on load.
+        $this->linkedDescription = null;
+        if ($this->package && $this->package->information_object_id) {
+            $this->linkedDescription = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as ioi', function ($j) {
+                    $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', 'en');
+                })
+                ->where('io.id', $this->package->information_object_id)
+                ->value('ioi.title');
+        }
+
         // Handle form submission
         if ($request->isMethod('post')) {
             $action = $request->getParameter('form_action');
@@ -924,6 +946,8 @@ class preservationActions extends AhgController
                         'originator' => $request->getParameter('originator'),
                         'submission_agreement' => $request->getParameter('submission_agreement'),
                         'retention_period' => $request->getParameter('retention_period'),
+                        'parent_package_id' => ((int) $request->getParameter('parent_package_id')) ?: null,
+                        'information_object_id' => ((int) $request->getParameter('information_object_id')) ?: null,
                         'created_by' => $this->getUser()->getAttribute('user_name', 'admin'),
                     ];
 
@@ -937,10 +961,26 @@ class preservationActions extends AhgController
                         'originator' => $request->getParameter('originator'),
                         'submission_agreement' => $request->getParameter('submission_agreement'),
                         'retention_period' => $request->getParameter('retention_period'),
+                        'parent_package_id' => ((int) $request->getParameter('parent_package_id')) ?: null,
+                        'information_object_id' => ((int) $request->getParameter('information_object_id')) ?: null,
                     ];
 
                     $this->service->updatePackage($id, $data);
-                    $this->getUser()->setFlash('notice', 'Package updated successfully.');
+
+                    // "Package on save": if the box is ticked and the package has
+                    // objects, build + export it now so a download is immediately
+                    // available - no separate build/validate/export clicks.
+                    $notice = 'Package updated successfully.';
+                    if ($request->getParameter('build_on_save') && (int) $this->package->object_count > 0) {
+                        $result = $this->service->buildAndExportPackage($id, 'zip');
+                        if (!empty($result['success'])) {
+                            $notice .= ' Package built and exported - the download is ready.';
+                        } else {
+                            $this->getUser()->setFlash('error', 'Build & export failed: '.($result['error'] ?? 'unknown error'));
+                        }
+                    }
+
+                    $this->getUser()->setFlash('notice', $notice);
                     $this->redirect(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $id]);
                 }
             } catch (Exception $e) {
@@ -1034,6 +1074,81 @@ class preservationActions extends AhgController
         }
 
         return $this->renderText(json_encode(['results' => $results]));
+    }
+
+    /**
+     * API: search archival descriptions (collections) by title, for the package
+     * "Linked Collection" lookup. Returns [{id,title,level,reference}].
+     */
+    public function executeApiSearchDescriptions($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        $q = trim((string) $request->getParameter('q', ''));
+        if (mb_strlen($q) < 2) {
+            return $this->renderText(json_encode(['results' => []]));
+        }
+
+        $rows = DB::table('information_object as io')
+            ->leftJoin('information_object_i18n as ioi', function ($j) {
+                $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', 'en');
+            })
+            ->leftJoin('term_i18n as ti', function ($j) {
+                $j->on('ti.id', '=', 'io.level_of_description_id')->where('ti.culture', '=', 'en');
+            })
+            ->where('io.id', '>', 1) // skip the root object
+            ->where(function ($w) use ($q) {
+                $w->where('ioi.title', 'like', '%' . $q . '%')
+                  ->orWhere('io.identifier', 'like', '%' . $q . '%');
+            })
+            ->select('io.id', 'ioi.title', 'io.identifier as reference', 'ti.name as level')
+            ->orderBy('ioi.title')
+            ->limit(15)
+            ->get();
+
+        $results = [];
+        foreach ($rows as $r) {
+            $results[] = [
+                'id' => (int) $r->id,
+                'title' => (string) ($r->title ?: '(untitled)'),
+                'reference' => (string) ($r->reference ?: ''),
+                'level' => (string) ($r->level ?: ''),
+            ];
+        }
+
+        return $this->renderText(json_encode(['results' => $results]));
+    }
+
+    /**
+     * API: build (if needed) and export a package in one call, so the caller
+     * lands with an immediately downloadable archive.
+     */
+    public function executeApiPackageBuildExport($request)
+    {
+        $this->checkAdminAccess();
+        $this->getResponse()->setContentType('application/json');
+
+        $packageId = (int) $request->getParameter('package_id');
+        $format = $request->getParameter('format', 'zip');
+
+        if (!$packageId) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'package_id is required',
+            ]));
+        }
+
+        try {
+            $result = $this->service->buildAndExportPackage($packageId, $format);
+
+            return $this->renderText(json_encode($result));
+        } catch (Exception $e) {
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ]));
+        }
     }
 
     public function executeApiPackageAddObject($request)
@@ -1299,9 +1414,24 @@ class preservationActions extends AhgController
             $this->redirect(['module' => 'preservation', 'action' => 'packageView', 'id' => $packageId]);
         }
 
-        $filename = basename($package->export_path);
+        // Name the download after the package title/description rather than the
+        // internal UUID (e.g. "Annual_Reports_2024_SIP.zip" not "8298c33d-...zip").
+        // Keep the archive's real extension; fall back to the UUID if the package
+        // has no usable name.
+        $ext = pathinfo($package->export_path, PATHINFO_EXTENSION) ?: 'zip';
+        $label = trim((string) ($package->name ?: $package->description ?: ''));
+        $safe = preg_replace('/[^A-Za-z0-9._-]+/', '_', $label);
+        $safe = trim($safe, '_.-');
+        if ('' === $safe) {
+            $safe = basename($package->export_path, '.'.$ext);
+        }
+        $filename = $safe.'.'.$ext;
+
         $this->getResponse()->setHttpHeader('Content-Type', 'application/octet-stream');
-        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        // Provide both an ASCII-safe filename and an RFC 5987 UTF-8 filename* so
+        // titles with accents/non-Latin characters download with a readable name.
+        $utf8 = rawurlencode($label !== '' ? $label.'.'.$ext : $filename);
+        $this->getResponse()->setHttpHeader('Content-Disposition', 'attachment; filename="'.$filename.'"; filename*=UTF-8\'\''.$utf8);
         $this->getResponse()->setHttpHeader('Content-Length', filesize($package->export_path));
 
         $this->getResponse()->sendHttpHeaders();

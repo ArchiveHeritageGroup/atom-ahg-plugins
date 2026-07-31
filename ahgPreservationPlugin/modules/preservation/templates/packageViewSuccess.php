@@ -17,9 +17,18 @@
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to Packages'); ?>
     </a>
-    <?php if ('draft' === $package->status): ?>
+    <?php if ('exported' !== $package->status): ?>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $package->id]); ?>" class="btn btn-outline-primary ms-2">
         <i class="bi bi-pencil me-1"></i><?php echo __('Edit'); ?>
+    </a>
+    <?php endif; ?>
+    <?php if (in_array($package->status, ['complete', 'validated'], true)): ?>
+    <?php // A complete/validated package has no Download yet; the Export control
+          // lives on the package editor, so surface a direct route to it here -
+          // otherwise the view page is a dead end (no Edit for non-drafts, no
+          // Download until exported). ?>
+    <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $package->id]); ?>" class="btn btn-primary ms-2">
+        <i class="bi bi-box-arrow-up me-1"></i><?php echo __('Export Package'); ?>
     </a>
     <?php endif; ?>
     <?php if ($package->export_path): ?>
@@ -319,7 +328,11 @@
                 echo "  manifest-" . $package->manifest_algorithm . ".txt\n";
                 echo "  tagmanifest-" . $package->manifest_algorithm . ".txt\n";
                 echo "  data/\n";
-                foreach (array_slice($objects, 0, 3) as $obj) {
+                // $objects arrives wrapped by AtoM's output escaper
+                // (sfOutputEscaperArrayDecorator); array_slice() needs a real
+                // array, so unwrap before slicing.
+                $rawObjects = sfOutputEscaper::unescape($objects);
+                foreach (array_slice($rawObjects, 0, 3) as $obj) {
                     echo "    " . basename($obj->relative_path) . "\n";
                 }
                 if (count($objects) > 3) {

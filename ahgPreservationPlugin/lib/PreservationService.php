@@ -3217,6 +3217,53 @@ class PreservationService
     }
 
     /**
+     * Build (if needed) and export a package in one pass, so a saved package is
+     * immediately downloadable without the manual draft -> build -> export dance.
+     *
+     * Re-runnable: an already-exported/errored package, or one whose BagIt tree
+     * has gone missing, is reset to draft and rebuilt cleanly from its current
+     * object list before export. A complete/validated package with an intact
+     * source tree is exported directly.
+     */
+    public function buildAndExportPackage(int $packageId, string $format = 'zip'): array
+    {
+        $package = $this->getPackage($packageId);
+        if (!$package) {
+            throw new Exception("Package not found: {$packageId}");
+        }
+
+        if ((int) $package->object_count < 1) {
+            return [
+                'success' => false,
+                'error' => 'Add at least one digital object before building this package.',
+            ];
+        }
+
+        $sourceIntact = $package->source_path && is_dir($package->source_path);
+        $needsBuild = 'draft' === $package->status
+            || !in_array($package->status, ['complete', 'validated'], true)
+            || !$sourceIntact;
+
+        if ($needsBuild) {
+            // buildBagItPackage only accepts draft packages; reset any other
+            // state (exported/error/complete-but-source-gone) back to draft first.
+            if ('draft' !== $package->status) {
+                $this->updatePackageStatus($packageId, 'draft', 'Reset for rebuild before export');
+            }
+
+            $build = $this->buildBagItPackage($packageId);
+            if (empty($build['success'])) {
+                return [
+                    'success' => false,
+                    'error' => $build['error'] ?? 'Package build failed.',
+                ];
+            }
+        }
+
+        return $this->exportPackage($packageId, $format);
+    }
+
+    /**
      * Create ZIP archive
      */
     private function createZipArchive(string $sourceDir, string $destFile): void
