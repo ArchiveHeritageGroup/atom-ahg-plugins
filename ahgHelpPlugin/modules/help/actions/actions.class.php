@@ -179,6 +179,28 @@ class helpActions extends AhgController
     }
 
     /**
+     * API: suggest help articles for an arbitrary page path.
+     *
+     * Backs F1 on the pages the curated context map does not cover, so the
+     * in-page panel always has something relevant to show.
+     */
+    public function executeApiSuggest($request)
+    {
+        $this->loadServices();
+
+        $path = (string) $request->getParameter('path', '');
+        $limit = min((int) $request->getParameter('limit', 6), 20);
+
+        $suggestions = \AhgHelp\Services\HelpArticleService::suggestForPath($path, $limit);
+
+        $this->getResponse()->setContentType('application/json');
+        $this->getResponse()->setHttpHeader('Cache-Control', 'public, max-age=300');
+        $this->getResponse()->setContent(json_encode($suggestions));
+
+        return sfView::NONE;
+    }
+
+    /**
      * API: FlexSearch JSON index for client-side instant search.
      */
     public function executeApiSearchIndex($request)

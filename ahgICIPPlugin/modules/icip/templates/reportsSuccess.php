@@ -50,6 +50,10 @@
                         <p class="text-muted">No consent records yet</p>
                     <?php else: ?>
                         <?php
+                        // Action vars arrive wrapped in sfOutputEscaperArrayDecorator,
+                        // which iterates but is not a real array - array_column() then
+                        // fatals. Unwrap before any array_* call.
+                        $consentByStatus = sfOutputEscaper::unescape($consentByStatus);
                         $total = array_sum(array_column($consentByStatus, 'count'));
                         $statusLabels = [
                             'not_required' => ['label' => 'Not Required', 'class' => 'bg-secondary'],

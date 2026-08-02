@@ -404,6 +404,107 @@ class HelpArticleService
     }
 
     /**
+     * Suggest help articles for an arbitrary request path.
+     *
+     * The curated context map in the help module only covers a handful of URL
+     * patterns, so on most of the site F1 had nothing to open. This derives
+     * candidates from the path instead, using related_plugin (set on 265 of the
+     * articles), then slug and title.
+     *
+     * Returns ['results' => [...], 'best' => ['slug' => ..., 'title' => ...]|null].
+     * 'best' is only set when the top hit belongs to the plugin the path names,
+     * which is confident enough to open directly rather than offer as a list.
+     */
+    public static function suggestForPath(string $path, int $limit = 6): array
+    {
+        $empty = ['results' => [], 'best' => null];
+
+        $tokens = self::pathTokens($path);
+        if (empty($tokens)) {
+            return $empty;
+        }
+
+        $primary = $tokens[0];
+        $pluginGuess = 'ahg'.ucfirst($primary).'Plugin';
+
+        try {
+            $rows = DB::table('help_article')
+                ->where('is_published', 1)
+                ->where(function ($q) use ($tokens, $pluginGuess) {
+                    $q->where('related_plugin', $pluginGuess);
+                    foreach ($tokens as $t) {
+                        $q->orWhere('related_plugin', 'like', '%'.$t.'%')
+                            ->orWhere('slug', 'like', '%'.$t.'%')
+                            ->orWhere('title', 'like', '%'.$t.'%');
+                    }
+                })
+                ->select('slug', 'title', 'category', 'related_plugin')
+                ->orderByRaw(
+                    'CASE WHEN related_plugin = ? THEN 0'
+                    .' WHEN slug LIKE ? THEN 1'
+                    .' WHEN related_plugin LIKE ? THEN 2 ELSE 3 END',
+                    [$pluginGuess, $primary.'%', '%'.$primary.'%']
+                )
+                // Someone pressing F1 wants the user guide, not the plugin's
+                // technical reference (slugged as the bare plugin name).
+                ->orderByRaw(
+                    "CASE WHEN category = 'Plugin Reference' OR slug LIKE 'ahg%' THEN 1 ELSE 0 END"
+                )
+                ->orderBy('sort_order')
+                ->orderBy('title')
+                ->limit($limit)
+                ->get()
+                ->map(fn ($r) => (array) $r)
+                ->all();
+        } catch (\Exception $e) {
+            return $empty;
+        }
+
+        $best = null;
+        if (!empty($rows) && 0 === strcasecmp((string) $rows[0]['related_plugin'], $pluginGuess)) {
+            $best = ['slug' => $rows[0]['slug'], 'title' => $rows[0]['title']];
+        }
+
+        return ['results' => $rows, 'best' => $best];
+    }
+
+    /**
+     * Reduce a request path to the one or two words worth searching on.
+     *
+     * Record slugs (which contain hyphens), numeric ids and generic CRUD verbs
+     * carry no help signal, so they are dropped.
+     */
+    private static function pathTokens(string $path): array
+    {
+        $path = parse_url($path, PHP_URL_PATH) ?: $path;
+        $path = preg_replace('#^/?index\.php#', '', (string) $path);
+
+        $skip = ['index', 'edit', 'add', 'new', 'create', 'update', 'delete', 'view', 'show', 'admin', 'api'];
+        $tokens = [];
+
+        foreach (explode('/', trim((string) $path, '/')) as $i => $part) {
+            $part = strtolower(trim($part));
+
+            if ('' === $part || is_numeric($part) || in_array($part, $skip, true)) {
+                continue;
+            }
+
+            // Beyond the first segment, a hyphenated value is a record slug.
+            if ($i > 0 && str_contains($part, '-')) {
+                continue;
+            }
+
+            $tokens[] = $part;
+
+            if (count($tokens) >= 2) {
+                break;
+            }
+        }
+
+        return $tokens;
+    }
+
+    /**
      * Get recently updated articles.
      */
     public static function getRecentlyUpdated(int $limit = 5): array

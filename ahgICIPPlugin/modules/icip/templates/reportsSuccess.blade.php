@@ -53,6 +53,9 @@
                         <p class="text-muted">No consent records yet</p>
                     @else
                         @php
+                        // Same guard as the Symfony template: unwrap any output
+                        // escaper before array_* calls.
+                        $consentByStatus = sfOutputEscaper::unescape($consentByStatus);
                         $total = array_sum(array_column($consentByStatus, 'count'));
                         $statusLabels = [
                             'not_required' => ['label' => 'Not Required', 'class' => 'bg-secondary'],

@@ -8,6 +8,12 @@
 (function () {
   'use strict';
 
+  function esc(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
   var HelpContext = {
     mappings: null,
     offcanvas: null,
@@ -63,8 +69,105 @@
       if (this.currentMapping) {
         this.openOffcanvas(this.currentMapping);
       } else {
-        window.open('/help', '_blank', 'noopener');
+        this.openSuggestions();
       }
+    },
+
+    /**
+     * Pages outside the curated context map still get in-page help: ask the
+     * server what is relevant to this path. A confident single match opens
+     * directly, anything else is offered as a list inside the panel.
+     */
+    openSuggestions: function () {
+      var self = this;
+
+      if (!this.offcanvas) {
+        this.createOffcanvas();
+      }
+
+      var titleEl = document.getElementById('helpOffcanvasLabel');
+      if (titleEl) {
+        titleEl.textContent = 'Help for this page';
+      }
+
+      var bodyEl = document.getElementById('helpOffcanvasBody');
+      if (bodyEl) {
+        bodyEl.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div></div>';
+      }
+
+      bootstrap.Offcanvas.getOrCreateInstance(this.offcanvas).show();
+
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/help/api/suggest?path=' + encodeURIComponent(window.location.pathname));
+      xhr.setRequestHeader('Accept', 'application/json');
+      xhr.onload = function () {
+        if (xhr.status !== 200) {
+          self.renderNoHelp();
+
+          return;
+        }
+
+        var data;
+        try {
+          data = JSON.parse(xhr.responseText);
+        } catch (e) {
+          self.renderNoHelp();
+
+          return;
+        }
+
+        if (data.best) {
+          self.openOffcanvas(data.best);
+        } else if (data.results && data.results.length) {
+          self.renderSuggestions(data.results);
+        } else {
+          self.renderNoHelp();
+        }
+      };
+      xhr.onerror = function () {
+        self.renderNoHelp();
+      };
+      xhr.send();
+    },
+
+    renderSuggestions: function (results) {
+      var bodyEl = document.getElementById('helpOffcanvasBody');
+      if (!bodyEl) return;
+
+      var html = '<p class="text-muted small">No help article is mapped to this page. These look relevant:</p>';
+      html += '<div class="list-group list-group-flush">';
+
+      for (var i = 0; i < results.length; i++) {
+        html += '<a href="#" class="list-group-item list-group-item-action help-suggestion"'
+          + ' data-slug="' + esc(results[i].slug) + '"'
+          + ' data-title="' + esc(results[i].title) + '">'
+          + esc(results[i].title)
+          + (results[i].category ? ' <span class="badge bg-light text-muted ms-1">' + esc(results[i].category) + '</span>' : '')
+          + '</a>';
+      }
+
+      html += '</div>';
+      bodyEl.innerHTML = html;
+
+      var self = this;
+      var links = bodyEl.querySelectorAll('.help-suggestion');
+      for (var j = 0; j < links.length; j++) {
+        links[j].addEventListener('click', function (e) {
+          e.preventDefault();
+          self.openOffcanvas({
+            slug: this.getAttribute('data-slug'),
+            title: this.getAttribute('data-title')
+          });
+        });
+      }
+    },
+
+    renderNoHelp: function () {
+      var bodyEl = document.getElementById('helpOffcanvasBody');
+      if (!bodyEl) return;
+
+      bodyEl.innerHTML = '<p class="text-muted">No help article matches this page yet.</p>'
+        + '<a class="btn btn-sm btn-outline-primary" href="/help" target="_blank" rel="noopener">Browse the help centre</a>';
     },
 
     resolvePendingOpen: function () {
