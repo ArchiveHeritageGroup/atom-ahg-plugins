@@ -48,5 +48,19 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php } ?>
 
+<?php // Online help (ahgHelpPlugin). The plugin registers these through
+      // $response->addJavascript()/addStylesheet(), but this theme never calls
+      // include_javascripts()/include_stylesheets(), so they were never emitted:
+      // contextual help, F1 and help-page search were all dead. Load them here
+      // directly, the same way the voice assets are loaded above.
+      // help-chatbot.js is deliberately not loaded - it adds a floating chat
+      // widget to every page, which is a separate decision. ?>
+<?php if (in_array('ahgHelpPlugin', sfProjectConfiguration::getActive()->getPlugins())) { ?>
+  <link rel="stylesheet" href="/plugins/ahgHelpPlugin/css/help.css?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+
+  <script src="/plugins/ahgHelpPlugin/js/help-context.js?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+  <script src="/plugins/ahgHelpPlugin/js/help-search.js?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<?php } ?>
+
 </body>
 </html>

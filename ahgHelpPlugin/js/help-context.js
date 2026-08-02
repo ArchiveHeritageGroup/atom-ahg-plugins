@@ -12,12 +12,66 @@
     mappings: null,
     offcanvas: null,
     button: null,
+    currentMapping: null,
+    pendingOpen: false,
 
     init: function () {
       // Don't show on help pages themselves
       if (window.location.pathname.indexOf('/help') === 0) return;
 
+      this.bindShortcut();
       this.fetchContextMap();
+    },
+
+    /**
+     * F1 opens help for the current page in the offcanvas panel, and closes it
+     * again on a second press. Where the page has no contextual mapping we fall
+     * back to the full help centre in a new tab.
+     */
+    bindShortcut: function () {
+      var self = this;
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'F1') return;
+
+        // Leave the browser's own help alone when a modifier is held.
+        if (e.ctrlKey || e.altKey || e.shiftKey || e.metaKey) return;
+
+        e.preventDefault();
+        self.toggleHelp();
+      });
+    },
+
+    toggleHelp: function () {
+      // Already open: close it.
+      if (this.offcanvas && this.offcanvas.classList.contains('show')) {
+        var instance = bootstrap.Offcanvas.getInstance(this.offcanvas);
+        if (instance) {
+          instance.hide();
+
+          return;
+        }
+      }
+
+      // The context map may not have arrived yet; open as soon as it does.
+      if (this.mappings === null) {
+        this.pendingOpen = true;
+
+        return;
+      }
+
+      if (this.currentMapping) {
+        this.openOffcanvas(this.currentMapping);
+      } else {
+        window.open('/help', '_blank', 'noopener');
+      }
+    },
+
+    resolvePendingOpen: function () {
+      if (!this.pendingOpen) return;
+
+      this.pendingOpen = false;
+      this.toggleHelp();
     },
 
     fetchContextMap: function () {
@@ -31,13 +85,20 @@
             var data = JSON.parse(xhr.responseText);
             self.mappings = data.mappings || [];
             self.checkCurrentPage();
+            self.resolvePendingOpen();
           } catch (e) {
             // Silently fail
           }
+        } else {
+          // No map available; F1 can still reach the full help centre.
+          self.mappings = [];
+          self.resolvePendingOpen();
         }
       };
       xhr.onerror = function () {
-        // Silently fail — contextual help is optional
+        // Contextual help is optional, but keep F1 working.
+        self.mappings = [];
+        self.resolvePendingOpen();
       };
       xhr.send();
     },
@@ -56,6 +117,8 @@
           break;
         }
       }
+
+      this.currentMapping = match;
 
       if (match) {
         this.showButton(match);
@@ -149,7 +212,7 @@
       html += '<div class="offcanvas-body" id="helpOffcanvasBody">';
       html += '</div>';
       html += '<div class="offcanvas-footer border-top p-2 text-center">';
-      html += '<a href="/help" class="btn btn-sm btn-outline-primary">Open Help Center</a>';
+      html += '<a href="/help" class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener">Open Help Center</a>';
       html += '</div>';
       html += '</div>';
 

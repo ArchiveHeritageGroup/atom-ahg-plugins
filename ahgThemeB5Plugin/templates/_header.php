@@ -103,13 +103,15 @@
             <a
               class="nav-link d-flex align-items-center p-0"
               href="<?php echo url_for('@help_index') ?>"
+              target="_blank"
+              rel="noopener"
               id="help-center-menu">
               <i
                 class="fas fa-2x fa-fw fa-question-circle px-0 px-lg-2 py-2"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"
                 data-bs-custom-class="d-none d-lg-block"
-                title="<?php echo __('Help Center'); ?>"
+                title="<?php echo __('Help Center (press F1 for help on this page)'); ?>"
                 aria-hidden="true">
               </i>
               <span class="d-lg-none mx-1" aria-hidden="true">
