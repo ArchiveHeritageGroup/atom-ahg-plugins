@@ -1,5 +1,5 @@
 /**
- * ahgHelpPlugin — Contextual Help Button & Offcanvas Panel
+ * ahgHelpPlugin - Contextual Help Button & Offcanvas Panel
  *
  * Injects a floating "?" help button on pages that have contextual help mappings.
  * On click, opens a Bootstrap 5 offcanvas panel with the relevant help article.

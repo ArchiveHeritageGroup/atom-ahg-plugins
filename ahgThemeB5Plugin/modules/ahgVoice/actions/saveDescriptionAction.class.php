@@ -1,6 +1,6 @@
 <?php
 /**
- * AHG Voice — Save AI-generated description to record.
+ * AHG Voice - Save AI-generated description to record.
  *
  * POST /ahgVoice/saveDescription
  * Params: information_object_id, description, save_target, save_mode
@@ -78,11 +78,11 @@ class ahgVoiceSaveDescriptionAction extends sfAction
         if ($saveTarget === 'extent_and_medium') {
             $taggedDescription = '[AI-described] ' . $description;
             if ($autoAppend) {
-                // Human content exists — append AI description after newline
+                // Human content exists - append AI description after newline
                 $this->saveToI18n($ioId, 'extent_and_medium', $taggedDescription, 'append', $culture);
                 $saved[] = 'extent and medium (appended)';
             } else {
-                // Empty or has existing AI tag — replace
+                // Empty or has existing AI tag - replace
                 $this->saveToI18n($ioId, 'extent_and_medium', $taggedDescription, 'replace', $culture);
                 $saved[] = 'extent and medium';
             }

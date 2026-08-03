@@ -1,5 +1,5 @@
 /**
- * AHG Voice Command Registry — Navigation + Action Commands
+ * AHG Voice Command Registry - Navigation + Action Commands
  *
  * Command definitions for voice-driven navigation and context-aware actions.
  * Each command has: patterns, action, mode, description, contextCheck (optional).
@@ -400,7 +400,7 @@ var AHGVoiceRegistry = (function () {
       action: function () { window.scrollBy({ top: 500, behavior: 'smooth' }); },
       mode: 'global',
       description: 'Scroll down',
-      feedback: null // no speech for scroll — too frequent
+      feedback: null // no speech for scroll - too frequent
     },
     {
       patterns: ['scroll up', 'page up'],
@@ -855,7 +855,7 @@ var AHGVoiceRegistry = (function () {
      * Used by contextCheck for "describe image" and "read image info" commands.
      */
     _hasDigitalObject: function () {
-      // Direct media elements (broad — gallery/museum templates don't use #content)
+      // Direct media elements (broad - gallery/museum templates don't use #content)
       if (document.querySelector('#wrapper img.img-fluid, #sidebar img.img-fluid, #content img.img-fluid, .digital-object-viewer, .converted-image-viewer, video, audio')) {
         return true;
       }

@@ -1,6 +1,6 @@
 <?php
 /**
- * AHG Voice — LLM Prompt Templates per descriptive standard / sector.
+ * AHG Voice - LLM Prompt Templates per descriptive standard / sector.
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */
@@ -12,9 +12,9 @@ class VoicePromptTemplates
     public static function getPrompt($context = 'default')
     {
         $prompts = [
-            'isad' => 'You are an archivist describing a digitised record. This is NOT a cartoon, illustration, or modern image — it is a scan or photograph of a real historical document, photograph, map, artwork, or artefact held in an archive. Describe what is depicted: visible text, dates, people, buildings, landmarks, or scenes. Note the physical condition if apparent. Use formal archival description language. Be factual and specific.',
+            'isad' => 'You are an archivist describing a digitised record. This is NOT a cartoon, illustration, or modern image - it is a scan or photograph of a real historical document, photograph, map, artwork, or artefact held in an archive. Describe what is depicted: visible text, dates, people, buildings, landmarks, or scenes. Note the physical condition if apparent. Use formal archival description language. Be factual and specific.',
 
-            'cco' => 'You are a museum cataloguer describing a heritage object or artwork. This is NOT a cartoon or modern illustration — it is a photograph, scan, or tracing of a real museum object, artefact, rock art, painting, sculpture, or cultural item. Consider that black silhouette figures on white backgrounds are likely tracings of ancient rock art or cave paintings. Describe the subject matter, artistic style, composition, figures depicted, and any cultural or historical significance you can identify. Be specific about what you observe.',
+            'cco' => 'You are a museum cataloguer describing a heritage object or artwork. This is NOT a cartoon or modern illustration - it is a photograph, scan, or tracing of a real museum object, artefact, rock art, painting, sculpture, or cultural item. Consider that black silhouette figures on white backgrounds are likely tracings of ancient rock art or cave paintings. Describe the subject matter, artistic style, composition, figures depicted, and any cultural or historical significance you can identify. Be specific about what you observe.',
 
             'marc' => 'You are a librarian describing a catalogue record image. This is a scan or photograph of a real book, manuscript, periodical, or library item. Note the cover content, title, author, text legibility, binding style and condition, and any visible cataloging information. Be factual.',
 
@@ -22,7 +22,7 @@ class VoicePromptTemplates
 
             'iptc' => 'Describe this image for a digital asset catalogue. Provide a factual, objective description suitable for alt text and search indexing. Note key subjects, setting, and notable features. Be concise but comprehensive.',
 
-            'default' => 'You are describing an image from a cultural heritage collection (archive, museum, library, or gallery). This is NOT a cartoon or modern illustration — it is a real historical or cultural item. Describe what is depicted factually: subjects, setting, visible text, notable features, and condition. Keep the description suitable for use as archival metadata.',
+            'default' => 'You are describing an image from a cultural heritage collection (archive, museum, library, or gallery). This is NOT a cartoon or modern illustration - it is a real historical or cultural item. Describe what is depicted factually: subjects, setting, visible text, notable features, and condition. Keep the description suitable for use as archival metadata.',
         ];
 
         $key = strtolower($context);
@@ -54,7 +54,7 @@ class VoicePromptTemplates
     {
         $base = 'This collage shows 6 views of a 3D-scanned heritage object: Front, Back, Left, Right, Top, and Detail.';
 
-        // Add filename context — often contains meaningful identifiers
+        // Add filename context - often contains meaningful identifiers
         if (!empty($fileName)) {
             $readable = str_replace(['_', '-', '.'], ' ', $fileName);
             $base .= ' The object is catalogued as: "' . $readable . '".';

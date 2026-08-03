@@ -1,5 +1,5 @@
 /**
- * ahgHelpPlugin — Help Chatbot Widget
+ * ahgHelpPlugin - Help Chatbot Widget
  *
  * A floating chat widget that provides help from the documentation.
  * Two modes:
@@ -31,7 +31,7 @@
     },
 
     createButton: function () {
-      // Chat button — positioned above the contextual help button
+      // Chat button - positioned above the contextual help button
       this.button = document.createElement('button');
       this.button.className = 'help-chat-btn';
       this.button.setAttribute('title', 'Help Chat');

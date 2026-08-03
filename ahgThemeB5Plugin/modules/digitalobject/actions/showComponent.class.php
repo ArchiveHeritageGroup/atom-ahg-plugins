@@ -9,7 +9,7 @@ class DigitalObjectShowComponent extends AhgComponents
     public function execute($request)
     {
         // $this->resource is already set by get_component() via the var holder.
-        // Do NOT overwrite it — just check if it was provided.
+        // Do NOT overwrite it - just check if it was provided.
         if (!$this->resource) {
             $this->showComponent = 'showDownload';
             $this->accessWarning = '';

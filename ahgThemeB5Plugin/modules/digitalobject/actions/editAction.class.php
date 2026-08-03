@@ -306,7 +306,7 @@ class digitalobjectEditAction extends AhgController
         // Treat empty string as null (delete) to preserve original behavior
         $value = ($value !== null && $value !== '') ? $value : null;
 
-        // Delegate to WriteService — handles object→property→property_i18n lifecycle
+        // Delegate to WriteService - handles object→property→property_i18n lifecycle
         \AtomFramework\Services\Write\WriteServiceFactory::digitalObject()
             ->saveProperty($objectId, $name, $value, 'en');
     }

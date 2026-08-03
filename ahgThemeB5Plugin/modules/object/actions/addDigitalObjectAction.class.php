@@ -107,7 +107,7 @@ class ObjectAddDigitalObjectAction extends AhgController
 
                 // External-URI link: the reference is stored instantly (no
                 // download), then derivatives (thumbnail/reference) are generated
-                // and the record reindexed in the background — so the request never
+                // and the record reindexed in the background - so the request never
                 // blocks on the remote fetch (which used to hang past php-fpm's
                 // request_terminate_timeout and roll the whole save back).
                 $this->generateExternalDerivativesBackground();
@@ -125,7 +125,7 @@ class ObjectAddDigitalObjectAction extends AhgController
      */
     public function processForm()
     {
-        // DEFERRED: new QubitDigitalObject is part of complex Propel asset pipeline — not wrapped
+        // DEFERRED: new QubitDigitalObject is part of complex Propel asset pipeline - not wrapped
         $digitalObject = new QubitDigitalObject();
 
         if (null !== $this->form->getValue('file')) {
@@ -143,7 +143,7 @@ class ObjectAddDigitalObjectAction extends AhgController
                 // downloading the remote bitstream. The download hangs past
                 // php-fpm's request_terminate_timeout (90s) for slow/large/
                 // unreachable URLs, which killed the request and rolled back the
-                // whole save — so the link "reported success" but never persisted.
+                // whole save - so the link "reported success" but never persisted.
                 $digitalObject->createDerivatives = false;
                 $digitalObject->importFromURI($this->form->getValue('url'));
             } catch (sfException $e) {

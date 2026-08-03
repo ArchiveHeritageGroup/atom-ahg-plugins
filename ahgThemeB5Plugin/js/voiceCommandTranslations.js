@@ -1,5 +1,5 @@
 /**
- * AHG Voice Command Translations — Multilingual command patterns
+ * AHG Voice Command Translations - Multilingual command patterns
  *
  * Maps English command patterns to equivalent patterns in supported languages.
  * Each language object maps an English pattern string to an array of translated alternatives.
@@ -480,7 +480,7 @@ var AHGVoiceTranslations = (function () {
      */
     mergePatterns: function (originalPatterns, langCode) {
       if (!langCode || langCode === 'en-US' || langCode === 'en-GB') {
-        return originalPatterns; // English — no translations needed
+        return originalPatterns; // English - no translations needed
       }
 
       var trans = this.getForLanguage(langCode);

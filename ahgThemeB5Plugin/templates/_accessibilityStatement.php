@@ -19,7 +19,7 @@
       <ul>
         <li><?php echo __('Skip navigation link to bypass repetitive content'); ?></li>
         <li><?php echo __('ARIA landmarks for screen reader navigation (banner, main, navigation, complementary, contentinfo)'); ?></li>
-        <li><?php echo __('Keyboard navigable — all interactive elements reachable via Tab'); ?></li>
+        <li><?php echo __('Keyboard navigable - all interactive elements reachable via Tab'); ?></li>
         <li><?php echo __('Visible focus indicators on interactive elements'); ?></li>
         <li><?php echo __('ARIA live regions for dynamic content announcements'); ?></li>
         <li><?php echo __('Collapsible facets with aria-expanded state'); ?></li>

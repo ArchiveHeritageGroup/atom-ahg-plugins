@@ -5,7 +5,7 @@ namespace AhgHelp\Services;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * Help Article Service — CRUD and search operations.
+ * Help Article Service - CRUD and search operations.
  *
  * Uses Laravel Query Builder for all database access.
  */
@@ -72,7 +72,7 @@ class HelpArticleService
     {
         $enabled = self::getEnabledPlugins();
         if (empty($enabled)) {
-            return; // No plugin list available — show all
+            return; // No plugin list available - show all
         }
 
         $query->where(function ($q) use ($enabled) {

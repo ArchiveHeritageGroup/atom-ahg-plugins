@@ -5,7 +5,7 @@ use AtomFramework\Http\Controllers\AhgController;
 class helpActions extends AhgController
 {
     /**
-     * Help center landing page — category cards + search + recent articles.
+     * Help center landing page - category cards + search + recent articles.
      */
     public function executeIndex($request)
     {
@@ -66,7 +66,7 @@ class helpActions extends AhgController
     }
 
     /**
-     * Category listing — articles grouped by subcategory.
+     * Category listing - articles grouped by subcategory.
      */
     public function executeCategory($request)
     {
@@ -221,7 +221,7 @@ class helpActions extends AhgController
     }
 
     /**
-     * API: Context map — URL pattern to help article mappings.
+     * API: Context map - URL pattern to help article mappings.
      */
     public function executeApiContextMap($request)
     {
@@ -264,7 +264,7 @@ class helpActions extends AhgController
     }
 
     /**
-     * API: Chatbot endpoint — search-based or AI-powered responses.
+     * API: Chatbot endpoint - search-based or AI-powered responses.
      *
      * POST /help/api/chat
      * Body: {message: string, mode: 'search'|'ai', history: [{role, content}]}
@@ -318,7 +318,7 @@ class helpActions extends AhgController
     }
 
     /**
-     * System map — interactive Cytoscape graph of the enabled plugins, grouped
+     * System map - interactive Cytoscape graph of the enabled plugins, grouped
      * by category (root → category → plugin). Admin-only dev/admin navigation.
      */
     public function executeSystemMap($request)

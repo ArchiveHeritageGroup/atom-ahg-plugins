@@ -350,7 +350,7 @@
         </div>
       </div>
 
-      <?php /* heratio#145 follow-up — Strongroom assignment, only when feature installed. */ ?>
+      <?php /* heratio#145 follow-up - Strongroom assignment, only when feature installed. */ ?>
       <?php if (!empty($strongroomChoices ?? []) || !empty($currentAssignment ?? null)): ?>
       <div class="card mb-4">
         <div class="card-header bg-info text-white">
@@ -361,7 +361,7 @@
             <div class="alert alert-secondary py-2 mb-3">
               <?php echo __('Currently in:'); ?>
               <strong><?php echo esc_entities($currentAssignment->strongroom_name); ?></strong>
-              — <?php echo (float) $currentAssignment->size_units_used; ?>
+              - <?php echo (float) $currentAssignment->size_units_used; ?>
               <?php echo esc_entities(__($currentAssignment->capacity_unit)); ?>
             </div>
           <?php endif; ?>

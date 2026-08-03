@@ -121,7 +121,7 @@
                 ->label(__('Archival and other holdings')), $resource); ?>
 
             <?php echo render_field($form->findingAids
-                ->help(__('"Record the title and other pertinent details of the published and/or unpublished finding aids and guides prepared by the institution and of any other relevant publications. Use ISO 690 Information and documentation – Bibliographic references and other national or international cataloguing rules." (ISDIAH 5.3.8)'))
+                ->help(__('"Record the title and other pertinent details of the published and/or unpublished finding aids and guides prepared by the institution and of any other relevant publications. Use ISO 690 Information and documentation - Bibliographic references and other national or international cataloguing rules." (ISDIAH 5.3.8)'))
                 ->label(__('Finding aids, guides and publications')), $resource); ?>
           </div>
         </div>

@@ -231,7 +231,7 @@
             if (clb) clb.addEventListener('click', clearAll);
 
             // NB: the merge job is now created lazily when the first file is added
-            // (see processFiles), NOT when the accordion opens — this avoids empty
+            // (see processFiles), NOT when the accordion opens - this avoids empty
             // jobs from merely browsing the section, and the race where files added
             // before the async job-create finished were discarded.
         });
@@ -273,7 +273,7 @@
             // Create the merge job lazily on first file add. Previously the job was
             // auto-created (async) when the accordion opened, and any files dropped
             // before that create finished were discarded with "Open the merge
-            // section first" — leaving empty jobs that failed "No files to process".
+            // section first" - leaving empty jobs that failed "No files to process".
             if (!currentJob) {
                 initMergeJob().then(function() { if (currentJob) uploadFiles(validFiles); });
             } else {

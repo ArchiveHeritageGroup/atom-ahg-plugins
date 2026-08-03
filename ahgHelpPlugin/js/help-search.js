@@ -1,5 +1,5 @@
 /**
- * ahgHelpPlugin — Client-side Instant Search
+ * ahgHelpPlugin - Client-side Instant Search
  *
  * Lazy-loads FlexSearch JSON index on first keystroke,
  * provides debounced instant search with dropdown results.

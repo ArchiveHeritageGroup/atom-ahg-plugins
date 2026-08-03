@@ -510,7 +510,7 @@ video.ahg-native-video::-webkit-media-controls {
 }
 
 // ====================================
-// ACCESSIBILITY — WCAG 2.1 AA
+// ACCESSIBILITY - WCAG 2.1 AA
 // ====================================
 
 // Focus visible indicator (CSS, not JS-injected)
@@ -532,7 +532,7 @@ video.ahg-native-video::-webkit-media-controls {
   border: 0;
 }
 
-// Reduced motion — disable animations/transitions for users who prefer it
+// Reduced motion - disable animations/transitions for users who prefer it
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -544,7 +544,7 @@ video.ahg-native-video::-webkit-media-controls {
   }
 }
 
-// High contrast / forced colours — ensure borders on interactive elements
+// High contrast / forced colours - ensure borders on interactive elements
 @media (forced-colors: active) {
   .btn,
   .button,

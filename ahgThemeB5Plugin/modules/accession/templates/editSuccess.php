@@ -157,7 +157,7 @@
           </button>
         </h2>
         <div id="io-collapse" class="accordion-collapse collapse" aria-labelledby="io-heading">
-          <?php // Searchable lookup (TomSelect remote) mirroring the donor field —
+          <?php // Searchable lookup (TomSelect remote) mirroring the donor field -
                 // the legacy form-autocomplete never enhanced in the BS5 theme, so
                 // this was free text. The endpoint returns the same HTML the JS parses. ?>
           <div class="accordion-body" data-io-remote-url="<?php echo url_for(['module' => 'informationobject', 'action' => 'autocomplete']); ?>">

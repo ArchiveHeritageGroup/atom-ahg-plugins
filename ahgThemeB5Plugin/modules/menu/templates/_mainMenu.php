@@ -109,7 +109,7 @@ $hasRic = checkPluginEnabled('ahgRicManagePlugin');
   <?php } ?>
 <?php } ?>
 
-<?php // Library module menu — the circulation desk, patrons, acquisitions,
+<?php // Library module menu - the circulation desk, patrons, acquisitions,
       // serials, ILL, e-resources (KBART), Z39.50/SRU and COUNTER/SUSHI
       // admin tools were relocated OUT of the main nav into the Reports &
       // Dashboards hub at /reports/ ("Sector Dashboards" > Library) on

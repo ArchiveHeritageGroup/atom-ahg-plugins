@@ -1,6 +1,6 @@
 <?php use_helper('I18N') ?>
 <?php
-  // Unescape to get raw arrays — Symfony 1.x auto-escapes all template variables
+  // Unescape to get raw arrays - Symfony 1.x auto-escapes all template variables
   $rawArticle = sfOutputEscaper::unescape($article);
   $rawToc = sfOutputEscaper::unescape($toc);
   $rawPrev = sfOutputEscaper::unescape($prevArticle);

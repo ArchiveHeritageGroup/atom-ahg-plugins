@@ -1,6 +1,6 @@
 <?php
 /**
- * AHG Voice Commands — Configuration
+ * AHG Voice Commands - Configuration
  *
  * @author Johan Pieterse <johan@theahg.co.za>
  */

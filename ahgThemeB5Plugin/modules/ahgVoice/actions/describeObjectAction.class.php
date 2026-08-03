@@ -1,7 +1,7 @@
 <?php
 
 /**
- * AHG Voice — Describe 3D Object via multi-angle renders + LLM.
+ * AHG Voice - Describe 3D Object via multi-angle renders + LLM.
  *
  * POST /ahgVoice/describeObject
  * Params: digital_object_id | information_object_id | slug
@@ -330,7 +330,7 @@ class ahgVoiceDescribeObjectAction extends sfAction
         $timeout = max($timeout, 50); // Single collage is much faster than 6 images
         $prompt = \VoicePromptTemplates::get3DPrompt($context, $fileName, $scopeContent);
 
-        // Vision via the AHG AI gateway (keyed + SSRF-guarded) — no direct node
+        // Vision via the AHG AI gateway (keyed + SSRF-guarded) - no direct node
         // port (migration 2026-06-15). "local" provider = local models via gateway.
         $result = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()->visionGenerate(
             $prompt,
@@ -533,7 +533,7 @@ class ahgVoiceDescribeObjectAction extends sfAction
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
-            // Silent — audit failure shouldn't break the feature
+            // Silent - audit failure shouldn't break the feature
         }
     }
 

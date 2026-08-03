@@ -1,6 +1,6 @@
 <?php
 /**
- * Voice Commands UI partial — included in layout_end.
+ * Voice Commands UI partial - included in layout_end.
  *
  * Renders: navbar mic button, floating mic button, listening indicator,
  * toast container, and help modal. Only rendered if not a bot/crawler.

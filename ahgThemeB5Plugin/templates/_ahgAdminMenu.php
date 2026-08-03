@@ -36,14 +36,14 @@ $hasDedupePlugin = ahgIsPluginEnabled('ahgDedupePlugin');
 $hasHeritage = ahgIsPluginEnabled('ahgHeritagePlugin');
 $hasResearcher = ahgIsPluginEnabled('ahgResearcherPlugin');
 
-// Strongroom feature — present when ahg_strongroom table exists
+// Strongroom feature - present when ahg_strongroom table exists
 // (ships with ahgStorageManagePlugin v3.40.0+).
 $hasStrongroom = false;
 try {
     $hasStrongroom = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_strongroom');
 } catch (Exception $e) {}
 
-// heratio#143 Phase 1 — Workflow visual diagram + designer surface
+// heratio#143 Phase 1 - Workflow visual diagram + designer surface
 // (gated by ahg_workflow table existence).
 $hasWorkflow = false;
 $hasSpectrumCompliance = false;

@@ -117,7 +117,7 @@ class helpImportTask extends arBaseTask
         'vendor-' => 'ahgVendorPlugin',
         'marketplace-' => 'ahgMarketplacePlugin',
         'workflow-' => 'ahgWorkflowPlugin',
-        // Application-wide help coverage (2026-06-15) — link the new guides to their plugins.
+        // Application-wide help coverage (2026-06-15) - link the new guides to their plugins.
         'dacs-manage' => 'ahgDacsManagePlugin',
         'dublin-core-manage' => 'ahgDcManagePlugin',
         'mods-manage' => 'ahgModsManagePlugin',
@@ -219,7 +219,7 @@ EOF;
         $this->logSection('help', sprintf('Found %d markdown files to process', count($files)));
 
         if ($dryRun) {
-            $this->logSection('help', '*** DRY RUN — no database writes ***');
+            $this->logSection('help', '*** DRY RUN - no database writes ***');
         }
 
         $imported = 0;

@@ -22,7 +22,7 @@ class ahgVoiceGetSettingsAction extends sfAction
                 $settings[$row->setting_key] = $row->setting_value;
             }
         } catch (\Exception $e) {
-            // Table may not exist — return defaults
+            // Table may not exist - return defaults
         }
 
         $response = $this->getResponse();

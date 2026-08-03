@@ -1,6 +1,6 @@
 <?php
 /**
- * AHG Voice — Describe Image via LLM (Ollama local / Anthropic cloud).
+ * AHG Voice - Describe Image via LLM (Ollama local / Anthropic cloud).
  *
  * POST /ahgVoice/describeImage
  * Params: digital_object_id (int)
@@ -117,7 +117,7 @@ class ahgVoiceDescribeImageAction extends sfAction
             }
         }
 
-        // Video/Audio detection — check media_transcription before sending thumbnail to LLM
+        // Video/Audio detection - check media_transcription before sending thumbnail to LLM
         if (preg_match('/^(video|audio)\//i', $mimeType)) {
             $mediaResult = $this->handleMedia($digitalObject, $objectId, $mimeType);
             if ($mediaResult !== null) {
@@ -125,7 +125,7 @@ class ahgVoiceDescribeImageAction extends sfAction
             }
         }
 
-        // Resolve image file — prefer reference/thumbnail derivative (already JPEG)
+        // Resolve image file - prefer reference/thumbnail derivative (already JPEG)
         // over converting a potentially large master TIFF
         $useObject = $this->findBestDerivative($digitalObject) ?? $digitalObject;
         $path = $this->resolveFilePath($useObject);
@@ -160,7 +160,7 @@ class ahgVoiceDescribeImageAction extends sfAction
     }
 
     /**
-     * Handle PDF digital objects — check for existing transcript/OCR text.
+     * Handle PDF digital objects - check for existing transcript/OCR text.
      * Returns response array if PDF handled, or null to fall through to visual description.
      */
     protected function handlePdf($digitalObject, $objectId)
@@ -169,7 +169,7 @@ class ahgVoiceDescribeImageAction extends sfAction
         $transcript = null;
         $source = null;
 
-        // Strategy 1: Base AtoM transcript (property table — populated by digitalobject:extract-text / pdftotext)
+        // Strategy 1: Base AtoM transcript (property table - populated by digitalobject:extract-text / pdftotext)
         try {
             $prop = DB::table('property')
                 ->join('property_i18n', 'property.id', '=', 'property_i18n.id')
@@ -182,10 +182,10 @@ class ahgVoiceDescribeImageAction extends sfAction
                 $source = 'transcript';
             }
         } catch (\Exception $e) {
-            // property_i18n may not have expected join — try object_id instead
+            // property_i18n may not have expected join - try object_id instead
         }
 
-        // Strategy 2: IIIF OCR text (iiif_ocr_text table — populated by Tesseract OCR)
+        // Strategy 2: IIIF OCR text (iiif_ocr_text table - populated by Tesseract OCR)
         if (!$transcript) {
             try {
                 $ocr = DB::table('iiif_ocr_text')
@@ -220,7 +220,7 @@ class ahgVoiceDescribeImageAction extends sfAction
         }
 
         if ($transcript) {
-            // PDF with readable text — offer to read it
+            // PDF with readable text - offer to read it
             // Truncate very long text for speech (keep full for display)
             $speechText = mb_strlen($transcript) > 2000
                 ? mb_substr($transcript, 0, 2000) . '... Document continues.'
@@ -249,7 +249,7 @@ class ahgVoiceDescribeImageAction extends sfAction
     }
 
     /**
-     * Handle video/audio digital objects — check media_transcription for transcript.
+     * Handle video/audio digital objects - check media_transcription for transcript.
      * Returns response array if handled, or null to fall through.
      */
     protected function handleMedia($digitalObject, $objectId, $mimeType)
@@ -307,7 +307,7 @@ class ahgVoiceDescribeImageAction extends sfAction
             ];
         }
 
-        // Video/audio without transcript — don't send thumbnail to LLM (it would hallucinate)
+        // Video/audio without transcript - don't send thumbnail to LLM (it would hallucinate)
         return [
             'success'     => true,
             'type'        => 'media_no_transcript',
@@ -394,7 +394,7 @@ class ahgVoiceDescribeImageAction extends sfAction
         $doId = $digitalObject->id;
 
         // Look for child derivatives (parent_id = this DO's id)
-        // Prefer reference (141) over thumbnail (142) — better quality for LLM
+        // Prefer reference (141) over thumbnail (142) - better quality for LLM
         $derivative = DB::table('digital_object')
             ->where('parent_id', $doId)
             ->whereIn('usage_id', [141, 142])
@@ -407,7 +407,7 @@ class ahgVoiceDescribeImageAction extends sfAction
     /**
      * Convert unsupported image formats (TIFF, BMP, etc.) to JPEG for LLM processing.
      * Resizes large images to max 1024px. Uses ImageMagick, then ffmpeg, then GD as fallbacks.
-     * Returns [filePath, mimeType] — original if already supported, converted otherwise.
+     * Returns [filePath, mimeType] - original if already supported, converted otherwise.
      */
     protected function ensureSupportedFormat($filePath, $mimeType)
     {
@@ -453,7 +453,7 @@ class ahgVoiceDescribeImageAction extends sfAction
             return [$tmpPath, 'image/jpeg'];
         }
 
-        // Strategy 3: PHP GD (last resort — may fail on large files)
+        // Strategy 3: PHP GD (last resort - may fail on large files)
         $img = @imagecreatefromstring(file_get_contents($filePath));
         if ($img) {
             imagejpeg($img, $tmpPath, 85);
@@ -463,7 +463,7 @@ class ahgVoiceDescribeImageAction extends sfAction
             }
         }
 
-        // Return original if all conversion fails — LLM will handle or reject
+        // Return original if all conversion fails - LLM will handle or reject
         return [$filePath, $mimeType];
     }
 
@@ -541,7 +541,7 @@ class ahgVoiceDescribeImageAction extends sfAction
         $timeout = (int) ($config['local_llm_timeout'] ?? 30);
         $prompt = VoicePromptTemplates::getPrompt($context);
 
-        // Vision via the AHG AI gateway (keyed + SSRF-guarded) — no direct node
+        // Vision via the AHG AI gateway (keyed + SSRF-guarded) - no direct node
         // port (migration 2026-06-15). "local" provider = local models via gateway.
         $result = \AtomFramework\Services\AI\AiGatewayClient::fromSettings()->visionGenerate(
             $prompt,
@@ -714,7 +714,7 @@ class ahgVoiceDescribeImageAction extends sfAction
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
         } catch (\Exception $e) {
-            // Silent — audit failure shouldn't break the feature
+            // Silent - audit failure shouldn't break the feature
         }
     }
 

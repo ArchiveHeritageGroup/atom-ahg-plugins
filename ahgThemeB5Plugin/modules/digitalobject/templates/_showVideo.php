@@ -22,7 +22,7 @@
   <?php if ($showMediaPlayer) { ?>
 
     <?php if ($hasIiifPlayer) { ?>
-      <?php // ahgIiifPlugin enabled — use AhgMediaPlayer JS player ?>
+      <?php // ahgIiifPlugin enabled - use AhgMediaPlayer JS player ?>
       <?php echo render_media_player([
           'id' => $resource->id,
           'name' => $resource->name,

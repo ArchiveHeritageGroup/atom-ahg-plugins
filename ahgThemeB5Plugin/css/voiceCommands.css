@@ -1,5 +1,5 @@
 /* =============================================================
-   AHG Voice Commands — Styles
+   AHG Voice Commands - Styles
    ============================================================= */
 
 /* -- Navbar mic button ---------------------------------------- */
@@ -165,7 +165,7 @@
 .voice-ctx-browse { background: #198754; color: #fff; }
 .voice-ctx-global { background: #6c757d; color: #fff; }
 
-/* -- Processing indicator (Phase 5 — AI describe) ------------- */
+/* -- Processing indicator (Phase 5 - AI describe) ------------- */
 .voice-indicator-processing {
   opacity: 1;
   background: linear-gradient(90deg, transparent, #ffc107, transparent);
@@ -183,7 +183,7 @@
   transition: box-shadow 0.3s;
 }
 
-/* Indicator bar — green for dictation */
+/* Indicator bar - green for dictation */
 .voice-indicator-dictation {
   opacity: 1;
   background: linear-gradient(90deg, transparent, #198754, transparent);

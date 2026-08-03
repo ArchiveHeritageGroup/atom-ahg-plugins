@@ -1,4 +1,4 @@
-/* ahgHelpPlugin — Help Center Styles
+/* ahgHelpPlugin - Help Center Styles
    Uses --ahg-* CSS custom properties from ahgSettingsPlugin dynamic styles */
 
 /* Category cards */
@@ -31,12 +31,12 @@
   color: var(--ahg-body-text, #212529) !important;
 }
 
-/* TOC sidebar column — prevent stretching to article height */
+/* TOC sidebar column - prevent stretching to article height */
 .help-toc-col {
   align-self: flex-start;
 }
 
-/* TOC sidebar — sticky + independent scroll */
+/* TOC sidebar - sticky + independent scroll */
 .help-toc-sidebar {
   position: sticky;
   top: 1rem;

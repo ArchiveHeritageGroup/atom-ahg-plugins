@@ -19,7 +19,7 @@ require_once SF_ROOT_DIR.'/config/ProjectConfiguration.class.php';
 $configuration = ProjectConfiguration::getApplicationConfiguration('qubit', 'prod', false);
 sfContext::createInstance($configuration);
 
-// Find ahgUniversalMetadataExtractor dynamically — check plugin paths
+// Find ahgUniversalMetadataExtractor dynamically - check plugin paths
 $extractorPaths = [
     SF_ROOT_DIR . '/atom-ahg-plugins/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php',
     SF_ROOT_DIR . '/plugins/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php',

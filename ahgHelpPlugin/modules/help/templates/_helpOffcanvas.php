@@ -1,6 +1,6 @@
 <?php use_helper('I18N') ?>
 
-<!-- Contextual Help Offcanvas Panel — rendered by help-context.js -->
+<!-- Contextual Help Offcanvas Panel - rendered by help-context.js -->
 <div class="offcanvas offcanvas-end help-offcanvas" tabindex="-1" id="helpOffcanvas" aria-labelledby="helpOffcanvasLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="helpOffcanvasLabel"><?php echo __('Help') ?></h5>

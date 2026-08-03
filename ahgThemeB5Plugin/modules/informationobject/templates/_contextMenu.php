@@ -35,7 +35,7 @@ if (isset($resource)) {
   } elseif (is_object($rawResource) && property_exists($rawResource, 'slug')) {
     $resourceSlug = $rawResource->slug;
   } elseif (is_object($resource) && method_exists($resource, '__call')) {
-    // Fallback for escaped objects — access slug via method call
+    // Fallback for escaped objects - access slug via method call
     try { $resourceSlug = $resource->slug; } catch (Exception $e) {}
   }
   
@@ -516,7 +516,7 @@ function scanForPii(objectId) {
 <section class="sidebar-widget">
   <h4><?php echo __('Privacy & PII'); ?></h4>
   <ul class="list-unstyled">
-    <?php // "Scan for PII" runs AI NER (ahgNerService) — only show when the AI plugin is enabled. ?>
+    <?php // "Scan for PII" runs AI NER (ahgNerService) - only show when the AI plugin is enabled. ?>
     <?php if (isPluginActive('ahgAIPlugin')): ?>
     <li>
       <a href="#" id="piiScanBtn" data-object-id="<?php echo $resource->id; ?>">

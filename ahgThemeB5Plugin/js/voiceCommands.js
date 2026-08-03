@@ -1,5 +1,5 @@
 /**
- * AHG Voice Commands — Core Engine
+ * AHG Voice Commands - Core Engine
  *
  * Uses Web Speech API (SpeechRecognition + SpeechSynthesis) for
  * voice-driven navigation and actions in AtoM Heratio.
@@ -26,7 +26,7 @@ class AHGVoiceCommands {
     this._suggestedCommand = null;     // The suggested command object
     this._suggestedText = null;        // The suggested pattern text
 
-    // Continuous listening mode (stays on after each command) — restore from session
+    // Continuous listening mode (stays on after each command) - restore from session
     this._continuousMode = false;
     try { this._continuousMode = sessionStorage.getItem('ahg_voice_continuous') === '1'; } catch (e) { /* ignore */ }
     this._isAutoRestart = false; // True during auto-restart cycle (skip "Listening" speech)
@@ -56,7 +56,7 @@ class AHGVoiceCommands {
   }
 
   /**
-   * Initialize — call on DOMContentLoaded.
+   * Initialize - call on DOMContentLoaded.
    */
   init() {
     if (!this.isSupported) {
@@ -160,7 +160,7 @@ class AHGVoiceCommands {
   toggle() {
     if (this._toggleDebounce) return;
     if (this._voiceDisabled) {
-      this.showToast('Voice disabled — right-click and type "enable voice"', 'warning');
+      this.showToast('Voice disabled - right-click and type "enable voice"', 'warning');
       return;
     }
     this._toggleDebounce = true;
@@ -216,7 +216,7 @@ class AHGVoiceCommands {
   }
 
   /**
-   * Disable voice commands — stops listening, hides all voice UI, persists to session.
+   * Disable voice commands - stops listening, hides all voice UI, persists to session.
    * Can be re-enabled via typed command "enable voice" (right-click) or page reload after enableVoice().
    */
   disableVoice() {
@@ -236,20 +236,20 @@ class AHGVoiceCommands {
     }
 
     // Confirm via a silent toast (deliberately NOT spoken - the point is silence).
-    this.showToast('Voice disabled for this session — right-click the mic and type "enable voice" to re-enable', 'warning');
+    this.showToast('Voice disabled for this session - right-click the mic and type "enable voice" to re-enable', 'warning');
 
     document.querySelectorAll('.voice-ui').forEach(function(el) { el.style.display = 'none'; });
     // Keep floating btn visible but dimmed so user can right-click to re-enable
     if (this.floatingBtn) {
       this.floatingBtn.style.display = 'flex';
       this.floatingBtn.style.opacity = '0.3';
-      this.floatingBtn.title = 'Voice disabled — right-click to type "enable voice"';
+      this.floatingBtn.title = 'Voice disabled - right-click to type "enable voice"';
     }
     this._updateUI(false);
   }
 
   /**
-   * Re-enable voice commands — shows UI, restores state.
+   * Re-enable voice commands - shows UI, restores state.
    */
   enableVoice() {
     this._voiceDisabled = false;
@@ -298,7 +298,7 @@ class AHGVoiceCommands {
         self.recognition.start();
         self.isListening = true;
         self._updateUI(true);
-        self.showToast('Dictation started — speak into field', 'info');
+        self.showToast('Dictation started - speak into field', 'info');
       } catch (e) {
         console.warn('Voice: could not start dictation', e);
       }
@@ -444,7 +444,7 @@ class AHGVoiceCommands {
         return;
       }
 
-      // Final text — insert it
+      // Final text - insert it
       this._clearInterim();
       // Capitalize first letter of sentence
       var insertText = this._smartCapitalize(text);
@@ -453,7 +453,7 @@ class AHGVoiceCommands {
       this._insertAtCursor(this.dictationField, insertText);
       this.dictationHistory.push(insertText);
     } else {
-      // Interim result — show grayed preview
+      // Interim result - show grayed preview
       this._showInterim(text);
     }
   }
@@ -638,9 +638,9 @@ class AHGVoiceCommands {
       if (this._matchCommand(text, cmd)) {
         matched = true;
 
-        // Context check — block if command not available on this page
+        // Context check - block if command not available on this page
         if (typeof cmd.contextCheck === 'function' && !cmd.contextCheck()) {
-          this.showToast(cmd.description + ' — not available here', 'warning');
+          this.showToast(cmd.description + ' - not available here', 'warning');
           this.speak('That command is not available on this page');
           break;
         }
@@ -672,7 +672,7 @@ class AHGVoiceCommands {
     }
 
     if (!matched) {
-      console.log('[Voice] No match for: "' + text + '" — tried ' + commands.length + ' commands');
+      console.log('[Voice] No match for: "' + text + '" - tried ' + commands.length + ' commands');
       // Suggest closest match
       var result = this._findClosestCommand(text, commands);
       if (result) {
@@ -822,7 +822,7 @@ class AHGVoiceCommands {
         var sectionName = header ? header.textContent.trim() : '';
         var sectionFields = [];
 
-        // Pattern 1: CCO/Gallery — .row.mb-3 > .col-md-3 (label) + .col-md-9 (value)
+        // Pattern 1: CCO/Gallery - .row.mb-3 > .col-md-3 (label) + .col-md-9 (value)
         section.querySelectorAll('.row.mb-3').forEach(function (row) {
           var label = row.querySelector('.col-md-3');
           var value = row.querySelector('.col-md-9');
@@ -834,7 +834,7 @@ class AHGVoiceCommands {
           }
         });
 
-        // Pattern 2: ISAD — .field .col-3 (label h3) + .col-9 (value)
+        // Pattern 2: ISAD - .field .col-3 (label h3) + .col-9 (value)
         section.querySelectorAll('.field.row').forEach(function (row) {
           var label = row.querySelector('h3, .col-3');
           var value = row.querySelector('.col-9');
@@ -976,7 +976,7 @@ class AHGVoiceCommands {
   }
 
   // ---------------------------------------------------------------
-  //  Accessibility — Screen Reader Mode
+  //  Accessibility - Screen Reader Mode
   // ---------------------------------------------------------------
 
   /**
@@ -1258,7 +1258,7 @@ class AHGVoiceCommands {
     var path = window.location.pathname;
     var pageName = this._detectPageName();
 
-    // Determine page type (view/edit checked before browse — view pages may contain browse-like elements)
+    // Determine page type (view/edit checked before browse - view pages may contain browse-like elements)
     if (ctx.admin) {
       parts.push('You are on ' + (pageName || 'an admin page'));
     } else if (ctx.edit) {
@@ -1438,7 +1438,7 @@ class AHGVoiceCommands {
       // Clear previous hover timer
       if (hoverTimer) clearTimeout(hoverTimer);
 
-      // Delay before reading — user must hover intentionally (configurable in settings)
+      // Delay before reading - user must hover intentionally (configurable in settings)
       hoverTimer = setTimeout(function () {
         if (self._isSpeaking) return;
         lastSpoken = text;
@@ -1499,7 +1499,7 @@ class AHGVoiceCommands {
       informationObjectId: null
     };
 
-    // Check for digital object viewer (broad selectors — gallery/museum/archive/library templates all differ)
+    // Check for digital object viewer (broad selectors - gallery/museum/archive/library templates all differ)
     var img = document.querySelector('.digital-object-reference img, .converted-image-viewer img.img-fluid, #content img.img-fluid, #sidebar img.img-fluid, .digital-object-viewer img, #wrapper img.img-fluid');
     var video = document.querySelector('#content video, #wrapper video, .digital-object-viewer video');
     var audio = document.querySelector('#content audio, #wrapper audio, .digital-object-viewer audio');
@@ -1557,7 +1557,7 @@ class AHGVoiceCommands {
     }
 
     // IIIF/PDF viewer container IDs contain the INFORMATION OBJECT ID (not digital object ID).
-    // Do NOT store as digitalObjectId — describeImage() handles this in Strategy 4b.
+    // Do NOT store as digitalObjectId - describeImage() handles this in Strategy 4b.
     if (!meta.digitalObjectId && !meta.informationObjectId) {
       var iiifContainer = document.querySelector('[id^="container-iiif-viewer-"], [id^="pdf-wrapper-iiif-viewer-"], [id^="pdf-frame-iiif-viewer-"]');
       if (iiifContainer) {
@@ -1579,7 +1579,7 @@ class AHGVoiceCommands {
     // Description
     meta.description = this._getPageDescription();
 
-    // File size — look in metadata fields
+    // File size - look in metadata fields
     var fields = document.querySelectorAll('#content .field, .row.mb-3, .digitalObjectMetadata tr, .field-group');
     fields.forEach(function (field) {
       var text = field.textContent || '';
@@ -1712,7 +1712,7 @@ class AHGVoiceCommands {
       console.log('[Voice] Strategy 3 (DO link): doId=' + doId + (doLink ? ', href=' + doLink.href : ''));
     }
 
-    // Strategy 4: data-object-id (information object ID — server can resolve DO from this)
+    // Strategy 4: data-object-id (information object ID - server can resolve DO from this)
     var infoObjectId = meta.informationObjectId || null;
     if (!doId && !infoObjectId) {
       var ioEl = document.querySelector('[data-object-id], #tpmInformationObjectId');
@@ -1736,7 +1736,7 @@ class AHGVoiceCommands {
       }
     }
 
-    // Strategy 5: extract slug from URL as final fallback — server resolves DO
+    // Strategy 5: extract slug from URL as final fallback - server resolves DO
     var slug = null;
     if (!doId && !infoObjectId) {
       var path = window.location.pathname.replace(/\/index\.php/, '');
@@ -1806,7 +1806,7 @@ class AHGVoiceCommands {
         // ── PDF handling ──
         if (data.type === 'pdf_transcript') {
           self.speak(data.message);
-          self.showToast('PDF with text (' + data.text_length + ' chars) — say "read PDF"', 'info');
+          self.showToast('PDF with text (' + data.text_length + ' chars) - say "read PDF"', 'info');
           // Store transcript for "read PDF" command
           self._pendingPdfText = data.full_text || data.description;
           self._pendingPdfSpeech = data.description;
@@ -1815,12 +1815,12 @@ class AHGVoiceCommands {
         }
         if (data.type === 'pdf_no_ocr') {
           self.speak(data.message);
-          self.showToast('PDF not OCR\'d — text not readable', 'warning');
+          self.showToast('PDF not OCR\'d - text not readable', 'warning');
           return;
         }
         if (data.type === 'media_transcript') {
           self.speak(data.message);
-          self.showToast(data.media_type + ' with transcript (' + data.text_length + ' chars) — say "read PDF"', 'info');
+          self.showToast(data.media_type + ' with transcript (' + data.text_length + ' chars) - say "read PDF"', 'info');
           self._pendingPdfText = data.full_text || data.description;
           self._pendingPdfSpeech = data.description;
           self._pendingInfoObjectId = data.information_object_id || null;
@@ -1828,7 +1828,7 @@ class AHGVoiceCommands {
         }
         if (data.type === 'media_no_transcript') {
           self.speak(data.message);
-          self.showToast(data.media_type + ' — no transcript available', 'warning');
+          self.showToast(data.media_type + ' - no transcript available', 'warning');
           return;
         }
 
@@ -1992,7 +1992,7 @@ class AHGVoiceCommands {
       if (self.indicator) self.indicator.classList.remove('voice-indicator-processing');
 
       if (data.success) {
-        // If returned from cached field, just read it — no save prompt
+        // If returned from cached field, just read it - no save prompt
         if (data.from_field) {
           self.speak(data.description);
           self.showToast('Reading existing AI description from extent and medium', 'success');
@@ -2215,7 +2215,7 @@ class AHGVoiceCommands {
    * Returns an object with boolean flags for each context type.
    */
   static detectContext() {
-    // Note: #counts-block is the clipboard counter in the navbar (on every page) — do NOT use for browse detection
+    // Note: #counts-block is the clipboard counter in the navbar (on every page) - do NOT use for browse detection
     return {
       edit: !!document.querySelector('form#editForm, form.form-edit, body.edit form'),
       view: !!document.querySelector('.informationObject, .section, #tts-content-area, body.show'),
@@ -2276,7 +2276,7 @@ class AHGVoiceCommands {
         return;
       }
       if (this._continuousMode && this.isListening) {
-        // Continuous command mode — auto-restart after each command.
+        // Continuous command mode - auto-restart after each command.
         // Use _isAutoRestart flag so startListening() doesn't speak "Listening" again.
         var self = this;
         this.isListening = false; // Temporarily set to false so startListening() works
@@ -2301,7 +2301,7 @@ class AHGVoiceCommands {
       } else if (nonFatal && (this._continuousMode || this.mode === 'dictation')) {
         // In continuous/dictation mode, non-fatal errors should NOT kill listening.
         // The 'end' event will fire next and handle auto-restart.
-        console.log('[Voice] Non-fatal error in continuous mode: ' + event.error + ' — will auto-restart');
+        console.log('[Voice] Non-fatal error in continuous mode: ' + event.error + ' - will auto-restart');
       } else if (event.error === 'no-speech') {
         this.showToast('No speech detected', 'warning');
         this.isListening = false;
@@ -2341,7 +2341,7 @@ class AHGVoiceCommands {
       }
     }
 
-    // Indicator bar — blue for command mode, green for dictation
+    // Indicator bar - blue for command mode, green for dictation
     if (this.indicator) {
       this.indicator.classList.toggle('voice-indicator-active', listening && this.mode !== 'dictation');
       this.indicator.classList.toggle('voice-indicator-dictation', listening && this.mode === 'dictation');
