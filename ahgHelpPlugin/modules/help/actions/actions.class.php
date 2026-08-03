@@ -242,6 +242,34 @@ class helpActions extends AhgController
             ['pattern' => '/privacy', 'slug' => 'privacy-user-guide', 'title' => 'Privacy & Compliance'],
             ['pattern' => '/user/login', 'slug' => 'password-security-user-guide', 'anchor' => 'login-lockout-brute-force-protection', 'title' => 'Login Security'],
             ['pattern' => '/user/passwordEdit', 'slug' => 'password-security-user-guide', 'anchor' => 'password-reuse-prevention', 'title' => 'Password Security'],
+
+            // Order below is load-bearing: the matcher stops at the first hit,
+            // so specific patterns must precede general ones.
+
+            // Heritage asset accounting (ahgHeritageAccountingPlugin). Must come
+            // before the bare /heritage entry, which belongs to a different plugin.
+            ['pattern' => '/heritage/dashboard', 'slug' => 'heritage-accounting-user-guide', 'title' => 'Heritage Asset Accounting'],
+            ['pattern' => '/heritage/browse', 'slug' => 'heritage-accounting-user-guide', 'title' => 'Heritage Assets'],
+            ['pattern' => '/heritage/add', 'slug' => 'heritage-accounting-user-guide', 'title' => 'Add Heritage Asset'],
+            ['pattern' => '/heritage/settings', 'slug' => 'heritage-accounting-user-guide', 'title' => 'Heritage Accounting Settings'],
+            ['pattern' => '/heritage/object', 'slug' => 'heritage-accounting-user-guide', 'title' => 'Heritage Asset'],
+
+            // Heritage discovery platform (ahgHeritagePlugin).
+            ['pattern' => '/heritage/admin', 'slug' => 'heritage-sites-user-guide', 'title' => 'Heritage Platform Administration'],
+            ['pattern' => '/heritage/access', 'slug' => 'heritage-sites-user-guide', 'title' => 'Heritage Access Requests'],
+
+            // /heritage/:id - accounting asset view. Catches what the patterns above missed.
+            ['pattern' => '/heritage/', 'slug' => 'heritage-accounting-user-guide', 'title' => 'Heritage Asset'],
+            // Bare /heritage is the discovery landing page. Exact, or it swallows every entry above.
+            ['pattern' => '/heritage', 'match' => 'exact', 'slug' => 'heritage-sites-user-guide', 'title' => 'Heritage Discovery Platform'],
+
+            ['pattern' => '/admin/ipsas', 'slug' => 'ipsas-accounting-user-guide', 'title' => 'IPSAS 45 Heritage Asset Accounting'],
+            ['pattern' => '/label', 'slug' => 'label-printing-user-guide', 'title' => 'Label Printing'],
+
+            // Spectrum pages are /:slug/spectrum/* - the slug comes first, so a
+            // prefix match would never fire.
+            ['pattern' => '/spectrum/label', 'match' => 'contains', 'slug' => 'label-printing-user-guide', 'title' => 'Label Printing'],
+            ['pattern' => '/spectrum', 'match' => 'contains', 'slug' => 'spectrum-user-guide', 'title' => 'Collections Procedures'],
         ];
 
         // Filter context map to only include articles that exist and are visible

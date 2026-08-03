@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <?php if (in_array('ahgHelpPlugin', sfProjectConfiguration::getActive()->getPlugins())) { ?>
   <link rel="stylesheet" href="/plugins/ahgHelpPlugin/css/help.css?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
-  <script src="/plugins/ahgHelpPlugin/js/help-context.js?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+  <script src="/plugins/ahgHelpPlugin/js/help-context.js?v=1.2.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
   <script src="/plugins/ahgHelpPlugin/js/help-search.js?v=1.1.0" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php } ?>
 

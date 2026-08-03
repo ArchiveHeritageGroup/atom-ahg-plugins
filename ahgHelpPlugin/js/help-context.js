@@ -214,8 +214,21 @@
 
       for (var i = 0; i < this.mappings.length; i++) {
         var m = this.mappings[i];
-        // Prefix match (e.g., /research/annotation-studio matches /research/annotation-studio/*)
-        if (path === m.pattern || path.indexOf(m.pattern + '/') === 0 || path.indexOf(m.pattern) === 0) {
+        var hit;
+
+        if (m.match === 'exact') {
+          // Landing pages whose prefix belongs to another plugin: /heritage is
+          // the discovery platform, /heritage/12 is an accounting asset.
+          hit = path === m.pattern;
+        } else if (m.match === 'contains') {
+          // Routes where the slug comes first, e.g. /:slug/spectrum/label.
+          hit = path.indexOf(m.pattern) !== -1;
+        } else {
+          // Prefix match (e.g. /research/annotation-studio matches its children).
+          hit = path === m.pattern || path.indexOf(m.pattern) === 0;
+        }
+
+        if (hit) {
           match = m;
           break;
         }
