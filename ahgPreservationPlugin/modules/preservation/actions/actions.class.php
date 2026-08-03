@@ -494,7 +494,25 @@ class preservationActions extends AhgController
     {
         $this->checkAdminAccess();
 
-        $path = $request->getParameter('path');
+        // #246: verifyBackup calls file_exists(), filesize() and checksums the
+        // target, so an unscoped path is an existence-and-size oracle for any
+        // file on the host. Admin-only, but scope it to the permitted roots.
+        $roots = \AtomExtensions\Services\PathGuard::defaultRoots();
+        $path = \AtomExtensions\Services\PathGuard::within(
+            (string) $request->getParameter('path'),
+            $roots
+        );
+
+        if (null === $path) {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode([
+                'success' => false,
+                'error' => 'Path not found, or outside the permitted roots ('
+                    . \AtomExtensions\Services\PathGuard::describeRoots($roots) . ').',
+            ]));
+        }
+
         $type = $request->getParameter('type', 'full');
         $checksum = $request->getParameter('checksum');
         $verifiedBy = $this->getUser()->getAttribute('user_name', 'user');

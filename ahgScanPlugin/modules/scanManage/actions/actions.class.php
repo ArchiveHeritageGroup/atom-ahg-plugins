@@ -150,10 +150,21 @@ class scanManageActions extends AhgController
      */
     private function collectInput($request): array
     {
+        // #246: the scan worker reads from `path` and MOVES files into
+        // `processed_path` / `failed_path`, so an unscoped value here is
+        // arbitrary read plus arbitrary file movement. Constrain all three to
+        // the permitted roots; realpath() collapses `..` and resolves symlinks.
+        // Destinations use withinForWrite() because the worker creates them on
+        // first use, so they need not exist yet.
+        $roots = \AtomExtensions\Services\PathGuard::defaultRoots();
+
         return [
             'code' => trim((string) $request->getParameter('code')),
             'label' => trim((string) $request->getParameter('label')),
-            'path' => trim((string) $request->getParameter('path')),
+            'path' => (string) \AtomExtensions\Services\PathGuard::within(
+                trim((string) $request->getParameter('path')),
+                $roots
+            ),
             'layout' => $request->getParameter('layout', 'flat'),
             'parent_id' => $request->getParameter('parent_id') ? (int) $request->getParameter('parent_id') : null,
             'repository_id' => $request->getParameter('repository_id') ? (int) $request->getParameter('repository_id') : null,
@@ -161,8 +172,14 @@ class scanManageActions extends AhgController
             'standard' => $request->getParameter('standard', 'isadg'),
             'disposition_success' => $request->getParameter('disposition_success', 'move'),
             'disposition_failure' => $request->getParameter('disposition_failure', 'quarantine'),
-            'processed_path' => trim((string) $request->getParameter('processed_path')) ?: null,
-            'failed_path' => trim((string) $request->getParameter('failed_path')) ?: null,
+            'processed_path' => \AtomExtensions\Services\PathGuard::withinForWrite(
+                trim((string) $request->getParameter('processed_path')),
+                $roots
+            ),
+            'failed_path' => \AtomExtensions\Services\PathGuard::withinForWrite(
+                trim((string) $request->getParameter('failed_path')),
+                $roots
+            ),
             'min_quiet_seconds' => (int) $request->getParameter('min_quiet_seconds', 10),
             'auto_commit' => $request->getParameter('auto_commit') ? 1 : 0,
             'enabled' => $request->getParameter('enabled') ? 1 : 0,

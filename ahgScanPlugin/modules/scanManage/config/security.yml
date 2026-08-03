@@ -1,0 +1,15 @@
+# SECURITY (#246 / #263): scanManage is an administrative module and had NO
+# security.yml, so it inherited apps/qubit/config/security.yml where
+# `default: is_secure: false` - every action was public.
+#
+# The plugin is enabled and the module is routed, so /admin/scan/create,
+# /admin/scan/:id/run and /admin/scan/:id/delete were reachable anonymously.
+# A watched folder carries `path`, `processed_path` and `failed_path`, which the
+# scan worker reads from and moves files into - so this was not only an
+# arbitrary directory read but arbitrary file movement, unauthenticated.
+#
+# Double-bracket (OR) form: a single-item list such as `credentials: [editor]`
+# requires literally that group and 403s administrators.
+all:
+  is_secure:   true
+  credentials: [[ administrator ]]

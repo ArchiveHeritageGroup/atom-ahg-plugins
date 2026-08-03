@@ -251,8 +251,17 @@ class ingestActions extends sfActions
                     $this->getUser()->setFlash('error', 'Server directory ingest requires administrator access.');
                     return;
                 }
-                if (!is_dir($dirPath)) {
-                    $this->getUser()->setFlash('error', 'Directory not found: ' . $dirPath);
+                // #246: administrator is not the same as "may read any path on
+                // the host". Resolve and constrain to the configured roots -
+                // realpath() collapses `..`, resolves symlinks, and returns
+                // false for anything that does not exist.
+                $roots = \AtomExtensions\Services\PathGuard::defaultRoots();
+                $dirPath = \AtomExtensions\Services\PathGuard::within((string) $dirPath, $roots);
+                if (null === $dirPath || !is_dir($dirPath)) {
+                    $this->getUser()->setFlash('error', 'Directory not found, or outside the permitted roots ('
+                        . \AtomExtensions\Services\PathGuard::describeRoots($roots)
+                        . '). Add another root via file_access_roots in AHG Settings if needed.');
+
                     return;
                 }
                 // Server directory path — register as directory type
@@ -320,9 +329,18 @@ class ingestActions extends sfActions
             $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
         }
 
-        $path = rtrim((string) $request->getParameter('directory_path'), '/');
-        if ($path === '' || !is_dir($path)) {
-            $this->getUser()->setFlash('error', 'Enter a valid server directory path in the field above, then click "Set as watched folder".');
+        // #246: same constraint as the server-directory branch - a watched
+        // folder is read repeatedly by the ingest worker, so an unscoped path
+        // here is a standing arbitrary read rather than a one-off.
+        $roots = \AtomExtensions\Services\PathGuard::defaultRoots();
+        $path = \AtomExtensions\Services\PathGuard::within(
+            rtrim((string) $request->getParameter('directory_path'), '/'),
+            $roots
+        );
+        if (null === $path || !is_dir($path)) {
+            $this->getUser()->setFlash('error', 'Enter a valid server directory inside the permitted roots ('
+                . \AtomExtensions\Services\PathGuard::describeRoots($roots)
+                . '), then click "Set as watched folder".');
             $this->redirect(['module' => 'ingest', 'action' => 'upload', 'id' => $id]);
         }
 
