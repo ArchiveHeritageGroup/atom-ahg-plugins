@@ -140,7 +140,24 @@ AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Li
 - PHP 8.3 (tested/supported version; the framework's dependencies require PHP >= 8.2)
 - MySQL 8.0+
 - Elasticsearch 7.10 (for AtoM 2.10)
+- Composer 2.x
+- ImageMagick + `php8.3-imagick` (base AtoM requirement for digital-object derivatives)
 - [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework)
+
+The plugins carry no Composer dependencies of their own - PHP libraries live in
+`atom-framework/composer.json` and are installed by `composer install` there.
+
+JavaScript and CSS libraries used by the plugins (Bootstrap, OpenSeadragon,
+Mirador, Annotorious, PDF.js, three.js, Cytoscape, D3, Chart.js, Leaflet,
+FlexSearch, TipTap, html2canvas and others) are **vendored and committed** to this
+repository. There is no npm install at deploy time and nothing is fetched from a
+CDN at runtime, so the interface works without outbound internet and without
+widening the Content-Security-Policy.
+
+Optional per-feature external tools (Tesseract, ClamAV, Siegfried, Aspell, Argos
+Translate, Cantaloupe) are documented in the framework's
+[INSTALLATION.md](https://github.com/ArchiveHeritageGroup/atom-framework/blob/main/INSTALLATION.md#third-party-dependencies).
+Each degrades gracefully when absent - the feature is unavailable rather than broken.
 
 ### Quick Install
 ```bash
