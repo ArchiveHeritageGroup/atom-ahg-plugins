@@ -1,0 +1,22 @@
+# SECURITY (#263): this module overrides base AtoM's /rightsholder/* routes under
+# a different module name (rightsHolderManage), so
+# apps/qubit/modules/rightsholder/config/security.yml never applied.
+#
+# Base AtoM requires `credentials: administrator` for browse, list, edit and
+# delete. The add/edit paths here are covered by code-level guards
+# (forward('admin','secure')), but `browse` was not - it was reachable
+# anonymously. rights_holder is empty on this instance so nothing was disclosed,
+# but the page would list rights holders (copyright and licensing contacts,
+# frequently personal data) if any existed.
+#
+# Credentials mirror the base module so the override cannot weaken it.
+all:
+  is_secure: true
+
+browse:
+  is_secure:   true
+  credentials: [[ administrator ]]
+
+list:
+  is_secure:   true
+  credentials: [[ administrator ]]
