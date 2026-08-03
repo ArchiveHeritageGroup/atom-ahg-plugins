@@ -158,9 +158,22 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 @media print {
-    .no-print, #sidebar, #context-menu, nav, header, footer { display: none !important; }
+    /* Hide everything, then reveal only the label itself. The previous rule
+       blacklisted selectors (.no-print, nav, header, footer), which missed the
+       theme banner, the system-error alert bar and the surrounding panels - so
+       printing produced the whole screen instead of the label. */
+    body * { visibility: hidden !important; }
+    #labelContent, #labelContent * { visibility: visible !important; }
+    #labelContent {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
     body { background: white !important; }
-    .label-preview { box-shadow: none !important; border: 1px solid #ccc !important; }
+    @page { margin: 10mm; }
 }
 .label-preview {
     background: white;
@@ -169,7 +182,9 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
     margin: 20px auto;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-.barcode-img { max-height: 60px; }
+/* max-width keeps a linear (Code 128) barcode inside the label frame - without
+   it a long identifier renders wider than the 300px preview and overflows. */
+.barcode-img { max-height: 60px; max-width: 100%; height: auto; }
 .qr-img { max-width: 120px; max-height: 120px; }
 </style>
 
@@ -283,6 +298,12 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         </div>
     </div>
 </div>
+
+<?php // Download PNG needs html2canvas. It was never loaded, so the button only
+      // ever produced "Download requires html2canvas. Use Print instead."
+      // Vendored locally rather than pulled from a CDN, so it works under CSP
+      // and without external network access. ?>
+<script src="/plugins/ahgSpectrumPlugin/web/js/html2canvas.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function updateBarcodeSource() {

@@ -146,9 +146,21 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 
 <style @cspNonce>
 @media print {
-    .no-print, #sidebar, #context-menu, nav, header, footer { display: none !important; }
+    /* Hide everything, then reveal only the label itself. The previous rule
+       blacklisted selectors and missed the theme banner, the system-error alert
+       bar and the surrounding panels, so printing produced the whole screen. */
+    body * { visibility: hidden !important; }
+    #labelContent, #labelContent * { visibility: visible !important; }
+    #labelContent {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+    }
     body { background: white !important; }
-    .label-preview { box-shadow: none !important; border: 1px solid #ccc !important; }
+    @page { margin: 10mm; }
 }
 .label-preview {
     background: white;
@@ -157,7 +169,8 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
     margin: 20px auto;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
-.barcode-img { max-height: 60px; }
+/* max-width keeps a linear (Code 128) barcode inside the label frame. */
+.barcode-img { max-height: 60px; max-width: 100%; height: auto; }
 .qr-img { max-width: 120px; max-height: 120px; }
 </style>
 
@@ -271,6 +284,9 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         </div>
     </div>
 </div>
+
+{{-- Download PNG needs html2canvas; vendored locally so it works under CSP. --}}
+<script src="/plugins/ahgSpectrumPlugin/web/js/html2canvas.min.js" @cspNonce></script>
 
 <script @cspNonce>
 function updateBarcodeSource() {

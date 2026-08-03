@@ -21,7 +21,7 @@ $verdictBadge = function (string $v) {
       <div class="text-muted"><?php echo esc_entities($title) ?></div>
     </div>
     <?php if ($resource): ?>
-      <a class="btn btn-outline-secondary btn-sm" href="/<?php echo esc_entities($resource->slug) ?>" target="_blank"><i class="fas fa-external-link-alt me-1"></i><?php echo __('Open record') ?></a>
+      <a class="btn btn-outline-secondary btn-sm" href="/<?php echo esc_entities($resource->slug) ?>"><i class="fas fa-arrow-left me-1"></i><?php echo __('Open record') ?></a>
     <?php endif ?>
   </div>
 
