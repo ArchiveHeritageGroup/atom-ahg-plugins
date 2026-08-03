@@ -185,9 +185,44 @@ beside a `.json.err`. Writing the file and validating its JSON proves nothing -
 Re-dropped all three as markdown (the session logs already are markdown, so they
 went in unchanged) and confirmed ingestion. The failed JSON copies were removed.
 
-**74 other failed payloads remain in `failed/` from other sources**, some
-predating this work. If they share the cause, a significant amount of intended KM
-content has never arrived and nothing surfaces it. Left untouched.
+### The full extent: four weeks, 37 payloads, all mine (#265 filed)
+
+Investigating the rest of `failed/` showed it was not "other sources" - it was
+the same bug, all the way back:
+
+- **74 files = 37 payloads + 37 `.err`**, every one `title and body are required`
+- Date range **2026-07-04 to 2026-07-31**
+- All carry `title`, `project`, `instance`, `date`, `tags`, `summary` - the exact
+  shape used today, no `body`
+
+So **every KM drop from this project since 4 July was rejected**, and each was
+reported as "KM updated". The verification being done - file exists, JSON parses -
+confirms the write, never the system's response.
+
+**Impact.** 29 of 37 also had an in-repo session log, so were recoverable from
+git. **Eight dates had no session log** - including four on 2026-07-29
+(archeology reconciliation, RiC typed relations #237, security classification
+#236, tracking-issues backlog) and two on 2026-07-28. For those the rejected
+payload was the only record outside per-project memory: invisible to any other
+project, host or person. Exactly the gap KM exists to close.
+
+**Recovery (done).** All 37 converted to markdown and re-dropped - session log
+where one existed, otherwise generated from the payload's own fields and marked
+as recovered. Verified in `archive/` with `failed/` empty of this project's
+payloads. Average recovered summary ~1,300 chars, so content was intact
+throughout; it simply never arrived. 47 `psis-*` files now in KM.
+
+**#265 filed** on the failure mode rather than the backlog. A drop-folder with no
+feedback channel will fail this way again - the format contract is the proximate
+cause, silent rejection is the root one. Proposed, in order: ship the
+`km_ingest_doc` MCP tool (a direct call returns the 400 to the caller); accept
+`summary` as `body`; **surface a non-empty `failed/`** (the workbench
+notification drop folder would do it); update publishing guidance. Item 3 matters
+most after item 1 - with the format fixed, the next incompatibility fails
+identically.
+
+Cross-project: the standing rule directs every agent on this host to publish this
+way, so anyone sending the same JSON shape has been failing the same.
 
 ## Outstanding
 
