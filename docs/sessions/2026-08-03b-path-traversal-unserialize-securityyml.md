@@ -138,6 +138,57 @@ and will follow to Docker, where the socket differs again. They also mean PSIS's
 IIIF and media routes currently run on the **shared** pool, undoing half the
 isolation. Worth a variable-based refactor as part of the migration.
 
+## 6. #264 filed - /heritage/search cost
+
+The endpoint behind two outages in three days, previously untracked.
+
+`AtomFramework\Heritage\Discovery\SearchOrchestrator::search()` runs up to four
+independent strategies (keyword, entity, date-range, synonym-expanded), merges
+every result set, fuses and ranks **the whole set**, deduplicates **the whole
+set**, and only then paginates in PHP:
+
+```php
+$total = $uniqueResults->count();
+$pagedResults = $uniqueResults->slice($offset, $limit);
+```
+
+So page 1 with `limit=20` costs the same as materialising and ranking every
+match. The limit is applied after the expensive work rather than pushed into the
+queries, and there is no result cache. Cost scales with corpus size, not page size.
+
+That fits the observed traffic better than "slow endpoint": **499 distinct IPs
+across 500 requests**, one each, with **91 of 200 returning 499** (client aborted
+mid-flight). Per-IP `limit_req` cannot touch one-request-per-IP, and a 499 does
+not reclaim a worker that has already started. With PSIS on the 15-child `[atom]`
+pool, a handful of concurrent requests exhausts it.
+
+#264 puts **measure first** as step one - which strategy dominates is not
+obvious from reading, and the fix depends on the answer. Also folded in the
+`HeritageAssetService::browse()` OR-join (same anti-pattern as the 2026-08-01
+outage, harmless at 6 rows today) since it is the same subsystem.
+
+## 7. KM ingest was failing silently
+
+⚠️ **Three session-log payloads dropped into `/var/spool/km-ingest/` had all been
+rejected** - 2026-08-02's and both of 2026-08-03's - and were reported as "KM
+updated" without checking.
+
+The watcher accepts **markdown with a `#` heading**, or JSON with **both `title`
+and `body`**. The payloads were JSON with `title` plus `summary`/`lessons`/
+`follow_ups` and no `body`, so each returned
+`HTTP 400 {"error":"title and body are required"}`.
+
+Ingested files move to `archive/<YYYY-MM-DD>/`; rejected ones land in `failed/`
+beside a `.json.err`. Writing the file and validating its JSON proves nothing -
+**the archive/failed split is the only confirmation that matters.**
+
+Re-dropped all three as markdown (the session logs already are markdown, so they
+went in unchanged) and confirmed ingestion. The failed JSON copies were removed.
+
+**74 other failed payloads remain in `failed/` from other sources**, some
+predating this work. If they share the cause, a significant amount of intended KM
+content has never arrived and nothing surfaces it. Left untouched.
+
 ## Outstanding
 
 - #246: live verification of the four call sites (needs a healthy instance).
