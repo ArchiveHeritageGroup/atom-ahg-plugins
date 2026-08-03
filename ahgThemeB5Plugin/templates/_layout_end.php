@@ -48,6 +48,13 @@ document.addEventListener('DOMContentLoaded', function() {
   <script src="/plugins/ahgThemeB5Plugin/js/voiceCommands.js?v=<?php echo time(); ?>" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php } ?>
 
+<?php // Theme overrides (custom.css). The webpack bundle is the only theme
+      // stylesheet the layout emits, so custom.css was never loaded and every
+      // override in it - including the record-view carousel styling added in
+      // v3.88.10 - had no effect on any page. Load it after the bundle so the
+      // overrides win. ?>
+<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/custom.css?v=3.88.19" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+
 <?php // Online help (ahgHelpPlugin). The plugin registers these through
       // $response->addJavascript()/addStylesheet(), but this theme never calls
       // include_javascripts()/include_stylesheets(), so they were never emitted:

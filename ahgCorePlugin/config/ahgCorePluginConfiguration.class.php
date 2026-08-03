@@ -35,6 +35,101 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // those cultures and every page 500s. Falling back to the default renders the
         // page normally instead of erroring.
         $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'enforceEnabledCulture']);
+
+        // Missing-representation guard. Connected after enforceEnabledCulture so
+        // that guard's HTML fallback for authority modules is applied first.
+        $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'refuseUnavailableFormat']);
+    }
+
+    /**
+     * Return 404 when the requested format has no template in the target module.
+     *
+     * Symfony resolves the template path to an empty string when a module ships
+     * no template for the requested format, and sfPHPView::renderFile() then runs
+     * require('') and fatals. Because there is an ob_start() immediately above
+     * that require, the buffer is discarded and the caller gets either a blank
+     * HTTP 200 or a bare 500 rather than an error page - and the log fills with
+     * "Failed opening required '/'".
+     *
+     * Reached by malformed export URLs only, never by the UI. The supported
+     * syntax is the semicolon form (/<slug>;ead?sf_format=xml), which routes to
+     * sfEadPlugin and works correctly; the query-string form (?template=ead)
+     * never populates the route's template parameter, so the module stays on the
+     * record's display standard, which has no XML template. A 404 is the honest
+     * answer: that representation does not exist.
+     *
+     * Fails open - if the template directories cannot be resolved, the request
+     * proceeds untouched.
+     *
+     * @param sfEvent $event
+     */
+    public static function refuseUnavailableFormat($event)
+    {
+        $module = $event['module'] ?? null;
+        if (empty($module)) {
+            return;
+        }
+
+        try {
+            $context = sfContext::getInstance();
+            $request = $context ? $context->getRequest() : null;
+            if (!$request) {
+                return;
+            }
+
+            $format = $request->getParameter('sf_format');
+            if (empty($format) || 'html' === $format) {
+                return;
+            }
+
+            if (self::moduleHasFormatTemplate($module, $format)) {
+                return;
+            }
+
+            // Reset to HTML before raising: the 404 page is itself rendered
+            // through the view layer, so leaving the format as (say) xml makes
+            // the error template lookup fail exactly the same way and the caller
+            // gets a blank 200 instead of a 404.
+            $request->setRequestFormat('html');
+            $request->setParameter('sf_format', 'html');
+        } catch (\Throwable $e) {
+            return; // never let the guard break the request
+        }
+
+        // Deliberately outside the try: this must propagate, not be swallowed.
+        throw new sfError404Exception(sprintf(
+            'No "%s" representation exists for module "%s".',
+            $format,
+            $module
+        ));
+    }
+
+    /**
+     * Whether a module ships at least one template for the given format.
+     *
+     * Returns true when it cannot be determined, so an unexpected condition
+     * lets the request through rather than 404ing it.
+     */
+    private static function moduleHasFormatTemplate($module, $format)
+    {
+        // Formats are used to build a glob; keep them to a safe character set.
+        if (!preg_match('/^[a-z0-9]{1,16}$/i', (string) $format)) {
+            return true;
+        }
+
+        try {
+            $dirs = sfContext::getInstance()->getConfiguration()->getTemplateDirs($module);
+        } catch (\Throwable $e) {
+            return true;
+        }
+
+        foreach ((array) $dirs as $dir) {
+            if (is_dir($dir) && glob(rtrim($dir, '/').'/*.'.$format.'.php')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
