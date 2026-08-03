@@ -25,6 +25,20 @@ class DigitalObjectViewAction extends sfAction
 
         list($obj, $action) = $this->getObjAndAction();
 
+        // #258: a derivative whose parent chain is broken - for example a
+        // thumbnail row with parent_id NULL - yields a null $obj, and
+        // QubitAcl::check then fails with "get_class(): Argument #1 must be of
+        // type object, null given".
+        //
+        // Harmless while nginx served /uploads/r/ statically and these requests
+        // never reached PHP. Once masters route through this action for the ACL
+        // check, every request for an orphaned derivative fatals. Treat an
+        // unresolvable owner as not found: there is no record whose permissions
+        // could grant access to it.
+        if (null === $obj) {
+            $this->forward404();
+        }
+
         // If access is denied, forward user to a 404 "Not found" page
         if (!QubitAcl::check($obj, $action)) {
             $this->forward404();
