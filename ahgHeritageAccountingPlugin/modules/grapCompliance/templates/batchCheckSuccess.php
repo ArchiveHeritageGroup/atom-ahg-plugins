@@ -2,6 +2,11 @@
 <?php slot('title') ?><?php echo __('GRAP 103 Batch Compliance Check') ?><?php end_slot() ?>
 
 <div class="container-fluid">
+  <div class="row">
+    <div class="col-md-3">
+      <?php include_partial('heritageAccounting/accountingMenu') ?>
+    </div>
+    <div class="col-md-9">
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h1 class="h3 mb-0"><i class="fas fa-check-double me-2"></i><?php echo __('Batch Compliance Check') ?></h1>
@@ -78,4 +83,6 @@
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to GRAP Dashboard') ?>
         </a>
     </div>
+    </div>
+  </div>
 </div>

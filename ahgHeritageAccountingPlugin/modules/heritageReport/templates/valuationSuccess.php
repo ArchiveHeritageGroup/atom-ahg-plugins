@@ -2,6 +2,11 @@
 <?php slot('title') ?><?php echo __('Valuation Report') ?><?php end_slot() ?>
 
 <div class="container-fluid">
+  <div class="row">
+    <div class="col-md-3">
+      <?php include_partial('heritageAccounting/accountingMenu') ?>
+    </div>
+    <div class="col-md-9">
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h1 class="h3 mb-0"><i class="fas fa-dollar-sign me-2"></i><?php echo __('Valuation Report') ?></h1>
@@ -50,4 +55,6 @@
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Reports') ?>
         </a>
     </div>
+    </div>
+  </div>
 </div>

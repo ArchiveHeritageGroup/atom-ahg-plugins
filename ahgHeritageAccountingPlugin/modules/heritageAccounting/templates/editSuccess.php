@@ -2,6 +2,11 @@
 <?php $rawClasses = $sf_data->getRaw('classes'); $rawStandards = $sf_data->getRaw('standards'); ?>
 
 <div class="container-fluid">
+  <div class="row">
+    <div class="col-md-3">
+      <?php include_partial('heritageAccounting/accountingMenu') ?>
+    </div>
+    <div class="col-md-9">
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <h1 class="h3 mb-0"><i class="fas fa-edit me-2"></i><?php echo __('Edit Heritage Asset') ?></h1>
@@ -229,6 +234,8 @@
             </div>
         </div>
     </form>
+    </div>
+  </div>
 </div>
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
