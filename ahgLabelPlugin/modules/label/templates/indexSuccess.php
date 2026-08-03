@@ -147,6 +147,19 @@ foreach ($preferredOrder as $key) {
 
 $qrUrl = sfContext::getInstance()->getRequest()->getUriPrefix() . '/' . $resource->slug;
 
+// Generated locally as data URIs rather than fetched from barcodeapi.org and
+// api.qrserver.com, which sent the identifier and public URL to third parties
+// and produced nothing offline (#260). Every dropdown option is pre-rendered so
+// switching source is a local swap, keyed by the option's value.
+$barcodeUris = [];
+foreach ($barcodeSources as $source) {
+    if (!empty($source['value'])) {
+        $barcodeUris[$source['value']] = \AtomExtensions\Services\BarcodeService::barcodeDataUri($source['value']);
+    }
+}
+$defaultBarcodeUri = \AtomExtensions\Services\BarcodeService::barcodeDataUri($defaultBarcodeData);
+$qrUri = \AtomExtensions\Services\BarcodeService::qrDataUri($qrUrl);
+
 $sectorLabels = [
     'library' => __('Library Item'),
     'archive' => __('Archival Record'),
@@ -268,15 +281,16 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     
                     <div id="barcodeSection" class="mb-2">
                         <img id="barcodeImg" class="barcode-img"
-                             src="https://barcodeapi.org/api/128/<?php echo rawurlencode($defaultBarcodeData); ?>" 
-                             alt="Barcode">
+                             src="<?php echo $defaultBarcodeUri; ?>"
+                             data-barcode-uris="<?php echo esc_entities(json_encode($barcodeUris)); ?>"
+                             alt="<?php echo __('Barcode'); ?>">
                         <div class="small mt-1" id="barcodeText"><?php echo esc_entities($defaultBarcodeData); ?></div>
                     </div>
-                    
+
                     <div id="qrSection">
                         <img id="qrImg" class="qr-img"
-                             src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=<?php echo rawurlencode($qrUrl); ?>" 
-                             alt="QR Code">
+                             src="<?php echo $qrUri; ?>"
+                             alt="<?php echo __('QR code'); ?>">
                     </div>
                 </div>
             </div>
@@ -287,7 +301,17 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function updateBarcodeSource() {
     var value = document.getElementById('barcodeSource').value;
-    document.getElementById('barcodeImg').src = 'https://barcodeapi.org/api/128/' + encodeURIComponent(value);
+    var img = document.getElementById('barcodeImg');
+
+    // Every option was rendered server-side, so switching source is a local
+    // swap - no request, and nothing leaves the instance (#260).
+    var uris = {};
+    try { uris = JSON.parse(img.getAttribute('data-barcode-uris') || '{}'); } catch (e) { uris = {}; }
+
+    if (uris[value]) {
+        img.src = uris[value];
+    }
+
     document.getElementById('barcodeText').textContent = value;
 }
 

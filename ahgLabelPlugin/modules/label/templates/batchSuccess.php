@@ -88,8 +88,9 @@ function lbl_barcode_value(array $r, $t): string
       <?php if ($t->show_title): ?><div class="l-title"><?php echo htmlspecialchars((string) ($r['title'] ?? $r['slug'] ?? '')); ?></div><?php endif; ?>
       <?php if ($t->show_repository && !empty($r['repository'])): ?><div class="l-repo text-muted"><?php echo htmlspecialchars((string) $r['repository']); ?></div><?php endif; ?>
       <div class="l-codes">
-        <?php if ($t->show_barcode && $bcVal !== ''): ?><img alt="barcode" src="https://barcodeapi.org/api/128/<?php echo rawurlencode($bcVal); ?>"><?php endif; ?>
-        <?php if ($t->show_qr && $qrData !== ''): ?><img alt="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=<?php echo rawurlencode((string) $qrData); ?>"><?php endif; ?>
+<?php // Generated locally rather than fetched from barcodeapi.org / api.qrserver.com (#260). ?>
+        <?php if ($t->show_barcode && $bcVal !== ''): ?><img alt="barcode" src="<?php echo \AtomExtensions\Services\BarcodeService::barcodeDataUri($bcVal); ?>"><?php endif; ?>
+        <?php if ($t->show_qr && $qrData !== ''): ?><img alt="qr" src="<?php echo \AtomExtensions\Services\BarcodeService::qrDataUri((string) $qrData); ?>"><?php endif; ?>
       </div>
     </div>
   <?php endforeach; ?>
