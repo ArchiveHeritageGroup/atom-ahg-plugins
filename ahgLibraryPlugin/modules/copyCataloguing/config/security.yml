@@ -1,0 +1,14 @@
+# SECURITY (#263): copy cataloguing CREATES information objects from posted MARC
+# data (executeImport -> Z3950Service::importResults), and had no security.yml,
+# so it inherited apps/qubit/config/security.yml where `default: is_secure: false`.
+#
+# The module is routed and the plugin enabled, so an unauthenticated caller could
+# POST base64 MARC to /library/copy-cataloguing/import and inject catalogue
+# records - attributed to no one, since currentUserId() is empty for anonymous.
+# executeImport was POST-gated but that is not an access control.
+#
+# Cataloguing is a contributor-and-up function. Double-bracket (OR) form:
+# `credentials: [editor]` as a single-item list 403s administrators.
+all:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]

@@ -89,7 +89,10 @@ class InformationObjectInventoryAction extends DefaultBrowseAction
         }
 
         $setting = QubitSetting::getByName('inventory_levels');
-        if (null === $setting || false === $value = unserialize($setting->getValue())) {
+        // #245: stored setting value is a plain array - refuse object
+        // instantiation so a crafted value cannot trigger a destructor chain.
+        if (null === $setting
+            || false === $value = unserialize($setting->getValue(), ['allowed_classes' => false])) {
             return;
         }
 

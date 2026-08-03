@@ -30,7 +30,12 @@ class SettingsOaiAction extends sfAction
     public function execute($request)
     {
         // Redirect to global settings form if the OAI plugin is not enabled
-        if (!in_array('arOaiPlugin', unserialize(sfConfig::get('app_plugins')))) {
+        // #245: data-only value (a list of plugin-name strings), so refuse
+        // object instantiation. Without allowed_classes a crafted setting value
+        // could instantiate arbitrary classes and fire their destructors.
+        // `?: []` guards against a corrupt value returning false, which
+        // in_array() would otherwise fatal on.
+        if (!in_array('arOaiPlugin', unserialize(sfConfig::get('app_plugins'), ['allowed_classes' => false]) ?: [])) {
             $this->redirect('settings/global');
         }
 

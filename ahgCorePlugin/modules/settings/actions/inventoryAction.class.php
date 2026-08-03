@@ -61,8 +61,11 @@ class SettingsInventoryAction extends DefaultEditAction
     {
         switch ($name) {
             case 'levels':
+                // #245: stored setting value is a plain array of level
+                // definitions - refuse object instantiation.
                 $value = unserialize(
-                    $this->settingLevels->getValue(['sourceCulture' => true])
+                    $this->settingLevels->getValue(['sourceCulture' => true]),
+                    ['allowed_classes' => false]
                 );
 
                 if (false !== $value) {

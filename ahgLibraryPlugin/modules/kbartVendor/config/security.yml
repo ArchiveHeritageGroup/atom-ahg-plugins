@@ -1,0 +1,12 @@
+# SECURITY (#263): KBART vendor management is library administration - it adds,
+# edits, toggles and deletes vendor records and triggers remote fetches.
+#
+# The module had no security.yml, so it inherited apps/qubit/config/security.yml
+# where `default: is_secure: false` - every action was public, including
+# executeDelete and executeToggle, on an enabled and routed module.
+#
+# Double-bracket (OR) form: a single-item list such as `credentials: [editor]`
+# requires literally that group and 403s administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

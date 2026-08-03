@@ -1,0 +1,13 @@
+# SECURITY (#263): Z39.50 / SRU target configuration is library administration -
+# it edits and deletes search-target definitions and issues outbound queries to
+# them, so an unauthenticated caller could both reconfigure targets and use the
+# instance as a request proxy.
+#
+# The module had no security.yml, so it inherited apps/qubit/config/security.yml
+# where `default: is_secure: false` - every action was public.
+#
+# Double-bracket (OR) form: `credentials: [editor]` as a single-item list 403s
+# administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
