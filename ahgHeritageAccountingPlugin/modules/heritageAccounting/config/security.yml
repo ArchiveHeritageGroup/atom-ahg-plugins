@@ -1,0 +1,19 @@
+# SECURITY: heritage asset accounting is a staff finance function, not public data.
+#
+# Without this file the module inherits apps/qubit/config/security.yml, whose
+# `default: is_secure: false` makes every action public. Verified anonymously
+# before this was added: /heritage/settings, /heritage/add, /heritage/<id> and
+# /heritage/<id>/edit all returned 200, and executeAdd writes to heritage_asset
+# on POST with no credential check - so an anonymous visitor could create and
+# amend asset financial records.
+#
+# Credentials use the double-bracket (OR) form. A single-item list such as
+# `credentials: [editor]` requires literally that group and 403s administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+# Configuration of accounting standards and thresholds - administrators only.
+settings:
+  is_secure:   true
+  credentials: [[ administrator ]]

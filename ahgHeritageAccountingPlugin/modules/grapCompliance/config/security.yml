@@ -1,0 +1,9 @@
+# SECURITY: staff function. Without this file the module inherits
+# apps/qubit/config/security.yml, whose `default: is_secure: false` makes every
+# action public.
+#
+# Double-bracket (OR) form: a single-item list such as `credentials: [editor]`
+# requires literally that group and 403s administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

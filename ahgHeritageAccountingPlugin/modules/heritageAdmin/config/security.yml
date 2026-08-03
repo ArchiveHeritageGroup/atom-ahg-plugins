@@ -1,0 +1,14 @@
+# SECURITY: administrators only - this module deletes accounting standards and
+# compliance rules, installs and uninstalls regional configurations, and does so
+# straight from request parameters with no CSRF token and no POST requirement.
+#
+# The module is currently unrouted (no RouteLoader registers it), so these
+# actions are unreachable. This file exists so that routing it can never
+# silently expose them: apps/qubit/config/security.yml defaults to
+# `is_secure: false`, so a module without its own file is public.
+#
+# Before routing this module, the destructive actions still need POST-gating and
+# CSRF protection - credentials alone are not sufficient for a GET that deletes.
+all:
+  is_secure:   true
+  credentials: [[ administrator ]]
