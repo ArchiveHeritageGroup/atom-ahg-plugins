@@ -26,17 +26,25 @@ $countries = is_array($region->countries) ? $region->countries : [];
   <div class="alert alert-success">
     <i class="fas fa-check-circle me-2"></i>
     <?php echo __('This region is installed and ready to use.'); ?>
-    <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionSetActive', 'region' => $region->region_code]); ?>" class="alert-link ms-2">
-      <?php echo __('Set as active'); ?> <i class="fas fa-arrow-right"></i>
-    </a>
+    <?php include_partial('heritageAdmin/postAction', [
+        'action'  => 'regionSetActive',
+        'params'  => ['region' => $region->region_code],
+        'class'   => 'btn btn-link alert-link ms-2 p-0 align-baseline',
+        'label'   => __('Set as active'),
+        'confirm' => __('Set %1% as the active region?', ['%1%' => $region->region_name]),
+    ]); ?>
   </div>
 <?php else: ?>
   <div class="alert alert-secondary">
     <i class="fas fa-info-circle me-2"></i>
     <?php echo __('This region is not installed.'); ?>
-    <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionInstall', 'region' => $region->region_code]); ?>" class="alert-link ms-2">
-      <?php echo __('Install now'); ?> <i class="fas fa-arrow-right"></i>
-    </a>
+    <?php include_partial('heritageAdmin/postAction', [
+        'action'  => 'regionInstall',
+        'params'  => ['region' => $region->region_code],
+        'class'   => 'btn btn-link alert-link ms-2 p-0 align-baseline',
+        'label'   => __('Install now'),
+        'confirm' => __('Install %1%? This will add the accounting standard and compliance rules.', ['%1%' => $region->region_name]),
+    ]); ?>
   </div>
 <?php endif; ?>
 
@@ -226,21 +234,32 @@ $countries = is_array($region->countries) ? $region->countries : [];
 <!-- Actions -->
 <div class="mt-4">
   <?php if ($region->is_installed && !$isActive): ?>
-    <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionSetActive', 'region' => $region->region_code]); ?>"
-       class="btn btn-primary"
-       onclick="return confirm('Set <?php echo htmlspecialchars($region->region_name); ?> as the active region?');">
-      <i class="fas fa-check-circle me-1"></i><?php echo __('Set as Active Region'); ?>
-    </a>
-    <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionUninstall', 'region' => $region->region_code]); ?>"
-       class="btn btn-outline-danger"
-       onclick="return confirm('Uninstall <?php echo htmlspecialchars($region->region_name); ?>? This will remove the standard and all compliance rules.');">
-      <i class="fas fa-trash me-1"></i><?php echo __('Uninstall Region'); ?>
-    </a>
+    <?php include_partial('heritageAdmin/postAction', [
+        'action'  => 'regionSetActive',
+        'params'  => ['region' => $region->region_code],
+        'class'   => 'btn btn-primary',
+        'icon'    => 'fas fa-check-circle me-1',
+        'label'   => __('Set as Active Region'),
+        'confirm' => __('Set %1% as the active region?', ['%1%' => $region->region_name]),
+    ]); ?>
+    <?php include_partial('heritageAdmin/postAction', [
+        'action'  => 'regionUninstall',
+        'params'  => ['region' => $region->region_code],
+        'class'   => 'btn btn-outline-danger',
+        'icon'    => 'fas fa-trash me-1',
+        'label'   => __('Uninstall Region'),
+        'confirm' => __('Uninstall %1%? This will remove the standard and compliance rules.', ['%1%' => $region->region_name]),
+    ]); ?>
   <?php elseif (!$region->is_installed): ?>
-    <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionInstall', 'region' => $region->region_code]); ?>"
-       class="btn btn-success"
-       onclick="return confirm('Install <?php echo htmlspecialchars($region->region_name); ?>?');">
-      <i class="fas fa-download me-1"></i><?php echo __('Install Region'); ?>
-    </a>
+    <?php include_partial('heritageAdmin/postAction', [
+        'action'  => 'regionInstall',
+        'params'  => ['region' => $region->region_code],
+        'class'   => 'btn btn-success',
+        'icon'    => 'fas fa-download me-1',
+        'label'   => __('Install Region'),
+        'confirm' => __('Install %1%? This will add the accounting standard and compliance rules.', ['%1%' => $region->region_name]),
+    ]); ?>
   <?php endif; ?>
 </div>
+
+<?php include_partial('heritageAdmin/postActionScript'); ?>

@@ -66,6 +66,44 @@ class ahgHeritageAccountingPluginConfiguration extends sfPluginConfiguration
 
         $grap->register($routing);
 
+        // heritageAdmin module routes (#262)
+        //
+        // This module had 16 actions and 16 templates but was never routed, so
+        // regions, accounting standards and compliance rules were unreachable.
+        //
+        // State-changing actions are registered with post() rather than any().
+        // That is defence in depth alongside requireSafePost() in the action:
+        // the router refuses a GET before the action runs, and the action still
+        // validates the CSRF token in case a route is ever loosened.
+        $admin = new \AtomFramework\Routing\RouteLoader('heritageAdmin');
+
+        $admin->any('heritage_admin', '/heritage/admin', 'index');
+
+        // Regions
+        $admin->any('heritage_admin_regions', '/heritage/admin/regions', 'regions');
+        $admin->any('heritage_admin_region_info', '/heritage/admin/region/:region', 'regionInfo');
+        // Under /regions/ (plural), because /heritage/admin/region/:region would
+        // otherwise match these verbs as a region code and dispatch regionInfo.
+        $admin->post('heritage_admin_region_install', '/heritage/admin/regions/install', 'regionInstall');
+        $admin->post('heritage_admin_region_uninstall', '/heritage/admin/regions/uninstall', 'regionUninstall');
+        $admin->post('heritage_admin_region_activate', '/heritage/admin/regions/activate', 'regionSetActive');
+
+        // Accounting standards
+        $admin->any('heritage_admin_standards', '/heritage/admin/standards', 'standardList');
+        $admin->any('heritage_admin_standard_add', '/heritage/admin/standard/add', 'standardAdd');
+        $admin->any('heritage_admin_standard_edit', '/heritage/admin/standard/:id/edit', 'standardEdit', ['id' => '\d+']);
+        $admin->post('heritage_admin_standard_toggle', '/heritage/admin/standard/toggle', 'standardToggle');
+        $admin->post('heritage_admin_standard_delete', '/heritage/admin/standard/delete', 'standardDelete');
+
+        // Compliance rules
+        $admin->any('heritage_admin_rules', '/heritage/admin/rules', 'ruleList');
+        $admin->any('heritage_admin_rule_add', '/heritage/admin/rule/add', 'ruleAdd');
+        $admin->any('heritage_admin_rule_edit', '/heritage/admin/rule/:id/edit', 'ruleEdit', ['id' => '\d+']);
+        $admin->post('heritage_admin_rule_toggle', '/heritage/admin/rule/toggle', 'ruleToggle');
+        $admin->post('heritage_admin_rule_delete', '/heritage/admin/rule/delete', 'ruleDelete');
+
+        $admin->register($routing);
+
         // heritageApi module routes
         $api = new \AtomFramework\Routing\RouteLoader('heritageApi');
 

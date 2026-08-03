@@ -12,6 +12,36 @@ class heritageAdminActions extends AhgController
         }
     }
 
+    /**
+     * Guard a state-changing action (#262).
+     *
+     * boot() already restricts this module to administrators, but these actions
+     * deleted accounting standards, compliance rules and regional configurations
+     * straight from a GET parameter. An administrator following a crafted link -
+     * or loading a page with an <img src> pointing at one - would have triggered
+     * the change. Credentials are not protection for a GET that destroys data.
+     *
+     * Requires POST and a valid CSRF token. Fails closed: if the token cannot be
+     * validated the request is refused rather than allowed through.
+     */
+    protected function requireSafePost($request): void
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404('This action requires a POST request.');
+        }
+
+        if (!class_exists('\AtomFramework\Services\CsrfService')) {
+            $this->forward404('CSRF protection unavailable.');
+        }
+
+        $token = \AtomFramework\Services\CsrfService::getTokenFromRequest();
+
+        if (null === $token || '' === $token
+            || !\AtomFramework\Services\CsrfService::validateToken($token)) {
+            $this->forward404('Invalid or missing security token.');
+        }
+    }
+
     // =====================
     // Dashboard
     // =====================
@@ -85,6 +115,8 @@ class heritageAdminActions extends AhgController
 
     public function executeRegionInstall($request)
     {
+        $this->requireSafePost($request);
+
         $regionCode = $request->getParameter('region');
 
         if (!$regionCode) {
@@ -116,6 +148,8 @@ class heritageAdminActions extends AhgController
 
     public function executeRegionUninstall($request)
     {
+        $this->requireSafePost($request);
+
         $regionCode = $request->getParameter('region');
 
         if (!$regionCode) {
@@ -140,6 +174,8 @@ class heritageAdminActions extends AhgController
 
     public function executeRegionSetActive($request)
     {
+        $this->requireSafePost($request);
+
         $regionCode = $request->getParameter('region');
 
         if (!$regionCode) {
@@ -241,6 +277,8 @@ class heritageAdminActions extends AhgController
 
     public function executeStandardToggle($request)
     {
+        $this->requireSafePost($request);
+
         $id = $request->getParameter('id');
         $standard = DB::table('heritage_accounting_standard')->where('id', $id)->first();
         
@@ -256,6 +294,8 @@ class heritageAdminActions extends AhgController
 
     public function executeStandardDelete($request)
     {
+        $this->requireSafePost($request);
+
         $id = $request->getParameter('id');
         
         // Check if standard is in use
@@ -387,6 +427,8 @@ class heritageAdminActions extends AhgController
 
     public function executeRuleToggle($request)
     {
+        $this->requireSafePost($request);
+
         $id = $request->getParameter('id');
         $rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->first();
 
@@ -402,6 +444,8 @@ class heritageAdminActions extends AhgController
 
     public function executeRuleDelete($request)
     {
+        $this->requireSafePost($request);
+
         $id = $request->getParameter('id');
         $rule = \Illuminate\Database\Capsule\Manager::table('heritage_compliance_rule')->where('id', $id)->first();
         $standardId = $rule->standard_id ?? null;

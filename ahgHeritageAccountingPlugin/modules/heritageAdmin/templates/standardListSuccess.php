@@ -64,17 +64,21 @@
                                class="btn btn-sm btn-outline-primary" title="<?php echo __('Edit'); ?>">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'standardToggle', 'id' => $s->id]); ?>" 
-                               class="btn btn-sm btn-outline-<?php echo $s->is_active ? 'warning' : 'success'; ?>" 
-                               title="<?php echo $s->is_active ? __('Disable') : __('Enable'); ?>">
-                                <i class="fas fa-<?php echo $s->is_active ? 'toggle-on' : 'toggle-off'; ?>"></i>
-                            </a>
-                            <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'standardDelete', 'id' => $s->id]); ?>" 
-                               class="btn btn-sm btn-outline-danger" 
-                               onclick="return confirm('<?php echo __('Delete this standard?'); ?>')" 
-                               title="<?php echo __('Delete'); ?>">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <?php include_partial('heritageAdmin/postAction', [
+                                'action' => 'standardToggle',
+                                'params' => ['id' => $s->id],
+                                'class'  => 'btn btn-sm btn-outline-'.($s->is_active ? 'warning' : 'success'),
+                                'icon'   => 'fas fa-'.($s->is_active ? 'toggle-on' : 'toggle-off'),
+                                'title'  => $s->is_active ? __('Disable') : __('Enable'),
+                            ]); ?>
+                            <?php include_partial('heritageAdmin/postAction', [
+                                'action'  => 'standardDelete',
+                                'params'  => ['id' => $s->id],
+                                'class'   => 'btn btn-sm btn-outline-danger',
+                                'icon'    => 'fas fa-trash',
+                                'title'   => __('Delete'),
+                                'confirm' => __('Delete this standard?'),
+                            ]); ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -107,3 +111,5 @@
     </a>
 </div>
 </div>
+
+<?php include_partial('heritageAdmin/postActionScript'); ?>

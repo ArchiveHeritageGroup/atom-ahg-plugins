@@ -94,15 +94,21 @@
                                class="btn btn-sm btn-outline-primary" title="<?php echo __('Edit'); ?>">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'ruleToggle', 'id' => $r->id]); ?>" 
-                               class="btn btn-sm btn-outline-<?php echo $r->is_active ? 'warning' : 'success'; ?>">
-                                <i class="fas fa-<?php echo $r->is_active ? 'toggle-on' : 'toggle-off'; ?>"></i>
-                            </a>
-                            <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'ruleDelete', 'id' => $r->id]); ?>" 
-                               class="btn btn-sm btn-outline-danger"
-                               onclick="return confirm('<?php echo __('Delete this rule?'); ?>')">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                            <?php include_partial('heritageAdmin/postAction', [
+                                'action' => 'ruleToggle',
+                                'params' => ['id' => $r->id],
+                                'class'  => 'btn btn-sm btn-outline-'.($r->is_active ? 'warning' : 'success'),
+                                'icon'   => 'fas fa-'.($r->is_active ? 'toggle-on' : 'toggle-off'),
+                                'title'  => $r->is_active ? __('Deactivate') : __('Activate'),
+                            ]); ?>
+                            <?php include_partial('heritageAdmin/postAction', [
+                                'action'  => 'ruleDelete',
+                                'params'  => ['id' => $r->id],
+                                'class'   => 'btn btn-sm btn-outline-danger',
+                                'icon'    => 'fas fa-trash',
+                                'title'   => __('Delete'),
+                                'confirm' => __('Delete this rule?'),
+                            ]); ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -146,3 +152,5 @@
         </div>
     </div>
 </div>
+
+<?php include_partial('heritageAdmin/postActionScript'); ?>

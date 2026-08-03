@@ -28,6 +28,12 @@ $menuSections = [
         ['module' => 'grapCompliance', 'action' => 'batchCheck', 'icon' => 'fa-check-double', 'label' => __('Batch Check')],
         ['module' => 'grapCompliance', 'action' => 'nationalTreasuryReport', 'icon' => 'fa-file-alt', 'label' => __('Treasury Report')],
     ],
+    __('Administration') => [
+        ['module' => 'heritageAdmin', 'action' => 'index', 'icon' => 'fa-cog', 'label' => __('Admin Index')],
+        ['module' => 'heritageAdmin', 'action' => 'regions', 'icon' => 'fa-globe-africa', 'label' => __('Regions')],
+        ['module' => 'heritageAdmin', 'action' => 'standardList', 'icon' => 'fa-book', 'label' => __('Standards')],
+        ['module' => 'heritageAdmin', 'action' => 'ruleList', 'icon' => 'fa-gavel', 'label' => __('Rules')],
+    ],
     __('Reports') => [
         ['module' => 'heritageReport', 'action' => 'index', 'icon' => 'fa-chart-bar', 'label' => __('Reports Index')],
         ['module' => 'heritageReport', 'action' => 'assetRegister', 'icon' => 'fa-clipboard-list', 'label' => __('Asset Register')],

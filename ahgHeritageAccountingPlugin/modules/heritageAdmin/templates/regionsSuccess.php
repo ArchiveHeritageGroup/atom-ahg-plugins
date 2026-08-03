@@ -138,27 +138,36 @@ $activeRegion = $activeConfig ? $activeConfig->region_code : null;
         <div class="card-footer bg-transparent">
           <div class="btn-group w-100" role="group">
             <?php if (!$isInstalled): ?>
-              <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionInstall', 'region' => $region->region_code]); ?>"
-                 class="btn btn-success btn-sm"
-                 onclick="return confirm('Install <?php echo htmlspecialchars($region->region_name); ?>? This will add the accounting standard and compliance rules.');">
-                <i class="fas fa-download me-1"></i><?php echo __('Install'); ?>
-              </a>
+              <?php include_partial('heritageAdmin/postAction', [
+                  'action'  => 'regionInstall',
+                  'params'  => ['region' => $region->region_code],
+                  'class'   => 'btn btn-success btn-sm',
+                  'icon'    => 'fas fa-download me-1',
+                  'label'   => __('Install'),
+                  'confirm' => __('Install %1%? This will add the accounting standard and compliance rules.', ['%1%' => $region->region_name]),
+              ]); ?>
             <?php else: ?>
               <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionInfo', 'region' => $region->region_code]); ?>"
                  class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-info-circle me-1"></i><?php echo __('Details'); ?>
               </a>
               <?php if (!$isActive): ?>
-                <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionSetActive', 'region' => $region->region_code]); ?>"
-                   class="btn btn-primary btn-sm"
-                   onclick="return confirm('Set <?php echo htmlspecialchars($region->region_name); ?> as the active region?');">
-                  <i class="fas fa-check-circle me-1"></i><?php echo __('Activate'); ?>
-                </a>
-                <a href="<?php echo url_for(['module' => 'heritageAdmin', 'action' => 'regionUninstall', 'region' => $region->region_code]); ?>"
-                   class="btn btn-outline-danger btn-sm"
-                   onclick="return confirm('Uninstall <?php echo htmlspecialchars($region->region_name); ?>? This will remove the standard and compliance rules.');">
-                  <i class="fas fa-trash me-1"></i>
-                </a>
+                <?php include_partial('heritageAdmin/postAction', [
+                    'action'  => 'regionSetActive',
+                    'params'  => ['region' => $region->region_code],
+                    'class'   => 'btn btn-primary btn-sm',
+                    'icon'    => 'fas fa-check-circle me-1',
+                    'label'   => __('Activate'),
+                    'confirm' => __('Set %1% as the active region?', ['%1%' => $region->region_name]),
+                ]); ?>
+                <?php include_partial('heritageAdmin/postAction', [
+                    'action'  => 'regionUninstall',
+                    'params'  => ['region' => $region->region_code],
+                    'class'   => 'btn btn-outline-danger btn-sm',
+                    'icon'    => 'fas fa-trash me-1',
+                    'title'   => __('Uninstall'),
+                    'confirm' => __('Uninstall %1%? This will remove the standard and compliance rules.', ['%1%' => $region->region_name]),
+                ]); ?>
               <?php endif; ?>
             <?php endif; ?>
           </div>
@@ -182,3 +191,5 @@ php symfony heritage:region --info=south_africa_grap # View details
 php symfony heritage:region --uninstall=uk_frs     # Uninstall a region</code></pre>
   </div>
 </div>
+
+<?php include_partial('heritageAdmin/postActionScript'); ?>
