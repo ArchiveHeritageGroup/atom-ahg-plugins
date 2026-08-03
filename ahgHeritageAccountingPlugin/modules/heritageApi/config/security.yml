@@ -1,0 +1,21 @@
+# SECURITY (#263): the heritage accounting API had no security.yml while every
+# UI module in the same plugin was locked down in v3.88.25. Verified anonymously:
+#
+#   /api/heritage/asset/12          -> full asset record: recognition status and
+#                                      reason, acquisition method, acquisition
+#                                      cost, fair value, nominal value
+#   /api/heritage/summary           -> totals, counts and per-class valuations
+#   /api/heritage/actor-autocomplete-> enumerates authority records, bypassing
+#                                      ActorVisibilityService (actor draft and
+#                                      embargo, added for GDPR)
+#
+# Only `autocomplete` was protected, and by accident: apps/qubit/config/security.yml
+# carries an app-level `autocomplete:` rule that matches on ACTION NAME, so
+# executeAutocomplete inherited it while executeActorAutocomplete did not.
+#
+# Heritage asset accounting is a staff finance function - the API follows the UI.
+# Double-bracket (OR) form: `credentials: [editor]` as a single-item list 403s
+# administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

@@ -1,0 +1,34 @@
+# SECURITY (#263): this module overrides base AtoM's /physicalobject/* routes,
+# but the resolved module is `storageManage`, NOT `physicalobject` - so
+# apps/qubit/modules/physicalobject/config/security.yml never applied and the
+# override silently REMOVED base AtoM's access control.
+#
+# Verified anonymously before this file existed:
+#   /physicalobject/browse               -> reachable (base requires editor)
+#   /physicalobject/holdingsReportExport -> reachable, "Export storage report"
+#   /physicalobject/boxList              -> reachable, physical storage listing
+#
+# Physical storage reveals where holdings are located, which is exactly what an
+# archive restricts. Credentials mirror the base module they override so the
+# override does not weaken it.
+#
+# LESSON: overriding a base module's routes from a differently-named plugin
+# module drops the base security.yml. Any such override must restate it.
+all:
+  is_secure: true
+
+browse:
+  is_secure:   true
+  credentials: [[ administrator, editor, translator ]]
+
+autocomplete:
+  is_secure:   true
+  credentials: [[ administrator, contributor, editor ]]
+
+boxList:
+  is_secure:   true
+  credentials: [[ administrator, editor ]]
+
+holdingsReportExport:
+  is_secure:   true
+  credentials: [[ administrator, editor ]]
