@@ -167,6 +167,44 @@ obvious from reading, and the fix depends on the answer. Also folded in the
 `HeritageAssetService::browse()` OR-join (same anti-pattern as the 2026-08-01
 outage, harmless at 6 rows today) since it is the same subsystem.
 
+### #264 MEASURED - and the premise was wrong
+
+Filed from code reading with "measure first" as step 1. Measurement contradicted
+the diagnosis. **`/heritage/search` is not an expensive endpoint.**
+
+| page | avg (3 samples, healthy instance) |
+|---|---|
+| **`/heritage/search?q=zzqxwv`** | **1.31s** |
+| `/heritage` | 1.59s |
+| `/informationobject/browse` | 1.67s |
+| `/engelbrecht-family-fonds` | 1.84s |
+| `/` (homepage) | 2.07s |
+
+It is the **fastest** page tested. And the four strategies are not the cost -
+an **empty query** (parser early-returns, no strategy runs) costs 1.52s against
+1.46s for a keyword query and 1.47s for keyword+date+expanded. The ~1.45s is the
+shared per-page render cost of any AtoM page on this instance.
+
+Cost is also flat across result-set size, page size and page number:
+`limit=1` 1.59s vs `limit=100` 1.58s; `page=1` 1.62s vs `page=5` 1.66s. That
+**does** confirm the limit is applied after fusion and dedup rather than pushed
+into the queries - but PSIS's corpus is small enough that it is latent, not live.
+
+**The outages were arithmetic, not inefficiency.** At ~1.5s on the `[atom]`
+pool's **15 workers**, capacity is ~10 req/s. The flood ran at **293 requests in
+8 seconds ≈ 37/s - about 3.6x capacity.** Any page would have done it; the
+homepage at 2.07s would have saturated sooner. `/heritage/search` appeared in
+both incidents because it was the endpoint being flooded, not because it is slow.
+
+Rate limiting and capacity (plus the Docker migration) are the correct fixes and
+#264 is not a prerequisite for either. What survives: push the limit down into
+the queries, and cap candidates before fusion - both cheap, both worth doing
+before the corpus grows. Caching is not justified by these numbers.
+
+**LESSON: reading code tells you what COULD be expensive, never what IS.** The
+"measure first" instruction caught the error, which is the argument for keeping
+it in every performance issue.
+
 ## 7. KM ingest was failing silently
 
 ⚠️ **Three session-log payloads dropped into `/var/spool/km-ingest/` had all been
