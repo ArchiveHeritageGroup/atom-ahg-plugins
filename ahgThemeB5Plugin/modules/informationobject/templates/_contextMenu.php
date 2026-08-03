@@ -64,7 +64,10 @@ if (isset($resource)) {
     <li><a href="<?php echo url_for('@spectrum_index?slug=' . $resourceSlug); ?>"><i class="fas fa-tasks fa-fw me-2"></i><?php echo __('Collections Procedures data'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasGrap): ?>
-    <li><a href="/index.php/heritage/add?io_id=<?php echo $resource->id; ?>"><i class="fas fa-landmark fa-fw me-2"></i><?php echo __('Heritage Assets'); ?></a></li>
+    <?php // Route via the record rather than straight to the add form: the action
+          // shows the existing asset, or lists them where there is more than one,
+          // and only offers creation when the record has none. ?>
+    <li><a href="/heritage/object/<?php echo $resource->slug; ?>"><i class="fas fa-landmark fa-fw me-2"></i><?php echo __('Heritage Assets'); ?></a></li>
     <?php endif; ?>
     <?php if ($hasOais): ?>
     <li><a href="/admin/preservation/packages/?object_id=<?php echo $resource->id; ?>"><i class="fas fa-archive fa-fw me-2"></i><?php echo __('Preservation Packages'); ?></a></li>

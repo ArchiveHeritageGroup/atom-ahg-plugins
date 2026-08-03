@@ -44,6 +44,7 @@ class heritageAccountingActions extends AhgController
             'class_id' => $request->getParameter('class_id'),
             'recognition_status' => $request->getParameter('status'),
             'repository_id' => $request->getParameter('repository_id'),
+            'information_object_id' => $request->getParameter('io_id'),
             'search' => $request->getParameter('sq')
         ];
         
@@ -444,15 +445,26 @@ class heritageAccountingActions extends AhgController
             $this->forward404('Record not found');
         }
         
-        // Find linked heritage asset
-        $asset = \Illuminate\Database\Capsule\Manager::table('heritage_asset')
-            ->where('information_object_id', $io->id)
-            ->first();
-        
-        if ($asset) {
-            $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]);
+        // Find linked heritage assets. Both columns are checked because the table
+        // carries information_object_id and the older object_id, and ->first()
+        // previously hid every asset but one on records that have several.
+        $assets = \Illuminate\Database\Capsule\Manager::table('heritage_asset')
+            ->where(function ($q) use ($io) {
+                $q->where('information_object_id', $io->id)
+                    ->orWhere('object_id', $io->id);
+            })
+            ->get();
+
+        // One asset goes straight to it; several go to the browse list filtered
+        // to this record, so none of them are hidden.
+        if (1 === count($assets)) {
+            $this->redirect(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $assets[0]->id]);
         }
-        
+
+        if (count($assets) > 1) {
+            $this->redirect('/heritage/browse?io_id='.$io->id);
+        }
+
         // No asset yet - offer to create
         $this->io = $io;
         $this->slug = $slug;

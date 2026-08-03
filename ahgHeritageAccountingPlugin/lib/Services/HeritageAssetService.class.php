@@ -104,6 +104,15 @@ class HeritageAssetService
         if (!empty($filters['repository_id'])) {
             $query->where('io.repository_id', $filters['repository_id']);
         }
+        // Assets belonging to one record. Both columns are checked because the
+        // table carries information_object_id and the older object_id.
+        if (!empty($filters['information_object_id'])) {
+            $ioId = (int) $filters['information_object_id'];
+            $query->where(function ($q) use ($ioId) {
+                $q->where('ha.information_object_id', $ioId)
+                    ->orWhere('ha.object_id', $ioId);
+            });
+        }
         if (!empty($filters['search'])) {
             $search = '%' . $filters['search'] . '%';
             $query->where(function($q) use ($search) {
