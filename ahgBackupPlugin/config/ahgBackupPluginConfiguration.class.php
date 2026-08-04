@@ -17,6 +17,12 @@ class ahgBackupPluginConfiguration extends sfPluginConfiguration
     {
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
+        // Contribute the Manage menu entry at runtime rather than as a `menu` row.
+        // A database row outlives plugin enablement, so disabling the plugin used to
+        // leave a dead entry pointing at a module that no longer loads.
+        require_once __DIR__ . '/../lib/Listeners/MenuInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgBackup\Listeners\MenuInjector', 'filter']);
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'backup';
         sfConfig::set('sf_enabled_modules', array_unique($enabledModules));
