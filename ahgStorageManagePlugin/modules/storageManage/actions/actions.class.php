@@ -81,7 +81,15 @@ class storageManageActions extends AhgController
             $request->limit = $this->config('app_hits_per_page');
         }
 
-        $this->resource = $this->getRoute()->resource;
+        // This module registers /physicalobject/boxList as a plain sfRoute, which -
+        // unlike base AtoM's QubitResourceRoute - never populates ->resource. Without
+        // a resource the template fatals on $resource->getLabel(), so degrade to a
+        // clean 404 the way the other actions in this plugin do.
+        $this->resource = $this->getRoute()->resource ?? null;
+
+        if (!isset($this->resource)) {
+            $this->forward404();
+        }
 
         if (class_exists('Criteria')) {
             $criteria = new Criteria();
