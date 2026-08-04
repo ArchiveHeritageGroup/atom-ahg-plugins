@@ -467,7 +467,15 @@ class provenanceActions extends AhgController
     {
         $this->requireAuth();
 
-        $recordId = $request->getParameter('record_id');
+        // Validate before doing anything: addEvent() declares int $recordId, so a
+        // missing parameter raised a TypeError - an \Error, which the try/catch below
+        // does not catch - and surfaced as an uncaught 500. Agents were also created
+        // further down before this was ever checked, leaving orphan rows behind.
+        $recordId = (int) $request->getParameter('record_id');
+        if ($recordId < 1) {
+            return $this->renderJsonError('record_id is required');
+        }
+
         $service = new \AhgProvenancePlugin\Service\ProvenanceService();
 
         $data = [
@@ -491,7 +499,9 @@ class provenanceActions extends AhgController
             $eventId = $service->addEvent($recordId, $data);
 
             return $this->renderJsonSuccess(['event_id' => $eventId]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            // \Throwable, not \Exception: a TypeError from the service is an \Error and
+            // would otherwise escape an AJAX endpoint as an uncaught 500.
             return $this->renderJsonError($e->getMessage());
         }
     }

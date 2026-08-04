@@ -11,6 +11,7 @@
   </nav>
 
   <form method="post" id="provenanceForm" enctype="multipart/form-data">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
@@ -520,7 +521,7 @@ document.addEventListener('DOMContentLoaded', function() {
     btn.addEventListener('click', function() {
       if (confirm('Delete this document?')) {
         var docId = this.dataset.docId;
-        fetch('/index.php/provenance/deleteDocument/' + docId, { method: 'POST' })
+        fetch('/index.php/provenance/deleteDocument/' + docId, { headers: { 'X-CSRF-TOKEN': '<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>' }, method: 'POST' })
           .then(function() { btn.closest('.d-flex').remove(); });
       }
     });

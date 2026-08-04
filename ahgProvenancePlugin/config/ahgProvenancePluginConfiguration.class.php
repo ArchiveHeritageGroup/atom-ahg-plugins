@@ -24,6 +24,12 @@ class ahgProvenancePluginConfiguration extends sfPluginConfiguration
         // Register PSR-4 autoloader for namespaced classes
         $this->registerAutoloader();
 
+        // Show the provenance panel on stock description pages. Only theme templates
+        // call the provenanceDisplay component, so without this an install with no AHG
+        // theme can capture provenance but never display it.
+        require_once __DIR__ . '/../lib/Listeners/ProvenanceInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgProvenancePlugin\Listeners\ProvenanceInjector', 'filter']);
+
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'provenance';
