@@ -191,10 +191,14 @@ class ViewerInjector
         $nonce = (string) \sfConfig::get('csp_nonce', '');
         $nonceAttr = $nonce ? ' ' . preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
 
-        $block = '<div class="ahg-iiif-viewer mb-4">' . $html . '</div>';
-        if ($plugin) {
-            $block .= '<script src="/plugins/' . $plugin . '/web/js/boot.js"' . $nonceAttr . '></script>';
-        }
+        // The viewer plugin's own stylesheet. It must be a <link>, not inline styles:
+        // AtoM's CSP is `style-src 'self' 'nonce-...'` with NO 'unsafe-inline', so a
+        // style="" attribute is silently dropped and the viewer renders at default
+        // size with no error anywhere. Same convention as boot.js - derived from
+        // data-rendered-by, so each plugin owns its own assets.
+        $block = '<link rel="stylesheet" href="/plugins/' . $plugin . '/web/css/viewer.css">';
+        $block .= '<div class="ahg-iiif-viewer mb-4">' . $html . '</div>';
+        $block .= '<script src="/plugins/' . $plugin . '/web/js/boot.js"' . $nonceAttr . '></script>';
 
         // Put it at the top of the content area. Appending before </body> puts the
         // viewer *after the footer*, where nobody scrolls - it renders but appears

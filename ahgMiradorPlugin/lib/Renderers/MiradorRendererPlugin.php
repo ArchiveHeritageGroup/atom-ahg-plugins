@@ -36,11 +36,8 @@ class MiradorRendererPlugin implements RendererInterface
         return '<div id="mirador-' . $id . '" class="mirador-viewer" data-viewer="mirador"'
              . ' data-rendered-by="ahgMiradorPlugin"'
              . ' data-manifest="' . $manifest . '"'
-             . ' data-assets="/plugins/ahgMiradorPlugin/web/mirador"'
-             . ' style="position:relative;overflow:hidden;width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;">'
-             . '<iframe src="' . htmlspecialchars($src, ENT_QUOTES) . '"'
-             . ' title="Mirador viewer" loading="lazy"'
-             . ' style="border:0;width:100%;height:100%;display:block;"></iframe>'
+             . ' data-assets="/plugins/ahgMiradorPlugin/web/mirador">'
+             . '<iframe src="' . htmlspecialchars($src, ENT_QUOTES) . '" title="Mirador viewer"></iframe>'
              . '</div>';
     }
 

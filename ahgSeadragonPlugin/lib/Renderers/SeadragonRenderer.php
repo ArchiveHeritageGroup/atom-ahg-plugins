@@ -37,7 +37,7 @@ class SeadragonRenderer implements RendererInterface
              . ' data-manifest="' . $manifest . '"'
              . $tile
              . ' data-assets="/plugins/ahgSeadragonPlugin/web/openseadragon"'
-             . ' style="width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;"></div>';
+             . '></div>';
     }
 
     public function getName(): string

@@ -10,6 +10,13 @@
 
   function boot(el) {
     if (el.dataset.booted) { return; }
+
+    // The renderer mounts Mirador in an iframe (see viewer.html). If one is already
+    // present the viewer is running in its own document and mounting again here
+    // would put a SECOND, inline Mirador on top of it - which is what produced the
+    // stray black panels: two instances, one of them fighting Bootstrap.
+    if (el.querySelector('iframe')) { el.dataset.booted = '1'; return; }
+
     el.dataset.booted = '1';
 
     var manifest = el.dataset.manifest;

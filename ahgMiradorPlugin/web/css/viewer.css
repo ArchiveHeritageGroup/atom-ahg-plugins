@@ -1,0 +1,26 @@
+/*
+ * Styles live here, not in style="" attributes.
+ *
+ * AtoM's CSP is `style-src 'self' 'nonce-...'` with NO 'unsafe-inline', so inline
+ * style attributes are silently dropped by the browser - the element simply gets
+ * default sizing and nothing reports an error. That is what made the viewer render
+ * at the iframe default of 300x150 inside a container with no height.
+ */
+.mirador-viewer {
+  position: relative;   /* Mirador positions panels against the nearest positioned ancestor */
+  overflow: hidden;
+  width: 100%;
+  height: 600px;
+  background: #1a1a1a;
+  border-radius: 8px;
+}
+
+.mirador-viewer iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
