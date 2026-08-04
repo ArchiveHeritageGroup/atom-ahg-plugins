@@ -200,9 +200,24 @@ class ViewerInjector
         $block .= '<div class="ahg-iiif-viewer mb-4">' . $html . '</div>';
         $block .= '<script src="/plugins/' . $plugin . '/web/js/boot.js"' . $nonceAttr . '></script>';
 
-        // Put it at the top of the content area. Appending before </body> puts the
-        // viewer *after the footer*, where nobody scrolls - it renders but appears
-        // to do nothing.
+        // Prefer REPLACING AtoM's built-in digital object display. The viewer is a
+        // richer presentation of the same file, so showing both leaves the page with
+        // the image twice. The block contains only an <a> and an <img>, no nested
+        // divs, so a non-greedy match to the first </div> is safe.
+        $replaced = preg_replace(
+            '#<div class="digital-object-reference[^"]*"[^>]*>.*?</div>#s',
+            $block,
+            $content,
+            1,
+            $count
+        );
+        if (null !== $replaced && $count > 0) {
+            return $replaced;
+        }
+
+        // Otherwise put it at the top of the content area. Appending before </body>
+        // puts the viewer *after the footer*, where nobody scrolls - it renders but
+        // appears to do nothing.
         foreach (['<div id="content"', '<div id="main-column"'] as $anchor) {
             $at = stripos($content, $anchor);
             if (false === $at) {
