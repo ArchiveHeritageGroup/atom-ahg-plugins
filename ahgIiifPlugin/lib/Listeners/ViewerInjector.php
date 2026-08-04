@@ -37,6 +37,9 @@ class ViewerInjector
         'sfDacsPlugin',
     ];
 
+    /** response.filter_content can fire more than once per request. */
+    private static bool $injected = false;
+
     public static function filter(\sfEvent $event, $content)
     {
         try {
@@ -47,9 +50,29 @@ class ViewerInjector
         }
     }
 
+    /**
+     * This injector exists for installs with NO AHG theme. When ahgThemeB5Plugin is
+     * present it already dispatches viewers from its own templates, so injecting
+     * here duplicates it - and duplicates whatever that renderer emits, including
+     * "no data" placeholders.
+     */
+    private function themeProvidesViewer(): bool
+    {
+        return is_dir((string) \sfConfig::get('sf_plugins_dir') . '/ahgThemeB5Plugin');
+    }
+
     private function inject(\sfEvent $event, $content)
     {
         $response = $event->getSubject();
+
+        // Once per request, never on a themed install, never into content that
+        // already carries a viewer.
+        if (self::$injected || $this->themeProvidesViewer()) {
+            return $content;
+        }
+        if (false !== stripos((string) $content, 'ahg-iiif-viewer')) {
+            return $content;
+        }
 
         if (!$this->isHtmlGet($response)) {
             return $content;
@@ -75,6 +98,8 @@ class ViewerInjector
         if ('' === $html) {
             return $content;
         }
+
+        self::$injected = true;
 
         return $this->place($content, $html);
     }
@@ -160,6 +185,20 @@ class ViewerInjector
         $block = '<div class="ahg-iiif-viewer mb-4">' . $html . '</div>';
         if ($plugin) {
             $block .= '<script src="/plugins/' . $plugin . '/web/js/boot.js"' . $nonceAttr . '></script>';
+        }
+
+        // Put it at the top of the content area. Appending before </body> puts the
+        // viewer *after the footer*, where nobody scrolls - it renders but appears
+        // to do nothing.
+        foreach (['<div id="content"', '<div id="main-column"'] as $anchor) {
+            $at = stripos($content, $anchor);
+            if (false === $at) {
+                continue;
+            }
+            $close = strpos($content, '>', $at);
+            if (false !== $close) {
+                return substr_replace($content, "\n" . $block, $close + 1, 0);
+            }
         }
 
         $pos = strripos($content, '</body>');

@@ -478,12 +478,105 @@ class IiifManifestV3Service
     }
 
     /**
+     * Is a IIIF image server actually reachable?
+     *
+     * Setting app_iiif_image_server: 'on' | 'off' | 'auto' (default). 'auto' probes
+     * once per request and caches - cheap, and it means an install that later gains
+     * an image server starts serving full manifests without a config change.
+     */
+    private function imageServerAvailable(): bool
+    {
+        static $available = null;
+
+        if (null !== $available) {
+            return $available;
+        }
+
+        $mode = (string) \sfConfig::get('app_iiif_image_server', 'auto');
+        if ('off' === $mode) {
+            return $available = false;
+        }
+        if ('on' === $mode) {
+            return $available = true;
+        }
+
+        $ch = curl_init(rtrim($this->cantaloupeBaseUrl, '/') . '/iiif/2');
+        curl_setopt_array($ch, [
+            CURLOPT_NOBODY => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 1,
+            CURLOPT_CONNECTTIMEOUT => 1,
+        ]);
+        curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        // Any HTTP answer means something is listening; a connection failure gives 0.
+        return $available = ($code > 0 && $code < 500);
+    }
+
+    /**
+     * Canvas for installs with no image server: the derivative is painted directly
+     * and no ImageService is advertised.
+     */
+    private function buildCanvasWithoutImageService(string $canvasId, string $label, string $cantaloupeId, int $width, int $height): array
+    {
+        // The id encodes the web path with '/' replaced by '_SL_'; reverse it.
+        $path = '/' . ltrim(str_replace('_SL_', '/', $cantaloupeId), '/');
+
+        // With no image service the viewer lays the canvas out from these numbers, so
+        // a wrong width/height visibly distorts the image. The caller's values come
+        // from digital_object, which is often empty for derivatives, so measure the
+        // file we are actually painting.
+        $file = rtrim((string) \sfConfig::get('sf_web_dir'), '/') . $path;
+        if (is_readable($file) && ($size = @getimagesize($file))) {
+            $width = (int) $size[0];
+            $height = (int) $size[1];
+        }
+
+        return [
+            'id' => $canvasId,
+            'type' => 'Canvas',
+            'label' => ['none' => [$label]],
+            'width' => $width,
+            'height' => $height,
+            'items' => [[
+                'id' => "{$canvasId}/page",
+                'type' => 'AnnotationPage',
+                'items' => [[
+                    'id' => "{$canvasId}/page/annotation",
+                    'type' => 'Annotation',
+                    'motivation' => 'painting',
+                    'body' => [
+                        'id' => $this->baseUrl . $path,
+                        'type' => 'Image',
+                        'format' => 'image/jpeg',
+                        'width' => $width,
+                        'height' => $height,
+                    ],
+                    'target' => $canvasId,
+                ]],
+            ]],
+        ];
+    }
+
+    /**
      * Build a v3 canvas with annotation page and painting annotation.
      */
     private function buildCanvas(string $manifestId, int $index, string $label, string $cantaloupeId, int $width, int $height): array
     {
         $canvasId = "{$manifestId}/canvas/{$index}";
         $imageApiBase = "{$this->baseUrl}/iiif/2/{$cantaloupeId}";
+
+        // Without an image server the /iiif/2/* URLs 404 and return AtoM's HTML error
+        // page. A viewer that fetches info.json then dies on "Unexpected token '<'"
+        // is worse than one that shows a flat image, so when no image server is
+        // available we point the body at the derivative directly and omit the
+        // ImageService entirely - a manifest with no service is valid IIIF, and
+        // viewers fall back to displaying the image as-is.
+        if (!$this->imageServerAvailable()) {
+            return $this->buildCanvasWithoutImageService($canvasId, $label, $cantaloupeId, $width, $height);
+        }
 
         return [
             'id' => $canvasId,
