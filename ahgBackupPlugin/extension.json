@@ -15,9 +15,9 @@
     "ahgCorePlugin"
   ],
   "tables": [
-    "ahg_backup",
-    "ahg_backup_schedule",
-    "ahg_backup_settings"
+    "backup_history",
+    "backup_schedule",
+    "backup_setting"
   ],
   "provides": {
     "admin_section": {
