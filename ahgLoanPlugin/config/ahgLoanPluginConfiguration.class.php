@@ -16,6 +16,9 @@
  */
 class ahgLoanPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Loan management for objects lent between institutions';
+
     /** Plugin version */
     public const VERSION = '1.0.0';
 

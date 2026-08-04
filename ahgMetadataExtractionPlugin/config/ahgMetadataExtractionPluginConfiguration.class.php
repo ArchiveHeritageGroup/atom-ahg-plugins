@@ -13,6 +13,9 @@
  */
 class ahgMetadataExtractionPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Embedded metadata extraction from digital objects (EXIF, IPTC, XMP)';
+
     /** Plugin version */
     public const VERSION = '1.0.0';
 

@@ -13,6 +13,9 @@
  */
 class ahgSemanticSearchPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Semantic search with vector embeddings and thesaurus expansion';
+
     /** Plugin version */
     public const VERSION = '1.0.0';
 

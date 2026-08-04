@@ -5,6 +5,9 @@
  */
 class ahgContactPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Extended contact information for actors and repositories';
+
     public function initialize()
     {
         // Register autoloader for Contact extension classes immediately

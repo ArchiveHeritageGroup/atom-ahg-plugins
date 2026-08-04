@@ -1,6 +1,9 @@
 <?php
 class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Security classification, user clearance and embargo enforcement';
+
     /** Per-request guard: the MFA gate evaluates only the first dispatched action. */
     private $mfaGateChecked = false;
 

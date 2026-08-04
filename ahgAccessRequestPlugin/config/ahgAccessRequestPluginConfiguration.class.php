@@ -2,6 +2,9 @@
 
 class ahgAccessRequestPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Researcher access requests for restricted material';
+
     public function initialize()
     {
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);

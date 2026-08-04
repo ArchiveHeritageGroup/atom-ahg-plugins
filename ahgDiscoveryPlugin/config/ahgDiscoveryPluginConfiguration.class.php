@@ -8,6 +8,9 @@
  */
 class ahgDiscoveryPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Natural-language discovery search with query expansion';
+
     const VERSION = '0.2.0';
 
     public function initialize()

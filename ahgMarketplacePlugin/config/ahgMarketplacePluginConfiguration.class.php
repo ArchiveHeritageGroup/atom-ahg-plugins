@@ -2,6 +2,9 @@
 
 class ahgMarketplacePluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Marketplace for reproductions and licensed collection material';
+
     public function initialize()
     {
         // Enable the marketplace module so Symfony can resolve actions

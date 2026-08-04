@@ -29,6 +29,7 @@ class MiradorRendererPlugin implements RendererInterface
         return '<div id="mirador-' . $id . '" class="mirador-viewer" data-viewer="mirador"'
              . ' data-rendered-by="ahgMiradorPlugin"'
              . ' data-manifest="' . $manifest . '"'
+             . ' data-assets="/plugins/ahgMiradorPlugin/web/mirador"'
              . ' style="width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;"></div>';
     }
 

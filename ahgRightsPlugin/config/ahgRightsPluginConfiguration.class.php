@@ -2,6 +2,9 @@
 
 class ahgRightsPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Rights statements, PREMIS rights and Creative Commons licensing';
+
     public function initialize()
     {
         // Register autoloader for plugin namespace

@@ -7,6 +7,9 @@
  */
 class ahgGISPluginConfiguration extends sfPluginConfiguration
 {
+    /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
+    public static $summary = 'Geographic and spatial data for archival descriptions';
+
     const VERSION = '0.1.0';
 
     public function initialize()

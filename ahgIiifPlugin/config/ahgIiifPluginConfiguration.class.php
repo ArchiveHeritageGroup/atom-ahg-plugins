@@ -50,6 +50,12 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // Add routes
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
+        // Place the viewer on stock description pages without overriding any theme
+        // template. Which viewer appears is decided by RendererRegistry, i.e. by
+        // which viewer plugin is installed.
+        require_once __DIR__ . '/../lib/Listeners/ViewerInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgIiif\Listeners\ViewerInjector', 'filter']);
+
         // Include helper
         $this->loadHelpers();
     }

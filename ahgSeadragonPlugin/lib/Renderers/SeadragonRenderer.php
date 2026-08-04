@@ -26,9 +26,17 @@ class SeadragonRenderer implements RendererInterface
         $manifest = htmlspecialchars((string) ($config['manifestUrl'] ?? ''), ENT_QUOTES);
         $height   = $this->height((string) ($config['options']['height'] ?? '600px'));
 
+        // Optional: a direct image URL, used when no IIIF image service is available
+        // so the viewer still works on installs without Cantaloupe.
+        $tile = isset($config['tileSource'])
+            ? ' data-tile-source="' . htmlspecialchars((string) $config['tileSource'], ENT_QUOTES) . '"'
+            : '';
+
         return '<div id="osd-' . $id . '" class="osd-viewer" data-viewer="openseadragon"'
              . ' data-rendered-by="ahgSeadragonPlugin"'
              . ' data-manifest="' . $manifest . '"'
+             . $tile
+             . ' data-assets="/plugins/ahgSeadragonPlugin/web/openseadragon"'
              . ' style="width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;"></div>';
     }
 
