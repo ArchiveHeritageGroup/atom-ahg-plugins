@@ -44,9 +44,22 @@
     nodes.forEach(boot);
   }
 
+  // A hidden pane measures zero, so booting it yields a viewer with no dimensions.
+  // The switcher fires ahg:viewer-shown when a pane becomes visible.
+  document.addEventListener('ahg:viewer-shown', function (e) {
+    var el = e.target;
+    if (el && el.dataset && el.dataset.viewer === 'mirador') { boot(el); }
+  });
+
+  function initVisible() {
+    document.querySelectorAll('[data-viewer="mirador"]').forEach(function (el) {
+      if (el.offsetParent !== null) { init(); }
+    });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initVisible);
   } else {
-    init();
+    initVisible();
   }
 })();

@@ -94,14 +94,14 @@ class ViewerInjector
             return $content;
         }
 
-        $html = $this->renderViewer($resource, $digitalObject);
-        if ('' === $html) {
+        $viewers = $this->renderViewers($resource, $digitalObject);
+        if (!$viewers) {
             return $content;
         }
 
         self::$injected = true;
 
-        return $this->place($content, $html);
+        return $this->place($content, $viewers);
     }
 
     private function isHtmlGet($response): bool
@@ -130,17 +130,23 @@ class ViewerInjector
         return null;
     }
 
-    private function renderViewer($resource, $digitalObject): string
+    /**
+     * Render EVERY viewer plugin that supports this file, highest priority first.
+     *
+     * Built-in renderers are skipped: they carry no data-rendered-by, so there is no
+     * plugin to load a boot script or stylesheet from, and a container nothing can
+     * initialise is just a black rectangle.
+     *
+     * @return array<int, array{plugin:string,label:string,html:string}>
+     */
+    private function renderViewers($resource, $digitalObject): array
     {
         $helper = \sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/Services';
         require_once $helper . '/Renderers/RendererInterface.php';
         require_once $helper . '/RendererRegistry.php';
 
         $registry = new \AhgIiif\Services\RendererRegistry();
-        $renderer = $registry->getRenderer((string) $digitalObject->mimeType, []);
-        if (!$renderer) {
-            return '';
-        }
+        $mimeType = (string) $digitalObject->mimeType;
 
         $slug = $resource->slug ?? '';
 
@@ -158,47 +164,98 @@ class ViewerInjector
             $image = (string) ($digitalObject->getFullPath() ?? '');
         }
 
-        return $renderer->render([
+        $config = [
             'viewerId' => 'io' . $resource->id,
-            'mimeType' => (string) $digitalObject->mimeType,
+            'mimeType' => $mimeType,
             'manifestUrl' => \sfConfig::get('app_siteBaseUrl', '') . '/iiif/manifest/' . $slug,
             'tileSource' => $image,
             'options' => ['height' => '600px'],
-        ]);
+        ];
+
+        $viewers = [];
+        foreach ($registry->all() as $renderer) {
+            if (!$renderer->supports($mimeType, [])) {
+                continue;
+            }
+
+            $html = (string) $renderer->render($config);
+            if ('' === $html || !preg_match('/' . self::PROVENANCE_ATTR . '="([A-Za-z0-9_-]+)"/', $html, $m)) {
+                continue;
+            }
+
+            $viewers[] = [
+                'plugin' => $m[1],
+                'label' => $this->label($renderer->getName()),
+                'html' => $html,
+            ];
+        }
+
+        return $viewers;
+    }
+
+    /** Human label for a switch button, from the renderer name. */
+    private function label(string $name): string
+    {
+        $known = [
+            'mirador-plugin' => 'Mirador',
+            'openseadragon-plugin' => 'OpenSeadragon',
+        ];
+
+        if (isset($known[$name])) {
+            return $known[$name];
+        }
+
+        return ucwords(str_replace(['-plugin', '-', '_'], ['', ' ', ' '], $name));
     }
 
     /**
-     * Insert before the closing </body>, and load the owning plugin's boot script
-     * with the CSP nonce - the fragment itself never carries a <script>, so this is
-     * the only place a script tag is allowed to appear.
+     * Build the viewer block and place it where AtoM's own image display was.
+     *
+     * With more than one viewer plugin enabled, all of them are rendered and a switch
+     * button per viewer is emitted. Only the first pane is visible; the rest carry
+     * `hidden`, and viewer-switch.js toggles them. Every style and script is an
+     * external file - AtoM's CSP has no 'unsafe-inline', so an inline style attribute
+     * is silently dropped and an inline script is blocked outright.
+     *
+     * @param array<int, array{plugin:string,label:string,html:string}> $viewers
      */
-    private function place(string $content, string $html): string
+    private function place(string $content, array $viewers): string
     {
-        $plugin = '';
-        if (preg_match('/' . self::PROVENANCE_ATTR . '="([A-Za-z0-9_-]+)"/', $html, $m)) {
-            $plugin = $m[1];
-        }
-
-        // No owning plugin means no boot script, and a viewer container with nothing
-        // to initialise it is just a permanent black rectangle - worse than showing
-        // AtoM's ordinary image display. Only the viewer PLUGINS ship a boot.js;
-        // ahgIiifPlugin's built-in renderers are booted by its own templates, which
-        // are not in play on a theme-less install. So inject nothing.
-        if ('' === $plugin) {
-            return $content;
-        }
-
         $nonce = (string) \sfConfig::get('csp_nonce', '');
         $nonceAttr = $nonce ? ' ' . preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
 
-        // The viewer plugin's own stylesheet. It must be a <link>, not inline styles:
-        // AtoM's CSP is `style-src 'self' 'nonce-...'` with NO 'unsafe-inline', so a
-        // style="" attribute is silently dropped and the viewer renders at default
-        // size with no error anywhere. Same convention as boot.js - derived from
-        // data-rendered-by, so each plugin owns its own assets.
-        $block = '<link rel="stylesheet" href="/plugins/' . $plugin . '/web/css/viewer.css">';
-        $block .= '<div class="ahg-iiif-viewer mb-4">' . $html . '</div>';
-        $block .= '<script src="/plugins/' . $plugin . '/web/js/boot.js"' . $nonceAttr . '></script>';
+        $assets = '';
+        $panes = '';
+        $tabs = '';
+        $seen = [];
+
+        foreach ($viewers as $i => $viewer) {
+            $plugin = $viewer['plugin'];
+
+            if (!isset($seen[$plugin])) {
+                $seen[$plugin] = true;
+                $assets .= '<link rel="stylesheet" href="/plugins/' . $plugin . '/web/css/viewer.css">';
+                $assets .= '<script src="/plugins/' . $plugin . '/web/js/boot.js"' . $nonceAttr . '></script>';
+            }
+
+            $active = 0 === $i;
+            $panes .= '<div class="ahg-viewer-pane" data-viewer-plugin="' . $plugin . '"'
+                    . ($active ? '' : ' hidden') . '>' . $viewer['html'] . '</div>';
+
+            if (count($viewers) > 1) {
+                $tabs .= '<button type="button" class="ahg-viewer-tab' . ($active ? ' is-active' : '') . '"'
+                       . ' data-viewer-target="' . $plugin . '">' . htmlspecialchars($viewer['label'], ENT_QUOTES) . '</button>';
+            }
+        }
+
+        $switcher = '';
+        if ('' !== $tabs) {
+            $assets .= '<link rel="stylesheet" href="/plugins/ahgIiifPlugin/web/css/viewer-switch.css">';
+            $assets .= '<script src="/plugins/ahgIiifPlugin/web/js/viewer-switch.js"' . $nonceAttr . '></script>';
+            $switcher = '<div class="ahg-viewer-tabs" role="group" aria-label="Choose viewer">' . $tabs . '</div>';
+        }
+
+        $block = $assets . '<div class="ahg-iiif-viewer mb-4">' . $switcher . $panes . '</div>';
 
         // Prefer REPLACING AtoM's built-in digital object display. The viewer is a
         // richer presentation of the same file, so showing both leaves the page with
@@ -215,9 +272,6 @@ class ViewerInjector
             return $replaced;
         }
 
-        // Otherwise put it at the top of the content area. Appending before </body>
-        // puts the viewer *after the footer*, where nobody scrolls - it renders but
-        // appears to do nothing.
         foreach (['<div id="content"', '<div id="main-column"'] as $anchor) {
             $at = stripos($content, $anchor);
             if (false === $at) {
