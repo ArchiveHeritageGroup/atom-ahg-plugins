@@ -74,6 +74,9 @@ class ahg3DModelPluginConfiguration extends sfPluginConfiguration
         $model->any('ar3d_bookmark_add', '/ahg3DModel/addBookmark/:id', 'addBookmark', ['id' => '\d+']);
         $model->any('ar3d_bookmark_delete', '/ahg3DModel/deleteBookmark/:id', 'deleteBookmark', ['id' => '\d+']);
         $model->any('ar3d_api_bookmarks', '/api/3d/bookmarks/:model_id', 'apiBookmarks', ['model_id' => '\d+']);
+        // Access-controlled 3D model delivery: 3D files are masters, so the raw
+        // /uploads/r/* URL is readMaster-gated (#258) and 404s anonymously.
+        $model->any('ar3d_file', '/3d/file/:id', 'file', ['id' => '\\d+']);
         $model->register($event->getSubject());
 
         // model3dSettings module routes

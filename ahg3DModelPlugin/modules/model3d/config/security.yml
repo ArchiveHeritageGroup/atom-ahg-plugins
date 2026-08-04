@@ -1,0 +1,17 @@
+# Declared explicitly so the posture is a decision, not an omission.
+#
+# apps/qubit/config/security.yml sets `default: is_secure: false`, so a module with
+# no security.yml is public by accident. This module IS public by intent, but only
+# because access is enforced in code rather than here:
+#
+#   file  - serves 3D model binaries. Model3DFileServer checks QubitAcl 'read' on the
+#           parent description and refuses anything whose extension AND mime type are
+#           not on the 3D allowlist, so it cannot be used to read other files. It must
+#           stay reachable anonymously or published records' models will not load for
+#           the public (the readMaster gate from #258 is what made that necessary).
+#
+# The remaining actions keep their historical behaviour; tightening them is tracked
+# with the wider security.yml backlog (#263) and should be done deliberately, not as
+# a side effect of adding this file.
+all:
+  is_secure: false

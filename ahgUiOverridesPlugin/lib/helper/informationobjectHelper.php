@@ -456,7 +456,14 @@ function _render_3d_viewer(int $doId, $digitalObject, string $ext): string
 {
     $n = sfConfig::get('csp_nonce', '');
     $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
-    $fullPath = ($digitalObject->path ?? '') . ($digitalObject->name ?? '');
+    // Serve through ahg3DModelPlugin's access-controlled route, not the raw
+    // /uploads/r/* path. 3D files are always masters, so the raw path is gated
+    // behind readMaster (#258) and 404s for anonymous users - the viewer then hangs
+    // on "Loading 3D model..." forever. The route grants access based on the
+    // description instead. Falls back to the direct path if the plugin is absent.
+    $fullPath = is_dir(sfConfig::get('sf_plugins_dir') . '/ahg3DModelPlugin')
+        ? '/3d/file/' . $doId
+        : ($digitalObject->path ?? '') . ($digitalObject->name ?? '');
     $viewerId = 'viewer-3d-' . $doId;
 
     $html = '<div class="model3d-viewer">';

@@ -1215,4 +1215,49 @@ class model3dActions extends AhgController
         }
     }
 
+    /**
+     * Serve a 3D model file with its own access control.
+     *
+     * 3D models are always masters, so the raw /uploads/r/* URL is gated behind
+     * readMaster (#258) and 404s for anonymous users - the viewer then hangs on
+     * "Loading 3D model...". This route decides access from the DESCRIPTION instead,
+     * so a published record's model loads while a restricted record's does not.
+     */
+    public function executeFile($request)
+    {
+        $id = (int) $request->getParameter('id');
+
+        require_once sfConfig::get('sf_plugins_dir') . '/ahg3DModelPlugin/lib/Model3DFileServer.php';
+        $file = \Model3DFileServer::resolve($id, $this->getUser());
+
+        if (null === $file) {
+            // One response for "not a 3D model", "no such object" and "not allowed",
+            // so this cannot be used to probe what exists.
+            $this->forward404();
+        }
+
+        $response = $this->getResponse();
+        $response->setContentType($file['mime']);
+        $response->setHttpHeader('Content-Disposition', 'inline; filename="' . rawurlencode($file['name']) . '"');
+        $response->setHttpHeader('Cache-Control', 'private, max-age=3600');
+
+        // Hand large models to nginx when the internal location from #258 exists;
+        // a 23 MB readfile() through PHP ties up a worker for the whole download.
+        if (sfConfig::get('app_iiif_internal_redirect', true) && isset($_SERVER['SERVER_SOFTWARE']) && false !== stripos($_SERVER['SERVER_SOFTWARE'], 'nginx')) {
+            $webDir = rtrim((string) sfConfig::get('sf_web_dir'), '/');
+            if (str_starts_with($file['path'], $webDir . '/')) {
+                $response->setHttpHeader('X-Accel-Redirect', '/private/' . ltrim(substr($file['path'], strlen($webDir) + 1), '/'));
+                $response->sendHttpHeaders();
+
+                return sfView::NONE;
+            }
+        }
+
+        $response->setHttpHeader('Content-Length', (string) filesize($file['path']));
+        $response->sendHttpHeaders();
+        readfile($file['path']);
+
+        return sfView::NONE;
+    }
+
 }
