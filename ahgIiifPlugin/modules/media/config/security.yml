@@ -1,0 +1,31 @@
+# This module had NO security.yml, so it inherited `default: is_secure: false` and
+# every action was public. `download` and `stream` took a digital object id and
+# readfile()'d it with NO QubitAcl check, NO PREMIS check and NO type allowlist.
+#
+# Verified on PSIS before this existed:
+#   /media/download/1102   -> 200, 67,516 bytes  (PDF master that correctly 404s
+#                             via /uploads/ - a straight #258 bypass)
+#   /media/download/902794 -> 200, 421,397 bytes (a DRAFT, UNPUBLISHED record's
+#                             master, downloadable anonymously)
+#
+# Default is now closed. `download` and `stream` are deliberately reopened because
+# they enforce access themselves via MediaFileServer::authorise(), which:
+#   - resolves the parent description (walking parent_id for derivatives),
+#   - requires QubitAcl 'read' on it,
+#   - honours QubitGrantedRight::checkPremis() - the check base AtoM's old
+#     text-master bypass skipped, which is why PREMIS could never restrict a PDF.
+#
+# That restores public access to published PDFs and streamed media without
+# reopening the master gate, and makes a rights statement on a document mean
+# something for the first time.
+#
+# ⚠️ If those in-code checks are ever removed, set these back to is_secure: true -
+# the posture depends on them.
+all:
+  is_secure: true
+
+download:
+  is_secure: false
+
+stream:
+  is_secure: false

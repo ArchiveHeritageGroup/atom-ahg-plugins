@@ -23,6 +23,15 @@ class mediaActions extends AhgController
     {
         $id = (int) $request->getParameter('id');
 
+        // Authorisation gate. These actions previously served ANY digital object
+        // master to anyone - no ACL, no PREMIS, no allowlist - which bypassed the
+        // master gate from #258 and leaked unpublished records. MediaFileServer
+        // checks the parent description is readable AND honours PREMIS rights.
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/MediaFileServer.php';
+        if (null === \MediaFileServer::authorise($id)) {
+            $this->forward404('Digital object not found');
+        }
+
         if (!$id) {
             $this->forward404('Digital object not found');
         }
@@ -62,6 +71,15 @@ class mediaActions extends AhgController
     public function executeDownload($request)
     {
         $id = (int) $request->getParameter('id');
+
+        // Authorisation gate. These actions previously served ANY digital object
+        // master to anyone - no ACL, no PREMIS, no allowlist - which bypassed the
+        // master gate from #258 and leaked unpublished records. MediaFileServer
+        // checks the parent description is readable AND honours PREMIS rights.
+        require_once sfConfig::get('sf_plugins_dir') . '/ahgIiifPlugin/lib/MediaFileServer.php';
+        if (null === \MediaFileServer::authorise($id)) {
+            $this->forward404('Digital object not found');
+        }
 
         if (!$id) {
             $this->forward404('Digital object not found');
