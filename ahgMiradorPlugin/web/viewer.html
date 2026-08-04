@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mirador viewer</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #1a1a1a; }
+    #mirador { position: absolute; inset: 0; }
+    #msg { color: #ccc; font: 14px system-ui, sans-serif; padding: 1rem; }
+  </style>
+</head>
+<body>
+  <!--
+    Mirador is mounted in its own document on purpose.
+
+    It is a full React/Material-UI application that expects to own its viewport and
+    positions panels absolutely. Dropped straight into an AtoM page it collides with
+    the Bootstrap bundle and its panels scatter as dark blocks. OpenSeadragon has no
+    such problem - it paints to a canvas and owns a single element - which is why
+    viewer plugins should declare HOW they need to be mounted rather than being
+    assumed interchangeable.
+
+    Deliberately a static file: ahgMiradorPlugin ships no routes and no PHP, so the
+    whole plugin stays a drop-in directory.
+  -->
+  <div id="mirador"></div>
+  <div id="msg" hidden>No manifest supplied.</div>
+
+  <script src="./mirador/mirador.min.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var params = new URLSearchParams(window.location.search);
+      var manifest = params.get('manifest');
+
+      if (!manifest) {
+        document.getElementById('msg').hidden = false;
+        return;
+      }
+
+      // Only same-origin manifests, so this page cannot be used to frame arbitrary
+      // remote content.
+      var url;
+      try {
+        url = new URL(manifest, window.location.origin);
+      } catch (e) {
+        document.getElementById('msg').hidden = false;
+        return;
+      }
+      if (url.origin !== window.location.origin) {
+        document.getElementById('msg').textContent = 'Manifest must be same-origin.';
+        document.getElementById('msg').hidden = false;
+        return;
+      }
+
+      Mirador.viewer({
+        id: 'mirador',
+        windows: [{ manifestId: url.href }],
+        window: { allowClose: false, allowMaximize: false, sideBarOpenByDefault: false },
+        workspaceControlPanel: { enabled: false }
+      });
+    })();
+  </script>
+</body>
+</html>

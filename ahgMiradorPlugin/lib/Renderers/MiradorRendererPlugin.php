@@ -26,14 +26,22 @@ class MiradorRendererPlugin implements RendererInterface
         $manifest = htmlspecialchars((string) ($config['manifestUrl'] ?? ''), ENT_QUOTES);
         $height   = $this->height((string) ($config['options']['height'] ?? '600px'));
 
+        // Mounted in an iframe on purpose: Mirador is a full React/Material-UI app
+        // that expects to own its viewport and positions panels absolutely. Inline in
+        // an AtoM page it collides with Bootstrap and its panels scatter as dark
+        // blocks. The iframe target is a STATIC page in this plugin's own web/ dir,
+        // so the plugin still ships no routes and no PHP.
+        $src = '/plugins/ahgMiradorPlugin/web/viewer.html?manifest=' . rawurlencode((string) ($config['manifestUrl'] ?? ''));
+
         return '<div id="mirador-' . $id . '" class="mirador-viewer" data-viewer="mirador"'
              . ' data-rendered-by="ahgMiradorPlugin"'
              . ' data-manifest="' . $manifest . '"'
              . ' data-assets="/plugins/ahgMiradorPlugin/web/mirador"'
-             // position:relative matters: Mirador positions its panels absolutely
-             // against the nearest positioned ancestor. Without it they escape the
-             // container and render as misplaced dark blocks over the page.
-             . ' style="position:relative;overflow:hidden;width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;"></div>';
+             . ' style="position:relative;overflow:hidden;width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;">'
+             . '<iframe src="' . htmlspecialchars($src, ENT_QUOTES) . '"'
+             . ' title="Mirador viewer" loading="lazy"'
+             . ' style="border:0;width:100%;height:100%;display:block;"></iframe>'
+             . '</div>';
     }
 
     public function getName(): string
