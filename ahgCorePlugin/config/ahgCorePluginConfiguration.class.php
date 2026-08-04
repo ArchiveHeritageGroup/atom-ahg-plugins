@@ -9,6 +9,16 @@
 class ahgCorePluginConfiguration extends sfPluginConfiguration
 {
     /**
+     * Shown by AtoM's stock plugin admin (sfPluginAdminPlugin). A plugin without
+     * $summary is silently omitted from that list - see
+     * plugins/sfPluginAdminPlugin/modules/sfPluginAdminPlugin/actions/pluginsAction.class.php:59.
+     * Must not contain the word "theme", which the same line uses to filter themes out.
+     */
+    public static $summary = 'Core utilities and shared services for AHG plugins';
+
+    public static $version = '1.0.0';
+
+    /**
      * Plugin initialization
      */
     public function initialize()

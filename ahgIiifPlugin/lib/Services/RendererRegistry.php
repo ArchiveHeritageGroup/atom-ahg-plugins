@@ -123,5 +123,53 @@ class RendererRegistry
                 }
             }
         }
+
+        $this->discoverFromPlugins();
+    }
+
+    /**
+     * Discover renderers contributed by OTHER plugins.
+     *
+     * Convention: any enabled plugin may ship <plugin>/lib/Renderers/*.php. This is
+     * what lets a viewer (OpenSeadragon, Mirador, ...) be an independent plugin
+     * rather than a file inside this one - install it and it registers itself,
+     * disable it and the registry falls through to the next by priority.
+     *
+     * Class names are detected by diffing get_declared_classes() around the
+     * require, so a contributing plugin is free to use its own namespace and this
+     * registry never has to guess it.
+     */
+    private function discoverFromPlugins(): void
+    {
+        if (!class_exists('\sfConfig', false)) {
+            return;
+        }
+
+        $pluginsDir = \sfConfig::get('sf_plugins_dir');
+        if (!$pluginsDir || !is_dir($pluginsDir)) {
+            return;
+        }
+
+        foreach ((array) glob($pluginsDir . '/*/lib/Renderers/*.php') as $file) {
+            $before = get_declared_classes();
+
+            require_once $file;
+
+            foreach (array_diff(get_declared_classes(), $before) as $className) {
+                if (!in_array(RendererInterface::class, class_implements($className) ?: [], true)) {
+                    continue;
+                }
+
+                $instance = new $className();
+
+                foreach ($this->renderers as $existing) {
+                    if ($existing->getName() === $instance->getName()) {
+                        continue 2;
+                    }
+                }
+
+                $this->register($instance);
+            }
+        }
     }
 }
