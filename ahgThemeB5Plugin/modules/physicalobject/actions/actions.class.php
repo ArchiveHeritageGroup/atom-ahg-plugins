@@ -7,6 +7,9 @@ require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/
 require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/indexAction.class.php';
 require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/browseAction.class.php';
 require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/deleteAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/boxListAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/holdingsReportExportAction.class.php';
+require_once sfConfig::get('sf_root_dir') . '/apps/qubit/modules/physicalobject/actions/autocompleteAction.class.php';
 
 /**
  * Extended Physical Object Actions
@@ -140,5 +143,53 @@ class physicalobjectActions extends AhgController
     {
         $action = new PhysicalObjectDeleteAction($this->context, 'physicalobject', 'delete');
         return $action->execute($request);
+    }
+
+    // AtoM resolves actions plugin-first (qubitConfiguration::getControllerDirs) and
+    // sfController::controllerExists() stops at the FIRST directory holding an
+    // actions.class.php - it returns false when the method is missing instead of
+    // looking further. So every action this class omits is shadowed for the whole
+    // module, base AtoM's own included, and 404s. boxList, holdingsReportExport and
+    // autocomplete did exactly that. Delegate them the way executeBrowse() does.
+
+    public function executeBoxList($request)
+    {
+        return $this->delegateToBaseAction(
+            new PhysicalObjectBoxListAction($this->context, 'physicalobject', 'boxList'),
+            $request
+        );
+    }
+
+    public function executeHoldingsReportExport($request)
+    {
+        return $this->delegateToBaseAction(
+            new PhysicalObjectHoldingsReportExportAction($this->context, 'physicalobject', 'holdingsReportExport'),
+            $request
+        );
+    }
+
+    public function executeAutocomplete($request)
+    {
+        return $this->delegateToBaseAction(
+            new PhysicalObjectAutocompleteAction($this->context, 'physicalobject', 'autocomplete'),
+            $request
+        );
+    }
+
+    /**
+     * Run a base AtoM action and copy its public template variables onto this
+     * controller. get_object_vars() is called from outside the action's own class,
+     * so only public properties are copied - the action's internal state is left
+     * alone.
+     */
+    private function delegateToBaseAction($action, $request)
+    {
+        $result = $action->execute($request);
+
+        foreach (get_object_vars($action) as $key => $value) {
+            $this->{$key} = $value;
+        }
+
+        return $result;
     }
 }
