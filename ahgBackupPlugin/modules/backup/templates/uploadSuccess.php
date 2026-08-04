@@ -378,6 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch('<?php echo url_for(['module' => 'backup', 'action' => 'deleteUpload']) ?>', {
                 method: 'POST',
                 headers: {
+                  'X-CSRF-TOKEN': '<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>',
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Requested-With': 'XMLHttpRequest'
                 },

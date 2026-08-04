@@ -141,7 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch('<?php echo url_for(['module' => 'backup', 'action' => 'doRestoreUpload']) ?>', {
             method: 'POST',
-            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            headers: {
+                  'X-CSRF-TOKEN': '<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>','X-Requested-With': 'XMLHttpRequest'},
             body: new URLSearchParams(formData)
         })
         .then(r => r.json())

@@ -421,7 +421,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         fetch('<?php echo url_for(['module' => 'backup', 'action' => 'testConnection']) ?>', {
             method: 'POST',
-            headers: {'X-Requested-With': 'XMLHttpRequest'}
+            headers: {
+                  'X-CSRF-TOKEN': '<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>','X-Requested-With': 'XMLHttpRequest'}
         })
         .then(r => r.json())
         .then(data => {
@@ -503,6 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
             fetch('<?php echo url_for(['module' => 'backup', 'action' => 'delete']) ?>', {
                 method: 'POST',
                 headers: {
+                  'X-CSRF-TOKEN': '<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>',
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
@@ -530,6 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('<?php echo url_for(['module' => 'backup', 'action' => 'create']) ?>', {
             method: 'POST',
             headers: {
+                  'X-CSRF-TOKEN': '<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>',
                 'Content-Type': 'application/x-www-form-urlencoded',
                 'X-Requested-With': 'XMLHttpRequest'
             },
@@ -561,7 +564,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             fetch('<?php echo url_for(['module' => 'backup', 'action' => 'createIncremental']) ?>', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                headers: {
+                  'X-CSRF-TOKEN': '<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>', 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
                 body: 'database=1&uploads=1&plugins=1&framework=1'
             })
             .then(function(r) { return r.json(); })
