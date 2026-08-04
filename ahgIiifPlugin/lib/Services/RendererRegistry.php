@@ -150,7 +150,27 @@ class RendererRegistry
             return;
         }
 
-        foreach ((array) glob($pluginsDir . '/*/lib/Renderers/*.php') as $file) {
+        // Only ENABLED plugins contribute. Globbing the filesystem instead would
+        // keep using a renderer from a plugin the administrator has just disabled -
+        // the directory is still on disk, so disabling it in the admin UI would
+        // appear to do nothing at all.
+        $enabled = [];
+        if (class_exists('\ProjectConfiguration')) {
+            $configuration = \ProjectConfiguration::getActive();
+            if ($configuration) {
+                $enabled = (array) $configuration->getPlugins();
+            }
+        }
+        if (!$enabled) {
+            return;
+        }
+
+        $files = [];
+        foreach ($enabled as $plugin) {
+            $files = array_merge($files, (array) glob($pluginsDir . '/' . $plugin . '/lib/Renderers/*.php'));
+        }
+
+        foreach ($files as $file) {
             $before = get_declared_classes();
 
             require_once $file;

@@ -179,6 +179,15 @@ class ViewerInjector
             $plugin = $m[1];
         }
 
+        // No owning plugin means no boot script, and a viewer container with nothing
+        // to initialise it is just a permanent black rectangle - worse than showing
+        // AtoM's ordinary image display. Only the viewer PLUGINS ship a boot.js;
+        // ahgIiifPlugin's built-in renderers are booted by its own templates, which
+        // are not in play on a theme-less install. So inject nothing.
+        if ('' === $plugin) {
+            return $content;
+        }
+
         $nonce = (string) \sfConfig::get('csp_nonce', '');
         $nonceAttr = $nonce ? ' ' . preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
 

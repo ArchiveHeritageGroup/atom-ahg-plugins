@@ -30,7 +30,10 @@ class MiradorRendererPlugin implements RendererInterface
              . ' data-rendered-by="ahgMiradorPlugin"'
              . ' data-manifest="' . $manifest . '"'
              . ' data-assets="/plugins/ahgMiradorPlugin/web/mirador"'
-             . ' style="width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;"></div>';
+             // position:relative matters: Mirador positions its panels absolutely
+             // against the nearest positioned ancestor. Without it they escape the
+             // container and render as misplaced dark blocks over the page.
+             . ' style="position:relative;overflow:hidden;width:100%;height:' . $height . ';background:#1a1a1a;border-radius:8px;"></div>';
     }
 
     public function getName(): string
