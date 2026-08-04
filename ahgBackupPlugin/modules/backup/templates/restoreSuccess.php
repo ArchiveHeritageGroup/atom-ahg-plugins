@@ -40,6 +40,7 @@ $components = $backup['components'] ?? [];
                 <h6 class="mb-3"><?php echo __('Select components to restore:') ?></h6>
                 
                 <form id="restore-form">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
                     <input type="hidden" name="id" value="<?php echo esc_entities($backupId) ?>">
                     
                     <?php if (!empty($components['database'])): ?>

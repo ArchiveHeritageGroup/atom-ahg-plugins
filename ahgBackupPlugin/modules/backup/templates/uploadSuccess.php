@@ -34,6 +34,7 @@ function formatBytes($bytes) {
             </div>
             <div class="card-body">
                 <form id="upload-form" enctype="multipart/form-data">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
                     <!-- Upload Type Selection -->
                     <div class="mb-4">
                         <label class="form-label fw-bold"><?php echo __('Upload Type') ?></label>

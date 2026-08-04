@@ -137,12 +137,14 @@ foreach ($backups as $backup) {
                                 </div>
                                 <div class="btn-group btn-group-sm">
                                     <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'toggleSchedule']) ?>" class="d-inline">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
                                         <input type="hidden" name="id" value="<?php echo $sched->id ?>">
                                         <button type="submit" class="btn btn-sm <?php echo $sched->is_active ? 'btn-success' : 'btn-outline-secondary' ?>" title="<?php echo $sched->is_active ? __('Active — click to pause') : __('Paused — click to activate') ?>">
                                             <i class="fas <?php echo $sched->is_active ? 'fa-check' : 'fa-pause' ?>"></i>
                                         </button>
                                     </form>
                                     <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'deleteSchedule']) ?>" class="d-inline" onsubmit="return confirm('Delete this schedule?')">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
                                         <input type="hidden" name="id" value="<?php echo $sched->id ?>">
                                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                     </form>
@@ -578,6 +580,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div class="modal fade" id="createScheduleModal" tabindex="-1" aria-labelledby="createScheduleModalLabel" aria-modal="true">
     <div class="modal-dialog">
         <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'createSchedule']) ?>">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="createScheduleModalLabel"><i class="fas fa-clock me-2"></i><?php echo __('Create Backup Schedule') ?></h5>

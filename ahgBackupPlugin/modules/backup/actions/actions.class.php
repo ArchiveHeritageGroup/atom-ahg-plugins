@@ -134,10 +134,22 @@ if (!$this->getUser()->isAdministrator()) {
     // SCHEDULE MANAGEMENT
     // ==========================================
 
+    /**
+     * Schedules are listed on the index page (indexSuccess.php renders the full
+     * table), and nothing in the UI links here. The action had no
+     * schedulesSuccess.php template, so reaching this URL directly produced a 500 -
+     * "The template schedulesSuccess.php does not exist or is unreadable".
+     *
+     * Redirect to the page that actually shows them rather than adding a second,
+     * duplicate template to maintain.
+     */
     public function executeSchedules($request)
     {
-        $scheduleService = new \AtomExtensions\Services\ScheduleService();
-        $this->schedules = $scheduleService->getSchedules();
+        $this->redirect(['module' => 'backup', 'action' => 'index']);
+
+        // AhgController::redirect() does not throw, so returning is required or
+        // execution continues into the missing-template path.
+        return sfView::NONE;
     }
 
     public function executeCreateSchedule($request)

@@ -16,6 +16,7 @@ $settingsMap = $sf_data->getRaw('settingsMap') ?? [];
 ]) ?>
 
 <form method="post" action="<?php echo url_for(['module' => 'backup', 'action' => 'settings']) ?>">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(function_exists('csrf_token') ? csrf_token() : (class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : ''), ENT_QUOTES); ?>">
     <div class="row">
         <div class="col-lg-8">
             <!-- Storage Settings -->
