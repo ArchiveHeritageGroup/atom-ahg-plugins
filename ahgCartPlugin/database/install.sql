@@ -8,23 +8,23 @@
 
 -- Cart table (holds items before checkout)
 CREATE TABLE IF NOT EXISTS `cart` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `user_id` INT DEFAULT NULL,
-  `session_id` VARCHAR(255) DEFAULT NULL,
-  `archival_description_id` INT DEFAULT NULL,
-  `archival_description` VARCHAR(1024) DEFAULT NULL,
-  `slug` VARCHAR(1024) DEFAULT NULL,
-  `product_type_id` INT DEFAULT NULL,
-  `quantity` INT DEFAULT 1,
-  `unit_price` DECIMAL(10,2) DEFAULT NULL,
-  `notes` TEXT DEFAULT NULL,
-  `completed_at` DATETIME DEFAULT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(50) DEFAULT NULL,
+  `session_id` varchar(128) DEFAULT NULL,
+  `archival_description_id` varchar(50) DEFAULT NULL,
+  `archival_description` varchar(1024) DEFAULT NULL,
+  `slug` varchar(1024) DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `product_type_id` int DEFAULT NULL,
+  `selected_products` json DEFAULT NULL,
+  `unit_price` decimal(10,2) DEFAULT NULL,
+  `quantity` int DEFAULT '1',
+  `notes` text,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  INDEX `idx_cart_user` (`user_id`),
-  INDEX `idx_cart_description` (`archival_description_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_cart_session` (`session_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- E-Commerce Settings (per repository)
 CREATE TABLE IF NOT EXISTS `ahg_ecommerce_settings` (
@@ -83,31 +83,32 @@ CREATE TABLE IF NOT EXISTS `ahg_product_pricing` (
 
 -- Orders
 CREATE TABLE IF NOT EXISTS `ahg_order` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `order_number` VARCHAR(50) NOT NULL,
-  `user_id` INT NOT NULL,
-  `repository_id` INT DEFAULT NULL,
-  `status` VARCHAR(69) COMMENT 'pending, paid, processing, completed, cancelled, refunded' DEFAULT 'pending',
-  `subtotal` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `vat_amount` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `total` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `currency` VARCHAR(3) DEFAULT 'ZAR',
-  `customer_name` VARCHAR(255) DEFAULT NULL,
-  `customer_email` VARCHAR(255) DEFAULT NULL,
-  `customer_phone` VARCHAR(50) DEFAULT NULL,
-  `billing_address` TEXT DEFAULT NULL,
-  `shipping_address` TEXT DEFAULT NULL,
-  `notes` TEXT DEFAULT NULL,
-  `paid_at` DATETIME DEFAULT NULL,
-  `completed_at` DATETIME DEFAULT NULL,
-  `cancelled_at` DATETIME DEFAULT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `session_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `repository_id` int DEFAULT NULL,
+  `status` varchar(62) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending' COMMENT 'pending, paid, processing, completed, cancelled, refunded',
+  `subtotal` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `vat_amount` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `total` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `currency` varchar(3) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'ZAR',
+  `customer_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `customer_phone` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `billing_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `shipping_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `paid_at` datetime DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `cancelled_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_order_number` (`order_number`),
-  INDEX `idx_order_user` (`user_id`),
-  INDEX `idx_order_status` (`status`),
-  INDEX `idx_order_repo` (`repository_id`)
+  KEY `idx_order_user` (`user_id`),
+  KEY `idx_order_status` (`status`),
+  KEY `idx_order_repo` (`repository_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Order Items

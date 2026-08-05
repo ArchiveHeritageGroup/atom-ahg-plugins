@@ -44,22 +44,37 @@ CREATE TABLE IF NOT EXISTS ingest_session (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Uploaded files for an ingest session
-CREATE TABLE IF NOT EXISTS ingest_file (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    session_id INT NOT NULL,
-    file_type VARCHAR(36) COMMENT 'csv, zip, ead, directory' NOT NULL,
-    original_name VARCHAR(500),
-    stored_path VARCHAR(1000) NOT NULL,
-    file_size BIGINT DEFAULT 0,
-    mime_type VARCHAR(100),
-    row_count INT DEFAULT NULL,
-    `delimiter` VARCHAR(5) DEFAULT NULL,
-    encoding VARCHAR(50) DEFAULT NULL,
-    headers JSON DEFAULT NULL,
-    extracted_path VARCHAR(1000) DEFAULT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    KEY idx_session (session_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `ingest_file` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `session_id` int NOT NULL,
+  `file_type` varchar(31) NOT NULL COMMENT 'csv, zip, ead, directory',
+  `original_name` varchar(500) DEFAULT NULL,
+  `stored_path` varchar(1000) NOT NULL,
+  `file_size` bigint DEFAULT '0',
+  `mime_type` varchar(100) DEFAULT NULL,
+  `row_count` int DEFAULT NULL,
+  `delimiter` varchar(5) DEFAULT NULL,
+  `encoding` varchar(50) DEFAULT NULL,
+  `headers` json DEFAULT NULL,
+  `extracted_path` varchar(1000) DEFAULT NULL,
+  `status` varchar(32) NOT NULL DEFAULT 'pending',
+  `stage` varchar(32) DEFAULT NULL,
+  `source_hash` char(64) DEFAULT NULL,
+  `error_message` text,
+  `attempts` int NOT NULL DEFAULT '0',
+  `last_attempt_at` datetime DEFAULT NULL,
+  `resolved_io_id` int DEFAULT NULL,
+  `resolved_do_id` int DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `sidecar_path` varchar(1024) DEFAULT NULL,
+  `sidecar_json` json DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_session` (`session_id`),
+  KEY `ix_ingest_file_status` (`status`),
+  KEY `ix_ingest_file_hash` (`source_hash`),
+  KEY `ix_ingest_file_io` (`resolved_io_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Column mapping for this session
 CREATE TABLE IF NOT EXISTS ingest_mapping (
@@ -75,44 +90,46 @@ CREATE TABLE IF NOT EXISTS ingest_mapping (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Validation results
-CREATE TABLE IF NOT EXISTS ingest_validation (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    session_id INT NOT NULL,
-    `row_number` INT NOT NULL,
-    severity VARCHAR(32) COMMENT 'error, warning, info' DEFAULT 'error',
-    field_name VARCHAR(255) DEFAULT NULL,
-    message TEXT NOT NULL,
-    is_excluded TINYINT(1) DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    KEY idx_session (session_id),
-    KEY idx_row (`row_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `ingest_validation` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `session_id` int NOT NULL,
+  `row_number` int NOT NULL,
+  `severity` varchar(28) DEFAULT 'error' COMMENT 'error, warning, info',
+  `field_name` varchar(255) DEFAULT NULL,
+  `message` text NOT NULL,
+  `is_excluded` tinyint(1) DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_session` (`session_id`),
+  KEY `idx_row` (`row_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Parsed rows with enriched data
-CREATE TABLE IF NOT EXISTS ingest_row (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    session_id INT NOT NULL,
-    `row_number` INT NOT NULL,
-    legacy_id VARCHAR(255) DEFAULT NULL,
-    parent_id_ref VARCHAR(255) DEFAULT NULL,
-    level_of_description VARCHAR(100) DEFAULT NULL,
-    title VARCHAR(1000),
-    `data` JSON NOT NULL,
-    enriched_data JSON DEFAULT NULL,
-    digital_object_path VARCHAR(1000) DEFAULT NULL,
-    digital_object_matched TINYINT(1) DEFAULT 0,
-    metadata_extracted JSON DEFAULT NULL,
-    checksum_sha256 VARCHAR(64) DEFAULT NULL,
-    is_valid TINYINT(1) DEFAULT 1,
-    is_excluded TINYINT(1) DEFAULT 0,
-    created_atom_id INT DEFAULT NULL,
-    created_do_id INT DEFAULT NULL,
-    created_accession_id INT DEFAULT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    KEY idx_session (session_id),
-    KEY idx_legacy (legacy_id),
-    KEY idx_valid (is_valid)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `ingest_row` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `session_id` int NOT NULL,
+  `row_number` int NOT NULL,
+  `legacy_id` varchar(255) DEFAULT NULL,
+  `parent_id_ref` varchar(255) DEFAULT NULL,
+  `level_of_description` varchar(100) DEFAULT NULL,
+  `title` varchar(1000) DEFAULT NULL,
+  `data` json NOT NULL,
+  `enriched_data` json DEFAULT NULL,
+  `digital_object_path` varchar(1000) DEFAULT NULL,
+  `digital_object_matched` tinyint(1) DEFAULT '0',
+  `metadata_extracted` json DEFAULT NULL,
+  `checksum_sha256` varchar(64) DEFAULT NULL,
+  `is_valid` tinyint(1) DEFAULT '1',
+  `is_excluded` tinyint(1) DEFAULT '0',
+  `created_atom_id` int DEFAULT NULL,
+  `created_do_id` int DEFAULT NULL,
+  `created_accession_id` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_session` (`session_id`),
+  KEY `idx_legacy` (`legacy_id`),
+  KEY `idx_valid` (`is_valid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Commit job tracking
 CREATE TABLE IF NOT EXISTS ingest_job (

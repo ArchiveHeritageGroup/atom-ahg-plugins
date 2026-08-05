@@ -170,6 +170,7 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_check` (
   `image_reference` text,
   `photo_count` int DEFAULT '0',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT NULL,
   `created_by` int DEFAULT NULL,
   `condition_check_reference` varchar(255) DEFAULT NULL,
   `completeness` varchar(50) DEFAULT NULL,
@@ -190,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_check` (
   KEY `idx_wf_cond` (`workflow_state`),
   KEY `idx_check_date` (`check_date`),
   CONSTRAINT `spectrum_condition_check_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `information_object` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

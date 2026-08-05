@@ -753,6 +753,10 @@ CREATE TABLE IF NOT EXISTS preservation_package_event (
     -- Agent information
     agent_type VARCHAR(34) COMMENT 'user, system, software' DEFAULT 'system',
     agent_value VARCHAR(255),
+    -- created_by, not just created_at: PreservationService writes this column on
+    -- every package event, and the installer omitted it - so a fresh install failed
+    -- with "Unknown column 'created_by'" the first time a package was created.
+    created_by VARCHAR(100) DEFAULT NULL,
 
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 

@@ -48,24 +48,24 @@ CREATE TABLE IF NOT EXISTS atom_migration_job (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Import log for rollback and audit
-CREATE TABLE IF NOT EXISTS atom_migration_log (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    job_id BIGINT UNSIGNED NOT NULL,
-    `row_number` INT,
-    source_identifier VARCHAR(255),
-    target_type VARCHAR(100),
-    target_id INT COMMENT 'AtoM object ID',
-    target_slug VARCHAR(255),
-    action VARCHAR(45) COMMENT 'created, updated, skipped, failed' NOT NULL,
-    source_data JSON,
-    mapped_data JSON,
-    error_message TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_job_id (job_id),
-    INDEX idx_action (action),
-    FOREIGN KEY (job_id) REFERENCES atom_migration_job(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `atom_migration_log` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `job_id` bigint unsigned NOT NULL,
+  `row_number` int DEFAULT NULL,
+  `source_identifier` varchar(255) DEFAULT NULL,
+  `target_type` varchar(100) DEFAULT NULL,
+  `target_id` int DEFAULT NULL COMMENT 'AtoM object ID',
+  `target_slug` varchar(255) DEFAULT NULL,
+  `action` varchar(40) NOT NULL COMMENT 'created, updated, skipped, failed',
+  `source_data` json DEFAULT NULL,
+  `mapped_data` json DEFAULT NULL,
+  `error_message` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_job_id` (`job_id`),
+  KEY `idx_action` (`action`),
+  CONSTRAINT `atom_migration_log_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `atom_migration_job` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Validation rules configuration
 CREATE TABLE IF NOT EXISTS atom_validation_rule (
@@ -86,21 +86,21 @@ CREATE TABLE IF NOT EXISTS atom_validation_rule (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Validation results log
-CREATE TABLE IF NOT EXISTS atom_validation_log (
-    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    job_id BIGINT UNSIGNED,
-    `row_number` INT,
-    column_name VARCHAR(255),
-    rule_type VARCHAR(50),
-    severity VARCHAR(32) COMMENT 'error, warning, info',
-    message TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    INDEX idx_job (job_id),
-    INDEX idx_severity (severity),
-    INDEX idx_row (`row_number`),
-    FOREIGN KEY (job_id) REFERENCES atom_migration_job(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+CREATE TABLE IF NOT EXISTS `atom_validation_log` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `job_id` bigint unsigned DEFAULT NULL,
+  `row_number` int DEFAULT NULL,
+  `column_name` varchar(255) DEFAULT NULL,
+  `rule_type` varchar(50) DEFAULT NULL,
+  `severity` varchar(28) DEFAULT NULL COMMENT 'error, warning, info',
+  `message` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_job` (`job_id`),
+  KEY `idx_severity` (`severity`),
+  KEY `idx_row` (`row_number`),
+  CONSTRAINT `atom_validation_log_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `atom_migration_job` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Add columns to atom_data_mapping for sharing profiles
 -- Uses procedure to safely add columns (MySQL 8 does not support ADD COLUMN IF NOT EXISTS)

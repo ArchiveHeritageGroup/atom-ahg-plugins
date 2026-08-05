@@ -7,25 +7,23 @@
 
 -- Favorites table (user bookmarks for archival descriptions)
 CREATE TABLE IF NOT EXISTS `favorites` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `user_id` VARCHAR(50) DEFAULT NULL,
-  `archival_description_id` VARCHAR(50) DEFAULT NULL,
-  `archival_description` VARCHAR(1024) DEFAULT NULL,
-  `slug` VARCHAR(1024) DEFAULT NULL,
-  `notes` TEXT,
-  `object_type` VARCHAR(50) DEFAULT 'information_object',
-  `reference_code` VARCHAR(255) DEFAULT NULL,
-  `folder_id` INT DEFAULT NULL,
-  `completed_at` DATETIME DEFAULT NULL,
-  `last_viewed_at` DATETIME DEFAULT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(50) DEFAULT NULL,
+  `folder_id` int DEFAULT NULL,
+  `archival_description_id` varchar(50) DEFAULT NULL,
+  `archival_description` varchar(1024) DEFAULT NULL,
+  `slug` varchar(1024) DEFAULT NULL,
+  `url` varchar(1024) DEFAULT NULL,
+  `object_type` varchar(50) DEFAULT 'information_object',
+  `reference_code` varchar(255) DEFAULT NULL,
+  `notes` text,
+  `completed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `last_viewed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  INDEX `idx_user` (`user_id`),
-  INDEX `idx_description` (`archival_description_id`),
-  INDEX `idx_folder` (`folder_id`),
-  UNIQUE KEY `unique_user_item` (`user_id`, `archival_description_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_folder` (`folder_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Favorites folder table (organise bookmarks into folders)
 CREATE TABLE IF NOT EXISTS `favorites_folder` (

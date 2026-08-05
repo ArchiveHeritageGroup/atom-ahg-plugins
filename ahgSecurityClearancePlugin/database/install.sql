@@ -115,19 +115,22 @@ CREATE TABLE IF NOT EXISTS `security_access_log` (
   `user_id` int unsigned DEFAULT NULL,
   `object_id` int NOT NULL,
   `classification_id` int unsigned NOT NULL,
+  `compartment_id` int unsigned DEFAULT NULL,
   `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `access_granted` tinyint(1) NOT NULL,
   `denial_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `justification` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `session_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `prev_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `entry_hash` char(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_sal_object` (`object_id`),
   KEY `idx_sal_user` (`user_id`),
   KEY `idx_sal_classification` (`classification_id`),
-  CONSTRAINT `fk_sal_classification` FOREIGN KEY (`classification_id`) REFERENCES `security_classification` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT `fk_sal_object` FOREIGN KEY (`object_id`) REFERENCES `information_object` (`id`) ON DELETE CASCADE
+  KEY `idx_sal_entry_hash` (`entry_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

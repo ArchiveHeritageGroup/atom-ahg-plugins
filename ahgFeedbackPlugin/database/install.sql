@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS `feedback` (
 -- Feedback i18n table (translatable fields)
 CREATE TABLE IF NOT EXISTS `feedback_i18n` (
   `id` INT NOT NULL,
+  -- status: the feedback module filters on this column (`where status = pending`), and the installer omitted it, so a fresh install
+  -- 500s on /feedback with "Unknown column 'status'".
+  `status` varchar(50) DEFAULT 'pending',
   `culture` VARCHAR(14) NOT NULL DEFAULT 'en',
   `name` VARCHAR(1024) DEFAULT NULL,
   `unique_identifier` VARCHAR(1024) DEFAULT NULL,

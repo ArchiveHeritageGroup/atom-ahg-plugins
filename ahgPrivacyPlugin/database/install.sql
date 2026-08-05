@@ -256,19 +256,25 @@ CREATE TABLE IF NOT EXISTS `privacy_consent_log` (
 
 -- Privacy Consent Record (Simple)
 CREATE TABLE IF NOT EXISTS `privacy_consent_record` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `data_subject_id` VARCHAR(255) NOT NULL,
-  `purpose` VARCHAR(255) NOT NULL,
-  `consent_given` TINYINT(1) DEFAULT 0,
-  `consent_date` DATETIME DEFAULT NULL,
-  `withdrawal_date` DATETIME DEFAULT NULL,
-  `source` VARCHAR(100) DEFAULT NULL,
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `status` VARCHAR(50) DEFAULT 'active',
-  `withdrawn_date` DATE DEFAULT NULL,
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `data_subject_id` varchar(255) NOT NULL,
+  `subject_name` varchar(255) DEFAULT NULL,
+  `subject_email` varchar(255) DEFAULT NULL,
+  `purpose` varchar(255) NOT NULL,
+  `consent_given` tinyint(1) DEFAULT '0',
+  `consent_method` varchar(50) DEFAULT 'form',
+  `consent_date` datetime DEFAULT NULL,
+  `withdrawal_date` datetime DEFAULT NULL,
+  `source` varchar(100) DEFAULT NULL,
+  `jurisdiction` varchar(20) DEFAULT 'popia',
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_by` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `status` varchar(50) DEFAULT 'active',
+  `withdrawn_date` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_subject` (`data_subject_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Privacy Data Inventory
 CREATE TABLE IF NOT EXISTS `privacy_data_inventory` (
