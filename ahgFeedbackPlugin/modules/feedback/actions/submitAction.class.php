@@ -44,7 +44,16 @@ class feedbackSubmitAction extends AhgController
                 $this->processForm();
 
                 $this->getUser()->setFlash('notice', $this->context->i18n->__('Thank you for your feedback.'));
-                $this->redirect([$this->informationObject, 'module' => 'informationobject']);
+
+                // Back to the record the feedback was about. The previous
+                // [$this->informationObject, 'module' => 'informationobject'] is the
+                // legacy url_for form: the resource sits at index 0 where nothing
+                // reads it, so no slug reached the URL and every submission landed on
+                // the browse page instead of the description.
+                $this->redirect([
+                    'module' => 'informationobject',
+                    'slug' => $this->informationObject->slug,
+                ]);
             }
         }
     }

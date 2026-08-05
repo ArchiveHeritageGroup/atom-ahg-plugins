@@ -44,17 +44,20 @@
                 <div class="mb-3">
                     <label class="form-label fw-semibold"><?php echo __('Feedback Type') ?> <span class="text-danger">*</span></label>
                     <?php echo $form->feed_type_id->render(['class' => 'form-select']) ?>
+                    <?php if ($form['feed_type_id']->hasError()): ?><div class="invalid-feedback d-block"><?php echo $form['feed_type_id']->renderError() ?></div><?php endif ?>
                     <small class="text-muted"><?php echo __('Select the type of feedback you are providing') ?></small>
                 </div>
                 
                 <div class="mb-3">
                     <label class="form-label fw-semibold"><?php echo __('Your Feedback / Comments') ?> <span class="text-danger">*</span></label>
                     <?php echo $form->remarks->render(['class' => 'form-control', 'rows' => 5, 'placeholder' => __('Please provide details about your feedback, correction, or suggestion...')]) ?>
+                    <?php if ($form['remarks']->hasError()): ?><div class="invalid-feedback d-block"><?php echo $form['remarks']->renderError() ?></div><?php endif ?>
                 </div>
                 
                 <div class="mb-0">
                     <label class="form-label fw-semibold"><?php echo __('Your Relationship to this Record') ?></label>
                     <?php echo $form->feed_relationship->render(['class' => 'form-control', 'rows' => 2, 'placeholder' => __('e.g., Family member, researcher, previous owner, community member...')]) ?>
+                    <?php if ($form['feed_relationship']->hasError()): ?><div class="invalid-feedback d-block"><?php echo $form['feed_relationship']->renderError() ?></div><?php endif ?>
                 </div>
             </div>
         </div>
@@ -70,16 +73,19 @@
                     <div class="col-md-6">
                         <label class="form-label fw-semibold"><?php echo __('Name') ?> <span class="text-danger">*</span></label>
                         <?php echo $form->feed_name->render(['class' => 'form-control', 'placeholder' => __('Your first name')]) ?>
+                    <?php if ($form['feed_name']->hasError()): ?><div class="invalid-feedback d-block"><?php echo $form['feed_name']->renderError() ?></div><?php endif ?>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold"><?php echo __('Surname') ?> <span class="text-danger">*</span></label>
                         <?php echo $form->feed_surname->render(['class' => 'form-control', 'placeholder' => __('Your surname')]) ?>
+                    <?php if ($form['feed_surname']->hasError()): ?><div class="invalid-feedback d-block"><?php echo $form['feed_surname']->renderError() ?></div><?php endif ?>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold"><?php echo __('Phone Number') ?></label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-phone"></i></span>
                             <?php echo $form->feed_phone->render(['class' => 'form-control', 'placeholder' => __('Contact number')]) ?>
+                    <?php if ($form['feed_phone']->hasError()): ?><div class="invalid-feedback d-block"><?php echo $form['feed_phone']->renderError() ?></div><?php endif ?>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -87,6 +93,7 @@
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                             <?php echo $form->feed_email->render(['class' => 'form-control', 'placeholder' => __('your@email.com')]) ?>
+                    <?php if ($form['feed_email']->hasError()): ?><div class="invalid-feedback d-block"><?php echo $form['feed_email']->renderError() ?></div><?php endif ?>
                         </div>
                     </div>
                 </div>
