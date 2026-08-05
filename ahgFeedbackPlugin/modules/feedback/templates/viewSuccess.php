@@ -45,7 +45,7 @@
         <i class="fas fa-cog me-1"></i> <?php echo __('Actions') ?>
     </div>
     <div class="card-body d-grid gap-2">
-        <a href="<?php echo url_for([$resource, 'module' => 'feedback', 'action' => 'edit']) ?>" class="btn btn-primary btn-sm">
+        <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'edit', 'id' => $resource->id]) ?>" class="btn btn-primary btn-sm">
             <i class="fas fa-edit me-1"></i> <?php echo __('Edit') ?>
         </a>
     </div>

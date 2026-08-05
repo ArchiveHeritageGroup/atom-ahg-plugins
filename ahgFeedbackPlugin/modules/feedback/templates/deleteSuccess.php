@@ -25,14 +25,32 @@
                 </p>
             </div>
             <div class="card-footer bg-light">
-                <div class="d-flex justify-content-between">
-                    <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'browse']) ?>" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-1"></i> <?php echo __('Cancel') ?>
-                    </a>
-                    <a href="<?php echo url_for([$resource, 'module' => 'feedback', 'action' => 'delete', 'confirm' => 1]) ?>" class="btn btn-danger">
-                        <i class="fas fa-trash me-1"></i> <?php echo __('Yes, Delete') ?>
-                    </a>
-                </div>
+                <?php
+                // Confirmation is a POST, not a link. The action requires POST or
+                // DELETE precisely so a GET - a prefetch, a crawler, an <img> tag
+                // pointed at this URL - cannot delete feedback, which means the
+                // previous anchor could never have worked even once it rendered.
+                //
+                // It did not render: url_for([$resource, ...]) is the legacy form,
+                // and with $resource now a plain row object rather than a Propel
+                // model it threw 'Cannot use object of type stdClass as array' out
+                // of QubitRoute. The exception escaped mid-slot, so the content slot
+                // was captured only as far as Cancel and the page lost both the
+                // confirm button and the rest of its layout - which is why it
+                // appeared to have no styling.
+                ?>
+                <form method="post" action="<?php echo url_for(['module' => 'feedback', 'action' => 'delete', 'id' => $resource->id]) ?>">
+                    <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
+                    <input type="hidden" name="confirm" value="1">
+                    <div class="d-flex justify-content-between">
+                        <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'browse']) ?>" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> <?php echo __('Cancel') ?>
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> <?php echo __('Yes, delete') ?>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
