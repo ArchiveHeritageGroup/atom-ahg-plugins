@@ -151,6 +151,7 @@ $users = DB::table('user')
                 <div class="mb-3">
                     <h6>{{ __('Available Actions') }}</h6>
                     <form method="post" action="{{ url_for(['module' => 'spectrum', 'action' => 'generalWorkflowTransition']) }}" class="row g-3">
+<input type="hidden" name="_ahg_csrf_token" value="{{ class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '' }}">
                         <input type="hidden" name="procedure_type" value="{{ $procedureType }}">
                         <input type="hidden" name="from_state" value="{{ $currentStateName }}">
 

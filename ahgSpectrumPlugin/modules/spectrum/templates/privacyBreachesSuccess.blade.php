@@ -67,6 +67,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="/admin/privacy/breaches">
+<input type="hidden" name="_ahg_csrf_token" value="{{ class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '' }}">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>{{ __('Report Data Breach') }}</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>

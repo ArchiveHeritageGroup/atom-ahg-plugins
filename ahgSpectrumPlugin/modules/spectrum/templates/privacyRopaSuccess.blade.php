@@ -46,6 +46,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="/admin/privacy/ropa">
+<input type="hidden" name="_ahg_csrf_token" value="{{ class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '' }}">
                 <div class="modal-header">
                     <h5 class="modal-title"><i class="fas fa-clipboard-list me-2"></i>{{ __('Add Processing Activity') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

@@ -1,4 +1,33 @@
-<?php slot('title') ?><?php echo __('Edit Heritage Asset') ?><?php end_slot() ?>
+<?php slot('title') ?><?php echo __('Edit Heritage Asset') ?><script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Attach the CSRF token to this page's non-GET fetches. The framework rejects any
+// mutating request without it, and these templates issue their calls through plain
+// fetch() with no token - so every save, build and delete returned
+// {"error":"CSRF token validation failed"}. Wrapping once is safer than editing each
+// call site, and it leaves GETs untouched.
+(function () {
+    if (window.__ahgCsrfFetchWrapped) { return; }
+    window.__ahgCsrfFetchWrapped = true;
+
+    var token = '<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>';
+    if (!token) { return; }
+
+    var original = window.fetch;
+    window.fetch = function (input, init) {
+        init = init || {};
+        var method = (init.method || (typeof input === 'object' && input && input.method) || 'GET').toUpperCase();
+        var url = (typeof input === 'string') ? input : (input && input.url) || '';
+        var sameOrigin = !/^https?:\/\//i.test(url) || 0 === url.indexOf(window.location.origin);
+
+        if ('GET' !== method && 'HEAD' !== method && sameOrigin) {
+            var headers = new Headers(init.headers || (typeof input === 'object' && input ? input.headers : undefined) || {});
+            if (!headers.has('X-CSRF-TOKEN')) { headers.set('X-CSRF-TOKEN', token); }
+            init.headers = headers;
+        }
+        return original.call(this, input, init);
+    };
+})();
+</script>
+<?php end_slot() ?>
 <?php $rawClasses = $sf_data->getRaw('classes'); $rawStandards = $sf_data->getRaw('standards'); ?>
 
 <div class="container-fluid">
@@ -21,6 +50,7 @@
     <?php endif; ?>
 
     <form method="post">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
         <div class="row">
             <div class="col-md-8">
                 <!-- Basic Information -->

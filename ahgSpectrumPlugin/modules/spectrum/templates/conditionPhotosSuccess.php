@@ -93,6 +93,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                   enctype="multipart/form-data" 
                   id="photo-upload-form"
                   class="dropzone-container">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 
                 <div class="row">
                     <div class="col-md-8">
@@ -203,7 +204,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                                     <img src="<?php echo $photo['file_path']; ?>" 
                                          alt="<?php echo htmlspecialchars($photo['caption'] ?? ''); ?>"
                                          loading="lazy"
-                                         onclick="openLightbox(<?php echo $photo['id']; ?>)">
+                                         class="js-photo-lightbox" data-photo-id="<?php echo $photo['id']; ?>">
                                     
                                     <?php if ($photo['is_primary']): ?>
                                         <span class="badge badge-primary photo-badge"><?php echo __('Primary'); ?></span>
@@ -231,18 +232,21 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                                 
                                 <div class="photo-actions">
                                     <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-outline-primary" onclick="editPhoto(<?php echo $photo['id']; ?>)" title="<?php echo __('Edit'); ?>">
+                                        <button type="button" class="btn btn-outline-secondary js-photo-info" data-photo-id="<?php echo $photo['id']; ?>" title="<?php echo __('Field values'); ?>">
+                                            <i class="fas fa-list"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary js-photo-edit" data-photo-id="<?php echo $photo['id']; ?>" title="<?php echo __('Edit'); ?>">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="rotatePhoto(<?php echo $photo['id']; ?>, 90)" title="<?php echo __('Rotate'); ?>">
+                                        <button type="button" class="btn btn-outline-secondary js-photo-rotate" data-photo-id="<?php echo $photo['id']; ?>" data-angle="90" title="<?php echo __('Rotate'); ?>">
                                             <i class="fas fa-undo"></i>
                                         </button>
                                         <?php if (!$photo['is_primary']): ?>
-                                            <button type="button" class="btn btn-outline-success" onclick="setPrimary(<?php echo $photo['id']; ?>)" title="<?php echo __('Set as Primary'); ?>">
+                                            <button type="button" class="btn btn-outline-success js-photo-primary" data-photo-id="<?php echo $photo['id']; ?>" title="<?php echo __('Set as Primary'); ?>">
                                                 <i class="fas fa-star"></i>
                                             </button>
                                         <?php endif; ?>
-                                        <button type="button" class="btn btn-outline-danger" onclick="deletePhoto(<?php echo $photo['id']; ?>)" title="<?php echo __('Delete'); ?>">
+                                        <button type="button" class="btn btn-outline-danger js-photo-delete" data-photo-id="<?php echo $photo['id']; ?>" title="<?php echo __('Delete'); ?>">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -305,6 +309,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
         </div>
         <div class="card-body">
             <form action="<?php echo url_for(['module' => 'spectrum', 'action' => 'conditionPhotos', 'slug' => $objectSlug, 'condition_id' => $conditionCheckId, 'photo_action' => 'create_comparison']); ?>" method="post">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <div class="row">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -378,6 +383,21 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
 </div>
 
 <!-- Edit Photo Modal -->
+
+<!-- Stored field values for one uploaded image -->
+<div class="modal fade" id="photo-info-modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><?php echo __('Field values'); ?></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="<?php echo __('Close'); ?>"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-sm table-striped mb-0" id="photo-info-table"><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal fade" id="edit-photo-modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -434,8 +454,16 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Photo data for lightbox
-var photos = <?php echo json_encode($photos); ?>;
+<?php // sfOutputEscaper::unescape() first: inside a template $photos is an
+      // sfOutputEscaperArrayDecorator, and json_encode() on a decorator emits {}
+      // rather than the array - so photos.find() threw and every button that
+      // depends on this array (edit, lightbox) silently died. ?>
+var photos = <?php echo json_encode(sfOutputEscaper::unescape($photos)); ?>;
 var currentPhotoIndex = 0;
+var csrfToken = '<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>';
+// Dedicated JSON endpoints. The page action only ever handled 'upload',
+// so posting ?photo_action=delete|rotate|set_primary|edit to it did nothing.
+var photoBase = '<?php echo url_for(['module' => 'spectrum', 'action' => 'photoDelete', 'photo_id' => 0]); ?>'.replace(/photo\/delete\/0\/?$/, 'photo/');
 var baseUrl = '<?php echo url_for(['module' => 'spectrum', 'action' => 'conditionPhotos', 'slug' => $objectSlug, 'condition_id' => $conditionCheckId]); ?>';
 
 // Initialize on page load
@@ -546,7 +574,7 @@ function initSortable() {
 
                 fetch(baseUrl + '&photo_action=reorder', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken},
                     body: JSON.stringify({order: order})
                 });
             }
@@ -596,8 +624,9 @@ document.getElementById('edit-photo-form').addEventListener('submit', function(e
     e.preventDefault();
     var formData = new FormData(this);
 
-    fetch(baseUrl + '&photo_action=edit&photo_id=' + formData.get('photo_id'), {
+    fetch(photoBase + 'update/' + formData.get('photo_id'), {
         method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrfToken },
         body: formData
     })
     .then(function(response) { return response.json(); })
@@ -609,23 +638,27 @@ document.getElementById('edit-photo-form').addEventListener('submit', function(e
 });
 
 function rotatePhoto(photoId, degrees) {
-    fetch(baseUrl + '&photo_action=rotate&photo_id=' + photoId + '&degrees=' + degrees, {
-        method: 'POST'
+    fetch(photoBase + 'rotate/' + photoId + '?degrees=' + degrees, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrfToken }
     })
     .then(function(response) { return response.json(); })
     .then(function(data) {
         if (data.success) {
             var img = document.querySelector('.photo-item[data-id="' + photoId + '"] img');
-            if (img) {
-                img.src = data.thumbnail_url;
+            if (img && data.url) {
+                img.src = data.url;
+            } else {
+                location.reload();
             }
         }
     });
 }
 
 function setPrimary(photoId) {
-    fetch(baseUrl + '&photo_action=set_primary&photo_id=' + photoId, {
-        method: 'POST'
+    fetch(photoBase + 'primary/' + photoId, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrfToken }
     })
     .then(function(response) { return response.json(); })
     .then(function(data) {
@@ -640,8 +673,9 @@ function deletePhoto(photoId) {
         return;
     }
 
-    fetch(baseUrl + '&photo_action=delete&photo_id=' + photoId, {
-        method: 'POST'
+    fetch(photoBase + 'delete/' + photoId, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': csrfToken }
     })
     .then(function(response) { return response.json(); })
     .then(function(data) {
@@ -797,6 +831,65 @@ document.getElementById('annotation-modal').addEventListener('hidden.bs.modal', 
         currentAnnotator = null;
     }
 });
+
+// Delegated listeners, not inline handlers: AtoM's CSP script-src has no
+// 'unsafe-inline', so every onclick="" on the photo cards was refused by the
+// browser and none of the buttons did anything. This block carries the nonce.
+(function () {
+    function bind(selector, fn) {
+        document.querySelectorAll(selector).forEach(function (el) {
+            el.addEventListener('click', function () {
+                var id = parseInt(el.getAttribute('data-photo-id'), 10);
+                if (!id) { return; }
+                fn(id, el);
+            });
+        });
+    }
+
+    // Clicking the image opens the file itself, full page, rather than the modal:
+    // a condition photo is examined at full resolution and the lightbox constrained
+    // it to the viewport. The tile still carries data-photo-id so the entry is found
+    // even if the array order changes.
+    // Every column the query returned is already in the photos array, so the values
+    // are shown from there rather than fetched again.
+    window.showPhotoInfo = function (id) {
+        var photo = Array.isArray(photos) ? photos.find(function (p) { return p.id == id; }) : null;
+        var body = document.querySelector('#photo-info-table tbody');
+        if (!photo || !body) { return; }
+
+        body.innerHTML = '';
+        Object.keys(photo).forEach(function (key) {
+            var value = photo[key];
+            if (value === null || value === '') { value = '\u2014'; }
+            var tr = document.createElement('tr');
+            var th = document.createElement('th');
+            th.className = 'text-nowrap';
+            th.style.width = '35%';
+            th.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+            var td = document.createElement('td');
+            td.textContent = String(value);
+            tr.appendChild(th); tr.appendChild(td); body.appendChild(tr);
+        });
+
+        new bootstrap.Modal(document.getElementById('photo-info-modal')).show();
+    };
+
+    bind('.js-photo-lightbox', function (id) {
+        var photo = Array.isArray(photos) ? photos.find(function (p) { return p.id == id; }) : null;
+        if (photo && photo.file_path) {
+            window.open(photo.file_path, '_blank', 'noopener');
+        } else {
+            openLightbox(id);
+        }
+    });
+    bind('.js-photo-info',     function (id) { showPhotoInfo(id); });
+    bind('.js-photo-edit',     function (id) { editPhoto(id); });
+    bind('.js-photo-primary',  function (id) { setPrimary(id); });
+    bind('.js-photo-delete',   function (id) { deletePhoto(id); });
+    bind('.js-photo-rotate',   function (id, el) {
+        rotatePhoto(id, parseInt(el.getAttribute('data-angle'), 10) || 90);
+    });
+})();
 </script>
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

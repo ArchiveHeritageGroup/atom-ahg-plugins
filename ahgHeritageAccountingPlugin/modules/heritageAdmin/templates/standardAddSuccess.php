@@ -13,6 +13,7 @@
     </div>
 
     <form method="post">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
         <div class="row">
             <div class="col-lg-8">
                 <div class="card mb-4">

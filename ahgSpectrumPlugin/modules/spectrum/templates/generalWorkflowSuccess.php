@@ -146,6 +146,7 @@ $users = DB::table('user')
                 <div class="mb-3">
                     <h6><?php echo __('Available Actions'); ?></h6>
                     <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'generalWorkflowTransition']); ?>" class="row g-3">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                         <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
                         <input type="hidden" name="from_state" value="<?php echo esc_entities($currentStateName); ?>">
 

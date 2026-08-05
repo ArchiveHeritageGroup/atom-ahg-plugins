@@ -199,6 +199,7 @@ if ($users->isEmpty()) {
                     <?php endif; ?>
                     <?php if ($canEdit): ?>
                     <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowSteps', 'slug' => $resource->slug]); ?>">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                         <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
                         <?php foreach ($steps as $index => $step):
                             $st = $stepStates[$step['key']] ?? null;
@@ -223,6 +224,7 @@ if ($users->isEmpty()) {
                     </form>
                     <div class="mt-2">
                         <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowStepsMode', 'slug' => $resource->slug]); ?>" class="d-inline">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                             <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
                             <button type="submit" class="btn btn-sm btn-link text-muted p-0" onclick="return confirm('<?php echo __('Switch step mode for this procedure?'); ?>');">
                                 <i class="fas fa-exchange-alt me-1"></i><?php echo $stepsLinear ? __('Switch to checklist mode (any order)') : __('Switch to linear mode (ordered + gated)'); ?>
@@ -246,6 +248,7 @@ if ($users->isEmpty()) {
                 <div class="mb-3">
                     <h6><?php echo __('Available Actions'); ?></h6>
                     <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowTransition', 'slug' => $resource->slug]); ?>" class="row g-3">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                         <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
                         <input type="hidden" name="from_state" value="<?php echo esc_entities($currentStateName); ?>">
                         

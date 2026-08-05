@@ -99,6 +99,7 @@ $categories = [
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="/admin/privacy/templates" enctype="multipart/form-data">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <input type="hidden" name="form_action" value="upload">
                 <div class="modal-header" style="background-color: #1a5f2a;">
                     <h5 class="modal-title" style="color: #fff;"><i class="fas fa-upload me-2"></i>Upload Template</h5>
@@ -141,6 +142,7 @@ $categories = [
     <div class="modal-dialog">
         <div class="modal-content">
             <form method="post" action="/admin/privacy/templates" enctype="multipart/form-data">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <input type="hidden" name="form_action" value="replace">
                 <input type="hidden" name="id" id="replace_id">
                 <div class="modal-header" style="background-color: #d4a200;">

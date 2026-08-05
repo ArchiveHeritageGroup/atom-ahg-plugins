@@ -1,0 +1,13 @@
+# Collections Procedures is staff-facing: nothing in this module is public.
+#
+# Without this file Symfony applies its default of `is_secure: false`, which made
+# every action public unless it happened to gate itself in code. Four did not -
+# workflow, index, dashboard and loans all rendered to anonymous visitors, exposing
+# procedure states, task assignments and loan activity.
+#
+# Deliberately `is_secure` only, with no `credentials` key: a module-wide
+# `credentials: [editor]` refuses administrators, who hold the administrator
+# credential rather than editor. Actions needing more than "logged in" enforce it
+# themselves - conditionPhotos requires editor or administrator in code.
+all:
+  is_secure: true

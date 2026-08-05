@@ -22,6 +22,7 @@
     <?php endif; ?>
 
     <form method="post">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
         <div class="card">
             <div class="card-header bg-dark text-white">
                 <h5 class="mb-0"><i class="fas fa-balance-scale me-2"></i><?php echo __('Accounting Standards') ?></h5>

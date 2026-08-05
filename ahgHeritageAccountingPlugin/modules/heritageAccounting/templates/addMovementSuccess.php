@@ -14,6 +14,7 @@
     <?php endif; ?>
 
     <form method="post">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
         <div class="card mb-4">
             <div class="card-header bg-dark text-white">
                 <h5 class="mb-0"><?php echo __('Movement Details') ?></h5>

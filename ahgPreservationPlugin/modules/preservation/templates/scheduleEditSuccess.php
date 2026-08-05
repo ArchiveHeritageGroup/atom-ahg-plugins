@@ -25,6 +25,7 @@
             </div>
             <div class="card-body">
                 <form method="post">
+<input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label for="name" class="form-label">Schedule Name *</label>
