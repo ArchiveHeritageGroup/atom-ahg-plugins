@@ -120,7 +120,7 @@ CREATE TABLE IF NOT EXISTS `heritage_asset` (
 -- Valuations History
 CREATE TABLE IF NOT EXISTS `heritage_valuation_history` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `asset_id` INT UNSIGNED NOT NULL,
+    `heritage_asset_id` INT UNSIGNED NOT NULL,
     `valuation_date` DATE NOT NULL,
     `valuation_type` VARCHAR(50) NULL,
     `previous_value` DECIMAL(15,2) NULL,
@@ -133,9 +133,9 @@ CREATE TABLE IF NOT EXISTS `heritage_valuation_history` (
     `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    KEY `idx_asset` (`asset_id`),
+    KEY `idx_asset` (`heritage_asset_id`),
     KEY `idx_date` (`valuation_date`),
-    FOREIGN KEY (`asset_id`) REFERENCES `heritage_asset`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`heritage_asset_id`) REFERENCES `heritage_asset`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Impairments
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `heritage_impairment_assessment` (
 -- Movements/Transfers
 CREATE TABLE IF NOT EXISTS `heritage_movement_register` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `asset_id` INT UNSIGNED NOT NULL,
+    `heritage_asset_id` INT UNSIGNED NOT NULL,
     `movement_date` DATE NOT NULL,
     `movement_type` VARCHAR(98) COMMENT 'acquisition, disposal, transfer, loan_out, loan_return, revaluation, impairment, other' NOT NULL,
     `from_location` VARCHAR(255) NULL,
@@ -190,16 +190,16 @@ CREATE TABLE IF NOT EXISTS `heritage_movement_register` (
     `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    KEY `idx_asset` (`asset_id`),
+    KEY `idx_asset` (`heritage_asset_id`),
     KEY `idx_date` (`movement_date`),
     KEY `idx_type` (`movement_type`),
-    FOREIGN KEY (`asset_id`) REFERENCES `heritage_asset`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`heritage_asset_id`) REFERENCES `heritage_asset`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Journal Entries
 CREATE TABLE IF NOT EXISTS `heritage_journal_entry` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `asset_id` INT UNSIGNED NOT NULL,
+    `heritage_asset_id` INT UNSIGNED NOT NULL,
     `entry_date` DATE NOT NULL,
     `entry_type` VARCHAR(50) NOT NULL,
     `debit_account` VARCHAR(100) NULL,
@@ -210,9 +210,9 @@ CREATE TABLE IF NOT EXISTS `heritage_journal_entry` (
     `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
-    KEY `idx_asset` (`asset_id`),
+    KEY `idx_asset` (`heritage_asset_id`),
     KEY `idx_date` (`entry_date`),
-    FOREIGN KEY (`asset_id`) REFERENCES `heritage_asset`(`id`) ON DELETE CASCADE
+    FOREIGN KEY (`heritage_asset_id`) REFERENCES `heritage_asset`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Compliance Rules (database-driven)
