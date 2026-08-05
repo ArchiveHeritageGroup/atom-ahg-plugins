@@ -27,24 +27,19 @@ class FavoritesImportService
      */
     public function importFromCsv(int $userId, string $csvContent, ?int $folderId = null): array
     {
-        $lines = str_getcsv($csvContent, "\n");
-        if (empty($lines)) {
+        $rows = $this->readCsv($csvContent);
+
+        if (empty($rows)) {
             return ['imported' => 0, 'skipped' => 0, 'errors' => [\__('Empty CSV content.')]];
         }
 
-        // Strip BOM if present
-        $lines[0] = preg_replace('/^\xEF\xBB\xBF/', '', $lines[0]);
-
-        // Parse header
-        $header = str_getcsv($lines[0]);
-        $header = array_map(function ($h) {
-            return strtolower(trim($h));
-        }, $header);
+        $header = array_map([$this, 'normaliseHeading'], array_shift($rows));
 
         $slugCol = array_search('slug', $header);
         $refCol = array_search('reference_code', $header);
+        $dateCol = array_search('date_added', $header);
 
-        if ($slugCol === false && $refCol === false) {
+        if (false === $slugCol && false === $refCol) {
             return ['imported' => 0, 'skipped' => 0, 'errors' => [\__('CSV must have a "slug" or "reference_code" column.')]];
         }
 
@@ -52,8 +47,9 @@ class FavoritesImportService
         $skipped = 0;
         $errors = [];
 
-        for ($i = 1; $i < count($lines); $i++) {
-            $row = str_getcsv($lines[$i]);
+        foreach ($rows as $index => $row) {
+            $i = $index + 1;
+
             if (empty(array_filter($row))) {
                 continue;
             }
@@ -85,12 +81,30 @@ class FavoritesImportService
 
             $result = $this->favService->addToFavorites($userId, (int) $objectId);
             if ($result['success']) {
-                // Move to folder if specified
-                if ($folderId && isset($result['id'])) {
-                    DB::table('favorites')
-                        ->where('id', $result['id'])
-                        ->update(['folder_id' => $folderId, 'updated_at' => date('Y-m-d H:i:s')]);
+                $changes = [];
+
+                if ($folderId) {
+                    $changes['folder_id'] = $folderId;
                 }
+
+                // Preserve the original date when the file carries one. The exporter
+                // writes it, so a round trip keeps when the item was favourited
+                // rather than resetting everything to the moment of import.
+                if (false !== $dateCol && !empty($row[$dateCol])) {
+                    $added = $this->parseDate($row[$dateCol]);
+
+                    if (null === $added) {
+                        $errors[] = \__('Row %1%: unrecognised date "%2%", kept the import date.', ['%1%' => $i, '%2%' => trim($row[$dateCol])]);
+                    } else {
+                        $changes['created_at'] = $added;
+                    }
+                }
+
+                if ($changes && isset($result['id'])) {
+                    $changes['updated_at'] = date('Y-m-d H:i:s');
+                    DB::table('favorites')->where('id', $result['id'])->update($changes);
+                }
+
                 $imported++;
             } else {
                 $skipped++;
@@ -98,6 +112,101 @@ class FavoritesImportService
         }
 
         return ['imported' => $imported, 'skipped' => $skipped, 'errors' => $errors];
+    }
+
+    /**
+     * Parse a CSV document into rows.
+     *
+     * fgetcsv over a stream rather than splitting the text on newlines. The previous
+     * str_getcsv($content, "\n") applied CSV quoting rules with a newline delimiter,
+     * which strips the quotes around a field and then hands the line back to a second
+     * str_getcsv - so a title containing a comma became two fields and shifted every
+     * column after it. The slug column then read whatever happened to land in its
+     * position and the row could not be resolved. It also could not survive a value
+     * containing a line break at all.
+     */
+    private function readCsv(string $content): array
+    {
+        $content = preg_replace('/^\xEF\xBB\xBF/', '', $content);
+
+        $handle = fopen('php://temp', 'r+');
+        fwrite($handle, $content);
+        rewind($handle);
+
+        $rows = [];
+        while (false !== $row = fgetcsv($handle)) {
+            if ([null] === $row) {
+                continue;   // blank line
+            }
+            $rows[] = $row;
+        }
+
+        fclose($handle);
+
+        return $rows;
+    }
+
+    /**
+     * Reduce a column heading to the machine name this importer matches on.
+     *
+     * The exporter writes headings for people to read and runs them through the
+     * translator - 'Reference Code', 'Date Added'. Matching those against literal
+     * 'reference_code' never succeeded, so a file this plugin had just produced
+     * could only be re-imported because the English word 'Slug' happened to match
+     * on its own. Any other locale had no usable column at all.
+     */
+    private function normaliseHeading(string $heading): string
+    {
+        $heading = preg_replace('/^\xEF\xBB\xBF/', '', trim($heading));
+
+        return strtolower(preg_replace('/[\s-]+/', '_', $heading));
+    }
+
+    /**
+     * Normalise a date from a CSV into what MySQL DATETIME accepts.
+     *
+     * Anything the database would reject is reported and the row keeps the import
+     * date rather than failing, since the date is incidental to what is being
+     * imported. Day-first before month-first: this is an en-ZA product, and for an
+     * ambiguous value like 03/04/2026 the local reading is the right one.
+     */
+    private function parseDate(string $value): ?string
+    {
+        $value = trim($value);
+
+        if ('' === $value) {
+            return null;
+        }
+
+        $formats = [
+            'Y-m-d H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d H:i', 'Y-m-d',
+            'd/m/Y H:i:s', 'd/m/Y H:i', 'd/m/Y',
+            'd-m-Y H:i:s', 'd-m-Y',
+            'm/d/Y H:i:s', 'm/d/Y',
+            'd M Y', 'j F Y',
+        ];
+
+        foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $value);
+
+            if (false !== $date && $date->format($format) === $value) {
+                // createFromFormat fills anything the format does not mention from
+                // the current clock, so a date with no time in it would otherwise be
+                // stamped with the moment of import.
+                if (false === strpos($format, 'H')) {
+                    $date->setTime(0, 0, 0);
+                }
+
+                return $date->format('Y-m-d H:i:s');
+            }
+        }
+
+        // Last resort, so an ISO 8601 value with an offset is still understood.
+        try {
+            return (new \DateTime($value))->format('Y-m-d H:i:s');
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**
