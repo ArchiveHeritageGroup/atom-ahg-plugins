@@ -167,8 +167,11 @@ class FavoritesImportService
      *
      * Anything the database would reject is reported and the row keeps the import
      * date rather than failing, since the date is incidental to what is being
-     * imported. Day-first before month-first: this is an en-ZA product, and for an
-     * ambiguous value like 03/04/2026 the local reading is the right one.
+     * imported.
+     *
+     * Order is decided by the value wherever the value can decide it, and only
+     * falls back to the instance's locale when it genuinely cannot - 03/04/2026 is
+     * the sole ambiguous shape, and 25/12 or 12/25 answer for themselves.
      */
     private function parseDate(string $value): ?string
     {
@@ -178,26 +181,35 @@ class FavoritesImportService
             return null;
         }
 
-        $formats = [
-            'Y-m-d H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d H:i', 'Y-m-d',
-            'd/m/Y H:i:s', 'd/m/Y H:i', 'd/m/Y',
-            'd-m-Y H:i:s', 'd-m-Y',
-            'm/d/Y H:i:s', 'm/d/Y',
-            'd M Y', 'j F Y',
-        ];
+        // Unambiguous forms first: ISO, and anything naming the month in words.
+        foreach (['Y-m-d H:i:s', 'Y-m-d\TH:i:s', 'Y-m-d H:i', 'Y-m-d', 'd M Y', 'j F Y'] as $format) {
+            if (null !== $parsed = $this->fromFormat($format, $value)) {
+                return $parsed;
+            }
+        }
 
-        foreach ($formats as $format) {
-            $date = \DateTime::createFromFormat($format, $value);
+        // Numeric d/m/Y against m/d/Y. Which one a file means is a property of
+        // whoever wrote it, not of this code, so read it from the value where the
+        // value settles it and fall back to the instance's locale where it does not.
+        if (preg_match('#^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(.*)$#', $value, $parts)) {
+            $first = (int) $parts[1];
+            $second = (int) $parts[2];
 
-            if (false !== $date && $date->format($format) === $value) {
-                // createFromFormat fills anything the format does not mention from
-                // the current clock, so a date with no time in it would otherwise be
-                // stamped with the moment of import.
-                if (false === strpos($format, 'H')) {
-                    $date->setTime(0, 0, 0);
+            if ($first > 12) {
+                $order = ['d', 'm'];          // 25/12/2026 can only be day-first
+            } elseif ($second > 12) {
+                $order = ['m', 'd'];          // 12/25/2026 can only be month-first
+            } else {
+                $order = $this->monthFirstLocale() ? ['m', 'd'] : ['d', 'm'];
+            }
+
+            $separator = false !== strpos($value, '/') ? '/' : '-';
+            $base = implode($separator, $order).$separator.'Y';
+
+            foreach ([$base.' H:i:s', $base.' H:i', $base] as $format) {
+                if (null !== $parsed = $this->fromFormat($format, $value)) {
+                    return $parsed;
                 }
-
-                return $date->format('Y-m-d H:i:s');
             }
         }
 
@@ -207,6 +219,46 @@ class FavoritesImportService
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Parse against one format, or null if the value is not exactly that shape.
+     */
+    private function fromFormat(string $format, string $value): ?string
+    {
+        $date = \DateTime::createFromFormat($format, $value);
+
+        if (false === $date || $date->format($format) !== $value) {
+            return null;
+        }
+
+        // createFromFormat fills anything the format does not mention from the
+        // current clock, so a date with no time would be stamped with the moment
+        // of import.
+        if (false === strpos($format, 'H')) {
+            $date->setTime(0, 0, 0);
+        }
+
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * Does this instance's locale write the month first?
+     *
+     * Month-first is essentially a United States convention; nearly everywhere
+     * else writes the day first, so the default is day-first and en_US is the
+     * exception. This used to be hardcoded day-first "because this is an en-ZA
+     * product", which quietly turned 03/04/2026 from a US export into 3 April.
+     */
+    private function monthFirstLocale(): bool
+    {
+        try {
+            $culture = \sfContext::getInstance()->getUser()->getCulture();
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return in_array(str_replace('-', '_', (string) $culture), ['en_US', 'en_PH'], true);
     }
 
     /**
