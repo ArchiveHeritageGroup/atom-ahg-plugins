@@ -13,6 +13,12 @@ class ahgDisplayPluginConfiguration extends sfPluginConfiguration
         // Initialize the display action registry
         $this->initializeRegistry();
 
+        // Render declared display panels on installs with no AHG theme. The registry
+        // collects them from enabled plugins but only theme templates ever called it,
+        // so every declared panel was invisible on a stock AtoM install.
+        require_once __DIR__ . '/../lib/Listeners/PanelInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgDisplay\Listeners\PanelInjector', 'filter']);
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
         $this->dispatcher->connect('template.filter_parameters', [$this, 'onTemplateFilterParameters']);
         $this->dispatcher->connect('QubitInformationObject.save', [$this, 'onInformationObjectSave']);
