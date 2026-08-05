@@ -67,7 +67,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
         <div>
             <h1><i class="fas fa-camera"></i> <?php echo $title; ?></h1>
             <p class="text-muted mb-0">
-                <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'show', 'slug' => $resource->slug]); ?>">
+                <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]); ?>">
                     <?php echo esc_entities($resource->title ?? $resource->slug); ?>
                 </a>
                 &raquo;

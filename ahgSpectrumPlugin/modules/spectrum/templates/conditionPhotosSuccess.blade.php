@@ -61,7 +61,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
         <div>
             <h1><i class="fas fa-camera"></i> {{ $title }}</h1>
             <p class="text-muted mb-0">
-                <a href="{{ url_for(['module' => 'informationobject', 'action' => 'show', 'slug' => $resource->slug]) }}">
+                <a href="{{ url_for(['module' => 'informationobject', 'slug' => $resource->slug]) }}">
                     {{ $resource->title ?? $resource->slug }}
                 </a>
                 &raquo;
