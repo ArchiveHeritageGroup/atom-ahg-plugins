@@ -8,14 +8,21 @@ class DigitalObjectShowComponent extends AhgComponents
 
     public function execute($request)
     {
-        // Try multiple ways to get the resource
-        $this->resource = null;
-        
+        // The caller normally passes `resource` as a component variable, e.g. base
+        // AtoM's sfIsadPlugin/indexSuccess.php. That is the authoritative source and
+        // must not be discarded: overwriting it with null here made every digital
+        // object fall through to the no-resource branch below on any install without
+        // the AHG theme, leaving the template without $link, $usageType, $iconOnly
+        // and $editForm, and truncating the record page to an empty fragment.
+        if (!isset($this->resource) || !$this->resource) {
+            $this->resource = null;
+        }
+
         // Method 1: Direct from request
-        if (isset($request->resource)) {
+        if (!$this->resource && isset($request->resource)) {
             $this->resource = $request->resource;
         }
-        
+
         // Method 2: From sf_request attribute
         if (!$this->resource) {
             $sfRequest = $request->getAttribute('sf_request');
@@ -38,12 +45,24 @@ class DigitalObjectShowComponent extends AhgComponents
         if (!$this->resource) {
             $this->showComponent = 'showDownload';
             $this->accessWarning = '';
+
+            // _show.php reads all four unconditionally. Returning without them
+            // leaves the template rendering against undefined variables, which is
+            // what turned a missing digital object into a blank record page.
+            $this->usageType = $this->usageType ?? QubitTerm::THUMBNAIL_ID;
+            $this->link = $this->link ?? null;
+            $this->iconOnly = $this->iconOnly ?? false;
+            $this->editForm = $this->editForm ?? false;
+
             return;
         }
 
-        $this->usageType = $request->usageType;
-        $this->link = $request->link;
-        $this->iconOnly = $request->iconOnly;
+        // Component variables win over request parameters, for the same reason as
+        // the resource above: the caller passed them deliberately.
+        $this->usageType = $this->usageType ?? $request->usageType ?? QubitTerm::THUMBNAIL_ID;
+        $this->link = $this->link ?? $request->link ?? null;
+        $this->iconOnly = $this->iconOnly ?? $request->iconOnly ?? false;
+        $this->editForm = $this->editForm ?? false;
 
         // Check if it's a 3D model by extension
         $name = $this->resource->name ?? '';
