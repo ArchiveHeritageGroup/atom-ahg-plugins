@@ -545,20 +545,40 @@ document.addEventListener('DOMContentLoaded', function() {
     // ======================
     // Image Viewer with OpenSeadragon + Annotorious
     // ======================
-    function initImageViewer() {
+    async function initImageViewer() {
         updateStatus('Loading image...');
 
         // Tile server only when one is configured; otherwise open the file directly.
         // Deep zoom is a nicety here - the editor needs the image on screen to draw
         // on, and a tile source that cannot be reached leaves an empty pane.
         var cantaloupe = <?php echo json_encode($cantaloupeUrl); ?>;
-        var tileSource;
+
+        // Ask the tile server whether it can actually serve this image before
+        // handing it to the viewer. Relying on OpenSeadragon's open-failed handler
+        // to notice was not enough: the info.json 404s on this deployment (its
+        // resolver does not decode the %2F-escaped path, so it looks for a file
+        // named with the escapes still in it) and the viewer was left showing
+        // nothing rather than falling back.
+        //
+        // Deep zoom is a nicety here. Having the image on screen to draw on is the
+        // whole point, so anything short of a working tile source opens the file
+        // directly.
+        var tileSource = { type: 'image', url: documentUrl };
 
         if (cantaloupe) {
-            var imageId = documentUrl.replace(/^\/uploads\//, '').replace(/\//g, '%2F');
-            tileSource = cantaloupe + '/' + encodeURIComponent(imageId) + '/info.json';
-        } else {
-            tileSource = { type: 'image', url: documentUrl };
+            var imageId = encodeURIComponent(documentUrl.replace(/^\//, '').replace(/\//g, '%2F'));
+            var infoUrl = cantaloupe + '/' + imageId + '/info.json';
+
+            try {
+                var probe = await fetch(infoUrl, { method: 'GET' });
+                if (probe.ok) {
+                    tileSource = infoUrl;
+                } else {
+                    console.warn('Redaction: tile server returned ' + probe.status + ' for this image, opening it directly.');
+                }
+            } catch (e) {
+                console.warn('Redaction: tile server unreachable, opening the image directly.', e);
+            }
         }
 
         osdViewer = OpenSeadragon({
