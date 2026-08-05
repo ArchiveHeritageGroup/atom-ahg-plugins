@@ -331,14 +331,15 @@ class ProvenanceInjector
         // visitor is never shown a link that would 403.
         $candidates = [];
         if ($context->getUser()->isAuthenticated()) {
-            // The view when there is provenance to look at, the form when there is
-            // not. Always sending an archivist to /edit meant opening a populated
-            // record in a form rather than reading it, and always sending them to
-            // the view meant landing on an empty page with no way in.
+            // The timeline when there is provenance to read, the form when there is
+            // not. The timeline is the useful landing place for a populated record -
+            // the chain of custody laid out in order - while /edit opens it as a form
+            // and the plain view is a summary. A record with nothing captured still
+            // needs the form, or the link lands on an empty page with no way in.
             $candidates[] = [
                 'label' => __('Provenance'),
                 'route' => $this->hasProvenance($slug)
-                    ? ['module' => 'provenance', 'action' => 'view', 'slug' => $slug]
+                    ? ['module' => 'provenance', 'action' => 'timeline', 'slug' => $slug]
                     : ['module' => 'provenance', 'action' => 'edit', 'slug' => $slug],
                 'icon' => 'fas fa-history',
             ];
