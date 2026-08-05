@@ -19,6 +19,11 @@ class ahgFeedbackPluginConfiguration extends sfPluginConfiguration
     {
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
+        // The item feedback button on a record page. Registered here so it exists
+        // only while this plugin is enabled.
+        require_once __DIR__.'/../lib/Listeners/FeedbackButtonInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgFeedbackPlugin\Listeners\FeedbackButtonInjector', 'filter']);
+
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'feedback';

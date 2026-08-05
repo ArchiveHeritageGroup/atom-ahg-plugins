@@ -72,6 +72,11 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
+        // The add/remove favourite button on a record page. Registered here so it
+        // exists only while this plugin is enabled.
+        require_once __DIR__.'/../lib/Listeners/FavoritesButtonInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgFavoritesPlugin\Listeners\FavoritesButtonInjector', 'filter']);
+
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'favorites';
