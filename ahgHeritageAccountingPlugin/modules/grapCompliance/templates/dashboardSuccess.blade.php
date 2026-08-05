@@ -1,13 +1,13 @@
 @extends('layouts.page')
 
-@section('title', __('GRAP 103 Compliance Dashboard'))
+@section('title', __('Compliance Dashboard'))
 
 @section('content')
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-3">
-                <i class="fas fa-balance-scale me-2"></i>{{ __('GRAP 103 Compliance Dashboard') }}
+                <i class="fas fa-balance-scale me-2"></i>{{ __('Compliance Dashboard') }}
             </h1>
             <p class="text-muted">{{ __('South African heritage asset compliance monitoring') }}</p>
         </div>

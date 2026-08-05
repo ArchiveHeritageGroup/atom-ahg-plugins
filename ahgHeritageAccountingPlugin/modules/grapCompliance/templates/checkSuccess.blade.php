@@ -1,6 +1,6 @@
 @extends('layouts.page')
 
-@section('title', __('GRAP 103 Compliance Check'))
+@section('title', __('Compliance Check'))
 
 @section('content')
 <div class="container-fluid">

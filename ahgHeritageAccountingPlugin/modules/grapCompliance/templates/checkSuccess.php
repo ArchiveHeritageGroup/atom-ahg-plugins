@@ -1,5 +1,5 @@
 <?php use_helper('Date'); ?>
-<?php slot('title') ?><?php echo __('GRAP 103 Compliance Check') ?><?php end_slot() ?>
+<?php slot('title') ?><?php echo __('Compliance Check') ?><?php end_slot() ?>
 
 <div class="container-fluid">
     <div class="row mb-4">

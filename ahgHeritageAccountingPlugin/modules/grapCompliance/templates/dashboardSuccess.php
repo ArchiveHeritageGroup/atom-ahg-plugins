@@ -1,5 +1,5 @@
 <?php use_helper('Date'); ?>
-<?php slot('title') ?><?php echo __('GRAP 103 Compliance Dashboard') ?><?php end_slot() ?>
+<?php slot('title') ?><?php echo __('Compliance Dashboard') ?><?php end_slot() ?>
 
 <div class="container-fluid">
   <div class="row">
@@ -10,7 +10,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-3">
-                <i class="fas fa-balance-scale me-2"></i><?php echo __('GRAP 103 Compliance Dashboard') ?>
+                <i class="fas fa-balance-scale me-2"></i><?php echo __('Compliance Dashboard') ?>
             </h1>
             <p class="text-muted"><?php echo __('South African heritage asset compliance monitoring') ?></p>
         </div>

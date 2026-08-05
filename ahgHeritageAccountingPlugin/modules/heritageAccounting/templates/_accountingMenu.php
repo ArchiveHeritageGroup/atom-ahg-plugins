@@ -23,7 +23,7 @@ $menuSections = [
         ['module' => 'heritageAccounting', 'action' => 'add', 'icon' => 'fa-plus', 'label' => __('Add Asset')],
         ['module' => 'heritageAccounting', 'action' => 'settings', 'icon' => 'fa-cog', 'label' => __('Settings')],
     ],
-    __('GRAP 103 Compliance') => [
+    __('Compliance') => [
         ['module' => 'grapCompliance', 'action' => 'dashboard', 'icon' => 'fa-balance-scale', 'label' => __('Compliance Dashboard')],
         ['module' => 'grapCompliance', 'action' => 'batchCheck', 'icon' => 'fa-check-double', 'label' => __('Batch Check')],
         ['module' => 'grapCompliance', 'action' => 'nationalTreasuryReport', 'icon' => 'fa-file-alt', 'label' => __('Treasury Report')],
