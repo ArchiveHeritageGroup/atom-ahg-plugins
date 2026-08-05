@@ -11,8 +11,11 @@ $docInfo = $sf_data->getRaw('docInfo');
 $regions = $sf_data->getRaw('regions') ?? [];
 
 // IIIF Configuration
-$baseUrl = sfConfig::get('app_iiif_base_url', 'https://psis.theahg.co.za');
-$cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'https://psis.theahg.co.za/iiif/2');
+// No default. The previous one pointed at https://psis.theahg.co.za/iiif/2, so
+// every install without its own setting asked a particular production server
+// for tiles of a local file - cross-origin, blocked by connect-src, and for an
+// image that server has never seen.
+$cantaloupeUrl = trim((string) sfConfig::get('app_iiif_cantaloupe_url', ''));
 // Viewer assets are vendored in this plugin, so there is no framework path to
 // resolve. The IIIF viewer's own copies are not present on a stock install - the
 // framework ships no public/viewers/annotorious at all, so the image branch of
@@ -545,13 +548,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function initImageViewer() {
         updateStatus('Loading image...');
 
-        // Build IIIF image URL
-        const imageId = documentUrl.replace(/^\/uploads\//, '').replace(/\//g, '%2F');
-        const iiifUrl = '<?php echo $cantaloupeUrl; ?>/' + encodeURIComponent(imageId) + '/info.json';
+        // Tile server only when one is configured; otherwise open the file directly.
+        // Deep zoom is a nicety here - the editor needs the image on screen to draw
+        // on, and a tile source that cannot be reached leaves an empty pane.
+        var cantaloupe = <?php echo json_encode($cantaloupeUrl); ?>;
+        var tileSource;
+
+        if (cantaloupe) {
+            var imageId = documentUrl.replace(/^\/uploads\//, '').replace(/\//g, '%2F');
+            tileSource = cantaloupe + '/' + encodeURIComponent(imageId) + '/info.json';
+        } else {
+            tileSource = { type: 'image', url: documentUrl };
+        }
 
         osdViewer = OpenSeadragon({
             id: 'osd-redaction-viewer',
-            tileSources: iiifUrl,
+            tileSources: tileSource,
             prefixUrl: '/plugins/ahgRedactionPlugin/web/js/vendor/openseadragon-images/',
             showNavigator: true,
             navigatorPosition: 'BOTTOM_RIGHT',
