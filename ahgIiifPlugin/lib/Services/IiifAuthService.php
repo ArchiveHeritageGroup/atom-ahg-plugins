@@ -763,28 +763,6 @@ class IiifAuthService
     /** digital_object.usage_id for a master. Derivatives are 141 (reference) and 142 (thumbnail). */
     private const MASTER_USAGE_ID = 140;
 
-    /**
-     * May the current request read this description's master?
-     *
-     * Asks the same ACL the direct download path uses, so the two routes cannot
-     * disagree. Fails closed: if the check cannot be made, the master is refused
-     * and the viewer falls back to the reference copy.
-     */
-    protected function mayReadMaster(int $informationObjectId): bool
-    {
-        try {
-            $resource = \QubitInformationObject::getById($informationObjectId);
-
-            if (!$resource) {
-                return false;
-            }
-
-            return (bool) \QubitAcl::check($resource, 'readMaster');
-        } catch (\Throwable $e) {
-            return false;
-        }
-    }
-
     public function cantaloupeCheck(string $identifier, ?string $cookie = null, ?string $bearer = null): array
     {
         // Extract object_id from identifier path
@@ -816,23 +794,29 @@ class IiifAuthService
 
         $objectId = $digitalObject->object_id;
 
-        // A master is never served through the image server unless the caller could
-        // have downloaded it directly.
+        // Masters are never served through the image server. Not conditionally -
+        // never.
         //
-        // /uploads/r/ is routed through the application so that readMaster is
-        // enforced, but the tile server reads the same files straight off disk and
-        // knows nothing about that. The result was that the exact byte range a 404
-        // refused on /uploads/r/ came back 200 from /iiif/, at full resolution, to
-        // anyone who could form the path - and the paths appear in every manifest.
+        // /uploads/r/ is routed through the application so readMaster applies, but
+        // the tile server reads the same files off disk and knows nothing about
+        // that, so the bytes a 404 refused on one path came back 200 on the other.
+        //
+        // This deliberately does not consult the ACL. Cantaloupe's delegate forwards
+        // only iiif_auth_token and never the AtoM session, so a request arriving
+        // here can never be recognised as a signed-in user: the ACL can only ever
+        // answer as anonymous. On an instance whose ACL happens to permit anonymous
+        // master access it answered 'allowed' and the leak stayed open - which is
+        // exactly what happened on archaeology. A rule that depends on every
+        // instance being configured correctly is not a rule.
         //
         // Derivatives (reference 141, thumbnail 142) are public by design and are
-        // what a viewer should be requesting anyway.
-        if (self::MASTER_USAGE_ID === (int) $digitalObject->usage_id
-            && !$this->mayReadMaster((int) $objectId)) {
+        // what a viewer should request. Staff download masters through /uploads/r/,
+        // where the ACL genuinely applies and a session genuinely exists.
+        if (self::MASTER_USAGE_ID === (int) $digitalObject->usage_id) {
             return [
                 'allowed' => false,
                 'status' => 403,
-                'reason' => 'Master access requires authorisation.',
+                'reason' => 'Masters are not served through the image server.',
             ];
         }
 
