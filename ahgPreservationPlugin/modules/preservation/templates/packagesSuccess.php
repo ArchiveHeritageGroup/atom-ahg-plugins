@@ -86,9 +86,6 @@
         <a href="<?php echo url_for(array_merge(['module' => 'preservation', 'action' => 'packageEdit'], isset($filterObject) && $filterObject ? ['object_id' => $filterObject->id] : [])); ?>" class="btn btn-primary">
             <i class="fas fa-plus me-1"></i><?php echo __('Create Package'); ?>
         </a>
-        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary ms-2">
-            <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
-        </a>
     </div>
     <div class="d-flex gap-2">
         <!-- Type Filter -->

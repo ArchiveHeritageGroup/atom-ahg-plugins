@@ -83,9 +83,6 @@ if (!function_exists('formatBytes')) {
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageEdit']) }}" class="btn btn-primary">
             <i class="fas fa-plus me-1"></i>{{ __('Create Package') }}
         </a>
-        <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary ms-2">
-            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
-        </a>
     </div>
     <div class="d-flex gap-2">
         <!-- Type Filter -->
