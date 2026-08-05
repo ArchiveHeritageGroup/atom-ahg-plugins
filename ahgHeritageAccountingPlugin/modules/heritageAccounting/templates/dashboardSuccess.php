@@ -3,11 +3,8 @@
 <?php slot('title') ?><?php echo __('Heritage Asset Accounting') ?><?php end_slot() ?>
 
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-md-3">
-      <?php include_partial('heritageAccounting/accountingMenu') ?>
-    </div>
-    <div class="col-md-9">
+    <div class="row">
+    <div class="col-12">
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="h3 mb-3">
