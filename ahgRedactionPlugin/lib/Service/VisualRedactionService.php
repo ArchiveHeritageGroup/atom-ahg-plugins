@@ -72,7 +72,6 @@ class VisualRedactionService
             'coordinates' => $coordinates,
             'normalized' => (int)($data['normalized'] ?? 1),
             'source' => $data['source'] ?? 'manual',
-            'linked_entity_id' => $data['linked_entity_id'] ?? null,
             'label' => $data['label'] ?? null,
             'color' => $data['color'] ?? '#000000',
             'status' => $data['status'] ?? 'pending',
@@ -391,42 +390,103 @@ class VisualRedactionService
     /**
      * Apply image redactions using Python script
      */
+    /**
+     * Burn the regions into a copy of an image, with GD.
+     *
+     * This shelled out to a Python helper that needs Pillow. Pillow is not part of
+     * a PHP application's dependencies and was simply absent here, so applying a
+     * redaction to an image failed with ModuleNotFoundError - after the regions had
+     * been saved, so the archivist had every reason to think it had worked.
+     *
+     * GD ships with PHP on any install that can serve AtoM's own derivatives, so
+     * the image path now has no dependency beyond the language. PDFs still need
+     * PyMuPDF; there is no comparable way to rewrite a page in PHP.
+     */
     protected function applyImageRedactions(string $inputPath, string $outputPath, Collection $regions): array
     {
-        $script = \sfConfig::get('sf_plugins_dir') . '/ahgRedactionPlugin/lib/python/image_redactor.py';
+        if (!extension_loaded('gd')) {
+            return ['success' => false, 'error' => 'The GD extension is required to redact images.'];
+        }
 
-        // Prepare regions JSON
-        $regionsData = [];
+        $info = @getimagesize($inputPath);
+        if (!$info) {
+            return ['success' => false, 'error' => 'Could not read the image: '.basename($inputPath)];
+        }
+
+        [$width, $height, $type] = $info;
+
+        switch ($type) {
+            case IMAGETYPE_JPEG: $image = @imagecreatefromjpeg($inputPath); break;
+            case IMAGETYPE_PNG:  $image = @imagecreatefrompng($inputPath); break;
+            case IMAGETYPE_GIF:  $image = @imagecreatefromgif($inputPath); break;
+            case IMAGETYPE_WEBP: $image = @imagecreatefromwebp($inputPath); break;
+            default:
+                return ['success' => false, 'error' => 'Unsupported image type for redaction.'];
+        }
+
+        if (!$image) {
+            return ['success' => false, 'error' => 'Could not decode the image.'];
+        }
+
+        $painted = 0;
+
         foreach ($regions as $region) {
             $coords = json_decode($region->coordinates, true);
-            $regionsData[] = [
-                'x' => (float)($coords['x'] ?? 0),
-                'y' => (float)($coords['y'] ?? 0),
-                'width' => (float)($coords['width'] ?? 0),
-                'height' => (float)($coords['height'] ?? 0),
-                'color' => $region->color ?? '#000000',
-                'normalized' => (bool)$region->normalized,
-            ];
+            if (!is_array($coords)) {
+                continue;
+            }
+
+            // Coordinates are stored normalised 0-1 so they survive any resize.
+            $scaleX = !empty($region->normalized) ? $width : 1;
+            $scaleY = !empty($region->normalized) ? $height : 1;
+
+            $x1 = (int) round(((float) ($coords['x'] ?? 0)) * $scaleX);
+            $y1 = (int) round(((float) ($coords['y'] ?? 0)) * $scaleY);
+            $x2 = $x1 + (int) round(((float) ($coords['width'] ?? 0)) * $scaleX);
+            $y2 = $y1 + (int) round(((float) ($coords['height'] ?? 0)) * $scaleY);
+
+            // Clamp, so a region drawn slightly past the edge still paints.
+            $x1 = max(0, min($width - 1, $x1));
+            $y1 = max(0, min($height - 1, $y1));
+            $x2 = max(0, min($width - 1, $x2));
+            $y2 = max(0, min($height - 1, $y2));
+
+            if ($x2 <= $x1 || $y2 <= $y1) {
+                continue;
+            }
+
+            $hex = ltrim((string) ($region->color ?? '#000000'), '#');
+            if (3 === strlen($hex)) {
+                $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+            }
+            $rgb = array_map('hexdec', str_split(6 === strlen($hex) ? $hex : '000000', 2));
+            $colour = imagecolorallocate($image, $rgb[0], $rgb[1], $rgb[2]);
+
+            imagefilledrectangle($image, $x1, $y1, $x2, $y2, $colour);
+            ++$painted;
         }
 
-        $regionsJson = escapeshellarg(json_encode($regionsData));
-        $escapedInput = escapeshellarg($inputPath);
-        $escapedOutput = escapeshellarg($outputPath);
-
-        $cmd = "{$this->pythonPath} {$script} {$escapedInput} {$escapedOutput} {$regionsJson} 2>&1";
-        $output = shell_exec($cmd);
-
-        $result = @json_decode($output, true);
-        if ($result && isset($result['success'])) {
-            return $result;
+        $dir = dirname($outputPath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
 
-        // Fallback: check if output file was created
-        if (file_exists($outputPath)) {
-            return ['success' => true, 'output' => $output];
+        // Written as the type it came in as, so the redacted copy stays a drop-in
+        // replacement for the original.
+        switch ($type) {
+            case IMAGETYPE_PNG:  $ok = imagepng($image, $outputPath); break;
+            case IMAGETYPE_GIF:  $ok = imagegif($image, $outputPath); break;
+            case IMAGETYPE_WEBP: $ok = imagewebp($image, $outputPath); break;
+            default:             $ok = imagejpeg($image, $outputPath, 92); break;
         }
 
-        return ['success' => false, 'error' => $output ?? 'Unknown error'];
+        imagedestroy($image);
+
+        if (!$ok || !file_exists($outputPath)) {
+            return ['success' => false, 'error' => 'Could not write the redacted image.'];
+        }
+
+        return ['success' => true, 'regions_applied' => $painted, 'output' => $outputPath];
     }
 
     // =====================

@@ -25,9 +25,11 @@
       <i class="fas fa-chart-bar me-1"></i> View Timeline
     </a>
     <?php endif ?>
+    <?php if (!empty($hasAuthenticityData)): ?>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'authenticity', 'id' => $resource->id]) ?>" class="btn btn-outline-dark ms-2">
-      <i class="fas fa-fingerprint me-1"></i> Authenticity Report
+      <i class="fas fa-fingerprint me-1"></i> <?php echo __('Authenticity Report') ?>
     </a>
+    <?php endif ?>
     <?php if (!empty($provenance['exists'])): ?>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'export', 'slug' => $resource->slug]) ?>" class="btn btn-outline-success ms-2">
       <i class="fas fa-file-csv me-1"></i> Export CSV

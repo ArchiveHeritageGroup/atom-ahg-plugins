@@ -72,6 +72,38 @@ class provenanceActions extends AhgController
         }
         $this->eventTypes = $service->getEventTypes();
         $this->gaps = $service->identifyGaps($this->resource->id, $this->culture());
+
+        // Only offer the authenticity report when it has something to report. It
+        // reads ahg_ai_inference and ahg_c2pa_manifest, both of which stay empty
+        // until AI processing runs through the signing path or C2PA credentials are
+        // bound - so on most installs the button led to four zeros and two "nothing
+        // recorded" messages.
+        $this->hasAuthenticityData = $this->authenticityDataExists((int) $this->resource->id);
+    }
+
+    /**
+     * Is there any machine provenance recorded for this description?
+     *
+     * Either table may be absent - ahg_c2pa_manifest ships with ahgC2paPlugin,
+     * which need not be installed - so each is asked separately and a missing table
+     * counts as nothing rather than taking the page down.
+     */
+    protected function authenticityDataExists(int $objectId): bool
+    {
+        foreach ([
+            ['ahg_ai_inference', 'target_entity_id'],
+            ['ahg_c2pa_manifest', 'information_object_id'],
+        ] as [$table, $column]) {
+            try {
+                if (\Illuminate\Database\Capsule\Manager::table($table)->where($column, $objectId)->exists()) {
+                    return true;
+                }
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+
+        return false;
     }
 
     /**

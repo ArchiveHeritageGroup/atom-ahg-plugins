@@ -189,7 +189,16 @@ class redactionActions extends AhgController
             return $this->json(['success' => false, 'error' => $error]);
         }
 
+        // The editor posts a JSON body here, exactly as it does when saving, so
+        // there are no request parameters to read - getParameter() returned nothing
+        // and every Apply answered 'Object id required'. Accept either, since the
+        // guard already requires a POST with a token.
         $objectId = (int) $request->getParameter('object_id');
+
+        if (!$objectId) {
+            $body = json_decode((string) file_get_contents('php://input'), true);
+            $objectId = (int) ($body['object_id'] ?? 0);
+        }
 
         if (!$objectId) {
             return $this->json(['success' => false, 'error' => 'Object id required']);
