@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="bi bi-file-code text-primary me-2"></i>{{ __('Format Registry') }}</h1>
+<h1><i class="fas fa-file-code text-primary me-2"></i>{{ __('Format Registry') }}</h1>
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 <div class="d-flex justify-content-between mb-4">
     <p class="text-muted mb-0">File formats and their preservation risk assessment based on PRONOM registry.</p>
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>{{ __('Dashboard') }}
+        <i class="fas fa-arrow-left me-1"></i>{{ __('Dashboard') }}
     </a>
 </div>
 

@@ -13,31 +13,31 @@
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h4 class="mb-1"><i class="bi bi-clock-history me-2"></i>Provenance & Chain of Custody</h4>
+      <h4 class="mb-1"><i class="fas fa-clock-rotate-left me-2"></i>Provenance & Chain of Custody</h4>
       <p class="text-muted mb-0"><?php echo $resource->title ?? $resource->slug ?></p>
     </div>
     <?php if ($sf_user->isAuthenticated()): ?>
-    <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2"><i class="bi bi-arrow-left me-1"></i>Back to Record</a>
+    <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2"><i class="fas fa-arrow-left me-1"></i>Back to Record</a>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="btn btn-primary">
-      <i class="bi bi-pencil me-1"></i> Edit Provenance
+      <i class="fas fa-pen me-1"></i> Edit Provenance
     </a>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'timeline', 'slug' => $resource->slug]) ?>" class="btn btn-outline-info ms-2">
-      <i class="bi bi-bar-chart me-1"></i> View Timeline
+      <i class="fas fa-chart-bar me-1"></i> View Timeline
     </a>
     <?php endif ?>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'authenticity', 'id' => $resource->id]) ?>" class="btn btn-outline-dark ms-2">
-      <i class="bi bi-fingerprint me-1"></i> Authenticity Report
+      <i class="fas fa-fingerprint me-1"></i> Authenticity Report
     </a>
     <?php if (!empty($provenance['exists'])): ?>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'export', 'slug' => $resource->slug]) ?>" class="btn btn-outline-success ms-2">
-      <i class="bi bi-filetype-csv me-1"></i> Export CSV
+      <i class="fas fa-file-csv me-1"></i> Export CSV
     </a>
     <?php endif ?>
   </div>
 
   <?php if (!empty($gaps)): ?>
   <div class="alert alert-warning">
-    <h6 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i><?php echo __('Provenance gaps detected') ?></h6>
+    <h6 class="alert-heading"><i class="fas fa-triangle-exclamation me-2"></i><?php echo __('Provenance gaps detected') ?></h6>
     <ul class="mb-0 small">
       <?php foreach ($gaps as $g): ?>
       <li>
@@ -53,7 +53,7 @@
   <?php if (!$provenance['exists']): ?>
   <!-- No provenance recorded -->
   <div class="alert alert-info">
-    <i class="bi bi-info-circle me-2"></i>
+    <i class="fas fa-circle-info me-2"></i>
     No provenance information has been recorded for this item.
     <?php if ($sf_user->isAuthenticated()): ?>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="alert-link">Add provenance information</a>
@@ -70,7 +70,7 @@
       <!-- Provenance Summary -->
       <div class="card mb-4">
         <div class="card-header bg-primary text-white">
-          <h6 class="mb-0"><i class="bi bi-file-text me-2"></i>Provenance Summary</h6>
+          <h6 class="mb-0"><i class="fas fa-file-lines me-2"></i>Provenance Summary</h6>
         </div>
         <div class="card-body">
           <p class="lead mb-0"><?php echo nl2br(htmlspecialchars($provenance['summary'])) ?></p>
@@ -80,7 +80,7 @@
       <!-- Timeline -->
       <div class="card mb-4">
         <div class="card-header">
-          <h6 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Chain of Custody Timeline</h6>
+          <h6 class="mb-0"><i class="fas fa-sitemap me-2"></i>Chain of Custody Timeline</h6>
         </div>
         <div class="card-body">
           <?php if (empty($provenance['timeline'])): ?>
@@ -111,7 +111,7 @@
                 </div>
                 <?php if ($event['location']): ?>
                 <div class="small text-muted mt-1">
-                  <i class="bi bi-geo-alt me-1"></i><?php echo htmlspecialchars($event['location']) ?>
+                  <i class="fas fa-location-dot me-1"></i><?php echo htmlspecialchars($event['location']) ?>
                 </div>
                 <?php endif ?>
                 <?php if ($event['description']): ?>
@@ -129,19 +129,19 @@
       <?php if (!empty($provenance['documents'])): ?>
       <div class="card mb-4">
         <div class="card-header">
-          <h6 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Supporting Documents</h6>
+          <h6 class="mb-0"><i class="fas fa-file me-2"></i>Supporting Documents</h6>
         </div>
         <div class="list-group list-group-flush">
           <?php foreach ($provenance['documents'] as $doc): ?>
           <div class="list-group-item d-flex justify-content-between align-items-center">
             <div>
-              <i class="bi bi-file-pdf me-2"></i>
+              <i class="fas fa-file-pdf me-2"></i>
               <strong><?php echo htmlspecialchars($doc->title ?: $doc->original_filename) ?></strong>
               <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $doc->document_type)) ?></span>
             </div>
             <?php if ($doc->file_path): ?>
             <a href="<?php echo $doc->file_path ?>" class="btn btn-sm btn-outline-primary" target="_blank">
-              <i class="bi bi-download"></i>
+              <i class="fas fa-download"></i>
             </a>
             <?php endif ?>
           </div>
@@ -158,7 +158,7 @@
       <!-- Status Card -->
       <div class="card mb-4">
         <div class="card-header">
-          <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Status</h6>
+          <h6 class="mb-0"><i class="fas fa-circle-info me-2"></i>Status</h6>
         </div>
         <div class="card-body">
           <table class="table table-sm mb-0">
@@ -196,9 +196,9 @@
               <td class="text-muted">Complete</td>
               <td>
                 <?php if ($record->is_complete): ?>
-                <span class="text-success"><i class="bi bi-check-circle"></i> Yes</span>
+                <span class="text-success"><i class="fas fa-circle-check"></i> Yes</span>
                 <?php else: ?>
-                <span class="text-warning"><i class="bi bi-clock"></i> In Progress</span>
+                <span class="text-warning"><i class="fas fa-clock"></i> In Progress</span>
                 <?php endif ?>
               </td>
             </tr>
@@ -209,22 +209,22 @@
       <!-- Nazi-Era Provenance (for museums) -->
       <div class="card mb-4">
         <div class="card-header">
-          <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Nazi-Era Provenance Check</h6>
+          <h6 class="mb-0"><i class="fas fa-shield-halved me-2"></i>Nazi-Era Provenance Check</h6>
         </div>
         <div class="card-body">
           <?php if ($record->nazi_era_provenance_checked): ?>
             <?php if ($record->nazi_era_provenance_clear): ?>
             <div class="alert alert-success mb-0">
-              <i class="bi bi-check-circle me-2"></i>Checked and cleared
+              <i class="fas fa-circle-check me-2"></i>Checked and cleared
             </div>
             <?php else: ?>
             <div class="alert alert-warning mb-0">
-              <i class="bi bi-exclamation-triangle me-2"></i>Requires further investigation
+              <i class="fas fa-triangle-exclamation me-2"></i>Requires further investigation
             </div>
             <?php endif ?>
           <?php else: ?>
           <div class="alert alert-secondary mb-0">
-            <i class="bi bi-hourglass me-2"></i>Not yet checked
+            <i class="fas fa-hourglass me-2"></i>Not yet checked
           </div>
           <?php endif ?>
         </div>
@@ -234,7 +234,7 @@
       <?php if ($record->cultural_property_status && $record->cultural_property_status !== 'none'): ?>
       <div class="card mb-4 border-warning">
         <div class="card-header bg-warning">
-          <h6 class="mb-0"><i class="bi bi-globe me-2"></i>Cultural Property Status</h6>
+          <h6 class="mb-0"><i class="fas fa-globe me-2"></i>Cultural Property Status</h6>
         </div>
         <div class="card-body">
           <span class="badge bg-<?php echo $record->cultural_property_status === 'disputed' ? 'danger' : 'warning' ?> fs-6">
@@ -251,7 +251,7 @@
       <?php if ($record->current_agent_name): ?>
       <div class="card mb-4">
         <div class="card-header">
-          <h6 class="mb-0"><i class="bi bi-person me-2"></i>Current Owner/Holder</h6>
+          <h6 class="mb-0"><i class="fas fa-user me-2"></i>Current Owner/Holder</h6>
         </div>
         <div class="card-body">
           <strong><?php echo htmlspecialchars($record->current_agent_name) ?></strong>

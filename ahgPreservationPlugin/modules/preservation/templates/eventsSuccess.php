@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-calendar-event text-primary me-2"></i><?php echo __('Preservation Events (PREMIS)'); ?></h1>
+<h1><i class="fas fa-calendar-day text-primary me-2"></i><?php echo __('Preservation Events (PREMIS)'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -17,7 +17,7 @@
         <?php endforeach; ?>
     </div>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
+        <i class="fas fa-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
     </a>
 </div>
 

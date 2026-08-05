@@ -3,10 +3,10 @@
 @section('title')
 <h1>
     @php
-    $typeIcon = ['sip' => 'box-arrow-in-right', 'aip' => 'safe', 'dip' => 'box-arrow-right'][$package->package_type] ?? 'archive';
+    $typeIcon = ['sip' => 'right-to-bracket', 'aip' => 'vault', 'dip' => 'right-from-bracket'][$package->package_type] ?? 'box-archive';
     $typeClass = ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$package->package_type] ?? 'secondary';
     @endphp
-    <i class="bi bi-{{ $typeIcon }} text-{{ $typeClass }} me-2"></i>
+    <i class="fas fa-{{ $typeIcon }} text-{{ $typeClass }} me-2"></i>
     {{ $package->name }}
 </h1>
 @endsection
@@ -16,16 +16,16 @@
 <!-- Navigation -->
 <div class="mb-4">
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'packages']) }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>{{ __('Back to Packages') }}
+        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Packages') }}
     </a>
     @if('draft' === $package->status)
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $package->id]) }}" class="btn btn-outline-primary ms-2">
-        <i class="bi bi-pencil me-1"></i>{{ __('Edit') }}
+        <i class="fas fa-pen me-1"></i>{{ __('Edit') }}
     </a>
     @endif
     @if($package->export_path)
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageDownload', 'id' => $package->id]) }}" class="btn btn-success ms-2">
-        <i class="bi bi-download me-1"></i>{{ __('Download Export') }}
+        <i class="fas fa-download me-1"></i>{{ __('Download Export') }}
     </a>
     @endif
 </div>
@@ -35,7 +35,7 @@
         <!-- Package Details -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-archive me-2"></i>{{ __('Package Details') }}</span>
+                <span><i class="fas fa-box-archive me-2"></i>{{ __('Package Details') }}</span>
                 @php
                 $statusClass = [
                     'draft' => 'secondary',
@@ -106,7 +106,7 @@
         <!-- Package Objects -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-files me-2"></i>{{ __('Package Objects') }}</span>
+                <span><i class="fas fa-copy me-2"></i>{{ __('Package Objects') }}</span>
                 <span class="badge bg-primary">{{ count($objects) }}</span>
             </div>
             @if(!empty($objects))
@@ -156,7 +156,7 @@
             </div>
             @else
             <div class="card-body text-center text-muted">
-                <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+                <i class="fas fa-inbox fs-1 d-block mb-2 opacity-25"></i>
                 {{ __('No objects in this package') }}
             </div>
             @endif
@@ -165,7 +165,7 @@
         <!-- Package Events -->
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-clock-history me-2"></i>{{ __('Package Events') }}
+                <i class="fas fa-clock-rotate-left me-2"></i>{{ __('Package Events') }}
             </div>
             @if(!empty($events))
             <div class="table-responsive">
@@ -216,7 +216,7 @@
         <!-- Timeline -->
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-calendar3 me-2"></i>{{ __('Timeline') }}
+                <i class="fas fa-calendar me-2"></i>{{ __('Timeline') }}
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between">
@@ -254,7 +254,7 @@
         @if($package->source_path || $package->export_path)
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-folder me-2"></i>{{ __('File Paths') }}
+                <i class="fas fa-folder me-2"></i>{{ __('File Paths') }}
             </div>
             <div class="card-body">
                 @if($package->source_path)
@@ -274,14 +274,14 @@
         @if($parentPackage || !empty($childPackages))
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-diagram-3 me-2"></i>{{ __('Related Packages') }}
+                <i class="fas fa-sitemap me-2"></i>{{ __('Related Packages') }}
             </div>
             <ul class="list-group list-group-flush">
                 @if($parentPackage)
                 <li class="list-group-item">
                     <small class="text-muted d-block">{{ __('Parent Package') }}</small>
                     <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageView', 'id' => $parentPackage->id]) }}">
-                        <i class="bi bi-arrow-up-circle me-1"></i>
+                        <i class="fas fa-circle-arrow-up me-1"></i>
                         {{ $parentPackage->name }}
                     </a>
                     <span class="badge bg-{{ ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$parentPackage->package_type] ?? 'secondary' }} ms-2">
@@ -294,7 +294,7 @@
                 <li class="list-group-item">
                     <small class="text-muted d-block">{{ __('Derived Package') }}</small>
                     <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageView', 'id' => $child->id]) }}">
-                        <i class="bi bi-arrow-down-circle me-1"></i>
+                        <i class="fas fa-circle-arrow-down me-1"></i>
                         {{ $child->name }}
                     </a>
                     <span class="badge bg-{{ ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$child->package_type] ?? 'secondary' }} ms-2">
@@ -310,7 +310,7 @@
         @if($package->source_path && is_dir($package->source_path))
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-file-earmark-code me-2"></i>{{ __('BagIt Structure') }}
+                <i class="fas fa-file-code me-2"></i>{{ __('BagIt Structure') }}
             </div>
             <div class="card-body">
                 <pre class="mb-0 small bg-light p-2 rounded">{{ $package->uuid }}/

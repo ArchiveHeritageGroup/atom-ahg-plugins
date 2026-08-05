@@ -15,14 +15,14 @@
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
-        <h4 class="mb-1"><i class="bi bi-clock-history me-2"></i>Edit Provenance</h4>
+        <h4 class="mb-1"><i class="fas fa-clock-rotate-left me-2"></i>Edit Provenance</h4>
         <p class="text-muted mb-0"><?php echo $resource->title ?? $resource->slug ?></p>
       </div>
       <div>
-        <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>" class="btn btn-outline-primary me-2"><i class="bi bi-arrow-left me-1"></i>Back to Record</a>
+        <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>" class="btn btn-outline-primary me-2"><i class="fas fa-arrow-left me-1"></i>Back to Record</a>
         <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2">Cancel</a>
         <button type="submit" class="btn btn-success">
-          <i class="bi bi-check-lg me-1"></i> Save Provenance
+          <i class="fas fa-check me-1"></i> Save Provenance
         </button>
       </div>
     </div>
@@ -36,7 +36,7 @@
         <!-- Provenance Summary -->
         <div class="card mb-4">
           <div class="card-header bg-primary text-white">
-            <h6 class="mb-0"><i class="bi bi-file-text me-2"></i>Provenance Summary</h6>
+            <h6 class="mb-0"><i class="fas fa-file-lines me-2"></i>Provenance Summary</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
@@ -50,7 +50,7 @@
         <!-- Acquisition Details -->
         <div class="card mb-4">
           <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-cart-check me-2"></i>Acquisition Details</h6>
+            <h6 class="mb-0"><i class="fas fa-cart-shopping me-2"></i>Acquisition Details</h6>
           </div>
           <div class="card-body">
             <div class="row g-3">
@@ -95,9 +95,9 @@
         <!-- Chain of Custody Events -->
         <div class="card mb-4">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0"><i class="bi bi-diagram-3 me-2"></i>Chain of Custody Events</h6>
+            <h6 class="mb-0"><i class="fas fa-sitemap me-2"></i>Chain of Custody Events</h6>
             <button type="button" class="btn btn-sm btn-success" id="addEventBtn">
-              <i class="bi bi-plus-lg me-1"></i> Add Event
+              <i class="fas fa-plus me-1"></i> Add Event
             </button>
           </div>
           <div class="card-body" id="eventsContainer">
@@ -167,7 +167,7 @@
         <!-- Research Notes -->
         <div class="card mb-4">
           <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-journal-text me-2"></i>Research Notes</h6>
+            <h6 class="mb-0"><i class="fas fa-book me-2"></i>Research Notes</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
@@ -198,9 +198,9 @@
         <!-- Supporting Documents -->
         <div class="card mb-4">
           <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0"><i class="bi bi-file-earmark me-2"></i>Supporting Documents</h6>
+            <h6 class="mb-0"><i class="fas fa-file me-2"></i>Supporting Documents</h6>
             <button type="button" class="btn btn-sm btn-success" id="addDocumentBtn">
-              <i class="bi bi-plus me-1"></i>Add Document
+              <i class="fas fa-plus me-1"></i>Add Document
             </button>
           </div>
           <div class="card-body">
@@ -211,15 +211,15 @@
               <?php foreach ($documents as $doc): ?>
               <div class="d-flex align-items-center justify-content-between border rounded p-2 mb-2">
                 <div>
-                  <i class="bi bi-file-earmark me-2"></i>
+                  <i class="fas fa-file me-2"></i>
                   <strong><?php echo htmlspecialchars($doc->title ?: $doc->original_filename) ?></strong>
                   <span class="badge bg-secondary ms-2"><?php echo ucfirst(str_replace('_', ' ', $doc->document_type)) ?></span>
                 </div>
                 <div>
                   <?php if ($doc->file_path): ?>
-                  <a href="<?php echo $doc->file_path ?>" class="btn btn-sm btn-outline-primary" target="_blank"><i class="bi bi-download"></i> View</a>
+                  <a href="<?php echo $doc->file_path ?>" class="btn btn-sm btn-outline-primary" target="_blank"><i class="fas fa-download"></i> View</a>
                   <?php endif ?>
-                  <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-doc-id="<?php echo $doc->id ?>"><i class="bi bi-trash"></i> Delete</button>
+                  <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-doc-id="<?php echo $doc->id ?>"><i class="fas fa-trash"></i> Delete</button>
                 </div>
               </div>
               <?php endforeach ?>
@@ -228,7 +228,7 @@
             
             <!-- New Documents Container -->
             <div id="documentsContainer"></div>
-            <p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle me-1"></i>Click "Add Document" to add supporting documents. Documents will be uploaded when you save the form.</p>
+            <p class="text-muted small mt-2 mb-0"><i class="fas fa-circle-info me-1"></i>Click "Add Document" to add supporting documents. Documents will be uploaded when you save the form.</p>
           </div>
         </div>
       </div>
@@ -239,7 +239,7 @@
         <!-- Status -->
         <div class="card mb-4">
           <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-sliders me-2"></i>Status</h6>
+            <h6 class="mb-0"><i class="fas fa-sliders me-2"></i>Status</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
@@ -283,7 +283,7 @@
         <!-- Current Owner -->
         <div class="card mb-4">
           <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-person me-2"></i>Current Owner/Holder</h6>
+            <h6 class="mb-0"><i class="fas fa-user me-2"></i>Current Owner/Holder</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">
@@ -305,7 +305,7 @@
         <!-- Nazi-Era Provenance -->
         <div class="card mb-4">
           <div class="card-header bg-warning">
-            <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>Nazi-Era Provenance</h6>
+            <h6 class="mb-0"><i class="fas fa-shield-halved me-2"></i>Nazi-Era Provenance</h6>
           </div>
           <div class="card-body">
             <div class="form-check mb-3">
@@ -332,7 +332,7 @@
         <!-- Cultural Property -->
         <div class="card mb-4">
           <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-globe me-2"></i>Cultural Property</h6>
+            <h6 class="mb-0"><i class="fas fa-globe me-2"></i>Cultural Property</h6>
           </div>
           <div class="card-body">
             <div class="mb-3">

@@ -1,7 +1,7 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
 <h1>
-    <i class="bi bi-archive text-primary me-2"></i>
+    <i class="fas fa-box-archive text-primary me-2"></i>
     <?php echo $package ? __('Edit Package') : __('Create Package'); ?>
 </h1>
 <?php end_slot() ?>
@@ -26,7 +26,7 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-<?php echo $package ? 'pencil' : 'plus-lg'; ?> me-2"></i>
+                <i class="fas fa-<?php echo $package ? 'pen' : 'plus'; ?> me-2"></i>
                 <?php echo $package ? __('Package Details') : __('New Package'); ?>
             </div>
             <div class="card-body">
@@ -137,7 +137,7 @@
                                    value="<?php echo htmlspecialchars($linkedDescription ?? ''); ?>"
                                    placeholder="<?php echo __('Search archival descriptions by title or reference...'); ?>">
                             <button type="button" class="btn btn-outline-secondary" id="collectionClear" title="<?php echo __('Clear'); ?>">
-                                <i class="bi bi-x-lg"></i>
+                                <i class="fas fa-xmark"></i>
                             </button>
                         </div>
                         <div id="collectionResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1000;"></div>
@@ -156,10 +156,10 @@
 
                     <div class="d-flex justify-content-between">
                         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-1"></i><?php echo __('Cancel'); ?>
+                            <i class="fas fa-arrow-left me-1"></i><?php echo __('Cancel'); ?>
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-lg me-1"></i><?php echo $package ? __('Save Changes') : __('Create Package'); ?>
+                            <i class="fas fa-check me-1"></i><?php echo $package ? __('Save Changes') : __('Create Package'); ?>
                         </button>
                     </div>
                 </form>
@@ -170,7 +170,7 @@
         <!-- Add Objects Section -->
         <div class="card mt-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-plus me-2"></i><?php echo __('Package Objects'); ?></span>
+                <span><i class="fas fa-file-circle-plus me-2"></i><?php echo __('Package Objects'); ?></span>
                 <span class="badge bg-primary"><?php echo count($objects); ?> objects</span>
             </div>
             <div class="card-body">
@@ -180,7 +180,7 @@
                         <input type="text" id="objectSearchInput" class="form-control" autocomplete="off" placeholder="<?php echo __('Search by title or file name...'); ?>">
                         <input type="hidden" id="objectIdInput" value="">
                         <button type="button" class="btn btn-outline-primary" onclick="addObject()">
-                            <i class="bi bi-plus-lg me-1"></i><?php echo __('Add'); ?>
+                            <i class="fas fa-plus me-1"></i><?php echo __('Add'); ?>
                         </button>
                         <div id="objectSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
                     </div>
@@ -193,7 +193,7 @@
                         <input type="text" id="collImportSearch" class="form-control" autocomplete="off" placeholder="<?php echo __('Search a collection/description by title or reference...'); ?>">
                         <input type="hidden" id="collImportId" value="">
                         <button type="button" class="btn btn-outline-primary" onclick="addCollectionObjects()">
-                            <i class="bi bi-collection me-1"></i><?php echo __('Add all'); ?>
+                            <i class="fas fa-layer-group me-1"></i><?php echo __('Add all'); ?>
                         </button>
                         <div id="collImportResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
                     </div>
@@ -228,7 +228,7 @@
                                 <td><?php echo $obj->file_size ? formatBytes($obj->file_size) : '-'; ?></td>
                                 <td class="text-end">
                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeObject(<?php echo $obj->digital_object_id; ?>)">
-                                        <i class="bi bi-trash"></i>
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -238,7 +238,7 @@
                 </div>
                 <?php else: ?>
                 <div class="text-center text-muted py-3">
-                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+                    <i class="fas fa-inbox fs-1 d-block mb-2 opacity-25"></i>
                     <?php echo __('No objects added yet'); ?>
                 </div>
                 <?php endif; ?>
@@ -252,7 +252,7 @@
         <!-- Package Info -->
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-info-circle me-2"></i><?php echo __('Package Info'); ?>
+                <i class="fas fa-circle-info me-2"></i><?php echo __('Package Info'); ?>
             </div>
             <div class="card-body">
                 <dl class="row mb-0">
@@ -282,12 +282,12 @@
         <!-- Actions -->
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-lightning me-2"></i><?php echo __('Actions'); ?>
+                <i class="fas fa-bolt me-2"></i><?php echo __('Actions'); ?>
             </div>
             <div class="card-body">
                 <?php if ($package->object_count > 0): ?>
                 <button type="button" class="btn btn-success w-100 mb-2" onclick="buildExportPackage()">
-                    <i class="bi bi-lightning-charge me-1"></i><?php echo __('Build &amp; Export'); ?>
+                    <i class="fas fa-bolt me-1"></i><?php echo __('Build &amp; Export'); ?>
                 </button>
                 <div class="form-text mb-2"><?php echo __('One step: builds and exports so the download is ready.'); ?></div>
                 <hr>
@@ -295,46 +295,46 @@
 
                 <?php if ('draft' === $package->status && $package->object_count > 0): ?>
                 <button type="button" class="btn btn-outline-success w-100 mb-2" onclick="buildPackage()">
-                    <i class="bi bi-hammer me-1"></i><?php echo __('Build Package'); ?>
+                    <i class="fas fa-hammer me-1"></i><?php echo __('Build Package'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if ('complete' === $package->status): ?>
                 <button type="button" class="btn btn-primary w-100 mb-2" onclick="validatePackage()">
-                    <i class="bi bi-check-circle me-1"></i><?php echo __('Validate Package'); ?>
+                    <i class="fas fa-circle-check me-1"></i><?php echo __('Validate Package'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if (in_array($package->status, ['complete', 'validated'])): ?>
                 <button type="button" class="btn btn-info w-100 mb-2" onclick="exportPackage()">
-                    <i class="bi bi-box-arrow-up me-1"></i><?php echo __('Export Package'); ?>
+                    <i class="fas fa-up-right-from-square me-1"></i><?php echo __('Export Package'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if ($package->export_path): ?>
                 <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageDownload', 'id' => $package->id]); ?>" class="btn btn-outline-success w-100 mb-2">
-                    <i class="bi bi-download me-1"></i><?php echo __('Download Export'); ?>
+                    <i class="fas fa-download me-1"></i><?php echo __('Download Export'); ?>
                 </a>
                 <?php endif; ?>
 
                 <?php if ('sip' === $package->package_type && in_array($package->status, ['validated', 'exported'])): ?>
                 <hr>
                 <button type="button" class="btn btn-outline-primary w-100" onclick="convertPackage('aip')">
-                    <i class="bi bi-arrow-right-circle me-1"></i><?php echo __('Convert to AIP'); ?>
+                    <i class="fas fa-circle-arrow-right me-1"></i><?php echo __('Convert to AIP'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if ('aip' === $package->package_type && in_array($package->status, ['validated', 'exported'])): ?>
                 <hr>
                 <button type="button" class="btn btn-outline-warning w-100" onclick="convertPackage('dip')">
-                    <i class="bi bi-arrow-right-circle me-1"></i><?php echo __('Create DIP'); ?>
+                    <i class="fas fa-circle-arrow-right me-1"></i><?php echo __('Create DIP'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if ('draft' === $package->status): ?>
                 <hr>
                 <button type="button" class="btn btn-outline-danger w-100" onclick="deletePackage()">
-                    <i class="bi bi-trash me-1"></i><?php echo __('Delete Package'); ?>
+                    <i class="fas fa-trash me-1"></i><?php echo __('Delete Package'); ?>
                 </button>
                 <?php endif; ?>
             </div>
@@ -344,7 +344,7 @@
         <?php if (!empty($events)): ?>
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-clock-history me-2"></i><?php echo __('Recent Events'); ?>
+                <i class="fas fa-clock-rotate-left me-2"></i><?php echo __('Recent Events'); ?>
             </div>
             <ul class="list-group list-group-flush">
                 <?php foreach (array_slice($sf_data->getRaw('events'), 0, 5) as $event): ?>
@@ -367,16 +367,16 @@
         <!-- Help Card for New Package -->
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-question-circle me-2"></i><?php echo __('OAIS Package Types'); ?>
+                <i class="fas fa-circle-question me-2"></i><?php echo __('OAIS Package Types'); ?>
             </div>
             <div class="card-body">
-                <h6 class="text-info"><i class="bi bi-box-arrow-in-right me-1"></i>SIP - Submission</h6>
+                <h6 class="text-info"><i class="fas fa-right-to-bracket me-1"></i>SIP - Submission</h6>
                 <p class="small text-muted mb-3">Package used to submit content to the archive. Contains the digital objects and metadata.</p>
 
-                <h6 class="text-success"><i class="bi bi-safe me-1"></i>AIP - Archival</h6>
+                <h6 class="text-success"><i class="fas fa-vault me-1"></i>AIP - Archival</h6>
                 <p class="small text-muted mb-3">Package stored in the archive for long-term preservation. Created from a validated SIP.</p>
 
-                <h6 class="text-warning"><i class="bi bi-box-arrow-right me-1"></i>DIP - Dissemination</h6>
+                <h6 class="text-warning"><i class="fas fa-right-from-bracket me-1"></i>DIP - Dissemination</h6>
                 <p class="small text-muted mb-0">Package created for user access. Derived from an AIP with access-optimized formats.</p>
             </div>
         </div>
@@ -503,7 +503,7 @@ function buildPackage() {
         } else {
             alert('Error: ' + data.error);
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-hammer me-1"></i>Build Package';
+            btn.innerHTML = '<i class="fas fa-hammer me-1"></i>Build Package';
         }
     });
 }
@@ -526,7 +526,7 @@ function validatePackage() {
         } else {
             alert('Validation failed!\n\n' + data.errors.join('\n'));
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-check-circle me-1"></i>Validate Package';
+            btn.innerHTML = '<i class="fas fa-circle-check me-1"></i>Validate Package';
         }
     });
 }
@@ -552,7 +552,7 @@ function exportPackage() {
         } else {
             alert('Error: ' + data.error);
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-box-arrow-up me-1"></i>Export Package';
+            btn.innerHTML = '<i class="fas fa-up-right-from-square me-1"></i>Export Package';
         }
     });
 }
@@ -615,13 +615,13 @@ function buildExportPackage() {
         } else {
             alert('Error: ' + data.error);
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>Build & Export';
+            btn.innerHTML = '<i class="fas fa-bolt me-1"></i>Build & Export';
         }
     })
     .catch(e => {
         alert('Error: ' + e);
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-lightning-charge me-1"></i>Build & Export';
+        btn.innerHTML = '<i class="fas fa-bolt me-1"></i>Build & Export';
     });
 }
 
@@ -750,18 +750,18 @@ function addCollectionObjects() {
             } else {
                 alert(data.error || 'No new objects to add - everything under that collection is already in the package.');
                 btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-collection me-1"></i>Add all';
+                btn.innerHTML = '<i class="fas fa-layer-group me-1"></i>Add all';
             }
         } else {
             alert('Error: ' + (data.error || 'unknown'));
             btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-collection me-1"></i>Add all';
+            btn.innerHTML = '<i class="fas fa-layer-group me-1"></i>Add all';
         }
     })
     .catch(e => {
         alert('Error: ' + e);
         btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-collection me-1"></i>Add all';
+        btn.innerHTML = '<i class="fas fa-layer-group me-1"></i>Add all';
     });
 }
 

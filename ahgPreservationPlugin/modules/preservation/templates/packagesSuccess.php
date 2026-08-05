@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-archive text-primary me-2"></i><?php echo __('OAIS Packages'); ?></h1>
+<h1><i class="fas fa-box-archive text-primary me-2"></i><?php echo __('OAIS Packages'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -8,7 +8,7 @@
 <?php if (!empty($currentObjectId) && !empty($filterObjectSlug)): ?>
 <div class="mb-3">
     <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $filterObjectSlug]); ?>" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to record'); ?>
+        <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to record'); ?>
     </a>
 </div>
 <?php endif; ?>
@@ -24,7 +24,7 @@
                         <h2 class="mb-0"><?php echo number_format($stats['total_packages']); ?></h2>
                         <small><?php echo $stats['total_size_formatted']; ?></small>
                     </div>
-                    <i class="bi bi-archive fs-1 opacity-50"></i>
+                    <i class="fas fa-box-archive fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                         <h2 class="mb-0"><?php echo number_format($stats['by_type']['sip']['count'] ?? 0); ?></h2>
                         <small><?php echo __('Submission'); ?></small>
                     </div>
-                    <i class="bi bi-box-arrow-in-right fs-1 opacity-50"></i>
+                    <i class="fas fa-right-to-bracket fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -52,7 +52,7 @@
                         <h2 class="mb-0"><?php echo number_format($stats['by_type']['aip']['count'] ?? 0); ?></h2>
                         <small><?php echo __('Archival'); ?></small>
                     </div>
-                    <i class="bi bi-safe fs-1 opacity-50"></i>
+                    <i class="fas fa-vault fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -66,7 +66,7 @@
                         <h2 class="mb-0"><?php echo number_format($stats['by_type']['dip']['count'] ?? 0); ?></h2>
                         <small><?php echo __('Dissemination'); ?></small>
                     </div>
-                    <i class="bi bi-box-arrow-right fs-1 opacity-50"></i>
+                    <i class="fas fa-right-from-bracket fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -75,8 +75,8 @@
 
 <?php if (!empty($filterObject)): ?>
 <div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
-    <span><i class="bi bi-funnel me-2"></i>Showing packages for: <strong><?php echo htmlspecialchars($filterObject->title ?? 'Object #' . $currentObjectId); ?></strong></span>
-    <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-x me-1"></i>Clear Filter</a>
+    <span><i class="fas fa-filter me-2"></i>Showing packages for: <strong><?php echo htmlspecialchars($filterObject->title ?? 'Object #' . $currentObjectId); ?></strong></span>
+    <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-sm btn-outline-secondary"><i class="fas fa-xmark me-1"></i>Clear Filter</a>
 </div>
 <?php endif; ?>
 
@@ -84,17 +84,17 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit']); ?>" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i><?php echo __('Create Package'); ?>
+            <i class="fas fa-plus me-1"></i><?php echo __('Create Package'); ?>
         </a>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
+            <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
         </a>
     </div>
     <div class="d-flex gap-2">
         <!-- Type Filter -->
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-funnel me-1"></i>
+                <i class="fas fa-filter me-1"></i>
                 <?php echo $currentType ? strtoupper($currentType) : __('All Types'); ?>
             </button>
             <ul class="dropdown-menu">
@@ -126,7 +126,7 @@
 <!-- Packages Table -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-ul me-2"></i><?php echo __('Packages'); ?>
+        <i class="fas fa-list-ul me-2"></i><?php echo __('Packages'); ?>
         <?php if ($currentType || $currentStatus): ?>
             <span class="badge bg-secondary ms-2">
                 <?php
@@ -156,7 +156,7 @@
                 <?php if (empty($packages)): ?>
                 <tr>
                     <td colspan="8" class="text-center text-muted py-4">
-                        <i class="bi bi-archive fs-1 d-block mb-2 opacity-25"></i>
+                        <i class="fas fa-box-archive fs-1 d-block mb-2 opacity-25"></i>
                         <?php echo __('No packages found.'); ?>
                         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit']); ?>" class="d-block mt-2"><?php echo __('Create your first package'); ?></a>
                     </td>
@@ -188,10 +188,10 @@
                         <td>
                             <?php
                             $typeClass = ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$pkg->package_type] ?? 'secondary';
-                            $typeIcon = ['sip' => 'box-arrow-in-right', 'aip' => 'safe', 'dip' => 'box-arrow-right'][$pkg->package_type] ?? 'archive';
+                            $typeIcon = ['sip' => 'right-to-bracket', 'aip' => 'vault', 'dip' => 'right-from-bracket'][$pkg->package_type] ?? 'box-archive';
                             ?>
                             <span class="badge bg-<?php echo $typeClass; ?>">
-                                <i class="bi bi-<?php echo $typeIcon; ?> me-1"></i>
+                                <i class="fas fa-<?php echo $typeIcon; ?> me-1"></i>
                                 <?php echo strtoupper($pkg->package_type); ?>
                             </span>
                         </td>
@@ -216,16 +216,16 @@
                         <td class="text-end">
                             <div class="btn-group btn-group-sm">
                                 <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageView', 'id' => $pkg->id]); ?>" class="btn btn-outline-primary" title="<?php echo __('View'); ?>">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="fas fa-eye"></i>
                                 </a>
                                 <?php if ('draft' === $pkg->status): ?>
                                 <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $pkg->id]); ?>" class="btn btn-outline-secondary" title="<?php echo __('Edit'); ?>">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="fas fa-pen"></i>
                                 </a>
                                 <?php endif; ?>
                                 <?php if ($pkg->export_path): ?>
                                 <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageDownload', 'id' => $pkg->id]); ?>" class="btn btn-outline-success" title="<?php echo __('Download'); ?>">
-                                    <i class="bi bi-download"></i>
+                                    <i class="fas fa-download"></i>
                                 </a>
                                 <?php endif; ?>
                             </div>

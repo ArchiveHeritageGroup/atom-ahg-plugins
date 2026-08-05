@@ -1,14 +1,14 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="bi bi-graph-up text-primary me-2"></i>{{ __('Preservation Reports') }}</h1>
+<h1><i class="fas fa-chart-line text-primary me-2"></i>{{ __('Preservation Reports') }}</h1>
 @endsection
 
 @section('content')
 
 <div class="d-flex justify-content-end mb-4">
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>{{ __('Dashboard') }}
+        <i class="fas fa-arrow-left me-1"></i>{{ __('Dashboard') }}
     </a>
 </div>
 
@@ -47,12 +47,12 @@
 <!-- Objects Without Checksums -->
 <div class="card mb-4">
     <div class="card-header bg-warning text-dark">
-        <i class="bi bi-exclamation-triangle me-2"></i>{{ __('Objects Without Checksums') }}
+        <i class="fas fa-triangle-exclamation me-2"></i>{{ __('Objects Without Checksums') }}
         <span class="badge bg-dark float-end">{{ count($objectsWithoutChecksums) }}</span>
     </div>
     @if(empty($objectsWithoutChecksums))
     <div class="card-body text-center text-muted">
-        <i class="bi bi-check-circle fs-1 text-success"></i>
+        <i class="fas fa-circle-check fs-1 text-success"></i>
         <p class="mt-2">{{ __('All objects have checksums') }}</p>
     </div>
     @else
@@ -82,12 +82,12 @@
 <!-- Stale Verification -->
 <div class="card mb-4">
     <div class="card-header bg-info text-white">
-        <i class="bi bi-clock me-2"></i>{{ __('Stale Verification (>30 days)') }}
+        <i class="fas fa-clock me-2"></i>{{ __('Stale Verification (>30 days)') }}
         <span class="badge bg-light text-dark float-end">{{ count($staleVerification) }}</span>
     </div>
     @if(empty($staleVerification))
     <div class="card-body text-center text-muted">
-        <i class="bi bi-check-circle fs-1 text-success"></i>
+        <i class="fas fa-circle-check fs-1 text-success"></i>
         <p class="mt-2">{{ __('All verifications are current') }}</p>
     </div>
     @else
@@ -119,12 +119,12 @@
 <!-- High Risk Formats -->
 <div class="card mb-4">
     <div class="card-header bg-danger text-white">
-        <i class="bi bi-shield-exclamation me-2"></i>{{ __('High-Risk Format Objects') }}
+        <i class="fas fa-shield-virus me-2"></i>{{ __('High-Risk Format Objects') }}
         <span class="badge bg-light text-dark float-end">{{ count($highRiskObjects) }}</span>
     </div>
     @if(empty($highRiskObjects))
     <div class="card-body text-center text-muted">
-        <i class="bi bi-check-circle fs-1 text-success"></i>
+        <i class="fas fa-circle-check fs-1 text-success"></i>
         <p class="mt-2">{{ __('No high-risk format objects') }}</p>
     </div>
     @else

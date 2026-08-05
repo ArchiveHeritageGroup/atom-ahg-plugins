@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-file-earmark-binary text-primary me-2"></i><?php echo __('Preservation Details'); ?></h1>
+<h1><i class="fas fa-file-lines text-primary me-2"></i><?php echo __('Preservation Details'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -16,7 +16,7 @@
 <!-- Object Info -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-info-circle me-2"></i><?php echo __('Digital Object Information'); ?>
+        <i class="fas fa-circle-info me-2"></i><?php echo __('Digital Object Information'); ?>
     </div>
     <div class="card-body">
         <div class="row">
@@ -55,7 +55,7 @@
             <div class="col-md-6">
                 <?php if ($formatInfo): ?>
                 <div class="alert <?php echo $formatInfo->risk_level === 'low' ? 'alert-success' : ($formatInfo->risk_level === 'high' || $formatInfo->risk_level === 'critical' ? 'alert-danger' : 'alert-warning'); ?>">
-                    <h6><i class="bi bi-file-code me-1"></i><?php echo __('Format Information'); ?></h6>
+                    <h6><i class="fas fa-file-code me-1"></i><?php echo __('Format Information'); ?></h6>
                     <p class="mb-1"><strong><?php echo htmlspecialchars($formatInfo->format_name); ?></strong></p>
                     <p class="mb-1">Risk Level: <strong><?php echo ucfirst($formatInfo->risk_level ?? 'unknown'); ?></strong></p>
                     <?php if ($formatInfo->is_preservation_format): ?>
@@ -66,10 +66,10 @@
 
                 <div class="d-grid gap-2">
                     <button class="btn btn-primary" onclick="generateChecksums(<?php echo $digitalObject->id; ?>)">
-                        <i class="bi bi-arrow-repeat me-1"></i><?php echo __('Regenerate Checksums'); ?>
+                        <i class="fas fa-arrows-rotate me-1"></i><?php echo __('Regenerate Checksums'); ?>
                     </button>
                     <button class="btn btn-outline-primary" onclick="verifyFixity(<?php echo $digitalObject->id; ?>)">
-                        <i class="bi bi-check-circle me-1"></i><?php echo __('Verify Fixity Now'); ?>
+                        <i class="fas fa-circle-check me-1"></i><?php echo __('Verify Fixity Now'); ?>
                     </button>
                 </div>
             </div>
@@ -80,7 +80,7 @@
 <!-- Checksums -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-fingerprint me-2"></i><?php echo __('Checksums'); ?>
+        <i class="fas fa-fingerprint me-2"></i><?php echo __('Checksums'); ?>
     </div>
     <div class="table-responsive">
         <table class="table table-hover mb-0">
@@ -127,7 +127,7 @@
 <!-- Fixity History -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-clock-history me-2"></i><?php echo __('Fixity Check History'); ?>
+        <i class="fas fa-clock-rotate-left me-2"></i><?php echo __('Fixity Check History'); ?>
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">
@@ -174,7 +174,7 @@
 <!-- Preservation Events -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-calendar-event me-2"></i><?php echo __('Preservation Events (PREMIS)'); ?>
+        <i class="fas fa-calendar-day me-2"></i><?php echo __('Preservation Events (PREMIS)'); ?>
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">
@@ -201,9 +201,9 @@
                         <td><?php echo htmlspecialchars(substr($event->event_detail ?? '', 0, 50)); ?></td>
                         <td>
                             <?php if ($event->event_outcome === 'success'): ?>
-                                <span class="text-success"><i class="bi bi-check-circle"></i> Success</span>
+                                <span class="text-success"><i class="fas fa-circle-check"></i> Success</span>
                             <?php elseif ($event->event_outcome === 'failure'): ?>
-                                <span class="text-danger"><i class="bi bi-x-circle"></i> Failure</span>
+                                <span class="text-danger"><i class="fas fa-circle-xmark"></i> Failure</span>
                             <?php else: ?>
                                 <span class="text-muted"><?php echo ucfirst($event->event_outcome); ?></span>
                             <?php endif; ?>

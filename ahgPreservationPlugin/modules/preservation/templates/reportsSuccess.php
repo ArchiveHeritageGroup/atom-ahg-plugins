@@ -1,13 +1,13 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-graph-up text-primary me-2"></i><?php echo __('Preservation Reports'); ?></h1>
+<h1><i class="fas fa-chart-line text-primary me-2"></i><?php echo __('Preservation Reports'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
 
 <div class="d-flex justify-content-end mb-4">
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
+        <i class="fas fa-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
     </a>
 </div>
 
@@ -46,12 +46,12 @@
 <!-- Objects Without Checksums -->
 <div class="card mb-4">
     <div class="card-header bg-warning text-dark">
-        <i class="bi bi-exclamation-triangle me-2"></i><?php echo __('Objects Without Checksums'); ?>
+        <i class="fas fa-triangle-exclamation me-2"></i><?php echo __('Objects Without Checksums'); ?>
         <span class="badge bg-dark float-end"><?php echo count($objectsWithoutChecksums); ?></span>
     </div>
     <?php if (empty($objectsWithoutChecksums)): ?>
     <div class="card-body text-center text-muted">
-        <i class="bi bi-check-circle fs-1 text-success"></i>
+        <i class="fas fa-circle-check fs-1 text-success"></i>
         <p class="mt-2"><?php echo __('All objects have checksums'); ?></p>
     </div>
     <?php else: ?>
@@ -81,12 +81,12 @@
 <!-- Stale Verification -->
 <div class="card mb-4">
     <div class="card-header bg-info text-white">
-        <i class="bi bi-clock me-2"></i><?php echo __('Stale Verification (>30 days)'); ?>
+        <i class="fas fa-clock me-2"></i><?php echo __('Stale Verification (>30 days)'); ?>
         <span class="badge bg-light text-dark float-end"><?php echo count($staleVerification); ?></span>
     </div>
     <?php if (empty($staleVerification)): ?>
     <div class="card-body text-center text-muted">
-        <i class="bi bi-check-circle fs-1 text-success"></i>
+        <i class="fas fa-circle-check fs-1 text-success"></i>
         <p class="mt-2"><?php echo __('All verifications are current'); ?></p>
     </div>
     <?php else: ?>
@@ -118,12 +118,12 @@
 <!-- High Risk Formats -->
 <div class="card mb-4">
     <div class="card-header bg-danger text-white">
-        <i class="bi bi-shield-exclamation me-2"></i><?php echo __('High-Risk Format Objects'); ?>
+        <i class="fas fa-shield-virus me-2"></i><?php echo __('High-Risk Format Objects'); ?>
         <span class="badge bg-light text-dark float-end"><?php echo count($highRiskObjects); ?></span>
     </div>
     <?php if (empty($highRiskObjects)): ?>
     <div class="card-body text-center text-muted">
-        <i class="bi bi-check-circle fs-1 text-success"></i>
+        <i class="fas fa-circle-check fs-1 text-success"></i>
         <p class="mt-2"><?php echo __('No high-risk format objects'); ?></p>
     </div>
     <?php else: ?>

@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-file-code text-primary me-2"></i><?php echo __('Format Registry'); ?></h1>
+<h1><i class="fas fa-file-code text-primary me-2"></i><?php echo __('Format Registry'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -8,7 +8,7 @@
 <div class="d-flex justify-content-between mb-4">
     <p class="text-muted mb-0">File formats and their preservation risk assessment based on PRONOM registry.</p>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
+        <i class="fas fa-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
     </a>
 </div>
 

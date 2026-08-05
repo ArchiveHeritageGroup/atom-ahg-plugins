@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="bi bi-gear text-primary me-2"></i>{{ __('Preservation Policies') }}</h1>
+<h1><i class="fas fa-gear text-primary me-2"></i>{{ __('Preservation Policies') }}</h1>
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 <div class="d-flex justify-content-between mb-4">
     <p class="text-muted mb-0">Automated preservation policies and schedules.</p>
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>{{ __('Dashboard') }}
+        <i class="fas fa-arrow-left me-1"></i>{{ __('Dashboard') }}
     </a>
 </div>
 
@@ -55,7 +55,7 @@
 
 <div class="card mt-4">
     <div class="card-header">
-        <i class="bi bi-terminal me-2"></i>{{ __('CLI Commands') }}
+        <i class="fas fa-terminal me-2"></i>{{ __('CLI Commands') }}
     </div>
     <div class="card-body">
         <p>Run fixity checks from command line:</p>

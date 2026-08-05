@@ -13,16 +13,16 @@
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h4 class="mb-1"><i class="bi bi-bar-chart-steps me-2"></i>Provenance Timeline</h4>
+      <h4 class="mb-1"><i class="fas fa-chart-gantt me-2"></i>Provenance Timeline</h4>
       <p class="text-muted mb-0"><?php echo $resource->title ?? $resource->slug ?></p>
     </div>
     <div>
       <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2">
-        <i class="bi bi-arrow-left me-1"></i>Back to Provenance
+        <i class="fas fa-arrow-left me-1"></i>Back to Provenance
       </a>
       <?php if ($sf_user->isAuthenticated()): ?>
       <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="btn btn-primary">
-        <i class="bi bi-pencil me-1"></i> Edit Provenance
+        <i class="fas fa-pen me-1"></i> Edit Provenance
       </a>
       <?php endif ?>
     </div>
@@ -32,7 +32,7 @@
   <div class="card shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
       <h5 class="mb-0">
-        <i class="bi bi-calendar-range me-2"></i>
+        <i class="fas fa-calendar-days me-2"></i>
         <?php echo __('Visual Timeline') ?>
       </h5>
     </div>
@@ -66,7 +66,7 @@
   <div class="card shadow-sm mb-4">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h5 class="mb-0">
-        <i class="bi bi-list-ul me-2"></i>
+        <i class="fas fa-list-ul me-2"></i>
         <?php echo __('Provenance Events') ?>
       </h5>
       <span class="badge bg-secondary"><?php echo count($rawTimeline) ?></span>
@@ -108,7 +108,7 @@
   </div>
   <?php else: ?>
   <div class="alert alert-info">
-    <i class="bi bi-info-circle me-2"></i>
+    <i class="fas fa-circle-info me-2"></i>
     No provenance events have been recorded.
     <?php if ($sf_user->isAuthenticated()): ?>
     <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $resource->slug]) ?>" class="alert-link">Add events</a>
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   if (timelineData.length === 0) {
     document.getElementById('timeline-container').innerHTML =
-      '<div class="alert alert-info mb-0"><i class="bi bi-info-circle me-2"></i>No events to display in timeline.</div>';
+      '<div class="alert alert-info mb-0"><i class="fas fa-circle-info me-2"></i>No events to display in timeline.</div>';
     return;
   }
 

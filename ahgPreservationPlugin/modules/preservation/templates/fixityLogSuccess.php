@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-list-check text-primary me-2"></i><?php echo __('Fixity Check Log'); ?></h1>
+<h1><i class="fas fa-list-check text-primary me-2"></i><?php echo __('Fixity Check Log'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -26,7 +26,7 @@
         </a>
     </div>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
+        <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
     </a>
 </div>
 

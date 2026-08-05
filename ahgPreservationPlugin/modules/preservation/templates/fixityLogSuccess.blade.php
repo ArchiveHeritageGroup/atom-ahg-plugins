@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="bi bi-list-check text-primary me-2"></i>{{ __('Fixity Check Log') }}</h1>
+<h1><i class="fas fa-list-check text-primary me-2"></i>{{ __('Fixity Check Log') }}</h1>
 @endsection
 
 @section('content')
@@ -27,7 +27,7 @@
         </a>
     </div>
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
+        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
     </a>
 </div>
 

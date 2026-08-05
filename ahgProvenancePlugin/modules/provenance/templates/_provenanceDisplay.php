@@ -12,7 +12,7 @@ $canEdit = $sf_user->isAuthenticated();
 <?php $record = $provenance['record']; ?>
 <div class="card mb-3 provenance-display">
   <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
-    <h6 class="mb-0"><i class="bi bi-clock-history me-2"></i><?php echo __('Provenance') ?></h6>
+    <h6 class="mb-0"><i class="fas fa-clock-rotate-left me-2"></i><?php echo __('Provenance') ?></h6>
     <?php if ($slug): ?>
     <div class="btn-group btn-group-sm" role="group">
       <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'view', 'slug' => $slug]) ?>" class="btn btn-outline-primary">
@@ -20,7 +20,7 @@ $canEdit = $sf_user->isAuthenticated();
       </a>
       <?php if ($canEdit): ?>
       <a href="<?php echo url_for(['module' => 'provenance', 'action' => 'edit', 'slug' => $slug]) ?>" class="btn btn-outline-secondary">
-        <i class="bi bi-pencil me-1"></i><?php echo __('Manage') ?>
+        <i class="fas fa-pen me-1"></i><?php echo __('Manage') ?>
       </a>
       <?php endif ?>
     </div>
@@ -45,7 +45,7 @@ $canEdit = $sf_user->isAuthenticated();
       <?php if ($record->nazi_era_provenance_checked): ?>
       <div class="col-auto">
         <span class="badge bg-<?php echo $record->nazi_era_provenance_clear ? 'success' : 'danger' ?>">
-          <i class="bi bi-shield-check me-1"></i>Nazi-era <?php echo $record->nazi_era_provenance_clear ? 'Clear' : 'Flagged' ?>
+          <i class="fas fa-shield-halved me-1"></i>Nazi-era <?php echo $record->nazi_era_provenance_clear ? 'Clear' : 'Flagged' ?>
         </span>
       </div>
       <?php endif ?>

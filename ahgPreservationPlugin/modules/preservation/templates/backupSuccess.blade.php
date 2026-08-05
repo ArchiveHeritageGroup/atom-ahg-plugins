@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="bi bi-cloud-arrow-up text-info me-2"></i>{{ __('Backup & Replication') }}</h1>
+<h1><i class="fas fa-cloud-arrow-up text-info me-2"></i>{{ __('Backup & Replication') }}</h1>
 @endsection
 
 @section('content')
@@ -10,7 +10,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
+            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
         </a>
     </div>
 </div>
@@ -25,7 +25,7 @@
                         <h6 class="mb-0">{{ __('Verified') }}</h6>
                         <h2 class="mb-0">{{ number_format($verificationStats['passed'] ?? 0) }}</h2>
                     </div>
-                    <i class="bi bi-patch-check fs-1 opacity-50"></i>
+                    <i class="fas fa-certificate fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                         <h6 class="mb-0">{{ __('Failed') }}</h6>
                         <h2 class="mb-0">{{ number_format($verificationStats['failed'] ?? 0) }}</h2>
                     </div>
-                    <i class="bi bi-x-octagon fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-xmark fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@
                         <h6 class="mb-0">{{ __('Warnings') }}</h6>
                         <h2 class="mb-0">{{ number_format($verificationStats['warning'] ?? 0) }}</h2>
                     </div>
-                    <i class="bi bi-exclamation-triangle fs-1 opacity-50"></i>
+                    <i class="fas fa-triangle-exclamation fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                         <h6 class="mb-0">{{ __('Replication Targets') }}</h6>
                         <h2 class="mb-0">{{ count($replicationTargets ?? []) }}</h2>
                     </div>
-                    <i class="bi bi-hdd-network fs-1 opacity-50"></i>
+                    <i class="fas fa-server fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -76,7 +76,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-hdd-network me-2"></i>{{ __('Replication Targets') }}
+                <i class="fas fa-server me-2"></i>{{ __('Replication Targets') }}
             </div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
@@ -121,7 +121,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-arrow-repeat me-2"></i>{{ __('Recent Replications') }}
+                <i class="fas fa-arrows-rotate me-2"></i>{{ __('Recent Replications') }}
             </div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
@@ -170,7 +170,7 @@
 <!-- CLI Commands -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-terminal me-2"></i>{{ __('CLI Commands') }}
+        <i class="fas fa-terminal me-2"></i>{{ __('CLI Commands') }}
     </div>
     <div class="card-body">
         <div class="row">
@@ -206,7 +206,7 @@ php symfony preservation:replicate --dry-run</code></pre>
 <!-- Recent Verifications Table -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-check me-2"></i>{{ __('Recent Backup Verifications') }}
+        <i class="fas fa-list-check me-2"></i>{{ __('Recent Backup Verifications') }}
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">

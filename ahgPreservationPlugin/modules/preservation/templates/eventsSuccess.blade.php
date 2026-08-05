@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="bi bi-calendar-event text-primary me-2"></i>{{ __('Preservation Events (PREMIS)') }}</h1>
+<h1><i class="fas fa-calendar-day text-primary me-2"></i>{{ __('Preservation Events (PREMIS)') }}</h1>
 @endsection
 
 @section('content')
@@ -18,7 +18,7 @@
         @endforeach
     </div>
     <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i>{{ __('Dashboard') }}
+        <i class="fas fa-arrow-left me-1"></i>{{ __('Dashboard') }}
     </a>
 </div>
 

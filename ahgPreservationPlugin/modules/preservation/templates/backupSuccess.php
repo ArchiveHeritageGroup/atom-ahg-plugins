@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-cloud-arrow-up text-info me-2"></i><?php echo __('Backup & Replication'); ?></h1>
+<h1><i class="fas fa-cloud-arrow-up text-info me-2"></i><?php echo __('Backup & Replication'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -9,7 +9,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
+            <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
         </a>
     </div>
 </div>
@@ -24,7 +24,7 @@
                         <h6 class="mb-0"><?php echo __('Verified'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($verificationStats['passed'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-patch-check fs-1 opacity-50"></i>
+                    <i class="fas fa-certificate fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -37,7 +37,7 @@
                         <h6 class="mb-0"><?php echo __('Failed'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($verificationStats['failed'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-x-octagon fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-xmark fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
                         <h6 class="mb-0"><?php echo __('Warnings'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($verificationStats['warning'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-exclamation-triangle fs-1 opacity-50"></i>
+                    <i class="fas fa-triangle-exclamation fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -63,7 +63,7 @@
                         <h6 class="mb-0"><?php echo __('Replication Targets'); ?></h6>
                         <h2 class="mb-0"><?php echo count($replicationTargets ?? []); ?></h2>
                     </div>
-                    <i class="bi bi-hdd-network fs-1 opacity-50"></i>
+                    <i class="fas fa-server fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -75,7 +75,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-hdd-network me-2"></i><?php echo __('Replication Targets'); ?>
+                <i class="fas fa-server me-2"></i><?php echo __('Replication Targets'); ?>
             </div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
@@ -120,7 +120,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-arrow-repeat me-2"></i><?php echo __('Recent Replications'); ?>
+                <i class="fas fa-arrows-rotate me-2"></i><?php echo __('Recent Replications'); ?>
             </div>
             <div class="table-responsive">
                 <table class="table table-sm table-hover mb-0">
@@ -169,7 +169,7 @@
 <!-- CLI Commands -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-terminal me-2"></i><?php echo __('CLI Commands'); ?>
+        <i class="fas fa-terminal me-2"></i><?php echo __('CLI Commands'); ?>
     </div>
     <div class="card-body">
         <div class="row">
@@ -205,7 +205,7 @@ php symfony preservation:replicate --dry-run</code></pre>
 <!-- Recent Verifications Table -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-check me-2"></i><?php echo __('Recent Backup Verifications'); ?>
+        <i class="fas fa-list-check me-2"></i><?php echo __('Recent Backup Verifications'); ?>
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">

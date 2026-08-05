@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-shield-exclamation text-danger me-2"></i><?php echo __('Virus Scanning'); ?></h1>
+<h1><i class="fas fa-shield-virus text-danger me-2"></i><?php echo __('Virus Scanning'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -25,7 +25,7 @@
             <?php endif; ?>
         </div>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
+            <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
         </a>
     </div>
 </div>
@@ -40,7 +40,7 @@
                         <h6 class="mb-0"><?php echo __('Clean'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($scanStats['clean'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-check fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -53,7 +53,7 @@
                         <h6 class="mb-0"><?php echo __('Infected'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($scanStats['infected'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-bug fs-1 opacity-50"></i>
+                    <i class="fas fa-bug fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -66,7 +66,7 @@
                         <h6 class="mb-0"><?php echo __('Errors'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($scanStats['error'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-exclamation-triangle fs-1 opacity-50"></i>
+                    <i class="fas fa-triangle-exclamation fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
                         <h6 class="mb-0"><?php echo __('Not Scanned'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($unscannedObjects ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-question-circle fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-question fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -89,7 +89,7 @@
 <!-- CLI Commands -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-terminal me-2"></i><?php echo __('CLI Commands'); ?>
+        <i class="fas fa-terminal me-2"></i><?php echo __('CLI Commands'); ?>
     </div>
     <div class="card-body">
         <p class="mb-2">Run virus scans from the command line:</p>
@@ -110,7 +110,7 @@ php symfony preservation:virus-scan --limit=500</code></pre>
 <!-- Recent Scans Table -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-ul me-2"></i><?php echo __('Recent Virus Scans'); ?>
+        <i class="fas fa-list-ul me-2"></i><?php echo __('Recent Virus Scans'); ?>
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">

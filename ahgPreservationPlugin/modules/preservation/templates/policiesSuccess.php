@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-gear text-primary me-2"></i><?php echo __('Preservation Policies'); ?></h1>
+<h1><i class="fas fa-gear text-primary me-2"></i><?php echo __('Preservation Policies'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -8,7 +8,7 @@
 <div class="d-flex justify-content-between mb-4">
     <p class="text-muted mb-0">Automated preservation policies and schedules.</p>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
+        <i class="fas fa-arrow-left me-1"></i><?php echo __('Dashboard'); ?>
     </a>
 </div>
 
@@ -54,7 +54,7 @@
 
 <div class="card mt-4">
     <div class="card-header">
-        <i class="bi bi-terminal me-2"></i><?php echo __('CLI Commands'); ?>
+        <i class="fas fa-terminal me-2"></i><?php echo __('CLI Commands'); ?>
     </div>
     <div class="card-body">
         <p>Run fixity checks from command line:</p>

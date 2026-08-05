@@ -2,9 +2,9 @@
 
 @section('title')
 <div class="d-flex justify-content-between align-items-center">
-  <h1><i class="bi bi-shield-check text-success me-2"></i>{{ __('Digital Preservation Dashboard') }}</h1>
+  <h1><i class="fas fa-shield-halved text-success me-2"></i>{{ __('Digital Preservation Dashboard') }}</h1>
   <a href="{{ url_for(['module' => 'reports', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>{{ __('Return to Central Dashboard') }}
+    <i class="fas fa-arrow-left me-1"></i>{{ __('Return to Central Dashboard') }}
   </a>
 </div>
 @endsection
@@ -22,7 +22,7 @@
                         <h2 class="mb-0">{{ number_format($stats['total_objects']) }}</h2>
                         <small>{{ $stats['total_size_formatted'] }}</small>
                     </div>
-                    <i class="bi bi-file-earmark-binary fs-1 opacity-50"></i>
+                    <i class="fas fa-file-lines fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -36,7 +36,7 @@
                         <h2 class="mb-0">{{ $stats['checksum_coverage'] }}%</h2>
                         <small>{{ number_format($stats['objects_with_checksum']) }} objects</small>
                     </div>
-                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-check fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
                         <h2 class="mb-0">{{ number_format($stats['fixity_checks_30d']) }}</h2>
                         <small>{{ $stats['fixity_failures_30d'] }} failures</small>
                     </div>
-                    <i class="bi bi-fingerprint fs-1 opacity-50"></i>
+                    <i class="fas fa-fingerprint fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                         <h2 class="mb-0">{{ number_format($stats['formats_at_risk']) }}</h2>
                         <small>{{ $stats['pending_verification'] }} pending verification</small>
                     </div>
-                    <i class="bi bi-exclamation-triangle fs-1 opacity-50"></i>
+                    <i class="fas fa-triangle-exclamation fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -75,33 +75,33 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'identification']) }}" class="btn btn-outline-info">
-            <i class="bi bi-fingerprint me-1"></i>{{ __('Format ID') }}
+            <i class="fas fa-fingerprint me-1"></i>{{ __('Format ID') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'fixityLog']) }}" class="btn btn-outline-primary">
-            <i class="bi bi-list-check me-1"></i>{{ __('Fixity Log') }}
+            <i class="fas fa-list-check me-1"></i>{{ __('Fixity Log') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'events']) }}" class="btn btn-outline-primary">
-            <i class="bi bi-calendar-event me-1"></i>{{ __('Events') }}
+            <i class="fas fa-calendar-day me-1"></i>{{ __('Events') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'formats']) }}" class="btn btn-outline-primary">
-            <i class="bi bi-file-code me-1"></i>{{ __('Format Registry') }}
+            <i class="fas fa-file-code me-1"></i>{{ __('Format Registry') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'scheduler']) }}" class="btn btn-outline-dark">
-            <i class="bi bi-clock-history me-1"></i>{{ __('Scheduler') }}
+            <i class="fas fa-clock-rotate-left me-1"></i>{{ __('Scheduler') }}
         </a>
     </div>
     <div>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'packages']) }}" class="btn btn-outline-primary">
-            <i class="bi bi-archive me-1"></i>{{ __('OAIS Packages') }}
+            <i class="fas fa-box-archive me-1"></i>{{ __('OAIS Packages') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'virusScan']) }}" class="btn btn-outline-danger">
-            <i class="bi bi-shield-exclamation me-1"></i>{{ __('Virus Scan') }}
+            <i class="fas fa-shield-virus me-1"></i>{{ __('Virus Scan') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'conversion']) }}" class="btn btn-outline-success">
-            <i class="bi bi-arrow-repeat me-1"></i>{{ __('Format Conversion') }}
+            <i class="fas fa-arrows-rotate me-1"></i>{{ __('Format Conversion') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'backup']) }}" class="btn btn-outline-info">
-            <i class="bi bi-cloud-arrow-up me-1"></i>{{ __('Backup') }}
+            <i class="fas fa-cloud-arrow-up me-1"></i>{{ __('Backup') }}
         </a>
     </div>
 </div>
@@ -111,7 +111,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-fingerprint me-2"></i>{{ __('Recent Fixity Checks') }}</span>
+                <span><i class="fas fa-fingerprint me-2"></i>{{ __('Recent Fixity Checks') }}</span>
                 <a href="{{ url_for(['module' => 'preservation', 'action' => 'fixityLog']) }}" class="btn btn-sm btn-outline-secondary">
                     {{ __('View All') }}
                 </a>
@@ -165,7 +165,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-calendar-event me-2"></i>{{ __('Recent Preservation Events') }}</span>
+                <span><i class="fas fa-calendar-day me-2"></i>{{ __('Recent Preservation Events') }}</span>
                 <a href="{{ url_for(['module' => 'preservation', 'action' => 'events']) }}" class="btn btn-sm btn-outline-secondary">
                     {{ __('View All') }}
                 </a>
@@ -194,11 +194,11 @@
                                 </td>
                                 <td>
                                     @if ($event->event_outcome === 'success')
-                                        <span class="text-success"><i class="bi bi-check-circle"></i></span>
+                                        <span class="text-success"><i class="fas fa-circle-check"></i></span>
                                     @elseif ($event->event_outcome === 'failure')
-                                        <span class="text-danger"><i class="bi bi-x-circle"></i></span>
+                                        <span class="text-danger"><i class="fas fa-circle-xmark"></i></span>
                                     @else
-                                        <span class="text-muted"><i class="bi bi-question-circle"></i></span>
+                                        <span class="text-muted"><i class="fas fa-circle-question"></i></span>
                                     @endif
                                 </td>
                                 <td>
@@ -218,7 +218,7 @@
 @if (!empty($atRiskObjects))
 <div class="card border-danger mb-4">
     <div class="card-header bg-danger text-white">
-        <i class="bi bi-exclamation-triangle me-2"></i>{{ __('Objects Requiring Attention') }}
+        <i class="fas fa-triangle-exclamation me-2"></i>{{ __('Objects Requiring Attention') }}
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">

@@ -1,6 +1,6 @@
 <?php decorate_with('layout_1col.php') ?>
 <?php slot('title') ?>
-<h1><i class="bi bi-arrow-repeat text-primary me-2"></i><?php echo __('Format Conversion'); ?></h1>
+<h1><i class="fas fa-arrows-rotate text-primary me-2"></i><?php echo __('Format Conversion'); ?></h1>
 <?php end_slot() ?>
 
 <?php slot('content') ?>
@@ -37,10 +37,10 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
+            <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
         </a>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'formats']); ?>" class="btn btn-outline-primary">
-            <i class="bi bi-file-code me-1"></i><?php echo __('Format Registry'); ?>
+            <i class="fas fa-file-code me-1"></i><?php echo __('Format Registry'); ?>
         </a>
     </div>
     <div class="text-end">
@@ -61,7 +61,7 @@
                         <h6 class="mb-0"><?php echo __('Completed'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($conversionStats['completed'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-check fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -74,7 +74,7 @@
                         <h6 class="mb-0"><?php echo __('Processing'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($conversionStats['processing'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-hourglass-split fs-1 opacity-50"></i>
+                    <i class="fas fa-hourglass-half fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -87,7 +87,7 @@
                         <h6 class="mb-0"><?php echo __('Pending'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($conversionStats['pending'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-clock fs-1 opacity-50"></i>
+                    <i class="fas fa-clock fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -100,7 +100,7 @@
                         <h6 class="mb-0"><?php echo __('Failed'); ?></h6>
                         <h2 class="mb-0"><?php echo number_format($conversionStats['failed'] ?? 0); ?></h2>
                     </div>
-                    <i class="bi bi-x-circle fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-xmark fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -110,7 +110,7 @@
 <!-- CLI Commands -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-terminal me-2"></i><?php echo __('CLI Commands'); ?>
+        <i class="fas fa-terminal me-2"></i><?php echo __('CLI Commands'); ?>
     </div>
     <div class="card-body">
         <p class="mb-2">Run format conversions from the command line:</p>
@@ -131,29 +131,29 @@ php symfony preservation:convert --mime-type=image/jpeg --format=tiff --limit=50
 <!-- Supported Conversions -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-diagram-3 me-2"></i><?php echo __('Supported Conversions'); ?>
+        <i class="fas fa-sitemap me-2"></i><?php echo __('Supported Conversions'); ?>
     </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
-                <h6><i class="bi bi-image me-2"></i>Images (ImageMagick)</h6>
+                <h6><i class="fas fa-image me-2"></i>Images (ImageMagick)</h6>
                 <ul class="small mb-3">
                     <li>JPEG, PNG, BMP, GIF &rarr; TIFF (uncompressed)</li>
                 </ul>
 
-                <h6><i class="bi bi-music-note-beamed me-2"></i>Audio (FFmpeg)</h6>
+                <h6><i class="fas fa-music me-2"></i>Audio (FFmpeg)</h6>
                 <ul class="small mb-3">
                     <li>MP3, AAC, OGG &rarr; WAV (PCM)</li>
                 </ul>
             </div>
             <div class="col-md-6">
-                <h6><i class="bi bi-file-earmark-pdf me-2"></i>Documents</h6>
+                <h6><i class="fas fa-file-pdf me-2"></i>Documents</h6>
                 <ul class="small mb-3">
                     <li>PDF &rarr; PDF/A (Ghostscript)</li>
                     <li>DOC, DOCX, XLS, PPT &rarr; PDF/A (LibreOffice)</li>
                 </ul>
 
-                <h6><i class="bi bi-film me-2"></i>Video (FFmpeg)</h6>
+                <h6><i class="fas fa-film me-2"></i>Video (FFmpeg)</h6>
                 <ul class="small mb-0">
                     <li>Various &rarr; MKV/FFV1 (lossless)</li>
                 </ul>
@@ -165,7 +165,7 @@ php symfony preservation:convert --mime-type=image/jpeg --format=tiff --limit=50
 <!-- Recent Conversions Table -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-ul me-2"></i><?php echo __('Recent Conversions'); ?>
+        <i class="fas fa-list-ul me-2"></i><?php echo __('Recent Conversions'); ?>
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">

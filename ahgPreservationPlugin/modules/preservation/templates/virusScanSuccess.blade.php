@@ -1,7 +1,7 @@
 @extends('layouts.page')
 
 @section('title')
-<h1><i class="bi bi-shield-exclamation text-danger me-2"></i>{{ __('Virus Scanning') }}</h1>
+<h1><i class="fas fa-shield-virus text-danger me-2"></i>{{ __('Virus Scanning') }}</h1>
 @endsection
 
 @section('content')
@@ -26,7 +26,7 @@
             @endif
         </div>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
+            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
         </a>
     </div>
 </div>
@@ -41,7 +41,7 @@
                         <h6 class="mb-0">{{ __('Clean') }}</h6>
                         <h2 class="mb-0">{{ number_format($scanStats['clean'] ?? 0) }}</h2>
                     </div>
-                    <i class="bi bi-check-circle fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-check fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -54,7 +54,7 @@
                         <h6 class="mb-0">{{ __('Infected') }}</h6>
                         <h2 class="mb-0">{{ number_format($scanStats['infected'] ?? 0) }}</h2>
                     </div>
-                    <i class="bi bi-bug fs-1 opacity-50"></i>
+                    <i class="fas fa-bug fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
                         <h6 class="mb-0">{{ __('Errors') }}</h6>
                         <h2 class="mb-0">{{ number_format($scanStats['error'] ?? 0) }}</h2>
                     </div>
-                    <i class="bi bi-exclamation-triangle fs-1 opacity-50"></i>
+                    <i class="fas fa-triangle-exclamation fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -80,7 +80,7 @@
                         <h6 class="mb-0">{{ __('Not Scanned') }}</h6>
                         <h2 class="mb-0">{{ number_format($unscannedObjects ?? 0) }}</h2>
                     </div>
-                    <i class="bi bi-question-circle fs-1 opacity-50"></i>
+                    <i class="fas fa-circle-question fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
 <!-- CLI Commands -->
 <div class="card mb-4">
     <div class="card-header">
-        <i class="bi bi-terminal me-2"></i>{{ __('CLI Commands') }}
+        <i class="fas fa-terminal me-2"></i>{{ __('CLI Commands') }}
     </div>
     <div class="card-body">
         <p class="mb-2">Run virus scans from the command line:</p>
@@ -111,7 +111,7 @@ php symfony preservation:virus-scan --limit=500</code></pre>
 <!-- Recent Scans Table -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-ul me-2"></i>{{ __('Recent Virus Scans') }}
+        <i class="fas fa-list-ul me-2"></i>{{ __('Recent Virus Scans') }}
     </div>
     <div class="table-responsive">
         <table class="table table-sm table-hover mb-0">

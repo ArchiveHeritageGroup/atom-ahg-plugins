@@ -12,7 +12,7 @@ if (!function_exists('formatBytes')) {
 @endphp
 
 @section('title')
-<h1><i class="bi bi-archive text-primary me-2"></i>{{ __('OAIS Packages') }}</h1>
+<h1><i class="fas fa-box-archive text-primary me-2"></i>{{ __('OAIS Packages') }}</h1>
 @endsection
 
 @section('content')
@@ -28,7 +28,7 @@ if (!function_exists('formatBytes')) {
                         <h2 class="mb-0">{{ number_format($stats['total_packages']) }}</h2>
                         <small>{{ $stats['total_size_formatted'] }}</small>
                     </div>
-                    <i class="bi bi-archive fs-1 opacity-50"></i>
+                    <i class="fas fa-box-archive fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@ if (!function_exists('formatBytes')) {
                         <h2 class="mb-0">{{ number_format($stats['by_type']['sip']['count'] ?? 0) }}</h2>
                         <small>{{ __('Submission') }}</small>
                     </div>
-                    <i class="bi bi-box-arrow-in-right fs-1 opacity-50"></i>
+                    <i class="fas fa-right-to-bracket fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -56,7 +56,7 @@ if (!function_exists('formatBytes')) {
                         <h2 class="mb-0">{{ number_format($stats['by_type']['aip']['count'] ?? 0) }}</h2>
                         <small>{{ __('Archival') }}</small>
                     </div>
-                    <i class="bi bi-safe fs-1 opacity-50"></i>
+                    <i class="fas fa-vault fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -70,7 +70,7 @@ if (!function_exists('formatBytes')) {
                         <h2 class="mb-0">{{ number_format($stats['by_type']['dip']['count'] ?? 0) }}</h2>
                         <small>{{ __('Dissemination') }}</small>
                     </div>
-                    <i class="bi bi-box-arrow-right fs-1 opacity-50"></i>
+                    <i class="fas fa-right-from-bracket fs-1 opacity-50"></i>
                 </div>
             </div>
         </div>
@@ -81,17 +81,17 @@ if (!function_exists('formatBytes')) {
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageEdit']) }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i>{{ __('Create Package') }}
+            <i class="fas fa-plus me-1"></i>{{ __('Create Package') }}
         </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary ms-2">
-            <i class="bi bi-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
+            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
         </a>
     </div>
     <div class="d-flex gap-2">
         <!-- Type Filter -->
         <div class="dropdown">
             <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                <i class="bi bi-funnel me-1"></i>
+                <i class="fas fa-filter me-1"></i>
                 {{ $currentType ? strtoupper($currentType) : __('All Types') }}
             </button>
             <ul class="dropdown-menu">
@@ -123,7 +123,7 @@ if (!function_exists('formatBytes')) {
 <!-- Packages Table -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-list-ul me-2"></i>{{ __('Packages') }}
+        <i class="fas fa-list-ul me-2"></i>{{ __('Packages') }}
         @if($currentType || $currentStatus)
             <span class="badge bg-secondary ms-2">
                 @php
@@ -152,7 +152,7 @@ if (!function_exists('formatBytes')) {
                 @if(empty($packages))
                 <tr>
                     <td colspan="7" class="text-center text-muted py-4">
-                        <i class="bi bi-archive fs-1 d-block mb-2 opacity-25"></i>
+                        <i class="fas fa-box-archive fs-1 d-block mb-2 opacity-25"></i>
                         {{ __('No packages found.') }}
                         <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageEdit']) }}" class="d-block mt-2">{{ __('Create your first package') }}</a>
                     </td>
@@ -170,10 +170,10 @@ if (!function_exists('formatBytes')) {
                         <td>
                             @php
                             $typeClass = ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$pkg->package_type] ?? 'secondary';
-                            $typeIcon = ['sip' => 'box-arrow-in-right', 'aip' => 'safe', 'dip' => 'box-arrow-right'][$pkg->package_type] ?? 'archive';
+                            $typeIcon = ['sip' => 'right-to-bracket', 'aip' => 'vault', 'dip' => 'right-from-bracket'][$pkg->package_type] ?? 'box-archive';
                             @endphp
                             <span class="badge bg-{{ $typeClass }}">
-                                <i class="bi bi-{{ $typeIcon }} me-1"></i>
+                                <i class="fas fa-{{ $typeIcon }} me-1"></i>
                                 {{ strtoupper($pkg->package_type) }}
                             </span>
                         </td>
@@ -198,16 +198,16 @@ if (!function_exists('formatBytes')) {
                         <td class="text-end">
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageView', 'id' => $pkg->id]) }}" class="btn btn-outline-primary" title="{{ __('View') }}">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="fas fa-eye"></i>
                                 </a>
                                 @if('draft' === $pkg->status)
                                 <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $pkg->id]) }}" class="btn btn-outline-secondary" title="{{ __('Edit') }}">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="fas fa-pen"></i>
                                 </a>
                                 @endif
                                 @if($pkg->export_path)
                                 <a href="{{ url_for(['module' => 'preservation', 'action' => 'packageDownload', 'id' => $pkg->id]) }}" class="btn btn-outline-success" title="{{ __('Download') }}">
-                                    <i class="bi bi-download"></i>
+                                    <i class="fas fa-download"></i>
                                 </a>
                                 @endif
                             </div>

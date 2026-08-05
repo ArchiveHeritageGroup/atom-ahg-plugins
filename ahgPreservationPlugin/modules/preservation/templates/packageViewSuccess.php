@@ -2,10 +2,10 @@
 <?php slot('title') ?>
 <h1>
     <?php
-    $typeIcon = ['sip' => 'box-arrow-in-right', 'aip' => 'safe', 'dip' => 'box-arrow-right'][$package->package_type] ?? 'archive';
+    $typeIcon = ['sip' => 'right-to-bracket', 'aip' => 'vault', 'dip' => 'right-from-bracket'][$package->package_type] ?? 'box-archive';
     $typeClass = ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$package->package_type] ?? 'secondary';
     ?>
-    <i class="bi bi-<?php echo $typeIcon; ?> text-<?php echo $typeClass; ?> me-2"></i>
+    <i class="fas fa-<?php echo $typeIcon; ?> text-<?php echo $typeClass; ?> me-2"></i>
     <?php echo htmlspecialchars($package->name); ?>
 </h1>
 <?php end_slot() ?>
@@ -15,11 +15,11 @@
 <!-- Navigation -->
 <div class="mb-4">
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packages']); ?>" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-1"></i><?php echo __('Back to Packages'); ?>
+        <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Packages'); ?>
     </a>
     <?php if ('exported' !== $package->status): ?>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $package->id]); ?>" class="btn btn-outline-primary ms-2">
-        <i class="bi bi-pencil me-1"></i><?php echo __('Edit'); ?>
+        <i class="fas fa-pen me-1"></i><?php echo __('Edit'); ?>
     </a>
     <?php endif; ?>
     <?php if (in_array($package->status, ['complete', 'validated'], true)): ?>
@@ -28,12 +28,12 @@
           // otherwise the view page is a dead end (no Edit for non-drafts, no
           // Download until exported). ?>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $package->id]); ?>" class="btn btn-primary ms-2">
-        <i class="bi bi-box-arrow-up me-1"></i><?php echo __('Export Package'); ?>
+        <i class="fas fa-up-right-from-square me-1"></i><?php echo __('Export Package'); ?>
     </a>
     <?php endif; ?>
     <?php if ($package->export_path): ?>
     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageDownload', 'id' => $package->id]); ?>" class="btn btn-success ms-2">
-        <i class="bi bi-download me-1"></i><?php echo __('Download Export'); ?>
+        <i class="fas fa-download me-1"></i><?php echo __('Download Export'); ?>
     </a>
     <?php endif; ?>
 </div>
@@ -43,7 +43,7 @@
         <!-- Package Details -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-archive me-2"></i><?php echo __('Package Details'); ?></span>
+                <span><i class="fas fa-box-archive me-2"></i><?php echo __('Package Details'); ?></span>
                 <?php
                 $statusClass = [
                     'draft' => 'secondary',
@@ -114,7 +114,7 @@
         <!-- Package Objects -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-files me-2"></i><?php echo __('Package Objects'); ?></span>
+                <span><i class="fas fa-copy me-2"></i><?php echo __('Package Objects'); ?></span>
                 <span class="badge bg-primary"><?php echo count($objects); ?></span>
             </div>
             <?php if (!empty($objects)): ?>
@@ -164,7 +164,7 @@
             </div>
             <?php else: ?>
             <div class="card-body text-center text-muted">
-                <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+                <i class="fas fa-inbox fs-1 d-block mb-2 opacity-25"></i>
                 <?php echo __('No objects in this package'); ?>
             </div>
             <?php endif; ?>
@@ -173,7 +173,7 @@
         <!-- Package Events -->
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-clock-history me-2"></i><?php echo __('Package Events'); ?>
+                <i class="fas fa-clock-rotate-left me-2"></i><?php echo __('Package Events'); ?>
             </div>
             <?php if (!empty($events)): ?>
             <div class="table-responsive">
@@ -224,7 +224,7 @@
         <!-- Timeline -->
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-calendar3 me-2"></i><?php echo __('Timeline'); ?>
+                <i class="fas fa-calendar me-2"></i><?php echo __('Timeline'); ?>
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between">
@@ -262,7 +262,7 @@
         <?php if ($package->source_path || $package->export_path): ?>
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-folder me-2"></i><?php echo __('File Paths'); ?>
+                <i class="fas fa-folder me-2"></i><?php echo __('File Paths'); ?>
             </div>
             <div class="card-body">
                 <?php if ($package->source_path): ?>
@@ -282,14 +282,14 @@
         <?php if ($parentPackage || !empty($childPackages)): ?>
         <div class="card mb-4">
             <div class="card-header">
-                <i class="bi bi-diagram-3 me-2"></i><?php echo __('Related Packages'); ?>
+                <i class="fas fa-sitemap me-2"></i><?php echo __('Related Packages'); ?>
             </div>
             <ul class="list-group list-group-flush">
                 <?php if ($parentPackage): ?>
                 <li class="list-group-item">
                     <small class="text-muted d-block"><?php echo __('Parent Package'); ?></small>
                     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageView', 'id' => $parentPackage->id]); ?>">
-                        <i class="bi bi-arrow-up-circle me-1"></i>
+                        <i class="fas fa-circle-arrow-up me-1"></i>
                         <?php echo htmlspecialchars($parentPackage->name); ?>
                     </a>
                     <span class="badge bg-<?php echo ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$parentPackage->package_type] ?? 'secondary'; ?> ms-2">
@@ -302,7 +302,7 @@
                 <li class="list-group-item">
                     <small class="text-muted d-block"><?php echo __('Derived Package'); ?></small>
                     <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageView', 'id' => $child->id]); ?>">
-                        <i class="bi bi-arrow-down-circle me-1"></i>
+                        <i class="fas fa-circle-arrow-down me-1"></i>
                         <?php echo htmlspecialchars($child->name); ?>
                     </a>
                     <span class="badge bg-<?php echo ['sip' => 'info', 'aip' => 'success', 'dip' => 'warning'][$child->package_type] ?? 'secondary'; ?> ms-2">
@@ -318,7 +318,7 @@
         <?php if ($package->source_path && is_dir($package->source_path)): ?>
         <div class="card">
             <div class="card-header">
-                <i class="bi bi-file-earmark-code me-2"></i><?php echo __('BagIt Structure'); ?>
+                <i class="fas fa-file-code me-2"></i><?php echo __('BagIt Structure'); ?>
             </div>
             <div class="card-body">
                 <pre class="mb-0 small bg-light p-2 rounded"><?php
