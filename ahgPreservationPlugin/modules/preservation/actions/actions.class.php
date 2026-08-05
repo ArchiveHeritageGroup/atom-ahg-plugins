@@ -929,10 +929,17 @@ class preservationActions extends AhgController
                 ->where('id', $objectId)->where('culture', $culture)->first();
             // Slug for the "Back to record" button.
             $this->filterObjectSlug = DB::table('slug')->where('object_id', $objectId)->value('slug');
+
+            // Count what is on screen, not what is in the database. getStatistics()
+            // is site-wide, so a record with no packages of its own still showed
+            // 'Total Packages 3' above an empty list and read as a broken page
+            // rather than an empty one.
+            $this->filteredCount = count($this->packages);
         } else {
             $this->packages = $this->service->getPackages($type, $status, 50);
             $this->filterObject = null;
             $this->filterObjectSlug = null;
+            $this->filteredCount = null;
         }
 
         $this->stats = $this->service->getPackageStatistics();

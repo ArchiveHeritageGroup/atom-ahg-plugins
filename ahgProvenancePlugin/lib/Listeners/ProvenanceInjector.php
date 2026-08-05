@@ -254,6 +254,27 @@ class ProvenanceInjector
     }
 
     /**
+     * The record's id, but only when it has a digital object to work on.
+     *
+     * Returns null on any failure so the caller omits one link rather than losing
+     * the block.
+     */
+    private function objectIdWithDigitalObject(string $slug): ?int
+    {
+        try {
+            $id = \Illuminate\Database\Capsule\Manager::table('slug as s')
+                ->join('information_object as io', 'io.id', '=', 's.object_id')
+                ->join('digital_object as do', 'do.object_id', '=', 'io.id')
+                ->where('s.slug', $slug)
+                ->value('io.id');
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        return $id ? (int) $id : null;
+    }
+
+    /**
      * The Collections Management block: heading plus its links.
      *
      * Returns '' when there is nothing to show, so callers can leave the page alone
@@ -321,6 +342,25 @@ class ProvenanceInjector
                     'label' => __('Preservation'),
                     'route' => ['module' => 'preservation', 'action' => 'packagesBySlug', 'slug' => $slug],
                     'icon' => 'fas fa-box-archive',
+                ];
+            }
+
+            if ($this->pluginEnabled('ahgHeritageAccountingPlugin')) {
+                $candidates[] = [
+                    'label' => __('Heritage Accounting'),
+                    'route' => ['module' => 'heritageAccounting', 'action' => 'viewByObject', 'slug' => $slug],
+                    'icon' => 'fas fa-scale-balanced',
+                ];
+            }
+
+            // Redaction is keyed on the object id, not the slug: the editor loads a
+            // digital object rather than a description. Offered only when the record
+            // actually has one, since the editor has nothing to draw on otherwise.
+            if ($this->pluginEnabled('ahgRedactionPlugin') && null !== $objectId = $this->objectIdWithDigitalObject($slug)) {
+                $candidates[] = [
+                    'label' => __('Visual Redaction'),
+                    'route' => ['module' => 'redaction', 'action' => 'editor', 'id' => $objectId],
+                    'icon' => 'fas fa-marker',
                 ];
             }
         }

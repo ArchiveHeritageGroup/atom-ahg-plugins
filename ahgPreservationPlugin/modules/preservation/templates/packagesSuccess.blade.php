@@ -24,8 +24,8 @@ if (!function_exists('formatBytes')) {
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="mb-0">{{ __('Total Packages') }}</h6>
-                        <h2 class="mb-0">{{ number_format($stats['total_packages']) }}</h2>
+                        <h6 class="mb-0">{{ isset($filteredCount) && $filteredCount !== null ? __('Packages for this record') : __('Total Packages') }}</h6>
+                        <h2 class="mb-0">{{ number_format(isset($filteredCount) && $filteredCount !== null ? $filteredCount : $stats['total_packages']) }}</h2>
                         <small>{{ $stats['total_size_formatted'] }}</small>
                     </div>
                     <i class="fas fa-box-archive fs-1 opacity-50"></i>

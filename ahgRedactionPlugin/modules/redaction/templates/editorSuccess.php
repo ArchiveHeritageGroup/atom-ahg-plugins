@@ -13,7 +13,10 @@ $regions = $sf_data->getRaw('regions') ?? [];
 // IIIF Configuration
 $baseUrl = sfConfig::get('app_iiif_base_url', 'https://psis.theahg.co.za');
 $cantaloupeUrl = sfConfig::get('app_iiif_cantaloupe_url', 'https://psis.theahg.co.za/iiif/2');
-$frameworkPath = sfConfig::get('app_iiif_framework_path', '/atom-framework/src/Extensions/IiifViewer');
+// Viewer assets are vendored in this plugin, so there is no framework path to
+// resolve. The IIIF viewer's own copies are not present on a stock install - the
+// framework ships no public/viewers/annotorious at all, so the image branch of
+// this editor loaded nothing and rendered an empty pane.
 $viewerId = 'redaction-viewer-' . $objectId;
 ?>
 
@@ -235,8 +238,8 @@ $viewerId = 'redaction-viewer-' . $objectId;
 
 <?php if ($docInfo): ?>
 <!-- Load required libraries -->
-<link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/css/iiif-viewer.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-<link rel="stylesheet" href="<?php echo $frameworkPath; ?>/public/viewers/annotorious/annotorious.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<link rel="stylesheet" href="/plugins/ahgRedactionPlugin/web/css/iiif-viewer.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+<link rel="stylesheet" href="/plugins/ahgRedactionPlugin/web/css/annotorious.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 <link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
 <?php if ($docInfo['is_pdf']): ?>
@@ -246,7 +249,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = '/plugins/ahgRedactionPlugin/web/js/ven
 </script>
 <?php else: ?>
 <script src="/plugins/ahgRedactionPlugin/web/js/vendor/openseadragon.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
-<script src="<?php echo $frameworkPath; ?>/public/viewers/annotorious/openseadragon-annotorious.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
+<script src="/plugins/ahgRedactionPlugin/web/js/vendor/annotorious/openseadragon-annotorious.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php endif; ?>
 
 <script src="/plugins/ahgRedactionPlugin/web/js/vendor/fabric.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>

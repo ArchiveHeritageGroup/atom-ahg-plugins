@@ -20,8 +20,8 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="mb-0"><?php echo __('Total Packages'); ?></h6>
-                        <h2 class="mb-0"><?php echo number_format($stats['total_packages']); ?></h2>
+                        <h6 class="mb-0"><?php echo (isset($filteredCount) && null !== $filteredCount) ? __('Packages for this record') : __('Total Packages'); ?></h6>
+                        <h2 class="mb-0"><?php echo number_format((isset($filteredCount) && null !== $filteredCount) ? $filteredCount : $stats['total_packages']); ?></h2>
                         <small><?php echo $stats['total_size_formatted']; ?></small>
                     </div>
                     <i class="fas fa-box-archive fs-1 opacity-50"></i>
