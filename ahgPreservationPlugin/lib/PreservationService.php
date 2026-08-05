@@ -2758,7 +2758,10 @@ class PreservationService
             'puid' => $formatInfo->puid ?? null,
             'object_role' => $options['object_role'] ?? 'payload',
             'sequence' => $maxSeq + 1,
-            'added_at' => date('Y-m-d H:i:s'),
+            // created_at, not added_at: the column has always been called that in
+            // install.sql and in every live table. The single reference to added_at
+            // was here, and it made every add-object fail.
+            'created_at' => date('Y-m-d H:i:s'),
         ]);
 
         // Update package counts

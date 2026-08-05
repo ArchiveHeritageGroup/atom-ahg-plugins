@@ -326,11 +326,15 @@ EOF;
                 $service->addObjectToPackage($package->id, $objId);
                 ++$added;
             } catch (Exception $e) {
-                if (false !== strpos($e->getMessage(), 'not found')) {
-                    ++$errors;
-                    $this->logSection('package', "  Object {$objId}: not found", null, 'ERROR');
-                } else {
+                // Report what actually went wrong. Matching on 'not found' swallowed
+                // everything else - a SQLSTATE 'Column not found' from a schema
+                // mismatch was reported as a missing digital object, which sent the
+                // search somewhere entirely unrelated.
+                if (false !== stripos($e->getMessage(), 'already in package')) {
                     ++$skipped;
+                } else {
+                    ++$errors;
+                    $this->logSection('package', "  Object {$objId}: ".$e->getMessage(), null, 'ERROR');
                 }
             }
         }
