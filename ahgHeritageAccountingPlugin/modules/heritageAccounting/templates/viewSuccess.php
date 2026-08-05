@@ -21,9 +21,6 @@
                 <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'edit', 'id' => $asset->id]) ?>" class="btn btn-warning">
                     <i class="fas fa-edit me-1"></i><?php echo __('Edit') ?>
                 </a>
-                <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'browse']) ?>" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-1"></i><?php echo __('Back') ?>
-                </a>
             </div>
         </div>
     </div>

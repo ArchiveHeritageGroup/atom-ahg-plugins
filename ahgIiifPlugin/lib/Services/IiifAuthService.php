@@ -760,11 +760,41 @@ class IiifAuthService
      * @param string|null $bearer Bearer token from Authorization header
      * @return array {allowed: bool, max_scale?: float}
      */
+    /** digital_object.usage_id for a master. Derivatives are 141 (reference) and 142 (thumbnail). */
+    private const MASTER_USAGE_ID = 140;
+
+    /**
+     * May the current request read this description's master?
+     *
+     * Asks the same ACL the direct download path uses, so the two routes cannot
+     * disagree. Fails closed: if the check cannot be made, the master is refused
+     * and the viewer falls back to the reference copy.
+     */
+    protected function mayReadMaster(int $informationObjectId): bool
+    {
+        try {
+            $resource = \QubitInformationObject::getById($informationObjectId);
+
+            if (!$resource) {
+                return false;
+            }
+
+            return (bool) \QubitAcl::check($resource, 'readMaster');
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     public function cantaloupeCheck(string $identifier, ?string $cookie = null, ?string $bearer = null): array
     {
         // Extract object_id from identifier path
-        // Identifiers look like: uploads_SL_r_SL_REPO_SL_...
-        $decodedPath = str_replace('_SL_', '/', $identifier);
+        // Identifiers look like: uploads_SL_r_SL_REPO_SL_... but the tile URLs this
+        // guards use percent-encoded slashes, and nginx hands the value through
+        // still encoded. Normalise both, or the lookup finds nothing and the old
+        // code fell through to 'unprotected, allow'.
+        $decodedPath = rawurldecode($identifier);
+        $decodedPath = str_replace('_SL_', '/', $decodedPath);
+        $decodedPath = '/'.ltrim($decodedPath, '/');
 
         // Strip page suffix (;N) for multi-page TIFF
         $decodedPath = preg_replace('/;[0-9]+$/', '', $decodedPath);
@@ -774,14 +804,36 @@ class IiifAuthService
         $dirPath = '/' . ltrim(($parts['dirname'] ?? '') . '/', '/');
         $fileName = $parts['basename'] ?? '';
 
-        $objectId = DB::table('digital_object')
+        $digitalObject = DB::table('digital_object')
             ->where('path', $dirPath)
             ->where('name', $fileName)
-            ->value('object_id');
+            ->first(['id', 'object_id', 'usage_id']);
 
-        if (!$objectId) {
+        if (!$digitalObject) {
             // No matching digital object — allow (unprotected)
             return ['allowed' => true];
+        }
+
+        $objectId = $digitalObject->object_id;
+
+        // A master is never served through the image server unless the caller could
+        // have downloaded it directly.
+        //
+        // /uploads/r/ is routed through the application so that readMaster is
+        // enforced, but the tile server reads the same files straight off disk and
+        // knows nothing about that. The result was that the exact byte range a 404
+        // refused on /uploads/r/ came back 200 from /iiif/, at full resolution, to
+        // anyone who could form the path - and the paths appear in every manifest.
+        //
+        // Derivatives (reference 141, thumbnail 142) are public by design and are
+        // what a viewer should be requesting anyway.
+        if (self::MASTER_USAGE_ID === (int) $digitalObject->usage_id
+            && !$this->mayReadMaster((int) $objectId)) {
+            return [
+                'allowed' => false,
+                'status' => 403,
+                'reason' => 'Master access requires authorisation.',
+            ];
         }
 
         $authResource = $this->getAuthResourceForObject((int) $objectId);
