@@ -138,7 +138,7 @@
                     <label class="form-label">{{ __('Add Digital Object') }}</label>
                     <div class="input-group">
                         <input type="number" id="objectIdInput" class="form-control" placeholder="{{ __('Enter digital object ID') }}">
-                        <button type="button" class="btn btn-outline-primary" onclick="addObject()">
+                        <button type="button" class="btn btn-outline-primary" data-ahg-action="addObject">
                             <i class="fas fa-plus me-1"></i>{{ __('Add') }}
                         </button>
                     </div>
@@ -172,7 +172,7 @@
                                 </td>
                                 <td>{{ $obj->file_size ? formatBytes($obj->file_size) : '-' }}</td>
                                 <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeObject({{ $obj->digital_object_id }})">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-action="removeObject" data-ahg-args='[{{ $obj->digital_object_id }}]'>
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -231,19 +231,19 @@
             </div>
             <div class="card-body">
                 @if('draft' === $package->status && $package->object_count > 0)
-                <button type="button" class="btn btn-success w-100 mb-2" onclick="buildPackage()">
+                <button type="button" class="btn btn-success w-100 mb-2" data-ahg-action="buildPackage">
                     <i class="fas fa-hammer me-1"></i>{{ __('Build Package') }}
                 </button>
                 @endif
 
                 @if('complete' === $package->status)
-                <button type="button" class="btn btn-primary w-100 mb-2" onclick="validatePackage()">
+                <button type="button" class="btn btn-primary w-100 mb-2" data-ahg-action="validatePackage">
                     <i class="fas fa-circle-check me-1"></i>{{ __('Validate Package') }}
                 </button>
                 @endif
 
                 @if(in_array($package->status, ['complete', 'validated']))
-                <button type="button" class="btn btn-info w-100 mb-2" onclick="exportPackage()">
+                <button type="button" class="btn btn-info w-100 mb-2" data-ahg-action="exportPackage">
                     <i class="fas fa-up-right-from-square me-1"></i>{{ __('Export Package') }}
                 </button>
                 @endif
@@ -256,21 +256,21 @@
 
                 @if('sip' === $package->package_type && in_array($package->status, ['validated', 'exported']))
                 <hr>
-                <button type="button" class="btn btn-outline-primary w-100" onclick="convertPackage('aip')">
+                <button type="button" class="btn btn-outline-primary w-100" data-ahg-action="convertPackage" data-ahg-args='["aip"]'>
                     <i class="fas fa-circle-arrow-right me-1"></i>{{ __('Convert to AIP') }}
                 </button>
                 @endif
 
                 @if('aip' === $package->package_type && in_array($package->status, ['validated', 'exported']))
                 <hr>
-                <button type="button" class="btn btn-outline-warning w-100" onclick="convertPackage('dip')">
+                <button type="button" class="btn btn-outline-warning w-100" data-ahg-action="convertPackage" data-ahg-args='["dip"]'>
                     <i class="fas fa-circle-arrow-right me-1"></i>{{ __('Create DIP') }}
                 </button>
                 @endif
 
                 @if('draft' === $package->status)
                 <hr>
-                <button type="button" class="btn btn-outline-danger w-100" onclick="deletePackage()">
+                <button type="button" class="btn btn-outline-danger w-100" data-ahg-action="deletePackage">
                     <i class="fas fa-trash me-1"></i>{{ __('Delete Package') }}
                 </button>
                 @endif
@@ -497,4 +497,37 @@ function formatBytesJs(bytes) {
 </script>
 @endif
 
+<script nonce="{{ sfConfig::get('csp_nonce_value', '') }}">
+// Dispatches the buttons on this page.
+//
+// They used inline onclick handlers, and script-src here carries no
+// 'unsafe-inline', so the browser refused to run them - silently, with nothing in
+// the console pointing at the cause. Build & Export, validate, convert, export,
+// delete and the object controls therefore did nothing at all, which is why every
+// package sat in Draft: the request was never made.
+//
+// One delegated listener, dispatching by name to the functions defined above. No
+// eval, so it works under the same policy that blocked the originals.
+(function () {
+    if (window.__ahgPreservationActionsWired) { return; }
+    window.__ahgPreservationActionsWired = true;
+
+    document.addEventListener('click', function (event) {
+        var el = event.target.closest('[data-ahg-action]');
+        if (!el) { return; }
+
+        var fn = window[el.getAttribute('data-ahg-action')];
+        if ('function' !== typeof fn) { return; }
+
+        event.preventDefault();
+
+        var args = [];
+        try { args = JSON.parse(el.getAttribute('data-ahg-args') || '[]'); } catch (e) { args = []; }
+
+        fn.apply(null, args);
+    });
+})();
+</script>
+
 @endsection
+

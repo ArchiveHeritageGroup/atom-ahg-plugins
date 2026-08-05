@@ -179,7 +179,7 @@
                     <div class="input-group position-relative">
                         <input type="text" id="objectSearchInput" class="form-control" autocomplete="off" placeholder="<?php echo __('Search by title or file name...'); ?>">
                         <input type="hidden" id="objectIdInput" value="">
-                        <button type="button" class="btn btn-outline-primary" onclick="addObject()">
+                        <button type="button" class="btn btn-outline-primary" data-ahg-action="addObject">
                             <i class="fas fa-plus me-1"></i><?php echo __('Add'); ?>
                         </button>
                         <div id="objectSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
@@ -192,7 +192,7 @@
                     <div class="input-group position-relative">
                         <input type="text" id="collImportSearch" class="form-control" autocomplete="off" placeholder="<?php echo __('Search a collection/description by title or reference...'); ?>">
                         <input type="hidden" id="collImportId" value="">
-                        <button type="button" class="btn btn-outline-primary" onclick="addCollectionObjects()">
+                        <button type="button" class="btn btn-outline-primary" data-ahg-action="addCollectionObjects">
                             <i class="fas fa-layer-group me-1"></i><?php echo __('Add all'); ?>
                         </button>
                         <div id="collImportResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
@@ -227,7 +227,7 @@
                                 </td>
                                 <td><?php echo $obj->file_size ? formatBytes($obj->file_size) : '-'; ?></td>
                                 <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeObject(<?php echo $obj->digital_object_id; ?>)">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-ahg-action="removeObject" data-ahg-args='[<?php echo $obj->digital_object_id; ?>]'>
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -286,7 +286,7 @@
             </div>
             <div class="card-body">
                 <?php if ($package->object_count > 0): ?>
-                <button type="button" class="btn btn-success w-100 mb-2" onclick="buildExportPackage()">
+                <button type="button" class="btn btn-success w-100 mb-2" data-ahg-action="buildExportPackage">
                     <i class="fas fa-bolt me-1"></i><?php echo __('Build &amp; Export'); ?>
                 </button>
                 <div class="form-text mb-2"><?php echo __('One step: builds and exports so the download is ready.'); ?></div>
@@ -294,19 +294,19 @@
                 <?php endif; ?>
 
                 <?php if ('draft' === $package->status && $package->object_count > 0): ?>
-                <button type="button" class="btn btn-outline-success w-100 mb-2" onclick="buildPackage()">
+                <button type="button" class="btn btn-outline-success w-100 mb-2" data-ahg-action="buildPackage">
                     <i class="fas fa-hammer me-1"></i><?php echo __('Build Package'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if ('complete' === $package->status): ?>
-                <button type="button" class="btn btn-primary w-100 mb-2" onclick="validatePackage()">
+                <button type="button" class="btn btn-primary w-100 mb-2" data-ahg-action="validatePackage">
                     <i class="fas fa-circle-check me-1"></i><?php echo __('Validate Package'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if (in_array($package->status, ['complete', 'validated'])): ?>
-                <button type="button" class="btn btn-info w-100 mb-2" onclick="exportPackage()">
+                <button type="button" class="btn btn-info w-100 mb-2" data-ahg-action="exportPackage">
                     <i class="fas fa-up-right-from-square me-1"></i><?php echo __('Export Package'); ?>
                 </button>
                 <?php endif; ?>
@@ -319,21 +319,21 @@
 
                 <?php if ('sip' === $package->package_type && in_array($package->status, ['validated', 'exported'])): ?>
                 <hr>
-                <button type="button" class="btn btn-outline-primary w-100" onclick="convertPackage('aip')">
+                <button type="button" class="btn btn-outline-primary w-100" data-ahg-action="convertPackage" data-ahg-args='["aip"]'>
                     <i class="fas fa-circle-arrow-right me-1"></i><?php echo __('Convert to AIP'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if ('aip' === $package->package_type && in_array($package->status, ['validated', 'exported'])): ?>
                 <hr>
-                <button type="button" class="btn btn-outline-warning w-100" onclick="convertPackage('dip')">
+                <button type="button" class="btn btn-outline-warning w-100" data-ahg-action="convertPackage" data-ahg-args='["dip"]'>
                     <i class="fas fa-circle-arrow-right me-1"></i><?php echo __('Create DIP'); ?>
                 </button>
                 <?php endif; ?>
 
                 <?php if ('draft' === $package->status): ?>
                 <hr>
-                <button type="button" class="btn btn-outline-danger w-100" onclick="deletePackage()">
+                <button type="button" class="btn btn-outline-danger w-100" data-ahg-action="deletePackage">
                     <i class="fas fa-trash me-1"></i><?php echo __('Delete Package'); ?>
                 </button>
                 <?php endif; ?>
@@ -803,4 +803,37 @@ function formatBytes(bytes) {
     };
 })();
 </script>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Dispatches the buttons on this page.
+//
+// They used inline onclick handlers, and script-src here carries no
+// 'unsafe-inline', so the browser refused to run them - silently, with nothing in
+// the console pointing at the cause. Build & Export, validate, convert, export,
+// delete and the object controls therefore did nothing at all, which is why every
+// package sat in Draft: the request was never made.
+//
+// One delegated listener, dispatching by name to the functions defined above. No
+// eval, so it works under the same policy that blocked the originals.
+(function () {
+    if (window.__ahgPreservationActionsWired) { return; }
+    window.__ahgPreservationActionsWired = true;
+
+    document.addEventListener('click', function (event) {
+        var el = event.target.closest('[data-ahg-action]');
+        if (!el) { return; }
+
+        var fn = window[el.getAttribute('data-ahg-action')];
+        if ('function' !== typeof fn) { return; }
+
+        event.preventDefault();
+
+        var args = [];
+        try { args = JSON.parse(el.getAttribute('data-ahg-args') || '[]'); } catch (e) { args = []; }
+
+        fn.apply(null, args);
+    });
+})();
+</script>
+
 <?php end_slot() ?>

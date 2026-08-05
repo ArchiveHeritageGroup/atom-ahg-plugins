@@ -76,11 +76,7 @@ class redactionActions extends AhgController
         $this->docInfo = $service->getDocumentInfo($objectId);
 
         if ($this->docInfo) {
-            $digitalObject = DB::table('digital_object')->where('object_id', $objectId)->first();
-
-            if ($digitalObject) {
-                $this->docInfo['url'] = $digitalObject->path.$digitalObject->name;
-            }
+            $this->docInfo['url'] = $this->displayUrl($objectId);
         }
 
         $this->regions = $service->getRegionsForObject($objectId);
@@ -225,16 +221,48 @@ class redactionActions extends AhgController
                 return $this->json(['success' => false, 'error' => 'No digital object for this record']);
             }
 
-            $digitalObject = DB::table('digital_object')->where('object_id', $objectId)->first();
-
-            if ($digitalObject) {
-                $info['url'] = $digitalObject->path.$digitalObject->name;
-            }
+            $info['url'] = $this->displayUrl($objectId);
 
             return $this->json(['success' => true, 'document' => $info]);
         } catch (\Exception $e) {
             return $this->json(['success' => false, 'error' => $e->getMessage()]);
         }
+    }
+
+
+    /**
+     * The image the editor draws on.
+     *
+     * The reference derivative, not the master. Masters under /uploads/r/ are no
+     * longer served statically - they go through an ACL check and answer 404 to
+     * anyone without readMaster - so pointing the canvas at one left the editor
+     * with an empty pane. The reference copy is served normally and is what the
+     * viewer should be handling anyway.
+     *
+     * It costs nothing in accuracy: regions are stored as 0-1 normalised
+     * coordinates, so they are resolution independent, and applying them happens
+     * server side against the master. Drawing on the reference also keeps the
+     * master out of the browser entirely.
+     *
+     * Falls back to whatever digital object exists if there is no reference.
+     */
+    protected function displayUrl(int $objectId): ?string
+    {
+        $master = DB::table('digital_object')->where('object_id', $objectId)->first();
+
+        if (!$master) {
+            return null;
+        }
+
+        // usage 141 is the reference copy, 142 the thumbnail.
+        $reference = DB::table('digital_object')
+            ->where('parent_id', $master->id)
+            ->where('usage_id', 141)
+            ->first();
+
+        $chosen = $reference ?: $master;
+
+        return $chosen->path.$chosen->name;
     }
 
     /**

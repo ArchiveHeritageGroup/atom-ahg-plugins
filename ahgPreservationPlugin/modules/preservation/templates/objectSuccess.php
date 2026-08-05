@@ -65,10 +65,10 @@
                 <?php endif; ?>
 
                 <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="generateChecksums(<?php echo $digitalObject->id; ?>)">
+                    <button class="btn btn-primary" data-ahg-action="generateChecksums" data-ahg-args='[<?php echo $digitalObject->id; ?>]'>
                         <i class="fas fa-arrows-rotate me-1"></i><?php echo __('Regenerate Checksums'); ?>
                     </button>
-                    <button class="btn btn-outline-primary" onclick="verifyFixity(<?php echo $digitalObject->id; ?>)">
+                    <button class="btn btn-outline-primary" data-ahg-action="verifyFixity" data-ahg-args='[<?php echo $digitalObject->id; ?>]'>
                         <i class="fas fa-circle-check me-1"></i><?php echo __('Verify Fixity Now'); ?>
                     </button>
                 </div>
@@ -289,4 +289,37 @@ function verifyFixity(id) {
     };
 })();
 </script>
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Dispatches the buttons on this page.
+//
+// They used inline onclick handlers, and script-src here carries no
+// 'unsafe-inline', so the browser refused to run them - silently, with nothing in
+// the console pointing at the cause. Build & Export, validate, convert, export,
+// delete and the object controls therefore did nothing at all, which is why every
+// package sat in Draft: the request was never made.
+//
+// One delegated listener, dispatching by name to the functions defined above. No
+// eval, so it works under the same policy that blocked the originals.
+(function () {
+    if (window.__ahgPreservationActionsWired) { return; }
+    window.__ahgPreservationActionsWired = true;
+
+    document.addEventListener('click', function (event) {
+        var el = event.target.closest('[data-ahg-action]');
+        if (!el) { return; }
+
+        var fn = window[el.getAttribute('data-ahg-action')];
+        if ('function' !== typeof fn) { return; }
+
+        event.preventDefault();
+
+        var args = [];
+        try { args = JSON.parse(el.getAttribute('data-ahg-args') || '[]'); } catch (e) { args = []; }
+
+        fn.apply(null, args);
+    });
+})();
+</script>
+
 <?php end_slot() ?>
