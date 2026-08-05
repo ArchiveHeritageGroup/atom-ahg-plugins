@@ -69,7 +69,7 @@
 <!-- Spectrum 5.1 Procedures Grid -->
 <div class="card mb-4">
   <div class="card-header bg-success text-white">
-    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i><?php echo __('Collections Procedures Procedures'); ?></h5>
+    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i><?php echo __('Collections Procedures'); ?></h5>
   </div>
   <div class="card-body">
     <p class="text-muted mb-4"><?php echo __('Manage collections management procedures according to Collections Procedures standard.'); ?></p>
