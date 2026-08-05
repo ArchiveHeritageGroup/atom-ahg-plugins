@@ -200,7 +200,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                         <label class="form-label fw-semibold">
                             <i class="fas fa-barcode me-1"></i>{{ __('Barcode Source') }}
                         </label>
-                        <select class="form-select" id="barcodeSource" onchange="updateBarcodeSource()">
+                        <select class="form-select" id="barcodeSource">
                             @foreach ($barcodeSources as $key => $source)
                                 @if (!empty($source['value']))
                                 <option value="{{ $source['value'] }}"
@@ -215,7 +215,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <!-- Label Size -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold">{{ __('Label Size') }}</label>
-                        <select class="form-select" id="labelSize" onchange="updateLabelSize()">
+                        <select class="form-select" id="labelSize">
                             <option value="200">{{ __('Small (50mm)') }}</option>
                             <option value="300" selected>{{ __('Medium (75mm)') }}</option>
                             <option value="400">{{ __('Large (100mm)') }}</option>
@@ -226,11 +226,11 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Show') }}</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showBarcode" checked onchange="toggleBarcode()">
+                            <input class="form-check-input" type="checkbox" id="showBarcode" checked>
                             <label class="form-check-label" for="showBarcode">{{ __('Linear Barcode') }}</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showQR" checked onchange="toggleQR()">
+                            <input class="form-check-input" type="checkbox" id="showQR" checked>
                             <label class="form-check-label" for="showQR">{{ __('QR Code') }}</label>
                         </div>
                     </div>
@@ -238,11 +238,11 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <div class="col-md-6 mb-3">
                         <label class="form-label">{{ __('Include') }}</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showTitle" checked onchange="toggleTitle()">
+                            <input class="form-check-input" type="checkbox" id="showTitle" checked>
                             <label class="form-check-label" for="showTitle">{{ __('Title') }}</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showRepo" checked onchange="toggleRepo()">
+                            <input class="form-check-input" type="checkbox" id="showRepo" checked>
                             <label class="form-check-label" for="showRepo">{{ __('Repository') }}</label>
                         </div>
                     </div>
@@ -255,12 +255,16 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
             <a class="btn btn-outline-secondary" href="{{ url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]) }}">
                 <i class="fas fa-arrow-left me-1"></i>{{ __('Back') }}
             </a>
-            <button type="button" class="btn btn-primary" onclick="window.print()">
+            <button type="button" class="btn btn-primary" id="printLabelBtn">
                 <i class="fas fa-print me-1"></i>{{ __('Print Label') }}
             </button>
-            <button type="button" class="btn btn-secondary" onclick="downloadLabel()">
+            {{-- Download PNG hidden for now. The listener is registered defensively so it
+     no-ops when the element is absent; restoring it is just uncommenting. --}}
+{{--
+<button type="button" class="btn btn-secondary" id="downloadLabelBtn">
                 <i class="fas fa-download me-1"></i>{{ __('Download PNG') }}
             </button>
+--}}
         </div>
     </div>
 
@@ -345,6 +349,26 @@ function downloadLabel() {
         alert('{{ __('Download requires html2canvas. Use Print instead.') }}');
     }
 }
+
+// Event wiring, not inline handlers: AtoM's CSP script-src has no 'unsafe-inline',
+// so onclick="" / onchange="" attributes are refused by the browser and every
+// control on this page silently did nothing. This block carries the nonce, so it
+// runs; the listeners it registers are what make the page work.
+(function () {
+    function on(id, evt, fn) {
+        var el = document.getElementById(id);
+        if (el) { el.addEventListener(evt, fn); }
+    }
+
+    on('printLabelBtn', 'click', function () { window.print(); });
+    on('downloadLabelBtn', 'click', function () { downloadLabel(); });
+    on('barcodeSource', 'change', updateBarcodeSource);
+    on('labelSize', 'change', updateLabelSize);
+    on('showBarcode', 'change', toggleBarcode);
+    on('showQR', 'change', toggleQR);
+    on('showTitle', 'change', toggleTitle);
+    on('showRepo', 'change', toggleRepo);
+})();
 </script>
 
 @endsection

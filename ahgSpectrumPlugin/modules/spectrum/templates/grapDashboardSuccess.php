@@ -2,7 +2,7 @@
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
-    <h4><?php echo __('Heritage Assets'); ?></h4>
+    <h4><?php echo __('Heritage Asset'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for('@spectrum_index?slug=' . $resource->slug); ?>"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Collections Procedures'); ?></a></li>
         <li><a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'dashboard']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Collections Dashboard'); ?></a></li>
@@ -15,7 +15,7 @@
 <?php end_slot(); ?>
 
 <?php slot('title'); ?>
-<h1><i class="fas fa-landmark"></i> <?php echo __('Heritage Assets'); ?></h1>
+<h1><i class="fas fa-landmark"></i> <?php echo __('Heritage Asset'); ?><small class="text-muted ms-2"><?php echo esc_entities($resource->title ?? $resource->slug); ?></small></h1>
 <?php end_slot(); ?>
 
 <?php slot('content'); ?>
@@ -25,41 +25,47 @@
         <?php echo __('Heritage Assets: Financial reporting for cultural property, museum collections, and archival materials per international accounting standards.'); ?>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-center bg-primary text-white">
-                <div class="card-body">
-                    <h2 class="mb-0"><?php echo number_format($totalAssets ?? 0); ?></h2>
-                    <p class="mb-0"><?php echo __('Total Heritage Assets'); ?></p>
-                </div>
-            </div>
+    <!-- This record's heritage asset values. The four institution-wide counters that
+         used to sit here (Total Heritage Assets / Valued / Pending / Total Value) were
+         computed from a single record, so they always read 1, 1 or 0, and 0 or 1 - a
+         dashboard shape around one item. The collection-wide dashboard is a separate
+         page; this one answers "what is recorded against this record". -->
+    <?php if (!$grapData): ?>
+      <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <?php echo __('No heritage asset record exists for this item.'); ?>
+      </div>
+    <?php else: ?>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-coins me-2"></i><?php echo __('Valuation'); ?></h5>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center bg-success text-white">
-                <div class="card-body">
-                    <h2 class="mb-0"><?php echo number_format($valuedAssets ?? 0); ?></h2>
-                    <p class="mb-0"><?php echo __('Valued Assets'); ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center bg-warning text-dark">
-                <div class="card-body">
-                    <h2 class="mb-0"><?php echo number_format($pendingValuation ?? 0); ?></h2>
-                    <p class="mb-0"><?php echo __('Pending Valuation'); ?></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-center bg-info text-white">
-                <div class="card-body">
-                    <h2 class="mb-0"><?php echo number_format($totalValue ?? 0, 2); ?></h2>
-                    <p class="mb-0"><?php echo __('Total Value'); ?></p>
-                </div>
-            </div>
-        </div>
-    </div>
+        <table class="table table-sm mb-0">
+          <tbody>
+            <?php
+            $rows = [
+                __('Asset number')        => $grapData->asset_number ?? null,
+                __('Recognition status')  => $grapData->recognition_status ?? null,
+                __('Current carrying amount') => $grapData->current_carrying_amount ?? null,
+                __('Last valuation')      => $grapData->last_valuation_amount ?? null,
+                __('Last valuation date') => $grapData->last_valuation_date ?? null,
+                __('Valuation method')    => $grapData->valuation_method ?? null,
+                __('Acquisition date')    => $grapData->acquisition_date ?? null,
+                __('Acquisition method')  => $grapData->acquisition_method ?? null,
+                __('Acquisition cost')    => $grapData->acquisition_cost ?? null,
+                __('Insurance value')     => $grapData->insurance_value ?? null,
+                __('Insurance expiry')    => $grapData->insurance_expiry_date ?? null,
+            ];
+            foreach ($rows as $label => $value): ?>
+              <tr>
+                <th class="w-25"><?php echo $label; ?></th>
+                <td><?php echo ('' === (string) $value || null === $value) ? '&mdash;' : esc_entities((string) $value); ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    <?php endif; ?>
 
     <!-- Compliance Status -->
     <div class="row mb-4">

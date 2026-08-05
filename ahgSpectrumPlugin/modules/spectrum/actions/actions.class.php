@@ -77,11 +77,26 @@ class spectrumActions extends AhgController
             ->first();
         
         if (!$conditionCheck) {
+            // checked_by is NOT NULL with no default, so omitting it makes the insert
+            // throw - which the caller catches and logs, leaving no condition check and
+            // silently disabling photo upload.
+            $checkedBy = '';
+            try {
+                $userId = $this->getUser()->getAttribute('user_id');
+                if ($userId) {
+                    $user = DB::table('user')->where('id', $userId)->first();
+                    $checkedBy = (string) ($user->username ?? $user->email ?? '');
+                }
+            } catch (\Exception $e) {
+                // fall through with an empty attribution rather than blocking the check
+            }
+
             // Create a new condition check
             $newId = DB::table('spectrum_condition_check')->insertGetId([
                 'object_id' => $objectId,
                 'condition_check_reference' => 'CC-' . date('Ymd') . '-' . $objectId,
                 'check_date' => date('Y-m-d'),
+                'checked_by' => $checkedBy,
                 'created_at' => date('Y-m-d H:i:s'),
             ]);
             
@@ -675,6 +690,17 @@ class spectrumActions extends AhgController
             ahgSpectrumNotificationService::markTaskNotificationsAsReadBySlug($slug, $procedureType);
         }
 
+        // Confirm the save in the alerts block. The transition was recorded in the
+        // activity history but the page came back looking unchanged, so there was
+        // nothing to tell the user it had worked.
+        $this->getUser()->setFlash('success', $this->context->i18n->__(
+            'Moved from %1% to %2%.',
+            [
+                '%1%' => ucwords(str_replace('_', ' ', (string) $fromState)),
+                '%2%' => ucwords(str_replace('_', ' ', (string) $toState)),
+            ]
+        ));
+
         // Redirect back
         $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
     }
@@ -690,6 +716,172 @@ class spectrumActions extends AhgController
         
         $this->labelType = $request->getParameter('type', 'full');
         $this->labelSize = $request->getParameter('size', 'medium');
+    }
+
+
+    /**
+     * Render the label as a PNG server-side.
+     *
+     * The browser-side route (html2canvas) returned a 0x0 canvas from a correctly
+     * sized element, which is a fault inside the library and not something the page
+     * can work around. Everything on the label is already available here - the text
+     * from the record, the barcode and QR as PNGs from BarcodeService - so composing
+     * it with GD is deterministic, needs no third-party script, and sidesteps CSP
+     * entirely.
+     */
+    public function executeLabelPng($request)
+    {
+        $slug = $request->getParameter('slug');
+        $this->resource = $this->getResourceBySlug($slug);
+
+        if (!$this->resource) {
+            $this->forward404();
+        }
+
+        $size = (int) $request->getParameter('size', 300);
+        if (!in_array($size, [200, 300, 400], true)) {
+            $size = 300;
+        }
+
+        $data = (string) $request->getParameter('data', '');
+        if ('' === $data) {
+            $data = (string) ($this->resource->identifier ?? $this->resource->slug);
+        }
+
+        $title = (string) ($this->resource->title ?? $this->resource->slug);
+        $qrUrl = $request->getUriPrefix().'/'.$this->resource->slug;
+
+        $png = $this->composeLabelPng($title, $data, $qrUrl, $size);
+
+        $response = $this->getResponse();
+        $response->setContentType('image/png');
+        $response->setHttpHeader(
+            'Content-Disposition',
+            'attachment; filename="label-'.preg_replace('/[^a-z0-9_-]/i', '-', $this->resource->slug).'.png"'
+        );
+        $response->setContent($png);
+        $response->send();
+
+        throw new sfStopException();
+    }
+
+    /**
+     * Compose the label bitmap: title, barcode, its human-readable value, and QR.
+     */
+    protected function composeLabelPng(string $title, string $data, string $qrUrl, int $size): string
+    {
+        $pad = (int) round($size * 0.05);
+        $width = $size;
+
+        $barcode = $this->imageFromDataUri(\AtomExtensions\Services\BarcodeService::barcodeDataUri($data));
+        $qr = $this->imageFromDataUri(\AtomExtensions\Services\BarcodeService::qrDataUri($qrUrl));
+
+        $font = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf';
+        $fontBold = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf';
+        $hasFont = is_readable($font);
+        $titleSize = max(8, (int) round($size / 25));
+        $smallSize = max(7, (int) round($size / 33));
+
+        // Wrap the title to the label width before allocating the canvas, so the
+        // height matches the content instead of clipping it.
+        $lines = $hasFont ? $this->wrapToWidth($title, $fontBold, $titleSize, $width - 2 * $pad) : [$title];
+        $lineHeight = (int) round($titleSize * 1.45);
+
+        $barcodeH = $barcode ? (int) round($size / 5) : 0;
+        $barcodeW = 0;
+        if ($barcode) {
+            $barcodeW = min($width - 2 * $pad, (int) round(imagesx($barcode) * ($barcodeH / imagesy($barcode))));
+        }
+        $qrSide = $qr ? (int) round($size * 0.4) : 0;
+
+        $height = $pad + count($lines) * $lineHeight + $pad
+                + ($barcode ? $barcodeH + $smallSize + 10 : 0)
+                + ($qr ? $qrSide + $pad : 0) + $pad;
+
+        $im = imagecreatetruecolor($width, $height);
+        $white = imagecolorallocate($im, 255, 255, 255);
+        $black = imagecolorallocate($im, 0, 0, 0);
+        $grey = imagecolorallocate($im, 90, 90, 90);
+        imagefilledrectangle($im, 0, 0, $width, $height, $white);
+        imagerectangle($im, 0, 0, $width - 1, $height - 1, $black);
+
+        $y = $pad + $titleSize;
+        foreach ($lines as $line) {
+            if ($hasFont) {
+                imagettftext($im, $titleSize, 0, $pad, $y, $black, $fontBold, $line);
+            } else {
+                imagestring($im, 4, $pad, $y - $titleSize, $line, $black);
+            }
+            $y += $lineHeight;
+        }
+        $y += $pad;
+
+        if ($barcode) {
+            $x = (int) round(($width - $barcodeW) / 2);
+            imagecopyresampled($im, $barcode, $x, $y, 0, 0, $barcodeW, $barcodeH, imagesx($barcode), imagesy($barcode));
+            $y += $barcodeH + $smallSize + 4;
+            if ($hasFont) {
+                $box = imagettfbbox($smallSize, 0, $font, $data);
+                $tw = abs($box[2] - $box[0]);
+                imagettftext($im, $smallSize, 0, (int) round(($width - $tw) / 2), $y, $grey, $font, $data);
+            } else {
+                imagestring($im, 2, $pad, $y - $smallSize, $data, $grey);
+            }
+            $y += 6;
+        }
+
+        if ($qr) {
+            $x = (int) round(($width - $qrSide) / 2);
+            imagecopyresampled($im, $qr, $x, $y, 0, 0, $qrSide, $qrSide, imagesx($qr), imagesy($qr));
+        }
+
+        ob_start();
+        imagepng($im);
+        $out = (string) ob_get_clean();
+
+        imagedestroy($im);
+        if ($barcode) { imagedestroy($barcode); }
+        if ($qr) { imagedestroy($qr); }
+
+        return $out;
+    }
+
+    /** Decode a data:image/png;base64,... URI into a GD image, or null. */
+    protected function imageFromDataUri(string $uri)
+    {
+        if ('' === $uri || false === strpos($uri, 'base64,')) {
+            return null;
+        }
+        $raw = base64_decode(substr($uri, strpos($uri, 'base64,') + 7), true);
+        if (false === $raw || '' === $raw) {
+            return null;
+        }
+        $im = @imagecreatefromstring($raw);
+
+        return $im ?: null;
+    }
+
+    /** Break text into lines that fit $maxWidth at the given font size. */
+    protected function wrapToWidth(string $text, string $font, int $fontSize, int $maxWidth): array
+    {
+        $words = preg_split('/\s+/', trim($text)) ?: [];
+        $lines = [];
+        $current = '';
+        foreach ($words as $word) {
+            $try = '' === $current ? $word : $current.' '.$word;
+            $box = imagettfbbox($fontSize, 0, $font, $try);
+            if (abs($box[2] - $box[0]) > $maxWidth && '' !== $current) {
+                $lines[] = $current;
+                $current = $word;
+            } else {
+                $current = $try;
+            }
+        }
+        if ('' !== $current) {
+            $lines[] = $current;
+        }
+
+        return $lines ?: [$text];
     }
 
     /**
@@ -1037,8 +1229,13 @@ class spectrumActions extends AhgController
                 $this->conditionCheckId = $this->conditionCheck->id;
             }
         } catch (\Exception $e) {
-            // Log error
+            // Surface it. Logging alone meant a failed condition check looked like a
+            // working page that simply refused to upload anything.
             error_log('Condition check error: ' . $e->getMessage());
+            $this->getUser()->setFlash(
+                'error',
+                $this->context->i18n->__('Could not open a condition check for this record: %1%', ['%1%' => $e->getMessage()])
+            );
         }
         
         // Handle upload AFTER we have a valid condition check
@@ -1097,6 +1294,46 @@ class spectrumActions extends AhgController
         }
     }
     
+    /**
+     * Turn PHP's uploaded-file structure into a plain list of per-file arrays.
+     *
+     * A multiple file input (name="photos[]") gives the transposed shape
+     * ['name' => [...], 'tmp_name' => [...], ...] rather than a list of files, so
+     * iterating it directly yields the column arrays and every file is skipped -
+     * silently, since each column has no 'tmp_name' key of its own. A single input
+     * gives the per-file shape already; both are handled here.
+     */
+    protected function normaliseUploadedFiles($files): array
+    {
+        if (!$files || !is_array($files)) {
+            return [];
+        }
+
+        if (isset($files['tmp_name']) && !is_array($files['tmp_name'])) {
+            return [$files];                      // single file input
+        }
+
+        if (isset($files['tmp_name']) && is_array($files['tmp_name'])) {
+            $out = [];
+            foreach (array_keys($files['tmp_name']) as $i) {
+                if (UPLOAD_ERR_NO_FILE === ($files['error'][$i] ?? UPLOAD_ERR_NO_FILE)) {
+                    continue;                     // empty slot, not a failure
+                }
+                $out[] = [
+                    'name' => $files['name'][$i] ?? '',
+                    'type' => $files['type'][$i] ?? '',
+                    'tmp_name' => $files['tmp_name'][$i] ?? '',
+                    'error' => $files['error'][$i] ?? UPLOAD_ERR_OK,
+                    'size' => $files['size'][$i] ?? 0,
+                ];
+            }
+
+            return $out;
+        }
+
+        return array_values(array_filter($files, 'is_array'));   // already a list
+    }
+
     protected function handlePhotoUpload(sfWebRequest $request)
     {
         if (!$this->conditionCheckId) {
@@ -1110,10 +1347,17 @@ class spectrumActions extends AhgController
         $photoDate = $request->getParameter('photo_date', date('Y-m-d'));
         $locationOnObject = $request->getParameter('location_on_object', '');
         
-        if (!$files || !is_array($files)) {
+        $files = $this->normaliseUploadedFiles($files);
+
+        if (!$files) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('No photo was selected to upload.'));
+
             return;
         }
-        
+
+        $uploaded = 0;
+        $failed = [];
+
         $uploadDir = $this->config('sf_upload_dir') . '/condition_photos/' . $this->resource->id;
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
@@ -1121,9 +1365,13 @@ class spectrumActions extends AhgController
         
         foreach ($files as $file) {
             if (!isset($file['tmp_name']) || !is_uploaded_file($file['tmp_name'])) {
+                if (!empty($file['name'])) {
+                    $failed[] = $file['name'];
+                }
+
                 continue;
             }
-            
+
             $originalFilename = $file['name'];
             $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
             $newFilename = uniqid('cond_') . '.' . $extension;
@@ -1161,9 +1409,27 @@ class spectrumActions extends AhgController
                     'created_at' => date('Y-m-d H:i:s'),
                     'created_by' => $userId,
                 ]);
+
+                ++$uploaded;
+            } else {
+                $failed[] = $originalFilename;
             }
         }
-        
+
+        // Report the outcome in the alerts block. Without this an upload that moved
+        // no files was indistinguishable from one that worked: the page simply
+        // reloaded with nothing new on it.
+        $i18n = $this->context->i18n;
+        if ($uploaded > 0) {
+            $this->getUser()->setFlash('success', $i18n->__('%1% photo(s) uploaded.', ['%1%' => $uploaded]));
+        }
+        if ($failed) {
+            $this->getUser()->setFlash('error', $i18n->__('Could not upload: %1%', ['%1%' => implode(', ', $failed)]));
+        }
+        if (0 === $uploaded && !$failed) {
+            $this->getUser()->setFlash('error', $i18n->__('No photo was uploaded.'));
+        }
+
         // Redirect back to avoid form resubmission
         $this->redirect(['module' => 'spectrum', 'action' => 'conditionPhotos', 'slug' => $this->resource->slug]);
     }
@@ -1216,18 +1482,28 @@ class spectrumActions extends AhgController
         $this->insuranceComplete = false;
 
         try {
-            $this->grapData = DB::table('grap_heritage_asset')
-                ->where('object_id', $this->resource->id)
+            // heritage_asset, not grap_heritage_asset: the latter is a mysqldump
+            // placeholder view (`select 1 AS id, 1 AS object_id, ...`) whose real
+            // definition was never applied, so it returns a single row of literal 1s
+            // and this page displayed fabricated figures. The real table is owned and
+            // installed by ahgHeritageAccountingPlugin, and links on
+            // information_object_id - object_id is NULL throughout.
+            $this->grapData = DB::table('heritage_asset')
+                ->where('information_object_id', $this->resource->id)
+                ->orderBy('id', 'desc')
                 ->first();
 
             if ($this->grapData) {
                 $this->totalAssets = 1;
-                $this->valuedAssets = $this->grapData->current_value ? 1 : 0;
-                $this->pendingValuation = $this->grapData->current_value ? 0 : 1;
-                $this->totalValue = $this->grapData->current_value ?? 0;
+                $value = $this->grapData->current_carrying_amount ?? null;
+                $valuationDate = $this->grapData->last_valuation_date ?? null;
+
+                $this->valuedAssets = $value ? 1 : 0;
+                $this->pendingValuation = $value ? 0 : 1;
+                $this->totalValue = $value ?? 0;
                 $this->assetRegisterComplete = true;
-                $this->valuationsCurrent = $this->grapData->valuation_date &&
-                    strtotime($this->grapData->valuation_date) > strtotime('-5 years');
+                $this->valuationsCurrent = $valuationDate
+                    && strtotime($valuationDate) > strtotime('-5 years');
                 $this->insuranceComplete = !empty($this->grapData->insurance_value);
             }
         } catch (\Exception $e) {
@@ -1690,30 +1966,58 @@ class spectrumActions extends AhgController
                 return $this->renderText(json_encode(['success' => false, 'error' => 'File not found']));
             }
             
-            $image = imagecreatefromstring(file_get_contents($fullPath));
-            if ($image) {
-                $rotated = imagerotate($image, -$degrees, 0);
-                
-                $mime = $photo->mime_type ?: 'image/jpeg';
-                if (strpos($mime, 'png') !== false) {
-                    imagepng($rotated, $fullPath);
-                } else {
-                    imagejpeg($rotated, $fullPath, 90);
-                }
-                
-                imagedestroy($image);
-                imagedestroy($rotated);
-                
-                // Swap width/height in DB
-                DB::table('spectrum_condition_photo')
-                    ->where('id', $photoId)
-                    ->update([
-                        'width' => $photo->height,
-                        'height' => $photo->width,
-                    ]);
+            $image = @imagecreatefromstring(file_get_contents($fullPath));
+            if (!$image) {
+                // Previously this fell through and still reported success, so an
+                // unreadable file looked like a rotation that had worked.
+                return $this->renderText(json_encode([
+                    'success' => false,
+                    'error' => 'The image could not be read.',
+                ]));
             }
-            
-            return $this->renderText(json_encode(['success' => true]));
+
+            $isPng = false !== strpos((string) ($photo->mime_type ?: 'image/jpeg'), 'png');
+
+            // Transparent fill for the corners exposed by the rotation, and keep the
+            // alpha channel on save - a 0 background turns them black on a PNG.
+            imagealphablending($image, false);
+            imagesavealpha($image, true);
+            $transparent = imagecolorallocatealpha($image, 0, 0, 0, 127);
+            $rotated = imagerotate($image, -$degrees, $transparent);
+            imagealphablending($rotated, false);
+            imagesavealpha($rotated, true);
+
+            $written = $isPng ? imagepng($rotated, $fullPath) : imagejpeg($rotated, $fullPath, 90);
+
+            $newWidth = imagesx($rotated);
+            $newHeight = imagesy($rotated);
+
+            imagedestroy($image);
+            imagedestroy($rotated);
+
+            if (!$written) {
+                return $this->renderText(json_encode([
+                    'success' => false,
+                    'error' => 'The rotated image could not be written.',
+                ]));
+            }
+
+            // Measured from the rotated image rather than swapping the stored values,
+            // which is only correct for multiples of 90 degrees.
+            DB::table('spectrum_condition_photo')
+                ->where('id', $photoId)
+                ->update(['width' => $newWidth, 'height' => $newHeight]);
+
+            // The client replaces the tile's src with this. It used to read
+            // data.thumbnail_url, which this action never returned, so the src became
+            // the string "undefined" and the image broke. Cache-busted because the
+            // file is overwritten in place and the browser would otherwise reuse it.
+            return $this->renderText(json_encode([
+                'success' => true,
+                'url' => $photo->file_path.'?v='.time(),
+                'width' => $newWidth,
+                'height' => $newHeight,
+            ]));
         } catch (\Exception $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
@@ -1888,13 +2192,17 @@ class spectrumActions extends AhgController
      */
     public function executeConditionAdmin($request)
     {
+        // $culture was referenced by the joins below but never defined here, so the
+        // culture filter bound as NULL and no title ever joined.
+        $culture = $this->culture();
+
         if (!$this->getUser()->isAuthenticated()) {
             $this->redirect('/user/login');
         }
         
         $this->recentEvents = DB::table('spectrum_condition_check as c')
             ->leftJoin('information_object as io', 'c.object_id', '=', 'io.id')
-            ->leftJoin('information_object_i18n as i18n', function($j) {
+            ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                 $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'io.id', '=', 's.object_id')
@@ -1920,7 +2228,7 @@ class spectrumActions extends AhgController
             $this->redirect('/user/login');
         }
         $this->riskItems = DB::table('spectrum_condition_check as c')
-            ->leftJoin('information_object_i18n as i18n', function($j) {
+            ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                 $j->on('c.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
             })
             ->leftJoin('slug as s', 'c.object_id', '=', 's.object_id')
@@ -2161,7 +2469,7 @@ class spectrumActions extends AhgController
             if ($slugRecord) {
                 $objectId = $slugRecord->object_id;
                 $object = DB::table('information_object as io')
-                    ->leftJoin('information_object_i18n as i18n', function($j) {
+                    ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                         $j->on('io.id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->where('io.id', $objectId)
@@ -2196,13 +2504,18 @@ class spectrumActions extends AhgController
 
     protected function handleSpectrumDownload($format, $type, $request)
     {
+        // Every join below filters information_object_i18n by culture, but $culture
+        // was never defined in this scope - so the condition bound as NULL, matched
+        // nothing, and object_title came back empty on all five export types.
+        $culture = $this->culture();
+
         $data = [];
         $filename = "spectrum_{$type}_" . date('Y-m-d');
         
         switch ($type) {
             case 'condition':
                 $data = DB::table('spectrum_condition_check as c')
-                    ->leftJoin('information_object_i18n as i18n', function($j) {
+                    ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                         $j->on('c.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('c.*', 'i18n.title as object_title')
@@ -2211,7 +2524,7 @@ class spectrumActions extends AhgController
                 break;
             case 'valuation':
                 $data = DB::table('spectrum_valuation as v')
-                    ->leftJoin('information_object_i18n as i18n', function($j) {
+                    ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                         $j->on('v.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('v.*', 'i18n.title as object_title')
@@ -2220,7 +2533,7 @@ class spectrumActions extends AhgController
                 break;
             case 'movement':
                 $data = DB::table('spectrum_movement as m')
-                    ->leftJoin('information_object_i18n as i18n', function($j) {
+                    ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                         $j->on('m.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('m.*', 'i18n.title as object_title')
@@ -2229,13 +2542,13 @@ class spectrumActions extends AhgController
                 break;
             case 'loan':
                 $loansIn = DB::table('spectrum_loan_in as l')
-                    ->leftJoin('information_object_i18n as i18n', function($j) {
+                    ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                         $j->on('l.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('l.*', 'i18n.title as object_title', DB::raw("'IN' as direction"))
                     ->get()->toArray();
                 $loansOut = DB::table('spectrum_loan_out as l')
-                    ->leftJoin('information_object_i18n as i18n', function($j) {
+                    ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
                         $j->on('l.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('l.*', 'i18n.title as object_title', DB::raw("'OUT' as direction"))
@@ -2243,9 +2556,13 @@ class spectrumActions extends AhgController
                 $data = array_merge($loansIn, $loansOut);
                 break;
             case 'workflow':
+                // record_id, not object_id: that is the column this table actually
+                // has, and the mismatch made every workflow export fail with a 500.
+                // $culture has to be imported into the closure or it binds as null
+                // and the join matches nothing.
                 $data = DB::table('spectrum_workflow_history as w')
-                    ->leftJoin('information_object_i18n as i18n', function($j) {
-                        $j->on('w.object_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
+                    ->leftJoin('information_object_i18n as i18n', function($j) use ($culture) {
+                        $j->on('w.record_id', '=', 'i18n.id')->where('i18n.culture', '=', $culture);
                     })
                     ->select('w.*', 'i18n.title as object_title')
                     ->orderBy('w.created_at', 'desc')
@@ -2253,26 +2570,222 @@ class spectrumActions extends AhgController
                 break;
         }
         
-        if ($format === 'csv') {
-            $this->getResponse()->setContentType('text/csv');
-            $this->getResponse()->setHttpHeader('Content-Disposition', "attachment; filename=\"{$filename}.csv\"");
-            
+        // Headers are sent directly rather than through sfWebResponse: the response
+        // object's content type was being overridden downstream, so JSON arrived as
+        // text/html and opened in the browser instead of downloading.
+        $send = function (string $contentType, string $name) {
+            if (!headers_sent()) {
+                header('Content-Type: '.$contentType);
+                header('Content-Disposition: attachment; filename="'.$name.'"');
+                header('X-Content-Type-Options: nosniff');
+            }
+        };
+
+        if ('csv' === $format) {
+            $send('text/csv; charset=utf-8', $filename.'.csv');
+
             $output = fopen('php://output', 'w');
             if (!empty($data)) {
-                fputcsv($output, array_keys((array)$data[0]));
+                fputcsv($output, array_keys((array) $data[0]));
                 foreach ($data as $row) {
-                    fputcsv($output, (array)$row);
+                    fputcsv($output, (array) $row);
                 }
             }
             fclose($output);
-            return sfView::NONE;
-        } else {
-            // JSON format
-            $this->getResponse()->setContentType('application/json');
-            $this->getResponse()->setHttpHeader('Content-Disposition', "attachment; filename=\"{$filename}.json\"");
-            echo json_encode($data, JSON_PRETTY_PRINT);
+
             return sfView::NONE;
         }
+
+        if ('pdf' === $format) {
+            // dompdf ships with the framework and is what ahgFavoritesPlugin and the
+            // loan agreement generators already use, so this follows that pattern
+            // rather than introducing a second PDF toolchain.
+            require_once \sfConfig::get('sf_root_dir').'/atom-framework/vendor/autoload.php';
+
+            $send('application/pdf', $filename.'.pdf');
+
+            $dompdf = new \Dompdf\Dompdf([
+                'defaultFont' => 'DejaVu Sans',
+                'isRemoteEnabled' => false,
+                'isHtml5ParserEnabled' => true,
+            ]);
+            $dompdf->loadHtml($this->buildExportHtml($data, $type));
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+            echo $dompdf->output();
+
+            return sfView::NONE;
+        }
+
+        $send('application/json; charset=utf-8', $filename.'.json');
+        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+        return sfView::NONE;
+    }
+
+
+    /**
+     * Table markup for the PDF export: every column the query returned, in order.
+     */
+    protected function buildExportHtml(array $data, string $type): string
+    {
+        $title = ucwords(str_replace('_', ' ', $type)).' export';
+        $html = '<html><head><meta charset="utf-8"><style>'
+              . 'body{font-family:"DejaVu Sans",sans-serif;font-size:8pt;}'
+              . 'h1{font-size:13pt;margin:0 0 4pt;}'
+              . 'p.meta{color:#555;font-size:8pt;margin:0 0 8pt;}'
+              . 'table{width:100%;border-collapse:collapse;}'
+              . 'th,td{border:1px solid #999;padding:3pt;text-align:left;vertical-align:top;}'
+              . 'th{background:#eee;}'
+              . '</style></head><body>'
+              . '<h1>'.htmlspecialchars($title, ENT_QUOTES).'</h1>'
+              . '<p class="meta">'.htmlspecialchars(date('Y-m-d H:i'), ENT_QUOTES)
+              . ' &mdash; '.count($data).' row(s)</p>';
+
+        if (empty($data)) {
+            return $html.'<p>No records.</p></body></html>';
+        }
+
+        $columns = array_keys((array) $data[0]);
+        $html .= '<table><thead><tr>';
+        foreach ($columns as $column) {
+            $html .= '<th>'.htmlspecialchars(ucwords(str_replace('_', ' ', $column)), ENT_QUOTES).'</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+
+        foreach ($data as $row) {
+            $row = (array) $row;
+            $html .= '<tr>';
+            foreach ($columns as $column) {
+                $value = $row[$column] ?? '';
+                if (is_array($value) || is_object($value)) {
+                    $value = json_encode($value);
+                }
+                $html .= '<td>'.htmlspecialchars((string) $value, ENT_QUOTES).'</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        return $html.'</tbody></table></body></html>';
+    }
+
+
+    /**
+     * Save the edit-photo modal.
+     *
+     * There was no handler for this at all: the form posted photo_action=edit, and
+     * executeConditionPhotos only ever acted on 'upload', so every edit silently did
+     * nothing. Mirrors executePhotoDelete's shape - JSON in, JSON out.
+     */
+    public function executePhotoUpdate($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Not authorised']));
+        }
+
+        $photoId = (int) $request->getParameter('photo_id');
+        if (!$photoId) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'No photo ID']));
+        }
+
+        // Only the fields the modal offers; anything else stays as it was.
+        $fields = ['photo_type', 'caption', 'description', 'location_on_object', 'photographer', 'photo_date'];
+        $update = [];
+        foreach ($fields as $field) {
+            $value = $request->getParameter($field);
+            if (null !== $value) {
+                $update[$field] = '' === $value ? null : $value;
+            }
+        }
+
+        if (!$update) {
+            return $this->renderText(json_encode(['success' => false, 'error' => 'Nothing to update']));
+        }
+
+        try {
+            DB::table('spectrum_condition_photo')->where('id', $photoId)->update($update);
+        } catch (\Exception $e) {
+            return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
+        }
+
+        return $this->renderText(json_encode(['success' => true]));
+    }
+
+
+    /**
+     * Record an Object Entry for a description.
+     *
+     * spectrum_object_entry existed and was read by the Object Entry report, but
+     * nothing anywhere wrote it - so that report has always been empty, on every
+     * install. The Spectrum procedure definition lists object_number, entry_date,
+     * entry_reason and depositor as required fields; this is the capture form for
+     * them. One row per record, updated in place on re-submission.
+     */
+    public function executeObjectEntry($request)
+    {
+        if (!$this->getUser()->isAuthenticated()
+            || !$this->getUser()->hasCredential(['editor', 'administrator'], false)) {
+            $this->forward('admin', 'secure');
+        }
+
+        $slug = $request->getParameter('slug');
+        $this->resource = $this->getResourceBySlug($slug);
+
+        if (!$this->resource) {
+            $this->forward404();
+        }
+
+        $this->entry = DB::table('spectrum_object_entry')
+            ->where('object_id', $this->resource->id)
+            ->first();
+
+        if (!$request->isMethod('post')) {
+            return;
+        }
+
+        $fields = [
+            'entry_number', 'entry_date', 'entry_method', 'entry_reason',
+            'depositor_name', 'depositor_contact', 'depositor_address',
+            'current_owner', 'owner_contact', 'return_date', 'entry_note',
+            'received_by', 'packing_note',
+        ];
+
+        $values = [];
+        foreach ($fields as $field) {
+            $value = $request->getParameter($field);
+            $values[$field] = ('' === $value || null === $value) ? null : $value;
+        }
+
+        // entry_number and entry_date are NOT NULL with no default, so fall back
+        // rather than letting the insert throw where the user left them blank.
+        if (empty($values['entry_number'])) {
+            $values['entry_number'] = 'OE-'.date('Ymd').'-'.$this->resource->id;
+        }
+        if (empty($values['entry_date'])) {
+            $values['entry_date'] = date('Y-m-d');
+        }
+
+        $userId = $this->getUser()->getAttribute('user_id');
+
+        try {
+            if ($this->entry) {
+                $values['updated_by'] = $userId;
+                DB::table('spectrum_object_entry')->where('id', $this->entry->id)->update($values);
+                $this->getUser()->setFlash('success', $this->context->i18n->__('Object entry updated.'));
+            } else {
+                $values['object_id'] = $this->resource->id;
+                $values['created_by'] = $userId;
+                DB::table('spectrum_object_entry')->insert($values);
+                $this->getUser()->setFlash('success', $this->context->i18n->__('Object entry recorded.'));
+            }
+        } catch (\Exception $e) {
+            $this->getUser()->setFlash('error', $this->context->i18n->__('Could not save the object entry: %1%', ['%1%' => $e->getMessage()]));
+        }
+
+        $this->redirect(['module' => 'spectrum', 'action' => 'objectEntry', 'slug' => $this->resource->slug]);
     }
 
     /**

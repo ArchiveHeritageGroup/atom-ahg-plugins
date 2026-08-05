@@ -9,6 +9,11 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
     public function initialize()
     {
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
+
+        // Standing notice for outstanding procedure tasks. Registered here so it
+        // exists only while this plugin is enabled.
+        require_once __DIR__.'/../lib/Listeners/TaskNoticeInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgSpectrumPlugin\Listeners\TaskNoticeInjector', 'filter']);
         
         // Enable modules
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
@@ -28,6 +33,8 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         // Core spectrum routes
         $spectrum->any('spectrum_index', '/:slug/spectrum', 'index');
         $spectrum->any('spectrum_label', '/:slug/spectrum/label', 'label');
+        $spectrum->any('spectrum_object_entry', '/:slug/spectrum/object-entry', 'objectEntry');
+        $spectrum->any('spectrum_label_png', '/:slug/spectrum/label.png', 'labelPng');
         $spectrum->any('spectrum_workflow', '/spectrum/:slug/workflow', 'workflow');
         $spectrum->any('spectrum_workflow_update', '/spectrum/:slug/workflow/update', 'workflowUpdate');
         $spectrum->any('spectrum_workflow_transition', '/spectrum/:slug/workflow/transition', 'workflowTransition');
@@ -60,9 +67,10 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         $spectrum->any('spectrum_annotation_get', '/spectrum/annotation/get/:photo_id', 'getAnnotation');
 
         // Photo management
-        $spectrum->any('spectrum_photo_delete', '/spectrum/photo/delete/:photo_id', 'deletePhoto');
-        $spectrum->any('spectrum_photo_primary', '/spectrum/photo/primary/:photo_id', 'setPrimaryPhoto');
-        $spectrum->any('spectrum_photo_rotate', '/spectrum/photo/rotate/:photo_id', 'rotatePhoto');
+        $spectrum->any('spectrum_photo_delete', '/spectrum/photo/delete/:photo_id', 'photoDelete');
+        $spectrum->any('spectrum_photo_primary', '/spectrum/photo/primary/:photo_id', 'photoSetPrimary');
+        $spectrum->any('spectrum_photo_rotate', '/spectrum/photo/rotate/:photo_id', 'photoRotate');
+        $spectrum->any('spectrum_photo_update', '/spectrum/photo/update/:photo_id', 'photoUpdate');
 
         // Provenance
         $spectrum->any('spectrum_provenance_ajax', '/spectrum/provenance/ajax', 'provenanceAjax');

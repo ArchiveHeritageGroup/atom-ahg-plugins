@@ -870,6 +870,36 @@ class preservationActions extends AhgController
         $this->redirect('/admin/preservation/packages/?object_id=' . $objectId);
     }
 
+
+    /**
+     * A description's id plus every descendant, via the nested set.
+     *
+     * Falls back to the single id if the bounds cannot be read, so a malformed tree
+     * narrows the result rather than losing the page.
+     */
+    protected function descriptionAndDescendantIds(int $objectId): array
+    {
+        try {
+            $node = DB::table('information_object')
+                ->where('id', $objectId)
+                ->first(['lft', 'rgt']);
+
+            if (!$node || null === $node->lft || null === $node->rgt) {
+                return [$objectId];
+            }
+
+            $ids = DB::table('information_object')
+                ->where('lft', '>=', $node->lft)
+                ->where('rgt', '<=', $node->rgt)
+                ->pluck('id')
+                ->all();
+
+            return $ids ?: [$objectId];
+        } catch (\Exception $e) {
+            return [$objectId];
+        }
+    }
+
     public function executePackages($request)
     {
         $this->checkAdminAccess();
@@ -879,9 +909,15 @@ class preservationActions extends AhgController
         $objectId = (int) $request->getParameter('object_id');
 
         if ($objectId) {
-            // Filter packages for a specific archival description
+            // The record and everything beneath it. A description's packages are
+            // rarely held only at the top level - a fonds is preserved through its
+            // series and items - so filtering on the single id showed an empty list
+            // for exactly the records people start from. Descendants come from the
+            // nested set bounds rather than a recursive walk.
+            $ids = $this->descriptionAndDescendantIds($objectId);
+
             $query = DB::table('preservation_package')
-                ->where('information_object_id', $objectId)
+                ->whereIn('information_object_id', $ids)
                 ->orderBy('created_at', 'desc');
             if ($type) { $query->where('package_type', $type); }
             if ($status) { $query->where('status', $status); }

@@ -34,11 +34,6 @@
           <i class="fas fa-camera me-2"></i>{{ __('Condition Photos') }}
         </a>
       </li>
-      <li class="list-group-item">
-        <a href="{{ url_for('@spectrum_grap_dashboard?slug=' . $resource->slug) }}">
-          <i class="fas fa-file-invoice-dollar me-2"></i>{{ __('Heritage Assets') }}
-        </a>
-      </li>
     </ul>
   </div>
 
@@ -111,8 +106,11 @@
     if (\AtomExtensions\Database\DatabaseBootstrap::getCapsule() === null) {
         \AtomExtensions\Database\DatabaseBootstrap::initializeFromAtom();
     }
-    $recentHistory = \Illuminate\Database\Capsule\Manager::table('spectrum_procedure_history')
-        ->where('object_id', $resource->id)
+    // spectrum_workflow_history, not spectrum_procedure_history: transitions write
+    // to the former (executeWorkflowTransition) and nothing ever writes the latter,
+    // so this panel always reported "no history" no matter how many transitions ran.
+    $recentHistory = \Illuminate\Database\Capsule\Manager::table('spectrum_workflow_history')
+        ->where('record_id', $resource->id)
         ->orderBy('created_at', 'desc')
         ->limit(5)
         ->get();
@@ -142,13 +140,13 @@
   </div>
   <div class="card-body">
     <div class="btn-group flex-wrap" role="group">
-      <a href="{{ url_for(['module' => 'spectrum', 'action' => 'export', 'slug' => $resource->slug, 'format' => 'pdf']) }}" class="btn btn-outline-danger">
+      <a href="{{ url_for(['module' => 'spectrum', 'action' => 'export', 'slug' => $resource->slug, 'format' => 'pdf', 'type' => 'workflow', 'download' => 1]) }}" class="btn btn-outline-danger">
         <i class="fas fa-file-pdf me-1"></i>{{ __('Export PDF') }}
       </a>
-      <a href="{{ url_for(['module' => 'spectrum', 'action' => 'export', 'slug' => $resource->slug, 'format' => 'csv']) }}" class="btn btn-outline-success">
+      <a href="{{ url_for(['module' => 'spectrum', 'action' => 'export', 'slug' => $resource->slug, 'format' => 'csv', 'type' => 'workflow', 'download' => 1]) }}" class="btn btn-outline-success">
         <i class="fas fa-file-csv me-1"></i>{{ __('Export CSV') }}
       </a>
-      <a href="{{ url_for(['module' => 'spectrum', 'action' => 'export', 'slug' => $resource->slug, 'format' => 'json']) }}" class="btn btn-outline-primary">
+      <a href="{{ url_for(['module' => 'spectrum', 'action' => 'export', 'slug' => $resource->slug, 'format' => 'json', 'type' => 'workflow', 'download' => 1]) }}" class="btn btn-outline-primary">
         <i class="fas fa-file-code me-1"></i>{{ __('Export JSON') }}
       </a>
     </div>

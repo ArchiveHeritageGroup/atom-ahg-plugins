@@ -219,7 +219,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                         <label class="form-label fw-semibold">
                             <i class="fas fa-barcode me-1"></i><?php echo __('Barcode Source'); ?>
                         </label>
-                        <select class="form-select" id="barcodeSource" onchange="updateBarcodeSource()">
+                        <select class="form-select" id="barcodeSource">
                             <?php foreach ($barcodeSources as $key => $source): ?>
                                 <?php if (!empty($source['value'])): ?>
                                 <option value="<?php echo htmlspecialchars($source['value']); ?>"
@@ -234,7 +234,7 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <!-- Label Size -->
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-semibold"><?php echo __('Label Size'); ?></label>
-                        <select class="form-select" id="labelSize" onchange="updateLabelSize()">
+                        <select class="form-select" id="labelSize">
                             <option value="200"><?php echo __('Small (50mm)'); ?></option>
                             <option value="300" selected><?php echo __('Medium (75mm)'); ?></option>
                             <option value="400"><?php echo __('Large (100mm)'); ?></option>
@@ -245,11 +245,11 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <div class="col-md-6 mb-3">
                         <label class="form-label"><?php echo __('Show'); ?></label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showBarcode" checked onchange="toggleBarcode()">
+                            <input class="form-check-input" type="checkbox" id="showBarcode" checked>
                             <label class="form-check-label" for="showBarcode"><?php echo __('Linear Barcode'); ?></label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showQR" checked onchange="toggleQR()">
+                            <input class="form-check-input" type="checkbox" id="showQR" checked>
                             <label class="form-check-label" for="showQR"><?php echo __('QR Code'); ?></label>
                         </div>
                     </div>
@@ -257,11 +257,11 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
                     <div class="col-md-6 mb-3">
                         <label class="form-label"><?php echo __('Include'); ?></label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showTitle" checked onchange="toggleTitle()">
+                            <input class="form-check-input" type="checkbox" id="showTitle" checked>
                             <label class="form-check-label" for="showTitle"><?php echo __('Title'); ?></label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="showRepo" checked onchange="toggleRepo()">
+                            <input class="form-check-input" type="checkbox" id="showRepo" checked>
                             <label class="form-check-label" for="showRepo"><?php echo __('Repository'); ?></label>
                         </div>
                     </div>
@@ -274,12 +274,13 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
             <a class="btn btn-outline-secondary" href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $resource->slug]); ?>">
                 <i class="fas fa-arrow-left me-1"></i><?php echo __('Back'); ?>
             </a>
-            <button type="button" class="btn btn-primary" onclick="window.print()">
+            <button type="button" class="btn btn-primary" id="printLabelBtn">
                 <i class="fas fa-print me-1"></i><?php echo __('Print Label'); ?>
             </button>
-            <button type="button" class="btn btn-secondary" onclick="downloadLabel()">
+            <a class="btn btn-secondary" id="downloadLabelLink" download
+               href="<?php echo url_for(['module' => 'spectrum', 'action' => 'labelPng', 'slug' => $resource->slug]); ?>">
                 <i class="fas fa-download me-1"></i><?php echo __('Download PNG'); ?>
-            </button>
+            </a>
         </div>
     </div>
     
@@ -317,11 +318,6 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
     </div>
 </div>
 
-<?php // Download PNG needs html2canvas. It was never loaded, so the button only
-      // ever produced "Download requires html2canvas. Use Print instead."
-      // Vendored locally rather than pulled from a CDN, so it works under CSP
-      // and without external network access. ?>
-<script src="/plugins/ahgSpectrumPlugin/web/js/html2canvas.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 function updateBarcodeSource() {
@@ -341,7 +337,23 @@ function updateBarcodeSource() {
 }
 
 function updateLabelSize() {
-    document.getElementById('labelContent').style.maxWidth = document.getElementById('labelSize').value + 'px';
+    var size = parseInt(document.getElementById('labelSize').value, 10) || 300;
+    document.getElementById('labelContent').style.maxWidth = size + 'px';
+
+    // Scale the codes with the label. Without this the selector only ever made the
+    // label narrower: .barcode-img is capped at 60px tall and max-width:100%, so it
+    // shrank on the small size and never grew on the large one.
+    var barcode = document.getElementById('barcodeImg');
+    if (barcode) {
+        barcode.style.width = '100%';
+        barcode.style.maxHeight = Math.round(size / 5) + 'px';
+    }
+    var qr = document.getElementById('qrImg');
+    if (qr) {
+        var q = Math.round(size * 0.4);
+        qr.style.maxWidth = q + 'px';
+        qr.style.maxHeight = q + 'px';
+    }
 }
 
 function toggleBarcode() {
@@ -360,16 +372,42 @@ function toggleRepo() {
     document.getElementById('labelRepo').style.display = document.getElementById('showRepo').checked ? 'block' : 'none';
 }
 
-function downloadLabel() {
-    if (typeof html2canvas !== 'undefined') {
-        html2canvas(document.getElementById('labelContent')).then(function(canvas) {
-            var link = document.createElement('a');
-            link.download = 'label-<?php echo $resource->slug; ?>.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        });
-    } else {
-        alert('<?php echo __('Download requires html2canvas. Use Print instead.'); ?>');
-    }
+// The PNG is composed server-side (spectrum/labelPng) rather than rendered in the
+// browser: html2canvas returned a 0x0 canvas from a correctly sized element, which
+// is a fault inside the library. Keeping the link's query string in step with the
+// on-screen choices is all the client needs to do.
+function updateDownloadLink() {
+    var link = document.getElementById('downloadLabelLink');
+    if (!link) { return; }
+    var base = link.getAttribute('href').split('?')[0];
+    var size = document.getElementById('labelSize');
+    var src = document.getElementById('barcodeSource');
+    var params = [];
+    if (size) { params.push('size=' + encodeURIComponent(size.value)); }
+    if (src) { params.push('data=' + encodeURIComponent(src.value)); }
+    link.setAttribute('href', base + (params.length ? '?' + params.join('&') : ''));
 }
+
+// Event wiring, not inline handlers: AtoM's CSP script-src has no 'unsafe-inline',
+// so onclick="" / onchange="" attributes are refused by the browser and every
+// control on this page silently did nothing. This block carries the nonce, so it
+// runs; the listeners it registers are what make the page work.
+(function () {
+    function on(id, evt, fn) {
+        var el = document.getElementById(id);
+        if (el) { el.addEventListener(evt, fn); }
+    }
+
+    on('printLabelBtn', 'click', function () { window.print(); });
+    on('barcodeSource', 'change', updateBarcodeSource);
+    on('labelSize', 'change', updateLabelSize);
+    on('labelSize', 'change', updateDownloadLink);
+    on('barcodeSource', 'change', updateDownloadLink);
+    updateLabelSize();       // match the preview to the selected size on load
+    updateDownloadLink();    // and the download link to both selectors
+    on('showBarcode', 'change', toggleBarcode);
+    on('showQR', 'change', toggleQR);
+    on('showTitle', 'change', toggleTitle);
+    on('showRepo', 'change', toggleRepo);
+})();
 </script>
