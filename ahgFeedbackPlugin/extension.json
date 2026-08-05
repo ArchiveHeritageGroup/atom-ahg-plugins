@@ -18,5 +18,19 @@
         "feedback",
         "feedback_i18n"
     ],
-    "category": "user_engagement"
+    "category": "user_engagement",
+    "menu": [
+        {
+            "name": "feedback",
+            "parent": "manage",
+            "path": "feedback/browse",
+            "label": "Feedback"
+        },
+        {
+            "name": "feedbackMenu",
+            "parent": "staticPagesMenu",
+            "path": "feedback/general",
+            "label": "Feedback"
+        }
+    ]
 }

@@ -1,34 +1,48 @@
 {
-  "name": "Backup & Restore",
-  "machine_name": "ahgBackupPlugin",
-  "version": "1.1.1",
-  "description": "Database and file backup with scheduling, restore, upload and retention management",
-  "author": "The Archive and Heritage Group",
-  "license": "GPL-3.0",
-  "category": "maintenance",
-  "requires": {
-    "atom_framework": ">=1.0.0",
-    "atom": ">=2.8",
-    "php": ">=8.1"
-  },
-  "dependencies": [
-    "ahgCorePlugin"
-  ],
-  "tables": [
-    "backup_history",
-    "backup_schedule",
-    "backup_setting"
-  ],
-  "provides": {
-    "admin_section": {
-      "id": "backup",
-      "section": "maintenance",
-      "title": "Backup & Restore",
-      "description": "Database and file backup management",
-      "icon": "fa-database",
-      "route": "backup/index",
-      "permission": "administrator",
-      "sort_order": 10
-    }
-  }
+    "name": "Backup & Restore",
+    "machine_name": "ahgBackupPlugin",
+    "version": "1.1.1",
+    "description": "Database and file backup with scheduling, restore, upload and retention management",
+    "author": "The Archive and Heritage Group",
+    "license": "GPL-3.0",
+    "category": "maintenance",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "backup_history",
+        "backup_schedule",
+        "backup_setting"
+    ],
+    "provides": {
+        "admin_section": {
+            "id": "backup",
+            "section": "maintenance",
+            "title": "Backup & Restore",
+            "description": "Database and file backup management",
+            "icon": "fa-database",
+            "route": "backup/index",
+            "permission": "administrator",
+            "sort_order": 10
+        }
+    },
+    "menu": [
+        {
+            "name": "ahgBackup",
+            "parent": "manage",
+            "path": "backup/index",
+            "label": "Backup"
+        },
+        {
+            "name": "ahgRestore",
+            "parent": "manage",
+            "path": "backup/restore",
+            "label": "Restore"
+        }
+    ]
 }

@@ -17,5 +17,13 @@
     "tables": [
         "favorites",
         "favorites_folder"
+    ],
+    "menu": [
+        {
+            "name": "favorites",
+            "parent": "staticPagesMenu",
+            "path": "favorites/browse",
+            "label": "Favorites"
+        }
     ]
 }
