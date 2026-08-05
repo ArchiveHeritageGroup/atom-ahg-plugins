@@ -21,6 +21,7 @@ use AhgMetadataExport\Exporters\EbucoreExporter;
 use AhgMetadataExport\Exporters\MetsExporter;
 use AhgMetadataExport\Exporters\ModsExporter;
 use AhgMetadataExport\Exporters\LidoExporter;
+use AhgMetadataExport\Exporters\Marc21BinaryExporter;
 use AhgMetadataExport\Exporters\Marc21Exporter;
 use AhgMetadataExport\Exporters\PbcoreExporter;
 use AhgMetadataExport\Exporters\PremisExporter;
@@ -39,6 +40,7 @@ class ExportService
         'rico' => RicoExporter::class,
         'lido' => LidoExporter::class,
         'marc21' => Marc21Exporter::class,
+        'marc21-binary' => Marc21BinaryExporter::class,
         'bibframe' => BibframeExporter::class,
         'vra-core' => VraCoreExporter::class,
         'pbcore' => PbcoreExporter::class,
@@ -115,6 +117,9 @@ class ExportService
             'rico' => 'RicoExporter',
             'lido' => 'LidoExporter',
             'marc21' => 'Marc21Exporter',
+            // Listed parent-first: this plugin registers no autoloader, so the
+            // subclass fatals unless Marc21Exporter is already in memory.
+            'marc21-binary' => ['Marc21Exporter', 'Marc21BinaryExporter'],
             'bibframe' => 'BibframeExporter',
             'vra-core' => 'VraCoreExporter',
             'pbcore' => 'PbcoreExporter',
@@ -124,9 +129,11 @@ class ExportService
         ];
 
         if (isset($classMap[$format])) {
-            $file = dirname(__DIR__).'/Exporters/'.$classMap[$format].'.php';
-            if (file_exists($file)) {
-                require_once $file;
+            foreach ((array) $classMap[$format] as $class) {
+                $file = dirname(__DIR__).'/Exporters/'.$class.'.php';
+                if (file_exists($file)) {
+                    require_once $file;
+                }
             }
         }
     }

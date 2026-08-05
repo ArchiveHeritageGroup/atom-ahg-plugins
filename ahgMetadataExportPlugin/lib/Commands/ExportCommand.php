@@ -40,7 +40,8 @@ class ExportCommand extends BaseCommand
         'ead3' => 'EAD3 (Archives)',
         'rico' => 'RIC-O (Archives - Linked Data)',
         'lido' => 'LIDO (Museums)',
-        'marc21' => 'MARC21 (Libraries)',
+        'marc21' => 'MARC21 MARCXML (Libraries)',
+        'marc21-binary' => 'MARC21 binary .mrc (Libraries)',
         'bibframe' => 'BIBFRAME (Libraries - Linked Data)',
         'vra-core' => 'VRA Core 4 (Visual Resources)',
         'pbcore' => 'PBCore (Media)',
@@ -50,7 +51,7 @@ class ExportCommand extends BaseCommand
 
     protected function configure(): void
     {
-        $this->addOption('format', null, 'Export format (ead3, rico, lido, marc21, bibframe, vra-core, pbcore, ebucore, premis, all)');
+        $this->addOption('format', null, 'Export format (ead3, rico, lido, marc21, marc21-binary, bibframe, vra-core, pbcore, ebucore, premis, all)');
         $this->addOption('slug', null, 'Slug of the record to export');
         $this->addOption('id', null, 'ID of the record to export');
         $this->addOption('repository', null, 'Repository ID to export all records from');
