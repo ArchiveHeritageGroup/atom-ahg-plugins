@@ -25,9 +25,6 @@
                 <br><small>Install with: <code>sudo apt install clamav clamav-daemon && sudo freshclam</code></small>
             @endif
         </div>
-        <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
-        </a>
     </div>
 </div>
 

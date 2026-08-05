@@ -26,9 +26,6 @@
             Error ({{ $statusCounts['error'] }})
         </a>
     </div>
-    <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
-    </a>
 </div>
 
 <!-- Fixity Log Table -->

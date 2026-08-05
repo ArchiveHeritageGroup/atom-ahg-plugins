@@ -5,15 +5,6 @@
 
 <?php slot('content') ?>
 
-<!-- Quick Actions -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
-        </a>
-    </div>
-</div>
-
 <!-- Verification Statistics -->
 <div class="row mb-4">
     <div class="col-md-3">

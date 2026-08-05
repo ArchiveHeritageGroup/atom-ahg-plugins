@@ -25,9 +25,6 @@
             Error (<?php echo $statusCounts['error']; ?>)
         </a>
     </div>
-    <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?>
-    </a>
 </div>
 
 <!-- Fixity Log Table -->

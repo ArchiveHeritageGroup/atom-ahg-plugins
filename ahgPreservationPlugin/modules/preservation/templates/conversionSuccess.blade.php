@@ -39,9 +39,6 @@
 <!-- Quick Actions -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
-        </a>
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'formats']) }}" class="btn btn-outline-primary">
             <i class="fas fa-file-code me-1"></i>{{ __('Format Registry') }}
         </a>

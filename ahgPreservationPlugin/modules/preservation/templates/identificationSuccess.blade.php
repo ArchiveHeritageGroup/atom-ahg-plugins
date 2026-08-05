@@ -2,9 +2,6 @@
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-fingerprint"></i> Format Identification</h1>
-    <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
-    </a>
 </div>
 
 <!-- Siegfried Status -->

@@ -6,9 +6,6 @@
         <a href="{{ url_for(['module' => 'preservation', 'action' => 'scheduleEdit']) }}" class="btn btn-success me-2">
             <i class="fas fa-plus me-1"></i>{{ __('New Schedule') }}
         </a>
-        <a href="{{ url_for(['module' => 'preservation', 'action' => 'index']) }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}
-        </a>
     </div>
 </div>
 
