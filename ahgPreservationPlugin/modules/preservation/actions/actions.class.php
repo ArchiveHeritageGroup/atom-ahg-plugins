@@ -28,11 +28,29 @@ class preservationActions extends AhgController
     // =========================================
 
     /**
-     * Preservation dashboard
+     * Preservation dashboard.
+     *
+     * TEMPORARY: the dashboard is skipped and the request goes straight to the
+     * package list. Its checksum, fixity and at-risk-format panels read tables
+     * that no fixity or format-identification run has populated, so it reports
+     * zeros across the board and reads as broken rather than as unexercised. The
+     * package list is the part that has something to show.
+     *
+     * Remove this redirect to bring the dashboard back - the action below is
+     * unchanged and still works.
      */
     public function executeIndex($request)
     {
         $this->checkAdminAccess();
+
+        $objectId = (int) $request->getParameter('object_id');
+
+        $this->redirect(array_merge(
+            ['module' => 'preservation', 'action' => 'packages'],
+            $objectId ? ['object_id' => $objectId] : []
+        ));
+
+        return;
 
         $this->stats = $this->service->getStatistics();
         $this->recentEvents = DB::table('preservation_event')
@@ -933,13 +951,25 @@ class preservationActions extends AhgController
             // Count what is on screen, not what is in the database. getStatistics()
             // is site-wide, so a record with no packages of its own still showed
             // 'Total Packages 3' above an empty list and read as a broken page
-            // rather than an empty one.
+            // rather than an empty one. The type breakdown needs the same
+            // treatment: three cards still reporting site-wide SIP/AIP/DIP totals
+            // beside a filtered list of none is the same lie in smaller print.
             $this->filteredCount = count($this->packages);
+            $this->filteredTypeCounts = ['sip' => 0, 'aip' => 0, 'dip' => 0];
+
+            foreach ($this->packages as $package) {
+                $type = strtolower((string) ($package->package_type ?? ''));
+
+                if (isset($this->filteredTypeCounts[$type])) {
+                    ++$this->filteredTypeCounts[$type];
+                }
+            }
         } else {
             $this->packages = $this->service->getPackages($type, $status, 50);
             $this->filterObject = null;
             $this->filterObjectSlug = null;
             $this->filteredCount = null;
+            $this->filteredTypeCounts = null;
         }
 
         $this->stats = $this->service->getPackageStatistics();
@@ -982,8 +1012,25 @@ class preservationActions extends AhgController
 
         // Title of the currently-linked collection (archival description), if set,
         // so the lookup field can show it on load.
+        // Creating from a record-filtered list carries the record through, so a
+        // package built from a description is linked to it without the archivist
+        // having to find it again in the lookup. Without this the Create Package
+        // button dropped the filter, every package came out unlinked, and the
+        // record's own package list stayed empty however many were made from it.
+        $this->prefillObjectId = null;
+        if (!$id && $prefill = (int) $request->getParameter('object_id')) {
+            $this->prefillObjectId = $prefill;
+        }
+
         $this->linkedDescription = null;
-        if ($this->package && $this->package->information_object_id) {
+        if ($this->prefillObjectId) {
+            $this->linkedDescription = DB::table('information_object as io')
+                ->leftJoin('information_object_i18n as ioi', function ($j) {
+                    $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', 'en');
+                })
+                ->where('io.id', $this->prefillObjectId)
+                ->value('ioi.title');
+        } elseif ($this->package && $this->package->information_object_id) {
             $this->linkedDescription = DB::table('information_object as io')
                 ->leftJoin('information_object_i18n as ioi', function ($j) {
                     $j->on('ioi.id', '=', 'io.id')->where('ioi.culture', '=', 'en');

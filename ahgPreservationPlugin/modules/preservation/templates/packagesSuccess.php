@@ -35,7 +35,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0"><?php echo __('SIPs'); ?></h6>
-                        <h2 class="mb-0"><?php echo number_format($stats['by_type']['sip']['count'] ?? 0); ?></h2>
+                        <h2 class="mb-0"><?php echo number_format((isset($filteredTypeCounts) && null !== $filteredTypeCounts) ? $filteredTypeCounts['sip'] : ($stats['by_type']['sip']['count'] ?? 0)); ?></h2>
                         <small><?php echo __('Submission'); ?></small>
                     </div>
                     <i class="fas fa-right-to-bracket fs-1 opacity-50"></i>
@@ -49,7 +49,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0"><?php echo __('AIPs'); ?></h6>
-                        <h2 class="mb-0"><?php echo number_format($stats['by_type']['aip']['count'] ?? 0); ?></h2>
+                        <h2 class="mb-0"><?php echo number_format((isset($filteredTypeCounts) && null !== $filteredTypeCounts) ? $filteredTypeCounts['aip'] : ($stats['by_type']['aip']['count'] ?? 0)); ?></h2>
                         <small><?php echo __('Archival'); ?></small>
                     </div>
                     <i class="fas fa-vault fs-1 opacity-50"></i>
@@ -63,7 +63,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0"><?php echo __('DIPs'); ?></h6>
-                        <h2 class="mb-0"><?php echo number_format($stats['by_type']['dip']['count'] ?? 0); ?></h2>
+                        <h2 class="mb-0"><?php echo number_format((isset($filteredTypeCounts) && null !== $filteredTypeCounts) ? $filteredTypeCounts['dip'] : ($stats['by_type']['dip']['count'] ?? 0)); ?></h2>
                         <small><?php echo __('Dissemination'); ?></small>
                     </div>
                     <i class="fas fa-right-from-bracket fs-1 opacity-50"></i>
@@ -83,7 +83,7 @@
 <!-- Actions and Filters -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit']); ?>" class="btn btn-primary">
+        <a href="<?php echo url_for(array_merge(['module' => 'preservation', 'action' => 'packageEdit'], isset($filterObject) && $filterObject ? ['object_id' => $filterObject->id] : [])); ?>" class="btn btn-primary">
             <i class="fas fa-plus me-1"></i><?php echo __('Create Package'); ?>
         </a>
         <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'index']); ?>" class="btn btn-outline-secondary ms-2">
@@ -158,7 +158,7 @@
                     <td colspan="8" class="text-center text-muted py-4">
                         <i class="fas fa-box-archive fs-1 d-block mb-2 opacity-25"></i>
                         <?php echo __('No packages found.'); ?>
-                        <a href="<?php echo url_for(['module' => 'preservation', 'action' => 'packageEdit']); ?>" class="d-block mt-2"><?php echo __('Create your first package'); ?></a>
+                        <a href="<?php echo url_for(array_merge(['module' => 'preservation', 'action' => 'packageEdit'], isset($filterObject) && $filterObject ? ['object_id' => $filterObject->id] : [])); ?>" class="d-block mt-2"><?php echo __('Create your first package'); ?></a>
                     </td>
                 </tr>
                 <?php else: ?>

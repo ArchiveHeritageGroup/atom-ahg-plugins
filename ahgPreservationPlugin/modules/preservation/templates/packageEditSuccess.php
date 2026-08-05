@@ -131,7 +131,7 @@
 
                     <div class="mb-3 position-relative">
                         <label class="form-label"><?php echo __('Linked Collection / Description'); ?></label>
-                        <input type="hidden" name="information_object_id" id="collectionId" value="<?php echo (int) ($package->information_object_id ?? 0) ?: ''; ?>">
+                        <input type="hidden" name="information_object_id" id="collectionId" value="<?php echo (int) ($package->information_object_id ?? $prefillObjectId ?? 0) ?: ''; ?>">
                         <div class="input-group">
                             <input type="text" id="collectionSearch" class="form-control" autocomplete="off"
                                    value="<?php echo htmlspecialchars($linkedDescription ?? ''); ?>"

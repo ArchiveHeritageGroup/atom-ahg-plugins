@@ -39,7 +39,7 @@ if (!function_exists('formatBytes')) {
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">{{ __('SIPs') }}</h6>
-                        <h2 class="mb-0">{{ number_format($stats['by_type']['sip']['count'] ?? 0) }}</h2>
+                        <h2 class="mb-0">{{ number_format(isset($filteredTypeCounts) && $filteredTypeCounts !== null ? $filteredTypeCounts['sip'] : ($stats['by_type']['sip']['count'] ?? 0)) }}</h2>
                         <small>{{ __('Submission') }}</small>
                     </div>
                     <i class="fas fa-right-to-bracket fs-1 opacity-50"></i>
@@ -53,7 +53,7 @@ if (!function_exists('formatBytes')) {
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">{{ __('AIPs') }}</h6>
-                        <h2 class="mb-0">{{ number_format($stats['by_type']['aip']['count'] ?? 0) }}</h2>
+                        <h2 class="mb-0">{{ number_format(isset($filteredTypeCounts) && $filteredTypeCounts !== null ? $filteredTypeCounts['aip'] : ($stats['by_type']['aip']['count'] ?? 0)) }}</h2>
                         <small>{{ __('Archival') }}</small>
                     </div>
                     <i class="fas fa-vault fs-1 opacity-50"></i>
@@ -67,7 +67,7 @@ if (!function_exists('formatBytes')) {
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="mb-0">{{ __('DIPs') }}</h6>
-                        <h2 class="mb-0">{{ number_format($stats['by_type']['dip']['count'] ?? 0) }}</h2>
+                        <h2 class="mb-0">{{ number_format(isset($filteredTypeCounts) && $filteredTypeCounts !== null ? $filteredTypeCounts['dip'] : ($stats['by_type']['dip']['count'] ?? 0)) }}</h2>
                         <small>{{ __('Dissemination') }}</small>
                     </div>
                     <i class="fas fa-right-from-bracket fs-1 opacity-50"></i>
