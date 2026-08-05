@@ -28,30 +28,133 @@
     </div>
   </div>
 
-  <!-- Timeline Visualization -->
+  <?php
+  // The visual timeline. Rendered as markup and CSS rather than drawn with d3:
+  // the previous version loaded d3 from /plugins/ahgThemeB5Plugin/web/js/, a theme
+  // path, so on any install without the AHG theme the script 404'd, `d3` was
+  // undefined and the chart silently never appeared - the page looked empty with
+  // nothing to say why.
+  //
+  // Nodes are spaced evenly in date order rather than proportionally to elapsed
+  // time. Proportional spacing needs a per-node offset, which means an inline
+  // style attribute, and style-src here carries no 'unsafe-inline' - the browser
+  // drops those silently. Even spacing also reads better for provenance, where a
+  // few events are separated by very uneven gaps.
+  $events = json_decode($sf_data->getRaw('timelineData'), true) ?: [];
+
+  // Font Awesome only. The stock arDominionB5Plugin bundle ships Font Awesome 6
+  // and no bootstrap-icons font, so a bi-* class renders as an empty box.
+  $categoryMeta = [
+      'creation'    => ['icon' => 'fa-seedling',          'label' => __('Creation')],
+      'sale'        => ['icon' => 'fa-money-bill-wave',   'label' => __('Sale / Purchase')],
+      'gift'        => ['icon' => 'fa-gift',              'label' => __('Gift / Donation')],
+      'inheritance' => ['icon' => 'fa-scroll',            'label' => __('Inheritance / Bequest')],
+      'auction'     => ['icon' => 'fa-gavel',             'label' => __('Auction')],
+      'transfer'    => ['icon' => 'fa-right-left',        'label' => __('Transfer')],
+      'loan'        => ['icon' => 'fa-hand-holding',      'label' => __('Loan')],
+      'theft'       => ['icon' => 'fa-triangle-exclamation', 'label' => __('Theft / Confiscation')],
+      'recovery'    => ['icon' => 'fa-shield-halved',     'label' => __('Recovery / Restitution')],
+      'event'       => ['icon' => 'fa-circle-dot',        'label' => __('Other event')],
+  ];
+
+  // Only the categories actually present, so the key describes this record rather
+  // than listing ten things most records never use.
+  $usedCategories = [];
+  foreach ($events as $e) {
+      $c = $e['category'] ?? 'event';
+      $usedCategories[isset($categoryMeta[$c]) ? $c : 'event'] = true;
+  }
+  ?>
+
   <div class="card shadow-sm mb-4">
-    <div class="card-header bg-primary text-white">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
       <h5 class="mb-0">
-        <i class="fas fa-calendar-days me-2"></i>
+        <i class="fas fa-chart-gantt me-2" aria-hidden="true"></i>
         <?php echo __('Visual Timeline') ?>
       </h5>
+      <?php if (count($events)): ?>
+        <span class="badge bg-light text-dark"><?php echo __('%1% events', ['%1%' => count($events)]) ?></span>
+      <?php endif ?>
     </div>
     <div class="card-body">
-      <div id="timeline-container" style="width: 100%; min-height: 400px; overflow-x: auto;">
-        <svg id="provenance-timeline"></svg>
-      </div>
-      <div class="mt-3">
-        <div class="d-flex flex-wrap gap-2">
-          <span class="badge" style="background-color: #4caf50;">Creation</span>
-          <span class="badge" style="background-color: #2196f3;">Sale/Purchase</span>
-          <span class="badge" style="background-color: #9c27b0;">Gift/Donation</span>
-          <span class="badge" style="background-color: #ff9800;">Inheritance</span>
-          <span class="badge" style="background-color: #f44336;">Auction</span>
-          <span class="badge" style="background-color: #607d8b;">Transfer</span>
-          <span class="badge" style="background-color: #795548;">Loan</span>
-          <span class="badge" style="background-color: #9e9e9e;">Other</span>
+      <?php if (empty($events)): ?>
+        <p class="text-muted mb-0">
+          <i class="fas fa-circle-info me-1" aria-hidden="true"></i>
+          <?php echo __('No dated events to plot yet.') ?>
+        </p>
+      <?php else: ?>
+        <div class="pv-scroll" tabindex="0" role="group" aria-label="<?php echo esc_entities(__('Provenance timeline')) ?>">
+          <ol class="pv-rail">
+            <?php foreach ($events as $i => $event):
+                $category = $event['category'] ?? 'event';
+                if (!isset($categoryMeta[$category])) { $category = 'event'; }
+                $meta = $categoryMeta[$category];
+
+                $certainty = strtolower((string) ($event['certainty'] ?? 'unknown'));
+                $uncertain = in_array($certainty, ['uncertain', 'possible', 'unknown', 'disputed'], true);
+
+                // Year alone on the rail; the full date belongs in the card. A rail
+                // crowded with 1923-04-17 stops reading as a sequence.
+                $date = trim((string) ($event['startDate'] ?? ''));
+                $year = ('' !== $date && preg_match('/^(\d{4})/', $date, $m)) ? $m[1] : null;
+            ?>
+              <li class="pv-node pv-<?php echo $category ?><?php echo $uncertain ? ' pv-uncertain' : '' ?>">
+                <div class="pv-year"><?php echo $year ? esc_entities($year) : '<span class="pv-nodate">'.esc_entities(__('undated')).'</span>' ?></div>
+
+                <div class="pv-marker" aria-hidden="true">
+                  <i class="fas <?php echo $meta['icon'] ?>"></i>
+                </div>
+
+                <div class="pv-card">
+                  <p class="pv-type"><?php echo esc_entities($event['type'] ?? $meta['label']) ?></p>
+
+                  <?php if (!empty($event['from']) || !empty($event['to'])): ?>
+                    <p class="pv-actors">
+                      <?php if (!empty($event['from'])): ?>
+                        <span class="pv-actor"><?php echo esc_entities($event['from']) ?></span>
+                      <?php endif ?>
+                      <?php if (!empty($event['from']) && !empty($event['to'])): ?>
+                        <i class="fas fa-arrow-right pv-arrow" aria-hidden="true"></i>
+                      <?php endif ?>
+                      <?php if (!empty($event['to'])): ?>
+                        <span class="pv-actor"><?php echo esc_entities($event['to']) ?></span>
+                      <?php endif ?>
+                    </p>
+                  <?php endif ?>
+
+                  <?php if ('' !== $date): ?>
+                    <p class="pv-meta"><i class="fas fa-calendar-days" aria-hidden="true"></i> <?php echo esc_entities($date) ?></p>
+                  <?php endif ?>
+
+                  <?php if (!empty($event['location'])): ?>
+                    <p class="pv-meta"><i class="fas fa-location-dot" aria-hidden="true"></i> <?php echo esc_entities($event['location']) ?></p>
+                  <?php endif ?>
+
+                  <?php if ($uncertain): ?>
+                    <p class="pv-meta pv-flag">
+                      <i class="fas fa-circle-question" aria-hidden="true"></i>
+                      <?php echo esc_entities(ucfirst($certainty)) ?>
+                    </p>
+                  <?php endif ?>
+
+                  <?php if (!empty($event['description'])): ?>
+                    <p class="pv-desc"><?php echo esc_entities($event['description']) ?></p>
+                  <?php endif ?>
+                </div>
+              </li>
+            <?php endforeach ?>
+          </ol>
         </div>
-      </div>
+
+        <div class="pv-key mt-3">
+          <?php foreach ($usedCategories as $category => $_): ?>
+            <span class="pv-key-item pv-<?php echo $category ?>">
+              <i class="fas <?php echo $categoryMeta[$category]['icon'] ?>" aria-hidden="true"></i>
+              <?php echo esc_entities($categoryMeta[$category]['label']) ?>
+            </span>
+          <?php endforeach ?>
+        </div>
+      <?php endif ?>
     </div>
   </div>
 
@@ -117,221 +220,166 @@
   <?php endif ?>
 </div>
 
-<!-- D3.js Timeline -->
-<script src="/plugins/ahgThemeB5Plugin/web/js/d3.v7.min.js"></script>
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-document.addEventListener('DOMContentLoaded', function() {
-  const timelineData = <?php echo $sf_data->getRaw('timelineData') ?>;
-  
-  const categoryColors = {
-    'creation': '#4caf50',
-    'sale': '#2196f3',
-    'gift': '#9c27b0',
-    'inheritance': '#ff9800',
-    'auction': '#f44336',
-    'transfer': '#607d8b',
-    'loan': '#795548',
-    'theft': '#e91e63',
-    'recovery': '#00bcd4',
-    'event': '#9e9e9e'
-  };
-
-  if (timelineData.length === 0) {
-    document.getElementById('timeline-container').innerHTML =
-      '<div class="alert alert-info mb-0"><i class="fas fa-circle-info me-2"></i>No events to display in timeline.</div>';
-    return;
-  }
-
-  // Parse dates
-  const parseDate = d3.timeParse('%Y-%m-%d');
-  timelineData.forEach(d => {
-    d.startDateParsed = d.startDate ? parseDate(d.startDate) : null;
-  });
-
-  const validData = timelineData.filter(d => d.startDateParsed);
-  const container = document.getElementById('timeline-container');
-  const margin = { top: 40, right: 200, bottom: 60, left: 60 };
-  const width = Math.max(900, container.clientWidth) - margin.left - margin.right;
-  
-  if (validData.length === 0) {
-    // Non-dated events - horizontal bars
-    const barHeight = 45;
-    const height = timelineData.length * barHeight + margin.top + margin.bottom;
-    
-    const svg = d3.select('#provenance-timeline')
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height);
-    
-    const g = svg.append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-    
-    const y = d3.scaleBand()
-      .domain(timelineData.map((d, i) => i))
-      .range([0, timelineData.length * barHeight])
-      .padding(0.2);
-    
-    // Bars
-    g.selectAll('.event-bar')
-      .data(timelineData)
-      .enter()
-      .append('rect')
-      .attr('class', 'event-bar')
-      .attr('x', 0)
-      .attr('y', (d, i) => y(i))
-      .attr('width', width)
-      .attr('height', y.bandwidth())
-      .attr('fill', d => categoryColors[d.category] || categoryColors.event)
-      .attr('opacity', 0.85)
-      .attr('rx', 6);
-    
-    // Type labels (left)
-    g.selectAll('.type-label')
-      .data(timelineData)
-      .enter()
-      .append('text')
-      .attr('x', 15)
-      .attr('y', (d, i) => y(i) + y.bandwidth() / 2 + 5)
-      .text(d => d.type)
-      .attr('fill', '#fff')
-      .attr('font-size', '14px')
-      .attr('font-weight', 'bold');
-    
-    // Agent/details labels (right)
-    g.selectAll('.detail-label')
-      .data(timelineData)
-      .enter()
-      .append('text')
-      .attr('x', width - 15)
-      .attr('y', (d, i) => y(i) + y.bandwidth() / 2 + 5)
-      .attr('text-anchor', 'end')
-      .text(d => {
-        let parts = [];
-        if (d.from) parts.push(d.from);
-        if (d.to) parts.push('→ ' + d.to);
-        if (d.location) parts.push('@ ' + d.location);
-        return parts.join(' ') || d.label;
-      })
-      .attr('fill', '#fff')
-      .attr('font-size', '12px');
-    
-    return;
-  }
-
-  // Timeline with dates
-  const height = Math.max(350, validData.length * 60);
-  
-  const svg = d3.select('#provenance-timeline')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom);
-  
-  const g = svg.append('g')
-    .attr('transform', `translate(${margin.left},${margin.top})`);
-  
-  // X scale (time)
-  const xExtent = d3.extent(validData, d => d.startDateParsed);
-  const x = d3.scaleTime()
-    .domain([d3.timeYear.offset(xExtent[0], -2), d3.timeYear.offset(xExtent[1] || new Date(), 2)])
-    .range([0, width]);
-  
-  // Y scale
-  const y = d3.scaleBand()
-    .domain(validData.map((d, i) => i))
-    .range([0, height - margin.top - margin.bottom])
-    .padding(0.4);
-  
-  // Grid lines
-  g.append('g')
-    .attr('class', 'grid')
-    .selectAll('line')
-    .data(x.ticks(10))
-    .enter()
-    .append('line')
-    .attr('x1', d => x(d))
-    .attr('x2', d => x(d))
-    .attr('y1', 0)
-    .attr('y2', height - margin.top - margin.bottom)
-    .attr('stroke', '#e0e0e0')
-    .attr('stroke-dasharray', '3,3');
-  
-  // X axis
-  g.append('g')
-    .attr('transform', `translate(0,${height - margin.top - margin.bottom})`)
-    .call(d3.axisBottom(x).ticks(10).tickFormat(d3.timeFormat('%Y')))
-    .selectAll('text')
-    .attr('font-size', '11px');
-  
-  // Event bars
-  g.selectAll('.event-bar')
-    .data(validData)
-    .enter()
-    .append('rect')
-    .attr('class', 'event-bar')
-    .attr('x', d => x(d.startDateParsed) - 3)
-    .attr('y', (d, i) => y(i))
-    .attr('width', 6)
-    .attr('height', y.bandwidth())
-    .attr('fill', d => categoryColors[d.category] || categoryColors.event)
-    .attr('rx', 3);
-  
-  // Event circles
-  g.selectAll('.event-marker')
-    .data(validData)
-    .enter()
-    .append('circle')
-    .attr('class', 'event-marker')
-    .attr('cx', d => x(d.startDateParsed))
-    .attr('cy', (d, i) => y(i) + y.bandwidth() / 2)
-    .attr('r', 12)
-    .attr('fill', d => categoryColors[d.category] || categoryColors.event)
-    .attr('stroke', '#fff')
-    .attr('stroke-width', 3);
-  
-  // Labels
-  g.selectAll('.event-label')
-    .data(validData)
-    .enter()
-    .append('text')
-    .attr('x', d => x(d.startDateParsed) + 20)
-    .attr('y', (d, i) => y(i) + y.bandwidth() / 2 + 5)
-    .text(d => {
-      let text = d.type;
-      if (d.from || d.to) {
-        text += ': ';
-        if (d.from) text += d.from;
-        if (d.from && d.to) text += ' → ';
-        if (d.to) text += d.to;
-      }
-      return text;
-    })
-    .attr('font-size', '12px')
-    .attr('fill', '#333');
-  
-  // Date labels
-  g.selectAll('.date-label')
-    .data(validData)
-    .enter()
-    .append('text')
-    .attr('x', d => x(d.startDateParsed))
-    .attr('y', (d, i) => y(i) - 5)
-    .attr('text-anchor', 'middle')
-    .text(d => d.startDate)
-    .attr('font-size', '10px')
-    .attr('fill', '#666');
-});
-</script>
-
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-.event-bar {
-  transition: opacity 0.2s;
+/* Horizontal provenance timeline.
+   Everything lives here rather than in style attributes: style-src carries no
+   'unsafe-inline', so an inline style attribute is dropped by the browser without
+   any console error - which is how the old legend ended up rendering grey. */
+
+.pv-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0 1rem;
 }
-.event-bar:hover {
-  opacity: 1 !important;
+.pv-scroll:focus-visible { outline: 2px solid #0d6efd; outline-offset: 2px; }
+
+.pv-rail {
+  display: flex;
+  align-items: flex-start;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: min-content;
 }
-.event-marker {
-  cursor: pointer;
-  transition: r 0.2s;
+
+.pv-node {
+  position: relative;
+  flex: 0 0 15rem;
+  max-width: 15rem;
+  padding: 0 0.75rem;
+  text-align: center;
 }
-.event-marker:hover {
-  r: 15;
+
+/* The rail itself, drawn as two half-connectors per node so the line stops at the
+   first and last marker instead of running off the ends. */
+.pv-node::before,
+.pv-node::after {
+  content: "";
+  position: absolute;
+  top: 3.15rem;
+  height: 2px;
+  background: #d5d9de;
+  width: 50%;
+}
+.pv-node::before { left: 0; }
+.pv-node::after { right: 0; }
+.pv-node:first-child::before,
+.pv-node:last-child::after { display: none; }
+
+.pv-year {
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1.6rem;
+  color: #333;
+  white-space: nowrap;
+}
+.pv-nodate { font-weight: 400; font-style: italic; color: #8a9099; }
+
+.pv-marker {
+  position: relative;
+  z-index: 1;
+  width: 3rem;
+  height: 3rem;
+  margin: 0.35rem auto 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.15rem;
+  background: #9e9e9e;
+  box-shadow: 0 0 0 4px #fff;
+}
+
+.pv-card {
+  text-align: left;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-top: 3px solid #9e9e9e;
+  border-radius: 0.25rem;
+  padding: 0.6rem 0.7rem;
+}
+.pv-type {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0 0 0.25rem;
+  color: #212529;
+}
+.pv-actors { margin: 0 0 0.35rem; font-size: 0.85rem; line-height: 1.35; }
+.pv-actor { color: #212529; }
+.pv-arrow { font-size: 0.7rem; color: #6c757d; margin: 0 0.2rem; }
+.pv-meta {
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
+  color: #6c757d;
+}
+.pv-meta i { width: 0.9rem; }
+.pv-flag { color: #b8860b; }
+.pv-desc {
+  margin: 0.4rem 0 0;
+  font-size: 0.8rem;
+  color: #495057;
+  border-top: 1px dashed #e6e8eb;
+  padding-top: 0.35rem;
+}
+
+/* An uncertain event should look uncertain at a glance, not only in its label. */
+.pv-uncertain .pv-marker { box-shadow: 0 0 0 4px #fff, 0 0 0 6px #f0e2c0; }
+.pv-uncertain .pv-card { border-style: dashed; }
+
+.pv-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  font-size: 0.8rem;
+  color: #495057;
+}
+.pv-key-item i { margin-right: 0.3rem; }
+
+/* Category colours. Applied to the marker, the card's top edge and the key entry,
+   so one class carries the whole visual identity of an event type. */
+.pv-creation    .pv-marker { background: #2e7d32; }
+.pv-creation    .pv-card   { border-top-color: #2e7d32; }
+.pv-creation.pv-key-item i { color: #2e7d32; }
+
+.pv-sale        .pv-marker { background: #1565c0; }
+.pv-sale        .pv-card   { border-top-color: #1565c0; }
+.pv-sale.pv-key-item i     { color: #1565c0; }
+
+.pv-gift        .pv-marker { background: #7b1fa2; }
+.pv-gift        .pv-card   { border-top-color: #7b1fa2; }
+.pv-gift.pv-key-item i     { color: #7b1fa2; }
+
+.pv-inheritance .pv-marker { background: #ef6c00; }
+.pv-inheritance .pv-card   { border-top-color: #ef6c00; }
+.pv-inheritance.pv-key-item i { color: #ef6c00; }
+
+.pv-auction     .pv-marker { background: #c62828; }
+.pv-auction     .pv-card   { border-top-color: #c62828; }
+.pv-auction.pv-key-item i  { color: #c62828; }
+
+.pv-transfer    .pv-marker { background: #455a64; }
+.pv-transfer    .pv-card   { border-top-color: #455a64; }
+.pv-transfer.pv-key-item i { color: #455a64; }
+
+.pv-loan        .pv-marker { background: #6d4c41; }
+.pv-loan        .pv-card   { border-top-color: #6d4c41; }
+.pv-loan.pv-key-item i     { color: #6d4c41; }
+
+.pv-theft       .pv-marker { background: #b71c1c; }
+.pv-theft       .pv-card   { border-top-color: #b71c1c; }
+.pv-theft.pv-key-item i    { color: #b71c1c; }
+
+.pv-recovery    .pv-marker { background: #00695c; }
+.pv-recovery    .pv-card   { border-top-color: #00695c; }
+.pv-recovery.pv-key-item i { color: #00695c; }
+
+.pv-event       .pv-marker { background: #757575; }
+.pv-event       .pv-card   { border-top-color: #757575; }
+.pv-event.pv-key-item i    { color: #757575; }
+
+@media print {
+  .pv-scroll { overflow: visible; }
+  .pv-rail { flex-wrap: wrap; }
 }
 </style>

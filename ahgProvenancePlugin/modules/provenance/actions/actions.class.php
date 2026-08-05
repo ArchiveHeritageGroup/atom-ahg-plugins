@@ -366,7 +366,12 @@ class provenanceActions extends AhgController
                 'startDate' => $startDate,
                 'endDate' => null,
                 'description' => $event['description'] ?? null,
-                'category' => $this->categorizeEventType($event['event_type'] ?? ''),
+                // ProvenanceService emits the machine type under 'type' - there is no
+                // 'event_type' key in a timeline row. Reading one meant
+                // categorizeEventType() always received an empty string and answered
+                // 'event', so every marker on the timeline drew the same grey generic
+                // icon no matter what the event actually was.
+                'category' => $this->categorizeEventType($event['type'] ?? $event['event_type'] ?? ''),
                 'certainty' => $event['certainty'] ?? 'unknown',
                 'from' => $event['from'] ?? null,
                 'to' => $event['to'] ?? null,
