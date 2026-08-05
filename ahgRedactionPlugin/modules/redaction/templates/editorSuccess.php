@@ -2,8 +2,8 @@
 /**
  * Visual Redaction Editor
  *
- * Uses the IIIF viewer with Annotorious for drawing redaction rectangles on images/PDFs.
- * Integrates with OpenSeadragon for zoomable image viewing.
+ * Redaction rectangles are drawn on a Fabric.js canvas laid over the document,
+ * the same way for a PDF page and for an image.
  */
 $objectId = $sf_request->getParameter('id');
 $object = $sf_data->getRaw('object');
@@ -11,15 +11,8 @@ $docInfo = $sf_data->getRaw('docInfo');
 $regions = $sf_data->getRaw('regions') ?? [];
 
 // IIIF Configuration
-// No default. The previous one pointed at https://psis.theahg.co.za/iiif/2, so
-// every install without its own setting asked a particular production server
-// for tiles of a local file - cross-origin, blocked by connect-src, and for an
-// image that server has never seen.
-$cantaloupeUrl = trim((string) sfConfig::get('app_iiif_cantaloupe_url', ''));
-// Viewer assets are vendored in this plugin, so there is no framework path to
-// resolve. The IIIF viewer's own copies are not present on a stock install - the
-// framework ships no public/viewers/annotorious at all, so the image branch of
-// this editor loaded nothing and rendered an empty pane.
+// Fabric.js is vendored in this plugin, so the editor does not depend on any
+// other plugin shipping a viewer.
 $viewerId = 'redaction-viewer-' . $objectId;
 ?>
 
@@ -149,8 +142,19 @@ $viewerId = 'redaction-viewer-' . $objectId;
                                 </div>
                             </div>
                         <?php else: ?>
-                            <!-- OpenSeadragon Image Viewer with Annotorious -->
-                            <div id="osd-redaction-viewer" class="rd-viewer"></div>
+                            <!-- Image: the same canvas pair the PDF branch uses. The
+                                 picture is drawn once and the redactions are drawn on a
+                                 Fabric overlay above it. -->
+                            <div id="image-redaction-container" class="rd-relative">
+                                <div id="image-viewer-area" class="rd-pdf-scroll">
+                                    <div id="image-wrapper" class="rd-page-wrap">
+                                        <canvas id="image-canvas"></canvas>
+                                        <div id="fabric-container" class="rd-overlay">
+                                            <canvas id="redaction-overlay"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -241,8 +245,6 @@ $viewerId = 'redaction-viewer-' . $objectId;
 
 <?php if ($docInfo): ?>
 <!-- Load required libraries -->
-<link rel="stylesheet" href="/plugins/ahgRedactionPlugin/web/css/iiif-viewer.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-<link rel="stylesheet" href="/plugins/ahgRedactionPlugin/web/css/annotorious.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
 <?php if ($docInfo['is_pdf']): ?>
 <script src="/plugins/ahgRedactionPlugin/web/js/vendor/pdf.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
@@ -250,8 +252,6 @@ $viewerId = 'redaction-viewer-' . $objectId;
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/plugins/ahgRedactionPlugin/web/js/vendor/pdf.worker.min.js';
 </script>
 <?php else: ?>
-<script src="/plugins/ahgRedactionPlugin/web/js/vendor/openseadragon.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
-<script src="/plugins/ahgRedactionPlugin/web/js/vendor/annotorious/openseadragon-annotorious.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
 <?php endif; ?>
 
 <script src="/plugins/ahgRedactionPlugin/web/js/vendor/fabric.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
@@ -278,8 +278,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let scale = 1.5;
     let pdfDoc = null;
     let fabricCanvas = null;
-    let osdViewer = null;
-    let annotorious = null;
     let regions = existingRegions.map(r => ({
         ...r,
         coordinates: typeof r.coordinates === 'string' ? JSON.parse(r.coordinates) : r.coordinates
@@ -323,7 +321,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         updateStatus(tool === 'rect' ? 'Draw mode - Click and drag to create redaction' : 'Select mode - Click regions to select');
 
-        if (isPdf && fabricCanvas) {
+        // Both document types draw on the same Fabric canvas now.
+        if (fabricCanvas) {
             fabricCanvas.isDrawingMode = false;
             fabricCanvas.selection = tool === 'select';
             fabricCanvas.getObjects().forEach(obj => {
@@ -334,20 +333,6 @@ document.addEventListener('DOMContentLoaded', function() {
             fabricCanvas.defaultCursor = tool === 'rect' ? 'crosshair' : 'default';
             fabricCanvas.renderAll();
             console.log('Fabric canvas updated for tool:', tool);
-        } else if (!isPdf && annotorious) {
-            if (tool === 'rect') {
-                // Fully suspend OpenSeadragon mouse navigation while drawing.
-                // Tweaking gestureSettingsMouse.dragToPan is not honoured by the
-                // live mouse-tracker, so a click-drag kept panning the image
-                // instead of drawing the redaction box. setMouseNavEnabled(false)
-                // hands the drag over to the Annotorious drawing layer.
-                if (osdViewer) { osdViewer.setMouseNavEnabled(false); }
-                annotorious.setDrawingTool('rect');
-                annotorious.setDrawingEnabled(true);
-            } else {
-                if (osdViewer) { osdViewer.setMouseNavEnabled(true); }
-                annotorious.setDrawingEnabled(false);
-            }
         }
     }
 
@@ -542,151 +527,59 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ======================
-    // Image Viewer with OpenSeadragon + Annotorious
+    // Image viewer: the picture on a canvas, redactions on a Fabric overlay
     // ======================
+    //
+    // This used OpenSeadragon with Annotorious for drawing. Deep zoom is a nicety
+    // for a redaction tool and it came at a real cost: a click-drag panned the
+    // image instead of drawing a box. Suspending navigation with
+    // setMouseNavEnabled(false) did not reliably hand the drag to the annotation
+    // layer, so the draw tool fought the viewer.
+    //
+    // The PDF branch already draws rectangles on a Fabric canvas and that works.
+    // Images now take the same path, so there is one drawing implementation rather
+    // than two, and OpenSeadragon and Annotorious are no longer needed at all.
     async function initImageViewer() {
         updateStatus('Loading image...');
 
-        // Tile server only when one is configured; otherwise open the file directly.
-        // Deep zoom is a nicety here - the editor needs the image on screen to draw
-        // on, and a tile source that cannot be reached leaves an empty pane.
-        var cantaloupe = <?php echo json_encode($cantaloupeUrl); ?>;
+        try {
+            const img = await loadImage(documentUrl);
 
-        // Ask the tile server whether it can actually serve this image before
-        // handing it to the viewer. Relying on OpenSeadragon's open-failed handler
-        // to notice was not enough: the info.json 404s on this deployment (its
-        // resolver does not decode the %2F-escaped path, so it looks for a file
-        // named with the escapes still in it) and the viewer was left showing
-        // nothing rather than falling back.
-        //
-        // Deep zoom is a nicety here. Having the image on screen to draw on is the
-        // whole point, so anything short of a working tile source opens the file
-        // directly.
-        var tileSource = { type: 'image', url: documentUrl };
+            // Fit the image to the available width, never scaling it up: a small
+            // image blown up to fill the pane would have the archivist drawing on
+            // interpolated pixels.
+            const area = document.getElementById('image-viewer-area');
+            const available = Math.max(320, area.clientWidth - 40);
+            const ratio = Math.min(1, available / img.naturalWidth);
+            const width = Math.round(img.naturalWidth * ratio);
+            const height = Math.round(img.naturalHeight * ratio);
 
-        if (cantaloupe) {
-            var imageId = encodeURIComponent(documentUrl.replace(/^\//, '').replace(/\//g, '%2F'));
-            var infoUrl = cantaloupe + '/' + imageId + '/info.json';
+            const canvas = document.getElementById('image-canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-            try {
-                var probe = await fetch(infoUrl, { method: 'GET' });
-                if (probe.ok) {
-                    tileSource = infoUrl;
-                } else {
-                    console.warn('Redaction: tile server returned ' + probe.status + ' for this image, opening it directly.');
-                }
-            } catch (e) {
-                console.warn('Redaction: tile server unreachable, opening the image directly.', e);
-            }
-        }
+            const wrapper = document.getElementById('image-wrapper');
+            wrapper.style.width = width + 'px';
+            wrapper.style.height = height + 'px';
 
-        osdViewer = OpenSeadragon({
-            id: 'osd-redaction-viewer',
-            tileSources: tileSource,
-            prefixUrl: '/plugins/ahgRedactionPlugin/web/js/vendor/openseadragon-images/',
-            showNavigator: true,
-            navigatorPosition: 'BOTTOM_RIGHT',
-            showRotationControl: true,
-            gestureSettingsMouse: { clickToZoom: false }
-        });
+            initFabricOverlay(width, height);
+            renderRegionsOnCanvas();
 
-        osdViewer.addHandler('open', function() {
-            initAnnotorious();
             updateStatus('Ready - Click "Draw Redaction" to start');
-        });
-
-        osdViewer.addHandler('open-failed', function(e) {
-            // Fallback to direct image URL
-            osdViewer.open({ type: 'image', url: documentUrl });
-        });
+        } catch (error) {
+            console.error('Image load error:', error);
+            updateStatus('Error loading image: ' + error.message);
+        }
     }
 
-    function initAnnotorious() {
-        if (!window.Annotorious) {
-            console.error('Annotorious not loaded');
-            return;
-        }
-
-        annotorious = OpenSeadragon.Annotorious(osdViewer, {
-            locale: 'auto',
-            allowEmpty: true,
-            disableEditor: true, // No popup editor for redactions
-            formatters: [redactionFormatter]
+    function loadImage(src) {
+        return new Promise(function (resolve, reject) {
+            const img = new Image();
+            img.onload = function () { resolve(img); };
+            img.onerror = function () { reject(new Error('could not load ' + src)); };
+            img.src = src;
         });
-
-        // Style redactions as black rectangles
-        function redactionFormatter(annotation) {
-            return {
-                className: 'redaction-annotation',
-                style: 'stroke: #ff0000; stroke-width: 3px; fill: rgba(0,0,0,0.5);'
-            };
-        }
-
-        // Load existing regions as annotations
-        regions.forEach((region, idx) => {
-            const coords = region.coordinates;
-            annotorious.addAnnotation({
-                '@context': 'http://www.w3.org/ns/anno.jsonld',
-                id: '#redaction-' + region.id,
-                type: 'Annotation',
-                body: [{ type: 'TextualBody', value: region.label || 'Redaction ' + (idx + 1) }],
-                target: {
-                    selector: {
-                        type: 'FragmentSelector',
-                        conformsTo: 'http://www.w3.org/TR/media-frags/',
-                        value: `xywh=percent:${coords.x * 100},${coords.y * 100},${coords.width * 100},${coords.height * 100}`
-                    }
-                },
-                regionData: region
-            });
-        });
-
-        // Handle new annotations
-        annotorious.on('createAnnotation', function(annotation) {
-            const selector = annotation.target?.selector;
-            if (selector && selector.value) {
-                const match = selector.value.match(/xywh=percent:([\d.]+),([\d.]+),([\d.]+),([\d.]+)/);
-                if (match) {
-                    addRegion({
-                        x: parseFloat(match[1]) / 100,
-                        y: parseFloat(match[2]) / 100,
-                        width: parseFloat(match[3]) / 100,
-                        height: parseFloat(match[4]) / 100
-                    }, annotation);
-                }
-            }
-        });
-
-        annotorious.on('deleteAnnotation', function(annotation) {
-            if (annotation.regionData) {
-                const idx = regions.findIndex(r => r.id === annotation.regionData.id);
-                if (idx > -1) {
-                    regions.splice(idx, 1);
-                    isDirty = true;
-                    updateRegionList();
-                }
-            }
-        });
-
-        annotorious.on('updateAnnotation', function(annotation) {
-            if (annotation.regionData) {
-                const selector = annotation.target?.selector;
-                if (selector && selector.value) {
-                    const match = selector.value.match(/xywh=percent:([\d.]+),([\d.]+),([\d.]+),([\d.]+)/);
-                    if (match) {
-                        annotation.regionData.coordinates = {
-                            x: parseFloat(match[1]) / 100,
-                            y: parseFloat(match[2]) / 100,
-                            width: parseFloat(match[3]) / 100,
-                            height: parseFloat(match[4]) / 100
-                        };
-                        isDirty = true;
-                    }
-                }
-            }
-        });
-
-        setTool('select');
     }
 
     // ======================
@@ -711,9 +604,7 @@ document.addEventListener('DOMContentLoaded', function() {
             annotation.regionData = region;
         }
 
-        if (isPdf) {
-            renderRegionsOnCanvas();
-        }
+        renderRegionsOnCanvas();
         updateRegionList();
         updateStatus('Redaction added');
     }
@@ -819,11 +710,7 @@ document.addEventListener('DOMContentLoaded', function() {
             regions.splice(idx, 1);
             isDirty = true;
 
-            if (isPdf) {
-                renderRegionsOnCanvas();
-            } else if (annotorious) {
-                annotorious.removeAnnotation('#redaction-' + id);
-            }
+            renderRegionsOnCanvas();
             updateRegionList();
         }
     }
@@ -832,8 +719,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!confirm('Delete all redaction regions?')) return;
         regions = [];
         isDirty = true;
-        if (isPdf) renderRegionsOnCanvas();
-        else if (annotorious) annotorious.clearAnnotations();
+        renderRegionsOnCanvas();
         updateRegionList();
     }
 
@@ -896,7 +782,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }));
                 }
                 updateRegionList();
-                if (isPdf) renderRegionsOnCanvas();
+                renderRegionsOnCanvas();
                 updateStatus('Saved successfully (' + (data.saved_count || regions.length) + ' regions)');
                 return true;
             } else {
@@ -985,11 +871,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* These were inline style attributes. style-src carries no 'unsafe-inline', so
-   the browser dropped every one of them without a word - and the viewer is sized
-   by exactly that. #osd-redaction-viewer collapsed to zero height, so
-   OpenSeadragon opened the image into a box with nothing in it and the editor
-   looked empty however well the image loaded. */
-.rd-viewer { width: 100%; height: 600px; background: #1a1a1a; }
+   the browser dropped every one of them without a word - and the panes are sized
+   by exactly that, which is how the viewer ended up with zero height and the
+   editor looked empty however well the image loaded. */
 .rd-dark { background: #1a1a1a; }
 .rd-relative { position: relative; }
 .rd-pdf-scroll { height: 600px; overflow: auto; background: #2a2a2a; display: flex; justify-content: center; padding: 20px; }
