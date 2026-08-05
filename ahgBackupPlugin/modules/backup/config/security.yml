@@ -1,0 +1,21 @@
+# SECURITY: administrators only.
+#
+# This module had no security.yml at all, and none of its actions gate in code.
+# apps/qubit/config/security.yml defaults to `is_secure: false`, so a module
+# without its own file is public - which made backup listing, creation, download
+# and restore reachable by anyone who knew the URL. A database backup is a
+# complete copy of the instance, restore overwrites it, and neither is something
+# an anonymous visitor should be able to reach.
+#
+# This also gates the navigation. QubitMenu::checkUserAccess() resolves a menu
+# row's path to a module and action and asks checkModuleActionAccess(), so the
+# Backup and Restore entries under Manage now appear only for administrators
+# rather than for everyone - the menu follows the module's rules instead of
+# needing its own.
+#
+# Double brackets are an OR list. A bare `credentials: [administrator]` reads as
+# an AND of one and behaves the same here, but the nested form is what the rest
+# of the codebase uses and it stays correct if another role is ever added.
+all:
+  is_secure:   true
+  credentials: [[ administrator ]]
