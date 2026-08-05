@@ -111,6 +111,7 @@
               <?php endif; ?>
               <form action="/favorites/folder/<?php echo $currentFolder->id; ?>/delete" method="post" class="d-inline"
                     onsubmit="return confirm('<?php echo __('Delete this folder? Items will be moved to Unfiled.'); ?>');">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <button type="submit" class="btn btn-sm btn-outline-danger">
                   <i class="fas fa-trash"></i> <?php echo __('Delete'); ?>
                 </button>
@@ -177,6 +178,7 @@
             <?php if ($count > 0): ?>
               <form action="<?php echo url_for(['module' => 'favorites', 'action' => 'clear']); ?>" method="post"
                     onsubmit="return confirm('<?php echo __('Are you sure you want to clear all favorites?'); ?>');">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
                 <button type="submit" class="btn btn-sm btn-outline-light">
                   <i class="fas fa-trash-alt me-1"></i><?php echo __('Clear All'); ?>
                 </button>
@@ -232,6 +234,7 @@
         <!-- Bulk Action Bar (hidden until selection) -->
         <div id="bulkActionBar" class="card-body border-bottom py-2 bg-light" style="display: none;">
           <form method="post" action="/favorites/bulk" id="bulkForm">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
             <div class="d-flex gap-2 align-items-center flex-wrap">
               <span id="selectedCount" class="text-muted small me-2">0 <?php echo __('selected'); ?></span>
               <button type="submit" name="bulk_action" value="remove" class="btn btn-sm btn-outline-danger"
@@ -466,6 +469,7 @@
 <div class="modal fade" id="newFolderModal" tabindex="-1" aria-labelledby="newFolderModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="/favorites/folder/create">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="newFolderModalLabel"><i class="fas fa-folder-plus me-2"></i><?php echo __('New Folder'); ?></h5>
@@ -508,6 +512,7 @@
 <div class="modal fade" id="editFolderModal" tabindex="-1" aria-labelledby="editFolderModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="/favorites/folder/<?php echo $currentFolder->id; ?>/edit">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="editFolderModalLabel"><i class="fas fa-edit me-2"></i><?php echo __('Edit Folder'); ?></h5>
@@ -537,6 +542,7 @@
 <div class="modal fade" id="shareFolderModal" tabindex="-1" aria-labelledby="shareFolderModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="/favorites/folder/<?php echo $currentFolder->id; ?>/share" id="shareFolderForm">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="shareFolderModalLabel"><i class="fas fa-share-alt me-2"></i><?php echo __('Share Folder'); ?></h5>
@@ -618,6 +624,7 @@
       </div>
       <div class="modal-footer">
         <form action="/favorites/folder/<?php echo $currentFolder->id; ?>/revoke-share" method="post" class="d-inline">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
           <button type="submit" class="btn btn-danger" onclick="return confirm('<?php echo __('Revoke sharing? The link will no longer work.'); ?>');">
             <i class="fas fa-ban me-1"></i><?php echo __('Revoke Sharing'); ?>
           </button>
@@ -634,6 +641,7 @@
 <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="/favorites/import" enctype="multipart/form-data">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
       <?php if ($currentFolderId): ?>
         <input type="hidden" name="folder_id" value="<?php echo $currentFolderId; ?>">
       <?php endif; ?>
@@ -668,6 +676,7 @@
 <div class="modal fade" id="sendToCollectionModal" tabindex="-1" aria-labelledby="sendToCollectionModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="/favorites/send-to-collection" id="sendToCollectionForm">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="sendToCollectionModalLabel"><i class="fas fa-archive me-2"></i><?php echo __('Send to Collection'); ?></h5>
@@ -699,6 +708,7 @@
 <div class="modal fade" id="sendToProjectModal" tabindex="-1" aria-labelledby="sendToProjectModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="/favorites/send-to-project" id="sendToProjectForm">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="sendToProjectModalLabel"><i class="fas fa-project-diagram me-2"></i><?php echo __('Send to Project'); ?></h5>
@@ -726,6 +736,7 @@
 <div class="modal fade" id="citeModal" tabindex="-1" aria-labelledby="citeModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <form method="post" action="/favorites/send-to-bibliography" id="citeForm">
+  <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="citeModalLabel"><i class="fas fa-quote-right me-2"></i><?php echo __('Cite / Add to Bibliography'); ?></h5>
@@ -1068,6 +1079,37 @@
         });
     }
     <?php endif; ?>
+})();
+</script>
+
+
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+// Attach the CSRF token to this page's non-GET fetches. The framework rejects any
+// mutating request without it, and this template issues its calls through plain
+// fetch() with no token - so saving a note, sharing a folder and the bulk actions
+// all returned {"error":"CSRF token validation failed"}. Wrapping once is safer
+// than editing each call site, and it leaves GETs untouched.
+(function () {
+    if (window.__ahgCsrfFetchWrapped) { return; }
+    window.__ahgCsrfFetchWrapped = true;
+
+    var token = '<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>';
+    if (!token) { return; }
+
+    var original = window.fetch;
+    window.fetch = function (input, init) {
+        init = init || {};
+        var method = (init.method || (typeof input === 'object' && input && input.method) || 'GET').toUpperCase();
+        var url = (typeof input === 'string') ? input : (input && input.url) || '';
+        var sameOrigin = !/^https?:\/\//i.test(url) || 0 === url.indexOf(window.location.origin);
+
+        if ('GET' !== method && 'HEAD' !== method && sameOrigin) {
+            var headers = new Headers(init.headers || (typeof input === 'object' && input ? input.headers : undefined) || {});
+            if (!headers.has('X-CSRF-TOKEN')) { headers.set('X-CSRF-TOKEN', token); }
+            init.headers = headers;
+        }
+        return original.call(this, input, init);
+    };
 })();
 </script>
 
