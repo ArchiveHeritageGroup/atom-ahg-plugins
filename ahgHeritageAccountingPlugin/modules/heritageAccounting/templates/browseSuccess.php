@@ -120,12 +120,12 @@
                         <tbody>
                             <?php foreach ($assets as $asset): ?>
                                 <tr>
+                                    <td><?php echo esc_entities($asset->object_identifier ?: 'N/A') ?></td>
                                     <td>
                                         <a href="<?php echo url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) ?>">
-                                            <?php echo esc_entities($asset->object_identifier ?: 'N/A') ?>
+                                            <?php echo esc_entities($asset->object_title ?: '-') ?>
                                         </a>
                                     </td>
-                                    <td><?php echo esc_entities($asset->object_title ?: '-') ?></td>
                                     <td><span class="badge bg-secondary"><?php echo esc_entities($asset->class_name ?: '-') ?></span></td>
                                     <td><?php echo esc_entities($asset->standard_code ?: '-') ?></td>
                                     <td>

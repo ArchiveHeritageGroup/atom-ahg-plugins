@@ -87,12 +87,12 @@
                         <tbody>
                             @foreach ($assets as $asset)
                                 <tr>
+                                    <td>{{ $asset->object_identifier ?: 'N/A' }}</td>
                                     <td>
                                         <a href="{{ url_for(['module' => 'heritageAccounting', 'action' => 'view', 'id' => $asset->id]) }}">
-                                            {{ $asset->object_identifier ?: 'N/A' }}
+                                            {{ $asset->object_title ?: '-' }}
                                         </a>
                                     </td>
-                                    <td>{{ $asset->object_title ?: '-' }}</td>
                                     <td><span class="badge bg-secondary">{{ $asset->class_name ?: '-' }}</span></td>
                                     <td>{{ $asset->standard_code ?: '-' }}</td>
                                     <td>
