@@ -125,11 +125,11 @@ $viewerId = 'redaction-viewer-' . $objectId;
         <div class="row">
             <!-- Viewer Column -->
             <div class="col-lg-9">
-                <div class="card" style="background: #1a1a1a;">
+                <div class="card rd-dark" >
                     <div class="card-body p-0">
                         <?php if ($docInfo['is_pdf']): ?>
                             <!-- PDF Viewer with text selection -->
-                            <div id="pdf-redaction-container" style="position: relative;">
+                            <div id="pdf-redaction-container" class="rd-relative">
                                 <div class="pdf-toolbar bg-dark text-white p-2 d-flex gap-2 align-items-center">
                                     <button class="btn btn-sm btn-outline-light" id="pdf-prev"><i class="fas fa-chevron-left"></i></button>
                                     <span id="pdf-page-info">Page 1 of <?php echo $docInfo['page_count']; ?></span>
@@ -139,10 +139,10 @@ $viewerId = 'redaction-viewer-' . $objectId;
                                         <button class="btn btn-sm btn-outline-light" id="pdf-zoom-in"><i class="fas fa-search-plus"></i></button>
                                     </div>
                                 </div>
-                                <div id="pdf-viewer-area" style="height: 600px; overflow: auto; background: #2a2a2a; display: flex; justify-content: center; padding: 20px;">
-                                    <div id="pdf-page-wrapper" style="position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                                <div id="pdf-viewer-area" class="rd-pdf-scroll">
+                                    <div id="pdf-page-wrapper" class="rd-page-wrap">
                                         <canvas id="pdf-canvas"></canvas>
-                                        <div id="fabric-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                                        <div id="fabric-container" class="rd-overlay">
                                             <canvas id="redaction-overlay"></canvas>
                                         </div>
                                     </div>
@@ -150,7 +150,7 @@ $viewerId = 'redaction-viewer-' . $objectId;
                             </div>
                         <?php else: ?>
                             <!-- OpenSeadragon Image Viewer with Annotorious -->
-                            <div id="osd-redaction-viewer" style="width: 100%; height: 600px; background: #1a1a1a;"></div>
+                            <div id="osd-redaction-viewer" class="rd-viewer"></div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -163,7 +163,7 @@ $viewerId = 'redaction-viewer-' . $objectId;
                         <span><i class="fas fa-list me-2"></i>Redaction Regions</span>
                         <span class="badge bg-danger" id="region-count"><?php echo count($regions); ?></span>
                     </div>
-                    <div class="card-body p-0" id="region-list" style="max-height: 500px; overflow-y: auto;">
+                    <div class="card-body p-0" id="region-list" class="rd-scroll-500">
                         <?php if (empty($regions)): ?>
                             <div class="text-center text-muted py-4" id="empty-regions">
                                 <i class="fas fa-draw-polygon fa-2x mb-2"></i>
@@ -243,7 +243,6 @@ $viewerId = 'redaction-viewer-' . $objectId;
 <!-- Load required libraries -->
 <link rel="stylesheet" href="/plugins/ahgRedactionPlugin/web/css/iiif-viewer.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 <link rel="stylesheet" href="/plugins/ahgRedactionPlugin/web/css/annotorious.min.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-<link rel="stylesheet" href="/plugins/ahgPrivacyPlugin/web/css/redaction-annotator.css" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 
 <?php if ($docInfo['is_pdf']): ?>
 <script src="/plugins/ahgRedactionPlugin/web/js/vendor/pdf.min.js" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>></script>
@@ -985,6 +984,19 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+/* These were inline style attributes. style-src carries no 'unsafe-inline', so
+   the browser dropped every one of them without a word - and the viewer is sized
+   by exactly that. #osd-redaction-viewer collapsed to zero height, so
+   OpenSeadragon opened the image into a box with nothing in it and the editor
+   looked empty however well the image loaded. */
+.rd-viewer { width: 100%; height: 600px; background: #1a1a1a; }
+.rd-dark { background: #1a1a1a; }
+.rd-relative { position: relative; }
+.rd-pdf-scroll { height: 600px; overflow: auto; background: #2a2a2a; display: flex; justify-content: center; padding: 20px; }
+.rd-page-wrap { position: relative; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); }
+.rd-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.rd-scroll-500 { max-height: 500px; overflow-y: auto; }
+
 .redaction-annotation {
     stroke: #ff0000 !important;
     stroke-width: 3px !important;
