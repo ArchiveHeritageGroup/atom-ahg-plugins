@@ -253,6 +253,26 @@ class ProvenanceInjector
         }
     }
 
+
+    /**
+     * Does this record have provenance captured?
+     *
+     * A provenance_record row is what the view action reads; without one it
+     * renders nothing. Any failure answers no, so the link falls back to the form
+     * rather than the block being lost.
+     */
+    private function hasProvenance(string $slug): bool
+    {
+        try {
+            return \Illuminate\Database\Capsule\Manager::table('provenance_record as p')
+                ->join('slug as s', 's.object_id', '=', 'p.information_object_id')
+                ->where('s.slug', $slug)
+                ->exists();
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
     /**
      * The record's id, but only when it has a digital object to work on.
      *
@@ -311,9 +331,15 @@ class ProvenanceInjector
         // visitor is never shown a link that would 403.
         $candidates = [];
         if ($context->getUser()->isAuthenticated()) {
+            // The view when there is provenance to look at, the form when there is
+            // not. Always sending an archivist to /edit meant opening a populated
+            // record in a form rather than reading it, and always sending them to
+            // the view meant landing on an empty page with no way in.
             $candidates[] = [
                 'label' => __('Provenance'),
-                'route' => ['module' => 'provenance', 'action' => 'edit', 'slug' => $slug],
+                'route' => $this->hasProvenance($slug)
+                    ? ['module' => 'provenance', 'action' => 'view', 'slug' => $slug]
+                    : ['module' => 'provenance', 'action' => 'edit', 'slug' => $slug],
                 'icon' => 'fas fa-history',
             ];
 
