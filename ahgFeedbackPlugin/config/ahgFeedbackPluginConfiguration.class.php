@@ -24,6 +24,11 @@ class ahgFeedbackPluginConfiguration extends sfPluginConfiguration
         require_once __DIR__.'/../lib/Listeners/FeedbackButtonInjector.php';
         $this->dispatcher->connect('response.filter_content', ['\AhgFeedbackPlugin\Listeners\FeedbackButtonInjector', 'filter']);
 
+        // The site-wide link on the landing page. Registered here so it exists
+        // only while this plugin is enabled.
+        require_once __DIR__.'/../lib/Listeners/FeedbackLandingLink.php';
+        $this->dispatcher->connect('response.filter_content', ['\\AhgFeedbackPlugin\\Listeners\\FeedbackLandingLink', 'filter']);
+
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'feedback';

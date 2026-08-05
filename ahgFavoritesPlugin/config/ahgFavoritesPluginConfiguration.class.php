@@ -77,6 +77,11 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
         require_once __DIR__.'/../lib/Listeners/FavoritesButtonInjector.php';
         $this->dispatcher->connect('response.filter_content', ['\AhgFavoritesPlugin\Listeners\FavoritesButtonInjector', 'filter']);
 
+        // The site-wide link on the landing page. Registered here so it exists
+        // only while this plugin is enabled.
+        require_once __DIR__.'/../lib/Listeners/FavoritesLandingLink.php';
+        $this->dispatcher->connect('response.filter_content', ['\\AhgFavoritesPlugin\\Listeners\\FavoritesLandingLink', 'filter']);
+
         // Enable module
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'favorites';
