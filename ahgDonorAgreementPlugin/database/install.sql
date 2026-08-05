@@ -1,3 +1,26 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgDonorAgreementPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: agreement_rights_vocabulary
+CREATE TABLE IF NOT EXISTS `agreement_rights_vocabulary` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `category` VARCHAR(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'usage, restriction, condition, license',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `sort_order` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`),
+  KEY `idx_rights_category` (`category`),
+  KEY `idx_rights_active` (`is_active`)
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ============================================================
 -- ahgDonorAgreementPlugin - Database Schema (from 112)
 -- ============================================================

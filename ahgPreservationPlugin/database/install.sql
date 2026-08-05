@@ -1,3 +1,138 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgPreservationPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: oais_information_package
+CREATE TABLE IF NOT EXISTS `oais_information_package` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `package_type` VARCHAR(25) NOT NULL COMMENT 'SIP, AIP, DIP',
+  `package_id` varchar(255) NOT NULL,
+  `object_id` int DEFAULT NULL COMMENT 'Link to information_object',
+  `parent_package_id` int DEFAULT NULL COMMENT 'For DIP->AIP relationship',
+  `status` VARCHAR(70) DEFAULT 'pending' COMMENT 'pending, ingesting, stored, preserved, disseminated, error',
+  `checksum_md5` varchar(32) DEFAULT NULL,
+  `checksum_sha256` varchar(64) DEFAULT NULL,
+  `checksum_sha512` varchar(128) DEFAULT NULL,
+  `total_size` bigint DEFAULT '0',
+  `file_count` int DEFAULT '0',
+  `storage_location` varchar(500) DEFAULT NULL,
+  `preservation_level` VARCHAR(34) DEFAULT 'bit' COMMENT 'bit, logical, semantic',
+  `retention_period` int DEFAULT NULL COMMENT 'Years to retain',
+  `created_by` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `ingested_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `package_id` (`package_id`),
+  KEY `parent_package_id` (`parent_package_id`),
+  KEY `idx_package_type` (`package_type`),
+  KEY `idx_status` (`status`),
+  KEY `idx_object_id` (`object_id`),
+  CONSTRAINT `oais_information_package_ibfk_1` FOREIGN KEY (`object_id`) REFERENCES `information_object` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `oais_information_package_ibfk_2` FOREIGN KEY (`parent_package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: oais_fixity_check
+CREATE TABLE IF NOT EXISTS `oais_fixity_check` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `package_id` int NOT NULL,
+  `content_id` int DEFAULT NULL,
+  `check_type` VARCHAR(31) NOT NULL COMMENT 'md5, sha256, sha512',
+  `expected_value` varchar(128) NOT NULL,
+  `actual_value` varchar(128) NOT NULL,
+  `is_valid` tinyint(1) NOT NULL,
+  `checked_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `checked_by` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_package_id` (`package_id`),
+  KEY `idx_is_valid` (`is_valid`),
+  CONSTRAINT `oais_fixity_check_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: oais_package_content
+CREATE TABLE IF NOT EXISTS `oais_package_content` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `package_id` int NOT NULL,
+  `digital_object_id` int DEFAULT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `file_size` bigint DEFAULT '0',
+  `mime_type` varchar(100) DEFAULT NULL,
+  `checksum_md5` varchar(32) DEFAULT NULL,
+  `checksum_sha256` varchar(64) DEFAULT NULL,
+  `pronom_puid` varchar(50) DEFAULT NULL COMMENT 'PRONOM format ID',
+  `format_name` varchar(255) DEFAULT NULL,
+  `format_version` varchar(50) DEFAULT NULL,
+  `content_type` VARCHAR(50) DEFAULT 'content' COMMENT 'content, metadata, manifest, signature',
+  `is_original` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `digital_object_id` (`digital_object_id`),
+  KEY `idx_package_id` (`package_id`),
+  KEY `idx_pronom` (`pronom_puid`),
+  CONSTRAINT `oais_package_content_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `oais_package_content_ibfk_2` FOREIGN KEY (`digital_object_id`) REFERENCES `digital_object` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: oais_premis_event
+CREATE TABLE IF NOT EXISTS `oais_premis_event` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `package_id` int NOT NULL,
+  `content_id` int DEFAULT NULL,
+  `event_identifier` varchar(255) NOT NULL,
+  `event_type` VARCHAR(289) NOT NULL COMMENT 'capture, compression, creation, deaccession, decompression, decryption, deletion, digital_signature_validation, dissemination, encryption, fixity_check, format_identification, ingestion, message_digest_calculation, migration, normalization, replication, validation, virus_check',
+  `event_date_time` datetime NOT NULL,
+  `event_detail` text,
+  `event_outcome` VARCHAR(37) NOT NULL COMMENT 'success, failure, warning',
+  `event_outcome_detail` text,
+  `linking_agent_identifier` varchar(255) DEFAULT NULL,
+  `linking_agent_role` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `content_id` (`content_id`),
+  KEY `idx_package_id` (`package_id`),
+  KEY `idx_event_type` (`event_type`),
+  KEY `idx_event_date` (`event_date_time`),
+  CONSTRAINT `oais_premis_event_ibfk_1` FOREIGN KEY (`package_id`) REFERENCES `oais_information_package` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `oais_premis_event_ibfk_2` FOREIGN KEY (`content_id`) REFERENCES `oais_package_content` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: oais_preservation_policy
+CREATE TABLE IF NOT EXISTS `oais_preservation_policy` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `source_format_puid` varchar(50) DEFAULT NULL,
+  `target_format_puid` varchar(50) DEFAULT NULL,
+  `action_type` VARCHAR(49) NOT NULL COMMENT 'migrate, normalize, emulate, preserve',
+  `priority` int DEFAULT '5',
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: oais_pronom_format
+CREATE TABLE IF NOT EXISTS `oais_pronom_format` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `puid` varchar(50) NOT NULL COMMENT 'e.g., fmt/18 for PDF 1.4',
+  `format_name` varchar(255) NOT NULL,
+  `format_version` varchar(50) DEFAULT NULL,
+  `mime_type` varchar(100) DEFAULT NULL,
+  `extensions` text COMMENT 'JSON array of extensions',
+  `risk_level` VARCHAR(39) DEFAULT 'low' COMMENT 'low, medium, high, critical',
+  `preservation_action_required` tinyint(1) DEFAULT '0',
+  `last_updated` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `puid` (`puid`),
+  KEY `idx_puid` (`puid`),
+  KEY `idx_risk` (`risk_level`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 --
 -- AHG Preservation Plugin - Database Schema
 -- Digital preservation features: checksums, fixity, PREMIS events, format registry

@@ -1,3 +1,74 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgAIPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: actor_face_index
+CREATE TABLE IF NOT EXISTS `actor_face_index` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `actor_id` int NOT NULL,
+  `face_image_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Path to cropped face image',
+  `source_image_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Original image path',
+  `bounding_box` json DEFAULT NULL COMMENT '{"x":0,"y":0,"width":100,"height":100}',
+  `face_encoding` blob COMMENT 'Face embedding vector for similarity matching',
+  `encoding_version` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Version of encoding algorithm',
+  `confidence` float DEFAULT '1',
+  `detection_backend` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'local/aws/azure/google',
+  `attributes` json DEFAULT NULL COMMENT 'Age, gender, emotions, etc.',
+  `landmarks` json DEFAULT NULL COMMENT 'Facial landmarks',
+  `is_primary` tinyint(1) DEFAULT '0' COMMENT 'Primary face for this actor',
+  `is_active` tinyint(1) DEFAULT '1',
+  `is_verified` tinyint(1) DEFAULT '0' COMMENT 'Human verified match',
+  `verified_by` int DEFAULT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_by` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `verified_by` (`verified_by`),
+  KEY `created_by` (`created_by`),
+  KEY `idx_actor` (`actor_id`),
+  KEY `idx_active` (`is_active`),
+  KEY `idx_verified` (`is_verified`),
+  KEY `idx_backend` (`detection_backend`),
+  CONSTRAINT `actor_face_index_ibfk_1` FOREIGN KEY (`actor_id`) REFERENCES `actor` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `actor_face_index_ibfk_2` FOREIGN KEY (`verified_by`) REFERENCES `user` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `actor_face_index_ibfk_3` FOREIGN KEY (`created_by`) REFERENCES `user` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: digital_object_faces
+CREATE TABLE IF NOT EXISTS `digital_object_faces` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_object_id` int NOT NULL,
+  `face_index` int DEFAULT '0' COMMENT 'Face number in image (0-based)',
+  `face_image_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bounding_box` json DEFAULT NULL,
+  `confidence` float DEFAULT '0',
+  `matched_actor_id` int DEFAULT NULL,
+  `match_similarity` float DEFAULT NULL,
+  `match_verified` tinyint(1) DEFAULT '0',
+  `alternative_matches` json DEFAULT NULL,
+  `attributes` json DEFAULT NULL,
+  `is_identified` tinyint(1) DEFAULT '0',
+  `identification_source` VARCHAR(34) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'auto, manual, verified',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `identified_by` int DEFAULT NULL,
+  `identified_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `identified_by` (`identified_by`),
+  KEY `idx_digital_object` (`digital_object_id`),
+  KEY `idx_matched_actor` (`matched_actor_id`),
+  KEY `idx_identified` (`is_identified`),
+  KEY `idx_confidence` (`confidence`),
+  CONSTRAINT `digital_object_faces_ibfk_1` FOREIGN KEY (`digital_object_id`) REFERENCES `digital_object` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `digital_object_faces_ibfk_2` FOREIGN KEY (`matched_actor_id`) REFERENCES `actor` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `digital_object_faces_ibfk_3` FOREIGN KEY (`identified_by`) REFERENCES `user` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ============================================================================
 -- ahgAIPlugin Database Tables
 -- Version: 2.1.0

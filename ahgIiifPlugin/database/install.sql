@@ -1,3 +1,157 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgIiifPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: media_metadata
+CREATE TABLE IF NOT EXISTS `media_metadata` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_object_id` int NOT NULL,
+  `object_id` int DEFAULT NULL,
+  `media_type` VARCHAR(24) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'audio, video',
+  `format` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_size` bigint DEFAULT NULL,
+  `duration` decimal(12,3) DEFAULT NULL,
+  `bitrate` int DEFAULT NULL,
+  `audio_codec` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `audio_sample_rate` int DEFAULT NULL,
+  `audio_channels` int DEFAULT NULL,
+  `audio_bits_per_sample` int DEFAULT NULL,
+  `audio_channel_layout` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `video_codec` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `video_width` int DEFAULT NULL,
+  `video_height` int DEFAULT NULL,
+  `video_frame_rate` decimal(10,3) DEFAULT NULL,
+  `video_pixel_format` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `video_aspect_ratio` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `artist` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `album` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `genre` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `year` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `copyright` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `comment` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `make` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `model` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `software` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gps_coordinates` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `raw_metadata` json DEFAULT NULL,
+  `consolidated_metadata` json DEFAULT NULL,
+  `waveform_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `extracted_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `digital_object_id` (`digital_object_id`),
+  KEY `idx_object` (`object_id`),
+  KEY `idx_digital_object` (`digital_object_id`),
+  KEY `idx_media_type` (`media_type`),
+  KEY `idx_format` (`format`),
+  FULLTEXT KEY `ft_tags` (`title`,`artist`,`album`,`genre`,`comment`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: media_chapters
+CREATE TABLE IF NOT EXISTS `media_chapters` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `media_metadata_id` int NOT NULL,
+  `chapter_index` int NOT NULL,
+  `start_time` decimal(12,3) NOT NULL,
+  `end_time` decimal(12,3) DEFAULT NULL,
+  `title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_metadata` (`media_metadata_id`),
+  CONSTRAINT `media_chapters_ibfk_1` FOREIGN KEY (`media_metadata_id`) REFERENCES `media_metadata` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: media_processing_queue
+CREATE TABLE IF NOT EXISTS `media_processing_queue` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_object_id` int NOT NULL,
+  `object_id` int NOT NULL,
+  `task_type` VARCHAR(67) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'metadata_extraction, transcription, waveform, thumbnail',
+  `task_options` json DEFAULT NULL,
+  `status` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending' COMMENT 'pending, processing, completed, failed',
+  `priority` int DEFAULT '0',
+  `progress` int DEFAULT '0',
+  `progress_message` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `error_message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `retry_count` int DEFAULT '0',
+  `max_retries` int DEFAULT '3',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `started_at` datetime DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_task_type` (`task_type`),
+  KEY `idx_priority` (`priority` DESC),
+  KEY `idx_digital_object` (`digital_object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: media_processor_settings
+CREATE TABLE IF NOT EXISTS `media_processor_settings` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `setting_value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `setting_type` VARCHAR(49) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'string' COMMENT 'string, integer, float, boolean, json',
+  `setting_group` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'general',
+  `description` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `setting_key` (`setting_key`)
+) ENGINE=InnoDB AUTO_INCREMENT=99 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: media_snippets
+CREATE TABLE IF NOT EXISTS `media_snippets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_object_id` int NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `start_time` decimal(10,3) NOT NULL,
+  `end_time` decimal(10,3) NOT NULL,
+  `notes` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_do_id` (`digital_object_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: media_transcription
+CREATE TABLE IF NOT EXISTS `media_transcription` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_object_id` int NOT NULL,
+  `object_id` int NOT NULL,
+  `language` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'en',
+  `full_text` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `transcription_data` json DEFAULT NULL,
+  `segment_count` int DEFAULT NULL,
+  `duration` decimal(12,3) DEFAULT NULL,
+  `confidence` decimal(5,2) DEFAULT NULL,
+  `model_used` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vtt_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `srt_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `txt_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `digital_object_id` (`digital_object_id`),
+  KEY `idx_object` (`object_id`),
+  KEY `idx_digital_object` (`digital_object_id`),
+  KEY `idx_language` (`language`),
+  FULLTEXT KEY `ft_text` (`full_text`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: media_speakers
+CREATE TABLE IF NOT EXISTS `media_speakers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `transcription_id` int NOT NULL,
+  `speaker_id` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `speaker_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `total_duration` decimal(12,3) DEFAULT NULL,
+  `segment_count` int DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_transcription` (`transcription_id`),
+  CONSTRAINT `media_speakers_ibfk_1` FOREIGN KEY (`transcription_id`) REFERENCES `media_transcription` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ============================================================
 -- ahgIiifCollectionPlugin - Database Schema
 -- Generated from actual database structure

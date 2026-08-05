@@ -1,3 +1,109 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgHeritagePlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Seed: Contribution Types
+INSERT IGNORE INTO `heritage_contribution_type` (`code`, `name`, `description`, `icon`, `color`, `requires_validation`, `points_value`, `display_order`) VALUES
+('transcription', 'Transcription', 'Transcribe handwritten or typed documents into searchable text', 'bi-file-text', 'primary', 1, 25, 1),
+('identification', 'Identification', 'Identify people, places, or objects in photographs and documents', 'bi-person-badge', 'success', 1, 15, 2),
+('context', 'Historical Context', 'Add historical context, personal memories, or background information', 'bi-book', 'info', 1, 20, 3),
+('correction', 'Correction', 'Suggest corrections to existing metadata or descriptions', 'bi-pencil-square', 'warning', 1, 10, 4),
+('translation', 'Translation', 'Translate content into other languages', 'bi-translate', 'secondary', 1, 30, 5),
+('tag', 'Tags/Keywords', 'Add relevant tags and keywords to improve discoverability', 'bi-tags', 'dark', 0, 5, 6);
+
+-- Seed: Contributor Badges
+INSERT IGNORE INTO `heritage_contributor_badge` (`code`, `name`, `description`, `icon`, `color`, `criteria_type`, `criteria_value`, `display_order`) VALUES
+('first_contribution', 'First Steps', 'Made your first contribution', 'bi-star', 'warning', 'contribution_count', 1, 1),
+('contributor_10', 'Active Contributor', 'Made 10 approved contributions', 'bi-star-fill', 'warning', 'contribution_count', 10, 2),
+('contributor_50', 'Dedicated Contributor', 'Made 50 approved contributions', 'bi-trophy', 'warning', 'contribution_count', 50, 3),
+('contributor_100', 'Heritage Champion', 'Made 100 approved contributions', 'bi-trophy-fill', 'primary', 'contribution_count', 100, 4),
+('transcriber', 'Transcription Expert', 'Completed 25 transcriptions', 'bi-file-text-fill', 'primary', 'type_specific', 25, 10),
+('identifier', 'Sharp Eye', 'Identified people in 25 photographs', 'bi-eye', 'success', 'type_specific', 25, 11),
+('historian', 'Local Historian', 'Added context to 25 records', 'bi-book-fill', 'info', 'type_specific', 25, 12),
+('perfectionist', 'High Quality', 'Maintained 95% approval rate on 20+ contributions', 'bi-check-circle-fill', 'success', 'approval_rate', 95, 20);
+
+-- =============================================================================
+-- Heritage Era Reference Data
+-- Core historical eras for search query understanding
+-- Additional eras can be loaded from PeriodO via: bin/load-eras
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS `heritage_era` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `term` VARCHAR(100) NOT NULL,
+    `label` VARCHAR(255) NOT NULL,
+    `start_date` DATE NOT NULL,
+    `end_date` DATE NOT NULL,
+    `category` VARCHAR(50) DEFAULT 'general',
+    `region` VARCHAR(50) DEFAULT NULL,
+    `source` VARCHAR(50) DEFAULT 'system',
+    `is_enabled` TINYINT(1) DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_term` (`term`),
+    KEY `idx_category` (`category`),
+    KEY `idx_region` (`region`),
+    KEY `idx_enabled` (`is_enabled`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Core eras (installed by default, covers common GLAM queries)
+INSERT INTO `heritage_era` (`term`, `label`, `start_date`, `end_date`, `category`, `region`, `source`) VALUES
+-- World Wars
+('ww1', 'World War I', '1914-01-01', '1918-12-31', 'war', 'global', 'system'),
+('wwi', 'World War I', '1914-01-01', '1918-12-31', 'war', 'global', 'system'),
+('world war 1', 'World War I', '1914-01-01', '1918-12-31', 'war', 'global', 'system'),
+('world war i', 'World War I', '1914-01-01', '1918-12-31', 'war', 'global', 'system'),
+('first world war', 'First World War', '1914-01-01', '1918-12-31', 'war', 'global', 'system'),
+('great war', 'Great War', '1914-01-01', '1918-12-31', 'war', 'global', 'system'),
+('ww2', 'World War II', '1939-01-01', '1945-12-31', 'war', 'global', 'system'),
+('wwii', 'World War II', '1939-01-01', '1945-12-31', 'war', 'global', 'system'),
+('world war 2', 'World War II', '1939-01-01', '1945-12-31', 'war', 'global', 'system'),
+('world war ii', 'World War II', '1939-01-01', '1945-12-31', 'war', 'global', 'system'),
+('second world war', 'Second World War', '1939-01-01', '1945-12-31', 'war', 'global', 'system'),
+('cold war', 'Cold War', '1947-01-01', '1991-12-31', 'war', 'global', 'system'),
+('pre-war', 'Pre-War', '1900-01-01', '1913-12-31', 'period', 'global', 'system'),
+('inter-war', 'Inter-War', '1918-01-01', '1939-12-31', 'period', 'global', 'system'),
+('post-war', 'Post-War', '1945-01-01', '1960-12-31', 'period', 'global', 'system'),
+-- British
+('victorian', 'Victorian Era', '1837-01-01', '1901-12-31', 'period', 'britain', 'system'),
+('edwardian', 'Edwardian Era', '1901-01-01', '1910-12-31', 'period', 'britain', 'system'),
+('georgian', 'Georgian Era', '1714-01-01', '1837-12-31', 'period', 'britain', 'system'),
+('tudor', 'Tudor Period', '1485-01-01', '1603-12-31', 'period', 'britain', 'system'),
+('elizabethan', 'Elizabethan Era', '1558-01-01', '1603-12-31', 'period', 'britain', 'system'),
+-- American
+('civil war', 'American Civil War', '1861-01-01', '1865-12-31', 'war', 'america', 'system'),
+('american civil war', 'American Civil War', '1861-01-01', '1865-12-31', 'war', 'america', 'system'),
+('great depression', 'Great Depression', '1929-01-01', '1939-12-31', 'period', 'america', 'system'),
+('roaring twenties', 'Roaring Twenties', '1920-01-01', '1929-12-31', 'period', 'america', 'system'),
+('civil rights era', 'Civil Rights Era', '1954-01-01', '1968-12-31', 'period', 'america', 'system'),
+-- European
+('medieval', 'Medieval Period', '0500-01-01', '1500-12-31', 'period', 'europe', 'system'),
+('middle ages', 'Middle Ages', '0500-01-01', '1500-12-31', 'period', 'europe', 'system'),
+('renaissance', 'Renaissance', '1400-01-01', '1600-12-31', 'period', 'europe', 'system'),
+('enlightenment', 'Age of Enlightenment', '1685-01-01', '1815-12-31', 'period', 'europe', 'system'),
+('french revolution', 'French Revolution', '1789-01-01', '1799-12-31', 'period', 'europe', 'system'),
+('holocaust', 'Holocaust', '1941-01-01', '1945-12-31', 'period', 'europe', 'system'),
+-- South Africa
+('apartheid', 'Apartheid Era', '1948-01-01', '1994-12-31', 'period', 'africa', 'system'),
+('post-apartheid', 'Post-Apartheid', '1994-01-01', '2030-12-31', 'period', 'africa', 'system'),
+('colonial', 'Colonial Era (SA)', '1652-01-01', '1910-12-31', 'period', 'africa', 'system'),
+('boer war', 'Boer War', '1899-01-01', '1902-12-31', 'war', 'africa', 'system'),
+('anglo-boer war', 'Anglo-Boer War', '1899-01-01', '1902-12-31', 'war', 'africa', 'system'),
+('great trek', 'Great Trek', '1836-01-01', '1852-12-31', 'period', 'africa', 'system'),
+('liberation struggle', 'Liberation Struggle', '1960-01-01', '1994-12-31', 'period', 'africa', 'system'),
+-- Art movements
+('baroque', 'Baroque', '1600-01-01', '1750-12-31', 'art', 'europe', 'system'),
+('impressionism', 'Impressionism', '1860-01-01', '1890-12-31', 'art', 'europe', 'system'),
+('art deco', 'Art Deco', '1920-01-01', '1940-12-31', 'art', 'global', 'system'),
+('modernism', 'Modernism', '1900-01-01', '1970-12-31', 'art', 'global', 'system'),
+-- General
+('industrial revolution', 'Industrial Revolution', '1760-01-01', '1840-12-31', 'period', 'global', 'system'),
+('digital age', 'Digital Age', '1990-01-01', '2030-12-31', 'period', 'global', 'system')
+ON DUPLICATE KEY UPDATE label = VALUES(label);
+
+
 -- =============================================================================
 -- ahgHeritagePlugin - Complete Database Schema
 -- Version: 1.0.0

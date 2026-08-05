@@ -1,3 +1,75 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgGalleryPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: gallery_exhibition_checklist
+CREATE TABLE IF NOT EXISTS `gallery_exhibition_checklist` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `exhibition_id` int NOT NULL,
+  `task_name` varchar(255) NOT NULL,
+  `description` text,
+  `category` VARCHAR(82) DEFAULT 'planning' COMMENT 'planning, design, marketing, installation, opening, operation, closing',
+  `assigned_to` varchar(255) DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `completed_at` datetime DEFAULT NULL,
+  `completed_by` int DEFAULT NULL,
+  `priority` VARCHAR(39) DEFAULT 'medium' COMMENT 'low, medium, high, critical',
+  `status` VARCHAR(54) DEFAULT 'pending' COMMENT 'pending, in_progress, completed, cancelled',
+  `notes` text,
+  `sort_order` int DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_exhibition` (`exhibition_id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_due` (`due_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: gallery_exhibition_object
+CREATE TABLE IF NOT EXISTS `gallery_exhibition_object` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `exhibition_id` int NOT NULL,
+  `object_id` int NOT NULL,
+  `space_id` int DEFAULT NULL,
+  `display_order` int DEFAULT '0',
+  `section` varchar(255) DEFAULT NULL,
+  `display_notes` text,
+  `label_text` text,
+  `installation_requirements` text,
+  `installed_at` datetime DEFAULT NULL,
+  `installed_by` int DEFAULT NULL,
+  `removed_at` datetime DEFAULT NULL,
+  `condition_on_install` text,
+  `condition_on_remove` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_exhibit` (`exhibition_id`,`object_id`),
+  KEY `idx_exhibition` (`exhibition_id`),
+  KEY `idx_object` (`object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: gallery_venue
+CREATE TABLE IF NOT EXISTS `gallery_venue` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `description` text,
+  `address` text,
+  `total_area_sqm` decimal(10,2) DEFAULT NULL,
+  `max_capacity` int DEFAULT NULL,
+  `climate_controlled` tinyint(1) DEFAULT '0',
+  `security_level` varchar(50) DEFAULT NULL,
+  `contact_name` varchar(255) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `contact_phone` varchar(50) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
 -- =====================================================
 -- ahgGalleryPlugin - Database Schema
 -- Gallery-specific: Artists, Loans, Valuations, Spaces

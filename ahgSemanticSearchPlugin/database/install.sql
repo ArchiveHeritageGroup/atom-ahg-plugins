@@ -1,3 +1,56 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgSemanticSearchPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: search_history
+CREATE TABLE IF NOT EXISTS `search_history` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int DEFAULT NULL,
+  `session_id` varchar(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `search_query` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `search_params` json DEFAULT NULL,
+  `entity_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'informationobject',
+  `result_count` int DEFAULT '0',
+  `execution_time` float DEFAULT '0',
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_search_history_user` (`user_id`),
+  KEY `idx_search_history_session` (`session_id`),
+  KEY `idx_search_history_created` (`created_at`),
+  KEY `idx_search_history_entity` (`entity_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: search_template
+CREATE TABLE IF NOT EXISTS `search_template` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `icon` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'fa-search',
+  `color` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT 'primary',
+  `search_params` json NOT NULL,
+  `entity_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'informationobject',
+  `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_featured` tinyint(1) DEFAULT '0',
+  `is_active` tinyint(1) DEFAULT '1',
+  `show_on_homepage` tinyint(1) DEFAULT '0',
+  `sort_order` int DEFAULT '0',
+  `created_by` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_search_template_slug` (`slug`),
+  KEY `idx_search_template_category` (`category`),
+  KEY `idx_search_template_featured` (`is_featured`),
+  KEY `idx_search_template_active` (`is_active`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ahgSemanticSearchPlugin Database Schema
 -- Semantic search, thesaurus management, and vector embeddings
 -- Version: 2.0.0

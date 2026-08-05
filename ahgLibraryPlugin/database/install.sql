@@ -1,3 +1,219 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgLibraryPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: atom_isbn_cache
+CREATE TABLE IF NOT EXISTS `atom_isbn_cache` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `isbn` varchar(13) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `isbn_10` varchar(10) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `isbn_13` varchar(13) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `metadata` json NOT NULL,
+  `source` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'worldcat',
+  `oclc_number` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_isbn` (`isbn`),
+  KEY `idx_isbn_10` (`isbn_10`),
+  KEY `idx_isbn_13` (`isbn_13`),
+  KEY `idx_oclc` (`oclc_number`),
+  KEY `idx_expires` (`expires_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: atom_isbn_lookup_audit
+CREATE TABLE IF NOT EXISTS `atom_isbn_lookup_audit` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `isbn` varchar(13) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `information_object_id` int DEFAULT NULL,
+  `source` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `success` tinyint(1) NOT NULL DEFAULT '0',
+  `fields_populated` json DEFAULT NULL,
+  `error_message` text COLLATE utf8mb4_unicode_ci,
+  `lookup_time_ms` int unsigned DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_isbn` (`isbn`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_io` (`information_object_id`),
+  KEY `idx_created` (`created_at`),
+  CONSTRAINT `fk_isbn_audit_io` FOREIGN KEY (`information_object_id`) REFERENCES `information_object` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_isbn_audit_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: atom_isbn_provider
+CREATE TABLE IF NOT EXISTS `atom_isbn_provider` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `api_endpoint` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `api_key_setting` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Reference to atom_setting key',
+  `priority` int NOT NULL DEFAULT '100',
+  `enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `rate_limit_per_minute` int unsigned DEFAULT NULL,
+  `response_format` VARCHAR(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'json' COMMENT 'json, xml, marcxml',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_slug` (`slug`),
+  KEY `idx_enabled_priority` (`enabled`,`priority`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: atom_isbn_provider
+CREATE TABLE IF NOT EXISTS `atom_isbn_provider` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `slug` varchar(50) NOT NULL,
+  `api_endpoint` varchar(500) NOT NULL,
+  `api_key_setting` varchar(100) DEFAULT NULL,
+  `priority` int DEFAULT 10,
+  `enabled` tinyint(1) DEFAULT 1,
+  `rate_limit_per_minute` int DEFAULT 100,
+  `response_format` varchar(20) DEFAULT 'json',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Default ISBN providers
+INSERT IGNORE INTO atom_isbn_provider (name, slug, api_endpoint, api_key_setting, priority, enabled, rate_limit_per_minute, response_format) VALUES
+('Open Library', 'openlibrary', 'https://openlibrary.org/api/books', NULL, 10, 1, 100, 'json'),
+('Google Books', 'googlebooks', 'https://www.googleapis.com/books/v1/volumes', NULL, 20, 1, 100, 'json'),
+('WorldCat', 'worldcat', 'https://www.worldcat.org/webservices/catalog/content/isbn/', NULL, 30, 0, 10, 'marcxml');
+
+-- Library cover queue for async processing
+CREATE TABLE IF NOT EXISTS atom_library_cover_queue (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  information_object_id INT UNSIGNED NOT NULL,
+  isbn VARCHAR(20) NOT NULL,
+  status VARCHAR(50) DEFAULT 'pending' COMMENT 'pending, processing, completed, failed',
+  attempts TINYINT DEFAULT 0,
+  error_message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  processed_at TIMESTAMP NULL,
+  INDEX idx_status (status),
+  INDEX idx_io_id (information_object_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: library_item
+CREATE TABLE IF NOT EXISTS `library_item` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `information_object_id` int unsigned NOT NULL,
+  `material_type` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'monograph' COMMENT 'monograph, serial, volume, issue, chapter, article, manuscript, map, pamphlet',
+  `subtitle` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `responsibility_statement` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `call_number` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `classification_scheme` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'dewey, lcc, udc, bliss, colon, custom',
+  `classification_number` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dewey_decimal` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cutter_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shelf_location` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `copy_number` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `volume_designation` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `isbn` varchar(17) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `issn` varchar(9) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lccn` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `oclc_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `openlibrary_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `goodreads_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `librarything_id` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `openlibrary_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ebook_preview_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cover_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cover_url_original` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `doi` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `barcode` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edition` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `edition_statement` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `publisher` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `publication_place` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `publication_date` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `copyright_date` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `printing` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pagination` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dimensions` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `physical_details` text COLLATE utf8mb4_unicode_ci,
+  `language` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `accompanying_material` text COLLATE utf8mb4_unicode_ci,
+  `series_title` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `series_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `series_issn` varchar(9) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `subseries_title` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `general_note` text COLLATE utf8mb4_unicode_ci,
+  `bibliography_note` text COLLATE utf8mb4_unicode_ci,
+  `contents_note` text COLLATE utf8mb4_unicode_ci,
+  `summary` text COLLATE utf8mb4_unicode_ci,
+  `target_audience` text COLLATE utf8mb4_unicode_ci,
+  `system_requirements` text COLLATE utf8mb4_unicode_ci,
+  `binding_note` text COLLATE utf8mb4_unicode_ci,
+  `frequency` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `former_frequency` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `numbering_peculiarities` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `publication_start_date` date DEFAULT NULL,
+  `publication_end_date` date DEFAULT NULL,
+  `publication_status` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'current, ceased, suspended',
+  `total_copies` smallint unsigned NOT NULL DEFAULT '1',
+  `available_copies` smallint unsigned NOT NULL DEFAULT '1',
+  `circulation_status` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'available' COMMENT 'available, on_loan, processing, lost, withdrawn, reference',
+  `cataloging_source` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cataloging_rules` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'aacr2, rda, isbd',
+  `encoding_level` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: library_item_creator
+CREATE TABLE IF NOT EXISTS `library_item_creator` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `library_item_id` bigint unsigned NOT NULL,
+  `name` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `role` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'author',
+  `sort_order` int DEFAULT '0',
+  `authority_uri` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_library_item_id` (`library_item_id`),
+  KEY `idx_name` (`name`(100)),
+  CONSTRAINT `library_item_creator_ibfk_1` FOREIGN KEY (`library_item_id`) REFERENCES `library_item` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=90 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: library_item_subject
+CREATE TABLE IF NOT EXISTS `library_item_subject` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `library_item_id` bigint unsigned NOT NULL,
+  `heading` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `subject_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT 'topic',
+  `source` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `uri` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_library_item_id` (`library_item_id`),
+  KEY `idx_heading` (`heading`(100)),
+  CONSTRAINT `library_item_subject_ibfk_1` FOREIGN KEY (`library_item_id`) REFERENCES `library_item` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=329 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: library_settings
+CREATE TABLE IF NOT EXISTS `library_settings` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `setting_key` varchar(100) NOT NULL,
+  `setting_value` text,
+  `setting_type` VARCHAR(42) DEFAULT 'string' COMMENT 'string, integer, boolean, json',
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `setting_key` (`setting_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 -- =====================================================
 -- Library Plugin Install
 -- =====================================================

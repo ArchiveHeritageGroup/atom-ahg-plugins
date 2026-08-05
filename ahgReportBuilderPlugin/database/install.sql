@@ -1,3 +1,74 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgReportBuilderPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: access_audit_log
+CREATE TABLE IF NOT EXISTS `access_audit_log` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `action` varchar(50) NOT NULL,
+  `granted` tinyint(1) NOT NULL DEFAULT '1',
+  `access_level` varchar(50) DEFAULT 'full',
+  `denial_reasons` json DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_object` (`object_id`),
+  KEY `idx_user` (`user_id`),
+  KEY `idx_created` (`created_at`),
+  KEY `idx_granted` (`granted`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: gallery_exhibition
+CREATE TABLE IF NOT EXISTS `gallery_exhibition` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) DEFAULT NULL,
+  `description` text,
+  `curator` varchar(255) DEFAULT NULL,
+  `exhibition_type` VARCHAR(60) DEFAULT 'temporary' COMMENT 'permanent, temporary, traveling, virtual, pop-up',
+  `status` VARCHAR(77) DEFAULT 'planning' COMMENT 'planning, confirmed, installing, open, closing, closed, cancelled',
+  `venue_id` int DEFAULT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `opening_event_date` datetime DEFAULT NULL,
+  `closing_event_date` datetime DEFAULT NULL,
+  `target_audience` text,
+  `themes` text,
+  `budget` decimal(12,2) DEFAULT NULL,
+  `actual_cost` decimal(12,2) DEFAULT NULL,
+  `visitor_count` int DEFAULT '0',
+  `notes` text,
+  `created_by` int DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_status` (`status`),
+  KEY `idx_dates` (`start_date`,`end_date`),
+  KEY `idx_venue` (`venue_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: object_provenance
+CREATE TABLE IF NOT EXISTS `object_provenance` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int NOT NULL,
+  `donor_id` int DEFAULT NULL,
+  `acquisition_type` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `acquisition_date` date DEFAULT NULL,
+  `provenance_notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_object_id` (`object_id`),
+  KEY `idx_donor_id` (`donor_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ============================================================
 -- ahgReportBuilderPlugin - Database Schema & Seed Data
 -- Enterprise Report Builder v2.0

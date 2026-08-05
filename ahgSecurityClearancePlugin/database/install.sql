@@ -444,3 +444,106 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 18:05:06
+
+
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgSecurityClearancePlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: access_justification_template
+CREATE TABLE IF NOT EXISTS `access_justification_template` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `paia_section` varchar(50) DEFAULT NULL,
+  `template_text` text NOT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: object_classification_history
+CREATE TABLE IF NOT EXISTS `object_classification_history` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int NOT NULL,
+  `previous_classification_id` int unsigned DEFAULT NULL,
+  `new_classification_id` int unsigned DEFAULT NULL,
+  `action` varchar(50) NOT NULL,
+  `changed_by` int DEFAULT NULL,
+  `reason` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_object_id` (`object_id`),
+  KEY `idx_changed_by` (`changed_by`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: object_compartment
+CREATE TABLE IF NOT EXISTS `object_compartment` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int unsigned NOT NULL,
+  `compartment_id` int unsigned NOT NULL,
+  `assigned_by` int unsigned DEFAULT NULL,
+  `assigned_date` date NOT NULL,
+  `notes` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_object_compartment` (`object_id`,`compartment_id`),
+  KEY `idx_compartment` (`compartment_id`),
+  CONSTRAINT `object_compartment_ibfk_1` FOREIGN KEY (`compartment_id`) REFERENCES `security_compartment` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: object_declassification_schedule
+CREATE TABLE IF NOT EXISTS `object_declassification_schedule` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `object_id` int NOT NULL,
+  `from_classification_id` int DEFAULT NULL,
+  `to_classification_id` int DEFAULT NULL,
+  `scheduled_date` date NOT NULL,
+  `processed` tinyint(1) DEFAULT '0',
+  `processed_at` datetime DEFAULT NULL,
+  `processed_by` int DEFAULT NULL,
+  `notes` text,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_object` (`object_id`),
+  KEY `idx_scheduled` (`scheduled_date`),
+  KEY `idx_processed` (`processed`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Security Classification Object relationship
+CREATE TABLE IF NOT EXISTS security_classification_object (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    object_id INT NOT NULL,
+    classification_id BIGINT UNSIGNED NOT NULL,
+    assigned_by INT,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    notes TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_sco_object (object_id),
+    INDEX idx_sco_classification (classification_id),
+    UNIQUE KEY unique_object_classification (object_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: user_compartment_access
+CREATE TABLE IF NOT EXISTS `user_compartment_access` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `compartment_id` int unsigned NOT NULL,
+  `granted_by` int unsigned NOT NULL,
+  `granted_date` date NOT NULL,
+  `expiry_date` date DEFAULT NULL,
+  `briefing_date` date DEFAULT NULL,
+  `briefing_reference` varchar(100) DEFAULT NULL,
+  `notes` text,
+  `active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_user_compartment` (`user_id`,`compartment_id`),
+  KEY `idx_compartment` (`compartment_id`),
+  KEY `idx_expiry` (`expiry_date`,`active`),
+  CONSTRAINT `user_compartment_access_ibfk_1` FOREIGN KEY (`compartment_id`) REFERENCES `security_compartment` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

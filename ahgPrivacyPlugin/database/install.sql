@@ -1,3 +1,62 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgPrivacyPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: digital_object_metadata
+CREATE TABLE IF NOT EXISTS `digital_object_metadata` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `digital_object_id` int NOT NULL,
+  `file_type` VARCHAR(51) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'image, pdf, office, video, audio, other',
+  `raw_metadata` json DEFAULT NULL COMMENT 'Complete raw metadata as extracted',
+  `title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `creator` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `keywords` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `copyright` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `date_created` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_width` int DEFAULT NULL,
+  `image_height` int DEFAULT NULL,
+  `camera_make` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `camera_model` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gps_latitude` decimal(10,8) DEFAULT NULL,
+  `gps_longitude` decimal(11,8) DEFAULT NULL,
+  `gps_altitude` decimal(10,2) DEFAULT NULL,
+  `page_count` int DEFAULT NULL,
+  `word_count` int DEFAULT NULL,
+  `author` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `application` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `duration` decimal(12,3) DEFAULT NULL COMMENT 'Duration in seconds',
+  `duration_formatted` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `video_codec` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `audio_codec` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `resolution` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `frame_rate` decimal(6,2) DEFAULT NULL,
+  `bitrate` int DEFAULT NULL,
+  `sample_rate` int DEFAULT NULL,
+  `channels` int DEFAULT NULL,
+  `artist` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `album` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `track_number` int DEFAULT NULL,
+  `genre` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `year` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `extraction_date` datetime DEFAULT CURRENT_TIMESTAMP,
+  `extraction_method` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `extraction_errors` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_digital_object` (`digital_object_id`),
+  KEY `idx_file_type` (`file_type`),
+  KEY `idx_creator` (`creator`),
+  KEY `idx_date_created` (`date_created`),
+  KEY `idx_gps` (`gps_latitude`,`gps_longitude`),
+  CONSTRAINT `digital_object_metadata_ibfk_1` FOREIGN KEY (`digital_object_id`) REFERENCES `digital_object` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- =====================================================
 -- AHG Privacy Plugin - Database Schema
 -- Version: 1.0.0

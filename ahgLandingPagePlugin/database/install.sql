@@ -238,3 +238,73 @@ FROM atom_landing_page_block_type WHERE machine_name = 'browse_panels' AND @page
 INSERT INTO atom_landing_page_block (page_id, block_type_id, position, config)
 SELECT @page_id, id, 5, '{"entity_type":"informationobject","limit":6,"columns":3}'
 FROM atom_landing_page_block_type WHERE machine_name = 'recent_items' AND @page_id > 0 AND @has_blocks = 0;
+
+
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgLandingPagePlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: atom_landing_block_type
+CREATE TABLE IF NOT EXISTS `atom_landing_block_type` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `machine_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `icon` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'bi-square',
+  `template` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `default_config` json DEFAULT NULL,
+  `config_schema` json DEFAULT NULL,
+  `is_system` tinyint(1) DEFAULT '0',
+  `is_active` tinyint(1) DEFAULT '1',
+  `sort_order` int DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `machine_name` (`machine_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: atom_landing_block
+CREATE TABLE IF NOT EXISTS `atom_landing_block` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `page_id` int NOT NULL,
+  `block_type_id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `config` json DEFAULT NULL,
+  `css_classes` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `container_type` VARCHAR(42) COLLATE utf8mb4_unicode_ci DEFAULT 'container' COMMENT 'fluid, container, container-lg',
+  `background_color` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `text_color` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `padding_top` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT '3',
+  `padding_bottom` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT '3',
+  `position` int DEFAULT '0',
+  `is_visible` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `parent_block_id` int DEFAULT NULL,
+  `column_slot` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `block_type_id` (`block_type_id`),
+  KEY `idx_page_position` (`page_id`,`position`),
+  KEY `idx_parent` (`parent_block_id`),
+  CONSTRAINT `atom_landing_block_ibfk_1` FOREIGN KEY (`page_id`) REFERENCES `atom_landing_page` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `atom_landing_block_ibfk_2` FOREIGN KEY (`block_type_id`) REFERENCES `atom_landing_block_type` (`id`) ON DELETE RESTRICT,
+  CONSTRAINT `atom_landing_block_ibfk_3` FOREIGN KEY (`parent_block_id`) REFERENCES `atom_landing_block` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: atom_landing_page_audit
+CREATE TABLE IF NOT EXISTS `atom_landing_page_audit` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `page_id` int DEFAULT NULL,
+  `block_id` int DEFAULT NULL,
+  `action` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `details` json DEFAULT NULL,
+  `user_id` int DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_page` (`page_id`),
+  KEY `idx_action` (`action`),
+  KEY `idx_created` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

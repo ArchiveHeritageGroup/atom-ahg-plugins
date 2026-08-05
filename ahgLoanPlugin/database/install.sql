@@ -1,3 +1,101 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgLoanPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: loan
+CREATE TABLE IF NOT EXISTS `loan` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `loan_number` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `loan_type` VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'out, in',
+  `status` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `purpose` VARCHAR(97) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'exhibition' COMMENT 'exhibition, research, conservation, photography, education, filming, long_term, other',
+  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `partner_institution` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `partner_contact_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partner_contact_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partner_contact_phone` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `partner_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `request_date` date NOT NULL,
+  `start_date` date DEFAULT NULL,
+  `end_date` date DEFAULT NULL,
+  `return_date` date DEFAULT NULL,
+  `insurance_type` VARCHAR(54) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'borrower' COMMENT 'borrower, lender, shared, government, self',
+  `insurance_value` decimal(15,2) DEFAULT NULL,
+  `insurance_currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ZAR',
+  `insurance_policy_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `insurance_provider` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `loan_fee` decimal(12,2) DEFAULT NULL,
+  `loan_fee_currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ZAR',
+  `internal_approver_id` int unsigned DEFAULT NULL,
+  `approved_date` date DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_by` int unsigned NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `loan_loan_number_unique` (`loan_number`),
+  KEY `idx_loan_type` (`loan_type`),
+  KEY `idx_loan_partner` (`partner_institution`),
+  KEY `idx_loan_start` (`start_date`),
+  KEY `idx_loan_end` (`end_date`),
+  KEY `idx_loan_return` (`return_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: loan_document
+CREATE TABLE IF NOT EXISTS `loan_document` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `loan_id` bigint unsigned NOT NULL,
+  `document_type` VARCHAR(125) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'agreement, facilities_report, condition_report, insurance_certificate, receipt, correspondence, photograph, other',
+  `file_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mime_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `file_size` int unsigned DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `uploaded_by` int unsigned DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_ld_loan` (`loan_id`),
+  KEY `idx_ld_type` (`document_type`),
+  CONSTRAINT `loan_document_loan_id_foreign` FOREIGN KEY (`loan_id`) REFERENCES `loan` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: loan_extension
+CREATE TABLE IF NOT EXISTS `loan_extension` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `loan_id` bigint unsigned NOT NULL,
+  `previous_end_date` date NOT NULL,
+  `new_end_date` date NOT NULL,
+  `reason` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `approved_by` int unsigned NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_le_loan` (`loan_id`),
+  CONSTRAINT `loan_extension_loan_id_foreign` FOREIGN KEY (`loan_id`) REFERENCES `loan` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Table: loan_object
+CREATE TABLE IF NOT EXISTS `loan_object` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `loan_id` bigint unsigned NOT NULL,
+  `information_object_id` int unsigned NOT NULL,
+  `object_title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `object_identifier` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `insurance_value` decimal(15,2) DEFAULT NULL,
+  `condition_report_id` bigint unsigned DEFAULT NULL,
+  `special_requirements` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `display_requirements` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_lo_loan` (`loan_id`),
+  KEY `idx_lo_object` (`information_object_id`),
+  CONSTRAINT `loan_object_loan_id_foreign` FOREIGN KEY (`loan_id`) REFERENCES `loan` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- =====================================================
 -- AHG Loan Plugin - Unified Database Schema
 -- Version: 1.0.0

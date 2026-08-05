@@ -186,3 +186,35 @@ CREATE TABLE IF NOT EXISTS `security_access_request` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 16:53:54
+
+
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgAccessRequestPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: object_access_grant
+CREATE TABLE IF NOT EXISTS `object_access_grant` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int unsigned NOT NULL,
+  `request_id` int unsigned DEFAULT NULL,
+  `object_type` VARCHAR(49) NOT NULL COMMENT 'information_object, repository, actor',
+  `object_id` int unsigned NOT NULL,
+  `include_descendants` tinyint(1) DEFAULT '0',
+  `access_level` VARCHAR(32) DEFAULT 'view' COMMENT 'view, download, edit',
+  `granted_by` int unsigned NOT NULL,
+  `granted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` datetime DEFAULT NULL,
+  `revoked_at` datetime DEFAULT NULL,
+  `revoked_by` int unsigned DEFAULT NULL,
+  `notes` text,
+  `active` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_object` (`object_type`,`object_id`),
+  KEY `idx_active` (`active`),
+  KEY `idx_request` (`request_id`),
+  CONSTRAINT `object_access_grant_ibfk_1` FOREIGN KEY (`request_id`) REFERENCES `access_request` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

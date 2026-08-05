@@ -1,3 +1,69 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgMuseumPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: getty_vocabulary_link
+CREATE TABLE IF NOT EXISTS `getty_vocabulary_link` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `term_id` int unsigned NOT NULL,
+  `vocabulary` VARCHAR(26) NOT NULL COMMENT 'aat, tgn, ulan',
+  `getty_uri` varchar(255) NOT NULL,
+  `getty_id` varchar(50) NOT NULL,
+  `getty_pref_label` varchar(500) DEFAULT NULL,
+  `getty_scope_note` text,
+  `status` VARCHAR(51) NOT NULL DEFAULT 'pending' COMMENT 'confirmed, suggested, rejected, pending',
+  `confidence` decimal(3,2) NOT NULL DEFAULT '0.00',
+  `confirmed_by_user_id` int unsigned DEFAULT NULL,
+  `confirmed_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_term_getty` (`term_id`,`getty_uri`),
+  KEY `idx_vocabulary` (`vocabulary`),
+  KEY `idx_status` (`status`),
+  KEY `idx_getty_id` (`getty_id`),
+  KEY `idx_vocab_status` (`vocabulary`,`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Table: provenance_entry
+CREATE TABLE IF NOT EXISTS `provenance_entry` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `information_object_id` int unsigned NOT NULL,
+  `sequence` smallint unsigned NOT NULL DEFAULT '1',
+  `owner_name` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner_type` VARCHAR(108) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unknown' COMMENT 'person, family, dealer, auction_house, museum, corporate, government, religious, artist, unknown',
+  `owner_actor_id` int unsigned DEFAULT NULL,
+  `owner_location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `owner_location_tgn` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `start_date` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `start_date_qualifier` VARCHAR(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'circa, before, after, by',
+  `end_date` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `end_date_qualifier` VARCHAR(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'circa, before, after, by',
+  `transfer_type` VARCHAR(138) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unknown' COMMENT 'sale, auction, gift, bequest, inheritance, commission, exchange, seizure, restitution, transfer, loan, found, created, unknown',
+  `transfer_details` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `sale_price` decimal(15,2) DEFAULT NULL,
+  `sale_currency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `auction_house` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `auction_lot` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `certainty` VARCHAR(59) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unknown' COMMENT 'certain, probable, possible, uncertain, unknown',
+  `sources` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `is_gap` tinyint(1) NOT NULL DEFAULT '0',
+  `gap_explanation` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_pe_object` (`information_object_id`),
+  KEY `idx_pe_object_seq` (`information_object_id`,`sequence`),
+  KEY `idx_pe_owner` (`owner_name`),
+  KEY `idx_pe_transfer` (`transfer_type`),
+  KEY `idx_pe_certainty` (`certainty`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- =====================================================
 -- Museum Plugin Install
 -- =====================================================

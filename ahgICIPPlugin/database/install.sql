@@ -1,3 +1,28 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgICIPPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: object_tk_label
+CREATE TABLE IF NOT EXISTS `object_tk_label` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int NOT NULL,
+  `tk_label_id` bigint unsigned NOT NULL,
+  `community_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `community_contact` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `custom_text` text COLLATE utf8mb4_unicode_ci,
+  `created_by` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_obj_tk` (`object_id`,`tk_label_id`),
+  KEY `idx_object_id` (`object_id`),
+  KEY `idx_tk_label_id` (`tk_label_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ahgICIPPlugin Database Schema
 -- Indigenous Cultural and Intellectual Property Management
 -- Version 1.0.0

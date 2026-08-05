@@ -1,3 +1,25 @@
+-- ---------------------------------------------------------------------------
+-- Moved from atom-framework/database/install.sql.
+-- These tables belong to ahgRightsPlugin and are created when this plugin is installed,
+-- rather than for every installation regardless of need. Ordered by dependency;
+-- each table is followed by its own seed data.
+-- ---------------------------------------------------------------------------
+
+-- Table: object_creative_commons
+CREATE TABLE IF NOT EXISTS `object_creative_commons` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `object_id` int NOT NULL,
+  `creative_commons_license_id` bigint unsigned NOT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_obj_cc` (`object_id`,`creative_commons_license_id`),
+  KEY `idx_object_id` (`object_id`),
+  KEY `idx_cc_id` (`creative_commons_license_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ============================================================
 -- ahgRightsPlugin - Database Schema
 -- Generated from actual database structure
