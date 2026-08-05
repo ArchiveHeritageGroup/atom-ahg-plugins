@@ -61,6 +61,19 @@ class MenuInjector
             return $content;
         }
 
+        // The dropdown's first child is its own title, <li><h6 class="dropdown-header">.
+        // Inserting straight after the <ul> put this entry above that heading, so the
+        // menu read "Backup & Restore" then "Manage". Skip past the header when one is
+        // present; themes without a header keep the original position.
+        $insertAt = $open + 1;
+        $headerEnd = stripos($content, '</li>', $insertAt);
+        if (false !== $headerEnd) {
+            $between = substr($content, $insertAt, $headerEnd - $insertAt);
+            if (false !== stripos($between, 'dropdown-header')) {
+                $insertAt = $headerEnd + strlen('</li>');
+            }
+        }
+
         self::$injected = true;
 
         $context = \sfContext::getInstance();
@@ -72,7 +85,7 @@ class MenuInjector
         $item = '<li id="node_ahgBackup">'
               . '<a class="dropdown-item" href="' . $href . '" title="' . $label . '">' . $label . '</a></li>';
 
-        return substr_replace($content, $item, $open + 1, 0);
+        return substr_replace($content, $item, $insertAt, 0);
     }
 
     private function isHtml($response): bool
