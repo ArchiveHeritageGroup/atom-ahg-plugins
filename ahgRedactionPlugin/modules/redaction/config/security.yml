@@ -1,0 +1,12 @@
+# SECURITY: redaction is a staff function.
+#
+# The editor renders the full unredacted document - that is the whole point of it -
+# so anonymous access would hand out exactly what the redactions exist to hide. The
+# write actions change what other people are allowed to see.
+#
+# A module with no security.yml is public: apps/qubit/config/security.yml defaults
+# to is_secure: false. That is how ahgBackupPlugin ended up exposing backup and
+# restore, so this file ships with the module rather than after someone notices.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
