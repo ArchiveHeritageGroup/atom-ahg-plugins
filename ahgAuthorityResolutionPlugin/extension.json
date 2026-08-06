@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "description": "Evidence-based authority resolution for persons, places, and organisations. Replaces name-only matching with an archivist-driven workflow that surfaces neighbourhood-context evidence, ranked candidates, and provenance-tracked decisions. Provenance writes to Fuseki as RDF-Star.",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "category": "authority",
     "keywords": [
         "authority",

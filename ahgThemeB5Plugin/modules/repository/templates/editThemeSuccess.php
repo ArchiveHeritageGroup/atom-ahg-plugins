@@ -60,4 +60,75 @@
     </ul>
 
   </form>
+
+  <?php
+  // Keep the open accordion panel open across a save.
+  //
+  // Both panels are markup-collapsed, so submitting the form reloads the page
+  // with everything shut and the section just edited hidden again. On a form
+  // this long that means hunting for your place after every save.
+  //
+  // Held in sessionStorage rather than on the server: it is a display
+  // preference, it should not outlive the browser session, and it needs no
+  // round trip. Inline script carries the CSP nonce - without it the policy
+  // drops the block silently and the page merely goes back to its old
+  // behaviour with nothing in the console to explain why.
+  $n = sfConfig::get('csp_nonce', '');
+  ?>
+  <script <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+    (function () {
+      var KEY = 'ahgRepositoryThemeAccordion';
+      var accordion = document.querySelector('.accordion');
+
+      if (!accordion || !window.sessionStorage) {
+        return;
+      }
+
+      function remembered() {
+        try {
+          return window.sessionStorage.getItem(KEY);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function remember(id) {
+        try {
+          if (id) {
+            window.sessionStorage.setItem(KEY, id);
+          } else {
+            window.sessionStorage.removeItem(KEY);
+          }
+        } catch (e) {
+          // Private browsing and quota failures are not worth breaking over.
+        }
+      }
+
+      var open = remembered();
+
+      if (open) {
+        var panel = document.getElementById(open);
+        var button = accordion.querySelector('[data-bs-target="#' + open + '"]');
+
+        if (panel && button) {
+          panel.classList.add('show');
+          button.classList.remove('collapsed');
+          button.setAttribute('aria-expanded', 'true');
+        } else {
+          // The panel has been renamed or removed since it was recorded.
+          remember(null);
+        }
+      }
+
+      accordion.addEventListener('shown.bs.collapse', function (event) {
+        remember(event.target.id);
+      });
+
+      accordion.addEventListener('hidden.bs.collapse', function (event) {
+        if (remembered() === event.target.id) {
+          remember(null);
+        }
+      });
+    })();
+  </script>
 <?php end_slot(); ?>

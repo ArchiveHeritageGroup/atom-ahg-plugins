@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>All sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Federation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Federation members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Harvest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Harvested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Harvested only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Last harvest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Local</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Local only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Member</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>No federation members yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>No records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Search title…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Total holdings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Union catalogue</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

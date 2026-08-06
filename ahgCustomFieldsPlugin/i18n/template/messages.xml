@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Additional Fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Any</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Approximate location shown. Precise coordinates for this site are restricted; sign in as authorised staff to view them.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>datum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Extent and medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Filter records on the values recorded in Additional Fields. Terms such as phase or context type are inherited, so a filter set on a context also returns the finds within it.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Find search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Keywords</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>max</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>min</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>No records match these filters.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>public location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>result(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Site location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Title, identifier or extent</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

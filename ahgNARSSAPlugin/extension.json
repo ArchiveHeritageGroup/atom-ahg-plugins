@@ -5,7 +5,7 @@
     "description": "South African National Archives and Records Service Act 1996 compliance — generates NARSSA-compliant transfer manifests (METS-EAD2002 XML + digital files + manifest.csv) for records reaching disposal-due via the ahgExtendedRightsPlugin disposal workflow.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "email": "johan@theahg.co.za",
-    "license": "proprietary",
+    "license": "AGPL-3.0-or-later",
     "category": "compliance",
     "keywords": ["south-africa", "narssa", "national-archives", "transfer", "compliance", "ead2002", "mets"],
     "requires": {

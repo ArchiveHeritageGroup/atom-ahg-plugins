@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select Repository --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Access points are created and linked via the NER review workflow.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Advanced Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>AI Cataloguer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>AI draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>AI Job Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>AI offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>AI ready</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>All Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Already-extracted entities (review in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Apply selected to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Ask about the collection…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Ask a question about the catalogue in plain language. Answers are grounded in published descriptions and cite the records they came from.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Ask questions about the catalogue in plain language. Your sessions are saved here so you can pick up research where you left off, and export a transcript. Answers are grounded in published descriptions and cite their records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Ask something like “What records do we hold about land claims in the 1960s?”</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Attempts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Back to Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Back to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Batch Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Batch Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Batch Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Batch Overview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>By IDs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>By Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Collection assistant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Create Batch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Create Batch Job</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Creators</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Current value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Dates and level are shown for reference — set them on the record’s edit form.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Delay (ms)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Description Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Descriptive fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Document parsing is temporarily unavailable. Records can still be entered manually.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>DONUT Document Understanding</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>DONUT gateway: offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>DONUT gateway: online</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Drafting for</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>empty</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>from the command line.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Generate AI draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Job Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Languages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Limit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Loading sessions…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Max Concurrent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Max Retries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>NER Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>New Batch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>New research session</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>New session</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>No batch jobs yet. Click "New Batch" to create one.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>No draft yet. Click “Generate AI draft” to produce one from the record’s sources.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>No jobs in this batch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>No language model is configured, so answers will fall back to a list of relevant records. Configure one under AI settings to enable generated answers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>No language model is configured — answers fall back to a list of relevant records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Not available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Object IDs (comma-separated)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Only published descriptions are searched. The assistant can be wrong — always verify against the record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Only records with empty scope_and_content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>overwrites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Pause</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Places</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Queued</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Recent Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Refresh</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Regenerate draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Researcher Copilot</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Resume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Retry Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Running</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Select Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Send</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Start a new question, or open a saved session on the left.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Start Batch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Start immediately after creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Suggested access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Suggested dating &amp; level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Task</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Task Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>The cataloguer drafts strictly from the record’s existing fields, OCR/transcribed text, embedded technical metadata and extracted entities — it does not invent facts. Review each field and apply only what you approve.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Tick the fields to write to the record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Training status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Use the AI overlay on a document edit page to pre-fill fields from a scanned image, or run</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

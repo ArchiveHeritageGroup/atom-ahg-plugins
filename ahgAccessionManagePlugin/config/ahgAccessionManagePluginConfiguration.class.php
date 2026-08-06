@@ -11,6 +11,10 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
 
+        // Stop an unresolvable donor value reaching base AtoM's relatedDonor
+        // component. See dropUnresolvableDonor() for why.
+        $this->dispatcher->connect('request.filter_parameters', [$this, 'dropUnresolvableDonor']);
+
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'accessionManage';
         $enabledModules[] = 'accession';
@@ -18,6 +22,112 @@ class ahgAccessionManagePluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'accessionAppraisal';
         $enabledModules[] = 'accessionContainer';
         sfConfig::set('sf_enabled_modules', $enabledModules);
+    }
+
+    /**
+     * Remove a donor "resource" value that does not resolve to a real record.
+     *
+     * Base AtoM dereferences the parse result without checking it:
+     *
+     *   $this->relation->object = $params['_sf_route']->resource;
+     *   if (null === $this->contactInformation = $this->relation->object->getPrimaryContact()) {
+     *
+     * (qtAccessionPlugin/modules/accession/actions/relatedDonorComponent.class.php:149)
+     *
+     * When the submitted value does not correspond to an existing donor, resource
+     * is null and saving an accession dies with "Call to a member function
+     * getPrimaryContact() on null" - a white screen that loses everything typed
+     * into the form. Reproduced on archaeology 2026-08-05 and again 2026-08-06.
+     *
+     * qtAccessionPlugin is base AtoM and is not ours to patch. This plugin does
+     * carry a corrected AccessionEditAction with a donorValueResolves() guard,
+     * but it never runs: qtAccessionPlugin is in AtoM's hardcoded plugin list and
+     * so registers the AccessionEditAction class name first, and the autoloader
+     * keeps the first registration. Forcing our class to win would swap a
+     * live-tested code path for one that has, on the evidence, never executed.
+     * Not something to do to a running site.
+     *
+     * So the value is dropped before base ever sees it. The block is skipped
+     * (guarded by isset), the accession saves with every other field intact, and
+     * the donor link is simply not made. Losing one unresolvable field beats
+     * losing the whole form.
+     *
+     * Resolution is checked against the slug table rather than the router,
+     * because this runs before routing is necessarily usable.
+     */
+    public function dropUnresolvableDonor(sfEvent $event, $parameters)
+    {
+        if (!is_array($parameters) || empty($parameters['resource'])) {
+            return $parameters;
+        }
+
+        // Only the accession forms; this event fires on every request.
+        $module = $parameters['module'] ?? null;
+
+        if ('accession' !== $module) {
+            return $parameters;
+        }
+
+        $value = $parameters['resource'];
+
+        if (!is_string($value) || '' === trim($value)) {
+            return $parameters;
+        }
+
+        if ($this->slugExists($this->slugFromValue($value))) {
+            return $parameters;
+        }
+
+        unset($parameters['resource']);
+
+        try {
+            $this->dispatcher->notify(new sfEvent(
+                $this,
+                'application.log',
+                [sprintf('ahgAccessionManage: dropped unresolvable donor value "%s" before base relatedDonor could dereference it', $value)]
+            ));
+        } catch (Exception $e) {
+            // Logging must never be the thing that breaks the save.
+        }
+
+        return $parameters;
+    }
+
+    /**
+     * The trailing path segment of a resource URL, which is the slug.
+     */
+    protected function slugFromValue(string $value): string
+    {
+        $path = parse_url(trim($value), PHP_URL_PATH);
+
+        if (!is_string($path) || '' === $path) {
+            $path = trim($value);
+        }
+
+        $segments = array_values(array_filter(explode('/', $path), static function ($s) {
+            return '' !== $s && 'index.php' !== $s;
+        }));
+
+        return $segments === [] ? '' : (string) end($segments);
+    }
+
+    protected function slugExists(string $slug): bool
+    {
+        if ('' === $slug) {
+            return false;
+        }
+
+        try {
+            $connection = Propel::getConnection();
+            $statement = $connection->prepare('SELECT 1 FROM slug WHERE slug = ? LIMIT 1');
+            $statement->execute([$slug]);
+
+            return false !== $statement->fetchColumn();
+        } catch (Exception $e) {
+            // If the check itself cannot run, leave the value alone rather than
+            // silently discarding something that may well be valid.
+            return true;
+        }
     }
 
     protected function registerAutoloader()

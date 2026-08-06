@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(unnamed)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Add new physical storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add strongroom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Add the first one.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Assign</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Assign a physical object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Back to strongroom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Back to strongrooms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Blocked:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Browse %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Capacity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Conditions governing access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Create strongroom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Date(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Delete strongroom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>e.g. box-12-shelf-3</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Export options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Export storage report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Include containers linked to accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Include containers linked to descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Include unlinked containers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Leave blank if not tracking capacity.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>no capacity set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>No capacity set for this strongroom.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>No physical objects are assigned to this strongroom yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>No strongrooms match your search.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>No strongrooms yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>not set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Occupants</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Part of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Paste the physical object's slug (find it on the physical object's page URL — the segment after /physicalobject/).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Physical-object slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Physical object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Please check one or more of the export options.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Print preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Reference code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Remaining</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Required. e.g. "Room A1" or "North annex shelving".</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Save changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Search %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Search strongrooms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Set one</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Showing %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Size used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Sort</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Sort ascending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Sort descending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Strongrooms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Unassign from this strongroom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Unit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Utilisation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Where in the building / on the site this room is. Free text.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>You are about to delete %1%. This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

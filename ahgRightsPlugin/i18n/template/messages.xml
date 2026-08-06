@@ -1,0 +1,680 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- Select act --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>- Select Label -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>About Orphan Works</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Access Restricted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Access Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Access to this item may be restricted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Act / Granted rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Acts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Add act</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Add Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Add rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Add Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Add Search Step</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Add Step</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Are you sure you want to delete this rights record? This action cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Are you sure you want to release this embargo immediately?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Assign Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Assign TK Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Auto-release</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Automatically lift embargo when end date is reached</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Available TK Labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Basis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Community Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Community Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Copyright holder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Copyright Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Copyright note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Copyright status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Creative Commons</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Creative Commons License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Creative Commons Licenses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Custom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Custom Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Define what actions are allowed or restricted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Delete Rights Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Determination date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Diligent search completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Donor Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Donor name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Edit Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Edit rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Embargo Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Embargoes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Embargoes Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Embargo released.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Embargo saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Embargo Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Embargo Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>End Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>End date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Expiry date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Indefinite</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Information Object ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Intended Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Internal Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Label Assignments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Learn more about Traditional Knowledge Labels at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>License identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>License Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>License terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>License type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>License URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Manage TK Labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>New Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>New Orphan Work Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>No data found for this report.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>No end date specified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>No rights records have been added.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>No rights records have been added yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Notification Emails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Notify Before (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Object ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Orphan Work</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Orphan Work Due Diligence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Orphan work record saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Orphan Works</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Orphan Works Due Diligence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Orphan Works Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Other Open License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Policy identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Policy Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Proposed Fee (if any)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Proprietary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Reason (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Reason Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Recommended Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Release</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Release Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Release Now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Results Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Results found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Review Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Review Interval (months)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Review Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Rights basis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Rights holder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Rights Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Rights note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Rights record deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Rights Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Rights record saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Rights Statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Rights Statement / License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Rights Statements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Rights Statements &amp; Licenses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Rights Summary Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Save Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Search Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Search Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Search Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Search Started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Search Steps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Search Terms Used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Source Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Source Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Source URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Standardized statement from rightsstatements.org</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Start Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Start date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Statement/License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Status determination date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Statute citation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Statute Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Statute note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Target Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>The item will become accessible according to its other rights settings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>This item is accessible.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>TK Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>TK Label assigned.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>TK Labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>TK Labels Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Traditional Knowledge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Traditional Knowledge Labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Under Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Until</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Usage Guide</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>View/Edit Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>View rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>View Search Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Work Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Work Type</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(longer requires the unlimited-expiry permission)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Access denied</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Access log (%d)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>All share links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Any holder of link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Anyone with this link can view the record until it expires.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Any user</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Back to list</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Back to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Captured in the audit trail.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Classification level at issuance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Copied</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Copy link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Create share link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Denied — expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Denied — quota exhausted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Denied — revoked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Denied — unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Exhausted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Expires</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Expires on</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Informational only; the token itself grants access.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>IP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Issue another</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Issued</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Issue link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Issuer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Issue share link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Issuing a share link for</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Leave blank for unlimited views until expiry.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Manage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Max</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Maximum expiry is 90 days unless your account has an extended-expiry permission.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Max views</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Max views (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Max visits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>No access attempts recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>No share links match the current filter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Note (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Note for recipient</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Outcome</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>permission.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Public URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Recipient</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Recipient email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Recipient email (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Revoke</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Revoked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Revoked at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Revoke this share link? Recipients will no longer be able to view the record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Send the URL below to the recipient. They will see the record without logging in.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Share link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Share link issued</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Share link issued.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Share link revoked.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Share links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Share record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Share this record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>This record is classified (level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>This share link was already revoked.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Token</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Token, email, or record title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Unlimited within window</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>User agent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>View details and access log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Viewed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Visits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>When</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Why are you sharing this?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>You are not allowed to view this page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Your clearance must meet or exceed this level to issue a link, and you need the</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

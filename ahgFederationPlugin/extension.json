@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "OAI-PMH Federation plugin for Heritage Platform metadata exchange",
     "author": "AHG Development Team",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://github.com/ahg/atom-ahg-plugins",
 
     "type": "atom-plugin",

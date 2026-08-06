@@ -1,0 +1,5256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(unknown vendor)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- N/A --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- None --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>-- None / Self --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>-- Not applicable --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>-- Select category --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>-- Select Institution --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>-- Select software --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>-- Select type --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>-- Select vendor --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>About</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Academic</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Accepted Answer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Accession records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Accreditation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Acronym</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Acronym (A–Z)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Activate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Active Instances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Active Subscribers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Add all URLs relevant to this vendor — website, GitHub / GitLab, LinkedIn, blog, social profiles. Use the type selector to classify each link.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Add a New Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Add a note...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Add a standard or compliance instrument not yet listed — e.g., regional legislation, niche sector standards. Once saved, it will appear in the list above and be available to all institutions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Add Client</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Add Client Relationship</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Add Component</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Add Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Add Dropdown Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Added:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Add ERD Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Add every URL relevant to this institution — main website, AtoM instance, digital repository, online catalogue, social profiles, etc. Contact details (email, phone) belong in the Contacts section.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Add Extension</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Add Instance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Additional Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Add Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Add Member</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Add Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Add Release</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Add Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Add Software Product</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Add Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Add to favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Add URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Add Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Add your first client institution to showcase your AtoM partnerships.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Add your first contact person to get started.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Add your first software product to the directory.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Add your first standard to get started.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Add your institution to the global AtoM directory.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Add your institution to the global AtoM directory. Fields marked with * are required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Ad hoc</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Admin / Personal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Admin: Manage Any Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Admin Controls</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Admin Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Administrators</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Agenda, location, or meeting link...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>All Categories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>All Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>All foreign keys use ON DELETE CASCADE. The extension_count shown on standard cards is computed via a subquery on registry_standard_extension where is_active = 1.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>All Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>All Licenses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>All Newsletters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Allowed Attachment Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Allowed Logo Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Allowed types: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Allowed types: .zip, .tar.gz, .tgz, .gz, .bz2</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Allowed Upload Extensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Allow Self-Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>All Schemas</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>All Sectors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>All Sizes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>All statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>All Statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>All Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>All Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Alpha</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Already Sent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>AMS (Archival Management System)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Analog Holdings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Announcement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Annual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Anonymous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>API Endpoint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Apply Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Approve and publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Archival descriptions (ISAD/RAD/DACS/MODS/DC)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Archival Management System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Archives</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Are you sure you want to delete this contact?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Are you sure you want to delete this extension?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Are you sure you want to delete this instance?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Are you sure you want to delete this review?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Are you sure you want to delete this setup guide? This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Are you sure you want to delete this standard? This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Are you sure you want to leave this group?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>As an admin, you can switch to any institution to manage it on their behalf.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>ASCII Diagram (Detail)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>ASCII ERD Diagram</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>A SHA-256 checksum will be calculated automatically after upload for integrity verification.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>A short statement of collection scope and purpose. Shown on your public profile.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>as Manager</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>as Owner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>AtoM Community Hub</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>AtoM Instance URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Attachment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Attachments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Audit log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Author</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Authority records (ISAAR-CPF)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Author Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>auto-generated-from-title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Auto-generated if blank</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Available in:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Avg. Rating</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Background jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Back to Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Back to Blog</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Back to Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Back to Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Back to Newsletters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Back to Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Back to Sign In</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Back to Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Back to Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Back to Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Badge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Badge Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Basic Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Beta</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Be the first to start a discussion in this group.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Bi-annual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Bi-weekly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Blog</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Blog &amp; News</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Blog Posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>blog posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Born-digital and digitised holdings — free-form.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Born-digital and digitised holdings — free-form. Use any units (TB, GB, files, records).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Brief description of this instance — purpose, audience, notable collections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Brief one-line description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Brief preview text shown in email clients...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Brief summary of your collections, scope, and focus areas...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Brief summary shown in listings and previews...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Browse Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Browse Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Browse Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Browse Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Browse the directory instead</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Browse Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Call &amp; Issue Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Call Log Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Case Study</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Categories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Certifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Changed your mind?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Check for typos or use more general terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>City</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Claim for myself</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Claim it to add it to your account, or link it to another user.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Clear Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Click or drag files here</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Client Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Clients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>clients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Clipboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>CMS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Co-organizer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Co-Organizer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Collection Management System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Collections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Collections are accessible to researchers and the general public, whether online or in-person.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Collections Mandate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Collection Strengths</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Collection Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Column</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Column title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Comma-separated, e.g.: atom, preservation, digitization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Comma-separated: archives, digital preservation, metadata, GLAM...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Comma-separated: AtoM, archives, GLAM, preservation...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Comma-separated: AtoM, migration, metadata...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Comma-separated: English, French, Afrikaans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Comma-separated: ISO 27001, TOGAF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Comma-separated: Southern Africa, Europe</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Comma-separated keywords describing subject areas, formats, or themes your collection is known for. Used for discovery and helping researchers find relevant repositories.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Comma-separated tags</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Comma-separated tags: photographs, maps, government records...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Comment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Common SMTP Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Communication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Communication Channels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Community</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Community Hub</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Company / Vendor Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Company Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Company Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Compliance &amp; Regulatory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Component Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Components</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Components &amp; Plugins</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Component Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Configure up to 4 link columns. Each column has a title and a list of links.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>Confirmed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>Confirm Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Confirm Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Conformance Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Constraint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>Consultant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Consulting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Contact deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Contact Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Contact for Pricing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>Contact Person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>Contacts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>Copyright line</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Copyright Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Count of active Heratio extensions for a standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>Country (A–Z)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Create a Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Created:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>Create Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>Create new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>Create New Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>Create Newsletter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>Create your first newsletter to send to subscribers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>Create your first release to distribute your software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>Current</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>Current file:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>Current logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>Current logo. Upload a new file to replace.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>Currently linked to vendor:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>Current Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>custom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>Custom / Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>DAM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>DAM (Digital Asset Management)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>DAMS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>Database schemas, entity relationships, and field definitions for all Heratio plugins.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>Database structure, relationships, and field definitions for the Standards &amp; Conformance module.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>DB Tables</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>De-link from institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>De-link this instance from your institution? It will become an orphan and can be re-linked later.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Deactivate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>Decommissioned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Default Branch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>Default branch: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Default Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Default Latitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Default Longitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Default Zoom Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Delete this component?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Delete this dropdown value?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Delete this note?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Delink</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>Department</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Deployment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>Deployment Architecture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Deployment Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Describe the purpose, focus, and goals of this group...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Describe the services provided to this institution...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Describe what changed in this release...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Description text (left column)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Descriptive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Descriptive Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Descriptive Standard(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>Descriptive Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Developer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Diagram</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Digital Asset Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Digital Holdings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Digital Object Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Digital Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Digitization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Digitization %</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Direction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Direct URL to your AtoM instance, if applicable.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Discord</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Discord URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Discovery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Discovery / Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Discussion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Discussions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>Displayed in the left column of the footer.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Display Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Display text shown to users.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Documentation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Documentation URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>Download Diagram</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Downloads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>downloads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Drag and drop, or click to upload.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Drag and drop, or click to upload a featured image.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Drag and drop a new logo, or click to browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Drag and drop your logo here, or click to browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Drag and drop your package here</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Dropdown Manager</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Duration (minutes)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>e.g., -33.9249</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>e.g., 1.0.0, 2.8.2</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>e.g., 2 TB images, 500 GB audio/video, 80,000 digital files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>e.g., 2 TB images, 500 GB audio/video, 80,000 digital files, 1.2 million records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>e.g., 2.8.2</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>e.g., 18.4241</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>e.g., 500 linear metres of records, 12,000 photographs, 8,000 books, 200 maps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>e.g., abc1234</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>e.g., archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>e.g., Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>e.g., archive, heritage, photographs, manuscripts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>e.g., Archivist, Director, IT Manager</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>e.g., atom, archivematica, digitization, consulting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>e.g., BC Freedom of Information and Protection of Privacy Act</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>e.g., Best time to reach, preferred language, areas of expertise</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>e.g., City of Vancouver, University of Cape Town</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>e.g., Core, AI &amp; Automation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>e.g., Free, $99/year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>e.g., https://www.accesstomemory.org/en/download/</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>e.g., institution_type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>e.g., NARSSA, CAN/CGSB-72.34</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>e.g., Next meeting reminder...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>e.g., photographs, oral history, indigenous heritage, maps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>e.g., Production Server</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>e.g., Province of British Columbia</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>e.g., Southern Africa, Europe</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>e.g., Ubuntu 22.04, RHEL 9, Windows Server 2022</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>e.g., Upgrade in progress, customisations, hosting notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>e.g., v1.0.0</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>e.g., Zoom, Teams, Google Meet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>e.g. Directory, Community...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>e.g. South Africa</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Edit Blog Post</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Edit Component</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>Edit Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>Edit Dropdown Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Edit ERD Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Edit Extension</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Edit Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Edit Instance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>Edit Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Edit Institution Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Edit Log Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Edit Newsletter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Editor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>Edit Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Edit Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Edit Software Product</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>Edit Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>Edit User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Edit Vendor Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>Email / SMTP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>Email Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Email All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Email All Active Members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>Email Notify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>Email Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>Email settings saved successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>Enable comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>Enable SMTP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>Enable sync (heartbeat reporting)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>Encryption</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>English, Afrikaans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>Enter a compelling title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="403">
+        <source>Enter a search term above to find institutions, vendors, software, groups, discussions, and blog posts.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="404">
+        <source>Enter comma-separated tags for the topics this group covers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="405">
+        <source>Enter comma-separated values.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="406">
+        <source>Enter tags separated by commas. Used for discoverability.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="407">
+        <source>Enter your email address and we will send you a link to reset your password.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="408">
+        <source>Enter your new password below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="409">
+        <source>Entity ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="410">
+        <source>Entity Relationship Diagram</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="411">
+        <source>Entity Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="412">
+        <source>Environment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="413">
+        <source>ERD Diagram Image / Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="414">
+        <source>ERD Documentation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="415">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="416">
+        <source>Established %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="417">
+        <source>Established Year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="418">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="419">
+        <source>Event Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="420">
+        <source>Excerpt</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="421">
+        <source>Excerpt / Preview Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="422">
+        <source>Expected Heartbeat Interval (hours)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="423">
+        <source>Extension</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="424">
+        <source>Extension Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="425">
+        <source>Extensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="426">
+        <source>Extension Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="427">
+        <source>Extra</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="428">
+        <source>Facebook App ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="429">
+        <source>Facebook App Secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="430">
+        <source>Facebook OAuth Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="431">
+        <source>Failed to create standard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="432">
+        <source>Failed to delete contact.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="433">
+        <source>Failed to link software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="434">
+        <source>Failed to save changes.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="435">
+        <source>Fax</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="436">
+        <source>Feature</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="437">
+        <source>Feature / Module Usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="438">
+        <source>Featured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="439">
+        <source>Featured Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="440">
+        <source>Featured groups appear on the homepage.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="441">
+        <source>Featured Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="442">
+        <source>Featured Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="443">
+        <source>Featured Items Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="444">
+        <source>Featured Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="445">
+        <source>Featured Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="446">
+        <source>Features in Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="447">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="448">
+        <source>Filter institutions...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="449">
+        <source>Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="450">
+        <source>Finding aid generation (EAD/PDF)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="451">
+        <source>First Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="452">
+        <source>Focus Areas</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="453">
+        <source>Follow-up</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="454">
+        <source>Follow-up Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="455">
+        <source>Follow-up Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="456">
+        <source>Footer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="457">
+        <source>Footer Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="458">
+        <source>Footer Link Columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="459">
+        <source>Footer Link Columns (JSON)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="460">
+        <source>Footer Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="461">
+        <source>Footer settings saved successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="462">
+        <source>Foreign Key / Index</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="463">
+        <source>Foreign Key Relationships</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="464">
+        <source>For Gmail, use an App Password (not your account password).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="465">
+        <source>Forgot Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="466">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="467">
+        <source>Forum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="468">
+        <source>Free</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="469">
+        <source>Free-form keywords that help users find your institution in the registry directory. Tags appear as clickable filters on the browse page — use broad terms (region, era, theme, collection type) that users might search for.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="470">
+        <source>Freemium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="471">
+        <source>Frequency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="472">
+        <source>From Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="473">
+        <source>From Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="474">
+        <source>Full Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="475">
+        <source>Full description of your institution, its mission, and scope...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="476">
+        <source>Functions (ISDF)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="477">
+        <source>Galleries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="478">
+        <source>Gallery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="479">
+        <source>General</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="480">
+        <source>Get Involved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="481">
+        <source>Get the latest news about GLAM institutions, software releases, and community events.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="482">
+        <source>Get updates on new institutions, vendors, software releases, and community events.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="483">
+        <source>Git Commit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="484">
+        <source>GitHub Client ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="485">
+        <source>GitHub Client Secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="486">
+        <source>GitHub OAuth Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="487">
+        <source>Git Provider</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="488">
+        <source>Git Tag</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="489">
+        <source>Git URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="490">
+        <source>GLAM / DAM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="491">
+        <source>GLAM Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="492">
+        <source>GLAM Sectors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="493">
+        <source>Gmail Setup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="494">
+        <source>Google Client ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="495">
+        <source>Google Client Secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="496">
+        <source>Google OAuth Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="497">
+        <source>Governance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="498">
+        <source>Government</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="499">
+        <source>Grid view</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="500">
+        <source>Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="501">
+        <source>Group Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="502">
+        <source>Group Members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="503">
+        <source>Group Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="504">
+        <source>Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="505">
+        <source>groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="506">
+        <source>Groups I Belong To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="507">
+        <source>Groups I Organize</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="508">
+        <source>Group Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="509">
+        <source>Help</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="510">
+        <source>Help / Support</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="511">
+        <source>Heratio Extensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="512">
+        <source>Heritage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="513">
+        <source>Heritage Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="514">
+        <source>Heritage Site</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="515">
+        <source>Hidden</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="516">
+        <source>Hide</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="517">
+        <source>Highest rated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="518">
+        <source>Hold Ctrl (Windows) or Cmd (Mac) to select multiple. ERD appears in the Schema section of each linked software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="519">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="520">
+        <source>Hosting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="521">
+        <source>Hosting &amp; Environment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="522">
+        <source>Hosting Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="523">
+        <source>Host Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="524">
+        <source>Hybrid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="525">
+        <source>Icon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="526">
+        <source>Icon CSS Class</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="527">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="528">
+        <source>If checked, this relationship will be visible on both the vendor and institution profiles.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="529">
+        <source>If unchecked, this contact will only be visible to administrators.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="530">
+        <source>If Vendor or Institution, the post will be attributed to your registered entity.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="531">
+        <source>Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="532">
+        <source>Import / Export (CSV, EAD, EAC-CPF)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="533">
+        <source>Import Completed Successfully</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="534">
+        <source>Import Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="535">
+        <source>Import Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="536">
+        <source>IMS (Information Management)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="537">
+        <source>in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="538">
+        <source>in %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="539">
+        <source>In-Person/Hybrid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="540">
+        <source>Inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="541">
+        <source>Inactive groups are hidden from public listings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="542">
+        <source>Inbound</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="543">
+        <source>Indicate which core AtoM features are in use on this instance. Non-standard extensions (IIIF viewer, AI, preservation, etc.) should be registered separately as Software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="544">
+        <source>Indigenous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="545">
+        <source>Information Management System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="546">
+        <source>In Person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="547">
+        <source>Install / Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="548">
+        <source>Install / Download URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="549">
+        <source>Instance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="550">
+        <source>instance(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="551">
+        <source>Instance Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="552">
+        <source>Instance Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="553">
+        <source>Instances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="554">
+        <source>Instance Sync / Heartbeat</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="555">
+        <source>Instance Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="556">
+        <source>Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="557">
+        <source>Institutional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="558">
+        <source>Institution Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="559">
+        <source>Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="560">
+        <source>institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="561">
+        <source>Institutions &amp; Vendors Map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="562">
+        <source>Institutions Directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="563">
+        <source>Institutions Map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="564">
+        <source>Institutions Using This Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="565">
+        <source>Institution Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="566">
+        <source>Institution updated successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="567">
+        <source>Integration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="568">
+        <source>Integration / Middleware</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="569">
+        <source>Integrator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="570">
+        <source>Interaction Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="571">
+        <source>Interchange</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="572">
+        <source>Interchange Formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="573">
+        <source>Interface Languages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="574">
+        <source>Internal key stored in database.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="575">
+        <source>Internal notes about this contact — availability, preferences, responsibilities. Visible only to administrators unless the contact itself is publicly visible.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="576">
+        <source>In Use?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="577">
+        <source>Invalid software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="578">
+        <source>IP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="579">
+        <source>Is primary contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="580">
+        <source>Issuing Body</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="581">
+        <source>Job Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="582">
+        <source>Join</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="583">
+        <source>Join a User Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="584">
+        <source>Joined</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="585">
+        <source>Join Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="586">
+        <source>Join this group to participate in discussions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="587">
+        <source>Join user groups, participate in discussions, and collaborate.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="588">
+        <source>JSON array of database table names. Schemas are rendered live from information_schema.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="589">
+        <source>just now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="590">
+        <source>Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="591">
+        <source>Label (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="592">
+        <source>Languages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="593">
+        <source>Large</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="594">
+        <source>Large (21+ staff)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="595">
+        <source>Last Heartbeat</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="596">
+        <source>Last heartbeat:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="597">
+        <source>Last Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="598">
+        <source>Last reply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="599">
+        <source>Last sync:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="600">
+        <source>Last sync: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="601">
+        <source>Latest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="602">
+        <source>Latest Blog Posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="603">
+        <source>Latest version: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="604">
+        <source>Latitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="605">
+        <source>Leave</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="606">
+        <source>Leave a Comment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="607">
+        <source>Leave blank to auto-generate from title.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="608">
+        <source>Legend</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="609">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="610">
+        <source>Libraries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="611">
+        <source>Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="612">
+        <source>License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="613">
+        <source>Licensing &amp; Pricing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="614">
+        <source>Link another person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="615">
+        <source>Linked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="616">
+        <source>Linked Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="617">
+        <source>Linked Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="618">
+        <source>Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="619">
+        <source>Link Service Provider</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="620">
+        <source>Link this software to my institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="621">
+        <source>Link to institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="622">
+        <source>Link to Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="623">
+        <source>Link User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="624">
+        <source>Link User to Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="625">
+        <source>Link Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="626">
+        <source>List view</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="627">
+        <source>List your services and reach AtoM institutions worldwide.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="628">
+        <source>List your services and software in the global AtoM vendor directory. Fields marked with * are required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="629">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="630">
+        <source>Lock</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="631">
+        <source>Locked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="632">
+        <source>Logged by:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="633">
+        <source>Log in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="634">
+        <source>Logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="635">
+        <source>Log Your First Interaction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="636">
+        <source>Longitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="637">
+        <source>Mailing List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="638">
+        <source>Mailing List URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="639">
+        <source>Maintenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="640">
+        <source>Maintenance Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="641">
+        <source>Major</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="642">
+        <source>Manage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="643">
+        <source>Manage Blog Posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="644">
+        <source>Manage Clients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="645">
+        <source>Manage Contacts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="646">
+        <source>Manage ERD Documentation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="647">
+        <source>Manage Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="648">
+        <source>Manage Instances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="649">
+        <source>Manage Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="650">
+        <source>Manage Linked Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="651">
+        <source>Manage Members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="652">
+        <source>Manage Newsletters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="653">
+        <source>Manager</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="654">
+        <source>Manage Reviews</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="655">
+        <source>Manage Setup Guides</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="656">
+        <source>Manage Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="657">
+        <source>Manage Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="658">
+        <source>Manage Subscribers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="659">
+        <source>Manage Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="660">
+        <source>Manage users linked to this institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="661">
+        <source>Manage Users — %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="662">
+        <source>Manage Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="663">
+        <source>Map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="664">
+        <source>Map Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="665">
+        <source>Map View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="666">
+        <source>Mark as Spam</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="667">
+        <source>Max Attachment Size (MB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="668">
+        <source>Maximum file size: 100 MB</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="669">
+        <source>Max Logo Size (MB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="670">
+        <source>Max size: %1% MB</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="671">
+        <source>Max Software Upload Size (MB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="672">
+        <source>Medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="673">
+        <source>Medium (6–20 staff)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="674">
+        <source>Meeting Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="675">
+        <source>Meetings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="676">
+        <source>Member</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="677">
+        <source>Members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="678">
+        <source>members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="679">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="680">
+        <source>Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="681">
+        <source>Metadata Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="682">
+        <source>Metrics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="683">
+        <source>Min. 6 characters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="684">
+        <source>Minimum 8 characters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="685">
+        <source>Minor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="686">
+        <source>minutes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="687">
+        <source>Mirror / read-only sync</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="688">
+        <source>Mobile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="689">
+        <source>Moderate Blog</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="690">
+        <source>Moderate Discussions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="691">
+        <source>Module</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="692">
+        <source>Monthly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="693">
+        <source>Most clients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="694">
+        <source>Most downloads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="695">
+        <source>Most extensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="696">
+        <source>Most instances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="697">
+        <source>Most institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="698">
+        <source>Multi-language UI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="699">
+        <source>Multi-repository instance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="700">
+        <source>Museum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="701">
+        <source>Museums</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="702">
+        <source>My Blog</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="703">
+        <source>My Blog Posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="704">
+        <source>My Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="705">
+        <source>My Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="706">
+        <source>My Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="707">
+        <source>My Institution Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="708">
+        <source>My Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="709">
+        <source>MySQL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="710">
+        <source>My Vendor Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="711">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="712">
+        <source>Name (A–Z)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="713">
+        <source>Name (Z–A)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="714">
+        <source>Name, email, or username...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="715">
+        <source>National</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="716">
+        <source>Navigation &amp; Menus</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="717">
+        <source>Never</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="718">
+        <source>Never synced</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="719">
+        <source>New</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="720">
+        <source>New Discussion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="721">
+        <source>New Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="722">
+        <source>Newest first</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="723">
+        <source>Newest publication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="724">
+        <source>New Log Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="725">
+        <source>New Newsletter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="726">
+        <source>New Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="727">
+        <source>New Post</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="728">
+        <source>News</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="729">
+        <source>Newsletter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="730">
+        <source>Newsletters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="731">
+        <source>Newsletter subject line...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="732">
+        <source>Next Meeting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="733">
+        <source>Next Meeting Date/Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="734">
+        <source>Next Meeting Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="735">
+        <source>NGO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="736">
+        <source>NGO / Non-Profit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="737">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="738">
+        <source>No active users found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="739">
+        <source>No attachments.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="740">
+        <source>No blog posts found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="741">
+        <source>No blog posts match your criteria.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="742">
+        <source>No blog posts yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="743">
+        <source>No call log entries yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="744">
+        <source>No client relationships yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="745">
+        <source>No components have been added yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="746">
+        <source>No contacts added yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="747">
+        <source>No contacts listed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="748">
+        <source>No contacts yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="749">
+        <source>No discussions found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="750">
+        <source>No discussions match the selected filter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="751">
+        <source>No discussions yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="752">
+        <source>No discussions yet. Join a group and start a conversation!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="753">
+        <source>No dropdown values found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="754">
+        <source>No ERD entries found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="755">
+        <source>No extensions defined for this standard yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="756">
+        <source>No groups found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="757">
+        <source>No guides are available for this software yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="758">
+        <source>No instances listed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="759">
+        <source>No instances registered</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="760">
+        <source>No instances registered yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="761">
+        <source>No institutions found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="762">
+        <source>No institutions linked to your account yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="763">
+        <source>No members found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="764">
+        <source>No members yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="765">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="766">
+        <source>No newsletters have been published yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="767">
+        <source>No newsletters yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="768">
+        <source>No pending registrations.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="769">
+        <source>No posts found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="770">
+        <source>No releases have been published for this software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="771">
+        <source>No releases yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="772">
+        <source>No results found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="773">
+        <source>No results match "%1%". Try different keywords or broaden your search.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="774">
+        <source>No reviews found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="775">
+        <source>No service provider relationships yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="776">
+        <source>No service providers listed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="777">
+        <source>No settings configured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="778">
+        <source>No setup guides found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="779">
+        <source>No software found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="780">
+        <source>No software linked yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="781">
+        <source>No software products yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="782">
+        <source>No software registered.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="783">
+        <source>No standards found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="784">
+        <source>No subscribers found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="785">
+        <source>No sync-enabled instances found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="786">
+        <source>No sync logs recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="787">
+        <source>No tags.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="788">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="789">
+        <source>Notifications OFF — click to enable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="790">
+        <source>Notifications ON — click to disable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="791">
+        <source>No users found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="792">
+        <source>No users linked to this institution yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="793">
+        <source>No vendors found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="794">
+        <source>Nullable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="795">
+        <source>Number of Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="796">
+        <source>OAuth / Social Login</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="797">
+        <source>Official Website</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="798">
+        <source>Offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="799">
+        <source>Offline Threshold (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="800">
+        <source>Oldest first</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="801">
+        <source>Oldest publication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="802">
+        <source>One-line summary of the standard or instrument</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="803">
+        <source>One-time License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="804">
+        <source>One-Time License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="805">
+        <source>Online</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="806">
+        <source>online</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="807">
+        <source>Online Presence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="808">
+        <source>Only institutions registered in the directory are listed. If the institution is not listed, they need to register first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="809">
+        <source>Open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="810">
+        <source>Open Full Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="811">
+        <source>Open Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="812">
+        <source>Open Source / Free</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="813">
+        <source>Open to the public</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="814">
+        <source>Optimization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="815">
+        <source>Optional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="816">
+        <source>Optional. Max 10MB.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="817">
+        <source>Optional ASCII art ERD diagram. Displayed in a &amp;lt;pre&amp;gt; block.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="818">
+        <source>Optional notes...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="819">
+        <source>Optional — shown as preview in email clients.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="820">
+        <source>or click to browse files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="821">
+        <source>Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="822">
+        <source>Organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="823">
+        <source>Organizer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="824">
+        <source>Orphaned Instances (No Institution)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="825">
+        <source>OS Environment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="826">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="827">
+        <source>Other Guides</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="828">
+        <source>Other Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="829">
+        <source>Outbound</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="830">
+        <source>Overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="831">
+        <source>Overdue Follow-ups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="832">
+        <source>Owner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="833">
+        <source>Page %1% of %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="834">
+        <source>Page navigation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="835">
+        <source>Parent Body</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="836">
+        <source>Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="837">
+        <source>Paste JSON Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="838">
+        <source>Paste the exported JSON data from your WordPress site. The data will be validated before import.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="839">
+        <source>Paste your WordPress export JSON data here...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="840">
+        <source>Patch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="841">
+        <source>pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="842">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="843">
+        <source>Pending Approval</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="844">
+        <source>pending review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="845">
+        <source>pending verification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="846">
+        <source>Pending Verification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="847">
+        <source>Periodically reports instance health (uptime, version, record counts) to the Registry so others can see your instance is active. No sensitive data is sent.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="848">
+        <source>Per User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="849">
+        <source>Phone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="850">
+        <source>PHP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="851">
+        <source>Physical holdings — free-form. Use any units (linear metres, cubic feet, items, boxes, volumes).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="852">
+        <source>Physical holdings — free-form. Use any units.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="853">
+        <source>Physical storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="854">
+        <source>Pin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="855">
+        <source>Pinned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="856">
+        <source>Pinned Discussions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="857">
+        <source>Plain text. Paragraphs separated by blank lines.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="858">
+        <source>Platform</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="859">
+        <source>Platforms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="860">
+        <source>Plugin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="861">
+        <source>Plugin / Extension</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="862">
+        <source>Plugin/Extension</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="863">
+        <source>Plugin Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="864">
+        <source>PNG, JPG, SVG</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="865">
+        <source>PNG, JPG, SVG. Max 2MB.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="866">
+        <source>PNG, JPG, SVG. Max 2MB. Recommended: 200x200px.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="867">
+        <source>PNG, JPG. Recommended: 1200x630px.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="868">
+        <source>Port</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="869">
+        <source>Postal Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="870">
+        <source>Post a Reply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="871">
+        <source>Post Comment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="872">
+        <source>Post Discussion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="873">
+        <source>Post Reply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="874">
+        <source>Pre-release</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="875">
+        <source>Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="876">
+        <source>Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="877">
+        <source>Pricing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="878">
+        <source>Pricing Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="879">
+        <source>Pricing Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="880">
+        <source>Primary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="881">
+        <source>Primary Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="882">
+        <source>Primary Key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="883">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="884">
+        <source>Private</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="885">
+        <source>Proprietary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="886">
+        <source>Province / State</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="887">
+        <source>Public</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="888">
+        <source>Public / Government</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="889">
+        <source>Publication Year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="890">
+        <source>Publicly visible</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="891">
+        <source>Publicly visible in directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="892">
+        <source>Public repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="893">
+        <source>Public search &amp; browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="894">
+        <source>Public View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="895">
+        <source>Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="896">
+        <source>Published</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="897">
+        <source>Published: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="898">
+        <source>Quarterly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="899">
+        <source>Question</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="900">
+        <source>Quick Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="901">
+        <source>Rating</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="902">
+        <source>Rationale</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="903">
+        <source>Re-link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="904">
+        <source>Re-link Instance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="905">
+        <source>Re-link Instance: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="906">
+        <source>Re-subscribe</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="907">
+        <source>Read</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="908">
+        <source>Recent Active Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="909">
+        <source>Recent Blog Posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="910">
+        <source>Recent Discussions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="911">
+        <source>Recent Releases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="912">
+        <source>Recent Sync Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="913">
+        <source>Recent Sync Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="914">
+        <source>Recipient</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="915">
+        <source>Recipients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="916">
+        <source>recipients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="917">
+        <source>Recommended</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="918">
+        <source>Record Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="919">
+        <source>Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="920">
+        <source>records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="921">
+        <source>Referenced Column</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="922">
+        <source>References</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="923">
+        <source>Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="924">
+        <source>Regional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="925">
+        <source>Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="926">
+        <source>Register as Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="927">
+        <source>Registered</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="928">
+        <source>Register Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="929">
+        <source>Register New</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="930">
+        <source>Register your first AtoM instance to track deployments.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="931">
+        <source>Register Your Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="932">
+        <source>Registration &amp; Moderation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="933">
+        <source>Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="934">
+        <source>Registry Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="935">
+        <source>Registry Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="936">
+        <source>Registry Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="937">
+        <source>Registry Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="938">
+        <source>Registry settings will appear here once configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="939">
+        <source>Reject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="940">
+        <source>Reject and delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="941">
+        <source>Related Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="942">
+        <source>Relationship</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="943">
+        <source>Relationship Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="944">
+        <source>Relationship type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="945">
+        <source>Release</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="946">
+        <source>Release Candidate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="947">
+        <source>Release Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="948">
+        <source>Release Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="949">
+        <source>Releases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="950">
+        <source>Release Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="951">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="952">
+        <source>Remove from favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="953">
+        <source>Remove relationship</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="954">
+        <source>Remove this member?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="955">
+        <source>Remove this service provider relationship? The vendor will not be deleted, only de-linked from your institution.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="956">
+        <source>Remove this software?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="957">
+        <source>replies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="958">
+        <source>Replies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="959">
+        <source>Reply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="960">
+        <source>Replying to a specific comment. This will be nested under that reply.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="961">
+        <source>Reply to Discussion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="962">
+        <source>Repository URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="963">
+        <source>Request a new reset link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="964">
+        <source>Require Admin Approval for Registrations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="965">
+        <source>Require Blog Post Approval</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="966">
+        <source>Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="967">
+        <source>Required / Core component</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="968">
+        <source>Require Discussion Approval</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="969">
+        <source>Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="970">
+        <source>Research Centre</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="971">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="972">
+        <source>Reset Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="973">
+        <source>Resolution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="974">
+        <source>Resolution &amp; Follow-up</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="975">
+        <source>Resolution Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="976">
+        <source>Resolved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="977">
+        <source>Resolved:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="978">
+        <source>Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="979">
+        <source>Reviewer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="980">
+        <source>Reviews</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="981">
+        <source>Reviews will appear here once users submit them.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="982">
+        <source>Review Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="983">
+        <source>Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="984">
+        <source>Rights &amp; Licensing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="985">
+        <source>Rights management (PREMIS)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="986">
+        <source>Role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="987">
+        <source>Roles</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="988">
+        <source>Rough estimate. Leave blank if unknown.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="989">
+        <source>rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="990">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="991">
+        <source>Save All Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="992">
+        <source>Save as Draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="993">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="994">
+        <source>Save Footer Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="995">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="996">
+        <source>Save Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="997">
+        <source>Schema &amp; ERD</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="998">
+        <source>Schema &amp; ERD Documentation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="999">
+        <source>Schema &amp; ERDs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1000">
+        <source>Screenshot</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1001">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1002">
+        <source>Search blog posts...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1003">
+        <source>Search by name or email...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1004">
+        <source>Search by name or ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1005">
+        <source>Search groups...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1006">
+        <source>Search icons...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1007">
+        <source>Search institutions, vendors, software, groups, discussions, blog...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1008">
+        <source>Search institutions, vendors, software...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1009">
+        <source>Search institutions...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1010">
+        <source>Search posts...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1011">
+        <source>Search Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1012">
+        <source>Search software...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1013">
+        <source>Search standards...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1014">
+        <source>Search the Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1015">
+        <source>Search vendors...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1016">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1017">
+        <source>Sector Applicability</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1018">
+        <source>Sector Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1019">
+        <source>Security</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1020">
+        <source>Select all GLAM sectors this software supports.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1021">
+        <source>Select all roles that apply to this contact. Roles are managed in Admin → Dropdowns → contact_role.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1022">
+        <source>Select all standards used by your institution. Click a standard name to view its details.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1023">
+        <source>Select every category that applies — software can serve multiple sectors or functions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1024">
+        <source>Select Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1025">
+        <source>Select roles...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1026">
+        <source>Self-hosted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1027">
+        <source>Send Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1028">
+        <source>Send Now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1029">
+        <source>Send Reset Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1030">
+        <source>Send Test</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1031">
+        <source>Send Test Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1032">
+        <source>Sent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1033">
+        <source>Separate edit &amp; public sites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1034">
+        <source>Service Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1035">
+        <source>Service description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1036">
+        <source>Service Provider</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1037">
+        <source>Service Provider Relationships</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1038">
+        <source>Service Providers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1039">
+        <source>Service Regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1040">
+        <source>Set as primary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1041">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1042">
+        <source>Settings saved successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1043">
+        <source>Setup Guide</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1044">
+        <source>Setup Guides</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1045">
+        <source>Setup guides are added through the vendor software management interface.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1046">
+        <source>Setup guides are managed through the vendor software management interface. This page provides an overview of all guides across all software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1047">
+        <source>Setup Guides for %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1048">
+        <source>Share your experience with this vendor or software...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1049">
+        <source>Share your group link to invite people to join.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1050">
+        <source>Share your thoughts, questions, or announcements...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1051">
+        <source>Short Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1052">
+        <source>Show Blog</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1053">
+        <source>Showcase</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1054">
+        <source>Show Community</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1055">
+        <source>Show Map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1056">
+        <source>shown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1057">
+        <source>Show Newsletters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1058">
+        <source>Show Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1059">
+        <source>Show Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1060">
+        <source>Shows verified badge on public profile.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1061">
+        <source>Show User Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1062">
+        <source>Sign In</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1063">
+        <source>Single site (edit + public)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1064">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1065">
+        <source>Slack</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1066">
+        <source>Slack URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1067">
+        <source>Slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1068">
+        <source>Slug / Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1069">
+        <source>Small</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1070">
+        <source>Small (1–5 staff)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1071">
+        <source>SMTP Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1072">
+        <source>SMTP Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1073">
+        <source>SMTP Host</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1074">
+        <source>SMTP Port</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1075">
+        <source>Software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1076">
+        <source>software</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1077">
+        <source>Software / Technical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1078">
+        <source>Software already linked.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1079">
+        <source>Software Conformance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1080">
+        <source>Software Directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1081">
+        <source>Software linked to your institution.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1082">
+        <source>Software Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1083">
+        <source>Software Products</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1084">
+        <source>Software unlinked from vendor.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1085">
+        <source>Software Used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1086">
+        <source>Software Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1087">
+        <source>Solo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1088">
+        <source>Sort</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1089">
+        <source>Sort Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1090">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1091">
+        <source>Source Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1092">
+        <source>Source Code Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1093">
+        <source>Spam</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1094">
+        <source>Speaker</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1095">
+        <source>Specialization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1096">
+        <source>Specializations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1097">
+        <source>Sponsor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1098">
+        <source>Stable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1099">
+        <source>Stable release</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1100">
+        <source>Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1101">
+        <source>Standard added. It is now available in the list below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1102">
+        <source>Standard Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1103">
+        <source>Standard name is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1104">
+        <source>Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1105">
+        <source>Standards &amp; Systems</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1106">
+        <source>Standards Conformance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1107">
+        <source>Standards Directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1108">
+        <source>Standards Schema &amp; ERD</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1109">
+        <source>star</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1110">
+        <source>Star rating</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1111">
+        <source>Start a Discussion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1112">
+        <source>Start a New Discussion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1113">
+        <source>Start Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1114">
+        <source>Start Discussion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1115">
+        <source>Start typing an institution name...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1116">
+        <source>Static pages / menus</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1117">
+        <source>Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1118">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1119">
+        <source>Status is managed by administrators.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1120">
+        <source>Stay Connected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1121">
+        <source>Stay Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1122">
+        <source>Stay up to date with the latest news from the AtoM Registry community. Get updates on new institutions, vendors, software releases, and community events.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1123">
+        <source>Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1124">
+        <source>Storage (GB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1125">
+        <source>Street Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1126">
+        <source>Strengths</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1127">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1128">
+        <source>Submit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1129">
+        <source>Submit Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1130">
+        <source>Subscribe</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1131">
+        <source>Subscribed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1132">
+        <source>Subscribers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1133">
+        <source>Subscribers will appear here when users sign up for the newsletter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1134">
+        <source>Subscribe to be notified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1135">
+        <source>Subscribe to newsletter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1136">
+        <source>Subscribe to Newsletter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1137">
+        <source>Subscribe to our newsletter for updates on new institutions, software releases, and community events.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1138">
+        <source>Subscription</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1139">
+        <source>Suggestions:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1140">
+        <source>Summarize your experience</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1141">
+        <source>Supports HTML markup. Use &amp;lt;p&amp;gt;, &amp;lt;h3&amp;gt;, &amp;lt;ul&amp;gt;, &amp;lt;a&amp;gt; and other tags for formatting.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1142">
+        <source>Suspend</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1143">
+        <source>Suspended</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1144">
+        <source>Switch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1145">
+        <source>Switch to Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1146">
+        <source>Sync</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1147">
+        <source>Sync Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1148">
+        <source>Sync Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1149">
+        <source>System Groups (ACL)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1150">
+        <source>System Instances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1151">
+        <source>Table</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1152">
+        <source>Tables</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1153">
+        <source>Tables (JSON Array)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1154">
+        <source>Table structures are read live from the database. Row counts reflect current data.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1155">
+        <source>Tag</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1156">
+        <source>Tags</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1157">
+        <source>Tags (comma-separated)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1158">
+        <source>Taxonomies &amp; terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1159">
+        <source>Team: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1160">
+        <source>Team Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1161">
+        <source>Technical Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1162">
+        <source>Test email failed:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1163">
+        <source>Test email sent successfully!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1164">
+        <source>Thanks! Your review has been submitted and is pending administrator approval before it appears on the public page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1165">
+        <source>The global directory for AtoM institutions, vendors, and archival software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1166">
+        <source>The main point of contact for this entity.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1167">
+        <source>Theme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1168">
+        <source>Theme / Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1169">
+        <source>This discussion is locked. No new replies can be posted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1170">
+        <source>This is a virtual group (no physical location)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1171">
+        <source>This standard is implemented without modifications.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1172">
+        <source>This will send an email to all active members of this group.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1173">
+        <source>Timestamp</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1174">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1175">
+        <source>to add notes.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1176">
+        <source>to leave a comment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1177">
+        <source>Topic-Based</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1178">
+        <source>Topic / Interest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1179">
+        <source>Topic Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1180">
+        <source>total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1181">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1182">
+        <source>Total Holdings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1183">
+        <source>Total Subscribers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1184">
+        <source>Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1185">
+        <source>Trending Discussions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1186">
+        <source>Tribal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1187">
+        <source>Troubleshooting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1188">
+        <source>Try adjusting your filters or create a new group.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1189">
+        <source>Try adjusting your filters or search terms.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1190">
+        <source>Try adjusting your search terms.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1191">
+        <source>Try searching a different type (institutions, vendors, software)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1192">
+        <source>Tutorial</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1193">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1194">
+        <source>Type your message here. Plain text — line breaks are preserved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1195">
+        <source>Uncategorized</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1196">
+        <source>Uncheck for pre-release or beta versions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1197">
+        <source>Undo Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1198">
+        <source>Unfeature</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1199">
+        <source>Unique Constraint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1200">
+        <source>University</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1201">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1202">
+        <source>Unlink</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1203">
+        <source>Unlink from Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1204">
+        <source>Unlinking removes the vendor association — this software will no longer appear under any vendor and cannot be managed via the vendor dashboard until a new vendor is set.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1205">
+        <source>Unlink this software from the vendor? It will become unowned.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1206">
+        <source>Unlink yourself from this institution?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1207">
+        <source>Unlock</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1208">
+        <source>Unnamed file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1209">
+        <source>Unpin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1210">
+        <source>Unpublish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1211">
+        <source>Unsubscribe</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1212">
+        <source>Unsubscribed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1213">
+        <source>Unsubscribe Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1214">
+        <source>Unverify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1215">
+        <source>Update</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1216">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1217">
+        <source>Updated:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1218">
+        <source>Update Newsletter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1219">
+        <source>Upload an ERD diagram image (PNG, JPG, SVG, WebP) or PDF document. Complements or replaces the ASCII diagram below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1220">
+        <source>Upload a new file to replace.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1221">
+        <source>Upload a new image to replace.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1222">
+        <source>Upload Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1223">
+        <source>Uploads &amp; Attachments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1224">
+        <source>Upload Software Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1225">
+        <source>URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1226">
+        <source>User &amp; ACL management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1227">
+        <source>User Approval</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1228">
+        <source>User Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1229">
+        <source>User email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1230">
+        <source>User Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1231">
+        <source>User Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1232">
+        <source>User ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1233">
+        <source>User Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1234">
+        <source>Username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1235">
+        <source>Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1236">
+        <source>User updated successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1237">
+        <source>Uses AtoM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1238">
+        <source>Use snake_case. Select existing or type new.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1239">
+        <source>Use the form above to add software used by your institution.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1240">
+        <source>Use the form above to link a vendor, or browse vendors to find service providers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1241">
+        <source>Use {year} as a placeholder for the current year. Basic HTML like &amp;lt;a&amp;gt; tags is allowed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1242">
+        <source>Utility</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1243">
+        <source>Utility / Tool</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1244">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1245">
+        <source>VAT Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1246">
+        <source>Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1247">
+        <source>Vendor Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1248">
+        <source>Vendor Relationships</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1249">
+        <source>Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1250">
+        <source>vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1251">
+        <source>Vendors Directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1252">
+        <source>Vendor Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1253">
+        <source>Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1254">
+        <source>Verify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1255">
+        <source>Verify Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1256">
+        <source>Verify Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1257">
+        <source>Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1258">
+        <source>Version: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1259">
+        <source>Version in Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1260">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1261">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1262">
+        <source>View All Guides</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1263">
+        <source>View all posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1264">
+        <source>View All Posts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1265">
+        <source>View community hub</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1266">
+        <source>Viewer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1267">
+        <source>View Map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1268">
+        <source>View Members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1269">
+        <source>View mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1270">
+        <source>View Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1271">
+        <source>View Public Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1272">
+        <source>Views</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1273">
+        <source>views</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1274">
+        <source>Virtual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1275">
+        <source>Virtual / Online-only group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1276">
+        <source>Virtual group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1277">
+        <source>Visibility</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1278">
+        <source>Visible</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1279">
+        <source>Visit Instance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1280">
+        <source>Website</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1281">
+        <source>Website URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1282">
+        <source>Weekly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1283">
+        <source>Welcome back! You have been re-subscribed to the newsletter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1284">
+        <source>We use this</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1285">
+        <source>What this institution collects, why, and for whom — scope, geographic focus, time periods, donor relationships.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1286">
+        <source>What would you like to discuss?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1287">
+        <source>When disabled, emails will use PHP mail() which may not work on all servers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1288">
+        <source>WordPress Export JSON</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1289">
+        <source>WordPress Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1290">
+        <source>Write a Blog Post</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1291">
+        <source>Write a reply...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1292">
+        <source>Write a Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1293">
+        <source>Write New Post</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1294">
+        <source>Write Post</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1295">
+        <source>Write your blog post content here...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1296">
+        <source>Write your comment...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1297">
+        <source>Write your first blog post to share with the community.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1298">
+        <source>Write your reply...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1299">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1300">
+        <source>You are already subscribed to the newsletter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1301">
+        <source>You are not linked to this institution.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1302">
+        <source>You are not organizing any groups yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1303">
+        <source>You can unsubscribe at any time via the link in each newsletter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1304">
+        <source>You have been subscribed to the newsletter. Thank you!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1305">
+        <source>You have been unsubscribed from the AtoM Registry newsletter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1306">
+        <source>You have not favorited anything yet. Browse the registry and click the star icon to add items to your favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1307">
+        <source>You have not joined any groups yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1308">
+        <source>You must register an institution before linking software.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1309">
+        <source>Your Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1310">
+        <source>Your Reply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1311">
+        <source>Your Role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1312">
+        <source>— None —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

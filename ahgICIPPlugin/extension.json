@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Indigenous Cultural and Intellectual Property management \u2014 community registration, TK Labels, cultural notices, consent tracking, consultations, and access restrictions",
   "author": "The Archive and Heritage Group",
-  "license": "GPL-3.0",
+  "license": "AGPL-3.0-or-later",
   "homepage": "https://theahg.co.za",
   "category": "rights",
   "keywords": [

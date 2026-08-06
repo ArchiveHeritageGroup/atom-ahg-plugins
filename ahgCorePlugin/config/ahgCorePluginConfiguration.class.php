@@ -23,6 +23,11 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
      */
     public function initialize()
     {
+        // Bring the framework up before anything else in this plugin or any
+        // other AHG plugin runs. See bootstrapFramework() for why this lives
+        // here rather than in AtoM's ProjectConfiguration.
+        self::bootstrapFramework($this->configuration->getRootDir());
+
         // Register autoloader for AhgCore namespace
         $this->registerAutoloader();
 
@@ -49,6 +54,117 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // Missing-representation guard. Connected after enforceEnabledCulture so
         // that guard's HTML fallback for authority modules is applied first.
         $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'refuseUnavailableFormat']);
+
+        // Base AtoM dereferences route-parse results without checking them in 53
+        // places across 13 modules. See sanitisePostedResourceValues().
+        //
+        // This runs here, during plugin configuration, because it has to mutate
+        // $_POST itself. sfWebRequest::initialize() takes a copy
+        // ($this->postParameters = $_POST) and only the parameter holder is
+        // exposed to the request.filter_parameters event; base binds its forms
+        // with $request->getPostParameters(), which returns that untouched copy.
+        // Filtering the event therefore has no effect on form binding at all -
+        // established the hard way after two guards that appeared correct and
+        // changed nothing.
+        // Drop posted values that base AtoM will dereference without checking.
+        // Done at controller.change_action, not here: the only reliable test is
+        // routing->parse(), and routing does not exist during plugin config.
+        // See guardPostedResourceValues().
+        $this->dispatcher->connect('controller.change_action', ['ahgCorePluginConfiguration', 'guardPostedResourceValues']);
+
+        // Shared edit-form endpoints, used by every descriptive standard.
+        // Registered here rather than in ahgInformationObjectManagePlugin so a
+        // standard plugin installed on its own has what it declares. See
+        // modules/ahgIoForm/actions/actions.class.php.
+        $this->dispatcher->connect('routing.load_configuration', [$this, 'loadIoFormRoutes']);
+
+        $enabledModules = sfConfig::get('sf_enabled_modules', []);
+
+        if (!in_array('ahgIoForm', $enabledModules, true)) {
+            $enabledModules[] = 'ahgIoForm';
+            sfConfig::set('sf_enabled_modules', $enabledModules);
+        }
+
+        // Capture exceptions symfony handles itself.
+        //
+        // ErrorNotificationService installs set_exception_handler, which only
+        // fires for exceptions that reach PHP uncaught. Symfony catches most of
+        // them first, renders its own error page and returns 500, so the only
+        // record left was the shutdown handler's bare "HTTP 500 Internal Server
+        // Error: /index.php/..." with no file, no line and no trace. That is
+        // enough to know something failed and nothing else, which cost most of a
+        // morning on the repository form.
+        //
+        // application.throw_exception is symfony's own notification for exactly
+        // those. Listening does not change behaviour: nothing is returned, so
+        // symfony still renders the page it would have.
+        $this->dispatcher->connect('application.throw_exception', ['ahgCorePluginConfiguration', 'logThrownException']);
+    }
+
+    /**
+     * Register the framework autoloader and the routing classes named by string.
+     *
+     * This is what lets the AHG plugins run on an unmodified AtoM.
+     *
+     * AtoM already enables plugins from the database: sfPluginAdminPlugin is in
+     * AtoM's own hardcoded list, and its initialize() reads the `plugins` setting
+     * and calls enablePlugins() on the list it finds. So the plugins themselves
+     * need no change to ProjectConfiguration at all - they are already being
+     * enabled. What was missing was only the autoloader: every AHG plugin
+     * references AtomFramework\* classes, and without vendor/autoload plus the
+     * PSR-4 prefixes those are undefined, so the first plugin configuration to
+     * name one fatals and the whole response comes back empty with a 200.
+     *
+     * Doing it here rather than in ProjectConfiguration means an AtoM install
+     * needs no modified files. bootstrap.php guards itself with
+     * ATOM_FRAMEWORK_LOADED, so an instance whose ProjectConfiguration still
+     * calls it is unaffected.
+     *
+     * Ordering matters: this must run before any other AHG plugin's
+     * initialize(). ExtensionManager keeps ahgCorePlugin ahead of its siblings
+     * in the `plugins` setting for that reason.
+     */
+    public static function bootstrapFramework(string $rootDir): void
+    {
+        $bootstrap = $rootDir.'/atom-framework/bootstrap.php';
+
+        if (!file_exists($bootstrap)) {
+            return;
+        }
+
+        require_once $bootstrap;
+
+        // Routes are declared with classes named as strings, which RouteLoader
+        // instantiates when routing.load_configuration fires. They live in
+        // .class.php files in the global namespace, so PSR-4 does not reach
+        // them and the autoloader registered above is not enough. Missing, the
+        // first plugin route takes down every page rather than one route.
+        //
+        // The Qubit parents must exist before the AHG subclasses extend them.
+        foreach (['QubitRoute', 'QubitMetadataRoute'] as $class) {
+            $path = $rootDir.'/lib/routing/'.$class.'.class.php';
+
+            if (!class_exists($class, false) && file_exists($path)) {
+                require_once $path;
+            }
+        }
+
+        foreach (['AhgMetadataRoute', 'AddActionRoute', 'SafeRequestRoute'] as $class) {
+            if (class_exists($class, false)) {
+                continue;
+            }
+
+            foreach ([
+                $rootDir.'/atom-framework/src/Routing/'.$class.'.class.php',
+                $rootDir.'/lib/routing/'.$class.'.class.php',
+            ] as $path) {
+                if (file_exists($path)) {
+                    require_once $path;
+
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -295,4 +411,428 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
     {
         return dirname(__DIR__) . '/web';
     }
+
+    /**
+     * Drop submitted resource-URL values that do not resolve to a record.
+     *
+     * Base AtoM repeatedly does this when processing a form field:
+     *
+     *   $params = $this->context->routing->parse(Qubit::pathInfo($value));
+     *   $resource = $params['_sf_route']->resource;   // null if nothing matches
+     *   $value[$resource->id] = ...                   // fatal
+     *
+     * There are 53 of these across 13 modules in apps/qubit/modules - term (14),
+     * informationobject (10), actor (6), user, repository, relation, object,
+     * event, right, search, physicalobject, function and default. None checks the
+     * result. Any submitted value that no longer resolves, whether because a term
+     * was deleted, a slug changed, or the field was typed rather than selected,
+     * takes the whole save down with an HTTP 500 and loses everything on the form.
+     *
+     * Found the hard way on 2026-08-06: accession, then repository, then actor,
+     * each failing the same way within minutes of each other.
+     *
+     * apps/ is base AtoM and is never modified by this project, so the values are
+     * removed before base sees them. Guarding it here rather than per plugin
+     * because the defect is in thirteen modules and counting, and a per-module
+     * fix would have to be written again for each one.
+     *
+     * SCOPE - deliberately narrow
+     *
+     * Only values shaped like an AtoM resource path are considered: a leading
+     * slash, no whitespace, slug characters only. A website field holding
+     * "https://example.com" does not match, and neither does ordinary prose. Of
+     * those candidates, only ones whose slug is absent from the slug table are
+     * dropped. Anything that resolves is passed through untouched, so a correctly
+     * completed form behaves exactly as before.
+     */
+    /**
+     * Form fields whose value is always a reference to another record.
+     *
+     * Base AtoM feeds each of these to routing->parse() and dereferences the
+     * result without checking, so ANY value that does not resolve is fatal -
+     * not just something shaped like a path. A donor name typed by hand rather
+     * than picked from the autocomplete is the common case, and it is exactly
+     * what a person doing this for the first time will do.
+     *
+     * Every one of these is a select or autocomplete bound to controlled
+     * vocabulary, so a value that resolves to nothing carries no meaning that
+     * could be preserved. Dropping it loses nothing that base would have kept:
+     * base would have crashed and lost the entire form.
+     */
+    protected const RESOURCE_FIELDS = [
+        'resource',                 // accession donor, relation targets
+        'type', 'geographicSubregion', 'thematicArea',
+        'descStatus', 'descDetail',
+        'entityType', 'maintainingRepository',
+        'placeAccessPoints', 'subjectAccessPoints', 'nameAccessPoints', 'genreAccessPoints',
+        'levelOfDescription', 'repository', 'parent',
+        'language', 'script', 'languageOfDescription', 'scriptOfDescription',
+    ];
+
+    public static function sanitisePostedResourceValues(): void
+    {
+        if ('POST' !== ($_SERVER['REQUEST_METHOD'] ?? '') || empty($_POST)) {
+            return;
+        }
+
+        $parameters = $_POST;
+
+        foreach ($parameters as $key => $value) {
+            if (in_array($key, ['module', 'action', '_sf_route'], true)) {
+                continue;
+            }
+
+            $always = in_array($key, self::RESOURCE_FIELDS, true);
+
+            if (is_string($value)) {
+                if ('' !== trim($value)
+                    && ($always || self::isResourcePath($value))
+                    && !self::slugResolves($value)
+                ) {
+                    unset($parameters[$key]);
+                    self::noteDrop($key, $value);
+                }
+
+                continue;
+            }
+
+            if (!is_array($value)) {
+                continue;
+            }
+
+            $kept = [];
+            $changed = false;
+
+            foreach ($value as $index => $item) {
+                if (is_string($item)
+                    && '' !== trim($item)
+                    && ($always || self::isResourcePath($item))
+                    && !self::slugResolves($item)
+                ) {
+                    $changed = true;
+                    self::noteDrop($key, $item);
+
+                    continue;
+                }
+
+                $kept[$index] = $item;
+            }
+
+            if ($changed) {
+                $parameters[$key] = array_values($kept);
+            }
+        }
+
+        $_POST = $parameters;
+    }
+
+    /**
+     * Does this look like an AtoM resource URL rather than user prose?
+     */
+    protected static function isResourcePath(string $value): bool
+    {
+        $value = trim($value);
+
+        if ('' === $value || '/' !== substr($value, 0, 1)) {
+            return false;
+        }
+
+        return 1 === preg_match('#^/[A-Za-z0-9._~/\-]+$#', $value);
+    }
+
+    /**
+     * Is the trailing path segment a slug that exists?
+     */
+    protected static function slugResolves(string $value): bool
+    {
+        $segments = array_values(array_filter(explode('/', parse_url(trim($value), PHP_URL_PATH) ?: ''), static function ($s) {
+            return '' !== $s && 'index.php' !== $s;
+        }));
+
+        if ($segments === []) {
+            return false;
+        }
+
+        $slug = (string) end($segments);
+
+        $connection = self::slugConnection();
+
+        if (null === $connection) {
+            // If the check cannot run, keep the value: discarding something that
+            // may be perfectly valid is worse than the crash we are avoiding.
+            return true;
+        }
+
+        try {
+            $statement = $connection->prepare('SELECT 1 FROM slug WHERE slug = ? LIMIT 1');
+            $statement->execute([$slug]);
+
+            return false !== $statement->fetchColumn();
+        } catch (\Exception $e) {
+            return true;
+        }
+    }
+
+    /**
+     * A connection usable during plugin configuration.
+     *
+     * Propel is not initialised this early - its database manager is set up well
+     * after plugin configuration runs - so asking it for a connection here always
+     * throws, the check fails open, and the guard silently does nothing. Reading
+     * AtoM's own config and opening one connection avoids depending on
+     * initialisation order. Held for the request, so this costs one connection.
+     */
+    protected static function slugConnection(): ?\PDO
+    {
+        static $connection = false;
+
+        if (false !== $connection) {
+            return $connection;
+        }
+
+        $connection = null;
+
+        try {
+            $configFile = dirname(__DIR__, 3).'/config/config.php';
+
+            if (!file_exists($configFile)) {
+                return null;
+            }
+
+            $config = require $configFile;
+            $params = $config['all']['propel']['param'] ?? null;
+
+            if (!is_array($params) || empty($params['dsn'])) {
+                return null;
+            }
+
+            $dsn = $params['dsn'];
+
+            if (false === strpos($dsn, 'host=')) {
+                $dsn = preg_replace('/^mysql:/', 'mysql:host=localhost;', $dsn);
+            }
+
+            $connection = new \PDO(
+                $dsn,
+                $params['username'] ?? 'root',
+                $params['password'] ?? '',
+                [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_TIMEOUT => 3]
+            );
+        } catch (\Exception $e) {
+            $connection = null;
+        }
+
+        return $connection;
+    }
+
+    protected static function noteDrop(string $field, string $value): void
+    {
+        try {
+            error_log(sprintf('ahgCore: dropped unresolvable resource value for "%s": %s', $field, $value));
+        } catch (\Exception $e) {
+        }
+    }
+
+
+    /**
+     * Record an exception symfony is about to handle, with its stack trace.
+     *
+     * Deliberately returns nothing so the event stays unhandled and symfony's
+     * error page renders exactly as before. This only observes.
+     */
+    public static function logThrownException($event)
+    {
+        try {
+            $exception = $event->getSubject();
+
+            if (!$exception instanceof \Throwable) {
+                return;
+            }
+
+            if (!class_exists('AhgCore\\Services\\ErrorNotificationService', false)
+                && !class_exists('AhgCore\\Services\\ErrorNotificationService')) {
+                return;
+            }
+
+            \AhgCore\Services\ErrorNotificationService::logToDatabase(
+                'error',
+                $exception->getMessage(),
+                $exception->getFile(),
+                $exception->getLine(),
+                $exception->getTraceAsString(),
+                $exception,
+                500
+            );
+        } catch (\Throwable $ignored) {
+            // Logging must never become the failure it is trying to record.
+        }
+    }
+
+
+    /**
+     * Remove posted values that base AtoM would dereference into a fatal.
+     *
+     * THE TEST THAT MATTERS
+     *
+     * Base does exactly this, in 53 places across 13 modules:
+     *
+     *   $params = $this->context->routing->parse(Qubit::pathInfo($value));
+     *   $resource = $params['_sf_route']->resource;   // never checked
+     *
+     * So the only question worth asking is whether routing->parse() yields a
+     * resource. Asking anything else gives the wrong answer: an earlier version
+     * of this guard checked whether the slug existed in the slug table, which
+     * passed the donor "rock-art-research-institute" through as valid while
+     * routing still resolved it to a route with a null resource, and the crash
+     * continued unchanged. Same value, two tests, opposite verdicts.
+     *
+     * WHY HERE
+     *
+     * routing is not available during plugin configuration, and $_POST is not
+     * what base reads. sfWebRequest::initialize() copies $_POST into its own
+     * postParameters, and forms are bound with getPostParameters(); the
+     * request.filter_parameters event only reaches the parameter holder, so
+     * filtering it has no effect on form binding whatsoever. This runs at
+     * controller.change_action - after routing, before the action executes and
+     * binds the form - and edits postParameters directly.
+     *
+     * Only fields that are always record references are considered, so ordinary
+     * text is never touched. A reference that resolves to nothing has no meaning
+     * to preserve, and base's alternative is to lose the entire form.
+     */
+    public static function guardPostedResourceValues($event)
+    {
+        try {
+            $context = sfContext::getInstance();
+            $request = $context->getRequest();
+
+            if (!$request instanceof sfWebRequest || !$request->isMethod('post')) {
+                return;
+            }
+
+            $property = new ReflectionProperty('sfWebRequest', 'postParameters');
+            $property->setAccessible(true);
+
+            $post = $property->getValue($request);
+
+            if (!is_array($post) || $post === []) {
+                return;
+            }
+
+            $changed = false;
+            $post = self::filterResourceValues($post, $context, $changed);
+
+            if ($changed) {
+                // Both stores, because base reads from both. Forms bind with
+                // getPostParameters(), while the relation components read
+                // $this->request['relatedDonor'], which comes from the parameter
+                // holder. Updating only one leaves the other still carrying the
+                // value that crashes.
+                $property->setValue($request, $post);
+
+                $holder = $request->getParameterHolder();
+
+                foreach ($post as $key => $value) {
+                    if (null !== $holder->get($key)) {
+                        $holder->set($key, $value);
+                    }
+                }
+            }
+        } catch (Throwable $ignored) {
+            // A guard that throws is worse than the crash it prevents.
+        }
+    }
+
+    /**
+     * Base AtoM's own resolution test, applied honestly.
+     */
+    protected static function routeResolves($context, string $value): bool
+    {
+        try {
+            $params = $context->routing->parse(Qubit::pathInfo($value));
+
+            return isset($params['_sf_route']) && null !== $params['_sf_route']->resource;
+        } catch (Throwable $e) {
+            return false;
+        }
+    }
+
+
+    /**
+     * Walk a posted structure and drop reference values that resolve to nothing.
+     *
+     * Recursive because the values are not at the top level. The relation
+     * components post nested structures - relatedDonor[resource], or
+     * relatedDonors[0][resource] once the dialog JavaScript has run - and a
+     * guard that only inspected top-level keys silently did nothing while the
+     * crash continued. That was this bug's fourth false start; the shape of the
+     * data was the thing to check first.
+     */
+    protected static function filterResourceValues(array $input, $context, bool &$changed): array
+    {
+        $output = [];
+
+        foreach ($input as $key => $value) {
+            if (is_array($value)) {
+                $output[$key] = self::filterResourceValues($value, $context, $changed);
+
+                continue;
+            }
+
+            if (!is_string($value)
+                || '' === trim($value)
+                || !in_array((string) $key, self::RESOURCE_FIELDS, true)
+                || self::routeResolves($context, $value)
+            ) {
+                $output[$key] = $value;
+
+                continue;
+            }
+
+            $changed = true;
+            self::noteDrop((string) $key, $value);
+        }
+
+        return $output;
+    }
+
+
+    /**
+     * Routes for the shared edit-form endpoints.
+     *
+     * Names and URLs are deliberately identical to the ones
+     * ahgInformationObjectManagePlugin used to register, so no template changed.
+     * That plugin no longer registers them; registering them in both places
+     * would be a duplicate route name.
+     */
+    public function loadIoFormRoutes($event)
+    {
+        $routing = $event->getSubject();
+
+        $routes = [
+            'io_actor_autocomplete' => ['/informationobject/actorAutocomplete', 'actorAutocomplete'],
+            'io_repository_autocomplete' => ['/informationobject/repositoryAutocomplete', 'repositoryAutocomplete'],
+            'io_term_autocomplete' => ['/informationobject/termAutocomplete', 'termAutocomplete'],
+            'io_term_create' => ['/informationobject/termCreate', 'termCreate'],
+            'io_generate_identifier' => ['/informationobject/generateIdentifierJson', 'generateIdentifier'],
+            // The form target for every standard.
+            'io_add_override' => ['/informationobject/add', 'edit'],
+        ];
+
+        $routing->prependRoute('io_edit_override', new sfRoute(
+            '/informationobject/:slug/edit',
+            ['module' => 'ahgIoForm', 'action' => 'edit']
+        ));
+
+        foreach ($routes as $name => $route) {
+            // Prepended: '/informationobject/:slug' would otherwise match these
+            // paths as a slug, find no record, and 404 - the same collision that
+            // hid /repository/autocomplete.
+            $routing->prependRoute($name, new sfRoute(
+                $route[0],
+                ['module' => 'ahgIoForm', 'action' => $route[1]]
+            ));
+        }
+    }
+
 }

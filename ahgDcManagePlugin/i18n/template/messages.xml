@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>- Select -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>- Select type -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>- Use global default -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Actor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Actor name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add child level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Add name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Add new archival description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Add new child levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Administration area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>An abstract, table of contents or description of the resource.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>A related resource from which the described resource is derived.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Could not generate identifier.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Coverage (spatial)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Date(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Display standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Dublin Core</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>e.g. ca. 1900</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Edit archival description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Elements area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>End</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Failed to generate identifier.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Information about rights held in and over the resource.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Last updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Name(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Part of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Please select a repository first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Relation (isLocatedAt)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Scheme: Archive Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Source language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Start</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>The file format, physical medium, or dimensions of the resource.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>The name of the organization which has custody of the resource.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>The nature or genre of the resource (DCMI Type Vocabulary).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Type to add place...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Type to add subject...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Type to search repositories...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

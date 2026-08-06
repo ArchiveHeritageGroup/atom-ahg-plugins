@@ -27,17 +27,10 @@ class ioManageActions extends AhgController
         // Load IO data + detect standard
         $standard = \IoFormHelper::loadIoData($this, $request, $culture);
 
-        // Forward to standard-specific module if not ISAD
-        if (isset(\IoFormHelper::MODULE_MAP[$standard])) {
-            $module = \IoFormHelper::MODULE_MAP[$standard];
-
-            // Check if the target module's plugin is enabled
-            try {
-                $this->forward($module, 'edit');
-            } catch (\sfConfigurationException $e) {
-                // Plugin not installed — fall through to ISAD
-            }
-        }
+        // Dispatch by standard now happens in ahgCorePlugin's ahgIoForm module,
+        // which is what the form routes point at. This action renders ISAD only
+        // and is reached by forward, never directly - dispatching again here
+        // would forward to itself for ISAD and loop.
 
         // ISAD(G) — load dropdowns and continue to editSuccess.php
         \IoFormHelper::loadDropdowns($this, $culture);
@@ -317,6 +310,103 @@ class ioManageActions extends AhgController
         }, $results);
 
         return $this->renderText(json_encode($json));
+    }
+
+    /**
+     * Create a new access-point term, for editors and administrators only.
+     *
+     * WHY THIS IS GATED
+     *
+     * Access points exist so that a concept has one name. If anyone who can edit
+     * a description can also invent vocabulary by typing, a collection ends up
+     * with "Pretoria", "pretoria", "Pretoria, Gauteng" and "PTA" as four separate
+     * place terms, and browsing by place stops meaning anything. That is the
+     * exact problem controlled vocabulary is there to prevent.
+     *
+     * So contributors get lookup and no more; editors and administrators, who are
+     * accountable for the vocabulary, can add to it. This mirrors the publication
+     * split already in place: a contributor drafts, an editor commits.
+     *
+     * Restricted to the three access-point taxonomies. Without that, this
+     * endpoint would be a way to inject terms into levels of description,
+     * publication status or any other controlled list in the system.
+     *
+     * Deduplicates case-insensitively and returns the existing term rather than
+     * erroring, so two people adding "Rock art" at the same time converge on one
+     * term instead of creating two.
+     */
+    public function executeTermCreate($request)
+    {
+        $this->getResponse()->setContentType('application/json');
+
+        if (!$request->isMethod('post')) {
+            $this->getResponse()->setStatusCode(405);
+
+            return $this->renderText(json_encode(['error' => 'POST required']));
+        }
+
+        $user = $this->context->user;
+
+        if (!$user->isAuthenticated()
+            || (!$user->hasCredential('administrator') && !$user->hasCredential('editor'))) {
+            $this->getResponse()->setStatusCode(403);
+
+            return $this->renderText(json_encode(['error' => 'Not permitted to create terms']));
+        }
+
+        $taxonomyId = (int) $request->getParameter('taxonomy', 0);
+        $name = trim((string) $request->getParameter('name', ''));
+
+        // Subject, place, genre. Nothing else.
+        if (!in_array($taxonomyId, [35, 42, 78], true)) {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'Taxonomy not open to term creation']));
+        }
+
+        if ('' === $name || mb_strlen($name) > 255) {
+            $this->getResponse()->setStatusCode(400);
+
+            return $this->renderText(json_encode(['error' => 'A name between 1 and 255 characters is required']));
+        }
+
+        $culture = $this->culture();
+
+        // Already there under any casing: hand back what exists.
+        $existing = \Illuminate\Database\Capsule\Manager::table('term')
+            ->join('term_i18n', 'term.id', '=', 'term_i18n.id')
+            ->where('term.taxonomy_id', $taxonomyId)
+            ->whereRaw('LOWER(term_i18n.name) = ?', [mb_strtolower($name)])
+            ->select('term.id', 'term_i18n.name')
+            ->first();
+
+        if ($existing) {
+            return $this->renderText(json_encode([
+                'id' => (int) $existing->id,
+                'name' => $existing->name,
+                'created' => false,
+            ]));
+        }
+
+        try {
+            // Propel, not a raw insert: a term needs its base object row, its
+            // slug and its i18n row, and QubitTerm is what knows to create all
+            // three. A direct insert fails under STRICT mode.
+            $term = new \QubitTerm();
+            $term->taxonomyId = $taxonomyId;
+            $term->setName($name, ['culture' => $culture]);
+            $term->save();
+        } catch (\Exception $e) {
+            $this->getResponse()->setStatusCode(500);
+
+            return $this->renderText(json_encode(['error' => 'Could not create the term']));
+        }
+
+        return $this->renderText(json_encode([
+            'id' => (int) $term->id,
+            'name' => $name,
+            'created' => true,
+        ]));
     }
 
     /**

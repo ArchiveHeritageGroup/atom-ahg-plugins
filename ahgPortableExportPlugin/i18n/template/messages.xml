@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Access Points (Term Relations)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Archive Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Archive Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Archive validated successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Archive ZIP File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Authority Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Branding</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Branding (Optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>By Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Choose how records should be imported.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Choose the export type and which content to include.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Clear and re-import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Configure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Content Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Destination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Digital Object Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Downloadable archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Download ZIP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Dry Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>e.g. My Archive Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Editable Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Entire Catalogue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Entity Counts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Entity Types to Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Entity Types to Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Error Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Estimated Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Estimate Export Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Existing writable directory on the server, e.g. /mnt/usb/catalogue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Expires</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Expires After (hours)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Export Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Export Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Export Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Export Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Fonds / Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Footer Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Framework</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Full-resolution master files. Warning: can significantly increase export size.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Full path to a ZIP file or extracted archive directory on the server.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Generate a self-contained catalogue viewer for offline access on CD, USB, or downloadable ZIP. The viewer opens in any modern browser with no server or internet connection required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Generate Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>HTML viewer for offline browsing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Import an archive package (ZIP) exported from another AtoM Heratio instance. The archive must have been created using Archive Export mode.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Import Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Import Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Imported</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Import Mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Import Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Import Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Include digital object files in the export package.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Master Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Max Downloads (blank = unlimited)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Medium-resolution images for detail views.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Menu Structure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Merge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Next: Configure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Next: Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Next: Review &amp; Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>No exports yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>No fonds found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>No imports yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Past Exports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Past Imports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Physical Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Portable Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Re-importable JSON + digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Reference Images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Relations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Replace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Replace mode will clear existing records before importing. This cannot be undone. Use with extreme caution.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Review &amp; Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Review your export settings and start generation.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Save to folder on this computer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Schema Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Search by title or identifier to find the fonds/collection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Select a .zip file created by AtoM Heratio Archive Export.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Select the scope of descriptions to include in the portable viewer.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Server folder / drive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Server Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Set the title, language, and optional branding for the viewer.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Share Download Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Share Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Share URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Skip existing, import new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Skipped</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Small thumbnail images for browse views.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Specific Fonds/Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Start Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Start Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Subtitle</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Taxonomies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>The bundle is written uncompressed straight to this path on the server (no ZIP, no size cap). It must exist and be writable by the web server.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>This computer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Thumbnails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Total Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Type to search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Uncompressed — for large collections / mounted server drive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Unzipped folder on your PC / laptop / USB</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Upload Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Upload a ZIP file or enter a server path to an archive package.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Upload File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Users &amp; Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Validate Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Validate only, no changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Validation failed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Viewer Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Viewer Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Viewer with notes + file import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Warning:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>What to Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>You will be asked to choose a folder or drive on this computer after the export is built; the catalogue is written there uncompressed so it runs straight off the drive (double-click index.html). Requires a Chromium browser (Chrome, Edge, Opera) — on other browsers it falls back to a ZIP download.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>ZIP file</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,720 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Add a note for the archivist...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>After create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>All sources default to disabled. Heratio will never make outbound HTTP calls until a source is explicitly enabled here.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>All types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Already decided</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Any</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Any archivist</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Archivist</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Assign</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Assigned to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Assigning routes this mention through the Workflow plugin and notifies the chosen archivist.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Assigning routes this mention through the Workflow plugin and notifies the chosen archivist. Re-assigning moves the existing workflow task.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Assign mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Assign selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Assign this mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Assign to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>At</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>authority #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Authority Resolution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Authority Resolution Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Authorized form of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Back to queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>cached</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Cache TTL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>candidate(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Candidates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Choose an archivist first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Clear selection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Co-occurring entities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Comma-separated source list. First source wins when two adapters disagree on a field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Context window</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Could not load context.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Create authority record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Create new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Create new authority record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>create_new decision row written to ahg_mention_decision.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Currently assigned to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Dates of existence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Decimal degrees. Optional but if provided latitude is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Decimal degrees. Optional but if provided longitude is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Decision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Decisions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Descriptive standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Digital object attached</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>e.g. Awaiting external authority lookup; insufficient distinguishing context.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>e.g. NER mis-typed; this is a date, not a place.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>enclosing paragraph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Entity type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Exact position not recorded for this mention - showing the full source text.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Examples: "not an entity", "wrong type (this is a date, not a place)", "OCR artefact", "synonym for an existing record but cannot identify which".</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>External authority sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>External lookup results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>feeds NER retraining</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Flag</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>from</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Full context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Full document text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Functions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>GeoNames username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Global lookup configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>hit(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Image attached</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>ISAAR-CPF mandatory.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>ISAAR-CPF mandatory. Biographical / institutional history.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>ISAAR-CPF mandatory. e.g. "1818-1895".</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Latitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Legal status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>License note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>License URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Limit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Link (top candidate)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Link to a different authority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Link to different</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Link to selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Link to this</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Loading source text...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Longitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Lookup settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Mandates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>mentions across all pages selected.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Mention state advances to new_record_created.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Nearby dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Nearby places</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>NER confidence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Network error loading context.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>New</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>New candidate(s) available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>New candidate(s) only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>New candidate available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>New record inserted via Qubit CTI (object + actor/term + i18n + slug).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>no candidate available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>No candidates generated yet. Run auth-res:generate-candidates and auth-res:score-evidence for this mention.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>No context packet computed for this mention.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>No eligible archivists found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>No evidence signals computed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>No external sources are enabled. Configure them at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>No mentions match.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>No parked mentions match the current filters.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>No source text available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Object ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Offset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>on this page selected.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Open full record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Original</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Paragraph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Park</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Parked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Parked at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Parked by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Parked Mentions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Parked since</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Parking removes the mention from the active queue but keeps it open for revisit when new authority candidates appear. State changes to "parked".</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Park queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Park this mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>PDF attached</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Per-field provenance written to Fuseki graph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Per page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Place name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Places</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Pre-filled from external sources + context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Promoted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Provenance written</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Ranked candidates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Rate limit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Reason / message (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Recorded on the workflow task as the assignment comment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Reject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Rejecting marks the NER entity as not corresponding to any authority. The reason is captured as a training signal for the NER model.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Rejection reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Reject this mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Required. Becomes the term.name value.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Required when GeoNames is enabled. Sign up:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Review mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Role language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Save settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Search the local authority store for a record other than those listed in the ranked candidates. Selected record will be linked and a link_different decision will be recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Select all %1% mentions matching the current filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Select all on this page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Select an archivist...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Select at least one mention.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Skip to next pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Sorted: new-candidate flagged first, then most-recently parked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Sorted by candidate count then id</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Source culture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Source IO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Source mention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Source precedence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>State</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Total parked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Type a name...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Un-park &amp; re-review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Un-park this mention? Candidates will be regenerated and the mention returns to the pending queue.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Unassigned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>View authority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>View full context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>View full document text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>workflow task</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Core utilities and shared services for AHG plugins. Provides centralized database access, configuration, taxonomy resolution, file storage, and cross-plugin contracts.",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "category": "core",
     "is_core": true,
     "is_locked": true,

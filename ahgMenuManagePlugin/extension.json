@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Menu configuration management — list, edit, and delete AtoM navigation menus via Laravel Query Builder",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "admin",
     "keywords": ["menu", "navigation", "configuration", "manage"],

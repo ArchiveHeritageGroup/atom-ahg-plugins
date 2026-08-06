@@ -5,7 +5,7 @@
     "description": "Multi-tenancy with domain routing, dedicated tenant tables, and user hierarchy",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "email": "johan@theahg.co.za",
-    "license": "proprietary",
+    "license": "AGPL-3.0-or-later",
     "category": "security",
     "requires": {
         "atom": ">=2.6.0"

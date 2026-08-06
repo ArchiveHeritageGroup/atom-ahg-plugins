@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Admin Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Already have an account?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>An unknown error occurred.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Approve Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Approve registration for:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Assign Group/Role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>A verification email has been sent to your email address. Please click the link in the email to verify your account.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Awaiting email verification — or mark verified to approve manually.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Awaiting Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Choose a username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Confirm Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Create an Account</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Describe your research interests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Email Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Email Verification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Email verified successfully!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Full Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Institution / Organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Letters, numbers, dots, hyphens, and underscores only.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Log in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Mark the email as verified — use when the applicant could not receive the verification email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Mark verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Minimum 8 characters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>No registration requests found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Optional notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Please provide a reason (sent to applicant via email)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Reason for Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Reason for Rejection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Register again</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Registration is currently disabled. Please contact the administrator.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Registration Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Registration submitted!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Reject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Rejected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Reject Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Reject registration for:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Repeat password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Research Interest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Submit Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Submitted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Unverified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Verification failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Why do you need access to this system?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>your.email@example.com</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Your full name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Your institution or organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Your registration is now pending administrator approval. You will receive an email once your account has been reviewed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Your registration will be reviewed by an administrator after email verification.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

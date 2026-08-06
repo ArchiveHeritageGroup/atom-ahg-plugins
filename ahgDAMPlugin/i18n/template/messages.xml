@@ -1,0 +1,1856 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Inherit from parent --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- Role --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>-- Select Asset Type --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>-- Select container --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>-- Select repository --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>-- Top level (no parent) --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>1954</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Academic</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Accession #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Access Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Access Points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Access status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Access URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Add a new digital asset with IPTC/XMP metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Add Credit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Add Holding</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Additional information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Additional information about this version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Additional notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Additional notes or description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Add Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Add to Cart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Add to Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Add Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Administration Area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Administration area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>afr</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Afrikaans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>After creating the asset, you can attach digital files (images, videos, documents) through the standard AtoM interface.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>After import, use the GLAM browser to convert records to DAM type.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>All Countries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>All Licenses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Alternative Versions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Aperture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Apply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Artwork / Object in Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Artwork / Painting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Artwork Copyright</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Artwork Creator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Artwork Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Artwork Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Artwork Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>assets found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Asset Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Asset Type &amp; Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Audio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Audio Cassette</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Audio Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Audio Language(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Audio Reel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Awards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Awards &amp; Nominations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Awards / Recognition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Bit Depth</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Black &amp; White</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Black and White</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Box</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Boxes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Brief synopsis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Brief synopsis or summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Brief synopsis or summary of the image content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Broadcast / Release Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Broadcast Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Browse all assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Bulk Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Bulk upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>By File Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>By License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Camera</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Caption / Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Cast</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Cast / Actor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Censored</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Choose a metadata standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>City</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>cm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Color, sound</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Color, sound, ratio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Colorized</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Color Space</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Color Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Comma-separated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Comma-separated keywords for search and categorization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Commissioning Editor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Condition &amp; Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Condition notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Contains GPS/location data — hidden from public display.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Content Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Convert Existing Records to DAM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Copyright</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Copyright &amp; Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Copyright Notice</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Country (Filming)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Country (Filming Location)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Country (Production)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Country Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Country where film/video was produced (may differ from filming location)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Create Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Create DAM Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Create new asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Create your first asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Creative Commons</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Creator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Creator...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Creator / Photographer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Credit Line</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Critical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>CSV Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>cubic metres</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>DAM Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>DAM Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>DAM Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>DAM Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Date Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Department/vault</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Description / Scope and Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Detailed description of the image content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Deteriorating</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Digital</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Digital Asset Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Digital Asset Management Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Digital Assets Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Digital File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Digital Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Digital Object Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Digitized</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Digitized Available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Dimensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Director</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Director's Cut</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Director, Actor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Display standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Distributor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Distributor / Broadcaster</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Document / PDF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Documentary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>e.g., 1954</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>e.g., African Film Productions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>e.g., Afrikaans, Dutch, English</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>e.g., Afrikaans, English</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>e.g., Documentary, Drama, Portrait</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>e.g., Documentary, Portrait</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>e.g., Donald Swanson</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>e.g., English</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>e.g., Kuddes van die veld</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>e.g., NFVSA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>e.g., NFVSA, WCPLS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>e.g., Nominated for Golden Calf Award</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>e.g., Nominated for Golden Calf Award - Best Short Documentary 2006</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>e.g., South Africa</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>e.g., VPRO, SABC</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Editor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Editorial Use Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Edit Provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Episode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Error extracting metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Excellent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Executive Producer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Extent and medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Extent unit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Extent value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>External References</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>extracted from file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Extracting...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Extract metadata from file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Fair</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Feature Film</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>File format, size, dimensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>File Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Film</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Film / Video Production</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Film Databases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Filmography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Filter tags…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Find the records you want to convert</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Flash</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Focal Length</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Folders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Format Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Format Holdings &amp; Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>for reproductions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>For reproductions of artworks or physical objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Full embedded metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Genre</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Genre access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Good</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Go to Cart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Go to the GLAM browser</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>GPS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>GPS Coordinates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Headline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Home Movie</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>How to request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>How to request, viewing conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>https://...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Identification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Identifier / Reference Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Import CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Import Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Import digital objects from a directory.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Import multiple DAM assets using a CSV file.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>Intellectual Genre</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>Interview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Interviewee / Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Interviewer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>In Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>IPTC - Administrative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>IPTC - Artwork / Object in Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>IPTC - Content Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>IPTC - Copyright &amp; Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>IPTC - Creator / Photographer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>IPTC - Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>IPTC - Model &amp; Property Releases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>IPTC Administrative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>IPTC Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>IPTC Metadata Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>IPTC Subject Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>IPTC Title / Object Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>ISO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>ISO 3166-1 alpha-3</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>ISO Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Item #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Item barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Item Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>Item Physical Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>Job / Assignment ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>Job Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>Keywords</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>Knowledge Bases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>Largest Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>Last updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>Lens</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>Level of Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>License Expiry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>License Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>License URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>Licensing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>Limited / Incomplete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>Link display text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>Links to ESAT, IMDb, Wikipedia, and other databases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>Links to ESAT, IMDb, Wikipedia, and other external databases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>Link text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>Link to a physical storage container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>Location &amp; Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Location (GPS) tags hidden — administrators only.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Location notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>Location within container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Manage Loans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Manuscript</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Media Platforms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Media Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Metadata Coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Metadata Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>metres</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>MIME Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>min</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Min Size (MB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>minutes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Minutes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Minutes, for video/audio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Missing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Mixed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Model &amp; Property Releases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Model Release ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Model Release Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Music</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Music / Composer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>Music Recording</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Name access points (subjects)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Name of the photographer or creator of the image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Names of people</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Names of people depicted in the image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Narrator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>New Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>New Loan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>New Loan Out</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>News / Footage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Nitrate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>No DAM assets yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Not Applicable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Offsite</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>On Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Open GLAM Browser</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Oral History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>orphaned files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Other language versions, formats, or edits of this work</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Pages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Parent Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>Person Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Persons Shown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>Persons Shown / Featured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Phone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Photo/DAM (IPTC/XMP)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Photo / Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Photo archive and DAM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Photography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Photography / Cinematography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Physical formats held at institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>Place access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>Podcast / Radio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>Polyester</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>Poor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>Position</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>Presenter / Host</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>Preservation Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>Press</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>Primary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>Primary copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>Producer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>Production Company</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>Production Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>Production Country Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>Production Credits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Production Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Property Release ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>Property Release Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>Provenance &amp; Chain of Custody</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>Publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>Public Domain</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>Read metadata aloud</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Read PDF content aloud</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>Reads EXIF/IPTC/XMP/FFmpeg metadata from the uploaded file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>Recent (30 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>Recent Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>records with IPTC data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>Ref number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>Remove from Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Request to Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Restoration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Restricted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>Rights Managed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Rights Usage Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Round to nearest minute</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Row</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>Royalty Free</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Running Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Safety</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Scan / Digitized</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>Scope and content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Screenplay</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Season</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>Series</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>Series Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Shelf</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>Short Film</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>Shutter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>Shutter Speed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Sound</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>Sound Design &amp; Mix</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>Source language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>South African</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>Special Instructions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>Speech / Lecture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>Sponsor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>Staff Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>State / Province</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="403">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="404">
+        <source>Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="405">
+        <source>Storage &amp; Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="406">
+        <source>Storage by Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="407">
+        <source>Storage container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="408">
+        <source>Storage Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="409">
+        <source>Storage Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="410">
+        <source>Streaming/download URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="411">
+        <source>Streaming URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="412">
+        <source>Subject access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="413">
+        <source>Sublocation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="414">
+        <source>Subtitle Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="415">
+        <source>Subtitle Language(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="416">
+        <source>Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="417">
+        <source>tags</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="418">
+        <source>Technical Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="419">
+        <source>This will overwrite existing metadata with values from the file. Continue?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="420">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="421">
+        <source>Title / Object Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="422">
+        <source>Title or name of the digital asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="423">
+        <source>Total Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="424">
+        <source>Total DAM Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="425">
+        <source>Total Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="426">
+        <source>Total Storage Used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="427">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="428">
+        <source>Unique identifier for this digital asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="429">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="430">
+        <source>Unlimited</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="431">
+        <source>Unlimited Model Releases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="432">
+        <source>Unlimited Property Releases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="433">
+        <source>Upload multiple digital assets at once</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="434">
+        <source>URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="435">
+        <source>Use the action menu to change type to "Photo/DAM"</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="436">
+        <source>Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="437">
+        <source>Verified Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="438">
+        <source>Video</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="439">
+        <source>Video / Film</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="440">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="441">
+        <source>View all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="442">
+        <source>View All Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="443">
+        <source>View file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="444">
+        <source>View Full Timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="445">
+        <source>View on map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="446">
+        <source>Vinyl</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="447">
+        <source>Website</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="448">
+        <source>What this link provides</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="449">
+        <source>Where film/video was produced</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="450">
+        <source>With Digital Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="451">
+        <source>With digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="452">
+        <source>With Extracted Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="453">
+        <source>With GPS:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="454">
+        <source>With GPS Coordinates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="455">
+        <source>With GPS only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="456">
+        <source>With IPTC Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="457">
+        <source>With Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="458">
+        <source>Writer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="459">
+        <source>Year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="460">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="461">
+        <source>You can convert existing archival descriptions to DAM type using the GLAM browser.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="462">
+        <source>ZAF</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

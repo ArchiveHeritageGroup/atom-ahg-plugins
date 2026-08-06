@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Access restriction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Access restrictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Back to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Community</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Community consent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Cultural notice</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Indigenous cultural &amp; IP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>inherited</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>TK label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Traditional knowledge labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>unknown</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

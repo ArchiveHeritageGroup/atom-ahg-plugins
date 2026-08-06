@@ -1,8 +1,19 @@
+<?php
+/*
+ * Search and holdings forms target GLAM Browse where ahgDisplayPlugin provides
+ * it, and fall back to AtoM's own description browse where it does not.
+ *
+ * They used to call url_for('@glam_browse') directly. url_for() throws on an
+ * unknown route, so a site with the theme but without ahgDisplayPlugin returned
+ * a 500 on every page carrying a search box - which is most of them. A theme
+ * must not require a feature plugin to be installed.
+ */
+?>
 <section class="card mb-3">
   <div class="card-body">
     <?php include_component('repository', 'logo', ['resource' => $resource]); ?>
 
-    <form class="mb-3" role="search" aria-label="<?php echo sfConfig::get('app_ui_label_institutionSearchHoldings'); ?>" action="<?php echo url_for('@glam_browse'); ?>">
+    <form class="mb-3" role="search" aria-label="<?php echo sfConfig::get('app_ui_label_institutionSearchHoldings'); ?>" action="<?php echo AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])); ?>">
       <input type="hidden" name="repos" value="<?php echo $resource->id; ?>">
       <label for="institution-search-query" class="h5 mb-2 form-label"><?php echo sfConfig::get('app_ui_label_institutionSearchHoldings'); ?></label>
       <div class="input-group">

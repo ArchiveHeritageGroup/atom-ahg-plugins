@@ -7,6 +7,16 @@ class ahgUserRegistrationPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Registration link, contributed rather than hardcoded in the theme.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('anonymous', 'user_register', [
+                'route' => '@user_register',
+                'label' => 'Create an account',
+                'icon' => 'fas fa-user-plus',
+                'weight' => 10,
+            ]);
+        }
         $this->registerAutoloader();
 
         $enabledModules = sfConfig::get('sf_enabled_modules', []);

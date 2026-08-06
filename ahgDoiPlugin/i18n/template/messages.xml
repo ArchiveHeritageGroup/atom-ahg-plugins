@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Error minting DOI:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Just minted!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Manage DOI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Mint DOI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Mint DOI for this record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Minted: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Minting...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>No DOI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Unknown error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>View on doi.org</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

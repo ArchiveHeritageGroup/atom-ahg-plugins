@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "ISAD(G) information object CRUD management — create, edit, delete, digital object upload, treeview navigation via Laravel Query Builder",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "descriptive-standard",
     "keywords": ["isadg", "information-object", "crud", "edit", "treeview", "descriptive-standard"],

@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Universal metadata extraction from digital objects using ExifTool, with automatic field mapping and preservation metadata support",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "preservation",
     "keywords": [

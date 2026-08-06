@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "DOI integration via DataCite — mint, deactivate, sync, queue processing, badge display, and verification",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "integration",
     "keywords": ["doi", "datacite", "persistent-identifier", "mint", "digital-object-identifier"],

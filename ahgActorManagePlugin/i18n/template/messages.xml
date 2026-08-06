@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Add new authority record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Authorized form of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Date modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Dates of existence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Description identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Display mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Empty: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Entity type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>General context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Institution identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Legal status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Maintained by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>No results found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Occupation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Other name(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Parallel form(s) of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Place</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Places</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Remove filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Search %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Showing %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Slug must be provided</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>With digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>[Untitled]</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -3,6 +3,15 @@
 /**
  * Shared helper for information object edit forms across all descriptive standards.
  *
+ * Lives in ahgCorePlugin, not ahgInformationObjectManagePlugin, because all six
+ * standards call it - ISAD, RAD, DACS, Dublin Core, MODS and RiC - while each of
+ * their extension.json files declares only ahgCorePlugin as a dependency. Held
+ * in a sibling standard plugin it was an undeclared cross-plugin dependency, so
+ * a standard installed on its own against stock AtoM had no IoFormHelper and
+ * fatalled on the first edit form.
+ *
+ * Referenced by bare class name everywhere, so the move needed no caller changes.
+ *
  * Loads dropdowns, IO data, and handles POST extraction — called by each
  * standard-specific action (ioManage for ISAD, dcManage for DC, etc.).
  */
@@ -226,7 +235,7 @@ class IoFormHelper
                 $culture
             );
         } else {
-            $parentId = (int) $request->getParameter('parent', $svc::ROOT_ID);
+            $parentId = self::resolveParentId($request->getParameter('parent'), $svc::ROOT_ID);
             $parentTitle = null;
             $parentSlug = null;
 
@@ -832,4 +841,49 @@ class IoFormHelper
             ->get()
             ->all();
     }
+
+    /**
+     * Resolve the ?parent= value on the add form, whether it is an id or a slug.
+     *
+     * The "Add new" button on a record passes the parent's SLUG:
+     *
+     *   link_to(__('Add new'), ['module' => 'informationobject', 'action' => 'add',
+     *                           'parent' => $resource->slug], ...)
+     *
+     * while this used to read it as (int) $request->getParameter('parent'), and
+     * (int) 'q9h8-4aqb-qh5s' is 0. Zero is falsy, so the parent was silently
+     * discarded and every description created from a record was filed at the top
+     * level instead of underneath it. Nothing errored, which is why it went
+     * unnoticed: the record saved perfectly, just in the wrong place.
+     *
+     * The RiC panel happened to work because it passes a numeric id, which is
+     * also why this looked like the mechanism was missing rather than broken.
+     *
+     * Both forms are accepted rather than changing the caller, because the slug
+     * is the better thing for a link to carry - it survives an export and reimport,
+     * and it is what every other record URL in the application uses.
+     */
+    protected static function resolveParentId($parent, int $rootId): int
+    {
+        if (null === $parent || '' === trim((string) $parent)) {
+            return $rootId;
+        }
+
+        $parent = trim((string) $parent);
+
+        if (ctype_digit($parent)) {
+            return (int) $parent;
+        }
+
+        // ObjectService offers getSlug() but no inverse, so resolve directly -
+        // and only to an information object, so a slug belonging to an actor or
+        // a term cannot be passed in as a parent.
+        $id = \Illuminate\Database\Capsule\Manager::table('slug')
+            ->join('information_object', 'information_object.id', '=', 'slug.object_id')
+            ->where('slug.slug', $parent)
+            ->value('slug.object_id');
+
+        return $id ? (int) $id : $rootId;
+    }
+
 }

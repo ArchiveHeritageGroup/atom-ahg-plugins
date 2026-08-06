@@ -1,0 +1,408 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Active (in-progress) jobs will not be affected.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>All queues</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Archived Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Are you sure you want to delete all completed and failed jobs?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Are you sure you want to delete the following job?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>attempt %1%/%2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Attempts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Backoff</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Back to jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Batch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Batch #%1% cancelled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Batches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Batch pagination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Breadcrumb</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Cancel this batch?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Cancel this job?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Chain</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Chain order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Clear inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Clear inactive jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Clear inactive jobs?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Completed jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Could not cancel batch.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Could not cancel job.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Delete all inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Delete job #%1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Delete this job</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Download file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Duration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Error details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Event Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Failed job not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Failed jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Job #%1% cancelled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Job #%1% retried.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Job Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Job ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Job name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Job notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Job not found or not in failed state.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Job output</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Job overview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Job pagination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Job report #%1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Job retried as #%1%.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Job Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>No batches found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>No jobs found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>No queue jobs found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Page %1% of %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Payload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Processing...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Queue Batches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Queue Job #%1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Queue pagination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Refresh</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Related object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Report #%1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Result</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Retry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Showing %1% of %2% batch(es)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Showing %1% of %2% job(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Stack trace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Toggle word wrap</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Total to delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>View Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Worker</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

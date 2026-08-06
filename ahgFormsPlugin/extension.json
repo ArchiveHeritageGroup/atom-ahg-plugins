@@ -4,7 +4,7 @@
     "version": "1.0.2",
     "description": "Configurable metadata entry forms per repository — drag-drop form builder, template library, field assignments, draft saving, and import/export",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "data-entry",
     "keywords": ["forms", "builder", "metadata", "template", "drag-drop", "custom-fields"],

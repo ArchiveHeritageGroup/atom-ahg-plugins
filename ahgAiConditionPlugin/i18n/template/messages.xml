@@ -1,0 +1,868 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- All repositories --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- Select grade --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- Severity --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>-- Type --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Accepted formats: PDF, DOC, DOCX, JPG, PNG</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add API Client</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add Client</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Add Damage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>AI Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>AI Condition Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>AI Condition Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>AI Condition Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>AI Condition Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>AI Condition Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>AI damage detection results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>AI Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Alert Grade</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>All grades</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Allow client to contribute training data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>All status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Analyze Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Analyzing...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Annotations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>API Client Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>API Clients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>API Key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Assessment Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Assessment Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Assessment Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Assessment statistics, grade distribution, and trends</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Assessor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Auto-Scan on Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Automatically scan digital objects when uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Available Datasets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Average Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Avg Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Back to Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Back to Browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Back to Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Batch Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Browse AI-powered damage detection results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Browse Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Bulk Condition Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Bulk Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Bulk scans run as a background CLI task. Use the command below to start:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Client</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Client:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Client Training Data Approval</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Condition Grade</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Condition History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Configure Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Configure service connection and assessment defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Configure the AI condition assessment service connection and defaults.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Confirm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Confirm Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Confirmed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Consent Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Contributions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Damage Classes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Damage description...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Damage Detection Overlay</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Damages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Damages Detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Dataset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Dataset ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Dataset uploaded successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Deduction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Delete this dataset? This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Detected Damages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Drag and drop a ZIP file here, or click to browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Enter conservation recommendations...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Epochs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>epochs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Expected format: ZIP file containing an &lt;code&gt;images/&lt;/code&gt; directory (JPG/PNG files) and an &lt;code&gt;annotations/&lt;/code&gt; directory (JSON files with damage type and bounding box coordinates).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Failed to delete dataset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Failed to load datasets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Failed to start training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>File Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Generate annotated overlay images with bounding boxes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Grade</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Grade Distribution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Image Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Images per training batch (reduce if running out of GPU memory)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Input image resolution for training (larger = more detail but slower)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Invalid response from server</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Last Modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Link to Object (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Loaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Loading datasets...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Loading model info...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Loading status...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Location zone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Manage SaaS API clients for external condition assessment access.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Manage SaaS API keys and usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Manual Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Manual Condition Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Max Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Min Confidence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Minimum confidence threshold for damage detection (0.1 - 0.9)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Model Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Model Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Month</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Monthly Limit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Monthly Trend (12 months)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Network error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Network error during upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>New AI Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>New Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>No API clients configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>No assessments found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>No assessments yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>No clients have training contributions enabled. Toggle the Training switch in the API Clients table above.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>No condition assessments found for this object.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>No damage data yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>No damage detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>No image available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Not Found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Notify when condition grade is at or below this level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>No training datasets available. Upload a ZIP file above.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>No trend data yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Not uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Number of training iterations (higher = longer but potentially more accurate)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Object Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Overall Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Overlay Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Pending Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Please select a condition grade</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Please select a dataset first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Please upload a ZIP file.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Precision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Push to Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Recall</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Recent Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Recommendations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Record a condition assessment manually without AI. Fill in the condition grade, damages, and recommendations based on physical inspection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Record a manual condition assessment without AI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Reference Photo (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Review and approve client data for use as model training data. Client consent documentation must be uploaded before approval.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Revoked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Run assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Run first assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Save Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Scan all digital objects in a repository or collection through AI assessment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Scan multiple objects for condition assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Search by title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Select a dataset from the table above to enable training.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>selected.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Service Connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Service URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Settings and API client management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Standalone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Starting...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Start Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Test</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Tier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Top Damage Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Total Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Training Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Training Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Upload an image for AI-powered damage detection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Upload an image or select an archival object to analyze for damage.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Upload a signed consent/approval document from the client authorizing use of their data for model training.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Upload Consent Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Upload consent document first</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Upload failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Uploading...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Upload labeled images and train the damage detection model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Upload labeled training data and train the damage detection model to improve accuracy for your collections.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Upload Training Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Use for Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>View Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>View Full Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>View Object</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

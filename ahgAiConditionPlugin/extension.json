@@ -2,6 +2,7 @@
     "name": "AI Condition Assessment",
     "machine_name": "ahgAiConditionPlugin",
     "version": "1.0.0",
+    "license": "AGPL-3.0-or-later",
     "description": "AI-powered condition assessment using YOLOv8 damage detection and EfficientNet classification. Companion to ahgConditionPlugin.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "category": "ai",

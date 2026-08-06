@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Add new archival institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Advanced search options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Archive type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Clipboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Date modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Display mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Enter the digital latitude of the institution's physical location (rather than degrees, minutes and seconds), e.g. 49.459044</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Enter the digital longitude of the institution's physical location (rather than degrees, minutes and seconds), e.g. -104.296984</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Geographic Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Geographic Subregion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Locality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Search %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>See ISDIAH 5.2 for contact area information and examples.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Set filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Showing %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Sort</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Sort ascending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Sort descending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Thematic Area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Thematic area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>We've redirected you to the first page of results. To avoid using vast amounts of memory, AtoM limits pagination to %1% records. To view the last records in the current result set, try changing the sort direction.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

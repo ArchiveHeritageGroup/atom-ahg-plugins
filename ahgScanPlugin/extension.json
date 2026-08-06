@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Watched-folder streaming ingest: configurable watched folders, a scan/watch CLI that detects new files and feeds the ingest pipeline, processed/failed disposition dirs, and dedupe by SHA-256 checksum.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

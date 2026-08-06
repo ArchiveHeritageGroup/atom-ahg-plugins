@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>+27 xx xxx xxxx</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add notes for internal reference or to communicate with the requester...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Add review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Admin Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Admin Response</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>All Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>anon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Any additional context or motivation for your request...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Approve Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Archival Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Archival Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Are you sure you want to delete this publication request?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Are you sure you want to delete this request?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Assigned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Assign me</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Completed At</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Completed on</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Confirm Deletion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Confirm deletion of publication request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Created On</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Curator inbox</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Curator notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Decision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Decision status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Delete Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>e-Mail Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>e.g., Publication in book, exhibition, documentary, academic research, etc.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Email Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Enter the receipt code you were given when you submitted your request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>First Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Inbox</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>In Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Institution / Organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Manage image publication requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Motivation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Motivation / Additional Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Need By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Need Image By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>No request found for that receipt code. Please check it and try again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>No requests found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>No requests found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>No requests in this view.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>No reviews yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Object not found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Outcome</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Peer review and curator notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Peer reviews</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Phone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Phone Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Planned Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Planned use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Please describe how you intend to use the image(s)...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Please select an outcome for this request:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Publication Request Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Receipt code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Rejected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Reject Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Request Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Request details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Requested Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Requester</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Requester Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Requester Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Request from</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Request Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Request not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Request status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>RequestToPublish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Request To Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Request to Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Review publication request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Review Publication Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Review Request to Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Save notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Save Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Showing %1% of %2% requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Submit a request for publication of archival images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Submit Decision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Submit Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Submitted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Submitted by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Submitted on</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Surname</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Take action on this request:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>There are no publication requests matching your filter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>This action cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Track</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Track a publication request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Triage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Triage, assign and review publication requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Verdict</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>View Full Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>View Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>When do you need the image(s)?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Yes, Delete Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>your.email@example.com</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Your company, university, or organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Your Contact Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Your first name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Your name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Your surname</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

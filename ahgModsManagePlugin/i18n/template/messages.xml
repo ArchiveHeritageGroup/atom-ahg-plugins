@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>- Select -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>- Select type -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>- Use global default -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Access conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Actor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Actor name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add alternative identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add child level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Add language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Add name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Add new archival description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Add new child levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Administration area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Alternative identifier(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>An abstract or description of the resource scope and content.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Could not generate identifier.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Display standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>e.g. ca. 1900</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>e.g. Former reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Edit archival description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Elements area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>End</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Failed to generate identifier.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Information about restrictions on access to the resource.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Last updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>MODS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Name access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Names and origin info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Part of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Place access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Please select a repository first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Scheme: Archive Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Source language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Start</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Subject access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>The nature or genre of the resource (MODS Resource Type).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>The repository which holds the resource.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Type of resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Type to add name...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Type to add place...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Type to add subject...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Type to search repositories...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select a fonds or collection --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>About EAC-CPF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Access and use restrictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Accession CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Accession CSV Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Acquisition Date From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Acquisition Date To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>All repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>All types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Archival Descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Arrangement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Authority Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Collecting Policies, Holdings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Contact Information (address, phone, email)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>CSV Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>CSV format includes all repository fields and contact information.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>CSV supports bulk export. EAD/DC require selecting a specific record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Custodial history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Descriptive identification (unitid, unittitle, unitdate)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Download CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>e.g. my-fonds-123</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>EAC-CPF is the standard for authority record exchange.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>EAD 2002 Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>EAD Export includes:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Entity Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Export Accession Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Export accession records to CSV. Compatible with ingest wizard re-import.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Export accession records to CSV format. The output matches the ahgIngestPlugin accession import format for round-trip compatibility.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Export Archival Descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Export archival descriptions in CSV format compatible with AtoM import.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Export archival descriptions in EAD 2002 XML format. Select a top-level record (fonds/collection) to export with its hierarchy.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Export archival descriptions in various formats.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Export Archival Descriptions to CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Export Authority Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Export authority records (people, organizations, families).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Export Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Export EAD XML</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Exported Columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Exported Fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Export Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Export only descendants of this record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Export Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Export repository/institution records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Export Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Export Tips</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Export to Encoded Archival Description (EAD)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>For bulk exports, use the command line tools: php symfony export:bulk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>GPS Coordinates (if available)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Hierarchical component structure (dsc/c)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Hold Ctrl/Cmd to select multiple. Leave empty for all levels.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Include all descendants (not just direct children)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Include all descendants (series, files, items)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Level of Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Limit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Name, Identifier, History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>No limit (all records)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Opening Times, Access Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Parent Record Slug (Optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Re-import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Repository (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Scope and content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Select Record to Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Showing top-level archival descriptions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Subject access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>The exported CSV can be re-imported using the Ingest wizard (Admin &gt; Ingest &gt; New &gt; Accessions) or the base AtoM command:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Total accessions:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Total Authority Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Total Descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Total Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>— All repositories —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

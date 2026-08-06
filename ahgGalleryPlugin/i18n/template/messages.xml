@@ -1,0 +1,956 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>24hr Security:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>About CCO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add new gallery item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add to Cart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add to Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Advanced search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Apply Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Appraiser</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Area (m²)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Artists</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>artists found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Artists Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Artwork Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Average Value:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Browse all items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Cataloguing Cultural Objects (CCO) is a standard for describing cultural works and their images.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>CCO Chapter %chapter%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>CCO Guide</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>CDWA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Cite this Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Climate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Climate Control:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Climate Controlled:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Collections Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Collections Procedures data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Collections Procedures equivalent: %field%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Complete if applicable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Compliance Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Condition &amp; Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Condition assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Condition Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Copyright Holder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Create new rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Creator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Credit Line</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Cultural Context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Culture/People</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Current</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Currently Open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Current Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Delete digital object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Digital object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Digital Preservation (OAIS)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Dimension Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Dimensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Drag to rotate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Duplicate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Edit digital object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Edit GRAP data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Edition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Edition Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Examples:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Exhibitions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>exhibitions found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Exhibitions Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Expiring Soon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Expiring within 90 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Extended Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Facility Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>facility reports found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Field Legend</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Fields include: work type, materials, techniques, dimensions, subjects, and provenance.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Fill all required and recommended fields for complete cataloguing.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Filter Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Fire</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Fire Detection:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Fullscreen</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Gallery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Gallery Browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Gallery Cataloguing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Gallery Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Gallery Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Gallery Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Gallery Reports Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Gallery Spaces</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Generate identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Generate label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>GLAM browser</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Go to Cart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>GRAP data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Handlers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Height (m)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Help</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Historical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Iconography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Image %1% of %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Import digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Impression Quality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Incoming</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>In Planning</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Inscriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Insurance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Item Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Link digital object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Link physical storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Loading 3D model...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Loan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Loan #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Loans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>loans found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Loans Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Manage artwork and gallery items using CCO cataloguing standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Manage Loans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Marks/Labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Materials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Max Value (R)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Max Weight (kg)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Measurements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Media</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Media Coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Media type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Min Value (R)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>More</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Move</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Must be completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Named Subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Nationality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>New Loan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>No gallery items yet. Add your first item to get started.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Object #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Object Identification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Object Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Outgoing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Overdue:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Overdue only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>pending requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Physical Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Place</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Provenance &amp; Chain of Custody</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Quick Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Read metadata aloud</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Read PDF content aloud</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Recent Gallery Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Recommended</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Recommended Fields Missing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Record Completeness</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Related Works</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Relationship Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Remove from Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Rename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Represented</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Reproduction Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Request to Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Reset view</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Right-click drag to pan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Save anyway</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>School/Group</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Scroll to zoom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Security</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Should be completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Showing %1% gallery objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Signature</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Space</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Spaces</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Standards Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>State</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Style</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Subject Matter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Subjects Depicted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Support</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Techniques</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>This form follows CCO/CDWA standards for artwork cataloguing.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>to close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Toggle auto-rotate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Total Area:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Total Current Value:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Total Fees:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Total Insurance:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Total Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Total Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Total Spaces:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Total Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Trained Handlers:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Upcoming</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Update publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Validation Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Valid Until</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Valuations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>valuations found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Valuations Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Venue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>View Collections Procedures data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>View GRAP data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>View in AR</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>View Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Visitors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Wall Length (m)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Wall Length:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>With Media</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Without Media</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Workflow Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Work Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

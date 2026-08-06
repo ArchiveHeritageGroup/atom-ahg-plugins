@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>all matching descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>all matching institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>all matching people &amp; organizations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>all matching places</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>all matching subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Are you sure you want to replace "%1%" with "%2%" in %3%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Both</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Both source and replacement fields are required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Browse all descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Case sensitive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Confirm replacement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Currently displaying:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Date of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>End</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Expanded with: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Filter by date range:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Filter options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Filter results by:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Find</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Global search/replace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Invalid end date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Invalid start date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Matching records (%1%)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Newest additions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>No results found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Replace with</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Revision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Search and replace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Showing %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Start</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>This action cannot be undone!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>This will permanently modify %1% records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Use regular expressions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>We've redirected you to the first page of results. To avoid using vast amounts of memory, AtoM limits pagination to %1% records. Please, narrow down your results.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

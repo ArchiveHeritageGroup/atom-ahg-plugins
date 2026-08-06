@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "OCFL v1.1 (Oxford Common File Layout) preservation storage: storage-root management, content-addressed object versioning with deterministic inventory.json + SHA-512 digests, per-version directories, fixity verification and tar export.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "preservation",
     "keywords": [

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Approve &amp; Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Click "Translate" to preview translations before saving.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Deselect All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Example: http://127.0.0.1:5100/translate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Fields to Translate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Health check:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>MT endpoint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Overwrite existing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Read from culture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Review Translations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Save with AtoM culture code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Select All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Source Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Target Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Timeout (seconds)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Translate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Translate Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Translation settings</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

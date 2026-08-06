@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Active — click to pause</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>AHG Framework</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Allowed types:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Are you sure? This will overwrite existing data!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Are you sure you want to delete this backup?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Are you sure you want to restore? This will overwrite existing data!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Backup &amp; Restore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Backup File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Backup Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Backups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Backup Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Browse Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Complete!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Components</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Components to include:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Configure default backup settings. These can be overridden when creating individual backups.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Create a backup before restoring</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Create Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Create Backup Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Create First Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Create Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Creating backup...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Custom Plugins</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Custom Plugins to Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Database</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Database Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Database Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Database Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Day of Month</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Day of Week</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>DB Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Default Components</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Delete this pending upload?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Deselect All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Directory where backups will be stored</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Drag and drop your backup file here</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>File too large. Maximum size is</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Framework</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Frequency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Full</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Full Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Fuseki / RIC Triplestore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Help</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Host</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Important</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Incremental Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Invalid file type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Large uploads may take several minutes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Log Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Max Backups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Max file size:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>May take longer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>No backups found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>No schedules configured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Notification Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Notify on backup failure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Notify on successful backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>or</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Paused — click to activate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Pending Uploads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Please select a file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Please wait, this may take several minutes...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Please wait...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Plugins</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Port</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Restore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Restore all database tables and data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Restore atom-framework files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Restore Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Restore Backup:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Restore custom plugin files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Restore digital objects and uploaded files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Restore from Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Restore Uploaded Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Restoring...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Restoring will overwrite existing data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Restoring will overwrite existing data. This action cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Restoring will overwrite existing data. This action cannot be undone. Make sure you have a current backup before proceeding.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Retention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Retention (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Retention Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Scheduled backups use a cron job. Set up with:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Schedules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Select All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Select components to include:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Select components to include in this backup:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Select components to restore:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Select which AHG plugins to include in plugin backups. Found %1% plugins.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Start Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Start Restore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Storage Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Test Connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Total Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Upload a complete backup archive (.tar.gz) containing database, uploads, plugins, etc.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Upload Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Upload Backup File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Upload Help</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Uploading...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Upload just a database dump file (.sql or .sql.gz)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Upload Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Uploads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Uploads (Digital Objects)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Uploads / Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Upload Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Use this for complete system migrations or disaster recovery. Upload a .tar.gz file created by this backup system.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Use this to restore just the database. Accepts .sql or .sql.gz files from mysqldump or this system.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Warning:</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

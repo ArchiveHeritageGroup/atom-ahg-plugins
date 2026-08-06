@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Action: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add a chain rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add steps first</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>All workflows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Apply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Auto-layout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Back to task</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Chain rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Clear all edges</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Clear filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Collection dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Collections Procedure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Collections Procedures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Collections Procedures:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Collections Procedures chain rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Collections Procedures compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Collections Procedures compliance dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Completion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Compliance dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Current step</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Current step:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Delete this chain rule?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Designer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Designer:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Diagram:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Drag from a node's right handle to another node's left handle to connect. Right-click an edge to delete it.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Edit workflow</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Edit workflow &amp; steps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Existing rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Filter by Collections Procedures procedure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Inactive step</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>In progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Install Collections Procedures pack</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Install the Collections Procedures procedure starter pack? Tick Overwrite first to RESET existing seeded steps.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Legend</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>List of tasks assigned to you</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>My assigned tasks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>No chain rules defined yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>No steps yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Not started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Object:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>On approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>On complete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>On first step</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Optional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Optional step (diamond)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Overdue threshold (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Overwrite</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Pending (not yet reached)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Priority: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Progress diagram</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Progress legend</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Recent workflow activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Recent workflow activity log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Rejected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Save edges</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Skip to main content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Spawn a task on THIS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Standard step</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Status: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Steps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Tag this workflow if it implements one of the 21 Collections Procedures procedures.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Task not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Task progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>This workflow has no steps yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>This workflow has no steps yet. Add at least one step to see a diagram.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Trigger</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>View diagram</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Visual diagram showing the steps of workflow "%1%" and the order they execute.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>When a procedure completes, automatically spawn a task on a downstream procedure for the same object.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>When THIS completes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>When ticked, existing Collections Procedures workflows have their steps replaced with the seed defaults.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Workflow not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Workflows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Workflow structure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>— Not a Collections Procedure —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>— then come back here to connect them.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

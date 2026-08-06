@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>All types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Are you sure you want to delete all extracted metadata?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Audio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Average Fields per Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Batch Extract</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Delete Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Digital Object Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Documents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>ExifTool can extract metadata from the following file types:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>ExifTool is not installed on this system. Install it with: &lt;code&gt;sudo apt install exiftool&lt;/code&gt;</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>ExifTool is required for metadata extraction. Install it with:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>ExifTool Not Available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>ExifTool Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Extracted Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Extraction Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Extract metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Extract Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>File Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Filter tags…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>For other operating systems, visit: https://exiftool.org/install.html</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Full embedded metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Has Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Installation Instructions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Installed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Limited</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Location (GPS) tags are hidden — visible to administrators only.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Metadata Extraction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Metadata Extraction Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>metadata fields extracted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>MIME Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>MIME Type Breakdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>No - not extracted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>No digital objects found in the repository.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>No digital objects found matching your criteria.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>No metadata has been extracted for this digital object yet. Click "Extract Metadata" to begin.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Objects with Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Parent Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Showing %1% of %2% digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Supported</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Supported Formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>System Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>tags</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>This image carries GPS/location data — hidden from public display.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Top 10 file types in your repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Total Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Total Metadata Fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Video</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>View metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Yes - has metadata</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

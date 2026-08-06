@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>AI inference provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>AI inferences</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Asset hash</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Auction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Authenticity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Authenticity report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Authenticity Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>By certainty</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>By research status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>C2PA content credentials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>C2PA manifests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Catalogue coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Certainty</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Collections Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Collections Procedures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Condition Photos</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Confidence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Cultural property status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Digital object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Every published record has a provenance record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Export the same data as JSON:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>flagged unclear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Gap</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Gift / Donation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Heritage Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>incomplete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Inheritance / Bequest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Loan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Manage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Manifest label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Nazi-era diligence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>No AI inferences recorded for this record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>No C2PA content credentials bound to this record’s digital objects.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>No dated events to plot yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>No gaps flagged.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Open record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Other event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Provenance &amp; Chain of Custody</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Provenance Coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Provenance Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Provenance gaps detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Provenance records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Provenance timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>published records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Published records with NO provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Recorded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Recorded gaps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Records with provenance gaps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Recovery / Restitution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Sale / Purchase</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Service</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Signed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Signing key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Signing key (kid)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Theft / Confiscation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>This report surfaces the machine provenance the platform records for this description: AI inferences that produced or enriched its metadata (each cryptographically signed at inference time) and any C2PA content credentials bound to its digital objects.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Transfer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>unchecked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>undated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>View details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Visual Redaction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Visual Timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>year gap</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>“Verified” = the inference’s Ed25519 signature was re-checked against the current signing key and matches the recorded manifest. “Signed” = a signature is present but was minted by a rotated key (still tamper-evident, verify with the archived key). “Unsigned” = recorded before signing was enabled.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

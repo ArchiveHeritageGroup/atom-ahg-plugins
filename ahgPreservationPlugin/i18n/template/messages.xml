@@ -1,0 +1,884 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>- None (top-level package) -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Add all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add all objects from a collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add Digital Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Agent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>AIPs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Algorithm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>All objects have checksums</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>All Statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>All Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>All verifications are current</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Archival</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Archival Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>At-Risk Formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Back to Packages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Back to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Back to Scheduler</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Backup &amp; Replication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>BagIt Structure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Brief description of package contents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Build &amp;amp; Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Build &amp;amp; export on save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Build Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Built</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Checked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Checked At</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Checked By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Checksum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Checksum Algorithm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Checksum Coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Checksums</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Clean</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>CLI Commands</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Convert to AIP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Created By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Create DIP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Create Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Create your first package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Date/Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Delete Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Derived Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Digital Object Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Digital Preservation Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>DIPs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Dissemination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Download Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Duration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>e.g., Annual Reports 2024 SIP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>e.g., Permanent, 10 years, etc.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Edit Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Edit Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Enter digital object ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Enter the ID of a digital object to add to this package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Event Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Exported</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Export Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Export Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Extension</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>File Paths</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>File Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Fixity Check History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Fixity Check Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Fixity Checks (30d)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Fixity Failures (30d)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Fixity Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Format Conversion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Format ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Format Identification (PRONOM)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Format Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Format Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>High-Risk Format Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Infected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Issue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Last Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Last Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Linked Collection / Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>MIME Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Nest this package under a parent - e.g. a SIP or DIP under its AIP.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>New Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>New Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Next Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>No backup verifications performed yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>No checksums generated yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>No events recorded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>No fixity checks found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>No fixity checks performed yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>No fixity checks yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>No format conversions performed yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>No high-risk format objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>No objects added yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>No objects in this package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>No packages found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>No preservation events recorded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>No preservation events yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>No replication logs yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>No replication targets configured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Not Scanned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>No virus scans performed yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>OAIS Packages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>OAIS Package Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Objects Requiring Attention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Objects Without Checksums</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>One step: builds and exports so the download is ready.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Organization creating this package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Originator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Outcome</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Package and export immediately so the download is ready after saving (requires at least one object).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Package Checksum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Package Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Package Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Package Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Package Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Package Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Package Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Packages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Packages for this record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Package Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Parent Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Parent Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Pending conversions:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Preservation Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Preservation Events (PREMIS)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Preservation Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Preservation Policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Preservation Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>PUID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Pulls every master digital object under the chosen description and its child records into this package.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Recent Backup Verifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Recent Conversions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Recent Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Recent Fixity Checks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Recent Preservation Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Recent Replications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Recent Virus Scans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Reference to submission agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Regenerate Checksums</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Related Packages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Replication Targets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Retention Period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Return to Central Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Scanned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Scanner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Scheduler</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Search a collection/description by title or reference...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Search a description by title or file name and pick it - or type a numeric digital object ID directly.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Search archival descriptions by title or reference...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Search by title or file name...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Select type...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>SIP for ingest, AIP for storage, DIP for access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>SIPs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Source Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Stale Verification (&gt;30 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Submission</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Submission Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Supported Conversions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Target</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>The archival collection this package represents (its child descriptions).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Threat</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Tool</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Total Packages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Total Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>UUID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Validated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Validate Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Verify Fixity Now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Virus Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Virus Scanning</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Warnings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Workflow Scheduler</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

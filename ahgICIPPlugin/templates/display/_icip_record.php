@@ -87,6 +87,56 @@ $esc = static fn ($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
 // Machine restriction_type values -> human-readable labels. Closure (not a named
 // function) because this template is included twice per page (badge + panel).
 // Unknown values fall back to Title Case of the raw value.
+// Consent status and scope are stored as machine values, and scope is a JSON
+// array, but both were printed raw - the panel read "Demonstration Descendant
+// Community: consultation_in_progress (["reproduction", "research_use"])".
+// The labels already exist on ahgICIPService and are what every other ICIP
+// screen shows, so they are reused rather than duplicated here.
+$optionLabel = static function ($value, string $method) {
+    $value = (string) $value;
+
+    if ('' === $value) {
+        return '';
+    }
+
+    if (class_exists('ahgICIPService') && method_exists('ahgICIPService', $method)) {
+        $options = ahgICIPService::$method();
+
+        if (isset($options[$value])) {
+            return __($options[$value]);
+        }
+    }
+
+    // Unknown value: Title Case it rather than show snake_case.
+    return ucfirst(str_replace('_', ' ', $value));
+};
+
+$consentStatusLabel = static fn ($v) => $optionLabel($v, 'getConsentStatusOptions');
+
+// Tolerate a bare string or comma-separated list so an older row still renders.
+$consentScopeLabel = static function ($raw) use ($optionLabel) {
+    if (empty($raw)) {
+        return '';
+    }
+
+    $values = json_decode((string) $raw, true);
+
+    if (!is_array($values)) {
+        $values = array_map('trim', explode(',', (string) $raw));
+    }
+
+    $labels = [];
+    foreach ($values as $value) {
+        $label = $optionLabel($value, 'getConsentScopeOptions');
+
+        if ('' !== $label) {
+            $labels[] = $label;
+        }
+    }
+
+    return implode(', ', $labels);
+};
+
 $restrictionLabel = static function ($type) {
     $map = [
         'community_permission_required' => 'Community permission required',
@@ -174,8 +224,9 @@ $canManage = isset($sf_user) && $sf_user->isAuthenticated();
                 <?php foreach ($consent as $c): ?>
                     <div class="small">
                         <?php echo $esc($c->community ?: __('Community')); ?>:
-                        <strong><?php echo $esc($c->consent_status ?: __('unknown')); ?></strong>
-                        <?php if ($c->consent_scope): ?><span class="text-muted">(<?php echo $esc($c->consent_scope); ?>)</span><?php endif; ?>
+                        <strong><?php echo $esc($consentStatusLabel($c->consent_status) ?: __('Unknown')); ?></strong>
+                        <?php $scope = $consentScopeLabel($c->consent_scope); ?>
+                        <?php if ('' !== $scope): ?><span class="text-muted">(<?php echo $esc($scope); ?>)</span><?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>

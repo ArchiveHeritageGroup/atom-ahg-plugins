@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Accession Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Archival Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Back to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Barcode Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Barcode source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Batch label printing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Batch print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Call Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Comma/space separated. Overrides repository.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Create a template first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Delete this template?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Download PNG</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Download requires html2canvas. Use Print instead.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>e.g. 631, 642, 700</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Edit label template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Font (pt)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Gallery Artwork</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Grid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Include</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>ISBN</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>ISSN</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Label (mm)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Label Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Label H (mm)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Label Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Label templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Label W (mm)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Large (100mm)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>LCCN</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Library Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Linear Barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Margin (mm)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Medium (75mm)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Museum Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>New label template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>New template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>No matching records found for that selection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>No templates yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Object IDs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Object Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>OpenLibrary ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Page size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Print Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Print Labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>QR Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>QR code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>QR target</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Record URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Show</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Show barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Show identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Show QR code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Show repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Shows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Show title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Small (50mm)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>— none —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>…or whole repository</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

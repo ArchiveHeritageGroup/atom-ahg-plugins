@@ -1,4 +1,15 @@
 <?php
+/*
+ * Search and holdings forms target GLAM Browse where ahgDisplayPlugin provides
+ * it, and fall back to AtoM's own description browse where it does not.
+ *
+ * They used to call url_for('@glam_browse') directly. url_for() throws on an
+ * unknown route, so a site with the theme but without ahgDisplayPlugin returned
+ * a 500 on every page carrying a search box - which is most of them. A theme
+ * must not require a feature plugin to be installed.
+ */
+?>
+<?php
 /**
  * Enhanced Simple Search Options Dropdown
  * Includes: Global search, Advanced search, Search Templates, Saved Searches, History
@@ -32,7 +43,7 @@ $popular = $searchService->getPopularSearches(5);
   </div>
   
   <!-- Advanced Search -->
-  <a class="dropdown-item" href="<?php echo url_for('@glam_browse') . '?showAdvanced=true'; ?>">
+  <a class="dropdown-item" href="<?php echo AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])) . '?showAdvanced=true'; ?>">
     <i class="fa fa-sliders-h me-2"></i><?php echo __('Advanced search'); ?>
   </a>
   
@@ -83,7 +94,7 @@ $popular = $searchService->getPopularSearches(5);
   <?php foreach ($history as $item): ?>
   <?php 
     $params = json_decode($item->search_params, true) ?: [];
-    $searchUrl = url_for('@glam_browse') . '?' . http_build_query($params);
+    $searchUrl = AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])) . '?' . http_build_query($params);
   ?>
   <a class="dropdown-item" href="<?php echo $searchUrl; ?>">
     <i class="fa fa-search me-2 text-muted"></i>
@@ -105,7 +116,7 @@ $popular = $searchService->getPopularSearches(5);
   <?php foreach (array_slice($popular, 0, 3) as $p): ?>
   <?php 
     $params = json_decode($p->search_params, true) ?: [];
-    $searchUrl = url_for('@glam_browse') . '?' . http_build_query($params);
+    $searchUrl = AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])) . '?' . http_build_query($params);
   ?>
   <a class="dropdown-item" href="<?php echo $searchUrl; ?>">
     <i class="fa fa-trending-up me-2 text-warning"></i>

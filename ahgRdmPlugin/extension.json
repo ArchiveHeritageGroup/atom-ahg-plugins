@@ -4,7 +4,7 @@
     "version": "0.1.0",
     "description": "Sovereign (POPIA-resident) research-data-management module: dataset deposit, AI-assisted human-gated POPIA sensitivity scan, access/embargo + DOI, compliance dashboard. Reverse port of Heratio ahg-rdm (heratio#1337).",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

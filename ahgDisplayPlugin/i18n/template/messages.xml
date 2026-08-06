@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select field --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Access Copies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Access Points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Acquisition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Acquisition method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add criterion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add new physical storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add to clipboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Advanced Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Advanced search options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>AI-powered search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>AIP UUID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>All descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>All sectors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Altitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Any</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Any field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Any level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Any repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Aperture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Archival description images carousel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Archival description title link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Archival history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Asc</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Ascending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Basic</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Basic file metadata extracted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Camera</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Card view</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Changing the current slide of this carousel will change the description title displayed in the following carousel. Clicking any image in this carousel will open the related description view page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Circulation status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Clicking this description title link will open the description view page for this digital object. Advancing the carousel above will update this title text.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Copyright</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Creator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Date Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Date from</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Date matching</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Date to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Desc</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Descending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Description updated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Descriptive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Did you mean:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Embedded Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Enable Semantic Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Enter search term...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Enter search terms...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Entities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Error loading expansions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Exact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Exposure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Extent and medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>File missing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Filesize</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>File UUID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Filter by:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Filter results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Focal Length</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Format name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Format registry key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Format registry name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Format version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Full Browse Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Full width</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Gallery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Genre</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>GLAM Browser</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>GLAM Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Global (visible to all users)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>GPS Coordinates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Grid view</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Group by top level only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Holdings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Image carousel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Ingested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>In progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>ISO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Keywords</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Latitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Loading expansions...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Longitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Make public (shareable link)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Manage Saved Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Master file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Materials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Material type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Media type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Mime-type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Museum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Museum repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Narrow your results by:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>No expansions found for this query.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>No results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>No results found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Normalized</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Notify me of new results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Only top-level descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Original file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Overlapping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Permissions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Photos</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Place</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Place of creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Please log in to download this PDF file.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Preservation Copies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Preservation copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Query Expansion Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Quick search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Reference code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Reference copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Relevance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Results %1% to %2% of %3%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>results ranked by relevance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>rtp_need_image_by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Saved Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Save Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Save This Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Scope and content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Search hierarchy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Search in sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Search instead for</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Search Query</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Search specific field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Semantic Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Show all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Showing %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Showing fuzzy matches from search index. Results may be approximate.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Showing results for</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Slug was adjusted to remove special characters or</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Sort</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Switch to classic search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Synonyms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Table view</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Technical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Thumbnail copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Top-level only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Type to search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Unable to extract embedded metadata: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>When enabled, your search will be expanded with synonyms and related terms. For example, searching for "archive" will also find "repository", "depot", "record office", etc.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>With digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>with digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Without digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Work type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

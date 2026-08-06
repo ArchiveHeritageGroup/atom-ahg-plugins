@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Add a comment...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add Chart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Add components to your report using the buttons above</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add Stat Card</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add Table</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add this cron entry to enable scheduled reports:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Aggregate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>All Versions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Are you sure you want to delete the template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Are you sure you want to delete this report?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Are you sure you want to delete this template?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Are you sure you want to restore version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Ascending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Available Columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Back to Editor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Bar Chart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Briefly describe what this report shows...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Build and execute queries for this report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Central Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Chart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Chart Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Chart Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Choose a descriptive name for your report.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Column Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Comma-separated list of email addresses to receive the report.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Compare</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Continue to Designer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Create New Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Create New Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Create Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Create Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Create Your First Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Create Your First Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Current</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Current Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Daily</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Data Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Data Table</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Data will appear here</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Day</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Day of Month</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Day of Week</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Days 29-31 will use the last day of the month if not available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Deleted Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Delete Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Delete this schedule?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Descending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Doughnut Chart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>e.g., 100</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>e.g., Monthly Accessions Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Edit Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Edit Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>email1@example.com, email2@example.com</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Email Recipients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Existing Schedules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>File not found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Frequency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Friday</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>From Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Generated:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Generated Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Group By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Hidden</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Horizontal Bar</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Institution (shared)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Last Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Line Chart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Loading comments...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Load Preview Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Manual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Monday</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Monthly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Narrative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>New Accession Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Next Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>No archived reports yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>No custom reports yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>No data available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>No data available for this section.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>No data found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>No data found matching your criteria.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>No filters applied</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>No schedules configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>No sections defined</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>No sections yet. Add sections to create a rich report with narrative, tables, charts, and more.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>No templates available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>No version history available for this report.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Only used for threshold triggers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Output Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Paused</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Per page:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Pie Chart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Please contact the report owner for access.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Powered by AtoM Report Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Private</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Public</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Quarterly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Query</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Query Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Quick Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Record Count Threshold</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Recurring</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Report Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Report Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Report Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Report Designer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Report Layout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Report Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Report Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Report Sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Report Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Report Status Changed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Report Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Request Revision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Restore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Restore Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Return to Draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Saturday</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Scheduled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Scheduled reports will appear here after they run.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Schedule Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Search columns...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Search reports...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Section title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Section Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Select column...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Select columns from the left panel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Select field...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Select the type of data you want to report on.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Server Setup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Shared</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Sort Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Statistic</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Stats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Status:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Sum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Sunday</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Table</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Template Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Template Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Template Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>The current version will be saved to history before restoring. This action can be undone by restoring the previous version.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>The share link has been deactivated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>The share link has expired.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>This action cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>This report has no content sections.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>This shared report is no longer available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>This template has no sections defined.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Threshold Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Thursday</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Time of Day</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Total:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Total Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Total Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Trigger-based</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Trigger Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Tuesday</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Untitled Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>User (private)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Use Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Use This Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Version History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>View full report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Viewing version history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Visibility</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Wednesday</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Weekly</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

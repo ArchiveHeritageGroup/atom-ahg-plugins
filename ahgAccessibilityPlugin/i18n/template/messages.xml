@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Alt text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Alt text (en)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Alt text coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Back to coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Coverage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Describe what the image conveys for users who cannot see it. Be concise and specific; do not start with “image of”. Leave blank if the image is purely decorative.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Edit alternative text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Image alternative text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Missing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>missing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Missing only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>No images.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Search title or filename…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>WCAG 1.1.1 — Non-text content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>With alt text</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

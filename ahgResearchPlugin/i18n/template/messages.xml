@@ -1,0 +1,4776 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(target-journal directory)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- none (use own Markdown below) --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- none --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>1. Take records offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>2. Bring your work back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Abstract</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Abstract max words</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Academic Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Accept</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Access conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Access Expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Accession</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Access Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Access Revoked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Account Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Accreditation / indexing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Accreditation market</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Actions for request %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Activities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>activities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Activity (last 7 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Activity Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Activity Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Add a comment...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Add a note...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Add credentials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Add dataset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Add Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Add First Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Add Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Add issue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Add Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Add Item to Evidence Set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Additional Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Additional Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Add Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Add Multiple</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Add Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Add notes, sources, suggestions, files to records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Add notes about the triage decision...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Add notes to items while browsing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Add notes to items while browsing or create standalone notes here.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Add partner institutions to enable cross-institutional research sharing.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Add Reading Room</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Add Resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Add Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Add Selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Add tags to organize and filter your journal entries.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Add to Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Add to Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Add to folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Add to my collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Add your ORCID client credentials below to enable Connect &amp; Sync.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Add your research notes here...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Admin - Can manage members</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Admin Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Administration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Advance Booking (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Advanced</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Affiliation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Affiliation Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>After approval, you can log in and book reading room visits.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>AI Extraction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Aims &amp; scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>All Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>All Projects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>All Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>All Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Already have an account?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Already have an account? Login</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Amenities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Analysis Tools</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>and is read-only.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Annotation List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Annotations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Annotation Studio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Any</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Any special handling notes...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Any special requirements or notes for staff</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>APC</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>API base (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Apply ODRL rights policies to outputs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Approved. Publishing creates a DRAFT AtoM description for a final archivist check before it goes public.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Approved:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Approve Researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Archive Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Archive Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Are you sure? This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Are you sure you want to delete this entry?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Arrangement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Article types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>A secret is already stored. Enter a new one only to replace it.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Assertions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Assessment title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Assign</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Assigned To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Assign Seat</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>At least 3 characters, letters and numbers only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>At least 8 characters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Attendees</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Audience</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Audience / role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Audit Trail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Author</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Authority Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Authors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Auto-Assign</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Available Equipment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Available Seats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>AV Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Back to Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Back to directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Back to Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Back to Login</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Back to Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Back to Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Back to Research</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Back to Workspace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Barcode Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Basic Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Batch Checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Batch Return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Batch Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Beginning</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Beginning keeps the essentials; Intermediate adds the working tools; Advanced reveals everything.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Best score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Bibliographies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Bibliography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Black &amp; White</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Body (Markdown)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Book</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Book a visit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Book Equipment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Booking #%1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Booking Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Booking Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Booking History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Booking Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Booking Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Bookings by Room</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Bookings require confirmation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Booking Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Book Reading Room</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Book Reading Room Visit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Book Visit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Breadcrumb</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Brief description of the institution...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Brief description of the report...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Bring valid ID on visit day</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Browse and annotate your collected records offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Build institutional journals or draft a manuscript toward an external target journal.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>By Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Can add notes and resources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Cancel Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Cancel at least 24h in advance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Cancel Booking</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Cancellation Notice (hours)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Cancelled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Cancel My Booking</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Cancel this activity?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Cancel this booking?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Cancel this equipment booking?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Can edit all project content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Can images or files be reused? (reproduction)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Can view project details and resources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Capacity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Capacity:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Category of document this template applies to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Certificate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Certificate no.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Certificate of completion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Certified Copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Chain of custody for %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Changing mode only changes what is shown - nothing you have created is removed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Check-in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Check-out</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Check In</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Check in researcher?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Check in this researcher?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Check Out</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Checkout Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Check out researcher?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Checkout Selected Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Check out this researcher?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Choose a Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Choose a username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Choose folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Choose researcher-sync.json &amp;amp; sync</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Choose the kind of archaeological archive you are describing. Each type is described against ISAD(G).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Choose what to take with you, then download a self-contained package. It opens in any web browser with no internet or login — add notes, sources, suggestions and files, then bring them back below. Only records you are permitted to see are included.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Chronological chain of custody events combining handoffs, movements, and provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Click "Save for sync" → get researcher-sync.json.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Click edit to add content to this section.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Client ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Client Secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Close as Fulfilled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Close this request as fulfilled?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Closing Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Collection Contents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Collection List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Collection or project title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Collections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Comma-separated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Comma-separated list of days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Comma-separated tags...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>Comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>complete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Complete all modules before taking the assessment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Complete all modules to unlock the assessment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Completeness</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>Complete Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Complete Your Researcher Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Compliance Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Condition: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Condition After</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>Condition After (at return)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>Condition after for %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>Condition Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>Condition at Checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Condition Before</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Condition Before (at checkout)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Condition before for %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>Conditions of Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>Conditions of Reproduction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Configured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Confirm Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Confirm Booking</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>Confirm Checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>Confirmed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>Confirm New Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>Confirm Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>Confirm Return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>Connect &amp; Sync with ORCID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>Connected ORCID iD</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>Connection status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>contact@institution.org</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>Contact Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>Contact Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>Contact person name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>Contains personal data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>Continue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>Contribute</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>Copy full token</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>Copy Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>Corrections and additions proposed by researchers while working offline. Accepting or rejecting records your decision — it does not change the catalogue automatically; apply an accepted change to the record yourself.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>Correspondence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>Correspondence thread</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>Cost</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>Could not load folders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Could not request item.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>Could not save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Course completed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Courses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Create Account</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Create Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Create an account to book reading room visits, request materials, and save your research.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Create a Project (title + brief abstract)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Create a report to document your research findings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Create Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Create First Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Create First Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>Create Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Create New Evidence Set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>Create New Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Create New Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Create Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Create Room</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Create Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Create your first evidence set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Create Your First Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Create Your Research Account</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Creator(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Credentials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Current Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Current Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Current Seat Assignment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Current Status:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Current Triage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Custody Chain</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Custody Checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Custody handoff history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>Custody History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Custom</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Damage notes...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Data Management Plans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Datasets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Data type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Date &amp; Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Date range of research</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Days Open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Decision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>Default Condition for All Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Define the fields that should be extracted from documents matching this template.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Delete article</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Delete DMP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Delete Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>Delete Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Delete this article?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>Delete this course and all its data?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Delete this entire DMP?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Delete this evidence set?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Delete this journal and all its issues/articles?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Delete this module?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Delete this note?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Delete this section?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Deny</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>Department</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>Describe an archaeological archive against ISAD(G) and submit it for archival review. Submitted descriptions are reviewed by archival staff before publication.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>Describe the purpose of your visit and any materials you wish to consult...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>Describe what this template is used for...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>Describe your current research project...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>Describe your research interests...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>Description (ISAD(G))</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>Destination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>Digest Frequency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>Digital Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>Disconnect</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>Disconnect ORCID?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>Doc Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Document Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>Document Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>DOCX</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>DOI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>DOI Minting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>Download offline package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>Draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Draft sections and keep a Research Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>Driver's License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>e.g., My Research Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>e.g., NASA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>e.g., National Archives of South Africa</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>e.g., Reading Room A, Seat 5</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>e.g. genealogy, 19th century, photographs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>e.g. Smith, J.; Doe, A.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Edit article</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Edit assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Edit course</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>Edit credentials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>Edit details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Edit Document Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Edit Evidence Set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Edit Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Edit lecture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>Edit module</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Edit Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Edit Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Editor - Can add resources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Editor email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>Editor name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Edit Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Edit Reading Room</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>Edit section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>eISSN</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>Email Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>End Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>End Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Enrol learner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Enrolments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>Enter a new password for account:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>Enter an ORCID iD first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>Enter report title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>Enter your email address and we will send you instructions to reset your password.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>Entity Resolution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>Entries will be added to this bibliography. Duplicate titles will be skipped.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>Entry title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>Entry Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="403">
+        <source>Equipment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="404">
+        <source>Estimated volume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="405">
+        <source>Ethics Milestones</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="406">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="407">
+        <source>events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="408">
+        <source>Evidence Set Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="409">
+        <source>Evidence Set Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="410">
+        <source>Evidence Sets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="411">
+        <source>Exhibition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="412">
+        <source>Existing Shares</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="413">
+        <source>Expected Attendees</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="414">
+        <source>Expires</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="415">
+        <source>Expires:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="416">
+        <source>Expiry Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="417">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="418">
+        <source>Export a bibliography for your draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="419">
+        <source>Export Finding Aid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="420">
+        <source>Export Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="421">
+        <source>Export Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="422">
+        <source>Export PDF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="423">
+        <source>Export Word</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="424">
+        <source>Extent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="425">
+        <source>Extent and medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="426">
+        <source>External Collaborators:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="427">
+        <source>External Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="428">
+        <source>External Research Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="429">
+        <source>External URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="430">
+        <source>Extraction Fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="431">
+        <source>Favorite</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="432">
+        <source>Favorited</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="433">
+        <source>Favourites folders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="434">
+        <source>Fetch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="435">
+        <source>Fetching from ORCID…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="436">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="437">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="438">
+        <source>Filter requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="439">
+        <source>Finalize manuscript sections and review any AI-assisted drafts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="440">
+        <source>Find a record by title or identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="441">
+        <source>Finding</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="442">
+        <source>Finding Aid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="443">
+        <source>Finished working offline? In the package, click "Save for sync" to download a researcher-sync.json file, then upload it here. Your notes and sources are added to your research, files are attached, and metadata suggestions go to a curator for review.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="444">
+        <source>First Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="445">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="446">
+        <source>Formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="447">
+        <source>From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="448">
+        <source>Full Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="449">
+        <source>Full Chain of Custody</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="450">
+        <source>Full Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="451">
+        <source>Funder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="452">
+        <source>Genealogical Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="453">
+        <source>Generate a new password for this user?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="454">
+        <source>Generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="455">
+        <source>Generated by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="456">
+        <source>Generate Finding Aid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="457">
+        <source>Generate finding aids from your evidence sets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="458">
+        <source>Generate Share Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="459">
+        <source>Government</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="460">
+        <source>Grant number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="461">
+        <source>Grayscale</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="462">
+        <source>has successfully completed the course with a score of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="463">
+        <source>Heading</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="464">
+        <source>Heritage Permits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="465">
+        <source>Historical Analysis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="466">
+        <source>Homepage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="467">
+        <source>Homepage URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="468">
+        <source>How far in advance can bookings be made</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="469">
+        <source>How it works</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="470">
+        <source>HTML</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="471">
+        <source>Hypotheses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="472">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="473">
+        <source>Identification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="474">
+        <source>ID Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="475">
+        <source>ID Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="476">
+        <source>Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="477">
+        <source>Import 3-5 references into Bibliography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="478">
+        <source>Import Citations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="479">
+        <source>In-App</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="480">
+        <source>Inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="481">
+        <source>Inactive institutions will not appear in share dropdowns.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="482">
+        <source>Include children</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="483">
+        <source>Include my existing notes/annotations on those records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="484">
+        <source>Independent Researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="485">
+        <source>Indexing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="486">
+        <source>Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="487">
+        <source>Ingest and tag sources; capture bibliographic metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="488">
+        <source>Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="489">
+        <source>Institution Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="490">
+        <source>Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="491">
+        <source>Intended Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="492">
+        <source>Intermediate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="493">
+        <source>Internal Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="494">
+        <source>Internal note (hidden from researcher)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="495">
+        <source>Invalid Access Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="496">
+        <source>Invite Member</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="497">
+        <source>ISSN</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="498">
+        <source>Issue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="499">
+        <source>Issued</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="500">
+        <source>Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="501">
+        <source>Item requested.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="502">
+        <source>items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="503">
+        <source>Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="504">
+        <source>Items for batch checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="505">
+        <source>Items for batch return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="506">
+        <source>Items in collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="507">
+        <source>Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="508">
+        <source>Journal Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="509">
+        <source>Journal Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="510">
+        <source>Keywords</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="511">
+        <source>Keywords...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="512">
+        <source>Knowledge Graph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="513">
+        <source>Knowledge Platform</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="514">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="515">
+        <source>Languages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="516">
+        <source>Last Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="517">
+        <source>Last Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="518">
+        <source>Learner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="519">
+        <source>Learner email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="520">
+        <source>Learner name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="521">
+        <source>leave blank to keep the stored secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="522">
+        <source>Leave empty for no expiry.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="523">
+        <source>Lecture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="524">
+        <source>Lecture Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="525">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="526">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="527">
+        <source>License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="528">
+        <source>Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="529">
+        <source>Linked project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="530">
+        <source>Linked Resources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="531">
+        <source>Link entries to projects to track research progress.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="532">
+        <source>Link Resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="533">
+        <source>Link this report to a research project to auto-populate data.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="534">
+        <source>Link to Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="535">
+        <source>Link to Entity (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="536">
+        <source>List of material requests with SLA status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="537">
+        <source>List of reproduction requests with SLA status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="538">
+        <source>Load a predefined set of sections from a report template. Existing sections are kept.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="539">
+        <source>Loading folders...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="540">
+        <source>Load Sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="541">
+        <source>Load Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="542">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="543">
+        <source>Login here</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="544">
+        <source>Make notes in a Notebook entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="545">
+        <source>Manage all evidence sets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="546">
+        <source>Manage Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="547">
+        <source>Manage folders...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="548">
+        <source>Manage Researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="549">
+        <source>Manual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="550">
+        <source>Manuscript passes all completeness and target-journal checks.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="551">
+        <source>Manuscripts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="552">
+        <source>Map Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="553">
+        <source>Mark All Read</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="554">
+        <source>Mark as no-show?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="555">
+        <source>Mark as read</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="556">
+        <source>Mark complete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="557">
+        <source>Markdown is rendered to HTML and word-counted on save.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="558">
+        <source>Market (e.g. ZA)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="559">
+        <source>Mark incomplete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="560">
+        <source>Material Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="561">
+        <source>Material Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="562">
+        <source>Material request not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="563">
+        <source>Material Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="564">
+        <source>Material requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="565">
+        <source>Materials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="566">
+        <source>Materials Requested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="567">
+        <source>Max Hours per Booking</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="568">
+        <source>Maximum duration of a single booking</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="569">
+        <source>Max words</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="570">
+        <source>Member - Can view and comment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="571">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="572">
+        <source>messages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="573">
+        <source>Messages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="574">
+        <source>Metadata Suggestions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="575">
+        <source>Microfilm Copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="576">
+        <source>Module</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="577">
+        <source>Modules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="578">
+        <source>Module title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="579">
+        <source>Move Down</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="580">
+        <source>Move Up</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="581">
+        <source>Multiple-choice questions. Select the correct option with the radio. Empty questions or those with fewer than two options are dropped on save.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="582">
+        <source>My enrolments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="583">
+        <source>My Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="584">
+        <source>My Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="585">
+        <source>My Notes &amp; Annotations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="586">
+        <source>My Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="587">
+        <source>My Projects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="588">
+        <source>My Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="589">
+        <source>My submissions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="590">
+        <source>My Workspace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="591">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="592">
+        <source>National ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="593">
+        <source>Needs Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="594">
+        <source>Network error. Please try again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="595">
+        <source>Network Graph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="596">
+        <source>New</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="597">
+        <source>new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="598">
+        <source>New Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="599">
+        <source>New Activity Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="600">
+        <source>New article</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="601">
+        <source>New Collection...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="602">
+        <source>New course</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="603">
+        <source>New Data Management Plan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="604">
+        <source>New DMP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="605">
+        <source>New Document Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="606">
+        <source>New Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="607">
+        <source>New journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="608">
+        <source>New Journal Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="609">
+        <source>New lecture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="610">
+        <source>New manuscript</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="611">
+        <source>New manuscript article</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="612">
+        <source>New Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="613">
+        <source>New or occasional researchers who want to create a simple project and collect a few key items quickly.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="614">
+        <source>New Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="615">
+        <source>New Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="616">
+        <source>New submission</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="617">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="618">
+        <source>No action available for this status.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="619">
+        <source>No actions yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="620">
+        <source>No activities found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="621">
+        <source>No articles.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="622">
+        <source>No assessment configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="623">
+        <source>No assessment configured for this course.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="624">
+        <source>No assessment configured yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="625">
+        <source>No bookings scheduled for today</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="626">
+        <source>No content for this module.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="627">
+        <source>No courses yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="628">
+        <source>No curriculum lectures available (research_lecture not present).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="629">
+        <source>No custody records found for this object.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="630">
+        <source>No data management plans yet. Create one to document how research data will be collected, stored, shared and preserved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="631">
+        <source>No datasets described yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="632">
+        <source>No equipment available for this time slot.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="633">
+        <source>No events yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="634">
+        <source>No evidence sets yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="635">
+        <source>No fields defined. Click "Add Field" to begin.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="636">
+        <source>No food or drinks, Handle materials with care...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="637">
+        <source>No issues or articles yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="638">
+        <source>No journal entries yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="639">
+        <source>No journals yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="640">
+        <source>No learners enrolled yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="641">
+        <source>No manuscripts yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="642">
+        <source>No material requests.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="643">
+        <source>No messages yet. Start the conversation below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="644">
+        <source>No modules yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="645">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="646">
+        <source>No notes yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="647">
+        <source>No notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="648">
+        <source>No partner institutions yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="649">
+        <source>No previous handoffs.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="650">
+        <source>No Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="651">
+        <source>No public ORCID record found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="652">
+        <source>No reading rooms available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="653">
+        <source>No reports yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="654">
+        <source>No reproduction requests.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="655">
+        <source>No requests selected for batch checkout.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="656">
+        <source>No requests selected for batch return.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="657">
+        <source>No researchers found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="658">
+        <source>No resources linked yet. Click "Link Resource" to add.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="659">
+        <source>No reviews requested yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="660">
+        <source>No seats available for this time slot.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="661">
+        <source>No sections yet. Add a section to start building your report.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="662">
+        <source>No shares yet. Generate a share link to collaborate with external researchers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="663">
+        <source>No Show</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="664">
+        <source>No specific institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="665">
+        <source>Not assigned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="666">
+        <source>Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="667">
+        <source>Note any damage, missing pages, etc.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="668">
+        <source>Note Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="669">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="670">
+        <source>Notes (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="671">
+        <source>Note title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="672">
+        <source>Nothing awaiting review.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="673">
+        <source>Notification Preferences</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="674">
+        <source>Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="675">
+        <source>Notification Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="676">
+        <source>Not yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="677">
+        <source>Not yet documented.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="678">
+        <source>Not yet triaged</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="679">
+        <source>No upcoming bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="680">
+        <source>No upcoming visits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="681">
+        <source>No visit history yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="682">
+        <source>Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="683">
+        <source>Object ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="684">
+        <source>Observation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="685">
+        <source>ODRL Policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="686">
+        <source>Open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="687">
+        <source>Open access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="688">
+        <source>Open index.html in any browser — no internet needed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="689">
+        <source>Opening Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="690">
+        <source>Operating Hours</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="691">
+        <source>Option</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="692">
+        <source>optional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="693">
+        <source>Optional description...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="694">
+        <source>optional inline Markdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="695">
+        <source>Optional message for the recipient...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="696">
+        <source>Optional notes...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="697">
+        <source>Optional notes visible to archive staff</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="698">
+        <source>Optional title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="699">
+        <source>or</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="700">
+        <source>ORCID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="701">
+        <source>ORCID Connect &amp; Sync</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="702">
+        <source>ORCID Credentials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="703">
+        <source>ORCID fetch failed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="704">
+        <source>ORCID iD</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="705">
+        <source>ORCID ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="706">
+        <source>Organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="707">
+        <source>Organizer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="708">
+        <source>Organizer Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="709">
+        <source>Original Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="710">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="711">
+        <source>Our staff will review your registration within 1-2 business days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="712">
+        <source>Overdue / Breached</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="713">
+        <source>overrides course default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="714">
+        <source>Own content (Markdown)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="715">
+        <source>Participants</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="716">
+        <source>Partner Institutions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="717">
+        <source>Pass mark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="718">
+        <source>Pass mark %</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="719">
+        <source>Pass mark % (overrides course)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="720">
+        <source>Passport</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="721">
+        <source>Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="722">
+        <source>Paste BibTeX or RIS content here...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="723">
+        <source>Paste Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="724">
+        <source>PDF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="725">
+        <source>Peer Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="726">
+        <source>Peer review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="727">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="728">
+        <source>Pending Approvals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="729">
+        <source>Pending Confirmation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="730">
+        <source>Pending Invitations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="731">
+        <source>Pending Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="732">
+        <source>Permalink</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="733">
+        <source>personal data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="734">
+        <source>Personal Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="735">
+        <source>Phone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="736">
+        <source>Photocopy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="737">
+        <source>Photograph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="738">
+        <source>Pick collections / projects / favourites and download the package.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="739">
+        <source>Pick the &lt;strong&gt;researcher-sync.json&lt;/strong&gt; file you downloaded; it uploads and syncs automatically.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="740">
+        <source>Pick the mode that fits you from the sidebar. Here is what each one is for and a short workflow - a map, not steps to click through.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="741">
+        <source>Placement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="742">
+        <source>Please describe why you need to renew your researcher registration...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="743">
+        <source>Please request a renewal to continue using research features.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="744">
+        <source>Please search and select an archive item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="745">
+        <source>Please select at least one note to export.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="746">
+        <source>Populated from ORCID record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="747">
+        <source>Position</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="748">
+        <source>Power users preparing publication-ready, reproducible outputs with cross-fonds analysis and impact tracking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="749">
+        <source>Preferences</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="750">
+        <source>Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="751">
+        <source>Print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="752">
+        <source>Print Call Slip</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="753">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="754">
+        <source>Priority: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="755">
+        <source>Private</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="756">
+        <source>Private - only you</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="757">
+        <source>Private Organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="758">
+        <source>Process Returns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="759">
+        <source>Profile last pulled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="760">
+        <source>Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="761">
+        <source>Project-specific tools (Knowledge Graph, Timeline, Map, AI Extraction) are available from each project page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="762">
+        <source>Project:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="763">
+        <source>Projects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="764">
+        <source>Provide a reason...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="765">
+        <source>Public</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="766">
+        <source>Public - all researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="767">
+        <source>Publications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="768">
+        <source>Published</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="769">
+        <source>Published as</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="770">
+        <source>Publisher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="771">
+        <source>Publish to AtoM (draft)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="772">
+        <source>Publish via the Journal Builder and track impact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="773">
+        <source>Pull profile from ORCID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="774">
+        <source>Purpose</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="775">
+        <source>Purpose (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="776">
+        <source>Purpose of Visit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="777">
+        <source>Quantity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="778">
+        <source>Question</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="779">
+        <source>questions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="780">
+        <source>questions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="781">
+        <source>Quick tips</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="782">
+        <source>Re-apply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="783">
+        <source>Reading Room Activities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="784">
+        <source>Reading Rooms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="785">
+        <source>Reason:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="786">
+        <source>Reason for cancellation...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="787">
+        <source>Reason for Rejection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="788">
+        <source>Reason for Renewal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="789">
+        <source>Recent Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="790">
+        <source>Recent Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="791">
+        <source>Recent Visits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="792">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="793">
+        <source>Record claims with supporting evidence and link sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="794">
+        <source>Record ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="795">
+        <source>Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="796">
+        <source>Reference / identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="797">
+        <source>Reference style</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="798">
+        <source>Register an ORCID API client at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="799">
+        <source>Register as a Researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="800">
+        <source>Registered</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="801">
+        <source>Registered:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="802">
+        <source>Registered Researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="803">
+        <source>Register for Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="804">
+        <source>Register Now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="805">
+        <source>Register to access the reading room, request materials, and save your research.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="806">
+        <source>Register your own ORCID API client (Member or Public) and store its credentials here — no administrator or server configuration required. Fetch/Pull of public profiles works even without credentials.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="807">
+        <source>Registration Expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="808">
+        <source>Registration Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="809">
+        <source>Registration Rejected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="810">
+        <source>Registrations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="811">
+        <source>Registrations Over Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="812">
+        <source>Registration Submitted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="813">
+        <source>Reject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="814">
+        <source>Rejected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="815">
+        <source>Rejection Reason:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="816">
+        <source>Reject Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="817">
+        <source>Related field notes, reports or datasets (notes)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="818">
+        <source>Release Seat</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="819">
+        <source>Release this seat?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="820">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="821">
+        <source>Remove enrolment?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="822">
+        <source>Remove from directory?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="823">
+        <source>Remove from Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="824">
+        <source>Remove this dataset?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="825">
+        <source>Remove this issue? Articles will be unassigned.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="826">
+        <source>Remove this resource?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="827">
+        <source>Remove your ORCID credentials?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="828">
+        <source>Report Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="829">
+        <source>Report Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="830">
+        <source>Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="831">
+        <source>Report Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="832">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="833">
+        <source>Reproducibility Pack</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="834">
+        <source>Reproduction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="835">
+        <source>Reproduction Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="836">
+        <source>Reproduction requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="837">
+        <source>Reproduction Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="838">
+        <source>Request Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="839">
+        <source>Request Correspondence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="840">
+        <source>Request Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="841">
+        <source>Requested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="842">
+        <source>Request ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="843">
+        <source>Requesting...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="844">
+        <source>Requesting access to:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="845">
+        <source>Request not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="846">
+        <source>Request Password Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="847">
+        <source>Request Peer Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="848">
+        <source>Request Registration Renewal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="849">
+        <source>Request Renewal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="850">
+        <source>Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="851">
+        <source>Requests Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="852">
+        <source>Request summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="853">
+        <source>Request this Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="854">
+        <source>Request this item for reading room access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="855">
+        <source>Request timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="856">
+        <source>Required for student researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="857">
+        <source>Required notice for cancellation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="858">
+        <source>Research</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="859">
+        <source>Researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="860">
+        <source>Researcher / principal investigator(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="861">
+        <source>Researcher Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="862">
+        <source>Researcher Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="863">
+        <source>Researcher Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="864">
+        <source>Researcher Renewal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="865">
+        <source>Researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="866">
+        <source>researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="867">
+        <source>Researchers running ongoing projects that need structured evidence capture, drafting and project management.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="868">
+        <source>Researcher submissions awaiting archival review. Open one to review, return for revision, approve, and publish.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="869">
+        <source>Researcher Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="870">
+        <source>Research Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="871">
+        <source>Research Interests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="872">
+        <source>Research Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="873">
+        <source>Research mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="874">
+        <source>Research mode guide</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="875">
+        <source>Research Output</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="876">
+        <source>Research Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="877">
+        <source>Research Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="878">
+        <source>Research Services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="879">
+        <source>Research Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="880">
+        <source>Research Tips</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="881">
+        <source>Reset Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="882">
+        <source>Resolution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="883">
+        <source>Resolved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="884">
+        <source>Resolve flagged conflicts via the Validation Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="885">
+        <source>Resource title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="886">
+        <source>Resource Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="887">
+        <source>Retention period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="888">
+        <source>Retrieval Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="889">
+        <source>Return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="890">
+        <source>Return &amp; Verify Material</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="891">
+        <source>Return / Verify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="892">
+        <source>Returned for revision:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="893">
+        <source>Return for revision — comment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="894">
+        <source>Return Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="895">
+        <source>Return notes for %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="896">
+        <source>Return to Homepage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="897">
+        <source>Return to researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="898">
+        <source>Reuse curriculum lecture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="899">
+        <source>Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="900">
+        <source>Reviewer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="901">
+        <source>Review history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="902">
+        <source>Review queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="903">
+        <source>Revoke</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="904">
+        <source>Revoke this share link?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="905">
+        <source>RO-Crate Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="906">
+        <source>Role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="907">
+        <source>Room</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="908">
+        <source>Room Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="909">
+        <source>Room Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="910">
+        <source>Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="911">
+        <source>Run a Cross-fonds Query and review Analytics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="912">
+        <source>Run source assessments as needed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="913">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="914">
+        <source>Save article</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="915">
+        <source>Save assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="916">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="917">
+        <source>Save course</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="918">
+        <source>Save credentials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="919">
+        <source>Saved Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="920">
+        <source>Save draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="921">
+        <source>Saved Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="922">
+        <source>Saved Search Alerts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="923">
+        <source>Saved Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="924">
+        <source>Save Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="925">
+        <source>Save module</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="926">
+        <source>Save Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="927">
+        <source>Save Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="928">
+        <source>Save Preferences</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="929">
+        <source>Save searches from browse results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="930">
+        <source>Save searches to quickly re-run them later</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="931">
+        <source>Saving...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="932">
+        <source>Scan or enter barcode...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="933">
+        <source>Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="934">
+        <source>Scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="935">
+        <source>Scope and content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="936">
+        <source>Scope and Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="937">
+        <source>Scope — what it accepts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="938">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="939">
+        <source>Search &amp;amp; add records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="940">
+        <source>Search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="941">
+        <source>Search Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="942">
+        <source>Search Archive Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="943">
+        <source>Search archive items...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="944">
+        <source>Search by name or email...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="945">
+        <source>Search by title, identifier or reference number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="946">
+        <source>Search for a reviewer...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="947">
+        <source>Search for item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="948">
+        <source>Search notes...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="949">
+        <source>Search requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="950">
+        <source>Search Researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="951">
+        <source>Search Resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="952">
+        <source>Search title, scope, publisher, indexing…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="953">
+        <source>Seat</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="954">
+        <source>Seat Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="955">
+        <source>Sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="956">
+        <source>Section title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="957">
+        <source>Section Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="958">
+        <source>Seed/refresh the DHET-accredited starter set (SA accreditation module)?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="959">
+        <source>Seed DHET starter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="960">
+        <source>Select %1% for checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="961">
+        <source>Select %1% for return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="962">
+        <source>Select All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="963">
+        <source>Select all items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="964">
+        <source>Select items to check out in batch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="965">
+        <source>Select multiple section types to add at once.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="966">
+        <source>Select Notes to Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="967">
+        <source>Select Reading Room</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="968">
+        <source>Send</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="969">
+        <source>Send Invitation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="970">
+        <source>Send Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="971">
+        <source>Send Reset Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="972">
+        <source>Sensitivity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="973">
+        <source>Services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="974">
+        <source>Set condition for each returning item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="975">
+        <source>Set New Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="976">
+        <source>Set status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="977">
+        <source>Set the redirect URI to your /research/orcid/callback URL. Your secret is encrypted at rest and never shown again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="978">
+        <source>Set up Project metadata and a Data Management Plan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="979">
+        <source>Setup Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="980">
+        <source>Share</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="981">
+        <source>Shared</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="982">
+        <source>Shared - project collaborators</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="983">
+        <source>Shared by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="984">
+        <source>Share Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="985">
+        <source>Share Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="986">
+        <source>Share Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="987">
+        <source>Short unique identifier code for the institution.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="988">
+        <source>Site name(s) / geographic area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="989">
+        <source>Sites / places</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="990">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="991">
+        <source>Skip to main content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="992">
+        <source>SLA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="993">
+        <source>SLA: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="994">
+        <source>SLA Due</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="995">
+        <source>Snapshots</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="996">
+        <source>Sort order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="997">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="998">
+        <source>Source Analysis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="999">
+        <source>Source Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1000">
+        <source>Special Instructions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1001">
+        <source>Start Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1002">
+        <source>Start documenting your research by creating your first journal entry.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1003">
+        <source>Start one</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1004">
+        <source>Start review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1005">
+        <source>Start Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1006">
+        <source>Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1007">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1008">
+        <source>Status: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1009">
+        <source>Structure / required sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1010">
+        <source>Student</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1011">
+        <source>Student Card</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1012">
+        <source>Student ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1013">
+        <source>Studio (AI artefacts)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1014">
+        <source>Style</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1015">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1016">
+        <source>Subject (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1017">
+        <source>Subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1018">
+        <source>Subjects / periods / material types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1019">
+        <source>Subject scope (what it mainly accepts)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1020">
+        <source>Submission checklist</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1021">
+        <source>Submission review queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1022">
+        <source>Submission rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1023">
+        <source>Submission type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1024">
+        <source>Submission URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1025">
+        <source>Submit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1026">
+        <source>Submit answers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1027">
+        <source>Submit Booking Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1028">
+        <source>Submit Decision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1029">
+        <source>Submit for archival review? You will not be able to edit it while it is under review.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1030">
+        <source>Submit for review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1031">
+        <source>Submit Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1032">
+        <source>Submit Registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1033">
+        <source>Submit Renewal Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1034">
+        <source>Submitted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1035">
+        <source>Subtitle</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1036">
+        <source>Suggestion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1037">
+        <source>suggestions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1038">
+        <source>Suspend Account</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1039">
+        <source>Suspended</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1040">
+        <source>Switch modes any time from the "Research mode" selector in the sidebar.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1041">
+        <source>Sync works</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1042">
+        <source>System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1043">
+        <source>Table of contents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1044">
+        <source>Table of Contents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1045">
+        <source>Tags</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1046">
+        <source>Tags:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1047">
+        <source>Take assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1048">
+        <source>Take offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1049">
+        <source>Target-journal directory (#114) not installed — enter an id manually if known.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1050">
+        <source>Target journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1051">
+        <source>Target Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1052">
+        <source>Team Workspaces</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1053">
+        <source>Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1054">
+        <source>Template Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1055">
+        <source>Template Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1056">
+        <source>Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1057">
+        <source>Thank You for Registering!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1058">
+        <source>The directory core is jurisdiction-neutral; the DHET list is the South-African accreditation module. Other markets seed from DOAJ / Scopus / Web of Science.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1059">
+        <source>The directory is empty. Use “Seed DHET starter” to load the South-African accreditation set, or add journals manually.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1060">
+        <source>This action cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1061">
+        <source>This booking has been cancelled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1062">
+        <source>This certifies that</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1063">
+        <source>This course has no modules.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1064">
+        <source>This evidence set is empty. Use the search above to add items.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1065">
+        <source>This finding aid was generated from a personal research collection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1066">
+        <source>This share link has been revoked by the project owner.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1067">
+        <source>This share link has expired. Please contact the project owner for a new link.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1068">
+        <source>This share link is invalid or does not exist. Please check the link and try again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1069">
+        <source>This submission is</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1070">
+        <source>This visit has been completed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1071">
+        <source>This Week</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1072">
+        <source>This will permanently delete the report and all its sections.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1073">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1074">
+        <source>Timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1075">
+        <source>Timeline Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1076">
+        <source>Time Spent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1077">
+        <source>Time Spent (minutes)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1078">
+        <source>Tips</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1079">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1080">
+        <source>Title Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1081">
+        <source>To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1082">
+        <source>Today</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1083">
+        <source>Today's Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1084">
+        <source>Today's Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1085">
+        <source>Token</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1086">
+        <source>Total Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1087">
+        <source>Total Visits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1088">
+        <source>Tour</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1089">
+        <source>Track time spent to monitor your research effort.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1090">
+        <source>Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1091">
+        <source>Training &amp; LMS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1092">
+        <source>Training courses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1093">
+        <source>Training Courses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1094">
+        <source>Triage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1095">
+        <source>Triage Decision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1096">
+        <source>Triage decision options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1097">
+        <source>Triage Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1098">
+        <source>Turnaround</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1099">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1100">
+        <source>Type name or email of a registered researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1101">
+        <source>Type to search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1102">
+        <source>Type to search by name or title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1103">
+        <source>Type to search by title or reference code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1104">
+        <source>Type to search items...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1105">
+        <source>Type your message...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1106">
+        <source>Unassigned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1107">
+        <source>Unfiled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1108">
+        <source>University, Organization, etc.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1109">
+        <source>University student number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1110">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1111">
+        <source>Unread</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1112">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1113">
+        <source>Untitled Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1114">
+        <source>Untitled Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1115">
+        <source>Untitled Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1116">
+        <source>Upcoming Confirmed Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1117">
+        <source>Upcoming Visits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1118">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1119">
+        <source>Update Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1120">
+        <source>Update Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1121">
+        <source>Upload 1-2 sources and save to an Evidence Set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1122">
+        <source>Upload a .bib or .ris file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1123">
+        <source>Upload File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1124">
+        <source>Upload it here to bring everything back.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1125">
+        <source>URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1126">
+        <source>Use "Add to Evidence Set" button while browsing to save items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1127">
+        <source>Used when no lecture is reused. GitHub-flavoured Markdown.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1128">
+        <source>Use https://api.orcid.org for a Member API client; leave blank for the Public API.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1129">
+        <source>Username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1130">
+        <source>Use the rich text editor to format your entry with headings, lists, and links.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1131">
+        <source>Validation Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1132">
+        <source>Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1133">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1134">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1135">
+        <source>View all pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1136">
+        <source>View certificate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1137">
+        <source>View Entity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1138">
+        <source>View Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1139">
+        <source>Visibility</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1140">
+        <source>Visit Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1141">
+        <source>Visualization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1142">
+        <source>Volume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1143">
+        <source>Walk-In Visitors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1144">
+        <source>Website URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1145">
+        <source>Welcome back,</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1146">
+        <source>What does this material document? (scope and content)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1147">
+        <source>What do these modes mean?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1148">
+        <source>What happens next?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1149">
+        <source>When</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1150">
+        <source>Where to Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1151">
+        <source>Who can access it? (conditions governing access)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1152">
+        <source>WiFi, Power outlets, Lockers...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1153">
+        <source>Word</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1154">
+        <source>Word count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1155">
+        <source>words</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1156">
+        <source>Work Offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1157">
+        <source>works</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1158">
+        <source>Workshop</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1159">
+        <source>Works last synced</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1160">
+        <source>Write section content...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1161">
+        <source>Write your journal entry...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1162">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1163">
+        <source>You can use these notes to track your research progress, observations, or any relevant information.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1164">
+        <source>You have no collections, projects or favourites folders yet — use the search below to add individual records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1165">
+        <source>You have no notifications yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1166">
+        <source>You have no submissions yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1167">
+        <source>You have no unread notifications.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1168">
+        <source>You need to complete your researcher registration to book reading room visits.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1169">
+        <source>your@email.com</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1170">
+        <source>Your Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1171">
+        <source>Your account is not yet linked to an ORCID iD.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1172">
+        <source>Your account will be reviewed and activated within 1-2 business days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1173">
+        <source>Your Booked Equipment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1174">
+        <source>Your full name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1175">
+        <source>Your Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1176">
+        <source>Your institution or organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1177">
+        <source>Your mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1178">
+        <source>Your note or contribution...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1179">
+        <source>Your notes...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1180">
+        <source>Your ORCID application</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1181">
+        <source>Your ORCID iD helps verify your identity as a researcher.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1182">
+        <source>Your registration expires on</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1183">
+        <source>Your registration has been submitted successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1184">
+        <source>Your registration was not approved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1185">
+        <source>Your registration was rejected.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1186">
+        <source>Your researcher registration has expired.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1187">
+        <source>Your researcher registration has expired. Please request a renewal to continue.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1188">
+        <source>Your researcher registration is being reviewed. You will be notified once approved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1189">
+        <source>You will receive an email once your account is approved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1190">
+        <source>— None —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1191">
+        <source>— none —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1192">
+        <source>— Unassigned —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

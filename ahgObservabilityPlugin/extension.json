@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Prometheus-format /metrics exporter for AtoM. Exposes app, HTTP request, DB query and queue-depth metrics through a lightweight, auth-gated (bearer token OR IP allow-list) endpoint. Auto-selecting APCu/Redis/in-memory counter storage with graceful fallback. CLI commands sample queue depth and emit node_exporter textfiles.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "category": "integration",
     "requires": {
         "atom_framework": ">=1.0.0",

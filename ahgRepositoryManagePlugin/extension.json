@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "High-performance archival institution browse using Laravel Query Builder and direct ES queries",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "browse",
     "keywords": ["repository", "institution", "browse", "performance"],

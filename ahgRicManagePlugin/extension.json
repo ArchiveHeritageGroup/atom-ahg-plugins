@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Adds Records in Context (RiC-O) as a selectable descriptive standard. A record captured as RiC keeps its RiC-O entity type, record-centric RiC properties, and typed RiC relations, all sourced from MySQL. Record-centric now, extensible to further RiC entity types later.",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

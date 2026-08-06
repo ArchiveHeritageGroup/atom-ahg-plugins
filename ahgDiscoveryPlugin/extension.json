@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Topic discovery and related content — natural language search with NER, synonym expansion, hierarchical context, and PageIndex LLM-driven retrieval over EAD, PDF, and RiC-O records",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "category": "search",
     "requires": {
         "atom_framework": ">=2.8.0",

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Add new authority record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Banner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Only hexadecimal color value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Requirements: PNG format, 256K max. size.&lt;br /&gt;Recommended dimensions of %1%x%2%px, it will be cropped if ImageMagick is installed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

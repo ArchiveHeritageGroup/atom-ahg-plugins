@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Add contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>City</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Contact information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Contact person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Fax</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Postal code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Primary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Primary contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Street address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Telephone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Website</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

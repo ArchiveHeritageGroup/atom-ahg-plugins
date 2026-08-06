@@ -1,3 +1,14 @@
+<?php
+/*
+ * Search and holdings forms target GLAM Browse where ahgDisplayPlugin provides
+ * it, and fall back to AtoM's own description browse where it does not.
+ *
+ * They used to call url_for('@glam_browse') directly. url_for() throws on an
+ * unknown route, so a site with the theme but without ahgDisplayPlugin returned
+ * a 500 on every page carrying a search box - which is most of them. A theme
+ * must not require a feature plugin to be installed.
+ */
+?>
 <?php $addDivider = false; ?>
 <?php if ($descriptions->getTotalHits() > 0) { ?>
   <li>
@@ -26,7 +37,7 @@
     <li>
       <?php echo link_to(
           __('all matching descriptions'),
-          url_for('@glam_browse') . '?' . http_build_query(['topLevel' => '0'] + $sf_data->getRaw('allMatchingIoParams')),
+          AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])) . '?' . http_build_query(['topLevel' => '0'] + $sf_data->getRaw('allMatchingIoParams')),
           ['class' => 'dropdown-item text-wrap text-muted fst-italic']
       ); ?>
     </li>

@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Add General Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Admin Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Admin Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>All Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Are you sure?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Are you sure you want to delete this feedback?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Brief subject of your feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Completed:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Confirm Deletion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Contact Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Contact number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Correction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Correction Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Created:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Delete Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>e.g., Family member, researcher, previous owner, community member...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>e.g., Researcher, visitor, community member, donor...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Email Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Error Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Feedback deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Feedback Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Feedback Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Feedback Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Feedback updated successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>From: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>General</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>General Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>ID: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Internal notes (not visible to submitter)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Item feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Linked Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Need Assistance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>No feedback found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Pending Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Phone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Phone Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Please provide details about your feedback, correction, or suggestion...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Please provide details about your feedback, suggestion, or issue...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Please provide your contact details so we can follow up if needed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Reference: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Relationship</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Relationship to Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Remarks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Remarks / Comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Reply by Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Review and manage user feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Review Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Select the type of feedback you are providing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Setting to Completed will record the completion date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Share your feedback, suggestions, or report issues</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Share your feedback about this record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Showing %1% of %2% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Subject/Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Submit Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Submitted:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Suggestion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Surname</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Thank you for your feedback.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>There are no feedback submissions matching your filter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>View Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Yes, delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>your@email.com</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Your Contact Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Your Feedback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Your Feedback / Comments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Your first name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Your Relationship to the Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Your Relationship to this Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Your surname</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

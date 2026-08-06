@@ -1,0 +1,1576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(Global / no repository)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- All Sectors --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- No Template --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Accept</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Accept this accession?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Accession</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Accession configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Accession dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Accession number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Accession numbering</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Accession statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Accessions with at least one valuation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Accession V2 configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Acquisition date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Acquisition date - This field is marked as mandatory in the relevant descriptive standard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Add container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Add Criterion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Add item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Additional notes about this valuation...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Add new accession record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Add right</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Add Valuation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Aggregate across all currencies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Allow container barcodes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Allow rights statements to be inherited from parent records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>All priorities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>All statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>An appraisal must be completed before an accession can be accepted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>An error occurred.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>An error occurred during upload.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Anyone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Apply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Apply checklist template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Applying a template will add items from the selected template. Existing items are preserved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Apply template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Apply this template? New items will be added to the checklist.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Appraisal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Appraisal Detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Appraisals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Appraisal Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Appraised Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Appraiser</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Archival</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Are you sure you want to delete this container and all its items?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Are you sure you want to delete this right? Inherited rights on information objects will also be removed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Assign</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Assigned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Assigned rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Assigned to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Attachments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Attachments page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Auto-assign to creator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Auto-incrementing sequence, zero-padded to N digits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Automatically apply this checklist template to new accessions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Automatically assign new accessions to the user who creates them.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Available tokens:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Avg processing time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Back to accession</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Back to intake detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Back to queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Barcode...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Barcode lookup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Breakdown by Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Breakdown by Valuation Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Brief description of when to use this template...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Browse accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Change default mask in Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Checklist</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Checklist items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Checklist page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Click to expand criteria</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Completed by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Containers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Containers &amp; rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Container type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Correspondence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Cost</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Create a new accession record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Create Appraisal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Create New Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Create Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Criteria</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Criteria:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Criteria Scoring</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Criterion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Criterion name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Currencies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Current four-digit year (e.g., 2026)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Current two-digit month</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Current Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>DAM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Date modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Date range</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Deed of gift</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Default appraisal template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Default intake checklist template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Default numbering mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Default priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Default template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Default template used when creating appraisals.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Defer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Delete container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Delete right</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Delete this attachment?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Delete this attachment? This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Delete this item?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Delete this template?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Describe what needs to be revised...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Detailed Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Dimensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Disposal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Distinct currencies in portfolio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Donor agreement must be attached before an accession can be submitted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Due date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>e.g. 30x20x15 cm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>e.g. Archival Significance Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Enable barcode scanning for container management.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Enable rights inheritance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>End date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Error adding item.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Error deleting container.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Error deleting item.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Error deleting right.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Error inheriting rights.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Error performing lookup.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Error saving container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Error saving right.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Exceptional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Failed to apply template.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Failed to delete attachment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Failed to toggle checklist item.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>file(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Found:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Full timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Gallery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>General</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Grant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Grant act</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Grant restriction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>GRAP 103 (Heritage Assets)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>High</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Historical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Identifier, title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Identifier available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Identifier unavailable.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Impairment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Income</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Inheritable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Inherit rights to linked information objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Inherit to information objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Inherit to IOs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Initial</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Insurance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Intake and numbering settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Intake details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Intake queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Intake Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Intake workflow</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Inventory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>IOs updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>IPSAS 45 (Property, Plant and Equipment)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Items in this container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Last sequence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Last year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Linked IO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Location detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Location information - This field is marked as mandatory in the relevant descriptive standard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Lookup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Low</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Market</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Monetary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Monetary Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Museum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Name of valuer or organisation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>NARSSA Audit Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>National Significance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>New accession</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>New Appraisal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>New container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>No accessions found in the intake queue.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>No appraisals recorded yet. Create one below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>No assignments yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>No attachments uploaded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>No attachments yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>No checklist items. Apply a template to get started.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>No container found with that barcode.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>No containers have been added to this accession yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>No criteria defined. Apply a template when creating the appraisal to populate criteria.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>No data available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>No dates specified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>No items in this container yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>No linked information objects found to inherit rights to. Ensure containers have items linked to information objects.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Nominal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>No notes.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>No numbering sequences configured yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>No recent activity.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>No rights have been assigned to this accession yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Normal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>No status data available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>No templates defined yet. Create one using the form.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Notes for revision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>No timeline events recorded for this accession.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>No timeline events yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>No valuations recorded across the system yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>No valuations recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>No valuations recorded yet. Add one using the form.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>Numbering</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>Numbering mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>on</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>Optional description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>out of 5.00</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>Overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>Overview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>Partial</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>Per-repository numbering sequences</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>Period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>Photo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>Please select a file.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>Please select a template.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>Portfolio Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>Portfolio Valuation Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>Portfolio value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>Portfolio value and analysis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>Portfolio value by currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Preview (next number)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Processing...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>Provide a reason for rejecting this accession...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Qty</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Quantity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Queue depth</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Queue pagination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Queue priorities</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Queue statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Quick links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Reason for rejection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Recent activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>Recent Valuations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Recommendation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>Record Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Record Valuation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Reference Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Reject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Reject accession</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Rejection reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Relevance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Replacement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Report number, file reference, etc.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Repository code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Require appraisal before acceptance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Require donor agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Research</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Restriction type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Return for revision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>Return notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Revaluation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Review and process submissions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Reviewed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Rights basis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Rights holder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Save Appraisal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Save configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Save container</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Save right</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Scan or enter barcode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>Score (1-5)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Search accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Select a checklist template...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Selecting a template populates the criteria scoring grid.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>sequence(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Sequences are created automatically when accessions are assigned to repositories.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>Sequence will reset for new year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Share</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Significance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Source of acquisition - This field is marked as mandatory in the relevant descriptive standard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Start date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Start review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>Status breakdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>Submit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>Submitted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>Submit this accession for review?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>The %open_link%job management page%close_link% will show progress and a download link when complete.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>This field is marked as mandatory in the relevant descriptive standard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>Timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>Toggle items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>Tokens: {YEAR}, {SEQ:N} (N = zero-padded digits), {REPO}, {MONTH}</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>Top assignees</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Total accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>Total Portfolio Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>Total Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>Total value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>Upload attachment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>Uploaded attachments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>Uploaded by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>Upload failed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>Uploading...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>Urgent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Use the form above to upload deed of gift, photos, correspondence, or other documents.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Valuation Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Valuation History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>Valuation records support compliance with:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>Valuation Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Valuation report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Valuations by type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Valued Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>valued accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Valuer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>View / Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>View and search all accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>We've redirected you to the first page of results. To avoid using vast amounts of memory, AtoM limits pagination to %1% records. To view the last records in the current result set, try changing the sort direction.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Weight</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Weight (kg)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>Weighted Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>When enabled, this right can be propagated to all information objects linked through accession containers.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Year reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>You are not allowed to export this entity type.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>You must be logged in to view accessions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>You must be logged in to view the accession dashboard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Your %entity_type% export package is being built.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

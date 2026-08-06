@@ -1,0 +1,748 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select a donor --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Accepted formats: PDF, DOC, DOCX, JPG, PNG, TIFF. Maximum 20MB per file.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>ACTIVE AGREEMENTS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Active Restrictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add Donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add More</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Add New Donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Add Reminder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Agreement #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Agreement #, title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Agreement Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Agreement Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Agreement ID if replacing another</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Agreement Logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Agreement Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Agreements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Agreements by Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Agreements Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Agreement Trends (12 Months)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Agreement Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>All Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Any</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Any special conditions or restrictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Auto-generated if blank</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Browse Donors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Contact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Contact Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Contract Documents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Courier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Covers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Create Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Create First Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Currently Linked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Describe what materials are covered by this agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Digital Transfer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Document</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Document Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Donor Agreements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Donor Contact Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Donor Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Donor Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Donor Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Donor Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Donor Name (Override)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Donor Signature</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Drafts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>e.g., 5 boxes, 2.5 linear metres</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Edit Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Effective Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Existing Documents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Existing Reminders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Expiring</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>EXPIRING SOON</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Expiring Soon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Expiry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Expiry Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Extent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Extent Statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Financial Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>General Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Important Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Inactive Donors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>In Person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Institution Contact Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Institution Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Institution Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Internal Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Leave date blank to skip.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Legal Representative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Link Accession</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Link Archival Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Linked Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Linked Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Mail/Post</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>New Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>No agreements expiring soon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>No agreements found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>No agreements yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>No documents uploaded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>No donors found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>No pending reminders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>No reminders set.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Not assigned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Notes for internal use only - not visible to donors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Notify Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Optional...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Overview of donors, agreements, and compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Partially Covers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Payment Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Pending Reminders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>PENDING REMINDERS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Pickup by Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Primary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Purchase Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Received By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Recent Agreements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>References</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Relationship</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Reminders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Remove logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Repository Representative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Repository Signature</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Representative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Representative Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Review Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Review Due</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Save as Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Save the agreement first, then edit to link Archival Descriptions and Accessions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Scope &amp; Transfer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Scope Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Search by accession number or title...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Search by title or identifier...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Select...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Select Donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Select File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Select type...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Signatures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Special Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Status &amp; Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Supersedes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Supersedes Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Terminated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Termination Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Termination Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Terms &amp; Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>This agreement includes financial terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>TOTAL DONORS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Transfer Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Transfer Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Type to search donors...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Type to search or select from list</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Update Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Upload New Documents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Upload organization logo for contract header (JPG, PNG, GIF, WebP)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Use if different from linked donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>View Agreements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>View All Donors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>View All Expiring</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>View All Reminders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>View Drafts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>View Expiring</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>View Provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>View Reminders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Within 7 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Within 30 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Within 90 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Witness</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Witness Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Witness Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Yes - This is a template</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

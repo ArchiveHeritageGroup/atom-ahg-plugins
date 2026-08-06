@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Access points, events, relations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Access points, events, relationships and physical-object links are NOT restored — they stay as they are currently. Full restore of these is a planned enhancement.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Access points: %d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Access points added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Access points removed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>All versions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>A new version will be created marking the restore (is_restore=1, restored_from_version=</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Back to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Base</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Base fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Base record fields + descriptive metadata (titles, scope, notes, all cultures) + custom fields.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Captured at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Changed fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Compare selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Confirm restore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Created at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Created by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>cultures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Custom field changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Custom fields: %d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Diff v%d → v%d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Events: %d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Events added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Events removed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>from v%d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Full history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Localized fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>no archival metadata changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>No archival metadata changes (or first version)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>No differences between these two versions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>No versions have been captured for this record yet. A version is written automatically the next time the record is saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Physical objects: %d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Physical objects added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Physical objects removed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Relations: %d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Relations added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Relations removed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>restore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Restored from v%1$d. New version v%2$d created.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Restored from v%d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Restore failed: </source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Restore this version (v%d)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Restore version %d?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Schema version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Scope of restore (v1):</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Snapshot</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>The snapshot is byte-equivalent. Versioning may have been triggered by a save that touched a field outside the snapshot scope (e.g. publication status).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Tick two versions to compare them</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>v%d (new)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>v%d (old)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>v%d details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Version %d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Version details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Version history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Version history (%d)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Version number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>View record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>You are about to overwrite the current state of &lt;strong&gt;%s&lt;/strong&gt; with the snapshot from v%d (captured %s).</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

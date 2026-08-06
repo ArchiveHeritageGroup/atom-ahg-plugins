@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Add manual suppression</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Addresses here are blocked from outgoing mail. Bounces and spam complaints are added automatically by the provider webhook at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>All reasons</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Email address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Email suppression list</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Last event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>No suppressed addresses.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Remove this suppression?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Search address…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Suppress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

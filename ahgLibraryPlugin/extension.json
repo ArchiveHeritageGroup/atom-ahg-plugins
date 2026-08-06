@@ -4,7 +4,7 @@
     "version": "1.9.15",
     "description": "Library cataloging with MARC-inspired fields, ISBN lookup, and bibliographic management",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "category": "sector",
     "requires": {
         "atom_framework": ">=1.0.0",

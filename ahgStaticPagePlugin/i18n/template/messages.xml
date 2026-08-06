@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Add static page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Edit static page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Home page not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>HTML content is allowed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Manage static pages displayed on the site. Protected pages (e.g. Home) cannot be deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>No static pages found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Page content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Static page created.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Static page deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Static pages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Static page updated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>This action will permanently delete this static page. This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>This page is protected and cannot be deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>This slug is protected and cannot be changed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Title is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>URL-friendly identifier. Leave blank to auto-generate from title.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

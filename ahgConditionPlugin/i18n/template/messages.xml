@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select Template --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>AI Condition Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>AI Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Analyzing image for damage...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Annotate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Annotate Condition Photo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Annotate Photo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Annotations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Are you sure you want to delete this photo?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Assessor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Back to Photos</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Brief description of the photo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>By Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Caption</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Checked By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Choose a template based on the object's material type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Condition Assessment Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Condition Assessment Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Condition History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Condition Photos</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Condition Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Condition Reports Administration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Contributed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Contribute to Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Create First Condition Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Damages Detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Drag &amp; drop a photo here, or click to select</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Error loading template. Please try again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Failed to submit training data.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Filename:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Filter by Material:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Help</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Latest Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Loading template...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Manage Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Network error submitting training data.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>New Condition Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>No annotations yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>No caption</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>No condition checks recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>No condition checks recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>No condition reports found for this object.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>No damage detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>No photos uploaded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>No templates available. Templates can be added by running the seed SQL script.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>No valid bounding box annotations found on this photo.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Photo Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Photos</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Photo Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Predefined assessment forms for different material types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Recent Condition Checks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Recommendations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Save Annotations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Select Assessment Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Select a template above to display the assessment form.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Select Photo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Shortcuts:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Size:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Submit this photo and its annotations as training data for the AI model?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Tools:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Total Condition Checks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Training data submitted successfully. It will be reviewed by an administrator.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Type:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Update Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Upload Photo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Upload Photos</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>View Full Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>View Photos</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

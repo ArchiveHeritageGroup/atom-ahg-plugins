@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(unnamed)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Add menu</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>A menu with this name already exists.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Back to list</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Display label shown to users.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Edit menu</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Internal identifier (e.g., mainMenu, browseArchivalDescriptions). Must be unique.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Label is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Menu item created.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Menu item deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Menu item details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Menu item reordered.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Menu item updated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Menus</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Move down</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Move up</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Name / Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Name is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>No menu items found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Optional description for this menu item.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Parent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Parent menu under which this item appears.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Protected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Reorder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>This action will permanently delete this menu item and all its children. This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>This menu item is protected and cannot be deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>This name is protected and cannot be changed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>URL path for this menu item (e.g., informationobject/browse). Leave empty for parent/grouping menus.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Warning: This menu item has children. Deleting it will also delete all child menu items.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "WCAG accessibility tooling for archival descriptions — human-authored image alternative text (WCAG 1.1.1), authoring UI, coverage dashboard and a consumer API.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
 
     "type": "atom-plugin",

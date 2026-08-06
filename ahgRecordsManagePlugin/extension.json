@@ -5,7 +5,7 @@
     "description": "Records-management file plan / classification scheme — a nested-set tree of classification nodes (function/series/file) with retention and disposal-action metadata. PSIS-parity port of the Heratio ahg-records-manage FilePlanService (#118). Email capture and full disposal/retention execution are follow-ups.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "email": "johan@theahg.co.za",
-    "license": "proprietary",
+    "license": "AGPL-3.0-or-later",
     "category": "records-management",
     "keywords": ["records-management", "file-plan", "classification", "retention", "disposal", "narssa"],
     "requires": {

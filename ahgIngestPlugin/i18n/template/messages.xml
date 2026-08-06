@@ -1,0 +1,908 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>...and</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>/path/to/files/on/server</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>About Directory Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add sequential counter to identifiers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>AIP (Archival Information Package) generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>All rows passed validation.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Applied to all imported records after commit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Apply Fix</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Apply Metadata &amp; Validate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Approve &amp; Commit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Archival Descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Argos offline translation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>aspell grammar check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Auto-generate summaries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Auto-ingest new files dropped into this folder, using this session's settings as the template (requires the ingest:watch cron).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Back to Mapping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Back to Validation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Browse Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Cancel this ingest?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Cancel this ingest session?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Choose whether to import archival descriptions or accession records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>ClamAV malware scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Click a record in the tree to view details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Column Mapping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Commit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Commit &amp; Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Committing...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Configure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Create a new parent record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Create AtoM records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>CSV Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>CSV Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Data Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Derivatives</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Descriptive Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Detect &amp; match faces</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Digital Object Matching</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>DIP (Dissemination Information Package) generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>DIP Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Download Manifest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Download Template for</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Drag and drop file here, or click to browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Drive (document library)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Duration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>e.g. Annual Report Collection 2024</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Edit Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Edit Ingest Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Error Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Exclude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Expand All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Face Detection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>File / Directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Files Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Fix</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Fix Field Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>For large batches, point to a directory on the server instead of uploading</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Format ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>found in directory. Enter metadata to apply to all records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>From SharePoint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Future ingests from this drive will pre-fill these mappings, including cron-driven auto-ingest.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Generate AIP package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Generate DIP package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Generate reference images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Generate SIP package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Generate thumbnails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Hierarchy Placement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Hierarchy Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>How to match digital objects from ZIP to CSV rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Identifier Counter / Suffix</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Ignore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Import from SharePoint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Import selected &amp; continue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Individual titles are generated from filenames.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Ingest Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Ingest Completed with Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Ingestion Manager</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Ingest Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Issues</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>issues</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Legend</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Load</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Loading sites...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Load saved profile:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Manage batch imports of records and digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Map &amp; Enrich</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Mapped (auto or manual)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Match by filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Match by legacyId</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Match by title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Metadata entered here applies to ALL records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>more files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Named entity extraction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>NER</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>New Ingest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>New parent title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>New value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Next: Upload Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>No data rows found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>No files found in directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>No hierarchy to display (flat import)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>No ingest sessions yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>No processing services are currently available on this server.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>No SharePoint tenants are configured. Configure at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>OCR</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>One record per file in the directory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Or enter a server directory path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Or upload an entire local folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Output Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Package Estimates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Padding (digits)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Pick a folder on your computer — every file inside is uploaded as a batch of digital objects (no CSV required).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Placement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Prefix</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Preview &amp; Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Preview:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Processed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Processing Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Re-validate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Ready to commit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Record Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Records Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Records created. Running post-processing (derivatives, packages, indexing)...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Records to create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Record Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Resume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Rollback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Row</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Row / Stage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Save Mappings &amp; Validate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Save this mapping as the default for SharePoint drive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Search for parent record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Security Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Select a drive to browse files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Select AI and processing actions to run on ingested records after commit.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Select a site first</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Select CSV, ZIP, or EAD file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Session #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Session Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Session Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Set as watched folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>SharePoint tenant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Siegfried PRONOM identification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>SIP (Submission Information Package) generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>SIP Package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Site</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Source Column</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Spell Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Start a new ingest to batch-import records and digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Start Commit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Start committing records to AtoM?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Start Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Summarize</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Supported: CSV, ZIP (with CSV + digital objects), EAD XML</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Target Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Tesseract text extraction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>This will create records in AtoM. Proceed?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>This will create records in AtoM based on your validated data.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>This will DELETE all records created by this ingest. Are you sure?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>This will DELETE all records created by this ingest. This action cannot be undone. Are you sure?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Tick the files to import; folders expand on click.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Titles auto-generated from filenames</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Top-level (directly under root)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Total Rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Transform</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Translate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Translate to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Type to search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Under an existing record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Unmapped (needs attention)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Untitled session</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Upload &amp; Continue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Uploaded Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Upload File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Upload Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Use hierarchy from CSV (legacyId/parentId)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Valid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Validate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Validation Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>valid rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>View Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Virus Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Warning</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Warnings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Where should imported records be placed?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>You can edit individual records after commit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>— None —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>— Select repository —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>— Select —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>— unmapped —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

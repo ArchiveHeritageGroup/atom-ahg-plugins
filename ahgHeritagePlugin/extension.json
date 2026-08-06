@@ -4,7 +4,7 @@
     "version": "1.1.0",
     "description": "Heritage discovery platform with contributor system, custodian management, and analytics",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

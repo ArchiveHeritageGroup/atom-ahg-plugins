@@ -4,7 +4,7 @@
     "version": "3.0.0",
     "description": "Full-system portable export and import for AtoM Heratio. Export complete instances with 15 entity types, SHA-256 checksummed manifests, and self-documenting packages. Import archives into fresh instances with ID remapping, merge/replace/dry-run modes. Also supports offline HTML viewer export for CD/USB/ZIP distribution.",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "requires": {
         "atom_framework": ">=2.0.0",
         "atom": ">=2.8",

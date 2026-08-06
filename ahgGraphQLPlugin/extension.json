@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "GraphQL API endpoint providing flexible querying with security safeguards including depth limiting and complexity analysis",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "category": "integration",
     "requires": {
         "atom_framework": ">=1.0.0",

@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- Select Product Type --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Academic publication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add Another Product</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Admin Notification Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Back to Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Back to Cart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Billing Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Billing Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Book/Magazine publication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Browse Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Browse the archive to add items to your cart.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Cancelled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Cart Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Clear all items from cart?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Clear Cart</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Commercial use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Company/Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Complete Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Configure this URL in your PayFast dashboard:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Continue Browsing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Customer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Customer Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Documentary/Film</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>E-Commerce</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>E-Commerce Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Enable E-Commerce Mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Enable for testing. Disable for live payments.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Exhibition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>First Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Full Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>General</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>General Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Has Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>I agree to the</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Institution/Company</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>ITN URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Log in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Merchant ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Merchant Key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Motivation/Purpose</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>My Orders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Need Images By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>No orders found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Optional but recommended for security.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Order #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Order Confirmation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Order Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Order History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Order Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Order Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Order Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Order Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Orders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Order Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Paid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Passphrase</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Pay</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>PayFast Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>PayFast is a South African payment gateway. Sign up at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Payment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Payment gateway is not configured. Please contact the administrator.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Pay Now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Personal research</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Phone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Planned Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Please describe why you need these images...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Price</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Pricing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Proceed to Checkout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Proceed to Payment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>product(s) selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Product Pricing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Product Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Receive order notifications at this email.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Remove this item?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Remove this item from cart?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Sandbox Mode (Testing)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Save Payment Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Save Pricing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Secure Payment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Select one or more products for this item:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Select products above to see summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Set prices for each product type. Prices include VAT.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Shipping Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Special instructions for your order...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Start browsing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Submit Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Submit Request to Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Subtotal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Surname</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Terms and Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Thank You!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>to save your cart to your account.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Total Orders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Total Revenue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>VAT</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>VAT No:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>VAT Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>VAT Rate (%)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>View Orders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Website</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>We will review your request and contact you via email with further information.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>When disabled, cart will use standard Request to Publish workflow.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>You are shopping as a guest.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>You have no orders yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Your cart is empty</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Your Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Your order is complete. Download links have been sent to your email.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Your order is pending payment confirmation.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Your payment has been received. We are processing your order.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Your payment is secured by PayFast</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Your payment is secured with SSL encryption</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Your request has been submitted successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>You will be redirected to PayFast to complete your payment.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

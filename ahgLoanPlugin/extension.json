@@ -4,7 +4,7 @@
     "version": "1.0.1",
     "description": "Shared loan management for GLAM institutions - Museums, Galleries, Archives, Libraries, and Digital Assets. Based on Collections Procedures and international GLAM standards.",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "loans",
     "requires": {

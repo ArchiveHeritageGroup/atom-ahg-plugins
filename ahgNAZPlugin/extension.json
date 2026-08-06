@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Zimbabwe National Archives Act [Chapter 25:06] compliance — 25-year closure rule, researcher permits, records schedules, transfers, and protected records management",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "compliance",
     "keywords": ["zimbabwe", "naz", "national-archives", "closure-rule", "records-schedule", "compliance"],

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Digest algorithm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Export path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Head</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Initialised (OCFL v1.1)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Initialise storage root</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Layout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>No OCFL objects in this storage root yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Not initialised</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>OCFL object id</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>OCFL objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>OCFL Preservation Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Storage root</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Verify all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Versions</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Usage statistics tracking with page views, downloads, GeoIP lookup, bot filtering, and reporting dashboards",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "category": "analytics",
     "requires": {
         "atom_framework": ">=1.0.0",

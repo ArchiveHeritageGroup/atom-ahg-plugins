@@ -4,7 +4,7 @@
     "version": "1.0.5",
     "description": "Digital preservation: checksums, fixity verification, PREMIS events, format registry",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "preservation",
     "keywords": [

@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>- Select -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Add new function</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Authorized form of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Authorized form of name is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Browse functions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Context area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Control area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Date modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Dates of creation, revision and deletion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Description identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Edit function</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Function</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Identity area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Institution identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Legislation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Level of detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Maintenance notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>One per line.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Other form(s) of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Parallel form(s) of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Related authority record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Related function</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Related resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Relationships area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Return to function list</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Rules and/or conventions used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Search functions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Source standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Type %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>View function</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "author": "The Archive and Heritage Group (Pty) Ltd",
     "authorEmail": "johan@theahg.co.za",
-    "license": "MIT",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
 
     "category": "export",

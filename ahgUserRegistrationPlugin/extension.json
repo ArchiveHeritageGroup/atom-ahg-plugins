@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Public user self-registration with email verification and admin approval workflow",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "user",
     "keywords": ["registration", "signup", "approval", "email verification"],

@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Manual visual redaction of digital objects: draw regions over a PDF or image, save them, and generate a redacted copy. The original file is never modified.",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "requires": {
         "atom_framework": ">=2.14.0",
         "atom": ">=2.8",

@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "OAIS-aligned multi-stage ingestion pipeline: configure, upload, map, validate, preview, commit with rollback support",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",

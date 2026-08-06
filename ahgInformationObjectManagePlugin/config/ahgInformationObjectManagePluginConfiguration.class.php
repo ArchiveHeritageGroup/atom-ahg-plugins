@@ -39,8 +39,11 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
         $router = new \AtomFramework\Routing\RouteLoader('ioManage');
 
         // Catch-all slug routes (checked last after prepending)
+        // io_actor_autocomplete, io_repository_autocomplete, io_term_autocomplete,
+        // io_term_create and io_generate_identifier moved to ahgCorePlugin: every
+        // standard plugin calls them but declares only ahgCorePlugin, so they were
+        // an undeclared cross-plugin dependency that broke a standalone install.
         $router->any('io_delete_override', '/informationobject/:slug/delete', 'delete');
-        $router->any('io_edit_override', '/informationobject/:slug/edit', 'edit');
 
         // Digital object routes (checked after treeview, before slug catch-alls)
         // NB: URL must NOT be '/digitalobject/upload' — that is base AtoM's own
@@ -60,11 +63,6 @@ class ahgInformationObjectManagePluginConfiguration extends sfPluginConfiguratio
         $router->any('io_treeview_sort', '/informationobject/treeviewSort', 'treeviewSort');
 
         // Specific routes (checked first after prepending)
-        $router->any('io_actor_autocomplete', '/informationobject/actorAutocomplete', 'actorAutocomplete');
-        $router->any('io_repository_autocomplete', '/informationobject/repositoryAutocomplete', 'repositoryAutocomplete');
-        $router->any('io_term_autocomplete', '/informationobject/termAutocomplete', 'termAutocomplete');
-        $router->any('io_generate_identifier', '/informationobject/generateIdentifierJson', 'generateIdentifier');
-        $router->any('io_add_override', '/informationobject/add', 'edit');
 
         $router->register($event->getSubject());
     }

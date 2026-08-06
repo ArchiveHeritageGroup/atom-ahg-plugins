@@ -4,7 +4,7 @@
     "version": "1.1.0",
     "description": "Enterprise-grade automated integrity assurance: scheduled fixity verification, scoped validation, concurrency controls, append-only ledger, dead-letter queue, retention policies, legal holds, disposition review, threshold alerting",
     "author": "The Archive and Heritage Group (Pty) Ltd",
-    "license": "AGPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "preservation",
     "keywords": ["integrity", "fixity", "verification", "checksum", "scheduling", "dead-letter", "ledger", "retention", "legal-hold", "disposition", "alerting"],

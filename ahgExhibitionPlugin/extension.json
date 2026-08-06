@@ -2,6 +2,7 @@
     "name": "AHG Exhibition",
     "machine_name": "ahgExhibitionPlugin",
     "version": "1.0.1",
+    "license": "AGPL-3.0-or-later",
     "description": "Exhibition management for GLAM/DAM sectors - standalone plugin for managing exhibitions, objects, storylines, and events",
     "author": "The Archive and Heritage Group",
     "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",

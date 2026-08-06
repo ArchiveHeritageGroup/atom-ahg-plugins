@@ -1,0 +1,1816 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Remove classification entirely --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- Select Classification --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- Select Level --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>-- Select User --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>2FA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>2FA Verified:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Access Denied</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Access Duration (hours)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Access Logs Today</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Access Over Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Access Request Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Access Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Access Until</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Actions Breakdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Active Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Activity Over Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Activity since %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Add a passkey</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Administration area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>All Audit Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Allied materials area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Also available from the CLI:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Any special handling requirements...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Application Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Apply Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Apply this classification to all child records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Apply to child records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Apply watermark on download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Apply watermark to all images by default.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Apply watermark when viewing images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Approved Today</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Approve Renewal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Are you sure you want to remove the security classification from this record?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Are you sure you want to revoke the security clearance for %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Are you sure you want to revoke this clearance?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Audit Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Audit trail integrity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Auto-declassify Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Auto-Declassify Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Available Watermarks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Awaiting review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Back to 2FA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Back to Clearances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Back to Compartments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Back to dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Back to Pending Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Back to Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Bottom Center</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Bottom Left</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Bottom Right</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Briefing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Cancel and return home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Center</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Center Left</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Center Right</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Chain intact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Change History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Check this to apply the new watermark to existing images. This may take a moment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Classification:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Classification Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Classification Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Classification History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Classification Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Classification Levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Classification Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>CLASSIFIED: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Classified By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Classified Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Classified Objects by Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Classify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Classify record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Clearance History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Clearance Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Clearance Upgrade:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Cleared Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Compartment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Compartment:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Compartment Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Compartments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Conditions of access and use area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Configure default watermark behavior for all digital objects.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Confirm &amp; Activate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Content and structure area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Context area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Could not change the publication status. Please check that the parent record is published.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Current</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Current Classification:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Current Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Current Clearance:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Custom Watermarks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Date/Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Date From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Date To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Date when classification should be reviewed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Date when classification will be automatically removed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Days Left</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Days Until</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Days with Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Declassification Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Declassifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Declassify Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Declassify To Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Default Watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Default Watermark Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Denied</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Denied Today</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Deny</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Description control area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Document the justification for this classification decision.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Don't have your authenticator app handy?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Downgrade To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Download Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Downloaded By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Downloaded images will have watermark applied. Master files are never modified.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Due</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Due for Declassification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Duration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Duration Requested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Duration Required (hours)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Edit %1% - ISAD(G)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Edit user</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Email:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Enable default watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Enable Watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Enable watermark for this object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Enforce per-role MFA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Enter any notes about this clearance...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Enter reason for declassification...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Enter the 6-digit code from your authenticator app.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Enter the 6-digit code shown in your authenticator app to confirm setup:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Enter Verification Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Enter watermark code (12 characters)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Every entry in the security access log is hash-linked to the one before it. This check recomputes the whole chain — any altered, deleted or inserted entry breaks it and is reported below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Existing Custom Watermarks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Expires</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Expires:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Expires: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Expiring Clearances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Expiry Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Explain why this classification level is appropriate...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Export to CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Failed to apply classification. Please try again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>File Hash</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Go Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Grant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Grant Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Grant Compartment Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Granted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Granted:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Granted By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Granted by %1% on %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Granted Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Grant New Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Grant Security Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Handling Instructions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>hours</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Identifier:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Identifier: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Identity area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>If checked, all descendant records will inherit this classification level.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Images smaller than this dimension will not receive watermarks.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Immediate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Inheritance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>IP Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Justification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Last 7 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Last used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Leave empty for no automatic expiry.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Leave empty to keep existing selection above</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Level %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Level:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Make available globally (for all records)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Manage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Manage Clearances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Manage passkeys</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Manage security clearances for all users.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Master switch. When off, no role is gated regardless of the selections below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>MFA policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Minimum 20 characters required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Minimum Image Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Most Active Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Most Viewed Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>My Access Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>N/A</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Name this passkey (e.g. "YubiKey", "iPhone")</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>never</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>No access records found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>No access requests found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>No actions recorded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>No active clearance.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>No audit entries found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>No clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>No Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>No compartment access granted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>No compartments defined</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>No Custom (Use System)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>No custom watermarks uploaded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>No declassifications currently due.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>No expiry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>No future declassifications scheduled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>No history.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>None (use system watermark)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>No object views</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>No passkeys registered yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>No pending access requests.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>No recent activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>No recent logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>No retention schedules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Normal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>No security classification has been applied to this record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>No security events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Notes:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Notes area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>Not Requested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>Not set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>No user activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>No users have access to this compartment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>No watermark found with code:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>Object Access Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>Objects Accessed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>Objects by Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>Opacity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>Open your authenticator app (Google Authenticator, Authy, or Microsoft Authenticator) and scan this QR code:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>or</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>Or Custom Watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>Or enter this key manually:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>Passkey</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>Passkeys (WebAuthn / FIDO2)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>Pending Access Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>Pending Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>Pending Reviews</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>Per-role MFA policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>Please provide a detailed justification for your access request. Include the purpose, project name, and any relevant authorization.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>Please select a valid classification level.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>PNG or GIF with transparency recommended</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>Position</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>Process</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Public</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Public (No Classification)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Quick Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Reason for Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Recent Access Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Recent Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Recent Audit Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Recent Denials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>Recent Security Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Reclassify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>Reclassify record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Regenerate derivatives with new watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Register a security key, fingerprint, or device passkey as a second factor. Passkeys are phishing-resistant and never leave your device.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Remove Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Remove this passkey?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Renewal Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Renewal Requested:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Renewal Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Repeat (tile)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Repeat/Tile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Request Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Request Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Requested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Requested Resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Requester</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Request History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Request Renewal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>Request Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Required Classification:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Require members of the selected roles to complete two-factor authentication (TOTP or a passkey) before they can use the site. Users without a second factor are sent to enrol first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Requires Briefing:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Result</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Retention Schedules (NARSSA)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Return to Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Review &amp; Declassification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Review Access Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Review Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>Review Decision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Reviewed By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Review Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Reviews Due</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Revoke</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Revoke access for this user?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>Revoke Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Revoke compartment access?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>Roles that require MFA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Save Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Save policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Scheduled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Scheduled Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Scheduled Declassifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>Security Audit Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>Security Audit Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>Security Audit Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>Security Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>Security classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>Security classification has been applied successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>Security classification has been removed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>Security classification overrides default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>Security classification watermarks have the highest priority and will override custom watermarks.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>Security classification watermarks override all other watermarks.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>Security classification watermarks take priority over default/custom watermarks.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>Security clearance has been revoked.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>Security clearance has been updated successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>Security Clearance Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>Security Compartments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Security Compliance Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Security Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>Security Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>Security Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>Select the maximum classification level this user should be able to access.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>Send code via email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>Set Up Two-Factor Authentication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>Showing 20 of %1% records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Special Handling Instructions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>Step 1: Scan the QR Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>Step 2: Enter Verification Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>Submit Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>Submitted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>Supported: PNG, JPEG, GIF. Recommended: transparent PNG.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>System Watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Tampering detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>The chain breaks at entry id %1%.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>This Month</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>This record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>This record is publicly accessible</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>This record will become publicly accessible.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>This user does not have a security clearance. They can only access public documents.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Tip: enrol your own passkey or authenticator before enabling this for the administrator role, or you will be redirected to set one up on your next request.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Title:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Top Center</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Top Left</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Top Right</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Total Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>Total Views</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Trace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Trace Watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>Two-Factor Authentication Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Type of Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>Update Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Upload NEW Custom Watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Upload New Watermark</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>Urgent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>Use as Default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>Use default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>User Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>User Clearance Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>User Clearances by Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>User Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>Username:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="403">
+        <source>Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="404">
+        <source>User security clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="405">
+        <source>User Security Clearances</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="406">
+        <source>Users with Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="407">
+        <source>Verify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="408">
+        <source>Verify 2FA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="409">
+        <source>Verify integrity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="410">
+        <source>Verify with a passkey</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="411">
+        <source>Vetting Authority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="412">
+        <source>Vetting Authority:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="413">
+        <source>Vetting Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="414">
+        <source>Vetting Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="415">
+        <source>Vetting Reference:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="416">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="417">
+        <source>View Access History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="418">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="419">
+        <source>View All Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="420">
+        <source>View Audit Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="421">
+        <source>View Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="422">
+        <source>View My Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="423">
+        <source>View Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="424">
+        <source>View Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="425">
+        <source>View record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="426">
+        <source>View Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="427">
+        <source>Views</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="428">
+        <source>View User Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="429">
+        <source>Watermark applied when no specific watermark is set.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="430">
+        <source>Watermark Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="431">
+        <source>Watermark Found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="432">
+        <source>Watermark Image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="433">
+        <source>Watermark Image File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="434">
+        <source>Watermark Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="435">
+        <source>Watermark Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="436">
+        <source>Watermark Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="437">
+        <source>Watermark Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="438">
+        <source>Watermark will be overlaid on IIIF image viewer.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="439">
+        <source>When auto-declassified, change to this level instead of making public.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="440">
+        <source>With Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="441">
+        <source>Within 30 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="442">
+        <source>Without Clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="443">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="444">
+        <source>You do not currently have a security clearance. Your request will need to be approved by a security officer.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="445">
+        <source>You do not have a security clearance. Contact your administrator.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="446">
+        <source>You do not have permission to access this resource.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="447">
+        <source>Your browser will prompt you to use a security key or device authenticator.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="448">
+        <source>Your Clearance:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="449">
+        <source>Your clearance level requires two-factor authentication to access classified materials.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="450">
+        <source>Your Current Clearance:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="451">
+        <source>Your passkeys</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="452">
+        <source>Your security clearance requires two-factor authentication. Follow the steps below to set up your authenticator app.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Add node</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Capture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Capture an .eml email file</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>captured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Capture queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Classification tree</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>classified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Classify</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Classify / Declare</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Code / Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Declare as record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>declared</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Delete this node?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Disposal action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Edit node</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Email capture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>File plan / classification scheme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>IO #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>No classification nodes yet — add one →</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>nodes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>No emails captured yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Parent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Retention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Retention period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Sent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>The original .eml is preserved; you can then classify it to a file-plan node and declare it as a record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>top level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>— file-plan node —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

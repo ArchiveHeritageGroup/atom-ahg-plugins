@@ -115,11 +115,29 @@
         </div>
       </div>
       <?php
-          $__vis = \AhgActorManage\Services\ActorVisibilityService::getStatus(isset($resource->id) ? (int) $resource->id : 0);
+          // ActorVisibilityService belongs to ahgActorManagePlugin, which the
+          // theme does not declare and cannot assume: enabling ahgThemeB5Plugin
+          // without it made this whole form fatal with "Class ... not found",
+          // so the authority record editor died on any install that had the
+          // theme but not the manage plugin. Verified on a clean AtoM 2.10.
+          //
+          // Guarded rather than removed, because the visibility panel is worth
+          // having where the plugin is present. Where it is absent the record
+          // simply behaves as published, which is the correct default.
+          $__vis = [];
+
+          if (class_exists('\\AhgActorManage\\Services\\ActorVisibilityService')) {
+              $__vis = \AhgActorManage\Services\ActorVisibilityService::getStatus(
+                  isset($resource->id) ? (int) $resource->id : 0
+              );
+          }
+
+          $__visAvailable = [] !== $__vis;
           $__visStatus = $__vis['status'] ?? 'published';
           $__visEmbargo = $__vis['embargo_until'] ?? '';
           $__visReason = $__vis['reason'] ?? '';
       ?>
+      <?php if ($__visAvailable) { ?>
       <div class="accordion-item">
         <h2 class="accordion-header" id="visibility-heading">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#visibility-collapse" aria-expanded="false" aria-controls="visibility-collapse">
@@ -151,6 +169,10 @@
           </div>
         </div>
       </div>
+      <?php } // $__visAvailable - the panel is only meaningful when
+              // ahgActorManagePlugin is present to store and enforce the values.
+              // Rendering it regardless would offer publication status, embargo
+              // and reason fields that silently save nowhere. ?>
       <div class="accordion-item">
         <h2 class="accordion-header" id="relationships-heading">
           <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#relationships-collapse" aria-expanded="false" aria-controls="relationships-collapse">

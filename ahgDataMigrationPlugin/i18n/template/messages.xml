@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- All Repositories --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- No mapping --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Archives (ISAD-G)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Check Database</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Column</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Digital Assets (DC)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Duplicate Detection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Error:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Export Records by Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Export with CCO compliant columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Export with Collections Procedures compliant columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Export with Dublin Core compliant columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Export with ISAD-G compliant columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Export with MARC/RDA compliant columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Gallery (CCO)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Invalid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Issues by Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Issues Found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Leave empty to use repository/limit filters above</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Library (MARC/RDA)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Mapping Profile (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Match by Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Match by Legacy ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Match by Title + Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Maximum Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Museum (Collections Procedures)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Or enter specific Record IDs (comma-separated)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Quick links to export records using different sector templates:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Referential Integrity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Repository (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Row</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Schema Validation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Sector Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Sector Export Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Showing first 100 issues. Download full report for complete list.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Total Rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Valid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Validate File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Validate Import File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Validation completed in %1% seconds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Validation Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Validation Results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Validation Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Valid Rows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Warning</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Warnings</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

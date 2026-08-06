@@ -1,8 +1,19 @@
+<?php
+/*
+ * Search and holdings forms target GLAM Browse where ahgDisplayPlugin provides
+ * it, and fall back to AtoM's own description browse where it does not.
+ *
+ * They used to call url_for('@glam_browse') directly. url_for() throws on an
+ * unknown route, so a site with the theme but without ahgDisplayPlugin returned
+ * a 500 on every page carrying a search box - which is most of them. A theme
+ * must not require a feature plugin to be installed.
+ */
+?>
 <form
   id="search-box"
   class="d-flex flex-grow-1 my-2"
   role="search"
-  action="<?php echo url_for('@glam_browse'); ?>">
+  action="<?php echo AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])); ?>">
   <h2 class="visually-hidden"><?php echo __('Search'); ?></h2>
   <input type="hidden" name="topLod" value="0">
   <input type="hidden" name="sort" value="relevance">
@@ -61,7 +72,7 @@
         </div>
         <div class="dropdown-divider"></div>
       <?php } ?>
-      <a class="dropdown-item" href="<?php echo url_for('@glam_browse') . '?showAdvanced=true&topLevel=0'; ?>">
+      <a class="dropdown-item" href="<?php echo AhgNav::safeUrl('@glam_browse', url_for(['module' => 'informationobject', 'action' => 'browse'])) . '?showAdvanced=true&topLevel=0'; ?>">
         <?php echo __('Advanced search'); ?>
       </a>
       <div class="dropdown-divider"></div>

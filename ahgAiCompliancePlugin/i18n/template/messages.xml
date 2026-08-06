@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>AI Risk Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>AI system</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>AI System Inventory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>AI systems</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Art. 9</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Attestations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>attested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Attested at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Attested by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Conformity &amp; Oversight Attestations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Delete this attestation?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Delete this model?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Delete this risk?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Delete this system?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Deployment context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Edit AI System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Edit Attestation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Edit Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Edit Risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>EU AI Act Governance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Evaluation summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Evidence URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>high/critical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Human oversight measures (Art. 14)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Inherent risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Intended purpose</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Intended purpose (Art. 6)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Inventory, risk management and conformity records for the EU AI Act (Articles 6, 9, 10, 11, 13, 14, 47/48). The tamper-evident Article 12 inference receipt chain is recorded separately.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Known limitations / accuracy / bias</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Last review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Lifecycle status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Likelihood</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Mitigation measures (Art. 9)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Modality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Model ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Model Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Models</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>New AI System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>New Attestation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>New attestation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>New model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>New Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>New Risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>New risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>New system</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Next review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>No AI systems recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>No attestations recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>No models registered yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>No risks recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Open risks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Owner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Provider</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Residual likelihood</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Residual risk (after mitigation, optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Residual severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Review date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>review overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Risk classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Role</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Setting "attested" stamps the attested date.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Systems by risk classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Training data summary (Art. 10)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>— n/a —</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>— none —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

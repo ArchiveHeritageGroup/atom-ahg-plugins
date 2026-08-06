@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>- Select -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>- Use global default -</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Accruals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Acquisition and appraisal elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Actor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Actor name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add alternative identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add archivist's note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Add child level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Add date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Add language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Add new archival description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Add new child levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Add note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Add publication note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Add script</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Administration area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Alternative identifier(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Appraisal, destruction and scheduling</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Archivist's notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Conditions governing access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Conditions governing reproduction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Conditions of access and use elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Content and structure elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Could not generate identifier.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Custodial history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Date(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Dates of creation, revision and deletion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Description control element</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Description identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Display standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>e.g. ca. 1900</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>e.g. Former reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Edit archival description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>End</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Existence and location of copies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Existence and location of originals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Extent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Failed to generate identifier.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Finding aids</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Genre access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Identity elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Immediate source of acquisition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Institution identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Keep</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Language(s) of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Language(s) of material</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Language and script notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Last updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Level of detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Make this the default for existing children</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Name access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Name of creator(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>No linked descriptions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Notes element</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Part of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Physical access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Place access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Please select a repository first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Publication notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Related material descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Related materials elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Related units of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Rules or conventions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Scheme: Archive Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Scope and content</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Script(s) of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Script(s) of material</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>select a repository first, then click Generate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Source language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Start</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Status of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Subject access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>System of arrangement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Technical access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Type to add creator...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Type to add genre...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Type to add name...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Type to add place...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Type to add subject...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Type to search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Uncheck to remove a linked description when you save.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

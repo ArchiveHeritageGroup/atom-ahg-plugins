@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>"Use for" labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Add new narrow terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add new term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>All labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Back to term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Broad term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Browse all terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Converse term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Date modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Elements area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Export SKOS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Genres</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>It's used in %1% events that will also be deleted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>It has %1% descendants that will also be deleted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Name - A term with this name already exists.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>No authority records are linked to this term.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Only %1% terms were shown.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Only results directly related</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Places</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Preferred label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Reference code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Related authority records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Related term(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Relationships</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Remove filter:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Results %1% to %2% of %3%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Scope note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Search %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Self-reciprocal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Showing %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Start date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Term %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>The related object(s) will &lt;strong&gt;not&lt;/strong&gt; be deleted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>This is a mandatory element.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>This term is used in %1% records. The term will be deleted from these records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Use for</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Use for: </source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>View related authority records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>We've redirected you to the first page of results. To avoid using vast amounts of memory, AtoM limits pagination to %1% records. To view the last records in the current result set, try changing the sort direction.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Your term has been updated. Its related descriptions are being updated asynchronously – check the &lt;a class="alert-link" href="%1"&gt;job scheduler page&lt;/a&gt; for status and details.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

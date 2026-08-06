@@ -1,0 +1,424 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Action Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Action Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>After</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>After (New Values)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>All Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>All Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>All Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Also from the CLI:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Anonymize IP Addresses (POPIA)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Apply Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Audit Log Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Audit Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Audit Trail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Audit trail integrity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Audit Trail Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Authentication Audit Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Authentication History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Authentication Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Back to audit log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Back to Audit Trail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Back to Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Before</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Before (Old Values)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Chain intact</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Change Comparison</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Changed by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Changed Fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Classified Content Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Compare Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Date/Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Deleted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Denied Access Attempts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Each audit entry from the seal point on is SHA-256 hash-linked to the one before it. This check recomputes the chain — any altered, deleted or inserted entry breaks it and is reported below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Enable Audit Logging</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Entity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Entity History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Entity ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Entity Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Export JSON</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Filter Audit Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>From Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>General Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Integrity check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>IP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Last 7 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Last 30 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Last 90 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Mask Sensitive Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Most Active Users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>No activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>No activity found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>No audit log entries found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>No authentication history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>No classified access records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>No denied access attempts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>No failed actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>No history found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>No recent logins</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>No suspicious activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Privacy Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Quick Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Recent Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Recent Failed Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Recent Logins</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Security Access Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Showing %1% to %2% of %3% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Statistics Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Suspicious Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Tampering detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Technical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>The chain breaks at entry id %1%.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>The chain is not sealed yet. Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Time Period:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>To Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Total Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>User Activity: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>User Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>UUID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>View Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>View Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>What to Log</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

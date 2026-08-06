@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Also export records with draft publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Bulk Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>CLI Usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>e.g., my-fonds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Enter the slug of the record to export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Export archival descriptions to various international metadata standards.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Export as ZIP</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Export Error:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Export Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Export Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Export Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Export Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Export Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Export the full hierarchy including all descendants</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>For bulk exports, use the command line:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Format Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>For very large repositories, consider using the CLI command for better performance.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Include child records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Include children</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Include digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Include draft records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Include references to attached digital objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Limit hierarchy depth (0 = unlimited)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Maximum Depth</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Metadata Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>No preview available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Output Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Output Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Quick Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>RDF Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Recent Exports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Record Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Record Slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Select Export Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Select format...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Select repository...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Select the repository to export records from</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>This will export all top-level records from the selected repository. Each record will be exported as a separate file, and all files will be packaged into a ZIP archive for download.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

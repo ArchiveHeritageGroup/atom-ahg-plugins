@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(all files in the upload root)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Attach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Attached to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Attach to record (slug, optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>blank = create + link later</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Cancelled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Chunk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>chunk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Clear all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Combine a folder into PDF/A</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Combine all images in an uploaded folder into one PDF/A. It runs in the background; you will be notified when it is done.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Combined PDFs - link to a record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Configure FTP Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Copy path prefix</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Create PDF/A</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Delete ALL uploaded files in this folder? This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Delete failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Drag and drop files here</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Enter a record slug first.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Filename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Files uploaded here are stored at the remote path shown below. In your CSV import file, set the &lt;code&gt;digitalObjectPath&lt;/code&gt; column to:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>FTP/SFTP Not Configured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>FTP Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Important: CSV Digital Object Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Invalid response</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Network error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>No files found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>or click to browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>pages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Pause</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Paused</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>paused</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>PDFs that were combined without a record slug. Enter a record slug and attach each one as a digital object.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Please configure the FTP/SFTP connection settings before using this page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Queuing…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>record slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Refresh</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>remaining</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Remote Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Replace &lt;em&gt;your-filename.ext&lt;/em&gt; with the actual filename you upload.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Resume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Retry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Retrying</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Select a folder to upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Server error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>supports files up to 2 GB — chunked upload with resume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Timeout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Upload Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Uploads every file in the folder, keeping its subfolder structure.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

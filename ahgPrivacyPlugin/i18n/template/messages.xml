@@ -1,0 +1,2536 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(untitled)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- Select Officer --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>-- Unassigned --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>0 = "as soon as feasible"</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>30 days (extendable by 30 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>About Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>About Privacy Officers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>About Regional Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Access Fee:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Access Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>A confirmation email has been sent to:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Actions taken or planned to address the breach...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Activating</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>ACTIVE</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Active Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Activity Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Activity Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Add Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Add a description to scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Add a field redaction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Add and pre-populate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Add Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Add Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Add Privacy Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Add Processing Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Add the descriptions covered by this request. Each one gets a privacy profile pre-populated (status: pending) so you can mark fields for redaction in the response.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Africa</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>All Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>All Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>All Statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>All types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Appeals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Appointed:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Appointed Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Approval History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>A privacy complaint is appropriate when you believe your personal information has been mishandled or your privacy rights have been violated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Archival description (numeric id or slug)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Assess the potential consequences for data subjects...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Assigned Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Assigned Privacy Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Assigned To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Assigned To:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Assign to Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>A unique identifier for the data subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Auto-assign (Primary Officer)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Available for selection in forms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Awaiting review by Privacy Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Back to Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Back to Privacy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Back to View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Basic Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Before You Submit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Breach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Breach Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Breaches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Breaches by Severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Breach Hours</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Breach Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Breach Notification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Breach Notification Hours</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Breach Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Breach Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Cannot change jurisdiction after creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Categories of Data Subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Categories of Personal Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Cause</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Changes Requested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Check Request Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Check Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>CLI Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Closed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Complainant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Complainant Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Complaint Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Complaints</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Complaint Submitted Successfully</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Complaint Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Complaint Type:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Complete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Completed:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Completed Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Compliance Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Compliance Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Compliance with legal and regulatory requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Configure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Consent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Consent Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Consent Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Consent Given</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Consent Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Consent Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Consent Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Consents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Contained</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Contained Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Copy and Inspection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Copy of record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Correction Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Could not update finding.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Countries outside jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Country:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Create DSAR</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Create PAIA Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>critical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Currently Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Cyber Attack / Hacking</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Data Breach Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Data Categories Affected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Data Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Data Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Data Protection Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Data Protection Impact Assessments (DPIA)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Data Protection Officer opinion / advice.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Data Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Data Subject Access Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Data Subject Access Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Data Subject Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Data Subject Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Data Subject Request Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Data Subjects Affected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Data Subjects Notified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Data Subjects Not Notified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Date of Incident</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Date of Incident:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>days remaining</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Days to respond to data subject requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Default:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Default Retention Years</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Delete this jurisdiction?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Deletion Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Department</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Describe the records being requested...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Describe what happened, what data was affected, and how the breach was detected...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Describe why this personal data is processed...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Description &amp; Analysis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Description:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Description of Records Requested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Description of Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Descriptions in scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Detailed description of the complaint...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Details of the information or action requested...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Detected Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Detected Date/Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Digital object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Disable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>DPIA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>DPIA (Data Protection Impact Assessment)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>DPIA Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>DPIA Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>DPIA Not Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>DPIA Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>DPIAs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>DPIA Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>DPO consultation opinion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>DPO consulted on</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Draft</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>DSAR</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>DSAR Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>DSAR Response Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>DSAR Response Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>DSARs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>DSARs by Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>DSARs by Request Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Due Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Due Date:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>e.g., 5 years after contract ends</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>e.g., Company registration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>e.g., Customer Database Processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>e.g., Customers, Employees, Researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>e.g., Encryption, Access controls</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>e.g., Information Officer, DPO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>e.g., IO registration with regulator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>e.g., Marketing communications, Data processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>e.g., Name, Email, ID Number, Health Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>e.g., Names, ID numbers, financial data...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>e.g., Names, ID numbers, Health data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>e.g., SCCs, BCRs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>e.g., Website, Paper form, Phone call</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>e.g. 1234 or my-collection-slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Each jurisdiction defines the data protection law applicable to your organization. Configure DSAR response times, breach notification requirements, and regulatory contacts for each jurisdiction you operate in.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Edit Breach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Edit Complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Edit Consent Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Edit DPIA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Edit DSAR</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Edit Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Edit Privacy Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Edit Processing Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Effective</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Effective:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Effective Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>Email:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>Email Address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Embedded-metadata PII</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Enable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Enable this jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>Escalated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Explicit Consent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Export Breaches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Export DSARs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Fee</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>Fee Allowed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>Fee Exempt</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>Fee exemption requested (for personal use or public interest)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>Fee Paid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Fee Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Fees</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Fee Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>Field-level redaction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Field redaction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Flag Icon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>form instead.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>Full</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>Full Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>GDPR (EU)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>GDPR Article 35 — assessments of high-risk processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>GPS coordinates, people and contact details found in embedded EXIF/IPTC metadata. GPS findings left pending are withheld from public surfaces (IIIF, exports, AI, OCFL) by the redaction gate.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>High</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>High-risk processing (special category / large-scale / biometric / cross-border) — auto-flagged from the text below if matched</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>High risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>hours</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>How was this complaint resolved?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>How We Process Your Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>hrs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>Human Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>I confirm that the information provided is accurate to the best of my knowledge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>Identify the risks to the rights and freedoms of data subjects.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>Identity Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>ID Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>ID Number:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>ID Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>ID Type:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>If known</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>If refused, explain the legal grounds...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>If you simply want to access, correct, or delete your personal information, please use our</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Impact Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>Improving our services and user experience</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Information object id</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>In Progress</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Inspection of record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Install</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Install and activate a jurisdiction to enable compliance tracking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Installation Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Installed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Installing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Installing a jurisdiction loads its lawful bases, special categories, request types, compliance rules, and retention schedules.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Install jurisdiction: </source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Install this jurisdiction?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>Internal Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Internal notes (not shared with requestor)...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>International</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Investigating</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Investigation and resolution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>IO #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>ISO code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Jurisdiction Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Jurisdiction Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Lawful Bases</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>Lawful Basis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Legal Ref</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Legal Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Lessons Learned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>LIA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Linked ROPA activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Lodge a Privacy Complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Lodge Complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Log Complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>Low</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Malware / Ransomware</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Manage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Manage Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Manage privacy compliance frameworks by region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Managing donor agreements and access restrictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Mark All Read</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Mark identity as verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Marks the DPIA completed and stamps the linked ROPA entry (dpia_completed / dpia_date).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Mark the assessment ready for DPO sign-off.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Measures to address each risk.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Mitigation measures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>Most regulations require breach notification within 72 hours of detection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Move to review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Name:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>NDPA (Nigeria)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Necessity &amp; proportionality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>need DPIA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>New DPIA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>New DSAR</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>New PAIA Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Next Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Next Review Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>No Active Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>No active jurisdiction configured. Install and activate a jurisdiction to enable compliance tracking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>No activity logged yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>No breaches recorded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>No breaches recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>No complaints</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>No Consent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>No consent records found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>No descriptions in scope yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>No DPIAs recorded yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>No DSAR requests recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>No DSARs found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>No findings for this filter.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>none</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>No objects have field redactions yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>No officers assigned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>No PAIA requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>No privacy officers configured. Add an Information Officer to comply with POPIA requirements.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>No processing activities recorded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Normal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Not Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>Note:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>Notification Deadline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>Notification Deadlines</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>Notification Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>Notification required within %hours% hours</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Notification Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>Not Installed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>Not specified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>No unread notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>Objects with redactions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>Object to processing of your information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>Occurred</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>Occurred Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>Occurred Date/Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>of </source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Officer Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Officers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>One law per line...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Open visual redaction editor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Optional comment...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Organization Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Our privacy team will review your complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Outcome</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Outcome:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Overdue by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Owner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>PAIA Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>PAIA Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>PAIA Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>PAIA Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>PAIA Sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>Paid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Partial (pattern)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Partial pattern</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>Passport</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>Pending DSARs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>Pending Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>Pending Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>Phishing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>Phone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>Phone:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="403">
+        <source>Phone Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="404">
+        <source>PII detected in this record - review recommended.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="405">
+        <source>PII finding updated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="406">
+        <source>Please describe the information you are requesting...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="407">
+        <source>Please provide details of your complaint, including what happened, when it happened, and how it affected you...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="408">
+        <source>Please save this reference number. You will need it to check the status of your complaint.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="409">
+        <source>POPIA (South Africa)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="410">
+        <source>Preferred Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="411">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="412">
+        <source>Privacy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="413">
+        <source>Privacy &amp; Data Protection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="414">
+        <source>Privacy &amp; PII</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="415">
+        <source>Privacy Complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="416">
+        <source>Privacy Complaints</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="417">
+        <source>Privacy Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="418">
+        <source>Privacy Compliance Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="419">
+        <source>Privacy Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="420">
+        <source>Privacy Officer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="421">
+        <source>Privacy Officers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="422">
+        <source>Privacy Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="423">
+        <source>Privacy status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="424">
+        <source>Processing Activity Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="425">
+        <source>Processing Activity Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="426">
+        <source>Processing description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="427">
+        <source>Processing research requests and reading room bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="428">
+        <source>Promotion of Access to Information Act (South Africa)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="429">
+        <source>Providing access to archival records and research services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="430">
+        <source>Pseudonymised</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="431">
+        <source>Public Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="432">
+        <source>Purpose</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="433">
+        <source>Purpose of Processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="434">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="435">
+        <source>R50.00 (may be waived)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="436">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="437">
+        <source>Reason:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="438">
+        <source>Reason for rejection (required)...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="439">
+        <source>Received</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="440">
+        <source>Received:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="441">
+        <source>Received Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="442">
+        <source>Receive your data in a portable format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="443">
+        <source>Recipients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="444">
+        <source>Record Consent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="445">
+        <source>Record Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="446">
+        <source>Record of Processing Activities (ROPA)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="447">
+        <source>records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="448">
+        <source>Records Affected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="449">
+        <source>Redacted fields for IO #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="450">
+        <source>Redact fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="451">
+        <source>Redaction scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="452">
+        <source>Redaction type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="453">
+        <source>Redact structured metadata fields for public viewers; staff see the full record.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="454">
+        <source>Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="455">
+        <source>Reference Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="456">
+        <source>Reference Number:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="457">
+        <source>Refusal Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="458">
+        <source>Reg:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="459">
+        <source>Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="460">
+        <source>Regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="461">
+        <source>Registration Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="462">
+        <source>Registration Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="463">
+        <source>Regulator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="464">
+        <source>Regulator:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="465">
+        <source>Regulator Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="466">
+        <source>Regulator Notified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="467">
+        <source>Regulator Notified Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="468">
+        <source>Regulator Not Notified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="469">
+        <source>Regulator Website</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="470">
+        <source>Regulatory Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="471">
+        <source>Rejected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="472">
+        <source>Related Laws</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="473">
+        <source>Remedial Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="474">
+        <source>Remove from scope?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="475">
+        <source>Report Breach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="476">
+        <source>Report Data Breach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="477">
+        <source>Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="478">
+        <source>Request access to your personal information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="479">
+        <source>Request Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="480">
+        <source>Request correction of inaccurate information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="481">
+        <source>Request deletion of your personal information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="482">
+        <source>Request Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="483">
+        <source>Request Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="484">
+        <source>Request Fee:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="485">
+        <source>Request Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="486">
+        <source>Requestor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="487">
+        <source>Requestor Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="488">
+        <source>Requestor Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="489">
+        <source>Request Submitted Successfully</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="490">
+        <source>Request Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="491">
+        <source>Request Type:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="492">
+        <source>Request Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="493">
+        <source>Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="494">
+        <source>Required for identity verification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="495">
+        <source>Required if outcome is Refused</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="496">
+        <source>Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="497">
+        <source>Residual risks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="498">
+        <source>Resolution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="499">
+        <source>Resolution Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="500">
+        <source>Resolved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="501">
+        <source>Resolved:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="502">
+        <source>Resolved Breaches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="503">
+        <source>Resolved Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="504">
+        <source>Response:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="505">
+        <source>Response Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="506">
+        <source>Response deadline:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="507">
+        <source>Response Deadlines</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="508">
+        <source>Response Summary</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="509">
+        <source>Response Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="510">
+        <source>Response Time:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="511">
+        <source>Responsible Person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="512">
+        <source>Retention Period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="513">
+        <source>Return to Privacy Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="514">
+        <source>Review PII</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="515">
+        <source>Right of Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="516">
+        <source>Right to Erasure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="517">
+        <source>Right to Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="518">
+        <source>Right to Portability</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="519">
+        <source>Right to Rectification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="520">
+        <source>Risk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="521">
+        <source>Risk remaining after mitigation.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="522">
+        <source>Risks to data subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="523">
+        <source>Risk to Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="524">
+        <source>ROPA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="525">
+        <source>Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="526">
+        <source>SA ID or Passport</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="527">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="528">
+        <source>Save Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="529">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="530">
+        <source>Save Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="531">
+        <source>Save field redaction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="532">
+        <source>Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="533">
+        <source>Security Measures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="534">
+        <source>Select...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="535">
+        <source>Sensitive (medical / biometric / financial)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="536">
+        <source>Set as Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="537">
+        <source>Set as active jurisdiction: </source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="538">
+        <source>Set as active jurisdiction?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="539">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="540">
+        <source>Severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="541">
+        <source>Short Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="542">
+        <source>Sign-off</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="543">
+        <source>Sign-off note (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="544">
+        <source>Signed off</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="545">
+        <source>Sign off as completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="546">
+        <source>Sort Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="547">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="548">
+        <source>South African ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="549">
+        <source>Special Categories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="550">
+        <source>Special Categories of Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="551">
+        <source>Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="552">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="553">
+        <source>Status &amp; Assignment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="554">
+        <source>Status &amp; Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="555">
+        <source>Status:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="556">
+        <source>Subject Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="557">
+        <source>Subjects Notified Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="558">
+        <source>Submit Complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="559">
+        <source>Submit Data Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="560">
+        <source>Submit for Review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="561">
+        <source>Submit Request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="562">
+        <source>Submitted:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="563">
+        <source>Submit this record for review by a Privacy Officer.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="564">
+        <source>Summary of how the request was handled...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="565">
+        <source>Supported Jurisdictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="566">
+        <source>System Failure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="567">
+        <source>Take Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="568">
+        <source>Thank you for your request</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="569">
+        <source>Thank you for your submission</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="570">
+        <source>The active jurisdiction determines which compliance rules apply globally. Only one jurisdiction can be active at a time.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="571">
+        <source>Theft of Device/Media</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="572">
+        <source>The Promotion of Access to Information Act (PAIA) gives effect to the constitutional right of access to information.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="573">
+        <source>Third Country Transfers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="574">
+        <source>This description also has %count% visual redaction region(s) on its digital object.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="575">
+        <source>This jurisdiction is not installed. Install it to see lawful bases, special categories, request types, and compliance rules.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="576">
+        <source>This record contains redacted personally identifiable information (PII).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="577">
+        <source>This record is pending review.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="578">
+        <source>Time-sensitive:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="579">
+        <source>Timeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="580">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="581">
+        <source>Title / Position</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="582">
+        <source>Total Breaches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="583">
+        <source>Total DSARs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="584">
+        <source>Transfer Safeguards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="585">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="586">
+        <source>Type of Complaint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="587">
+        <source>Unauthorized Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="588">
+        <source>Under applicable data protection laws, you have the following rights regarding your personal information:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="589">
+        <source>Uninstall</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="590">
+        <source>Uninstall jurisdiction: </source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="591">
+        <source>Unique ID, email or reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="592">
+        <source>Unique identifier, lowercase</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="593">
+        <source>Unknown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="594">
+        <source>Update</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="595">
+        <source>Update Breach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="596">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="597">
+        <source>Update Jurisdiction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="598">
+        <source>Update Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="599">
+        <source>Urgent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="600">
+        <source>Usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="601">
+        <source>Use the command line for advanced management:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="602">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="603">
+        <source>Varies based on format and volume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="604">
+        <source>Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="605">
+        <source>Verified:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="606">
+        <source>Verified at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="607">
+        <source>View all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="608">
+        <source>Visit Website</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="609">
+        <source>We collect and process personal information for the following purposes:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="610">
+        <source>We process your data in accordance with applicable data protection laws including POPIA, NDPA, Kenya DPA, and GDPR where applicable.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="611">
+        <source>We will contact you within 14 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="612">
+        <source>We will respond to your request within 30 days as required by POPIA.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="613">
+        <source>We will respond within 30 days as required by POPIA.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="614">
+        <source>What can be improved to prevent future breaches...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="615">
+        <source>What Happens Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="616">
+        <source>Who receives this data? Internal departments, third parties...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="617">
+        <source>Why is the processing necessary, and proportionate to its purpose?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="618">
+        <source>Withdraw</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="619">
+        <source>Withdraw Consent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="620">
+        <source>Withdrawn</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="621">
+        <source>Workflow</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="622">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="623">
+        <source>Your complaint has been received and will be reviewed by our privacy team.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="624">
+        <source>Your Contact Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="625">
+        <source>Your Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="626">
+        <source>Your Privacy Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="627">
+        <source>Your Reference Number:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="628">
+        <source>Your request has been completed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="629">
+        <source>Your request is being processed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="630">
+        <source>Your request was not approved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="631">
+        <source>You will receive a reference number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="632">
+        <source>— none —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

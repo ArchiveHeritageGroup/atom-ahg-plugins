@@ -1,0 +1,1616 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>-- Select --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>-- Select Class --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- Select Standard --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>About Accounting Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>About Compliance Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>About Regional Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Accounting Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Accounting Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Accumulated Depreciation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Acquisition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Acquisition Cost</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Acquisition Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Acquisition Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Activate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Active Region:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Add Accounting Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Add Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Add Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Add Compliance Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Add First Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Add Heritage Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Add Impairment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Add Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Add Journal Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Add Movement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Add Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Add Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Add Valuation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Adjustment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Admin Index</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Administration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>After</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>All Classes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>All Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>All Statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Assessment Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Assessor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Asset Class</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Asset ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Asset Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Asset Register Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Assets by Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Assets with valuation history, revaluation surplus, and impairment losses.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Assets with Valuations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Authorized By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Available Fields:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Available for selection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Available Regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Back to Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Back to GRAP Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Back to Heritage Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Back to Heritage Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Back to Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Back to Regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Back to Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Back to Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Back to View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Basic Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Basis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Batch Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Batch Compliance Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Before</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Bequest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Brief description of the standard and its applicability...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Browse Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Browse GRAP Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>By Asset Class</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Capital.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Capitalisation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Capitalisation Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Carrying Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Carrying Amounts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Categories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Change</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Checked %1% GRAP Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Checked at: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Check Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Check Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Class</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>CLI Commands</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Complete register of all heritage assets with carrying amounts and recognition status.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Compliance Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Compliance Checklist</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Compliance Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Compliance Overview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Compliance Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Compliance Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Compliance Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Compliant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Configure compliance validation rules for each standard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Configure regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Conservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Cost</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Cost Approach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Countries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Country / Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Country/Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Create Heritage Asset Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Credit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Credit Account</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Credit Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Critical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Current Carrying Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Current Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Current Values</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Database field to check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Deactivate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Debit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Debit Account</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Debit Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Default Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Delete this rule?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Delete this standard?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Depreciation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Derecognised</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Derecognition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Disable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Disclosure Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Donation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Donor Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Donor Restrictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Each region implements specific accounting standards for heritage assets. Install only the regions you need - this keeps your database lean and compliance rules relevant to your jurisdiction.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Edit Accounting Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Edit Asset to Fix Issues</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Edit Compliance Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Edit Heritage Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Enable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Enable or disable accounting standards for your organization. At least one standard should be enabled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Enter one disclosure requirement per line</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Environmental</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Error Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Excellent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Exceptional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Exchange</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Exhibition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Expert Opinion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Expiry Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Fair</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Fair Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Fair Value at Acquisition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Field Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Filter by Standard:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Financial Year Start</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>For value_check type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>From Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Generate heritage asset accounting reports.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Good</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Grand Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>GRAP 103 Heritage Assets - Financial Year %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>GRAP 103 References</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>GRAP Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Heritage Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Heritage Accounting Administration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Heritage accounting navigation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Heritage Accounting Regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Heritage Accounting Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Heritage accounting standards define how cultural and heritage assets should be recognized, measured, and disclosed in financial statements.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Heritage Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Heritage Asset Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Heritage Asset Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Heritage Asset Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Heritage Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Heritage Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>High</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Identified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Identifier, title, donor...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Impairment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Impairment Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Impairment Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Impairment Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Impairment Loss</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Impairment Reversal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Impairments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Impairment Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Income Approach</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Initial Carrying Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Install</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Install %1%? This will add the accounting standard and compliance rules.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Install and configure regional accounting standards (IPSAS, GRAP, FRS, etc.)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Installed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Installed:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Install now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Install Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Insurance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Insurance Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Insurance Valuation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Insurance Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Journal Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Journal Entries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Journal Entry Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Journal Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Journal Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Last Valuation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Legal/Regulatory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Linked Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Link to Archival Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Loan Out</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>Loan Return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Loss</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Low</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Manage Regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>Manage Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Manage Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Market Decline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Market Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Measurement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Measurement Basis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>Medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>Monetary value must be recorded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Movement Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Movement Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Movement Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>Movement Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>Movements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Movements: %1% to %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Movement Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Multi-standard heritage asset financial accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>National Treasury Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>New Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>No active region set.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>No active region set. Install and activate a region to enable compliance checking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>No assets recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>No assets yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>No GRAP 103 assets recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>No GRAP assets recorded yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>No GRAP assets to check.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>No heritage asset accounting data has been recorded for this item yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>No Heritage Asset Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>No heritage assets found matching your criteria.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>No heritage assets recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>No impairment assessments recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>No journal entries recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>Nominal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>Nominal Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>No movements in this period.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>No movements recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>Non-Compliant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>No rules found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>Not Practicable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Not Recognised</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>No valuation history recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Obsolescence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>One requirement per line...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Optional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Optional: Link to archival description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Partial</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Partially Compliant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Passed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Physical Damage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>Policy Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Poor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>Posted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Prepared By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Provider</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Purchase</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Recent Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Recent GRAP Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>Recognised</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Recognition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Recognition &amp; Measurement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Recognition Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Recognition Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Recognition Status Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Reference Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Region Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>Regions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Regions Installed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Regulatory Body</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Regulatory Body:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Reports Index</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Revaluation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Revaluation Surplus</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Reversal of Previous Impairment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Reviewed By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>Rule Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Rule Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Rule Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Run Batch Compliance Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Save Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>Save Impairment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Save Journal Entry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>Save Movement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Save Valuation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Select Standard...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Set %1% as the active region?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Set as active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>Set as Active Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>Severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>Severity Levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>Showing %1% of %2% assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>Significance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>Significance Statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>Sort Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>South African heritage asset compliance monitoring</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>Standard-Specific Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>Standard Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>Standard not installed. Install the region to add the accounting standard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>Standard Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Storage Change</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>Sub-class</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>Summary by Asset Class</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>Supported Standards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>This is the currently active region for compliance checking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>This region is installed and ready to use.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>This region is not installed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>To Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>Total: %1% assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>Total Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>Total Carrying Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>Total Impairment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>Totals:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>Total Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Track loans, transfers, exhibitions and storage changes by date range.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Transfer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Treasury Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>Type to search...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Uninstall</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Uninstall %1%? This will remove the standard and compliance rules.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Uninstall Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Unique identifier, uppercase</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>Update Asset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Update Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Update Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Validation Logic</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Valuation Amount</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>Valuation Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Valuation Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Valuation History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>Valuation Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>Valuation Methods</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Valuation Methods Allowed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>Valuation Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>Valuations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>Valuer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Valuer Credentials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Valuer Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>View and edit installed accounting standards.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>View Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>View Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>View Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>View Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>Warnings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>You can also manage regions via command line:</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

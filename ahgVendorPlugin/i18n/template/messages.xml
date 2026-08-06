@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Active Contracts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Address, phone, email...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>All Statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>All Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Are you sure you want to delete this contract?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Auto-generated if blank</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Auto-renew</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Confidentiality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Confidentiality Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Contact Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Contract #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Contract #, title, counterparty...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Contract Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Contract Logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Contract Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Contract Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Contract Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Contract Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Counterparty</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Counterparty Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Create Contract</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Critical</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Deliverables</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Documents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>e.g., 30 days from invoice</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Edit Contract</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Effective</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Effective Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Expired</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Expired %d days ago</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Expiring Soon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Expiry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Expiry Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Financial</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Financial Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>General Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Governing Law</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Governing Law:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Government</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Has financial terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>High</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Individual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Intellectual Property</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Internal Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>IP Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Link to Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Low</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>New Contract</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>No contracts found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>No documents uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>No reminders set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Other</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Our Organization</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Our Representative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Payment Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Pending Signature</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Reminders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Remove logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Representative:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Representative Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Representative Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Review Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Risk Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Save as Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Scope of Work</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Select type...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Signed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Special Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Terms &amp; Conditions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Title/Position</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Upload organization logo for contract header (JPG, PNG, GIF, WebP)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Vendor/Supplier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

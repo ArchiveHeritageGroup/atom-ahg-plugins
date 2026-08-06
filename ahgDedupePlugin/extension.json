@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "Duplicate detection and merging for archival records — configurable rules, scan jobs, compare view, merge workflow, and reports",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "data-quality",
     "keywords": ["duplicate", "dedupe", "merge", "data-quality", "scan"],

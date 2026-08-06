@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Admin-configurable custom metadata fields for any entity type. Define fields via UI \u2014 no code changes needed.",
   "author": "The Archive and Heritage Group",
-  "license": "GPL-3.0",
+  "license": "AGPL-3.0-or-later",
   "requires": {
     "atom_framework": ">=2.8.0",
     "atom": ">=2.8",

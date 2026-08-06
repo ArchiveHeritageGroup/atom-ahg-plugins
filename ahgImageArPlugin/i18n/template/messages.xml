@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Augmented reality is not available on this device/browser. AR needs a WebXR-capable mobile browser (Chrome on Android, or an AR-capable headset). The image is shown below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Back to record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Enter AR</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Move your phone to find a surface, then tap to place.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Point your phone at a wall or the floor, then tap to place this image at life size. Pinch is not needed — it is placed to scale.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>View in your space</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

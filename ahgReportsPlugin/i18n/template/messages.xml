@@ -1,0 +1,1732 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>3D Object Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Access (Archival Description)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Accession</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Accession Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Access Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Accrual Space</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Acquisitions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Acquisition Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Action Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Active Auctions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Active Embargoes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Activity Area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Add Vendor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Admin Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>AHG Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>AI Condition Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>All levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>All Listings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>All repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>All Transactions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>All types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>All users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Analytics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Analytics Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Annotation Studio</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Antiquities Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Apply Embargo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Approval Workflow</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Approvers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Archaeological Sites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Archival Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Archival Descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Assessment Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Asset Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Assignments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>At-Risk Formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Audit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Audit Actor/Authority Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Audit Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Audit Permissions/Groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Audit Physical Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Audit Repository/Archival Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Audit Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Audit Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Audit Trail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Authority Record/Actor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Authority Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Average Score</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Background Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Back to Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Back to reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Backup &amp; Maintenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Backup Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Batch Mint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Batch Payouts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Batch Rights Assignment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Bibliographies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Booked In</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Booked Out</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Both</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Breach Register</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Browse Accession Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Browse Access Items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Browse Archival Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Browse Assessments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Browse Authority Record/Actor Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Browse DOIs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Browse Donor Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Browse Duplicates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Browse Formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Browse Marketplace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Browse Merge Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Browse Physical Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Browse Physical Storage Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Browse Repository Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Browse Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Browse Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Browse Updates Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Browse User Activity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Browse Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Bulk Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Catalogue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Catalogue audit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Categories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>CDPA (Data Protection)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>CDPA Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>CDPA Data Protection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Central Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Checksums &amp; Integrity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>CIDOC-CRM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Circulation desk</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Classification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Clearance Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Closure Periods</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Collections Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Collections Procedures Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Collections Procedures History Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Collections Procedures Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Collections Procedures Workflow</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Commerce &amp; Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Condition (Collections Procedures)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Condition Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Condition Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Condition Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Configure Workflows</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Confirmed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Continue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>COUNTER usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Create Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Creative Commons</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Creators authority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>CSV (ISAD-G)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>CSV Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>CSV Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Culture</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Currencies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Custodian</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Custodian Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>DAM Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Dashboards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>DataCite Config</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Data Ingest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Data Integrity &amp; Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Data Migration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Data Operations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Data Quality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Data Quality &amp; Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Data Quality Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Data Subject Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Date/Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Date end</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Date End</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Date of</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Date range</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Date start</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Date Start</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>DB QUERY</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Dedupe Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Denied</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Description/Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Detection Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Digital Asset Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Digital Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Digital Preservation (OAIS)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Document Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>DOI Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>DOI Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Donor Agreements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Donor Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Donor Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>DSAR Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Duplicate Detection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>E-Commerce</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>EAD</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>EAD Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Embargo Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Entity Resolution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Entity type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Entity Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Error encountered</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Evidence Sets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Exhibitions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Expiring Soon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Export Audit Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Export CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Export Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Export Permits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Export Rights Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Export to CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Extent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Failed Checks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Filter options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Fixity Verification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Format Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Forms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Forms Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Form Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Found %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>FRBR work-key overrides</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Full Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Gallery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Gallery Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Gallery Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Gate Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>GLAM Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Grade Distribution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>GRAP 103</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>GRAP 103 / Heritage Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>GRAP 103 Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>GRAP 103 National Treasury Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Heritage Asset Accounting</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Heritage Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Import Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Ingest Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Ingested objects are auto-preserved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Insurance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Interlibrary loan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>IPSAS (Assets)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>IPSAS Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>IPSAS Heritage Assets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>ISBN providers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>Jurisdiction Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>KBART feeds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Knowledge Platform</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Last ingest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>Level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Levels of Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Library Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Library Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Linked Information Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>Listings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>Login</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Manage Bookings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Manage Researchers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Manage Sellers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>Manual Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>Marketplace</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Marketplace Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Media Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Method of Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>Migration Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>Migration History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>Minting Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>Missing Checksums</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>Model Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>Moderate Reviews</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>Monthly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>Months Ahead</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>Museum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>Museum Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>Museum Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>My Collections Procedures Tasks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>My Tasks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>My Workflow Tasks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>National Monuments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>NAZ (Archives)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>NAZ Archives</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>NAZ Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>New AI Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>New Ingest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>New Merge Job</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>New Transaction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>New Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Next</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>NMMZ (Monuments)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>NMMZ Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>NMMZ Monuments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>No results found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>No results found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>No results found. Adjust your search criteria.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>No results found. Try adjusting your filters.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>No results found. Use the filter options to search for donors.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>ODRL Policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Old Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Orders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>PAIA Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Patrons</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>Payouts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Pending Payouts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Pending Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Period Covered</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Per Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Physical Storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Please log in to access the Central Dashboard.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>POTRAZ License</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>PREMIS Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>PREMIS events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Preservation Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Preservation Policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Preservation Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Previous</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Privacy &amp;amp; Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Privacy &amp;amp; Data Protection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>Privacy Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Privacy Officers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Processing Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Projects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Publication status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Public catalogue (OPAC)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Publish</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Publish Gates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Publish Preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Publish Preservation %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Quick Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>RDM Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>RDM Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Reading Rooms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Records in Contexts (RiC)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Records Transfers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Refusal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>Registry</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Report Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Repository/Archival Institution</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Reproduction Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Request History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Research</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Research &amp; Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>Research Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>Research Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>Researcher</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>Research Journal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>Research Permits</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>Research Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>Research Services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>Resource Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>Restore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>Restriction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>Restriction Condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>Results per page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>Return</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Revenue Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Revision</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>RiC Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>RiC Explorer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>Rights &amp; Licensing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>Rights Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>Rights Holders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Rights Statements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>Rights Vocabularies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>Risk Assessment</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>ROPA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>Run Scan</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>Sales &amp; Payouts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>Saved Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>Sector Dashboards</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Sector Reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Security</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Security &amp; Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>Security, Compliance &amp; Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>Security Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Select</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Select Report Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Sellers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Sellers &amp; Stores</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>Sensitive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Sensitivity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Serials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Service Provider</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Service Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Settings &amp; API Clients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>SharePoint Mappings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>SharePoint Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>Shop Orders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Shop Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>Show/Hide Columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>Showing %1% - %2% of %3% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>Showing %1% of %2% results (Page %3% of %4%)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Showing %1% results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Show linked Information Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>Sort</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>Sort by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>Spatial Analysis Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>Stale Verification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>Statistics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>Subjects authority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>SUSHI settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>Sync Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="403">
+        <source>Table</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="404">
+        <source>Task Pool</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="405">
+        <source>Telephone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="406">
+        <source>Template Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="407">
+        <source>TIFF/PDF Merge Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="408">
+        <source>TIFF to PDF Merge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="409">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="410">
+        <source>TK Labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="411">
+        <source>To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="412">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="413">
+        <source>Transactions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="414">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="415">
+        <source>Unique Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="416">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="417">
+        <source>Updated (7 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="418">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="419">
+        <source>User Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="420">
+        <source>Validation Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="421">
+        <source>Valuations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="422">
+        <source>Vendor Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="423">
+        <source>Vendor Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="424">
+        <source>Vendors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="425">
+        <source>with checksums</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="426">
+        <source>Workflow Configurations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="427">
+        <source>Workflow Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="428">
+        <source>Workflow History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="429">
+        <source>Yearly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="430">
+        <source>Z39.50 / SRU</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="431">
+        <source>Zimbabwe Compliance</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

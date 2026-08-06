@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Access Request History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Actor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>All actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>All statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Apply</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Approved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Audit Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Denied</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>entries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Filter by action</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Filter by request status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Full audit trail of all access request actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>No audit log entries found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Page %1% of %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Request #</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Request Access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Request Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Total Requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>When</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

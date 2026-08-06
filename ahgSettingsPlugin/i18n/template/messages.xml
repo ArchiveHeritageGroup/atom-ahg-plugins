@@ -1,0 +1,5000 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(auto-generated on first share-link issue)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>1 hour</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>1 minute</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>5 minutes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>15 minutes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>30 minutes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>About AHG Central</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>About Sectors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>A brief site description or &amp;quot;tagline&amp;quot; for the header</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Absolute path for condition photo storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Access-log retention (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Accession counter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Accession mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Accession mask enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Accession Numbering</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Accessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Access points</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Access Request Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Access Restrictions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Access statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Access to upcoming cloud-based AI features</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Account Lockout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Acknowledgement Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Acquisition and appraisal area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Activate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Activation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Active Security Features</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Active Targets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Active Theme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Actor history (biographical/administrative history for donors).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Actual filesystem path on the server where files land. Shown to users for the CSV digitalObjectPath column.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Add</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Add new term in Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Add Numbering Scheme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Add Replication Target</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Add Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Adds "Portable Catalogue" option to the clipboard export page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Adds "Portable Viewer" to the Export section on archival description pages.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Add Scheme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Add Target</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Add Term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Add your first term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>A descriptive name to identify this webhook.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>AHG Central API URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>AHG Central Integration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>AHG Central integration settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>AHG Central is a cloud service provided by The Archive and Heritage Group that enhances your AtoM instance with:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>AHG Heratio (Bootstrap 5)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>ahgLdapUser is safe-by-default: with the toggle off (or php-ldap missing) it behaves exactly like the standard local-password login.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>AHG Plugin Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>AHG Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>AI &amp; Processing Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>AI Image Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>AI Services Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Alert Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Algorithm:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>All (*)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Allied materials area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>All levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Allow</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Allow Container Barcodes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Allow creation of offline portable catalogues from Admin UI.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Allow image rotation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Allow manual entry (users can override auto-generated)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Allow patrons to place holds via OPAC</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Allow users to navigate and control the application using voice commands.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>All Sectors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>All Systems Operational</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Also encrypt thumbnails and reference images. Recommended for full protection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Also remove triples where deleted record is the object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>A new record is created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>An existing record is modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Anthropic API Key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Anthropic model ID for image descriptions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>API Key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>API key for accessing the Local Contexts Hub. Leave blank if not using API integration.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>API key for Claude cloud vision. Stored encrypted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Apply to every %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Appraisal, destruction and scheduling information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Appraisal must be completed before an accession can be finalised.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Appraisal values in accession records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Approver notifications, request status emails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Archival description area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Archival descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Archival history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Archive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Archivist's notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>A record is deleted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>A record is published</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>A record is unpublished</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Are you sure you want to delete this taxonomy and all its terms?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Artwork and visual materials</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Audit &amp; Logging</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Audit AI Calls</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Authority records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Auto-Assign to Archivist</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Auto-create AtoM user on first manual push (Phase 2.B)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Auto-create Movements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Auto-Create Stubs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Auto-create thumbnails on upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Auto-expire patron memberships</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Auto-expire unfulfilled holds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Auto-extract metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Auto-generate barcodes for new copies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Auto-Generate Baselines</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Auto-generate daily overdue fines</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Auto-generated on first use; rotation invalidates every existing token.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Auto-generate on record creation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Auto-play</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Auto-play media on load</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Auto-Populate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Auto-Recalculate Completeness</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Auto-rotate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Auto-rotate based on EXIF orientation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Auto-Summarize</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Auto-Translate (Argos)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Auto-Update</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Auto-update has not run yet on this server.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Auto-Verify Wikidata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Automated Monitoring Setup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Automatically assign new accessions to the creating archivist.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Automatically create authority record stubs from NER entities above the confidence threshold.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Automatically create movement records on location change</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Automatically generate baseline checksums on first verification if none exist.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Automatically inherit rights from the donor agreement to created information objects.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Automatically mark Wikidata identifiers as verified when added via reconciliation.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Automatically recalculate completeness scores when the CLI scan runs.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Automatically sync to Fuseki when records are created/updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Available placeholders:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Available Tokens</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Backend</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Background color for card headers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Background color for primary buttons</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Background Job Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Back to Admin Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Back to AHG Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Back to List</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Back to Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Back to Settings Overview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Base AtoM (Dominion B5)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Base DN</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Basic HTML5 Player</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Basic Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Basis</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Batch Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Bell-LaPadula MAC</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Bibliographic materials (books, journals, articles)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Bind Lookup Attribute</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Body</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Booking details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Browse all levels in Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Brute force protection settings. Managed by LoginSecurityService (OWASP A07).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Bucket</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Button Background</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Button Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>California Consumer Privacy Act, reasonable security measures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Capped here unless the user has share_link.create_unlimited_expiry. Default: 90 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Card Header Background</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Card Header Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Cascade Delete References</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Checking...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Check interval</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Check Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Check spelling and grammar on title, scope and content, and archival history fields.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Choose color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Choose where AI image descriptions are processed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Circulation Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Class of material specific details area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Cleanup After</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Clear 30d+</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Clear cache and restart php-fpm.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>CLI Commands</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Client</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Clipboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Clipboard export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Clipboard saving</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Clipboard sending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Clipboard settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Clipboard settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Cloud LLM Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Cloud Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Cloud Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Collapse All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Collections Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Collections Procedures Email Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Color for hyperlinks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Completed exports are auto-deleted after this many days. Run portable:cleanup.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Completeness &amp; Quality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Conditional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Conditional statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Condition Check Interval</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Conditions of access and use area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Confidence Threshold</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Configure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Configure AHG theme and plugin settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Configure automatic metadata extraction.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Configure backup replication targets, verify integrity, and manage preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Configure backup replication targets for digital preservation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Configure defaults for standalone portable catalogue exports (CD/USB/ZIP distribution).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Configure different numbering schemes per GLAM/DAM sector in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Configure global identifier and accession numbering. Clear the application cache and rebuild the search index if you change the reference code separator.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Configure how Named Entity Recognition creates authority record stubs.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Configure Indigenous Cultural and Intellectual Property management settings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Configure loan periods, renewal limits, and fine rates per material type and patron type.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Configure loan periods, renewal limits, and fine rates per material type and patron type. Rules are matched in order: exact match → material default (*) → global default.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Configure password expiry and history requirements. These settings are enforced by the PasswordPolicyService (ISO 27001 A.9.4.3).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Configure the read-aloud accessibility feature for record detail pages.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Configure unique identifier numbering schemes per GLAM/DAM sector. Leave fields blank to inherit the global settings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Configure where extracted metadata is saved:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Connection failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Connection Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Connection successful!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Consecutive failures before escalation to dead letter queue.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Consent &amp; Consultation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Consent expiry warning (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Conservation note(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Contact Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>Containers &amp; Rights</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>Content and structure area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Context area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Continuous Listening</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Contribute and benefit from a community-trained Named Entity Recognition model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>Control area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Copy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Copyright statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Core Services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Counter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>Create AtoM records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>Create multi-page PDF documents from images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>Create new level term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>Create PDF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Create Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Create Thumbnails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Create Webhook</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>Create your first taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>Cron Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>Cron Syntax Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>CSRF Protection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>CSV Mapping YAML</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>CSV Validator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>CSV Validator default behaviour when CSV Import is run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>CSV Validator settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>CSV Validator settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="255">
+        <source>Current Global Identifier Settings (Reference)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="256">
+        <source>Current Sequence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="257">
+        <source>Current Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="258">
+        <source>Custodial history</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="259">
+        <source>Custom CSS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="260">
+        <source>Custom Logo</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="261">
+        <source>DACS template - area headings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="262">
+        <source>DACS template - elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="263">
+        <source>Daily</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="264">
+        <source>Daily (02:00)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="265">
+        <source>Daily Cap</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="266">
+        <source>Daily Cloud Limit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="267">
+        <source>DAM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="268">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="269">
+        <source>Data Protection Compliance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="270">
+        <source>Dates of creation, revision and deletion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="271">
+        <source>Dates of creation area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="272">
+        <source>days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="273">
+        <source>Days a hold remains ready for pickup before expiring.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="274">
+        <source>Days to retain orphaned triples before cleanup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="275">
+        <source>Deactivate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="276">
+        <source>Dead Letter Threshold</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="277">
+        <source>Decrypt a category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="278">
+        <source>Dedup Similarity Threshold</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="279">
+        <source>Default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="280">
+        <source>Default %1% upload limit (GB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="281">
+        <source>Default %1% upload limit for a new %2%.  A value of &amp;quot;0&amp;quot; (zero) disables file upload.  A value of &amp;quot;-1&amp;quot; allows unlimited uploads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="282">
+        <source>Default AIP output path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="283">
+        <source>Default Alert Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="284">
+        <source>Default Algorithm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="285">
+        <source>Default Batch Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="286">
+        <source>Default consultation follow-up (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="287">
+        <source>Default Content Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="288">
+        <source>Default Currency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="289">
+        <source>Default descriptive standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="290">
+        <source>Default DIP output path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="291">
+        <source>Default email for integrity alerts (used by new schedules and alert rules).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="292">
+        <source>Default expiry (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="293">
+        <source>Default for this sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="294">
+        <source>Default Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="295">
+        <source>Default Loan Period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="296">
+        <source>Default Loan Period (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="297">
+        <source>Default Max Renewals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="298">
+        <source>Default number of days for consultation follow-up reminders. Default: 30 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="299">
+        <source>Default page elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="300">
+        <source>Default page elements saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="301">
+        <source>Default page elements settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="302">
+        <source>Default Patron Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="303">
+        <source>Default Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="304">
+        <source>Default priority assigned to new accessions in the intake queue.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="305">
+        <source>Default Regulation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="306">
+        <source>Default scheme updated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="307">
+        <source>Default sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="308">
+        <source>Default Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="309">
+        <source>Default SIP output path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="310">
+        <source>Default template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="311">
+        <source>Default template settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="312">
+        <source>Default templates saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="313">
+        <source>Default Viewer Mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="314">
+        <source>Default Volume</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="315">
+        <source>Default volume level (0-100%)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="316">
+        <source>Default Webhook URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="317">
+        <source>Default webhook URL for alert notifications (Slack, Teams, PagerDuty, etc).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="318">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="319">
+        <source>Delete completed jobs after this many days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="320">
+        <source>Delete this scheme?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="321">
+        <source>Delete this target?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="322">
+        <source>Delete this term?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="323">
+        <source>Delete this webhook?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="324">
+        <source>Delete tokens whose expires_at OR revoked_at is older. Default: 365 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="325">
+        <source>Delete tokens whose expires_at OR revoked_at is older than this. CASCADE removes their access logs. Default: 365 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="326">
+        <source>Deliveries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="327">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="328">
+        <source>Description control area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="329">
+        <source>Description identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="330">
+        <source>Detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="331">
+        <source>Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="332">
+        <source>Detect and match faces in images to authority records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="333">
+        <source>Detect and match faces in images to authority records. Supports OpenCV, AWS, Azure, Google backends.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="334">
+        <source>Detect faces</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="335">
+        <source>Determines whether to show a link to the browse hierarchy page on the information objects browse/search pages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="336">
+        <source>Determines whether to sort siblings in the information object treeview control and, if so, what sort criteria to use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="337">
+        <source>Diacritics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="338">
+        <source>Diacritics settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="339">
+        <source>Diacritics Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="340">
+        <source>Diacritics settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="341">
+        <source>Digital Asset Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="342">
+        <source>Digital Asset Management (media files)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="343">
+        <source>Digital Asset Management Tools</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="344">
+        <source>Digital object derivatives</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="345">
+        <source>Digital object derivative settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="346">
+        <source>Digital Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="347">
+        <source>digital objects on disk.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="348">
+        <source>DIP upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="349">
+        <source>DIP upload settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="350">
+        <source>DIP Upload settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="351">
+        <source>DIP upload settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="352">
+        <source>Disable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="353">
+        <source>Disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="354">
+        <source>Disallow</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="355">
+        <source>Disallow statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="356">
+        <source>Disk Usage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="357">
+        <source>Display a flash notification on login when the password is expiring soon or has expired.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="358">
+        <source>Display a floating microphone button on all pages for quick voice activation.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="359">
+        <source>Display AHG branding</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="360">
+        <source>Display cultural notices to public users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="361">
+        <source>Display cultural notices to staff</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="362">
+        <source>Display Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="363">
+        <source>Display Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="364">
+        <source>Display player controls</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="365">
+        <source>Display Privacy Notification on first visit to site</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="366">
+        <source>Display Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="367">
+        <source>DNS pre-resolution, private IP blocking (HttpClientService)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="368">
+        <source>DOI Integration (DataCite)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="369">
+        <source>Donor agreement must be attached before an accession can be finalised.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="370">
+        <source>Donor Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="371">
+        <source>Drag to reorder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="372">
+        <source>Dropdown Manager</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="373">
+        <source>e.g., Sync to CMS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="374">
+        <source>Each webhook request includes an X-Webhook-Signature header with an HMAC SHA-256 signature. Verify this to ensure the request is authentic:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="375">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="376">
+        <source>Editable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="377">
+        <source>Edit Global Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="378">
+        <source>Edit in Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="379">
+        <source>Edition area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="380">
+        <source>Edit Numbering Scheme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="381">
+        <source>Edit Target</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="382">
+        <source>Edit Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="383">
+        <source>Email, address, telephone, fax, contact person (contact_information tables).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="384">
+        <source>Emailed on a successful update, a warning (skipped dirty repo), or a rollback. Requires a working mail command.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="385">
+        <source>Email Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="386">
+        <source>Email Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="387">
+        <source>Email Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="388">
+        <source>Enable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="389">
+        <source>Enable access statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="390">
+        <source>Enable Account Lockout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="391">
+        <source>Enable AHG Central Integration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="392">
+        <source>Enable AHG Theme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="393">
+        <source>Enable Automatic Sync</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="394">
+        <source>Enable background job processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="395">
+        <source>Enable barcode scanning for linking containers to accessions.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="396">
+        <source>Enable clipboard send functionality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="397">
+        <source>Enable Collections Procedures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="398">
+        <source>Enable Collections Procedures collections management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="399">
+        <source>Enable copyright statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="400">
+        <source>Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="401">
+        <source>Enable data protection module</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="402">
+        <source>Enable digital object export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="403">
+        <source>Enable Encryption</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="404">
+        <source>Enable Error Alerts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="405">
+        <source>Enable external authority file linking for reconciliation and enrichment.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="406">
+        <source>Enable identifier mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="407">
+        <source>Enable IIIF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="408">
+        <source>Enable IIIF viewer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="409">
+        <source>Enable Integrity Assurance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="410">
+        <source>Enable Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="411">
+        <source>Enable keyboard shortcuts for play/pause/stop (Alt+P, Alt+S).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="412">
+        <source>Enable LDAP authentication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="413">
+        <source>Enable Local Contexts Hub API</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="414">
+        <source>Enable Markdown support</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="415">
+        <source>Enable Module</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="416">
+        <source>Enable notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="417">
+        <source>Enable or disable the display of certain page elements. Unless they have been overridden by a specific theme, these settings will be used site wide.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="418">
+        <source>Enable passive mode for FTP connections (recommended for firewalled servers). Only applies to FTP, not SFTP.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="419">
+        <source>Enable Portable Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="420">
+        <source>Enable public OPAC</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="421">
+        <source>Enable Rotation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="422">
+        <source>Enable scheduled auto-update</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="423">
+        <source>Enable structured actor-to-function linking (ISDF). Requires ahgFunctionManagePlugin.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="424">
+        <source>Enable Text-to-Speech</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="425">
+        <source>Enable Voice Commands</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="426">
+        <source>Enable Wikidata entity linking and reconciliation.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="427">
+        <source>Enabling the toggle alone does not change login until the AtoM user class is switched. On the server (once, by an admin):</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="428">
+        <source>Encrypt a category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="429">
+        <source>Encrypt derivatives</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="430">
+        <source>Encryption at rest satisfies requirements from:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="431">
+        <source>Encryption Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="432">
+        <source>Encryption for digital object files and sensitive database fields using</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="433">
+        <source>Encryption key found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="434">
+        <source>Encrypts uploaded files (masters and derivatives) on disk using</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="435">
+        <source>Enforced on all state-changing requests (CsrfService)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="436">
+        <source>Enhanced Player (Recommended)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="437">
+        <source>Enhancements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="438">
+        <source>Ensure the php-ldap extension is installed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="439">
+        <source>Entity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="440">
+        <source>Entity Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="441">
+        <source>Environment Variables (Legacy)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="442">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="443">
+        <source>Error:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="444">
+        <source>Error adding term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="445">
+        <source>Error Alert Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="446">
+        <source>Error alert details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="447">
+        <source>Error context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="448">
+        <source>Error creating taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="449">
+        <source>Error deleting taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="450">
+        <source>Error deleting term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="451">
+        <source>Error moving taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="452">
+        <source>Error renaming taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="453">
+        <source>Error updating term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="454">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="455">
+        <source>Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="456">
+        <source>Example CSV:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="457">
+        <source>Expand All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="458">
+        <source>Experimental feature.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="459">
+        <source>Expiry defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="460">
+        <source>Expiry Grace Period (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="461">
+        <source>Expiry Warning (Days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="462">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="463">
+        <source>Export Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="464">
+        <source>Extended Color Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="465">
+        <source>Extended error context</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="466">
+        <source>External Authority Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="467">
+        <source>External IIIF server URL (leave blank to use built-in)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="468">
+        <source>External URL to send clipboard contents to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="469">
+        <source>Extract camera info from EXIF data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="470">
+        <source>Extract EXIF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="471">
+        <source>Extract on Upload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="472">
+        <source>Extract persons, organizations, places and dates from text fields. Creates access points automatically.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="473">
+        <source>Extract text from images and PDFs using Tesseract / pdftotext.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="474">
+        <source>Face Detection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="475">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="476">
+        <source>Failed Syncs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="477">
+        <source>Federated search tab in AtoM (Phase 3)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="478">
+        <source>Fee for special categories of personal info (R140)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="479">
+        <source>Field Mapping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="480">
+        <source>Fields to Read per Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="481">
+        <source>File name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="482">
+        <source>File size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="483">
+        <source>File Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="484">
+        <source>Fill gaps (reuse deleted numbers)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="485">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="486">
+        <source>Filter sections...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="487">
+        <source>Financial Data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="488">
+        <source>Finding Aid</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="489">
+        <source>Finding Aid settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="490">
+        <source>Finding aid settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="491">
+        <source>Fine/Day</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="492">
+        <source>Fine Cap</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="493">
+        <source>Fine Threshold (block borrowing)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="494">
+        <source>Footer Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="495">
+        <source>Force Password Change</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="496">
+        <source>Format Identification (Siegfried/PRONOM)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="497">
+        <source>Format name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="498">
+        <source>Format registry key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="499">
+        <source>Format registry name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="500">
+        <source>Format version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="501">
+        <source>Framework</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="502">
+        <source>Frequency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="503">
+        <source>FTP / SFTP Connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="504">
+        <source>Full encryption dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="505">
+        <source>Full URL to Fuseki SPARQL endpoint (e.g., http://localhost:3030/ric)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="506">
+        <source>Full width</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="507">
+        <source>Function Linking</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="508">
+        <source>Fuseki Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="509">
+        <source>Fuseki Connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="510">
+        <source>Fuseki SPARQL Endpoint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="511">
+        <source>Future AI Services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="512">
+        <source>Gallery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="513">
+        <source>General</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="514">
+        <source>General Data Protection Regulation (EU), Article 32</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="515">
+        <source>General note(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="516">
+        <source>Generate AIP package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="517">
+        <source>Generate DIP package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="518">
+        <source>Generate reference images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="519">
+        <source>Generate scope and content summaries for records with extensive text.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="520">
+        <source>Generate SIP package</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="521">
+        <source>Generate thumbnails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="522">
+        <source>Generate with:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="523">
+        <source>Getty ULAN</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="524">
+        <source>GLAM Metadata Export Formats</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="525">
+        <source>Global</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="526">
+        <source>Global settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="527">
+        <source>Global settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="528">
+        <source>Go to FTP Upload Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="529">
+        <source>Go to ICIP Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="530">
+        <source>Grace Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="531">
+        <source>Help for this plugin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="532">
+        <source>Hide stub-level authority records from public browse and search results.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="533">
+        <source>Hide Stubs from Public</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="534">
+        <source>High</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="535">
+        <source>HMAC secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="536">
+        <source>Hold Expiry (days after ready)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="537">
+        <source>Hold Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="538">
+        <source>Host</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="539">
+        <source>Hours to retain login attempt records. Default: 24</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="540">
+        <source>Hover Read Delay</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="541">
+        <source>How it works:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="542">
+        <source>How often to check services (for cron job)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="543">
+        <source>HSTS, X-Frame-Options, Permissions-Policy (SecurityHeadersMiddleware)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="544">
+        <source>HTTP method to use when sending clipboard contents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="545">
+        <source>HttpOnly Cookies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="546">
+        <source>HTTPS URL that will receive POST requests.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="547">
+        <source>Hybrid (Local + Cloud Fallback)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="548">
+        <source>I18n language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="549">
+        <source>I18n languages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="550">
+        <source>i18n language settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="551">
+        <source>ICIP Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="552">
+        <source>ICIP settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="553">
+        <source>Icon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="554">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="555">
+        <source>Identifier - Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="556">
+        <source>Identifier counter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="557">
+        <source>Identifier mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="558">
+        <source>Identifier mask enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="559">
+        <source>Identifier mask pattern</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="560">
+        <source>Identifier Numbering</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="561">
+        <source>Identifiers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="562">
+        <source>Identifier Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="563">
+        <source>Identifier settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="564">
+        <source>Identify file formats using PRONOM registry via Siegfried. Records PUID, MIME type, and confidence.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="565">
+        <source>Identity area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="566">
+        <source>Idle session timeout in minutes. Default: 30</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="567">
+        <source>If the page number does not exist, the derivative will be generated from the previous closest one.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="568">
+        <source>IIIF Image Viewer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="569">
+        <source>IIIF Server URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="570">
+        <source>Immediate source of acquisition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="571">
+        <source>Immediate source of acquisition or transfer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="572">
+        <source>Import AHG Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="573">
+        <source>Import Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="574">
+        <source>In %file%, set the user class to %class%:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="575">
+        <source>Inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="576">
+        <source>Include field labels (e.g. "Scope and content:") when reading aloud.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="577">
+        <source>Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="578">
+        <source>Ingested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="579">
+        <source>Inherit (global)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="580">
+        <source>Inherit reference code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="581">
+        <source>Inherit reference code (DC XML)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="582">
+        <source>Inherit reference code (information object)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="583">
+        <source>Insert Token</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="584">
+        <source>Install the cron entry (run once as root). Re-run after changing the frequency above:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="585">
+        <source>Install the schedule &amp;amp; run manually</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="586">
+        <source>Institution identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="587">
+        <source>Institution name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="588">
+        <source>Intake Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="589">
+        <source>Integration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="590">
+        <source>Integrations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="591">
+        <source>Integrity Check Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="592">
+        <source>Integrity Verification Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="593">
+        <source>International Standard Name Identifier linking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="594">
+        <source>Inventory</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="595">
+        <source>Inventory settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="596">
+        <source>Inventory settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="597">
+        <source>IO Throttle (ms)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="598">
+        <source>ISAD template - area headings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="599">
+        <source>ISAD template - elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="600">
+        <source>ISBN Providers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="601">
+        <source>ISDF Functions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="602">
+        <source>ISNI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="603">
+        <source>Issuers without the share_link.create_unlimited_expiry permission are capped at this value. Default: 90 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="604">
+        <source>Items per page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="605">
+        <source>Items per page can be a minimum of %1% and a maximum of %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="606">
+        <source>Job Queue Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="607">
+        <source>Job Timeout</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="608">
+        <source>JPEG Quality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="609">
+        <source>Keep microphone active after each command (no need to re-activate).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="610">
+        <source>Keep this server current by pulling the latest framework and plugin code from GitHub on a schedule. Updates run via cron (or the CLI) — under this server's hardened php-fpm the web app cannot run git itself, so use the commands below to schedule or trigger a run.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="611">
+        <source>Keyboard shortcuts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="612">
+        <source>Label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="613">
+        <source>Label and code are required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="614">
+        <source>Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="615">
+        <source>Language(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="616">
+        <source>Language saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="617">
+        <source>Large</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="618">
+        <source>Last checked:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="619">
+        <source>Last run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="620">
+        <source>Last Sync</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="621">
+        <source>Latitude and longitude</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="622">
+        <source>Layer 1: Digital Object Encryption</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="623">
+        <source>Layer 2: Database Field Encryption</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="624">
+        <source>LCNAF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="625">
+        <source>LDAP Authentication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="626">
+        <source>LDAP authentication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="627">
+        <source>LDAP authentication settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="628">
+        <source>Leave blank to keep current</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="629">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="630">
+        <source>Level of detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="631">
+        <source>Levels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="632">
+        <source>Levels of Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="633">
+        <source>Levels of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="634">
+        <source>Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="635">
+        <source>Library of Congress Name Authority File.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="636">
+        <source>LIBXML_NONET on all XML parsing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="637">
+        <source>Limit authenticated functionality to one or more IP addresses, separated by semicolons.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="638">
+        <source>Link Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="639">
+        <source>LLM Provider</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="640">
+        <source>Loanable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="641">
+        <source>Loan Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="642">
+        <source>Loan Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="643">
+        <source>Local Contexts API Key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="644">
+        <source>Local Contexts Hub provides TK Labels for Indigenous communities. Visit %link% for more information.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="645">
+        <source>Local Contexts Integration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="646">
+        <source>Local folder (no FTP)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="647">
+        <source>Local LLM Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="648">
+        <source>Local LLM Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="649">
+        <source>Local LLM URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="650">
+        <source>Local Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="651">
+        <source>Location</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="652">
+        <source>Lock accounts after repeated failed login attempts.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="653">
+        <source>Lockout Duration (Minutes)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="654">
+        <source>Log all AI image description requests to the audit trail.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="655">
+        <source>Log all ICIP record access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="656">
+        <source>Log file:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="657">
+        <source>Login Attempt Retention (Hours)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="658">
+        <source>Login button</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="659">
+        <source>Login page URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="660">
+        <source>Loop media automatically</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="661">
+        <source>Loop Playback</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="662">
+        <source>Low</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="663">
+        <source>Lowercase letters, numbers, and underscores only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="664">
+        <source>Make full width treeview collapsed on description pages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="665">
+        <source>Manage controlled vocabularies (dropdowns) used throughout the system.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="666">
+        <source>Manage controlled vocabularies for form dropdowns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="667">
+        <source>Manage ISBN lookup providers (Open Library, Google Books, WorldCat) for automatic metadata retrieval.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="668">
+        <source>Manage ISBN Providers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="669">
+        <source>Manual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="670">
+        <source>Mappings YAML</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="671">
+        <source>Mark All Read</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="672">
+        <source>Markdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="673">
+        <source>Markdown settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="674">
+        <source>Markdown settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="675">
+        <source>Mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="676">
+        <source>Mask Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="677">
+        <source>Master</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="678">
+        <source>Master Files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="679">
+        <source>Master switch for all integrity verification functionality.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="680">
+        <source>Master switch for all RIC sync operations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="681">
+        <source>Master toggle. When enabled, new file uploads will be encrypted automatically.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="682">
+        <source>Material Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="683">
+        <source>Max Checkouts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="684">
+        <source>Max Concurrent Jobs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="685">
+        <source>Max Export Size (MB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="686">
+        <source>Max Failed Attempts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="687">
+        <source>Max Holds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="688">
+        <source>Maximum alert emails per day. 0 = unlimited. Default: 50.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="689">
+        <source>Maximum cloud API calls per day (0 = unlimited).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="690">
+        <source>Maximum dimension in pixels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="691">
+        <source>Maximum expiry (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="692">
+        <source>Maximum length on longest edge (pixels)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="693">
+        <source>Maximum number of jobs to run simultaneously</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="694">
+        <source>Max Memory (MB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="695">
+        <source>Max Queue Size Per Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="696">
+        <source>Max Renewals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="697">
+        <source>Max Runtime (minutes)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="698">
+        <source>Max Upload Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="699">
+        <source>Max Zoom Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="700">
+        <source>Media Player Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="701">
+        <source>Media type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="702">
+        <source>Medium</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="703">
+        <source>Membership Duration (months)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="704">
+        <source>Merge &amp; Deduplication</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="705">
+        <source>Metadata Extraction</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="706">
+        <source>Microsoft 365 SharePoint: tenant, drives, webhook URL, retention map, push.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="707">
+        <source>Microsoft Search connector feed (Phase 3)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="708">
+        <source>Millisecond pause between objects to reduce disk pressure.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="709">
+        <source>Milliseconds to wait before reading (100 = instant, 1000 = slow). Lower values are more responsive.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="710">
+        <source>MIME type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="711">
+        <source>Minimum confidence score (0.0-1.0) for auto-creating stubs. Default: 0.85</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="712">
+        <source>Minimum confidence score for voice recognition (0.3 = lenient, 0.95 = strict).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="713">
+        <source>Minimum seconds between duplicate error alerts. Default: 300 (5 min).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="714">
+        <source>Minimum similarity score (0.0-1.0) for flagging potential duplicates. Default: 0.80</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="715">
+        <source>Minimum value is "%min%"</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="716">
+        <source>Minutes to lock the account after max failed attempts. Default: 15</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="717">
+        <source>Monthly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="718">
+        <source>Mouseover Read-Aloud</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="719">
+        <source>Move</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="720">
+        <source>Move to Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="721">
+        <source>Multi-repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="722">
+        <source>Museum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="723">
+        <source>Must be HTTPS, publicly reachable. Graph posts notifications here.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="724">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="725">
+        <source>National Archives and Record Service of South Africa</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="726">
+        <source>NER (Named Entity Recognition)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="727">
+        <source>NER Pipeline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="728">
+        <source>Never</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="729">
+        <source>New Arrivals Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="730">
+        <source>New Display Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="731">
+        <source>Next number will be this + 1</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="732">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="733">
+        <source>No deliveries yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="734">
+        <source>No encryption key found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="735">
+        <source>No errors logged.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="736">
+        <source>No events recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="737">
+        <source>No GLAM/DAM sectors detected. Enable sector plugins to configure numbering.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="738">
+        <source>No levels available for this sector. The required terms may not exist in the database. Please add them via the Taxonomy.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="739">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="740">
+        <source>No numbering schemes configured. Click "Add Scheme" to create one.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="741">
+        <source>No replication targets configured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="742">
+        <source>Normal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="743">
+        <source>Normalized</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="744">
+        <source>No sync logs yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="745">
+        <source>No taxonomies found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="746">
+        <source>Note: Accession numbering uses a single global counter across all sectors.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="747">
+        <source>Note: Incorrect security settings can result in the AtoM web UI becoming inaccessible.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="748">
+        <source>Note: Most browsers block autoplay with sound</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="749">
+        <source>Note: This is separate from local AI services configured in the AI Services settings. Local AI services run on your own infrastructure while AHG Central is a cloud service.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="750">
+        <source>Note content (internal staff notes on records).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="751">
+        <source>No terms in this taxonomy.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="752">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="753">
+        <source>Notes area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="754">
+        <source>Notification Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="755">
+        <source>Notification email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="756">
+        <source>Notification Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="757">
+        <source>Notification email (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="758">
+        <source>Notification Recipients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="759">
+        <source>Notification Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="760">
+        <source>Notification settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="761">
+        <source>Notify on Failure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="762">
+        <source>Notify on Hash Mismatch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="763">
+        <source>Notify on recovery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="764">
+        <source>Notify on Run Failure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="765">
+        <source>Notify on warnings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="766">
+        <source>Notify Overdue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="767">
+        <source>Not installed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="768">
+        <source>Not set</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="769">
+        <source>No webhooks configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="770">
+        <source>Numbering Mask</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="771">
+        <source>Numbering Scheme</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="772">
+        <source>Numbering Schemes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="773">
+        <source>Numbering scheme saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="774">
+        <source>Number of days before consent expiry to show warning in dashboard and reports. Default: 90 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="775">
+        <source>Number of days before passwords expire. Set to 0 to disable. Default: 90</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="776">
+        <source>Number of failed attempts before lockout. Default: 5</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="777">
+        <source>Number of previous passwords to remember (prevents reuse). Set to 0 to disable. Default: 5</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="778">
+        <source>OAI repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="779">
+        <source>OAI repository settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="780">
+        <source>OAI repository settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="781">
+        <source>Object-based descriptions (CCO/CDWA, Collections Procedures)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="782">
+        <source>Objects per run (0 = unlimited).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="783">
+        <source>OCR (Tesseract)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="784">
+        <source>Off - validation is not run before CSV imports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="785">
+        <source>OK</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="786">
+        <source>Ollama or compatible API endpoint.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="787">
+        <source>OPAC (Public Catalog)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="788">
+        <source>Open</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="789">
+        <source>Open Tools</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="790">
+        <source>Optional aggregate statistics to improve the platform</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="791">
+        <source>Optional regex to validate manual entries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="792">
+        <source>Optional Services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="793">
+        <source>Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="794">
+        <source>Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="795">
+        <source>Orphan Retention (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="796">
+        <source>Output Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="797">
+        <source>Override global settings for the %1% sector. Empty fields inherit global values.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="798">
+        <source>Owner</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="799">
+        <source>Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="800">
+        <source>Passive Mode</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="801">
+        <source>Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="802">
+        <source>Password Expiry (Days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="803">
+        <source>Password History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="804">
+        <source>Password Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="805">
+        <source>Password reset URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="806">
+        <source>Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="807">
+        <source>Path/Bucket</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="808">
+        <source>Path / Bucket</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="809">
+        <source>Path:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="810">
+        <source>Path as seen by the SFTP/FTP user (e.g. /uploads). Used for uploading and listing files.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="811">
+        <source>Path to custom logo image</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="812">
+        <source>Patron Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="813">
+        <source>Patrons with outstanding fines above this amount cannot borrow.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="814">
+        <source>Patron Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="815">
+        <source>Pattern</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="816">
+        <source>Pattern Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="817">
+        <source>Pattern for auto-generated accession numbers. Use {YYYY} for year and {####} for sequence.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="818">
+        <source>Payload Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="819">
+        <source>PDF merge, digital objects, 3D viewer, and media tools</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="820">
+        <source>PDF page number for image derivative</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="821">
+        <source>Pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="822">
+        <source>Per-tenant JSON object keyed by Purview compliance tag.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="823">
+        <source>Permalinks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="824">
+        <source>Permissions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="825">
+        <source>Permissions:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="826">
+        <source>Permissions saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="827">
+        <source>Permissions should be 0600 for security.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="828">
+        <source>Permission toggles</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="829">
+        <source>Permissive - validation is run; warnings are ignored</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="830">
+        <source>Personal Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="831">
+        <source>Photo Upload Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="832">
+        <source>PHP Extensions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="833">
+        <source>Physical access</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="834">
+        <source>Physical characteristics and technical requirements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="835">
+        <source>Physical condition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="836">
+        <source>Physical description area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="837">
+        <source>Physical storage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="838">
+        <source>Playback speed (0.5 = slow, 2.0 = fast).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="839">
+        <source>Player Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="840">
+        <source>Please enter a name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="841">
+        <source>Please fill in all required fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="842">
+        <source>Please rebuild the search index after uploading diacritics mappings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="843">
+        <source>Please rebuild the search index if you are adding new languages.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="844">
+        <source>Please rebuild the search index if you are enabling/disabling Markdown support.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="845">
+        <source>Plugin Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="846">
+        <source>Plugins</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="847">
+        <source>Plugin Services</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="848">
+        <source>POPIA/PAIA Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="849">
+        <source>POPIA Request Fee</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="850">
+        <source>Popular Items — Days Window</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="851">
+        <source>Populate description fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="852">
+        <source>Port</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="853">
+        <source>Portable Export Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="854">
+        <source>Pre-filled in the Share modal. Default: 14 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="855">
+        <source>Pre-filled in the Share modal when no expiry is supplied. Default: 14 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="856">
+        <source>PREMIS access permissions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="857">
+        <source>PREMIS access statements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="858">
+        <source>PREMIS act</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="859">
+        <source>Presentation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="860">
+        <source>Preservation &amp; Backup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="861">
+        <source>Preservation &amp; Backup Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="862">
+        <source>Preservation Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="863">
+        <source>Preservation system access statement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="864">
+        <source>Preview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="865">
+        <source>Previously, AHG Central was configured via environment variables. Database settings (above) take precedence over environment variables.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="866">
+        <source>Primary Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="867">
+        <source>Privacy Notification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="868">
+        <source>Privacy Notification Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="869">
+        <source>Privacy Notification Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="870">
+        <source>Privacy notification settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="871">
+        <source>Processing options require the corresponding services to be installed and running.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="872">
+        <source>Production Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="873">
+        <source>Production only (skip when sf_debug=true)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="874">
+        <source>Promotion of Access to Information Act, secure record keeping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="875">
+        <source>Protection of Personal Information Act (South Africa), Section 19</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="876">
+        <source>Protocol</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="877">
+        <source>Public webhook URL (for Graph subscriptions)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="878">
+        <source>Publisher's series area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="879">
+        <source>Quality for JPEG thumbnails (60-100)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="880">
+        <source>Queue sync operations for background processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="881">
+        <source>Quick Access: TIFF to PDF Merge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="882">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="883">
+        <source>Quick Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="884">
+        <source>RAD template - area headings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="885">
+        <source>RAD template - elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="886">
+        <source>Read button and link text aloud when hovering with the mouse (when voice mode is active).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="887">
+        <source>Read field labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="888">
+        <source>Read Only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="889">
+        <source>Recent Deliveries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="890">
+        <source>Recent Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="891">
+        <source>Recent Sync Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="892">
+        <source>Recipient email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="893">
+        <source>Recipient name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="894">
+        <source>Recommended interval between condition checks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="895">
+        <source>Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="896">
+        <source>Records handoff (auto/declare) — Phase 2.A</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="897">
+        <source>Records per batch for bulk sync operations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="898">
+        <source>Redirect users to the password change page when their password has expired. If disabled, only a notification is shown.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="899">
+        <source>Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="900">
+        <source>Reference Code Options</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="901">
+        <source>Reference code separator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="902">
+        <source>Reference Images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="903">
+        <source>Refresh</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="904">
+        <source>Regenerate Secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="905">
+        <source>Regenerate secret? The old secret will stop working immediately.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="906">
+        <source>Region</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="907">
+        <source>Rejection reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="908">
+        <source>Related materials area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="909">
+        <source>Remind to re-value after this many days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="910">
+        <source>Remote Base Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="911">
+        <source>Remote Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="912">
+        <source>Remove from Fuseki when records are deleted in AtoM</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="913">
+        <source>Remove the schedule:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="914">
+        <source>Rename</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="915">
+        <source>Rename Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="916">
+        <source>Renewal Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="917">
+        <source>Reopen</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="918">
+        <source>Replication Targets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="919">
+        <source>Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="920">
+        <source>Reproduction details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="921">
+        <source>Request timeout for local LLM API calls.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="922">
+        <source>Require acknowledgement by default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="923">
+        <source>Require Appraisal</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="924">
+        <source>Require Approval for Merge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="925">
+        <source>Require at least one photo for condition reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="926">
+        <source>Require Donor Agreement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="927">
+        <source>Required Plugin / Tool</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="928">
+        <source>Require Photos</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="929">
+        <source>Requires an encryption key at /etc/atom/encryption.key.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="930">
+        <source>Require SSL for all administrator functionality</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="931">
+        <source>Requires SMTP to be configured in Email settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="932">
+        <source>Require strong passwords</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="933">
+        <source>Require workflow approval before merging authority records. Requires ahgWorkflowPlugin.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="934">
+        <source>Researcher registration, approval, booking emails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="935">
+        <source>Research Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="936">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="937">
+        <source>Reset all settings in this section to defaults?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="938">
+        <source>Reset sequence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="939">
+        <source>Reset Sequence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="940">
+        <source>Reset sequence to 0?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="941">
+        <source>Reset to Defaults</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="942">
+        <source>Resolve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="943">
+        <source>Resolve All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="944">
+        <source>Resolved</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="945">
+        <source>Response</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="946">
+        <source>Response Days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="947">
+        <source>Result</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="948">
+        <source>Results Per Page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="949">
+        <source>Retention (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="950">
+        <source>Retention label → AtoM disposition map (JSON)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="951">
+        <source>Retention Policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="952">
+        <source>Retention sweeps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="953">
+        <source>Retry Attempts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="954">
+        <source>Review page URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="955">
+        <source>Review the current terms in the Levels of description taxonomy.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="956">
+        <source>RiC-O Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="957">
+        <source>RIC Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="958">
+        <source>RIC Sync Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="959">
+        <source>Rights Inheritance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="960">
+        <source>Rights note(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="961">
+        <source>Rights notes (access restriction details in rights statements).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="962">
+        <source>Rotation is not exposed here for safety. Run the rotation runbook via php symfony share-link:rotate-secret (future enhancement).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="963">
+        <source>Rotation runbook: php symfony share-link:rotate-secret (future enhancement).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="964">
+        <source>Rules or conventions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="965">
+        <source>Run backups from command line:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="966">
+        <source>Run on demand from a shell:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="967">
+        <source>Run via the share-link:prune cron (daily by default). Set the AtoM cron in System &gt; Cron Jobs.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="968">
+        <source>Run via the share-link:prune cron. Configure in System &gt; Cron Jobs.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="969">
+        <source>Safety: a dirty git working tree (uncommitted local edits) is never overwritten — that repo is skipped with a warning. If a pull breaks the app, the repos are automatically reset to their previous commit.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="970">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="971">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="972">
+        <source>Saved clipboard maximum age (in days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="973">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="974">
+        <source>Save settings first, then send a test email to verify configuration.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="975">
+        <source>Save Your Webhook Secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="976">
+        <source>Scan all uploaded files for malware before commit. Infected files are quarantined.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="977">
+        <source>Schedule &amp;amp; notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="978">
+        <source>Schedules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="979">
+        <source>Scheme deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="980">
+        <source>Script</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="981">
+        <source>Script(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="982">
+        <source>Search and browse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="983">
+        <source>Search message, URL, file, exception...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="984">
+        <source>Search taxonomies...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="985">
+        <source>Secondary Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="986">
+        <source>seconds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="987">
+        <source>Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="988">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="989">
+        <source>Sector-specific numbering?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="990">
+        <source>Sector Numbering Schemes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="991">
+        <source>Sector Numbering Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="992">
+        <source>Sector numbering settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="993">
+        <source>Security</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="994">
+        <source>Security Headers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="995">
+        <source>Security settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="996">
+        <source>Security settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="997">
+        <source>Security Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="998">
+        <source>Select a .json file exported from AHG Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="999">
+        <source>Select a section to configure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1000">
+        <source>Select a user...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1001">
+        <source>Selecting a non-Heratio theme switches the site to vanilla base AtoM. Applied on save (cache is rebuilt).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1002">
+        <source>Selecting a non-Heratio theme switches the site to vanilla base AtoM. Takes effect after a cache rebuild + PHP-FPM restart.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1003">
+        <source>Select the levels of description to be included in the inventory list. If no levels are selected, the inventory list link will not be displayed. You can use the control (Mac ⌘) and/or shift keys to multi-select values from the Levels of description menu.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1004">
+        <source>Select which levels appear in each sector. Only sectors with enabled plugins are shown. Archive levels are always available.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1005">
+        <source>Select which levels appear in the %1% sector:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1006">
+        <source>Select which metadata fields the TTS engine will read for each GLAM/DAM sector.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1007">
+        <source>Send</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1008">
+        <source>Send button text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1009">
+        <source>Send email alerts when unhandled exceptions occur.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1010">
+        <source>Send email notifications for overdue requests</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1011">
+        <source>Send email notifications for task assignments and state transitions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1012">
+        <source>Send email when jobs fail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1013">
+        <source>Send email when service status changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1014">
+        <source>Send in all environments</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1015">
+        <source>Sending...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1016">
+        <source>Send Test</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1017">
+        <source>Sequence reset to 0.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1018">
+        <source>Sequence Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1019">
+        <source>Server Disk Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1020">
+        <source>Service</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1021">
+        <source>Service Availability</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1022">
+        <source>Service Issues Detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1023">
+        <source>Services Monitor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1024">
+        <source>Session cookies inaccessible to JavaScript</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1025">
+        <source>Session Fixation Prevention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1026">
+        <source>Session ID regenerated on login (AuthMiddleware)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1027">
+        <source>Session Security</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1028">
+        <source>Session Timeout (Minutes)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1029">
+        <source>Set as default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1030">
+        <source>Settings File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1031">
+        <source>Settings Overview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1032">
+        <source>Settings Sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1033">
+        <source>SFTP recommended for remote servers. Choose "Local folder (no FTP)" to write uploads straight to a folder on this server - then only Server Disk Path below is required (Host/Username/Password are ignored).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1034">
+        <source>Shared NER Training</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1035">
+        <source>Share Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1036">
+        <source>SharePoint admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1037">
+        <source>SharePoint Integration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1038">
+        <source>SharePoint integration enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1039">
+        <source>Show book cover images</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1040">
+        <source>Show Branding</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1041">
+        <source>Show browse hierarchy page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1042">
+        <source>Show category status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1043">
+        <source>Show Controls</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1044">
+        <source>Show copy availability in search results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1045">
+        <source>Show dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1046">
+        <source>Show Download</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1047">
+        <source>Show download button</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1048">
+        <source>Show Expiry Notification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1049">
+        <source>Show export button on clipboard page</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1050">
+        <source>Show export button on description pages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1051">
+        <source>Show Floating Mic Button</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1052">
+        <source>Show identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1053">
+        <source>Show inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1054">
+        <source>Show level of description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1055">
+        <source>Show mini-map navigator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1056">
+        <source>Show Navigator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1057">
+        <source>Show the read-aloud button on record detail pages.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1058">
+        <source>Show warning when password expires within this many days. Default: 14</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1059">
+        <source>Sidebar</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1060">
+        <source>Sidebar Background</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1061">
+        <source>Sidebar Text</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1062">
+        <source>Signature Verification</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1063">
+        <source>Simple Security + Star Property (AccessFilterService)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1064">
+        <source>Site base URL (used in MODS and EAD exports)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1065">
+        <source>Site description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1066">
+        <source>Site ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1067">
+        <source>Site information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1068">
+        <source>Site information saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1069">
+        <source>Site information settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1070">
+        <source>Site Paths Setup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1071">
+        <source>Site title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1072">
+        <source>Small</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1073">
+        <source>SMTP Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1074">
+        <source>Some Services Have Warnings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1075">
+        <source>Sort (information object)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1076">
+        <source>Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1077">
+        <source>Special Category Fee</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1078">
+        <source>Speech Rate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1079">
+        <source>Spell Check (aspell)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1080">
+        <source>Spellcheck language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1081">
+        <source>SSRF Protection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1082">
+        <source>Standard number area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1083">
+        <source>Standard request fee (R50 per regulation)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1084">
+        <source>Standards: OWASP Top 10 (2021), ISO 27001:2022, Bell-LaPadula, POPIA Section 19</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1085">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1086">
+        <source>Storage service</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1087">
+        <source>Strict - validation is run; warnings will halt import from running</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1088">
+        <source>Strip file extensions from information object names</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1089">
+        <source>Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1090">
+        <source>Success!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1091">
+        <source>success/fail/pending</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1092">
+        <source>Successful</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1093">
+        <source>Successful Syncs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1094">
+        <source>Suggested:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1095">
+        <source>Supported Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1096">
+        <source>Sync Error Logs to AHG Central</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1097">
+        <source>Sync on Record Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1098">
+        <source>Sync on Record Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1099">
+        <source>System</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1100">
+        <source>System Error Log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1101">
+        <source>System Information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1102">
+        <source>System Overview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1103">
+        <source>Target Section</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1104">
+        <source>Task assignment, approval, rejection emails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1105">
+        <source>Task assignments and state transitions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1106">
+        <source>Taxonomy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1107">
+        <source>Taxonomy terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1108">
+        <source>Tenant credentials and per-drive auto-ingest label allowlists are managed at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1109">
+        <source>Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1110">
+        <source>Test Connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1111">
+        <source>Test connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1112">
+        <source>Test Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1113">
+        <source>Testing...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1114">
+        <source>Test LDAP connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1115">
+        <source>Test notification sent.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1116">
+        <source>Test password (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1117">
+        <source>Tests connectivity (and a bind, if you supply a test user) against the saved settings above. Save first, then test. No changes are made.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1118">
+        <source>Test the connection to AHG Central before saving your settings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1119">
+        <source>Test username (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1120">
+        <source>Text-to-speech playback rate (0.5 = slow, 2.0 = fast).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1121">
+        <source>Text-to-Speech Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1122">
+        <source>Text-to-speech settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1123">
+        <source>Text color for card headers</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1124">
+        <source>Text color for primary buttons</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1125">
+        <source>Text or HTML to display when sending clipboard contents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1126">
+        <source>That installs:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1127">
+        <source>The maximum number of pixels on the longest edge for derived reference images.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1128">
+        <source>Theme Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1129">
+        <source>The name of the website for display in the header</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1130">
+        <source>The number of days a saved clipboard should be retained before it is eligible for deletion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1131">
+        <source>The OAI-PMH API can be secured, optionally, by requiring API requests authenticate using API keys (granted to specific users).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1132">
+        <source>The pdfinfo tool is required to use this functionality. Please contact your system administrator.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1133">
+        <source>These defaults are pre-selected when creating a new ingest session. Users can override per session.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1134">
+        <source>The user who owns this webhook.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1135">
+        <source>This feature will not work until a Google Maps API key is specified on the %1%global%2% settings page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1136">
+        <source>This is your webhook secret for HMAC signature verification. Copy it now - it will not be shown again!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1137">
+        <source>This value can not be greater than %max% pixels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1138">
+        <source>This value must be at least %min% pixels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1139">
+        <source>This will check all services every %minutes% minutes and send notifications if configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1140">
+        <source>Throttle TTL (seconds)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1141">
+        <source>Thumb</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1142">
+        <source>Thumbnails</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1143">
+        <source>Thumbnail Sizes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1144">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1145">
+        <source>Time-limited share links let editors send a private URL to a record. Tokens are HMAC-derived, audited end-to-end, and expire automatically.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1146">
+        <source>Timeout (seconds)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1147">
+        <source>Tip: save the settings above once to write the config file the cron job reads:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1148">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1149">
+        <source>Title and statement of responsibility area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1150">
+        <source>Today</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1151">
+        <source>To Do</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1152">
+        <source>To enable automated service monitoring with notifications, add this cron job:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1153">
+        <source>To encrypt existing files:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1154">
+        <source>Token Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1155">
+        <source>Token retention (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1156">
+        <source>Tokens are derived from this per-install secret. Auto-generated on first use; rotation invalidates EVERY existing token.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1157">
+        <source>Tools for managing digital assets, images, and documents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1158">
+        <source>total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1159">
+        <source>Total space available for uploads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1160">
+        <source>Total Targets</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1161">
+        <source>Traditional archival levels (ISAD(G), RAD, DACS)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1162">
+        <source>Translate from</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1163">
+        <source>Translate metadata fields using offline Argos Translate engine.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1164">
+        <source>Translate to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1165">
+        <source>Transparent encryption of sensitive database columns. Toggle categories below, then run the CLI to encrypt existing data.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1166">
+        <source>Treeview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1167">
+        <source>Treeview settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1168">
+        <source>Treeview settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1169">
+        <source>Triggered When</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1170">
+        <source>Trim access-log rows older than this. Default: 180 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1171">
+        <source>Trim access-log rows older than this regardless of parent token state. Default: 180 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1172">
+        <source>Triple count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1173">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1174">
+        <source>Unable to upload diacritics mapping yaml file.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1175">
+        <source>Union List of Artist Names linking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1176">
+        <source>Unknown error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1177">
+        <source>Unknown value detected.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1178">
+        <source>Update Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1179">
+        <source>Upload a previously exported AHG settings JSON file to restore settings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1180">
+        <source>Uploaded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1181">
+        <source>Upload multi-page files as multiple descriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1182">
+        <source>Upload multiple TIFF, JPEG, or PNG files and merge them into a single PDF/A archival document. Jobs run in the background and can be attached directly to archival records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1183">
+        <source>Upload Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1184">
+        <source>Uploads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1185">
+        <source>Upload settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1186">
+        <source>Uploads settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1187">
+        <source>Uploads settings saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1188">
+        <source>Urgent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1189">
+        <source>URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1190">
+        <source>Usage Analytics</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1191">
+        <source>Use</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1192">
+        <source>Use AHG theme customizations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1193">
+        <source>Use Async Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1194">
+        <source>Used to create absolute URLs, pointing to resources, in XML exports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1195">
+        <source>Used when you (re)install the cron entry with the command below.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1196">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1197">
+        <source>User interface label</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1198">
+        <source>User interface labels</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1199">
+        <source>User interface labels saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1200">
+        <source>Username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1201">
+        <source>Use tokens below to build your pattern</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1202">
+        <source>Validation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1203">
+        <source>Validation Regex</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1204">
+        <source>Valuation Reminder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1205">
+        <source>Value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1206">
+        <source>Variable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1207">
+        <source>Version</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1208">
+        <source>VIAF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1209">
+        <source>View all jobs in Job Manager</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1210">
+        <source>View Current Crontab</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1211">
+        <source>View Deliveries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1212">
+        <source>Viewer Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1213">
+        <source>Virtual International Authority File linking.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1214">
+        <source>Virus Scan (ClamAV)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1215">
+        <source>Visible elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1216">
+        <source>Visible elements configuration saved.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1217">
+        <source>Vision-capable model name (e.g. llava:7b, bakllava).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1218">
+        <source>Voice Commands</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1219">
+        <source>Voice Language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1220">
+        <source>Warning: This will overwrite existing settings with the same keys.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1221">
+        <source>Webhook Documentation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1222">
+        <source>Webhook Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1223">
+        <source>Webhook Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1224">
+        <source>Webhooks</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1225">
+        <source>Webhooks notify external applications when records are created, updated, or deleted. Each webhook receives an HMAC signature for verification.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1226">
+        <source>Webhook URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1227">
+        <source>Weekly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1228">
+        <source>Weekly (Sunday 02:00)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1229">
+        <source>When</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1230">
+        <source>When enabled (and the user class is switched to ahgLdapUser — see Activation below), logins authenticate against the LDAP/AD directory below, falling back to the local password. When off, behaviour is unchanged (local accounts only).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1231">
+        <source>When enabled, all access to records flagged with ICIP content will be logged for audit purposes. Requires ahgAuditTrailPlugin.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1232">
+        <source>When enabled, an &amp;quot;Upload limit&amp;quot; meter is displayed for authenticated users on the %1% view page, and administrators can limit the disk space each %1% is allowed for %2% uploads</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1233">
+        <source>When enabled, cultural sensitivity notices will be displayed on the public view of records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1234">
+        <source>When enabled, cultural sensitivity notices will be displayed to authenticated staff members.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1235">
+        <source>When enabled, library:process-fines cron creates daily fine entries for overdue items.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1236">
+        <source>When enabled, new sensitive cultural notices will require user acknowledgement before viewing content.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1237">
+        <source>When enabled, suppresses alerts in debug/development mode.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1238">
+        <source>When enabled, the copyright pop-up will be applied to every %1%, regardless of whether there is an accompanying Rights statement.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1239">
+        <source>When enabled, TK Labels can be synchronized with the Local Contexts Hub.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1240">
+        <source>When enabled the following text will appear whenever a user tries to download a %1% master with an associated rights statement where the Basis = copyright and the Restriction = conditional. You can style and customize the text as in a static page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1241">
+        <source>When enabled the text above will appear in the %1% metadata section to describe how a user may access the original and preservation copy of the file stored in a linked digital preservation system. The text appears in the "Permissions" field. When disabled, the "Permissions" field is not displayed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1242">
+        <source>When off, the cron job exits without pulling (no need to remove the cron entry).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1243">
+        <source>Wikidata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1244">
+        <source>Will be overridden by database settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1245">
+        <source>Workflow Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1246">
+        <source>XXE Protection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1247">
+        <source>Yearly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="1248">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

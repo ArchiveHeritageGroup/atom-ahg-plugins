@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(Re)generate API key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>(you)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>-- Select action --</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Access control</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add new user</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Allowed languages for translation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>API keys</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>At least 8 characters.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Authorized form of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Basic info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Change password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>City</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Clearance level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Confirm new password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Confirm password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Contact information</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Current password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Date modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Delete API key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Display name for this user (from actor record).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Edit user</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Email is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Expires</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Fair</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Fax</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Good</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Grant clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Granted</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Group %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Hold Ctrl/Cmd to select multiple groups.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Hold Ctrl/Cmd to select multiple languages. User will be allowed to translate content into selected languages.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Inactive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Leave blank to keep current password.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>List users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Manage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>New password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>New password must be at least 8 characters long.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>No assignable groups found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>No languages configured. Add languages in Admin &gt; Settings &gt; I18n.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>None</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Not generated yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>OAI-PMH API access key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Password confirmation does not match.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Password is required for new users.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Passwords do not match.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Passwords match.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Password updated successfully.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Postal code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Region/province</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>REST API access key</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Return to user list</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Search users</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Security clearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Show active only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Show inactive only</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Street address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Strong</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Telephone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>This action will permanently delete this user account and all associated permissions. This cannot be undone.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>This email address is already in use.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>This username is already in use.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Translate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Update password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>User</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>User groups</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>User name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Username is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>User profile</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Very strong</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Weak</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Website</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>you</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>You cannot delete your own account.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Your current password is incorrect.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

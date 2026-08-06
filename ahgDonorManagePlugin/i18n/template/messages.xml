@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Accession area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Add new</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Add new donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Are you sure you want to delete %1%?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Authorized form of name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Authorized form of name - This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Basic info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Browse donors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>City</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Contact area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Contact person</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Country</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Create</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Date modified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Edit %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Edit donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Fax</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Identifier</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Identity area</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Note</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Postal code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Region/province</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Related accession(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Search donors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Street address</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Telephone</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>This is a mandatory field.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>View donor</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Website</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

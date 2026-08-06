@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>(not in standard)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>+ New template…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>AAD object id → AtoM user id. Auto-created on first manual push (toggle in Admin &gt; AHG Settings &gt; SharePoint).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add mapping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>AI processing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>AtoM core fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>AtoM information_object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>AtoM target</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>AtoM user</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>AtoM user id</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Attempts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Back to event log</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Change</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Comma-separated label names exactly as defined in Microsoft Purview.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Created by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Create new parent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Cron expression</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Default placement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Defaults for ingest sessions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Default value</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Delete template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Delete this drive?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Delete this mapping? The AtoM user account is NOT deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Delete this rule?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Detail</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Discover SP fields</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Drive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Drive (document library)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Drive available for ingest</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Drive default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Drives</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>e.g. Heritage Photos — ISAD(G)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>e.g. Ready for Archive, Permanent</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>e.g. Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Edit rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>elements</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>eTag</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Expires</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>File pattern (CSV of globs)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Filter by status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Folder / Pattern</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Folder path (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Ingest all matching files</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Ingested</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Ingest enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>IO</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Last error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Last renewed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Last run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Last seen</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Mapping not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Mappings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Mapping template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Mapping templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>never</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>New rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>No</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>No active subscriptions. Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>No drives registered yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>No mappings yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>No mappings yet. The first manual push from a new SharePoint user will create one (if auto-create is enabled).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>no Purview filter — use this for demos or tenants without Purview</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>No repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>No SharePoint tenants configured yet. Configure a tenant first at /sharepoint/tenants.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>No templates yet — create one below</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Only items carrying specific Purview retention label(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Only used when Parent placement is set to "existing".</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Parent (when existing)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Parent placement</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Pick a tenant, then a site, then the document library to register. AtoM stores the IDs so cron-driven auto-ingest and the wizard picker can reach the drive.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Processed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Purview retention/disposal label gating</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Raw payload</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Re-queue this event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Received</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Register a SharePoint drive before creating rules.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Register drive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Register SharePoint drive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Remove mapping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Repository (optional)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Resource</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Run now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Save rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Save template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Sector</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Select a drive to edit its mapping templates.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Select drive</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Select site first</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Select tenant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Select tenant first</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>SharePoint Auto-Ingest Rules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>SharePoint Drives</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>SharePoint event #%d</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>SharePoint field</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>SharePoint inbound events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>SharePoint Mapping Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>SharePoint user mapping</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>SharePoint user mappings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>SharePoint webhook subscriptions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>SharePoint → Mappings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Site</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>SP item</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Standard cron syntax. The cron daemon must invoke `php symfony sharepoint:auto-ingest` periodically.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Subscription ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Target</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Template details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Template name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Templates are managed at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Tenant</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Tenants</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>to create one.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Top level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Transform</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Two subscriptions per ingest-enabled drive: driveItem (content) + list (metadata, including retention labels).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Type to search archival descriptions…</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Under existing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Use drive default</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Yes</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

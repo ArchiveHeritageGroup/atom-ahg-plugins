@@ -8,6 +8,36 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Navigation contributed to the theme. The theme renders whatever is
+        // registered and knows nothing about this plugin: previously it named
+        // '@spectrum_my_tasks' directly and called ahgSpectrumWorkflowService
+        // itself, so a site with the theme but without this plugin fatalled.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('user', 'spectrum_my_tasks', [
+                'route' => '@spectrum_my_tasks',
+                'label' => 'My Tasks',
+                'icon' => 'fas fa-clipboard-list',
+                'section' => 'Tasks',
+                'weight' => 10,
+                'badge' => static function () {
+                    if (!class_exists('ahgSpectrumWorkflowService')) {
+                        return null;
+                    }
+
+                    return ahgSpectrumWorkflowService::countOpenTasksForUser(
+                        sfContext::getInstance()->getUser()->getUserID()
+                    );
+                },
+            ]);
+            AhgNav::register('user', 'spectrum_dashboard', [
+                'route' => '@spectrum_dashboard',
+                'label' => 'Workflow Dashboard',
+                'icon' => 'fas fa-tachometer-alt',
+                'section' => 'Tasks',
+                'weight' => 20,
+            ]);
+        }
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
         // Standing notice for outstanding procedure tasks. Registered here so it

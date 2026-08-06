@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "description": "High-performance term and taxonomy browse (subjects, places, genres) using Laravel Query Builder and direct ES queries",
     "author": "The Archive and Heritage Group",
-    "license": "GPL-3.0",
+    "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "browse",
     "keywords": ["term", "taxonomy", "subject", "place", "genre", "browse", "performance"],

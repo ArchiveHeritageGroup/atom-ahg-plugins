@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>across</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Ask a question... e.g. "photographs of District Six in the 1960s"</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Ask a question about indexed records...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Build and manage the document tree index</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Build failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Build Index</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Building...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Building index... this may take a minute.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Collapse All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Discover</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Discovery results pagination</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Document type:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>EAD</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>EAD Finding Aids</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Enter a query above to search across all indexed records using LLM reasoning.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Error:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Expand All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Flat list</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Group by collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Index built successfully!</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Indexed At</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>indexed record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Index Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Keyword search using Elasticsearch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>LLM-driven search across indexed document trees</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>LLM is reasoning over indexed trees...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>LLM Reasoning:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>match</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Network error. Please try again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Nodes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>nodes matched</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>No matching nodes found in indexed trees. Try different keywords or index more records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>No results found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>PageIndex Builder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>PageIndex Discovery</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>PDF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>PDF Documents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Popular searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Rebuild Index</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Relevance:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>RiC-O</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>RiC-O Metadata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Search across collections using natural language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Search indexed document trees</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Searching...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Searching across collections...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Semantic</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Standard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Standard + NER entity matching</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Standard + Semantic + vector similarity (requires Qdrant)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Total Indexed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Tree Structure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Try different keywords or a broader search term.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Vector</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

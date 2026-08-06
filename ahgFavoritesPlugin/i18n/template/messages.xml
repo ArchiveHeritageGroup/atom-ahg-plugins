@@ -1,0 +1,860 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>1 year</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>7 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>30 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>90 days</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Access denied.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Add a note...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Add a note for the recipients...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Add Citation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Added %1% citations.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Added %1% items to collection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Added %1% items to project.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Added to favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Add to Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Add to favourites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>A folder with this name already exists.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>All Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>APA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Are you sure you want to clear all favorites?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>A user</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>BibTeX</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Browse and annotate your collected records offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Chicago</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Citation Style</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Cite</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Cite / Add to Bibliography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Clear All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Cleared %1% favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Clear search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Column Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Copied %1% items to your favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Copy all items to your favorites?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Copy to My Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Could not revoke sharing.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Create Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>CSV must contain a "slug" or "reference_code" column.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>CSV must have a "slug" or "reference_code" column.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Date Added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Date Added (Newest)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Date Added (Oldest)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Dates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Delete this folder? Items will be moved to Unfiled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Digital Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Edit Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Email recipients</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Email service is not configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Empty CSV content.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Enter email addresses, one per line or comma-separated...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Error loading bibliographies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Error loading collections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Error loading projects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Errors:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Expires:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Expires: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Exported by %1% on %2%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Exported on %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Favorite not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Favorites: %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Folder:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Folder created.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Folder deleted. Items moved to unfiled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Folder is Shared</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Folder Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Folder name is required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Folder name is too long (max 255 characters).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Folder not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Folder not found or access denied.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>Folders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Folders can only be nested one level deep.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Folder shared.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Folder sharing has been revoked.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Folder updated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Generate a link to share this folder with others. They will see a read-only view of the items.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Grid View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Harvard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Has digital object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Import</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Imported %1% items.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Import Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Include notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Invalid action.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Item is already in your favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Item no longer accessible</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Item not found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Item not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Item not in favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>items</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Item updated since favourited</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>JSON</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Level</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Link expires in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Link generated but some emails could not be sent.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Link sent to</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Link sent to %1% recipient(s).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Loading...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Log in</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Log in to copy these items to your own favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Missing parameters.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>MLA</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Move</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Moved %1% items.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Move to...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>My Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>My Folders</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>New Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>No bibliographies found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>No collections found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>No CSV file or slug list provided.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>No favorites match your search.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>No favorites to display.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>No favorites to export.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>No folder specified.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>No items selected.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>None (top level)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>No projects found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Not authenticated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Not authenticated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Not authorized for that bibliography.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Not authorized for that collection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Not authorized for that project.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Notes updated.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Object ID %1% not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>One slug per line, or comma-separated...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>optional</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Optional Columns</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>or</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Or copy this link:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Parent Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Parent folder not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Paste Slugs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>PDF</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Personal message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Please log in to add favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Please select items and a collection.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Please select items and a project.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>POST required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>POST required.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Print</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Printed on %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>recipient(s)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Recipients will receive an email with the share link. Leave empty to only generate a link.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Reference Code</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Reference Code (A-Z)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Remove</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Removed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Removed %1% favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Removed from favorites.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Remove from Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Remove from favorites?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>Remove from favourites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Remove Selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Remove selected favorites?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Research plugin not enabled.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Revoke Sharing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>Revoke sharing? The link will no longer work.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>RIS</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Row %1%: could not resolve "%2%".</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Row %1%: unrecognised date "%2%", kept the import date.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Search favorites...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Select all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Select Bibliography</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Select Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>selected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Select Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Send</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Send to Collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Send to Project</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Share</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Shared</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>shared a folder with you</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Shared by %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Shared collection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Shared Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Shared folder not found or expired.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Share failed.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Share Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Share Link</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Sharing...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Slug "%1%" not found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Slug is required</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Table View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Take offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>This shared folder has no items.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Title (A-Z)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Title (Z-A)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Unfiled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Unfiled Favorites</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Unsupported export format.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Untitled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Updated since favourited</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Upload CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>View Shared Folder</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>You are not registered as a researcher.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>You have no favorites yet. Browse the archive and click the heart icon to add items.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>You must be logged in to copy favorites.</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

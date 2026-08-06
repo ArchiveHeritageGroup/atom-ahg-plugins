@@ -1,0 +1,644 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Acquisition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Advanced Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>All Entity Types</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>All Operations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>All Statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Arrows show the direction of custody transfer. Drag nodes to rearrange.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Authenticity &amp; due diligence</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Available</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Batch Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>By Creator</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>By Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>By Subject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Cascade delete references</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Certainty</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>checked — clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>checked — flagged</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Cleaned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Clear</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Complete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Conforms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Connected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Connected with data</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Continuous custody</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>creators</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Cultural property</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Current status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Custody &amp; acquisition</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Custody events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Custody gaps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Custody type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Detected</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Does not conform</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Drag nodes to rearrange. Colours: record (dark), repository (blue), creator (orange), subject (teal), related record (green).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>e.g., records about mining</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>e.g., records created by Hennie Pieterse</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Enable automatic sync</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Endpoint URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Engine</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Entity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Entity Sync Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Execute Cleanup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Expected Entity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Find records about a topic</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Find records by who created them</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Find records from a time period</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Fuseki Admin</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Fuseki Connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Fuseki Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Gaps</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Graph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Integrity Check Results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Issues</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Issues by validation rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Knowledge graph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Last Synced</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Loading chart...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Loading entity status...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Loading recent operations...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Manage orphans</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Manage queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Nazi-era provenance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>No orphaned triples found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>No provenance records yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>No records found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>No results found. Try different keywords.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>not checked</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Not verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>No validation reports yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>No violations recorded for this run.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Offline</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>Online</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Open record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Operation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>Operation Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Operations by Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Optional named graph URI (blank = all)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Orphaned Triples</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Orphaned Triples Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>Password</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Pick a record to see its cross-domain graph — creators, repository, subjects and related records.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Preview Cleanup</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Priority</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Provenance graph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Queue is empty.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Recent Operations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Recent validation reports</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Record Activity (7 Days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Records with recorded provenance. Open one to see its chain of custody.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>related</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Result</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Reviewed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>RiC-O Ontology Reference</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>RiC-O SHACL Validation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>RIC/Fuseki Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>RIC Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>RiC dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>RIC Explorer</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>RIC Sync Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>RIC Sync Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>RIC Tools</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>RIC URI</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Rule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Run at</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Run Integrity Check</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Run validation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Run window</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Save Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Scheduled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Search failed. Please try again.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Searching...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Search the archives using natural language</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Semantic Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>Severity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>SHACL engine:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>SHACL Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>SHACL Validation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Shape</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>subjects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Sync Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Sync Queue Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Sync Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Sync Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Sync Status Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Sync to Fuseki</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Test Connection</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>The SHACL engine (python3 + pyshacl + rdflib) is not installed on this host. Validation will be recorded as "not verified" until the dependency is available. Install with: pip install pyshacl rdflib --break-system-packages</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>This record has no provenance recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>Total triples</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Triggered By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Triples</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>triples</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Try:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Unavailable</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Use async queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Username</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>View Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>View SPARQL Query</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Violations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Warnings</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

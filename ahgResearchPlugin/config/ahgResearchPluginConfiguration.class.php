@@ -21,6 +21,30 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Navigation contributed to the theme, including the counts that the
+        // theme used to run against research_researcher and research_booking.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('user', 'research_dashboard', [
+                'route' => '@research_dashboard',
+                'label' => 'My Workspace',
+                'icon' => 'fas fa-folder-open',
+                'section' => 'Research',
+                'weight' => 10,
+            ]);
+            AhgNav::register('user', 'research_researchers', [
+                'route' => '@research_researchers',
+                'label' => 'Researchers',
+                'icon' => 'fas fa-user-check',
+                'section' => 'Research',
+                'weight' => 20,
+                'credentials' => ['administrator'],
+                'badge' => static function () {
+                    return \Illuminate\Database\Capsule\Manager::table('research_researcher')
+                        ->where('status', 'pending')->count();
+                },
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 

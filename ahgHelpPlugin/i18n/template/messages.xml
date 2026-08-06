@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Articles</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>articles</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Back to %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Browse by Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Categories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Close</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Contents</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Enter a search term to find help articles.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Full manuals</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Full user guides, technical reference, plugin documentation, and API reference for Heratio.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>Help</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Help Center</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Help Home</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>in %1%</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Instance Documentation</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Interactive map of the enabled plugins, grouped by category. Click a plugin for details.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Loading help article...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>No results found for "%1%". Try different keywords.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Open Help Center</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Open User Manual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Quick Links</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Recently Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Search Help</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Search help...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Search help articles...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Search Results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Search the documentation or browse by category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Sections</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Select a node to see details.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>System map</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Technical manual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>User Manual</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>User manual</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

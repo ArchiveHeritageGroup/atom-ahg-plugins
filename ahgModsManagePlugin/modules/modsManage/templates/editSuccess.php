@@ -414,77 +414,48 @@
   </form>
 
 <?php $n = sfConfig::get('csp_nonce', ''); $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<?php $n = sfConfig::get('csp_nonce', ''); $nz = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<script <?php echo $nz; ?>>
+  // Configuration for the shared edit-form script. Passed in rather than
+  // templated into the file so that io-form.js stays a cacheable static asset.
+  window.AHG_IO_FORM = {
+    actorAcUrl: '<?php echo url_for("@io_actor_autocomplete"); ?>',
+    repoAcUrl: '<?php echo url_for("@io_repository_autocomplete"); ?>',
+    termAcUrl: '<?php echo url_for("@io_term_autocomplete"); ?>',
+    termCreateUrl: '<?php echo url_for("@io_term_create"); ?>',
+    canCreateTerms: <?php echo ($sf_user->isAuthenticated() && ($sf_user->hasCredential('administrator') || $sf_user->hasCredential('editor'))) ? 'true' : 'false'; ?>,
+    labels: {
+      create: '<?php echo __("Create"); ?>',
+      remove: '<?php echo __("Remove"); ?>',
+      createFailed: '<?php echo __("The term could not be created."); ?>'
+    }
+  };
+</script>
+<script src="/plugins/ahgCorePlugin/web/js/io-form.js"></script>
 <script <?php echo $na; ?>>
 (function() {
   'use strict';
 
-  // ── AJAX endpoint URLs ──────────────────────────────────────────────
-  var ACTOR_AC_URL = '<?php echo url_for("@io_actor_autocomplete"); ?>';
-  var REPO_AC_URL = '<?php echo url_for("@io_repository_autocomplete"); ?>';
-  var TERM_AC_URL = '<?php echo url_for("@io_term_autocomplete"); ?>';
+    // Shared machinery lives in ahgCorePlugin/web/js/io-form.js, loaded above.
+    // Kept as locals so the standard-specific code below reads unchanged.
+    var C = window.AHG_IO_FORM || {};
+    var ACTOR_AC_URL = C.actorAcUrl, REPO_AC_URL = C.repoAcUrl, TERM_AC_URL = C.termAcUrl;
 
+          // Editors and administrators may add vocabulary; contributors look up only.
+  // The server enforces this as well - the flag only decides whether the option
+  // is offered, never whether it is allowed.
+  
   // ── Utility ──────────────────────────────────────────────────────────
-  function escHtml(str) {
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(str));
-    return div.innerHTML;
-  }
+  
 
   // ── Generic dropdown helper ─────────────────────────────────────────
-  function showDropdown(input, results, onSelect) {
-    var dropdown = document.createElement('div');
-    dropdown.className = 'list-group position-absolute w-100 ac-dropdown';
-    dropdown.style.zIndex = '1050';
-    results.forEach(function(item) {
-      var a = document.createElement('a');
-      a.className = 'list-group-item list-group-item-action py-1 small';
-      a.href = '#';
-      a.textContent = item.name || '';
-      a.addEventListener('click', function(e) {
-        e.preventDefault();
-        onSelect(item);
-        removeDropdownsFor(input);
-      });
-      dropdown.appendChild(a);
-    });
-    input.parentNode.style.position = 'relative';
-    removeDropdownsFor(input);
-    input.parentNode.appendChild(dropdown);
-  }
+  
 
-  function removeDropdownsFor(input) {
-    var existing = input.parentNode.querySelectorAll('.ac-dropdown');
-    existing.forEach(function(el) { el.remove(); });
-  }
+  
 
-  // Global click to close dropdowns
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.ac-dropdown') && !e.target.classList.contains('actor-autocomplete')
-        && !e.target.classList.contains('actor-autocomplete-add')
-        && !e.target.classList.contains('repository-autocomplete')
-        && !e.target.classList.contains('term-autocomplete-add')) {
-      document.querySelectorAll('.ac-dropdown').forEach(function(d) { d.remove(); });
-    }
-  });
+  
 
-  // ── Debounced fetch helper ──────────────────────────────────────────
-  function setupAutocomplete(input, buildUrl, onSelect) {
-    var timeout = null;
-    input.addEventListener('input', function() {
-      clearTimeout(timeout);
-      var q = input.value.trim();
-      if (q.length < 2) { removeDropdownsFor(input); return; }
-      timeout = setTimeout(function() {
-        fetch(buildUrl(q))
-          .then(function(r) { return r.json(); })
-          .then(function(results) {
-            if (!results || !results.length) { removeDropdownsFor(input); return; }
-            showDropdown(input, results, onSelect);
-          })
-          .catch(function() { removeDropdownsFor(input); });
-      }, 300);
-    });
-  }
+  
 
   // ── Generate identifier button ──────────────────────────────────────
   var genBtn = document.getElementById('generate-identifier');
@@ -642,16 +613,7 @@
   });
 
   // ── Actor autocomplete (events — inline) ────────────────────────────
-  function initActorAutocomplete(input) {
-    setupAutocomplete(input,
-      function(q) { return ACTOR_AC_URL + '?query=' + encodeURIComponent(q) + '&limit=10'; },
-      function(item) {
-        input.value = item.name;
-        var hiddenId = input.parentNode.querySelector('input[type=hidden]');
-        if (hiddenId) hiddenId.value = item.id;
-      }
-    );
-  }
+  
 
   document.querySelectorAll('.actor-autocomplete').forEach(initActorAutocomplete);
 
@@ -691,27 +653,7 @@
     );
   });
 
-  // ── Term access point add (subject, place) ──────────────────────────
-  document.querySelectorAll('.term-autocomplete-add').forEach(function(input) {
-    var taxonomy = input.getAttribute('data-taxonomy');
-    var targetId = input.getAttribute('data-target');
-    var fieldName = input.getAttribute('data-name');
-
-    setupAutocomplete(input,
-      function(q) { return TERM_AC_URL + '?taxonomy=' + taxonomy + '&query=' + encodeURIComponent(q) + '&limit=10'; },
-      function(item) {
-        var list = document.getElementById(targetId);
-        var div = document.createElement('div');
-        div.className = 'input-group input-group-sm mb-1';
-        div.innerHTML =
-          '<input type="text" class="form-control" value="' + escHtml(item.name) + '" readonly>' +
-          '<input type="hidden" name="' + fieldName + '" value="' + item.id + '">' +
-          '<button type="button" class="btn btn-outline-danger btn-remove-ap"><?php echo __("Remove"); ?></button>';
-        list.appendChild(div);
-        input.value = '';
-      }
-    );
-  });
+  
 
 })();
 </script>

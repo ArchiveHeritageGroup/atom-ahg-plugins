@@ -7,6 +7,41 @@ class ahgAccessRequestPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Navigation contributed to the theme. The pending count is this
+        // plugin's query, not the theme's: the theme used to SELECT from
+        // access_request directly, which meant it knew this plugin's schema.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('user', 'access_request_my', [
+                'route' => '@access_request_my',
+                'label' => 'My Access Requests',
+                'icon' => 'fas fa-key',
+                'section' => 'Security',
+                'weight' => 10,
+            ]);
+            AhgNav::register('user', 'access_request_pending', [
+                'route' => '@access_request_pending',
+                'label' => 'Pending Requests',
+                'icon' => 'fas fa-clock',
+                'section' => 'Security',
+                'weight' => 20,
+                'visible' => static function ($user) {
+                    if (null === $user || !$user->isAuthenticated()) {
+                        return false;
+                    }
+
+                    if ($user->isAdministrator()) {
+                        return true;
+                    }
+
+                    return \AtomExtensions\Services\AccessRequestService::isApprover($user->getUserID());
+                },
+                'badge' => static function () {
+                    return \Illuminate\Database\Capsule\Manager::table('access_request')
+                        ->where('status', 'pending')->count();
+                },
+            ]);
+        }
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
     }
 

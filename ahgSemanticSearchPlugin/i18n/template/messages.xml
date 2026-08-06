@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>active sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Add Term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Add your first term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>After exporting synonyms, you need to restart Elasticsearch for changes to take effect. Add the synonyms filter to your index settings.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>All Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Appearance</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Archival</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>Authority Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>auto-generated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>Back to Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>Broader</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Browse Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Browse terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Category</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Color</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Created</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Data Sources</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Delete this saved search?</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>Display which synonyms were used on search results page.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Domain</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Duration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>e.g., archive, manuscript, photograph</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Edit Search Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Elasticsearch Integration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Embedding</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>Embeddings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Enable Now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Enable Semantic Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Enable semantic search in settings to expand search queries.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Enter a search term...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Enter each synonym on a new line.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Enter one synonym per line...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Entity Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Exact (synonym)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Example</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Expand</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Expanded</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Expanded Query</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Expansion Limit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Expansions:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Export Synonyms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Export to Elasticsearch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Export to ES</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>External ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Featured</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Fetch heritage and archival terms from Wikidata SPARQL.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Fetch synonyms from WordNet via Datamuse API.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>FontAwesome class</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>General</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>General Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Generated:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Generate synonyms file for Elasticsearch. Requires ES restart to apply.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Icon</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>Import Local</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Information Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>JSON Parameters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Keep a log of expanded searches for analysis.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Last Used</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Library</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Local Synonyms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Log Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Maximum number of synonyms per term.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Message</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Minimum relevance weight for synonyms (0.0 - 1.0).</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Minimum Weight</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Model:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Museum</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>My Saved Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Narrower</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>New</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>New Search Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>No saved searches yet. Use the "Save This Search" button on search results.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>No searches yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>No search history yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>No search logs found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>No search logs yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>No sync history yet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>No sync logs found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>No synonyms defined for this term.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>Note:</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>No terms found</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Notifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Ollama Embeddings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Ollama Endpoint</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Ollama Model</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Original Query</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Path where the Elasticsearch synonyms file will be exported.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Popular Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>Query</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Quick Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Recent Searches</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Recent Syncs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Related</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Relationship Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Relevance weight (0.0 - 1.0). Higher = more relevant.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>Results</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Running</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Save Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Save Template</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Save Term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Search History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Search Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Search Parameters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Search queries are being expanded with synonyms and related terms.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Search Templates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Search terms...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Semantic Search</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Semantic Search is Active</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Semantic Search is Disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Settings</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Show Expansion Info</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Showing %1% - %2% of %3% terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Show on Homepage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Slug</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>Sort Order</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>Source</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>South African</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>Started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Synchronization History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>Sync Logs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>Sync WordNet</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>Synonym</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>Synonyms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>Synonyms Added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>Synonyms File Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>Template Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>Term</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>Term Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>Terms Added</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>Terms Updated</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>Test Query Expansion</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>The main term to add to the thesaurus.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>Time</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>Time (ms)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>Total Synonyms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>Total Terms</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>Use locally defined archival, museum, and library terms.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Use Ollama for vector embeddings and semantic similarity.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Uses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Vector embeddings for semantic similarity</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>View All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Visibility</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>Weight</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>When enabled, search queries will be expanded with synonyms.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>Wikidata</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>WordNet (Datamuse API)</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

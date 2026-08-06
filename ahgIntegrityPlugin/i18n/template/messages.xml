@@ -1,0 +1,1024 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+  <file source-language="EN" target-language="EN" datatype="plaintext" original="messages" product-name="messages">
+    <header/>
+    <body>
+      <trans-unit id="1">
+        <source>0 = indefinite retention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>0 = indefinite retention (never eligible for disposition)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="3">
+        <source>Acknowledge</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="4">
+        <source>Actions</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="5">
+        <source>Ad hoc</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="6">
+        <source>Alert Configuration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="7">
+        <source>Alerts</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="8">
+        <source>Alert Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="9">
+        <source>Algorithm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="10">
+        <source>All</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="11">
+        <source>All policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="12">
+        <source>All Repositories</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="13">
+        <source>All statuses</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="14">
+        <source>Approve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="15">
+        <source>Auditor Pack (ZIP)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="16">
+        <source>Authorised by</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="17">
+        <source>Avg</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="18">
+        <source>Back</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="19">
+        <source>Back to Runs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="20">
+        <source>Back to Schedules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="21">
+        <source>Batch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="22">
+        <source>Batch Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="23">
+        <source>Cancel</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="24">
+        <source>Clear Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="25">
+        <source>CLI Report Commands</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="26">
+        <source>Comparison</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="27">
+        <source>Completed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="28">
+        <source>Concurrency Controls</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="29">
+        <source>Count</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="30">
+        <source>Counters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="31">
+        <source>Create Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="32">
+        <source>Cron Expression</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="33">
+        <source>CSV Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="34">
+        <source>Daily</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="35">
+        <source>Daily Verification Trend (30 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="36">
+        <source>Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="37">
+        <source>Date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="38">
+        <source>Date From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="39">
+        <source>Date To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="40">
+        <source>Dead Letter Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="41">
+        <source>Dead Letters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="42">
+        <source>Declare (pending approval)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="43">
+        <source>Declare a record</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="44">
+        <source>Declared</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="45">
+        <source>Delete</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="46">
+        <source>Description</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="47">
+        <source>Destruction Certificates</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="48">
+        <source>Destruction date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="49">
+        <source>Disabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="50">
+        <source>Disposition Queue</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="51">
+        <source>DO ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="52">
+        <source>Download Auditor Pack</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="53">
+        <source>Download a ZIP containing summary.html, exceptions.csv, and config-snapshot.json.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="54">
+        <source>Download CSV</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="55">
+        <source>Download the verification ledger as a CSV file with all columns.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="56">
+        <source>Duration</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="57">
+        <source>Edit</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="58">
+        <source>Edit Retention Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="59">
+        <source>Edit Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="60">
+        <source>Eligible At</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="61">
+        <source>Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="62">
+        <source>Enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="63">
+        <source>enabled</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="64">
+        <source>Error</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="65">
+        <source>Errors</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="66">
+        <source>Event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="67">
+        <source>Event date</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="68">
+        <source>Event type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="69">
+        <source>Exists</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="70">
+        <source>Export</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="71">
+        <source>Export Filters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="72">
+        <source>Export Ledger</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="73">
+        <source>Failed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="74">
+        <source>Failures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="75">
+        <source>Failure Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="76">
+        <source>Failure Type Breakdown (30 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="77">
+        <source>File</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="78">
+        <source>File Path</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="79">
+        <source>Filter</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="80">
+        <source>Filter by Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="81">
+        <source>Fire a retention event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="82">
+        <source>Fire event</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="83">
+        <source>First</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="84">
+        <source>Flag a record as vital</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="85">
+        <source>Flag vital</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="86">
+        <source>For hierarchy scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="87">
+        <source>Format</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="88">
+        <source>Format Breakdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="89">
+        <source>Frequency</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="90">
+        <source>From</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="91">
+        <source>General</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="92">
+        <source>Global</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="93">
+        <source>Global (all objects)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="94">
+        <source>Hash Algorithm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="95">
+        <source>Hash Match</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="96">
+        <source>Hierarchy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="97">
+        <source>Hierarchy node</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="98">
+        <source>Holds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="99">
+        <source>ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="100">
+        <source>Ignore</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="101">
+        <source>Information object ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="102">
+        <source>Information Object ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="103">
+        <source>Integrity Dashboard</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="104">
+        <source>Integrity Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="105">
+        <source>Investigate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="106">
+        <source>IO ID</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="107">
+        <source>IO Throttle (ms)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="108">
+        <source>Issue a destruction certificate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="109">
+        <source>Issue certificate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="110">
+        <source>Last</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="111">
+        <source>Last Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="112">
+        <source>Last Triggered</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="113">
+        <source>Leave empty for all formats. Uses prefix matching.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="114">
+        <source>Ledger</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="115">
+        <source>Legal Holds</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="116">
+        <source>Mark reviewed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="117">
+        <source>Master Objects</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="118">
+        <source>Max Concurrent Runs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="119">
+        <source>Max Memory (MB)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="120">
+        <source>Max Runtime (min)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="121">
+        <source>Method</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="122">
+        <source>Missing</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="123">
+        <source>Month</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="124">
+        <source>Monthly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="125">
+        <source>Monthly Trend (12 months)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="126">
+        <source>Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="127">
+        <source>Never Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="128">
+        <source>New Alert</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="129">
+        <source>New Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="130">
+        <source>New Retention Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="131">
+        <source>New Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="132">
+        <source>Next review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="133">
+        <source>Next Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="134">
+        <source>No alert configurations.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="135">
+        <source>No alert configurations. Create one to get notified of integrity issues.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="136">
+        <source>No certificates issued.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="137">
+        <source>No dead letter entries.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="138">
+        <source>No declarations.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="139">
+        <source>No disposition queue entries.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="140">
+        <source>No entries.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="141">
+        <source>No entries found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="142">
+        <source>No failures in the last 30 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="143">
+        <source>No ledger entries found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="144">
+        <source>No legal holds.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="145">
+        <source>No monthly data yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="146">
+        <source>No repository data yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="147">
+        <source>No retention events recorded.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="148">
+        <source>No retention policies defined.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="149">
+        <source>No runs found.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="150">
+        <source>No runs recorded yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="151">
+        <source>No runs yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="152">
+        <source>No schedules configured.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="153">
+        <source>No schedules configured. Create one to begin automated verification.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="154">
+        <source>Notes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="155">
+        <source>Notification Email</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="156">
+        <source>Notifications &amp; Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="157">
+        <source>Notify on failure</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="158">
+        <source>Notify on mismatch</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="159">
+        <source>No verification data in the last 30 days.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="160">
+        <source>No verification data yet.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="161">
+        <source>No vital records flagged.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="162">
+        <source>Number</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="163">
+        <source>Object</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="164">
+        <source>Object Format (MIME type)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="165">
+        <source>Open Dead Letters</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="166">
+        <source>optional override</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="167">
+        <source>Outcome</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="168">
+        <source>Outcome Breakdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="169">
+        <source>Outcome Breakdown (All Time)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="170">
+        <source>Outcomes (30 days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="171">
+        <source>overdue review</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="172">
+        <source>Passed</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="173">
+        <source>Pass Rate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="174">
+        <source>Percentage</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="175">
+        <source>Placed At</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="176">
+        <source>Placed By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="177">
+        <source>Place Hold</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="178">
+        <source>Place Legal Hold</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="179">
+        <source>Policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="180">
+        <source>Policy</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="181">
+        <source>Policy Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="182">
+        <source>Rate</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="183">
+        <source>Reason</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="184">
+        <source>Recent Failures</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="185">
+        <source>Recent Runs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="186">
+        <source>Record Declarations</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="187">
+        <source>Records Management</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="188">
+        <source>Reject</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="189">
+        <source>Release</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="190">
+        <source>Released By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="191">
+        <source>Reopen</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="192">
+        <source>Report</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="193">
+        <source>Repository</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="194">
+        <source>Repository Breakdown</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="195">
+        <source>Reset</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="196">
+        <source>Resolve</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="197">
+        <source>Retention</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="198">
+        <source>Retention Period (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="199">
+        <source>Retention Policies</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="200">
+        <source>Retention Trigger Events</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="201">
+        <source>Retries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="202">
+        <source>Review cycle (days)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="203">
+        <source>Reviewed By</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="204">
+        <source>Run</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="205">
+        <source>Run Details</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="206">
+        <source>Run History</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="207">
+        <source>Run Now</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="208">
+        <source>Runs</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="209">
+        <source>Save</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="210">
+        <source>Save Changes</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="211">
+        <source>Save Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="212">
+        <source>Scan for Eligible</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="213">
+        <source>Scanned</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="214">
+        <source>Schedule</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="215">
+        <source>Schedule Name</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="216">
+        <source>Schedules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="217">
+        <source>Scope</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="218">
+        <source>Scope &amp; Algorithm</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="219">
+        <source>Scope Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="220">
+        <source>Select...</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="221">
+        <source>Showing latest 200 entries. Use filters to narrow results.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="222">
+        <source>Size</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="223">
+        <source>Skipped</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="224">
+        <source>Started</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="225">
+        <source>Status</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="226">
+        <source>Storage Scanned (30d)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="227">
+        <source>The integrity ledger is append-only. Entries are never updated or deleted, providing a complete audit trail of all verification attempts.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="228">
+        <source>The integrity ledger is append-only. Entries are never updated or deleted.</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="229">
+        <source>Threshold</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="230">
+        <source>Throughput (7d)</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="231">
+        <source>Title</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="232">
+        <source>To</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="233">
+        <source>Toggle</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="234">
+        <source>Total</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="235">
+        <source>Total Verifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="236">
+        <source>Trigger</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="237">
+        <source>Triggered</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="238">
+        <source>Trigger Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="239">
+        <source>Type</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="240">
+        <source>Unflag</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="241">
+        <source>Verification Entries</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="242">
+        <source>Verification Ledger</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="243">
+        <source>Verifications</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="244">
+        <source>Verification Schedules</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="245">
+        <source>Verified</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="246">
+        <source>View</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="247">
+        <source>View all</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="248">
+        <source>Vital Records</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="249">
+        <source>Webhook</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="250">
+        <source>Webhook Secret</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="251">
+        <source>Webhook URL</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="252">
+        <source>Weekly</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="253">
+        <source>Witness</source>
+        <target></target>
+      </trans-unit>
+      <trans-unit id="254">
+        <source>— All —</source>
+        <target></target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
