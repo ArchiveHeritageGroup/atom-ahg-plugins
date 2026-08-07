@@ -1,5 +1,38 @@
 <?php decorate_with('layout_1col'); ?>
 
+<?php
+// Column widths, avatars and hidden panels are carried by these rules rather
+// than style attributes.
+//
+// A CSP nonce applies to <style> and <script> elements, never to a style
+// attribute. AtoM ships style-src with a nonce and no 'unsafe-hashes', so when
+// the header is enforcing rather than report-only the browser drops every one of
+// them - the table columns lose their widths and the layout collapses, silently,
+// with nothing logged.
+//
+// fav-hidden is a plain display:none rather than Bootstrap's d-none because the
+// script on this page reveals these elements by setting style.display, and
+// d-none carries !important, which an inline style cannot override.
+$n = sfConfig::get('csp_nonce', '');
+?>
+<style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  .fav-w35  { width: 35px; }
+  .fav-w50  { width: 50px; }
+  .fav-w60  { width: 60px; }
+  .fav-w100 { width: 100px; }
+  .fav-w110 { width: 110px; }
+  .fav-w130 { width: 130px; }
+  .fav-w140 { width: 140px; }
+  .fav-w150 { width: 150px; }
+  .fav-avatar { width: 36px; height: 36px; }
+  .fav-pl-search { padding-left: 2.5rem; }
+  .fav-mw250 { max-width: 250px; }
+  .fav-thumb { height: 120px; object-fit: cover; }
+  .fav-toast { bottom: 20px; right: 20px; z-index: 1050; }
+  .fav-hidden { display: none; }
+</style>
+
+
 <?php slot('title'); ?>
   <h1><i class="fas fa-heart me-2"></i><?php echo __('My Favorites'); ?></h1>
 <?php end_slot(); ?>
@@ -70,7 +103,7 @@
             <?php foreach ($folders as $folder): ?>
               <a href="/favorites?folder_id=<?php echo $folder->id; ?>"
                  class="list-group-item list-group-item-action d-flex justify-content-between align-items-center<?php echo ($currentFolderId == $folder->id) ? ' active' : ''; ?>"
-                 <?php if ($folder->parent_id): ?>style="padding-left: 2.5rem;"<?php endif; ?>>
+                 <?php if ($folder->parent_id): ?>class="fav-pl-search"<?php endif; ?>>
                 <span>
                   <i class="fas fa-folder<?php echo ($currentFolderId == $folder->id) ? '-open' : ''; ?> me-2"></i>
                   <?php echo esc_entities($folder->name); ?>
@@ -232,7 +265,7 @@
         </div>
 
         <!-- Bulk Action Bar (hidden until selection) -->
-        <div id="bulkActionBar" class="card-body border-bottom py-2 bg-light" style="display: none;">
+        <div id="bulkActionBar" class="card-body border-bottom py-2 bg-light fav-hidden" >
           <form method="post" action="/favorites/bulk" id="bulkForm">
   <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
             <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -242,7 +275,7 @@
                 <i class="fas fa-trash me-1"></i><?php echo __('Remove Selected'); ?>
               </button>
               <?php if (!empty($folders)): ?>
-                <div class="input-group input-group-sm" style="max-width: 250px;">
+                <div class="input-group input-group-sm fav-mw250" >
                   <select name="target_folder_id" class="form-select form-select-sm">
                     <option value=""><?php echo __('Move to...'); ?></option>
                     <option value=""><?php echo __('Unfiled'); ?></option>
@@ -288,7 +321,7 @@
                 <div class="col">
                   <div class="card h-100 border">
                     <?php if (!empty($favorite->thumbnail_path)): ?>
-                      <img src="<?php echo esc_entities($favorite->thumbnail_path); ?>" class="card-img-top" alt="" style="height: 120px; object-fit: cover;">
+                      <img src="<?php echo esc_entities($favorite->thumbnail_path); ?>" class="card-img-top" alt="" class="fav-thumb">
                     <?php endif; ?>
                     <div class="card-body">
                       <div class="d-flex justify-content-between align-items-start mb-2">
@@ -354,19 +387,19 @@
               <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                   <tr>
-                    <th style="width: 35px;">
+                    <th class="fav-w35">
                       <input type="checkbox" class="form-check-input" id="selectAll" title="<?php echo __('Select all'); ?>">
                     </th>
                     <th><?php echo __('Title'); ?></th>
-                    <th style="width: 140px;"><?php echo __('Reference Code'); ?></th>
-                    <th class="text-center" style="width: 110px;"><?php echo __('Level'); ?></th>
-                    <th class="text-center col-optional col-dates" style="width: 130px;"><?php echo __('Dates'); ?></th>
-                    <th class="text-center col-optional col-repository" style="width: 150px;"><?php echo __('Repository'); ?></th>
-                    <th class="text-center" style="width: 50px;" title="<?php echo __('Digital Object'); ?>"><i class="fas fa-camera"></i></th>
-                    <th class="text-center" style="width: 110px;"><?php echo __('Date Added'); ?></th>
-                    <th class="text-center" style="width: 60px;"><?php echo __('Status'); ?></th>
-                    <th class="text-center" style="width: 60px;"><?php echo __('Notes'); ?></th>
-                    <th class="text-center" style="width: 100px;"><?php echo __('Actions'); ?></th>
+                    <th class="fav-w140"><?php echo __('Reference Code'); ?></th>
+                    <th class="text-center fav-w110" ><?php echo __('Level'); ?></th>
+                    <th class="text-center col-optional col-dates fav-w130" ><?php echo __('Dates'); ?></th>
+                    <th class="text-center col-optional col-repository fav-w150" ><?php echo __('Repository'); ?></th>
+                    <th class="text-center fav-w50"  title="<?php echo __('Digital Object'); ?>"><i class="fas fa-camera"></i></th>
+                    <th class="text-center fav-w110" ><?php echo __('Date Added'); ?></th>
+                    <th class="text-center fav-w60" ><?php echo __('Status'); ?></th>
+                    <th class="text-center fav-w60" ><?php echo __('Notes'); ?></th>
+                    <th class="text-center fav-w100" ><?php echo __('Actions'); ?></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -433,7 +466,7 @@
                       </td>
                     </tr>
                     <!-- Expandable notes row -->
-                    <tr class="notes-row" id="notes-row-<?php echo $favorite->id; ?>" style="display: none;">
+                    <tr class="notes-row" id="notes-row-<?php echo $favorite->id; ?>" class="fav-hidden">
                       <td></td>
                       <td colspan="10">
                         <div class="input-group input-group-sm">
@@ -570,8 +603,8 @@
             <textarea class="form-control" id="shareMessage" name="message" rows="2"
                       placeholder="<?php echo __('Add a note for the recipients...'); ?>"></textarea>
           </div>
-          <div id="shareResultArea" style="display:none;" class="mt-3">
-            <div class="alert alert-success mb-2" id="shareSuccessAlert" style="display:none;">
+          <div id="shareResultArea" class="mt-3 fav-hidden" >
+            <div class="alert alert-success mb-2" id="shareSuccessAlert" class="fav-hidden">
               <i class="fas fa-check-circle me-1"></i><span id="shareSuccessText"></span>
             </div>
             <label class="form-label"><?php echo __('Share Link'); ?></label>
@@ -771,8 +804,8 @@
 <?php endif; ?>
 
 <!-- Column Config Dropdown -->
-<div class="dropdown position-fixed" style="bottom: 20px; right: 20px; z-index: 1050;">
-  <button class="btn btn-sm btn-secondary rounded-circle shadow" type="button" data-bs-toggle="dropdown" title="<?php echo __('Column Settings'); ?>" style="width:36px;height:36px;">
+<div class="dropdown position-fixed fav-toast" >
+  <button class="btn btn-sm btn-secondary rounded-circle shadow" type="button" data-bs-toggle="dropdown" title="<?php echo __('Column Settings'); ?>" class="fav-avatar">
     <i class="fas fa-columns"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end">

@@ -273,7 +273,7 @@ foreach ($backups as $backup) {
                 </div>
                 <div id="backup-progress" class="mt-3 d-none">
                     <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                        <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
                     </div>
                     <small class="text-muted mt-1 d-block" id="backup-status"><?php echo __('Creating backup...') ?></small>
                 </div>
@@ -331,7 +331,7 @@ foreach ($backups as $backup) {
                 </div>
                 <div id="db-backup-progress" class="mt-3 d-none">
                     <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width: 100%"></div>
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary w-100"></div>
                     </div>
                     <small class="text-muted mt-1 d-block"><?php echo __('Creating backup...') ?></small>
                 </div>
@@ -395,7 +395,7 @@ foreach ($backups as $backup) {
                 </div>
                 <div id="full-backup-progress" class="mt-3 d-none">
                     <div class="progress">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark" style="width: 100%"></div>
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-dark w-100"></div>
                     </div>
                     <small class="text-muted mt-1 d-block"><?php echo __('Creating backup...') ?></small>
                 </div>
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-6" id="sched-dow-group" style="display:none">
+                        <div class="col-6 d-none" id="sched-dow-group">
                             <label class="form-label" for="sched-dow"><?php echo __('Day of Week') ?></label>
                             <select class="form-select" id="sched-dow" name="day_of_week">
                                 <option value="0">Sunday</option>
@@ -623,7 +623,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <option value="6">Saturday</option>
                             </select>
                         </div>
-                        <div class="col-6" id="sched-dom-group" style="display:none">
+                        <div class="col-6 d-none" id="sched-dom-group">
                             <label class="form-label" for="sched-dom"><?php echo __('Day of Month') ?></label>
                             <input type="number" class="form-control" id="sched-dom" name="day_of_month" min="1" max="28" value="1">
                         </div>
@@ -663,7 +663,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 // Show/hide day selectors based on frequency
 document.getElementById('sched-frequency').addEventListener('change', function() {
-    document.getElementById('sched-dow-group').style.display = this.value === 'weekly' ? '' : 'none';
-    document.getElementById('sched-dom-group').style.display = this.value === 'monthly' ? '' : 'none';
+    document.getElementById('sched-dow-group').classList.toggle('d-none', this.value !== 'weekly');
+    document.getElementById('sched-dom-group').classList.toggle('d-none', this.value !== 'monthly');
 });
 </script>

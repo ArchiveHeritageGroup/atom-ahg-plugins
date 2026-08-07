@@ -22,7 +22,29 @@ function prov_chips($map)
     <div class="col-md-3 mb-3"><div class="card h-100"><div class="card-body">
       <div class="text-muted small text-uppercase"><?php echo __('Catalogue coverage'); ?></div>
       <div class="display-6"><?php echo $pct; ?>%</div>
-      <div class="progress mt-2" style="height:8px"><div class="progress-bar<?php echo $pct < 50 ? ' bg-danger' : ($pct < 80 ? ' bg-warning' : ' bg-success'); ?>" style="width:<?php echo $pct; ?>%"></div></div>
+      <?php
+      // Height and width carried by a nonced <style> block rather than style
+      // attributes.
+      //
+      // A CSP nonce applies to <style> and <script> elements only - it can do
+      // nothing for a style attribute. AtoM ships style-src with a nonce and no
+      // 'unsafe-hashes', and when the header is enforcing rather than
+      // report-only the browser drops these attributes outright: the progress
+      // bar loses its height and its width and the figure reads as zero. It
+      // fails silently, with nothing logged server side.
+      //
+      // The width is per-record, so it cannot be a fixed utility class; a
+      // generated rule keyed to this card is the CSP-safe way to carry a
+      // computed value.
+      $n = sfConfig::get('csp_nonce', '');
+      $nonceAttr = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
+      $barId = 'prov-coverage-bar';
+      ?>
+      <style<?php echo $nonceAttr; ?>>
+        #<?php echo $barId; ?> { height: 8px; }
+        #<?php echo $barId; ?> > .progress-bar { width: <?php echo (float) $pct; ?>%; }
+      </style>
+      <div class="progress mt-2" id="<?php echo $barId; ?>"><div class="progress-bar<?php echo $pct < 50 ? ' bg-danger' : ($pct < 80 ? ' bg-warning' : ' bg-success'); ?>"></div></div>
       <div class="small text-muted mt-1"><?php echo (int) ($r['with_provenance'] ?? 0); ?> / <?php echo (int) ($r['published_total'] ?? 0); ?> <?php echo __('published records'); ?></div>
     </div></div></div>
     <div class="col-md-3 mb-3"><div class="card h-100 border-warning"><div class="card-body">

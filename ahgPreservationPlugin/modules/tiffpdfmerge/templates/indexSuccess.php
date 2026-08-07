@@ -33,7 +33,7 @@ if ($informationObject) {
                 </div>
 
                 <div class="card-body">
-                    <div id="tpmAlert" class="alert" style="display: none;"></div>
+                    <div id="tpmAlert" class="alert d-none"></div>
 
                     <input type="hidden" id="tpmInformationObjectId" value="<?php echo $informationObjectId ?? ''; ?>">
                     <input type="hidden" id="tpmJobId" value="">
@@ -84,13 +84,13 @@ if ($informationObject) {
                             <p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i>Supported: TIFF, JPEG, PNG, BMP, GIF</p>
                             <input type="file" id="tpmFileInput" class="d-none" multiple accept=".tif,.tiff,.jpg,.jpeg,.png,.bmp,.gif">
                         </div>
-                        <div id="tpmProgressContainer" class="mt-3" style="display: none;">
+                        <div id="tpmProgressContainer" class="mt-3 d-none">
                             <div class="d-flex justify-content-between mb-1">
                                 <small class="text-muted">Uploading...</small>
                                 <small id="tpmProgressText" class="text-muted"></small>
                             </div>
-                            <div class="progress" style="height: 8px;">
-                                <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                            <div class="progress tpm-progress">
+                                <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" ></div>
                             </div>
                         </div>
                     </div>
@@ -103,7 +103,7 @@ if ($informationObject) {
                             </h6>
                             <small class="text-muted"><i class="fas fa-arrows-alt me-1"></i>Drag to reorder</small>
                         </div>
-                        <div id="tpmFileList" class="border rounded bg-white" style="min-height: 100px; max-height: 400px; overflow-y: auto;">
+                        <div id="tpmFileList" class="border rounded bg-white tpm-file-list">
                             <div class="text-muted text-center py-5"><i class="fas fa-images fa-2x mb-2 d-block"></i>No files uploaded yet</div>
                         </div>
                     </div>
@@ -134,7 +134,7 @@ if ($informationObject) {
                             <?php endif; ?>
                         </div>
                         <div>
-                            <button type="button" class="btn btn-outline-danger me-2" id="tpmClearBtn" style="display: none;">
+                            <button type="button" class="btn btn-outline-danger me-2" id="tpmClearBtn" class="d-none">
                                 <i class="fas fa-trash me-1"></i>Clear All
                             </button>
                             <button type="button" class="btn btn-primary btn-lg" id="tpmCreateBtn" disabled>
@@ -169,6 +169,14 @@ if ($informationObject) {
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 .upload-zone { cursor: pointer; transition: all 0.3s ease; min-height: 200px; }
+/* Carried here rather than in style attributes.
+   A CSP nonce covers <style> elements only, never a style attribute, and AtoM
+   ships style-src with a nonce and no 'unsafe-hashes'. With the header
+   enforcing rather than report-only the browser drops those attributes, so the
+   progress bar lost its height and the file list its scroll box - silently. */
+.tpm-progress { height: 8px; }
+.tpm-file-list { min-height: 100px; max-height: 400px; overflow-y: auto; }
+#tpmProgressBar { width: 0; }
 .upload-zone:hover, .upload-zone.drag-over { border-color: #0d6efd !important; background-color: #e8f4ff !important; }
 .tpm-file-item { transition: background-color 0.2s; cursor: grab; }
 .tpm-file-item:hover { background-color: #f8f9fa; }
