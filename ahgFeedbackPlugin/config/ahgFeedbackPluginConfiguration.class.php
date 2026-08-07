@@ -17,6 +17,20 @@ class ahgFeedbackPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Contribute this plugin's own navigation entry.
+        //
+        // Registered here rather than named by the theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'feedback', [
+                'url' => '/index.php/feedback',
+                'label' => 'Feedback',
+            'credentials' => ['editor', 'administrator'],
+                'weight' => 50,
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
         // The item feedback button on a record page. Registered here so it exists

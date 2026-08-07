@@ -13,6 +13,20 @@ class ahgPreservationPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Contribute this plugin's own navigation entry.
+        //
+        // Registered here rather than named by the theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'preservation', [
+                'url' => '/index.php/admin/preservation/packages/',
+                'label' => 'Preservation',
+            'credentials' => ['editor', 'administrator'],
+                'weight' => 60,
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 

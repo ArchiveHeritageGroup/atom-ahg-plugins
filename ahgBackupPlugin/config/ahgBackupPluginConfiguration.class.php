@@ -15,6 +15,20 @@ class ahgBackupPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Contribute this plugin's own navigation entry.
+        //
+        // Registered here rather than named by the theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'backup', [
+                'url' => '/index.php/backup',
+                'label' => 'Backup & Restore',
+            'credentials' => ['administrator'],
+                'weight' => 80,
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 
         // Contribute the Manage menu entry at runtime rather than as a `menu` row.

@@ -69,6 +69,27 @@ class ahgFavoritesPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Contribute this plugin's own navigation entry.
+        //
+        // Registered here rather than named by the theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'favorites', [
+                'url' => '/index.php/favorites',
+                'label' => 'Favourites',
+                // Any signed-in user keeps a favourites list, so no particular
+                // credential is required - but an anonymous visitor has none, and
+                // AhgNav treats an empty credentials list as "everyone". Without
+                // this the entry advertised a page that immediately redirects to
+                // the login form.
+                'visible' => static function ($user) {
+                    return $user && $user->isAuthenticated();
+                },
+                'weight' => 20,
+            ]);
+        }
         $this->dispatcher->connect('routing.load_configuration', [$this, 'routingLoadConfiguration']);
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
 

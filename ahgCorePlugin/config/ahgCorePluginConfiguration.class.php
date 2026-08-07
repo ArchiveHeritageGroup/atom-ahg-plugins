@@ -102,6 +102,89 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
 
         // Supply the CSRF token wherever CSRF is enforced. See injectCsrfToken().
         $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectCsrfToken']);
+
+        // Render whatever plugins have contributed to AhgNav. See injectNavEntries().
+        $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectNavEntries']);
+    }
+
+    /**
+     * Put contributed navigation entries into the stock AtoM menus.
+     *
+     * AhgNav has always let a plugin register its own entries, but nothing
+     * rendered them outside ahgThemeB5Plugin - so on a stock AtoM an installed
+     * plugin had no way into the navigation at all. ahgFeedbackPlugin was
+     * reachable at /feedback and invisible from every menu; ahgPreservationPlugin
+     * had no entry of any kind. A plugin nobody can find is a plugin nobody uses.
+     *
+     * Two targets, both present in stock AtoM 2.9 and 2.10:
+     *
+     *   quick-links-menu  management entries. It exists in the top navigation
+     *                     and ships with nothing under its heading, which is
+     *                     exactly what it is for.
+     *   browse-menu       browse entries, alongside AtoM's own seven.
+     *
+     * Skipped entirely when ahgThemeB5Plugin is enabled: that theme renders its
+     * own Manage menu from the same registry, and both firing would duplicate
+     * every entry.
+     */
+    public static function injectNavEntries($event, $content)
+    {
+        if (!is_string($content) || false === stripos($content, 'quick-links-menu')) {
+            return $content;
+        }
+
+        if (!class_exists('AhgNav', false)) {
+            return $content;
+        }
+
+        try {
+            $configuration = sfProjectConfiguration::getActive();
+
+            if ($configuration && in_array('ahgThemeB5Plugin', $configuration->getPlugins(), true)) {
+                return $content;
+            }
+
+            $user = sfContext::hasInstance() ? sfContext::getInstance()->getUser() : null;
+        } catch (Throwable $e) {
+            return $content;
+        }
+
+        foreach ([
+            'manage' => 'quick-links-menu',
+            'browse' => 'browse-menu',
+        ] as $group => $anchor) {
+            $items = AhgNav::resolved($group, $user);
+
+            if (!$items) {
+                continue;
+            }
+
+            $html = '';
+
+            foreach ($items as $item) {
+                $badge = empty($item['badgeCount'])
+                    ? ''
+                    : ' <span class="badge bg-secondary">'.(int) $item['badgeCount'].'</span>';
+
+                $html .= sprintf(
+                    '<li><a class="dropdown-item" href="%s">%s%s</a></li>',
+                    htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'),
+                    htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'),
+                    $badge
+                );
+            }
+
+            // Append inside the target <ul>, so the entries sit under the
+            // heading AtoM already renders rather than replacing anything.
+            $content = preg_replace(
+                '#(<ul[^>]*aria-labelledby="'.preg_quote($anchor, '#').'"[^>]*>)(.*?)(</ul>)#s',
+                '$1$2'.str_replace('\\', '\\\\', $html).'$3',
+                $content,
+                1
+            );
+        }
+
+        return $content;
     }
 
     /**

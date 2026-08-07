@@ -18,6 +18,20 @@ class ahgProvenancePluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Contribute this plugin's own navigation entry.
+        //
+        // Registered here rather than named by the theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'provenance', [
+                'url' => '/index.php/provenance',
+                'label' => 'Provenance',
+            'credentials' => ['editor', 'administrator'],
+                'weight' => 40,
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
