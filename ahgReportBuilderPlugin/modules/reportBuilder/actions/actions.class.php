@@ -119,7 +119,7 @@ class reportBuilderActions extends AhgController
 
                 $this->getUser()->setFlash('success', 'Report created. Now configure your report.');
                 $this->redirect("admin/report-builder/{$reportId}/edit");
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
@@ -161,7 +161,7 @@ class reportBuilderActions extends AhgController
                 ->where('report_id', $id)
                 ->where('is_resolved', 0)
                 ->count();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->commentCount = 0;
         }
     }
@@ -230,7 +230,7 @@ class reportBuilderActions extends AhgController
             $newId = $this->service->cloneReport($id, $this->getUserId());
             $this->getUser()->setFlash('success', 'Report cloned successfully');
             $this->redirect("admin/report-builder/{$newId}/edit");
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getUser()->setFlash('error', $e->getMessage());
             $this->redirect('admin/report-builder');
         }
@@ -509,7 +509,7 @@ class reportBuilderActions extends AhgController
 
                 $this->getUser()->setFlash('success', 'Schedule created');
                 $this->redirect("admin/report-builder/{$id}/schedule");
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->getUser()->setFlash('error', $e->getMessage());
             }
         }
@@ -584,7 +584,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode($response));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -623,7 +623,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode(['success' => true, 'data' => $results]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -659,7 +659,7 @@ class reportBuilderActions extends AhgController
                 'success' => true,
                 'data' => $chartData,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -899,7 +899,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode(['success' => true, 'id' => $id]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -961,7 +961,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode(['success' => true, 'id' => $id]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -980,7 +980,7 @@ class reportBuilderActions extends AhgController
             $sectionService->delete($id);
 
             return $this->renderText(json_encode(['success' => true]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1002,7 +1002,7 @@ class reportBuilderActions extends AhgController
             $sectionService->reorder($reportId, $sectionIds);
 
             return $this->renderText(json_encode(['success' => true]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1032,7 +1032,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode(['success' => true, 'id' => $id]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1052,7 +1052,7 @@ class reportBuilderActions extends AhgController
             $linkService->delete($id);
 
             return $this->renderText(json_encode(['success' => true]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1074,7 +1074,7 @@ class reportBuilderActions extends AhgController
             $ogData = $linkService->fetchOpenGraph($url);
 
             return $this->renderText(json_encode(['success' => true, 'data' => $ogData]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1096,7 +1096,7 @@ class reportBuilderActions extends AhgController
             $results = $linkService->searchEntities($query, $type);
 
             return $this->renderText(json_encode(['success' => true, 'results' => $results]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1229,7 +1229,7 @@ class reportBuilderActions extends AhgController
             $templateService->applyToReport($templateId, $reportId);
 
             return $this->renderText(json_encode(['success' => true, 'id' => $reportId]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1269,7 +1269,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode(['success' => true, 'id' => $id]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1289,7 +1289,7 @@ class reportBuilderActions extends AhgController
             $templateService->delete($id);
 
             return $this->renderText(json_encode(['success' => true]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1316,7 +1316,7 @@ class reportBuilderActions extends AhgController
             $workflowService->transition($reportId, $newStatus, $this->getUserId());
 
             return $this->renderText(json_encode(['success' => true, 'status' => $newStatus]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1373,7 +1373,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode(['success' => false, 'error' => 'Unknown action']));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1399,7 +1399,7 @@ class reportBuilderActions extends AhgController
             $versions = $versionService->getVersions($reportId);
 
             return $this->renderText(json_encode(['success' => true, 'versions' => $versions]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1422,7 +1422,7 @@ class reportBuilderActions extends AhgController
             $versionId = $versionService->createVersion($reportId, $this->getUserId(), $summary);
 
             return $this->renderText(json_encode(['success' => true, 'version_id' => $versionId]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1444,7 +1444,7 @@ class reportBuilderActions extends AhgController
             $versionService->restoreVersion($versionId, $this->getUserId());
 
             return $this->renderText(json_encode(['success' => true]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1518,7 +1518,7 @@ class reportBuilderActions extends AhgController
             }
 
             return $this->renderText(json_encode(['success' => true, 'data' => $results]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1540,7 +1540,7 @@ class reportBuilderActions extends AhgController
             $id = $queryBuilder->saveQuery($data);
 
             return $this->renderText(json_encode(['success' => true, 'id' => $id]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1566,7 +1566,7 @@ class reportBuilderActions extends AhgController
                 'valid' => empty($issues),
                 'issues' => $issues,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1585,7 +1585,7 @@ class reportBuilderActions extends AhgController
             $tables = $queryBuilder->getAvailableTables();
 
             return $this->renderText(json_encode(['success' => true, 'tables' => $tables]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1606,7 +1606,7 @@ class reportBuilderActions extends AhgController
             $columns = $queryBuilder->getTableColumns($table);
 
             return $this->renderText(json_encode(['success' => true, 'columns' => $columns]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1627,7 +1627,7 @@ class reportBuilderActions extends AhgController
             $relationships = $queryBuilder->getRelationships($table);
 
             return $this->renderText(json_encode(['success' => true, 'relationships' => $relationships]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1665,7 +1665,7 @@ class reportBuilderActions extends AhgController
                 'share' => $share,
                 'url' => $shareService->getShareUrl($share['token']),
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1685,7 +1685,7 @@ class reportBuilderActions extends AhgController
             $shareService->deactivateShare($id);
 
             return $this->renderText(json_encode(['success' => true]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1756,7 +1756,7 @@ class reportBuilderActions extends AhgController
             $attachment = $attachmentService->upload($reportId, $sectionId, $_FILES['file']);
 
             return $this->renderText(json_encode(['success' => true, 'attachment' => $attachment]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1776,7 +1776,7 @@ class reportBuilderActions extends AhgController
             $attachmentService->delete($id);
 
             return $this->renderText(json_encode(['success' => true]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1798,7 +1798,7 @@ class reportBuilderActions extends AhgController
             $attachments = $attachmentService->getAttachments($reportId, $sectionId);
 
             return $this->renderText(json_encode(['success' => true, 'attachments' => $attachments]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }
@@ -1832,7 +1832,7 @@ class reportBuilderActions extends AhgController
             $dataBindingService->createSnapshot($reportId);
 
             return $this->renderText(json_encode(['success' => true, 'mode' => 'snapshot']));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode(['success' => false, 'error' => $e->getMessage()]));
         }
     }

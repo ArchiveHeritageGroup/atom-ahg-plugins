@@ -189,7 +189,12 @@ class AttachmentService
      */
     public function getUploadPath(int $reportId): string
     {
-        $baseDir = \sfConfig::get('sf_upload_dir', '/usr/share/nginx/archive/uploads');
+        // Fall back to this installation's own upload directory, not a fixed one.
+        // The default here named a single site, so if sf_upload_dir were ever
+        // unset the attachments of every other installation would be written to,
+        // or read from, somewhere that is not theirs.
+        $baseDir = \sfConfig::get('sf_upload_dir')
+            ?: \sfConfig::get('sf_web_dir').'/uploads';
         $path = $baseDir . '/reports/' . $reportId;
 
         if (!is_dir($path)) {
