@@ -34,7 +34,7 @@ class DatasetService
     {
         // Container IO via the canonical create (handles object/io/i18n/slug/
         // nested-set). sourceStandard tags it as RDM-owned.
-        $ioId = \AhgInformationObjectManage\Services\InformationObjectCrudService::create([
+        $ioId = \AhgCore\Services\InformationObjectCrudService::create([
             'title'           => $title,
             'scopeAndContent' => $description,
             'parentId'        => self::ROOT_IO,
@@ -84,7 +84,7 @@ class DatasetService
             }
 
             // 1. Child IO for this file (title = filename stem), under the container.
-            $childIoId = \AhgInformationObjectManage\Services\InformationObjectCrudService::create([
+            $childIoId = \AhgCore\Services\InformationObjectCrudService::create([
                 'title'          => pathinfo($original, PATHINFO_FILENAME) ?: $original,
                 'parentId'       => $parentIoId,
                 'sourceStandard' => 'rdm',

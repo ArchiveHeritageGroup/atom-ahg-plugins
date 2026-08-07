@@ -61,9 +61,20 @@ class ahgIoFormActions extends AhgController
 
         try {
             $this->forward($module, 'edit');
-        } catch (\sfConfigurationException $e) {
-            // The plugin that renders this standard is not installed. Say so,
-            // rather than fatalling or silently rendering the wrong form.
+        } catch (\Throwable $e) {
+            // The plugin that renders this standard is not installed.
+            //
+            // Catching Throwable rather than sfConfigurationException: symfony
+            // raises different types depending on how far the forward gets. A
+            // missing module gives sfConfigurationException, a present module
+            // with no such action gives "Action \"ioManage/edit\" does not
+            // exist", and the narrow catch let that one through as an uncaught
+            // exception. Verified on a clean AtoM with only ahgCorePlugin and
+            // ahgThemeB5Plugin enabled.
+            //
+            // Anything thrown here means the standard cannot be rendered, and
+            // the honest response is the same whichever exception carried the
+            // news.
             $this->getResponse()->setStatusCode(501);
 
             return $this->renderText(sprintf(
@@ -311,7 +322,7 @@ class ahgIoFormActions extends AhgController
         }
 
         $DB = \Illuminate\Database\Capsule\Manager::class;
-        $rootId = \AhgInformationObjectManage\Services\InformationObjectCrudService::ROOT_ID;
+        $rootId = \AhgCore\Services\InformationObjectCrudService::ROOT_ID;
 
         // 1. Resolve REPO code
         $repoCode = '';

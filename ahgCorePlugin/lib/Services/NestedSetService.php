@@ -1,6 +1,6 @@
 <?php
 
-namespace AhgInformationObjectManage\Services;
+namespace AhgCore\Services;
 
 use Illuminate\Database\Capsule\Manager as DB;
 

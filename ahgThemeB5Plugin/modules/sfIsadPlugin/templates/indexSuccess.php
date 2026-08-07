@@ -37,7 +37,20 @@ if (!function_exists('ahg_render_display_panels')) {
 <?php echo "<!-- DEBUG: This is ISAD module -->\n"; ?>
 <?php
 // Load viewer helper from ahgUiOverridesPlugin
-require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php';
+// Load the theme helper from wherever it is available. It lives in
+// ahgCorePlugin, which the theme can rely on; the ahgUiOverridesPlugin copy is
+// kept first so an existing install keeps using the one it already had. Both
+// define their functions behind function_exists, so loading either is safe.
+foreach ([
+    sfConfig::get('sf_plugins_dir').'/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php',
+    sfConfig::get('sf_plugins_dir').'/ahgCorePlugin/lib/helper/informationobjectHelper.php',
+] as $ahgHelperPath) {
+    if (is_file($ahgHelperPath)) {
+        require_once $ahgHelperPath;
+
+        break;
+    }
+}
 // Load PII masking helper if privacy plugin is enabled
 if (in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
     require_once sfConfig::get('sf_plugins_dir') . '/ahgPrivacyPlugin/lib/helper/PiiHelper.php';

@@ -98,11 +98,15 @@
           <?php endif; ?>
 
           <?php if (in_array('ahgHelpPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
-          <!-- Help Center -->
+          <!-- Help Center. Rendered only when ahgHelpPlugin provides the route:
+               url_for() throws on an unknown route, and this sits in the header
+               of every page. -->
+          <?php $ahgHelpUrl = class_exists('AhgNav') ? AhgNav::safeUrl('@help_index') : null; ?>
+          <?php if (null !== $ahgHelpUrl) { ?>
           <li class="nav-item d-flex flex-column">
             <a
               class="nav-link d-flex align-items-center p-0"
-              href="<?php echo url_for('@help_index') ?>"
+              href="<?php echo $ahgHelpUrl; ?>"
               target="_blank"
               rel="noopener"
               id="help-center-menu">
@@ -122,6 +126,7 @@
               </span>
             </a>
           </li>
+          <?php } // $ahgHelpUrl ?>
           <?php endif; ?>
 
           <?php echo get_component('menu', 'mainMenu', ['sf_cache_key' => 'dominion-b5'.$sf_user->getCulture().$sf_user->getUserID()]); ?>

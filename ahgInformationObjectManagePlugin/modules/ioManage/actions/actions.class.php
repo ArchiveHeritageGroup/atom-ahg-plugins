@@ -58,13 +58,13 @@ class ioManageActions extends AhgController
         }
 
         $slug = $request->getParameter('slug');
-        $this->io = \AhgInformationObjectManage\Services\InformationObjectCrudService::getBySlug($slug, $culture);
+        $this->io = \AhgCore\Services\InformationObjectCrudService::getBySlug($slug, $culture);
         if (!$this->io) {
             $this->forward404();
         }
 
         // Check for children
-        $this->hasChildren = \AhgInformationObjectManage\Services\NestedSetService::hasChildren($this->io['id']);
+        $this->hasChildren = \AhgCore\Services\NestedSetService::hasChildren($this->io['id']);
 
         if ($request->isMethod('delete')) {
             if ($this->hasChildren) {
@@ -76,7 +76,7 @@ class ioManageActions extends AhgController
             $this->form->bind($request->getPostParameters());
             if ($this->form->isValid()) {
                 $parentSlug = $this->io['parentSlug'];
-                \AhgInformationObjectManage\Services\InformationObjectCrudService::delete($this->io['id']);
+                \AhgCore\Services\InformationObjectCrudService::delete($this->io['id']);
 
                 if ($parentSlug) {
                     $this->redirect('/' . $parentSlug);
@@ -443,7 +443,7 @@ class ioManageActions extends AhgController
         }
 
         $DB = \Illuminate\Database\Capsule\Manager::class;
-        $rootId = \AhgInformationObjectManage\Services\InformationObjectCrudService::ROOT_ID;
+        $rootId = \AhgCore\Services\InformationObjectCrudService::ROOT_ID;
 
         // 1. Resolve REPO code
         $repoCode = '';
@@ -553,7 +553,7 @@ class ioManageActions extends AhgController
             $this->forward404();
         }
 
-        $this->io = \AhgInformationObjectManage\Services\InformationObjectCrudService::getBySlug($ioSlug, $culture);
+        $this->io = \AhgCore\Services\InformationObjectCrudService::getBySlug($ioSlug, $culture);
         if (!$this->io) {
             $this->forward404();
         }

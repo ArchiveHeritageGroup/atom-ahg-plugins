@@ -26,7 +26,15 @@ class AhgRelatedAuthorityRecordComponent extends sfIsaarPluginRelatedAuthorityRe
                 $forbiddenUrl = '';
                 if (isset($this->resource) && isset($this->resource->id)) {
                     // Use url_for with explicit module to generate the URL safely
-                    $forbiddenUrl = url_for(['module' => 'actor', 'action' => 'index', 'slug' => $this->resource->slug]);
+                    // url_for() is a view helper and is not loaded in a component
+                    // class, so calling it here is a fatal - it took out any
+                    // authority record that has related records, while records
+                    // without relations rendered fine. Build the URL from the
+                    // routing service instead, which is always available.
+                    $forbiddenUrl = $this->context->routing->generate(
+                        null,
+                        ['module' => 'actor', 'action' => 'index', 'slug' => $this->resource->slug]
+                    );
                 }
 
                 $validators = [new sfValidatorString()];

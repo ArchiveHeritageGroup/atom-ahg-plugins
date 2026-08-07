@@ -1,6 +1,6 @@
 <?php
 
-namespace AhgInformationObjectManage\Services;
+namespace AhgCore\Services;
 
 use AhgCore\Services\EventService;
 use AhgCore\Services\I18nService;

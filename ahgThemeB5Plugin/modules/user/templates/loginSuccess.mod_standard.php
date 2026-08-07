@@ -49,7 +49,7 @@
       <p class="card-text text-muted">
         <?php echo __('Register for an account to access archival materials and services.'); ?>
       </p>
-      <a href="<?php echo url_for('@user_register'); ?>" class="btn btn-primary">
+      <a href="<?php echo AhgNav::safeUrl('@user_register', url_for(['module' => 'user', 'action' => 'login'])); ?>" class="btn btn-primary">
         <i class="fas fa-user-plus me-2"></i><?php echo __('Register'); ?>
       </a>
     </div>

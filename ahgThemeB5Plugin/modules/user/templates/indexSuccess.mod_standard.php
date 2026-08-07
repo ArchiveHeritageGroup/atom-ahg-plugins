@@ -41,7 +41,15 @@ try {
 
 // Check if current user is admin
 $isAdmin = $sf_user->isAdministrator();
+// The clearance screens belong to ahgSecurityClearancePlugin. Without it the
+// routes below do not exist and url_for() throws, which turned viewing any
+// user - and users are actors, so any authority record for a user - into a
+// 500. Availability is checked once here and gates every use.
+$hasClearancePlugin = class_exists('AhgNav')
+    ? null !== AhgNav::safeUrl('@security_clearances')
+    : false;
 $canManageClearance = $isAdmin || $sf_user->hasCredential('manage_security');
+$canManageClearance = $canManageClearance && $hasClearancePlugin;
 ?>
 
 <h1><?php echo __('User %1%', ['%1%' => render_title($resource)]); ?></h1>

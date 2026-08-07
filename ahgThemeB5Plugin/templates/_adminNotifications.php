@@ -135,7 +135,7 @@ if ($spectrumTaskCount > 0) {
         'type' => 'primary',
         'icon' => 'fa-clipboard-list',
         'text' => sprintf(__('You have %d task(s) assigned to you'), $spectrumTaskCount),
-        'url' => url_for('@spectrum_my_tasks'),
+        'url' => AhgNav::safeUrl('@spectrum_my_tasks', '#'),
         'action' => __('View Tasks')
     ];
 }

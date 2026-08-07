@@ -1,5 +1,18 @@
 <?php
-require_once sfConfig::get('sf_plugins_dir').'/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
+// Load the theme helper from wherever it is available. It lives in
+// ahgCorePlugin, which the theme can rely on; the ahgUiOverridesPlugin copy is
+// kept first so an existing install keeps using the one it already had. Both
+// define their functions behind function_exists, so loading either is safe.
+foreach ([
+    sfConfig::get('sf_plugins_dir').'/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php',
+    sfConfig::get('sf_plugins_dir').'/ahgCorePlugin/lib/helper/AhgLaravelHelper.php',
+] as $ahgHelperPath) {
+    if (is_file($ahgHelperPath)) {
+        require_once $ahgHelperPath;
+
+        break;
+    }
+}
 
 // Load PII masking helper if privacy plugin is enabled
 $piiEnabled = in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->getPlugins());
