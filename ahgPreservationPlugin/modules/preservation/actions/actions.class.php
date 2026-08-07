@@ -268,7 +268,7 @@ class preservationActions extends AhgController
                 'success' => true,
                 'checksums' => $results,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
 
             return $this->renderText(json_encode([
@@ -296,7 +296,7 @@ class preservationActions extends AhgController
                 'success' => true,
                 'results' => $results,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
 
             return $this->renderText(json_encode([
@@ -318,7 +318,7 @@ class preservationActions extends AhgController
                 'success' => true,
                 'stats' => $stats,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
 
             return $this->renderText(json_encode([
@@ -384,7 +384,7 @@ class preservationActions extends AhgController
                 'success' => true,
                 'result' => $result,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
 
             return $this->renderText(json_encode([
@@ -455,7 +455,7 @@ class preservationActions extends AhgController
                 'success' => true,
                 'result' => $result,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
 
             return $this->renderText(json_encode([
@@ -542,7 +542,7 @@ class preservationActions extends AhgController
                 'success' => true,
                 'result' => $result,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
 
             return $this->renderText(json_encode([
@@ -637,7 +637,7 @@ class preservationActions extends AhgController
             }
 
             return $this->renderText(json_encode($result));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -724,7 +724,7 @@ class preservationActions extends AhgController
                 }
 
                 $this->redirect(['module' => 'preservation', 'action' => 'scheduler']);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 if ($e instanceof sfStopException) {
                     throw $e;
                 }
@@ -760,7 +760,7 @@ class preservationActions extends AhgController
                 'is_enabled' => $schedule ? $schedule->is_enabled : null,
                 'next_run_at' => $schedule ? $schedule->next_run_at : null,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -791,7 +791,7 @@ class preservationActions extends AhgController
             $result = $this->service->executeWorkflow($id, 'manual', $userName);
 
             return $this->renderText(json_encode($result));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -823,7 +823,7 @@ class preservationActions extends AhgController
             return $this->renderText(json_encode([
                 'success' => $result,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -913,7 +913,7 @@ class preservationActions extends AhgController
                 ->all();
 
             return $ids ?: [$objectId];
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return [$objectId];
         }
     }
@@ -1091,7 +1091,7 @@ class preservationActions extends AhgController
                     $this->getUser()->setFlash('notice', $notice);
                     $this->redirect(['module' => 'preservation', 'action' => 'packageEdit', 'id' => $id]);
                 }
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 // $this->redirect() throws sfStopException to halt the action — it
                 // must NOT be treated as an error (that produced a phantom empty
                 // "Error:" flash alongside the success notice, and cancelled the
@@ -1251,7 +1251,7 @@ class preservationActions extends AhgController
             $result = $this->service->addObjectsFromCollection($packageId, $ioId);
 
             return $this->renderText(json_encode($result));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1282,7 +1282,7 @@ class preservationActions extends AhgController
             $result = $this->service->buildAndExportPackage($packageId, $format);
 
             return $this->renderText(json_encode($result));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1313,7 +1313,7 @@ class preservationActions extends AhgController
                 'success' => true,
                 'id' => $result,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1346,7 +1346,7 @@ class preservationActions extends AhgController
             return $this->renderText(json_encode([
                 'success' => $result,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1376,7 +1376,7 @@ class preservationActions extends AhgController
             $result = $this->service->buildBagItPackage($packageId);
 
             return $this->renderText(json_encode($result));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1406,7 +1406,7 @@ class preservationActions extends AhgController
             $result = $this->service->validateBagItPackage($packageId);
 
             return $this->renderText(json_encode($result));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1437,7 +1437,7 @@ class preservationActions extends AhgController
             $result = $this->service->exportPackage($packageId, $format);
 
             return $this->renderText(json_encode($result));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1469,7 +1469,7 @@ class preservationActions extends AhgController
             return $this->renderText(json_encode([
                 'success' => $result,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -1521,7 +1521,7 @@ class preservationActions extends AhgController
                 'new_package_id' => $newId,
                 'new_package_uuid' => $newPackage->uuid,
             ]));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderText(json_encode([
                 'success' => false,
                 'error' => $e->getMessage(),

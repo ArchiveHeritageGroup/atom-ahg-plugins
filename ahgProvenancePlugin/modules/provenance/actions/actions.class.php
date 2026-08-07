@@ -557,7 +557,7 @@ class provenanceActions extends AhgController
             $repo->deleteEvent($eventId);
 
             return $this->renderJsonSuccess();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJsonError($e->getMessage());
         }
     }

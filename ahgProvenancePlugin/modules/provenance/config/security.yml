@@ -1,0 +1,10 @@
+# Without this file symfony applies its own default, is_secure: false, so every
+# action is reachable anonymously. The absence is invisible in review - there is
+# nothing to read - which is why it is stated explicitly here.
+#
+# Mirrors the check the actions already make in code (editor or administrator).
+# Declared as a nested list so the credentials are OR'd; a flat [editor] would
+# also refuse administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

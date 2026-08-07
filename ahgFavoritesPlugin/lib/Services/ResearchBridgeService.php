@@ -18,10 +18,20 @@ class ResearchBridgeService
      */
     public function isResearchEnabled(): bool
     {
-        return DB::table('atom_plugin')
-            ->where('name', 'ahgResearchPlugin')
-            ->where('is_enabled', 1)
-            ->exists();
+        // Asked of the configuration, not the atom_plugin table.
+        //
+        // That table is the AHG framework's own registry and does not exist on a
+        // stock AtoM, where enablement lives in the `plugins` setting maintained
+        // by AtoM's plugin admin. Querying it threw on any install without the
+        // framework schema, so a check meant to detect an optional integration
+        // took the page down instead of returning false.
+        $configuration = \sfProjectConfiguration::getActive();
+
+        if (!$configuration) {
+            return false;
+        }
+
+        return in_array('ahgResearchPlugin', $configuration->getPlugins(), true);
     }
 
     /**
@@ -41,8 +51,7 @@ class ResearchBridgeService
      */
     private function getResearchService(): object
     {
-        $path = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/ResearchService.php';
-        require_once $path;
+        $this->requireResearchClass('ResearchService');
 
         return new \ResearchService();
     }
@@ -52,8 +61,7 @@ class ResearchBridgeService
      */
     private function getProjectService(): object
     {
-        $path = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/ProjectService.php';
-        require_once $path;
+        $this->requireResearchClass('ProjectService');
 
         return new \ProjectService();
     }
@@ -63,8 +71,7 @@ class ResearchBridgeService
      */
     private function getBibliographyService(): object
     {
-        $path = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/BibliographyService.php';
-        require_once $path;
+        $this->requireResearchClass('BibliographyService');
 
         return new \BibliographyService();
     }
@@ -272,4 +279,34 @@ class ResearchBridgeService
 
         return $service->getBibliographies($researcherId);
     }
+
+    /**
+     * Load one of ahgResearchPlugin's service classes, if that plugin is present.
+     *
+     * The paths here were fixed to <root>/atom-ahg-plugins/, which is the
+     * development checkout layout. Installed from a bundle the plugin sits under
+     * <root>/plugins/, so the require failed - and a failed require is fatal, so
+     * an optional integration took the whole page down and returned an empty body.
+     *
+     * Both layouts are tried, and a missing file raises a catchable exception
+     * rather than killing the request: ahgResearchPlugin is optional here.
+     */
+    private function requireResearchClass(string $class): void
+    {
+        $root = \sfConfig::get('sf_root_dir');
+
+        foreach ([
+            $root.'/plugins/ahgResearchPlugin/lib/Services/'.$class.'.php',
+            $root.'/atom-ahg-plugins/ahgResearchPlugin/lib/Services/'.$class.'.php',
+        ] as $path) {
+            if (is_file($path)) {
+                require_once $path;
+
+                return;
+            }
+        }
+
+        throw new \RuntimeException(sprintf('ahgResearchPlugin is not installed, so %s is unavailable.', $class));
+    }
+
 }

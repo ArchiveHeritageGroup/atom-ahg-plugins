@@ -9,7 +9,7 @@
  *   php symfony backup:run-scheduled --force   # Run regardless of schedule
  *
  * Cron (every hour):
- *   0 * * * * cd /usr/share/nginx/archive && php symfony backup:run-scheduled >> /var/log/atom/backup-cron.log 2>&1
+ *   0 * * * * cd <atom-root> && php symfony backup:run-scheduled >> /var/log/atom/backup-cron.log 2>&1
  */
 class backupRunScheduledTask extends sfBaseTask
 {
@@ -30,7 +30,7 @@ Checks backup_schedule table for active schedules that are due to run,
 then executes each one via BackupService::createBackup().
 
 Designed to be called by cron every hour:
-  0 * * * * cd /usr/share/nginx/archive && php symfony backup:run-scheduled
+  0 * * * * cd <atom-root> && php symfony backup:run-scheduled
 EOF;
     }
 

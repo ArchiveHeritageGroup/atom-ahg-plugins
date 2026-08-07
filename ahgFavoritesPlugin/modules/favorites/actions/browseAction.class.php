@@ -1,9 +1,9 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FolderService.php';
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/SimplePager.php';
+require_once dirname(__DIR__, 3).'/lib/Services/FavoritesService.php';
+require_once dirname(__DIR__, 3).'/lib/Services/FolderService.php';
+require_once dirname(__DIR__, 3).'/lib/SimplePager.php';
 
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService;
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FolderService;
@@ -82,10 +82,14 @@ class favoritesBrowseAction extends AhgController
             $this->currentFolder = $folderService->getFolder($userId, $this->currentFolderId);
         }
 
-        // Research plugin integration detection
-        $this->researchEnabled = DB::table('atom_plugin')
-            ->where('name', 'ahgResearchPlugin')
-            ->where('is_enabled', 1)
-            ->exists();
+        // Research plugin integration detection.
+        //
+        // From the configuration rather than the atom_plugin table, which the AHG
+        // framework owns and a stock AtoM does not have - the query threw rather
+        // than reporting the integration absent. See ResearchBridgeService.
+        $configuration = \sfProjectConfiguration::getActive();
+
+        $this->researchEnabled = $configuration
+            && in_array('ahgResearchPlugin', $configuration->getPlugins(), true);
     }
 }

@@ -159,7 +159,7 @@ if (!$this->getUser()->isAdministrator()) {
                 'framework' => (bool) $request->getParameter('framework', true),
             ]);
             return $this->renderJson($result);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['error' => $e->getMessage()], 500);
         }
     }
@@ -214,7 +214,7 @@ if (!$this->getUser()->isAdministrator()) {
 
             $this->getUser()->setFlash('notice', 'Schedule created successfully');
             $this->redirect(['module' => 'backup', 'action' => 'index']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($request->isXmlHttpRequest()) {
                 return $this->renderJson(['success' => false, 'error' => $e->getMessage()], 500);
             }
@@ -241,7 +241,7 @@ if (!$this->getUser()->isAdministrator()) {
 
             $this->getUser()->setFlash('notice', 'Schedule updated');
             $this->redirect(['module' => 'backup', 'action' => 'index']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($request->isXmlHttpRequest()) {
                 return $this->renderJson(['success' => false, 'error' => $e->getMessage()], 500);
             }
@@ -267,7 +267,7 @@ if (!$this->getUser()->isAdministrator()) {
 
             $this->getUser()->setFlash('notice', 'Schedule deleted');
             $this->redirect(['module' => 'backup', 'action' => 'index']);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($request->isXmlHttpRequest()) {
                 return $this->renderJson(['success' => false, 'error' => $e->getMessage()], 500);
             }

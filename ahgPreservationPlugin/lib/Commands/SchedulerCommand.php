@@ -13,7 +13,7 @@ class SchedulerCommand extends BaseCommand
 Executes scheduled preservation workflows based on their configured schedules.
 
 This task should be run via cron every minute:
-  * * * * * cd /usr/share/nginx/archive && php bin/atom preservation:scheduler
+  * * * * * cd <atom-root> && php bin/atom preservation:scheduler
 
 Examples:
   php bin/atom preservation:scheduler              # Run due workflows

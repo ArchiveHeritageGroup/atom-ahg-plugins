@@ -1,0 +1,7 @@
+# Preservation is a staff function: fixity, format identification, migration and
+# file movement. Without this file symfony defaults to is_secure: false and every
+# action was anonymous. Credentials are nested so they are OR'd rather than
+# required together.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

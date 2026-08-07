@@ -94,7 +94,7 @@ class tiffpdfmergeActions extends AhgController
             ]);
 
             return $this->renderJson(['success' => true, 'job_id' => $mergeJobId]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
         }
     }
@@ -201,7 +201,7 @@ class tiffpdfmergeActions extends AhgController
                     'size' => filesize($filePath),
                     'pages' => $pageCount,
                 ];
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $results[] = ['success' => false, 'filename' => $originalName, 'error' => $e->getMessage()];
             }
         }
@@ -446,7 +446,7 @@ class tiffpdfmergeActions extends AhgController
                 'files' => count($images),
                 'message' => count($images) . ' file(s) queued. The PDF/A is being created in the background; you will be notified when it is ready.',
             ]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['success' => false, 'error' => $e->getMessage()]);
         }
     }

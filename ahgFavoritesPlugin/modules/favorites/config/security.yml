@@ -1,0 +1,6 @@
+# Favourites belong to the signed-in user, so authentication is required but no
+# particular credential is - a researcher with no editing rights still keeps
+# their own list. Without this file the default is is_secure: false and one
+# user's folders were reachable anonymously.
+all:
+  is_secure: true

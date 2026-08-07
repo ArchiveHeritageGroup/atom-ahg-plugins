@@ -1,7 +1,7 @@
 <?php
 
 use AtomFramework\Http\Controllers\AhgController;
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesShareService.php';
+require_once dirname(__DIR__, 3).'/lib/Services/FavoritesShareService.php';
 
 use AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesShareService;
 
