@@ -126,13 +126,31 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
      */
     public static function bootstrapFramework(string $rootDir): void
     {
-        $bootstrap = $rootDir.'/atom-framework/bootstrap.php';
+        // The framework ships from two places: as atom-framework/ beside the AtoM
+        // root, which is how PSIS and Heratio run it, and packaged as
+        // plugins/ahgRuntimePlugin, which is what bin/build-runtime-plugin
+        // generates for a customer install. Only the first was looked for here,
+        // and the miss returned silently - so a packaged install loaded every
+        // plugin and registered every route, then died on the first database call
+        // with "connection() on null" and nothing to point at the cause.
+        $frameworkDir = null;
 
-        if (!file_exists($bootstrap)) {
+        foreach ([
+            $rootDir.'/atom-framework',
+            $rootDir.'/plugins/ahgRuntimePlugin',
+        ] as $candidate) {
+            if (file_exists($candidate.'/bootstrap.php')) {
+                $frameworkDir = $candidate;
+
+                break;
+            }
+        }
+
+        if (null === $frameworkDir) {
             return;
         }
 
-        require_once $bootstrap;
+        require_once $frameworkDir.'/bootstrap.php';
 
         // Routes are declared with classes named as strings, which RouteLoader
         // instantiates when routing.load_configuration fires. They live in
@@ -155,7 +173,7 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
             }
 
             foreach ([
-                $rootDir.'/atom-framework/src/Routing/'.$class.'.class.php',
+                $frameworkDir.'/src/Routing/'.$class.'.class.php',
                 $rootDir.'/lib/routing/'.$class.'.class.php',
             ] as $path) {
                 if (file_exists($path)) {
@@ -779,8 +797,22 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
                 continue;
             }
 
+            // A bare integer is a primary key, not a route reference, and must be
+            // passed through untouched.
+            //
+            // The same field name carries both shapes. A note's "type" posts a
+            // term id from a select, while a relation's "type" posts a resource
+            // path. routeResolves() runs the value through Qubit::pathInfo(), which
+            // an id can never satisfy, so every id-valued field in RESOURCE_FIELDS
+            // was being dropped - silently, since dropping is the guard's normal
+            // and quiet behaviour. Saving a repository lost its note types that
+            // way: 120, 124 and 125 were discarded although all three are real
+            // terms with slugs.
+            $isIdentifier = is_string($value) && ctype_digit(trim($value));
+
             if (!is_string($value)
                 || '' === trim($value)
+                || $isIdentifier
                 || !in_array((string) $key, self::RESOURCE_FIELDS, true)
                 || self::routeResolves($context, $value)
             ) {
@@ -796,6 +828,42 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         return $output;
     }
 
+
+    /**
+     * Is any module capable of rendering a description form installed?
+     *
+     * Checked by scanning enabled plugin paths for the module directory rather
+     * than by asking the routing or the context, neither of which is usable this
+     * early - routing.load_configuration fires before the context exists.
+     *
+     * The list is spelled out here instead of read from IoFormHelper::MODULE_MAP
+     * because that class is in core's lib/ and is not guaranteed to be autoloaded
+     * at configuration time; a fatal here would take down every route, not one.
+     */
+    private function hasStandardRenderer(): bool
+    {
+        static $has = null;
+
+        if (null !== $has) {
+            return $has;
+        }
+
+        $modules = [
+            'ioManage',   // ISAD, the default
+            'dcManage', 'radManage', 'modsManage', 'dacsManage', 'ricManage',
+            'museum', 'library', 'gallery', 'dam',
+        ];
+
+        foreach ($this->configuration->getAllPluginPaths() as $path) {
+            foreach ($modules as $module) {
+                if (is_dir($path.'/modules/'.$module)) {
+                    return $has = true;
+                }
+            }
+        }
+
+        return $has = false;
+    }
 
     /**
      * Routes for the shared edit-form endpoints.
@@ -815,14 +883,30 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
             'io_term_autocomplete' => ['/informationobject/termAutocomplete', 'termAutocomplete'],
             'io_term_create' => ['/informationobject/termCreate', 'termCreate'],
             'io_generate_identifier' => ['/informationobject/generateIdentifierJson', 'generateIdentifier'],
-            // The form target for every standard.
-            'io_add_override' => ['/informationobject/add', 'edit'],
         ];
 
-        $routing->prependRoute('io_edit_override', new sfRoute(
-            '/informationobject/:slug/edit',
-            ['module' => 'ahgIoForm', 'action' => 'edit']
-        ));
+        // The add and edit forms are only ours to claim if something can actually
+        // render them.
+        //
+        // ahgIoForm does not draw a form itself; it detects the record's standard
+        // and forwards to the module that owns it - ioManage for ISAD, dcManage for
+        // Dublin Core, and so on - each of which lives in a separate plugin. Taking
+        // these two routes unconditionally meant that on an install without any of
+        // those plugins, core intercepted base AtoM's perfectly good edit form and
+        // replied "This descriptive standard is not available". Installing an
+        // unrelated plugin such as Provenance took away description editing.
+        //
+        // So when no renderer is present, leave the routes alone and let base AtoM
+        // serve them. The guard in ahgIoForm::executeEdit stays as a backstop for
+        // the case where a renderer exists but fails partway.
+        if ($this->hasStandardRenderer()) {
+            $routes['io_add_override'] = ['/informationobject/add', 'edit'];
+
+            $routing->prependRoute('io_edit_override', new sfRoute(
+                '/informationobject/:slug/edit',
+                ['module' => 'ahgIoForm', 'action' => 'edit']
+            ));
+        }
 
         foreach ($routes as $name => $route) {
             // Prepended: '/informationobject/:slug' would otherwise match these

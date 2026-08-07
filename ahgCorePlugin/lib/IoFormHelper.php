@@ -18,6 +18,15 @@
 class IoFormHelper
 {
     /**
+     * Whether display_standard_sector exists. Resolved once per request.
+     *
+     * The table belongs to ahgAPIPlugin. Core reads it to narrow the
+     * level-of-description list to a record's sector, which is an enrichment
+     * rather than a requirement, so core must not assume it is there.
+     */
+    private static ?bool $hasSectorTable = null;
+
+    /**
      * Standard code → module name for forwarding.
      */
     public const MODULE_MAP = [
@@ -101,14 +110,22 @@ class IoFormHelper
             }
         }
 
-        // Also check display_standard_sector for sector-based terms
-        $sectorTerms = \Illuminate\Database\Capsule\Manager::table('display_standard_sector as dss')
-            ->join('term_i18n as ti', function ($join) {
-                $join->on('dss.term_id', '=', 'ti.id')
-                     ->where('ti.culture', '=', 'en');
-            })
-            ->select(['dss.term_id', 'dss.sector', 'ti.name'])
-            ->get();
+        // Also check display_standard_sector for sector-based terms.
+        //
+        // That table is created by ahgAPIPlugin, not by core, so on an install
+        // that does not include it the query throws and takes the whole edit form
+        // with it. The mapping is an enrichment - without it a term simply falls
+        // through to the archive default below - so its absence must cost the
+        // sector filter and nothing more.
+        $sectorTerms = self::hasSectorTable()
+            ? \Illuminate\Database\Capsule\Manager::table('display_standard_sector as dss')
+                ->join('term_i18n as ti', function ($join) {
+                    $join->on('dss.term_id', '=', 'ti.id')
+                         ->where('ti.culture', '=', 'en');
+                })
+                ->select(['dss.term_id', 'dss.sector', 'ti.name'])
+                ->get()
+            : [];
 
         foreach ($sectorTerms as $row) {
             $code = $row->sector;
@@ -172,11 +189,34 @@ class IoFormHelper
     }
 
     /**
+     * Is ahgAPIPlugin's display_standard_sector table present?
+     *
+     * Asked before every read of it. Checking beats catching: a missing table is
+     * an expected state on a small install, not an exceptional one, and swallowing
+     * a PDOException here would also swallow real connection faults.
+     */
+    private static function hasSectorTable(): bool
+    {
+        if (null !== self::$hasSectorTable) {
+            return self::$hasSectorTable;
+        }
+
+        try {
+            self::$hasSectorTable = \Illuminate\Database\Capsule\Manager::schema()
+                ->hasTable('display_standard_sector');
+        } catch (\Throwable $e) {
+            self::$hasSectorTable = false;
+        }
+
+        return self::$hasSectorTable;
+    }
+
+    /**
      * Load all dropdown data and set on the action.
      */
     public static function loadDropdowns(sfActions $action, string $culture): void
     {
-        $svc = '\\AhgInformationObjectManage\\Services\\InformationObjectCrudService';
+        $svc = '\\AhgCore\\Services\\InformationObjectCrudService';
 
         // Filter the level-of-description options to the record's sector, derived
         // from its display standard (display_standard_sector). Sector standards
@@ -184,7 +224,7 @@ class IoFormHelper
         // (ISAD/RAD/DACS/MODS/DC/RiC) get the archive levels. Unknown -> archive.
         $sector = 'archive';
         $dsId = isset($action->io['displayStandardId']) ? (int) $action->io['displayStandardId'] : 0;
-        if ($dsId) {
+        if ($dsId && self::hasSectorTable()) {
             $mapped = \Illuminate\Database\Capsule\Manager::table('display_standard_sector')
                 ->where('term_id', $dsId)
                 ->value('sector');
@@ -214,7 +254,7 @@ class IoFormHelper
      */
     public static function loadIoData(sfActions $action, sfWebRequest $request, string $culture): string
     {
-        $svc = '\\AhgInformationObjectManage\\Services\\InformationObjectCrudService';
+        $svc = '\\AhgCore\\Services\\InformationObjectCrudService';
         $slug = $request->getParameter('slug');
         $action->isNew = empty($slug);
 
@@ -287,7 +327,7 @@ class IoFormHelper
      */
     public static function getNewDefaults(int $parentId, ?string $parentTitle, ?string $parentSlug, string $culture): array
     {
-        $svc = '\\AhgInformationObjectManage\\Services\\InformationObjectCrudService';
+        $svc = '\\AhgCore\\Services\\InformationObjectCrudService';
 
         return [
             'id' => null,
@@ -740,7 +780,7 @@ class IoFormHelper
      */
     public static function handlePost(sfActions $action, sfWebRequest $request, string $culture): bool
     {
-        $svc = '\\AhgInformationObjectManage\\Services\\InformationObjectCrudService';
+        $svc = '\\AhgCore\\Services\\InformationObjectCrudService';
 
         $action->errors = [];
         $title = trim($request->getParameter('title', ''));
