@@ -33,12 +33,46 @@ if (!$this->getUser()->isAdministrator()) {
         $this->settings = $settingsService->getAllWithMeta();
         $this->settingsMap = $settingsService->all();
 
-        // Get all available AHG plugins from database
-        $this->availablePlugins = \Illuminate\Database\Capsule\Manager::table('atom_plugin')
-            ->where('name', 'like', 'ahg%')
-            ->orderBy('name')
-            ->pluck('name')
-            ->toArray();
+        // Which AHG plugins are available to include in a backup.
+        //
+        // Asked of the configuration rather than the atom_plugin table. That
+        // table is the AHG framework's own registry and does not exist on a
+        // stock AtoM, where enablement lives in the `plugins` setting that
+        // AtoM's plugin admin maintains - so the query took this page down with
+        // a 500 on any install that did not also carry the framework schema.
+        // The configuration knows the enabled plugins on both, and needs no
+        // table at all.
+        $this->availablePlugins = array_values(array_filter(
+            $this->context->getConfiguration()->getPlugins(),
+            static function ($name) {
+                return 0 === strpos($name, 'ahg');
+            }
+        ));
+
+        sort($this->availablePlugins);
+
+        // The cron line shown on this page, with the path resolved rather than
+        // guessed. The framework ships two ways - as atom-framework/ from git,
+        // and as plugins/ahgRuntimePlugin/ from a bundle - and the template used
+        // to name the first unconditionally, so the instruction was wrong on
+        // every packaged install.
+        $root = sfConfig::get('sf_root_dir');
+        $this->cronScriptExists = false;
+        $script = $root.'/atom-framework/scripts/run-backup.sh';
+
+        foreach ([
+            $root.'/atom-framework/scripts/run-backup.sh',
+            $root.'/plugins/ahgRuntimePlugin/scripts/run-backup.sh',
+        ] as $candidate) {
+            if (is_file($candidate)) {
+                $script = $candidate;
+                $this->cronScriptExists = true;
+
+                break;
+            }
+        }
+
+        $this->cronCommand = '0 2 * * * '.$script;
 
         if ($request->isMethod('post')) {
             $data = [
@@ -101,7 +135,7 @@ if (!$this->getUser()->isAdministrator()) {
             $service = new \AtomExtensions\Services\BackupService();
             $result = $service->createBackup($options);
             return $this->renderJson($result);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['error' => $e->getMessage()], 500);
         }
     }
@@ -337,7 +371,7 @@ if (!$this->getUser()->isAdministrator()) {
                 'message' => 'Upload successful. Ready to restore.'
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             // Clean up on failure
             $this->deleteDirectory($uploadDir);
             return $this->renderJson(['error' => $e->getMessage()], 400);
@@ -544,7 +578,7 @@ if (!$this->getUser()->isAdministrator()) {
                 'details' => $result
             ]);
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['error' => $e->getMessage()], 500);
         }
     }
@@ -574,7 +608,7 @@ if (!$this->getUser()->isAdministrator()) {
         try {
             $this->deleteDirectory($uploadDir);
             return $this->renderJson(['status' => 'success', 'message' => 'Upload deleted']);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['error' => $e->getMessage()], 500);
         }
     }
@@ -621,7 +655,7 @@ if (!$this->getUser()->isAdministrator()) {
             $service = new \AtomExtensions\Services\BackupService();
             $service->restoreBackup($backupId, $options);
             return $this->renderJson(['status' => 'success', 'message' => 'Restore completed']);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['error' => $e->getMessage()], 500);
         }
     }
@@ -640,7 +674,7 @@ if (!$this->getUser()->isAdministrator()) {
                 return $this->renderJson(['status' => 'success']);
             }
             return $this->renderJson(['error' => 'Delete failed'], 500);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson(['error' => $e->getMessage()], 500);
         }
     }

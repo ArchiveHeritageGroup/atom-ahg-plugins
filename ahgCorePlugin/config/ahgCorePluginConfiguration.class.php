@@ -99,6 +99,67 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // those. Listening does not change behaviour: nothing is returned, so
         // symfony still renders the page it would have.
         $this->dispatcher->connect('application.throw_exception', ['ahgCorePluginConfiguration', 'logThrownException']);
+
+        // Supply the CSRF token wherever CSRF is enforced. See injectCsrfToken().
+        $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectCsrfToken']);
+    }
+
+    /**
+     * Put the CSRF token on the page, because the framework enforces it.
+     *
+     * CsrfService rejects unsafe requests that arrive without a token, and the
+     * browser gets that token from <meta name="csrf-token">. Only
+     * ahgThemeB5Plugin's _layout_start.php ever emitted it. Enforcement therefore
+     * shipped in the framework while supply shipped in the theme, and an install
+     * without the theme enforced a token nothing could provide: every AJAX POST
+     * in every AHG plugin came back 403 "CSRF token validation failed". Found on
+     * ahgBackupPlugin, whose buttons all failed this way.
+     *
+     * The injected script is the theme's, verbatim. It reads the meta and adds
+     * the token to fetch, XMLHttpRequest and posted forms, and it opens with
+     * "if (!t) return" - so with no meta it silently did nothing, which is why
+     * this failed quietly rather than loudly.
+     *
+     * Skipped when the theme has already done it, so the two never both fire.
+     */
+    public static function injectCsrfToken($event, $content)
+    {
+        if (!is_string($content) || '' === $content) {
+            return $content;
+        }
+
+        // Only complete HTML documents. JSON and partials have no head to patch.
+        if (false === stripos($content, '</head>')) {
+            return $content;
+        }
+
+        if (false !== stripos($content, 'name="csrf-token"')) {
+            return $content;
+        }
+
+        if (!class_exists('\AtomFramework\Services\CsrfService')) {
+            return $content;
+        }
+
+        try {
+            $meta = \AtomFramework\Services\CsrfService::getMetaTag();
+        } catch (Throwable $e) {
+            // A missing token must not cost the page.
+            return $content;
+        }
+
+        // Inline scripts are dropped silently without the nonce under this
+        // project's CSP, which would leave the meta present and useless.
+        $nonce = sfConfig::get('csp_nonce', '');
+        $nonceAttr = $nonce ? ' '.preg_replace('/^nonce=/', 'nonce="', $nonce).'"' : '';
+
+        $js = '(function(){var m=document.querySelector(\'meta[name="csrf-token"]\');var t=m?m.getAttribute(\'content\'):\'\';if(!t)return;var u=/^(POST|PUT|DELETE|PATCH)$/i;function so(x){try{return new URL(x,window.location.href).origin===window.location.origin;}catch(e){return true;}}if(window.fetch){var f=window.fetch;window.fetch=function(i,n){n=n||{};var url=(typeof i===\'string\')?i:(i&&i.url)||\'\';var mth=n.method||(typeof i===\'object\'&&i.method)||\'GET\';if(u.test(mth)&&so(url)){var h=new Headers(n.headers||(typeof i===\'object\'&&i.headers)||{});if(!h.has(\'X-CSRF-TOKEN\'))h.set(\'X-CSRF-TOKEN\',t);n.headers=h;}return f.call(this,i,n);};}var o=XMLHttpRequest.prototype.open,s=XMLHttpRequest.prototype.send;XMLHttpRequest.prototype.open=function(m2,url){this.__csrf=u.test(m2||\'\')&&so(url||\'\');return o.apply(this,arguments);};XMLHttpRequest.prototype.send=function(){if(this.__csrf){try{this.setRequestHeader(\'X-CSRF-TOKEN\',t);}catch(e){}}return s.apply(this,arguments);};function af(fm){if(!fm||fm.tagName!==\'FORM\')return;if((fm.getAttribute(\'method\')||\'GET\').toUpperCase()!==\'POST\')return;if(!so(fm.getAttribute(\'action\')||window.location.href))return;if(fm.querySelector(\'input[name="_ahg_csrf_token"]\'))return;if(fm.querySelector(\'input[name="_csrf_token"]\'))return;var el=document.createElement(\'input\');el.type=\'hidden\';el.name=\'_ahg_csrf_token\';el.value=t;fm.appendChild(el);}document.addEventListener(\'submit\',function(e){af(e.target);},true);var fsub=HTMLFormElement.prototype.submit;HTMLFormElement.prototype.submit=function(){af(this);return fsub.apply(this,arguments);};})();';
+
+        $injection = "\n    ".$meta."\n    <script".$nonceAttr.">".$js."</script>\n";
+
+        $pos = stripos($content, '</head>');
+
+        return substr($content, 0, $pos).$injection.substr($content, $pos);
     }
 
     /**

@@ -160,7 +160,17 @@ $settingsMap = $sf_data->getRaw('settingsMap') ?? [];
                     <p class="small text-muted"><?php echo __('Configure default backup settings. These can be overridden when creating individual backups.') ?></p>
                     <hr>
                     <p class="small text-muted mb-0"><?php echo __('Scheduled backups use a cron job. Set up with:') ?></p>
-                    <code class="small">0 2 * * * ' . sfConfig::get('sf_root_dir') . '/atom-framework/scripts/run-backup.sh</code>
+                    <?php // Printed from the action, which resolves where the runtime actually
+                          // lives. This line used to be literal HTML containing PHP string
+                          // concatenation, so the page showed the source - including the
+                          // ' . sfConfig::get(...) . ' - and anyone who copied it got a cron
+                          // entry that could not run. ?>
+                    <code class="small"><?php echo htmlspecialchars($cronCommand, ENT_QUOTES, 'UTF-8'); ?></code>
+                    <?php if (!$cronScriptExists) { ?>
+                      <p class="small text-danger mb-0 mt-2">
+                        <?php echo __('The backup script was not found at that path. Scheduled backups will not run until it is present.'); ?>
+                      </p>
+                    <?php } ?>
                 </div>
             </div>
         </div>
