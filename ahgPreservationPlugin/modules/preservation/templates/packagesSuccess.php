@@ -204,8 +204,32 @@
                             ][$pkg->status] ?? 'secondary';
                             ?>
                             <span class="badge bg-<?php echo $statusClass; ?>"><?php echo ucfirst($pkg->status); ?></span>
+                            <?php
+                            // Say why a package is not moving.
+                            //
+                            // A draft with nothing in it cannot be built - the service
+                            // refuses with "Add at least one digital object before
+                            // building this package" - but the list showed only
+                            // "Draft" and "0", which reads as though the package is
+                            // waiting on something rather than blocked on the one
+                            // thing its owner has to do. Packages sat in draft
+                            // indefinitely for want of this sentence.
+                            ?>
+                            <?php if ('draft' === $pkg->status && (int) $pkg->object_count < 1) { ?>
+                              <div class="small text-muted mt-1">
+                                <i class="fas fa-circle-info" aria-hidden="true"></i>
+                                <?php echo __('Add a digital object before this can be built'); ?>
+                              </div>
+                            <?php } ?>
                         </td>
-                        <td><?php echo number_format($pkg->object_count); ?></td>
+                        <td>
+                            <?php echo number_format($pkg->object_count); ?>
+                            <?php if ('draft' === $pkg->status && (int) $pkg->object_count < 1) { ?>
+                              <i class="fas fa-triangle-exclamation text-warning ms-1"
+                                 title="<?php echo __('A package needs at least one digital object - a file, not a description - before it can be built and exported.'); ?>"
+                                 data-bs-toggle="tooltip" aria-hidden="true"></i>
+                            <?php } ?>
+                        </td>
                         <td><?php echo $pkg->total_size ? formatBytes($pkg->total_size) : '-'; ?></td>
                         <td>
                             <small><?php echo date('Y-m-d H:i', strtotime($pkg->created_at)); ?></small>
