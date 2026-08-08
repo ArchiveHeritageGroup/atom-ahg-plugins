@@ -1,4 +1,11 @@
 <?php use_helper('Text') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .metada-max-height-600px-overflow-au-9c5b { max-height: 600px; overflow: auto; }
+</style>
 
 <h1>
   <?php echo __('Export Preview') ?>
@@ -70,7 +77,7 @@
             <?php echo __('Export Error:') ?> <?php echo $error ?>
           </div>
         <?php elseif ($preview): ?>
-          <pre class="bg-light p-3" style="max-height: 600px; overflow: auto;"><code><?php echo htmlspecialchars($preview) ?></code></pre>
+          <pre class="bg-light p-3 metada-max-height-600px-overflow-au-9c5b" ><code><?php echo htmlspecialchars($preview) ?></code></pre>
         <?php else: ?>
           <div class="alert alert-warning">
             <?php echo __('No preview available.') ?>

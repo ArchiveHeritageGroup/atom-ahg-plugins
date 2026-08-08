@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-object-fit-cover-min-height--b2c0 { object-fit: cover; min-height: 120px; }
+</style>
 <?php
 /**
  * Card layout - compact card view for search results
@@ -8,8 +15,8 @@
         <?php if ($digitalObject && $data['thumbnail_size'] !== 'none'): ?>
         <div class="col-4">
             <img src="<?php echo $digitalObject->path; ?>" 
-                 class="img-fluid rounded-start h-100" 
-                 style="object-fit: cover; min-height: 120px;"
+                 class="img-fluid rounded-start h-100 displa-object-fit-cover-min-height--b2c0" 
+                 
                  alt="<?php echo $object->title ?? ''; ?>">
         </div>
         <?php endif; ?>

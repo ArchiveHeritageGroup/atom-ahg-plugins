@@ -1,4 +1,11 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .workfl-max-width-28rem-336f { max-width: 28rem; }
+</style>
 
 <?php include_partial('workflow/accessibilityHelpers') ?>
 
@@ -36,7 +43,7 @@
     <?php /* Collections Procedures#A — filter UI */ ?>
     <?php if (!empty($spectrumProcedures ?? [])): ?>
         <form method="get" action="<?php echo url_for(['module' => 'workflow', 'action' => 'admin']) ?>" class="d-flex flex-wrap gap-2 align-items-end mb-3">
-            <div class="flex-grow-1" style="max-width: 28rem;">
+            <div class="flex-grow-1 workfl-max-width-28rem-336f" >
                 <label for="spectrum" class="form-label small mb-1"><?php echo __('Filter by Collections Procedures procedure') ?></label>
                 <select name="spectrum" id="spectrum" class="form-select form-select-sm" onchange="this.form.submit()">
                     <option value=""><?php echo __('All workflows') ?></option>

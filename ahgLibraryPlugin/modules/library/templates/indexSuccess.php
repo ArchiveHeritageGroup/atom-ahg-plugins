@@ -1,4 +1,11 @@
 <?php decorate_with('layout_3col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-height-8px-d826 { height: 8px; }
+</style>
 <?php
 
 // Check if a plugin is enabled
@@ -634,8 +641,8 @@ $rawResource = sfOutputEscaper::unescape($resource);
             ?>
             <div class="mt-1">
               <small class="text-muted"><?php echo __('Capacity'); ?>: <?php echo $used; ?>/<?php echo $total; ?> <?php echo esc_entities($extData['capacity_unit'] ?? 'items'); ?></small>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar <?php echo $barClass; ?>" style="width: <?php echo $percent; ?>%;"></div>
+              <div class="progress librar-height-8px-d826" >
+                <div class="progress-bar <?php echo $barClass; ?>" data-ahg-style="width: <?php echo $percent; ?>%;"></div>
               </div>
             </div>
             <?php endif; ?>

@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-cursor-move-ba72 { cursor: move; }
+</style>
 <?php
 // Convert escaped arrays to raw arrays for PHP array functions
 $sectionsRaw = $sections ?? [];
@@ -40,7 +47,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
             <div class="card h-100">
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                  <i class="fas fa-grip-vertical me-2 text-muted drag-handle" style="cursor: move;"></i>
+                  <i class="fas fa-grip-vertical me-2 text-muted drag-handle exhibi-cursor-move-ba72" ></i>
                   <?php echo htmlspecialchars($section['name']); ?>
                 </h6>
                 <span class="badge bg-primary"><?php echo $section['display_order'] ?? 0; ?></span>
@@ -106,7 +113,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>

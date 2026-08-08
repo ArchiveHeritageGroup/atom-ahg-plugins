@@ -1,4 +1,14 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-cursor-pointer-24b5 { cursor: pointer; }
+  .regist-max-height-60px-215c { max-height: 60px; }
+  .regist-max-height-60px-a3b6 { max-height:60px; }
+  .regist-min-height-80px-cursor-point-0af0 { min-height: 80px; cursor: pointer; }
+</style>
 
 <?php slot('title'); ?><?php echo $software ? __('Edit Software') : __('Add Software'); ?><?php end_slot(); ?>
 
@@ -219,15 +229,15 @@
         <div class="card-body">
           <?php if (!empty($f->logo_path)): ?>
             <div class="mb-2">
-              <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded border" style="max-height: 60px;">
+              <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded border regist-max-height-60px-215c" >
             </div>
           <?php endif; ?>
-          <div class="border rounded p-3 text-center position-relative" id="sf-logo-drop" style="min-height: 80px; cursor: pointer;">
+          <div class="border rounded p-3 text-center position-relative" id="sf-logo-drop" class="regist-min-height-80px-cursor-point-0af0">
             <div id="sf-logo-preview">
               <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-1"></i>
               <p class="mb-0 small"><?php echo __('Drag and drop, or click to upload.'); ?> <span class="text-muted"><?php echo __('PNG, JPG, SVG'); ?></span></p>
             </div>
-            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="sf-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" style="cursor: pointer;">
+            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="sf-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" class="regist-cursor-pointer-24b5">
           </div>
         </div>
       </div>
@@ -272,7 +282,7 @@
 <script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var inp = document.getElementById('sf-logo'), prev = document.getElementById('sf-logo-preview'), drop = document.getElementById('sf-logo-drop');
-  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" style="max-height:60px;" class="mb-1"><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
+  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" class="mb-1 regist-max-height-60px-a3b6" ><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
   if (drop) { ['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('border-primary');});}); ['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('border-primary');});}); drop.addEventListener('drop',function(e){if(e.dataTransfer.files.length){inp.files=e.dataTransfer.files;inp.dispatchEvent(new Event('change'));}}); }
 });
 </script>

@@ -1,3 +1,14 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-display-none-224b { display: none; }
+  .ai-font-size-0-9rem-33dd { font-size: 0.9rem; }
+  .ai-max-height-400px-overflow-y--f4d9 { max-height: 400px; overflow-y: auto; }
+  .ai-white-space-pre-wrap-font-fa-7cab { white-space: pre-wrap; font-family: inherit; }
+  .ai-width-150px-d990 { width: 150px; }
+</style>
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1><i class="bi bi-magic me-2"></i>AI Description Suggestions</h1>
@@ -83,7 +94,7 @@
                         <th class="text-center">Tokens</th>
                         <th class="text-center">Model</th>
                         <th>Created</th>
-                        <th style="width: 150px">Actions</th>
+                        <th class="ai-width-150px-d990">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -146,7 +157,7 @@
                     <p class="mt-2">Loading...</p>
                 </div>
             </div>
-            <div class="modal-footer" id="reviewModalFooter" style="display: none;">
+            <div class="modal-footer" id="reviewModalFooter" class="ai-display-none-224b">
                 <div class="me-auto">
                     <small class="text-muted" id="reviewStats"></small>
                 </div>
@@ -191,9 +202,9 @@ function reviewSuggestion(suggestionId, objectId) {
             html += '<div class="col-md-6">';
             html += '<div class="card h-100">';
             html += '<div class="card-header"><i class="bi bi-file-text me-1"></i>Current Description</div>';
-            html += '<div class="card-body" style="max-height: 400px; overflow-y: auto;">';
+            html += '<div class="card-body ai-max-height-400px-overflow-y--f4d9" >';
             if (s.existing_text && s.existing_text.trim()) {
-                html += '<pre class="mb-0" style="white-space: pre-wrap; font-family: inherit;">' + escapeHtml(s.existing_text) + '</pre>';
+                html += '<pre class="mb-0 ai-white-space-pre-wrap-font-fa-7cab" >' + escapeHtml(s.existing_text) + '</pre>';
             } else {
                 html += '<em class="text-muted">No existing description</em>';
             }
@@ -205,7 +216,7 @@ function reviewSuggestion(suggestionId, objectId) {
             html += '<div class="card-header bg-primary text-white"><i class="bi bi-magic me-1"></i>AI Suggestion';
             html += '<span class="badge bg-light text-primary float-end">' + (s.model_used || 'AI') + '</span></div>';
             html += '<div class="card-body">';
-            html += '<textarea id="editSuggestedText" class="form-control" rows="15" style="font-size: 0.9rem;">' + escapeHtml(s.suggested_text) + '</textarea>';
+            html += '<textarea id="editSuggestedText" class="form-control" rows="15" class="ai-font-size-0-9rem-33dd">' + escapeHtml(s.suggested_text) + '</textarea>';
             html += '<small class="text-muted mt-1 d-block"><i class="bi bi-pencil me-1"></i>Edit before approving</small>';
             html += '</div></div></div>';
 

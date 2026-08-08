@@ -1,4 +1,12 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-font-size-3rem-5afc { font-size: 3rem; }
+  .datami-max-height-200px-overflow-au-8c50 { max-height: 200px; overflow: auto; }
+</style>
 
 <div class="container-fluid py-4">
   <div class="row justify-content-center">
@@ -31,7 +39,7 @@
                 <input type="file" name="import_file" id="importFile" class="d-none" 
                        accept=".csv,.xls,.xlsx,.xml,.json,.opex,.pax,.zip">
                 <div id="dropText">
-                  <p class="mb-2"><i class="bi bi-file-earmark-arrow-up" style="font-size: 3rem;"></i></p>
+                  <p class="mb-2"><i class="bi bi-file-earmark-arrow-up datami-font-size-3rem-5afc" ></i></p>
                   <p class="mb-2">Drag & drop file here or <a href="#" onclick="document.getElementById('importFile').click(); return false;">browse</a></p>
                   <small class="text-muted">Supported: CSV, Excel (XLS/XLSX), XML, JSON, OPEX, PAX</small>
                 </div>
@@ -229,7 +237,7 @@
             <!-- File Preview -->
             <div class="mb-4 d-none" id="previewSection">
               <h6 class="text-primary"><span class="badge bg-primary me-2">4</span>Preview</h6>
-              <div class="table-responsive border rounded" style="max-height: 200px; overflow: auto;">
+              <div class="table-responsive border rounded datami-max-height-200px-overflow-au-8c50" >
                 <table class="table table-sm table-striped mb-0" id="previewTable">
                   <thead class="table-light sticky-top" id="previewHead"></thead>
                   <tbody id="previewBody"></tbody>

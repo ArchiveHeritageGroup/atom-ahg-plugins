@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .privac-height-20px-84ce { height: 20px; }
+</style>
 
 @section('content')
 <div class="container-fluid py-4">
@@ -84,12 +89,12 @@ if ($scanResult['risk_score'] >= 70) echo 'bg-danger';
                     else echo 'bg-success';
 @endphp fs-5">{{ $scanResult['risk_score'] }}/100</span>
             </div>
-            <div class="progress" style="height: 20px;">
+            <div class="progress privac-height-20px-84ce" >
                 <div class="progress-bar @php
 if ($scanResult['risk_score'] >= 70) echo 'bg-danger';
                     elseif ($scanResult['risk_score'] >= 40) echo 'bg-warning';
                     else echo 'bg-success';
-@endphp" role="progressbar" style="width: {{ $scanResult['risk_score'] }}%"></div>
+@endphp" role="progressbar" data-ahg-style="width: {{ $scanResult['risk_score'] }}%"></div>
             </div>
         </div>
     </div>

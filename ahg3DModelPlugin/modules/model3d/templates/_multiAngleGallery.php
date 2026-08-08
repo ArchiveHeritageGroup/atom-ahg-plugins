@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .3dmode-max-height-120px-cursor-poin-0bf3 { max-height: 120px; cursor: pointer; }
+</style>
 <?php
 /**
  * Multi-angle gallery component for 3D objects.
@@ -71,8 +78,8 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
            class="multiangle-thumb">
           <img src="<?php echo htmlspecialchars($webPath); ?>"
                alt="<?php echo ucfirst($view); ?> view"
-               class="img-fluid rounded border"
-               style="max-height: 120px; cursor: pointer;">
+               class="img-fluid rounded border 3dmode-max-height-120px-cursor-poin-0bf3"
+               >
         </a>
         <small class="d-block text-muted mt-1"><?php echo ucfirst($view); ?></small>
       </div>

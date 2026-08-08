@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-auto-d3b6 { width:auto; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Users — %1%', ['%1%' => htmlspecialchars($institution->name ?? '', ENT_QUOTES, 'UTF-8')]); ?><?php end_slot(); ?>
 
@@ -93,7 +100,7 @@
                 <form method="post" class="d-inline">
                   <input type="hidden" name="form_action" value="update-role">
                   <input type="hidden" name="link_id" value="<?php echo (int) $lu->link_id; ?>">
-                  <select name="role" class="form-select form-select-sm d-inline-block" style="width:auto;" onchange="this.form.submit()">
+                  <select name="role" class="form-select form-select-sm d-inline-block regist-width-auto-d3b6"  onchange="this.form.submit()">
                     <?php foreach (['owner', 'manager', 'editor', 'viewer'] as $r): ?>
                       <option value="<?php echo $r; ?>"<?php echo ($lu->role ?? '') === $r ? ' selected' : ''; ?>><?php echo ucfirst($r); ?></option>
                     <?php endforeach; ?>

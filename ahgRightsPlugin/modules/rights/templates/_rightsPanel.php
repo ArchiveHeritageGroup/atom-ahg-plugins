@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .rights-display-inline-3df0 { display: inline; }
+  .rights-height-16px-margin-right-4px-3fc5 { height: 16px; margin-right: 4px; }
+  .rights-width-100px-e3d2 { width: 100px; }
+</style>
 <?php
 /**
  * Unified Rights Panel Component
@@ -103,10 +112,10 @@ $accessCheck = $rightsService->checkAccess($objectId, 'information_object', $sf_
                 <h6 class="text-muted mb-2"><?php echo __('Traditional Knowledge Labels'); ?></h6>
                 <div class="d-flex flex-wrap gap-2">
                     <?php foreach ($tkLabels as $label): ?>
-                        <span class="badge" style="background-color: <?php echo esc_entities($label['color'] ?? '#666'); ?>; font-size: 0.9em;" 
+                        <span class="badge" data-ahg-style="background-color: <?php echo esc_entities($label['color'] ?? '#666'); ?>; font-size: 0.9em;" 
                               data-bs-toggle="tooltip" title="<?php echo esc_entities($label['description'] ?? ''); ?>">
                             <?php if ($label['icon_url']): ?>
-                                <img src="<?php echo esc_entities($label['icon_url']); ?>" alt="" style="height: 16px; margin-right: 4px;">
+                                <img src="<?php echo esc_entities($label['icon_url']); ?>" alt="" class="rights-height-16px-margin-right-4px-3fc5">
                             <?php endif; ?>
                             <?php echo esc_entities($label['name']); ?>
                         </span>
@@ -161,7 +170,7 @@ $accessCheck = $rightsService->checkAccess($objectId, 'information_object', $sf_
                             <th><?php echo __('Acts'); ?></th>
                             <th><?php echo __('Dates'); ?></th>
                             <?php if ($canEdit): ?>
-                                <th style="width: 100px;"><?php echo __('Actions'); ?></th>
+                                <th class="rights-width-100px-e3d2"><?php echo __('Actions'); ?></th>
                             <?php endif; ?>
                         </tr>
                     </thead>
@@ -260,7 +269,7 @@ $accessCheck = $rightsService->checkAccess($objectId, 'information_object', $sf_
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
-                <form id="deleteRightForm" method="post" action="" style="display: inline;">
+                <form id="deleteRightForm" method="post" action="" class="rights-display-inline-3df0">
                     <input type="hidden" name="_csrf_token" value="<?php echo $sf_user->getAttribute('_csrf_token'); ?>">
                     <button type="submit" class="btn btn-danger"><?php echo __('Delete'); ?></button>
                 </form>
@@ -284,7 +293,7 @@ $accessCheck = $rightsService->checkAccess($objectId, 'information_object', $sf_
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
-                <form method="post" action="<?php echo url_for(['module' => 'rights', 'action' => 'releaseEmbargo', 'slug' => $resource->slug, 'id' => $embargo['id']]); ?>" style="display: inline;">
+                <form method="post" action="<?php echo url_for(['module' => 'rights', 'action' => 'releaseEmbargo', 'slug' => $resource->slug, 'id' => $embargo['id']]); ?>" class="rights-display-inline-3df0">
                     <input type="hidden" name="_csrf_token" value="<?php echo $sf_user->getAttribute('_csrf_token'); ?>">
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-unlock me-1"></i><?php echo __('Release Now'); ?>

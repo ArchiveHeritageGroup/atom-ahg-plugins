@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricexp-display-none-224b { display: none; }
+</style>
 <?php
 /**
  * RiC Semantic Search Component
@@ -45,7 +52,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
   </div>
   
   <!-- Results container -->
-  <div id="ric-search-results" class="ric-results-container" style="display: none;">
+  <div id="ric-search-results" class="ric-results-container ricexp-display-none-224b" >
     <div class="ric-results-header">
       <span id="ric-results-count"></span>
       <button type="button" id="ric-clear-results" class="ric-clear-btn">
@@ -57,7 +64,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
   </div>
   
   <!-- Loading indicator -->
-  <div id="ric-search-loading" class="ric-loading" style="display: none;">
+  <div id="ric-search-loading" class="ric-loading ricexp-display-none-224b" >
     <i class="fa fa-spinner fa-spin"></i> Searching...
   </div>
   
@@ -67,7 +74,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
       <i class="fa fa-code"></i> Show SPARQL
     </button>
   </div>
-  <pre id="ric-sparql-display" class="ric-sparql-code" style="display: none;"></pre>
+  <pre id="ric-sparql-display" class="ric-sparql-code ricexp-display-none-224b" ></pre>
 </div>
 
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

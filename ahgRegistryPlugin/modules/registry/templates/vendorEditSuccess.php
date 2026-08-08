@@ -1,4 +1,14 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-cursor-pointer-24b5 { cursor: pointer; }
+  .regist-max-height-80px-780c { max-height: 80px; }
+  .regist-max-height-80px-c3e6 { max-height:80px; }
+  .regist-min-height-100px-cursor-poin-64e1 { min-height: 100px; cursor: pointer; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Edit Vendor Profile'); ?><?php end_slot(); ?>
 
@@ -66,16 +76,16 @@
               <label for="ve-logo" class="form-label"><?php echo __('Logo'); ?></label>
               <?php if (!empty($f->logo_path)): ?>
                 <div class="mb-2">
-                  <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo __('Current logo'); ?>" class="rounded border" style="max-height: 80px;">
+                  <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo __('Current logo'); ?>" class="rounded border regist-max-height-80px-780c" >
                   <small class="text-muted d-block mt-1"><?php echo __('Upload a new file to replace.'); ?></small>
                 </div>
               <?php endif; ?>
-              <div class="border rounded p-3 text-center position-relative" id="ve-logo-drop" style="min-height: 100px; cursor: pointer;">
+              <div class="border rounded p-3 text-center position-relative" id="ve-logo-drop" class="regist-min-height-100px-cursor-poin-64e1">
                 <div id="ve-logo-preview">
                   <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                   <p class="mb-0 small"><?php echo __('Drag and drop a new logo, or click to browse'); ?></p>
                 </div>
-                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="ve-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" style="cursor: pointer;">
+                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="ve-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" class="regist-cursor-pointer-24b5">
               </div>
             </div>
           </div>
@@ -250,7 +260,7 @@
 <script <?php echo $na; ?>>
 document.addEventListener('DOMContentLoaded', function() {
   var inp = document.getElementById('ve-logo'), prev = document.getElementById('ve-logo-preview'), drop = document.getElementById('ve-logo-drop');
-  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" style="max-height:80px;" class="mb-1"><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
+  if (inp) { inp.addEventListener('change', function(e) { if (e.target.files && e.target.files[0]) { var r = new FileReader(); r.onload = function(ev) { prev.innerHTML = '<img src="'+ev.target.result+'" alt="Preview" class="mb-1 regist-max-height-80px-c3e6" ><br><small class="text-muted">'+e.target.files[0].name+'</small>'; }; r.readAsDataURL(e.target.files[0]); } }); }
   if (drop) { ['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('border-primary');});}); ['dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.remove('border-primary');});}); drop.addEventListener('drop',function(e){if(e.dataTransfer.files.length){inp.files=e.dataTransfer.files;inp.dispatchEvent(new Event('change'));}}); }
 });
 </script>

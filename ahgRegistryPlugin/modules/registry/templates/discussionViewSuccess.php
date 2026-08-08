@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-48px-height-48px-min-w-ba8a { width: 48px; height: 48px; min-width: 48px; }
+</style>
 
 <?php $groupDetail = $group['group']; ?>
 <?php $disc = $discussion['discussion']; ?>
@@ -47,7 +54,7 @@
   </div>
   <div class="card-body">
     <div class="d-flex mb-3">
-      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px; min-width: 48px;">
+      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 regist-width-48px-height-48px-min-w-ba8a" >
         <i class="fas fa-user text-muted"></i>
       </div>
       <div>

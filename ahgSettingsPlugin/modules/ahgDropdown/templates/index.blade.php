@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-font-size-0-9rem-2554 { font-size:0.9rem; }
+</style>
 
 @section('content')
 <div class="row">
@@ -54,7 +59,7 @@
       @php $meta = $sectionMeta[$sectionCode]; @endphp
       <div class="accordion-item section-block" data-section="{{ $sectionCode }}" id="section-{{ $sectionCode }}">
         <h2 class="accordion-header">
-          <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $sectionCode }}" style="font-size:0.9rem">
+          <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $sectionCode }}" class="settin-font-size-0-9rem-2554">
             <i class="fas {{ $meta['icon'] }} fa-fw me-2 text-muted"></i>
             {{ $meta['label'] }}
             <span class="badge bg-secondary ms-2">{{ $meta['count'] }}</span>

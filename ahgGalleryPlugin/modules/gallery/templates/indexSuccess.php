@@ -1,4 +1,22 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .galler-bottom-10px-right-10px-z-ind-09d0 { bottom:10px;right:10px;z-index:10; }
+  .galler-cursor-zoom-in-b43f { cursor:zoom-in; }
+  .galler-max-height-300px-a0b0 { max-height: 300px; }
+  .galler-max-height-100vh-max-width-1-95d5 { max-height:100vh;max-width:100vw;object-fit:contain; }
+  .galler-table-layout-fixed-width-100-566d { table-layout:fixed;width:100%; }
+  .galler-width-100-height-100-backgro-3344 { width:100%;height:100%;background:transparent; }
+  .galler-width-100-height-250px-backg-3670 { width:100%;height:250px;background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);border-radius:8px; }
+  .galler-width-100px-5134 { width:100px; }
+  .galler-z-index-10001-background-lin-1cd7 { z-index: 10001; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
+  .galler-z-index-10001-background-lin-d6c7 { z-index: 10001; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
+  .galler-z-index-9999-background-rgba-04b9 { z-index: 9999; background: rgba(0,0,0,0.95); }
+  .galler-z-index-1051-1f07 { z-index:1051; }
+</style>
 <?php
 // Load viewer helper from ahgUiOverridesPlugin
 require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/informationobjectHelper.php';
@@ -38,8 +56,8 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
           <!-- Video/Audio player with transcription support -->
           <?php include_partial('digitalobject/showVideo', ['resource' => $qubitResource->digitalObjectsRelatedByobjectId[0]]); ?>
         <?php elseif ($isImage): ?>
-          <a href="<?php echo esc_entities($displayPath); ?>" data-bs-toggle="modal" data-bs-target="#imageFullscreenModal" onclick="document.getElementById('fullscreenImage').src=this.href; return false;" style="cursor:zoom-in;">
-            <img src="<?php echo esc_entities($displayPath); ?>" alt="" class="img-fluid" style="max-height: 300px;">
+          <a href="<?php echo esc_entities($displayPath); ?>" data-bs-toggle="modal" data-bs-target="#imageFullscreenModal" onclick="document.getElementById('fullscreenImage').src=this.href; return false;" class="galler-cursor-zoom-in-b43f">
+            <img src="<?php echo esc_entities($displayPath); ?>" alt="" class="img-fluid galler-max-height-300px-a0b0" >
           </a>
         <?php elseif ($is3D): ?>
           <!-- 3D Preview with model-viewer -->
@@ -54,11 +72,11 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
                 touch-action="pan-y" 
                 auto-rotate
                 shadow-intensity="1"
-                style="width:100%;height:250px;background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);border-radius:8px;">
+                class="galler-width-100-height-250px-backg-3670">
               </model-viewer>
             <?php else: ?>
               <!-- Three.js preview for OBJ/STL -->
-              <div id="sidebar-3d-viewer" style="width:100%;height:250px;background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);border-radius:8px;"></div>
+              <div id="sidebar-3d-viewer" class="galler-width-100-height-250px-backg-3670"></div>
               <script type="importmap" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
               {
                 "imports": {
@@ -112,7 +130,7 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
               </script>
             <?php endif; ?>
             <!-- Fullscreen button overlay -->
-            <button onclick="open3DFullscreen()" class="btn btn-sm btn-primary position-absolute" style="bottom:10px;right:10px;z-index:10;">
+            <button onclick="open3DFullscreen()" class="btn btn-sm btn-primary position-absolute galler-bottom-10px-right-10px-z-ind-09d0" >
               <i class="fas fa-expand me-1"></i><?php echo __('Fullscreen'); ?>
             </button>
           </div>
@@ -189,9 +207,9 @@ $rawResource = isset($qubitResource) ? sfOutputEscaper::unescape($qubitResource)
         <h5 class="mb-0"><i class="fas fa-image me-2"></i><?php echo __('Digital object'); ?></h5>
       </div>
       <div class="card-body">
-        <table class="table table-sm mb-3" style="table-layout:fixed;width:100%;">
+        <table class="table table-sm mb-3 galler-table-layout-fixed-width-100-566d" >
           <tr>
-            <td class="text-muted" style="width:100px;"><?php echo __('Filename'); ?></td>
+            <td class="text-muted galler-width-100px-5134" ><?php echo __('Filename'); ?></td>
             <td class="text-break"><?php echo esc_entities($digitalObject->name); ?></td>
           </tr>
           <tr>
@@ -776,9 +794,9 @@ if ($digitalObject && in_array(strtolower(pathinfo($digitalObject->name, PATHINF
   $fullPath3D = $digitalObject->path . $digitalObject->name;
   $ext3D = strtolower(pathinfo($digitalObject->name, PATHINFO_EXTENSION));
 ?>
-<div id="fullscreen-3d-modal" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="z-index: 9999; background: rgba(0,0,0,0.95);">
+<div id="fullscreen-3d-modal" class="position-fixed top-0 start-0 w-100 h-100 d-none galler-z-index-9999-background-rgba-04b9" >
   <!-- Header bar -->
-  <div class="position-absolute top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center" style="z-index: 10001; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);">
+  <div class="position-absolute top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center galler-z-index-10001-background-lin-d6c7" >
     <div class="text-white">
       <h5 class="mb-0"><i class="fas fa-cube me-2"></i><?php echo esc_entities($resource->title ?? $digitalObject->name); ?></h5>
       <small class="text-muted"><?php echo esc_entities($digitalObject->name); ?></small>
@@ -809,7 +827,7 @@ if ($digitalObject && in_array(strtolower(pathinfo($digitalObject->name, PATHINF
         shadow-intensity="1"
         exposure="1"
         environment-image="neutral"
-        style="width:100%;height:100%;background:transparent;">
+        class="galler-width-100-height-100-backgro-3344">
         <div slot="poster" class="d-flex flex-column align-items-center justify-content-center h-100 text-white">
           <div class="spinner-border text-primary mb-3" role="status"></div>
           <span><?php echo __('Loading 3D model...'); ?></span>
@@ -825,7 +843,7 @@ if ($digitalObject && in_array(strtolower(pathinfo($digitalObject->name, PATHINF
   </div>
   
   <!-- Help overlay -->
-  <div class="position-absolute bottom-0 start-0 w-100 p-3 text-center" style="z-index: 10001; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);">
+  <div class="position-absolute bottom-0 start-0 w-100 p-3 text-center galler-z-index-10001-background-lin-1cd7" >
     <small class="text-white-50">
       <i class="fas fa-mouse me-2"></i><?php echo __('Drag to rotate'); ?> &nbsp;|&nbsp;
       <i class="fas fa-search-plus me-2"></i><?php echo __('Scroll to zoom'); ?> &nbsp;|&nbsp;
@@ -984,11 +1002,11 @@ window.cleanupThreeJs = function() { if (renderer) { renderer.dispose(); rendere
 <div class="modal fade" id="imageFullscreenModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-fullscreen">
     <div class="modal-content bg-dark">
-      <div class="modal-header border-0 position-absolute w-100" style="z-index:1051;">
+      <div class="modal-header border-0 position-absolute w-100 galler-z-index-1051-1f07" >
         <button type="button" class="btn btn-light btn-sm ms-auto" data-bs-dismiss="modal"><i class="fas fa-times"></i> <?php echo __('Close'); ?></button>
       </div>
       <div class="modal-body d-flex align-items-center justify-content-center p-0">
-        <img id="fullscreenImage" src="" alt="" class="img-fluid" style="max-height:100vh;max-width:100vw;object-fit:contain;">
+        <img id="fullscreenImage" src="" alt="" class="img-fluid galler-max-height-100vh-max-width-1-95d5" >
       </div>
     </div>
   </div>

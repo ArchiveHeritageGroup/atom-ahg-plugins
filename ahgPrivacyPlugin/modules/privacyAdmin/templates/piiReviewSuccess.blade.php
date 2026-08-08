@@ -1,4 +1,13 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .privac-background-color-6f42c1-1520 { background-color: #6f42c1; }
+  .privac-width-100px-e3d2 { width: 100px; }
+  .privac-width-120px-b15a { width: 120px; }
+  .privac-width-200px-5c2d { width: 200px; }
+  .privac-width-80px-588c { width: 80px; }
+</style>
 
 @section('content')
 <div class="container-fluid py-4">
@@ -33,12 +42,12 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 80px;">Status</th>
-                            <th style="width: 120px;">Type</th>
+                            <th class="privac-width-80px-588c">Status</th>
+                            <th class="privac-width-120px-b15a">Type</th>
                             <th>Value</th>
                             <th>Object</th>
-                            <th class="text-center" style="width: 100px;">Confidence</th>
-                            <th style="width: 200px;">Actions</th>
+                            <th class="text-center privac-width-100px-e3d2" >Confidence</th>
+                            <th class="privac-width-200px-5c2d">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -73,7 +82,7 @@ $typeBadges = [
                                 $isIsad = strpos($entity->entity_type, 'ISAD_') === 0;
                                 $displayType = $isIsad ? str_replace('ISAD_', '', $entity->entity_type) : $entity->entity_type;
 @endphp
-                                <span class="badge {{ $badge }}" style="{{ $isIsad ? 'background-color: #6f42c1 !important;' : '' }}">
+                                <span class="badge {{ $badge }}" data-ahg-style="{{ $isIsad ? 'background-color: #6f42c1 !important;' : '' }}">
                                     @if($isIsad)<i class="fas fa-tag me-1"></i>@endif
                                     {{ $displayType }}
                                 </span>
@@ -164,10 +173,10 @@ $conf = round($entity->confidence * 100);
                 </div>
                 <div class="col-md-6">
                     <p class="mb-2"><strong>ISAD Access Points</strong></p>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>SUBJECT</span>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>PLACE</span>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>NAME</span>
-                    <span class="badge me-1" style="background-color: #6f42c1;"><i class="fas fa-tag me-1"></i>DATE</span>
+                    <span class="badge me-1 privac-background-color-6f42c1-1520" ><i class="fas fa-tag me-1"></i>SUBJECT</span>
+                    <span class="badge me-1 privac-background-color-6f42c1-1520" ><i class="fas fa-tag me-1"></i>PLACE</span>
+                    <span class="badge me-1 privac-background-color-6f42c1-1520" ><i class="fas fa-tag me-1"></i>NAME</span>
+                    <span class="badge me-1 privac-background-color-6f42c1-1520" ><i class="fas fa-tag me-1"></i>DATE</span>
                     <small class="d-block text-muted mt-1">From Subject, Place, Name, and Date access point fields</small>
                 </div>
             </div>

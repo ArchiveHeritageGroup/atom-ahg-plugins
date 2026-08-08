@@ -1,7 +1,17 @@
 <?php if (!defined('_3D_FULLSCREEN_MODAL_RENDERED')): ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-width-100-height-100-backgro-3344 { width:100%;height:100%;background:transparent; }
+  .themeb-z-index-10001-background-lin-1cd7 { z-index: 10001; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
+  .themeb-z-index-10001-background-lin-d6c7 { z-index: 10001; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
+  .themeb-z-index-9999-background-rgba-04b9 { z-index: 9999; background: rgba(0,0,0,0.95); }
+</style>
 <?php define('_3D_FULLSCREEN_MODAL_RENDERED', true); ?>
-<div id="fullscreen-3d-modal" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="z-index: 9999; background: rgba(0,0,0,0.95);">
-  <div class="position-absolute top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center" style="z-index: 10001; background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);">
+<div id="fullscreen-3d-modal" class="position-fixed top-0 start-0 w-100 h-100 d-none themeb-z-index-9999-background-rgba-04b9" >
+  <div class="position-absolute top-0 start-0 w-100 p-3 d-flex justify-content-between align-items-center themeb-z-index-10001-background-lin-d6c7" >
     <div class="text-white">
       <h5 class="mb-0"><i class="fas fa-cube me-2"></i><?php echo __('3D Model Viewer'); ?></h5>
     </div>
@@ -11,7 +21,7 @@
     </div>
   </div>
   <div id="fullscreen-3d-container" class="w-100 h-100"></div>
-  <div class="position-absolute bottom-0 start-0 w-100 p-3 text-center" style="z-index: 10001; background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);">
+  <div class="position-absolute bottom-0 start-0 w-100 p-3 text-center themeb-z-index-10001-background-lin-1cd7" >
     <small class="text-white-50">
       <i class="fas fa-mouse me-2"></i><?php echo __('Drag to rotate'); ?> | <i class="fas fa-search-plus me-2"></i><?php echo __('Scroll to zoom'); ?> | <kbd>ESC</kbd> <?php echo __('to close'); ?>
     </small>
@@ -26,7 +36,7 @@ function open3DFullscreen(modelPath, ext) {
   document.body.style.overflow = 'hidden';
   container.innerHTML = '';
   if (ext === 'glb' || ext === 'gltf') {
-    container.innerHTML = '<model-viewer id="fs-model-viewer" src="' + modelPath + '" camera-controls touch-action="pan-y" auto-rotate shadow-intensity="1" exposure="1" style="width:100%;height:100%;background:transparent;"></model-viewer>';
+    container.innerHTML = '<model-viewer id="fs-model-viewer" src="' + modelPath + '" camera-controls touch-action="pan-y" auto-rotate shadow-intensity="1" exposure="1" class="themeb-width-100-height-100-backgro-3344"></model-viewer>';
   } else {
     initFullscreenThreeJs(container, modelPath, ext);
   }

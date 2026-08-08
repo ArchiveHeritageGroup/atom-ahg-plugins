@@ -1,4 +1,13 @@
 <?php /* AtoM escaping_strategy=true wraps action vars in sfOutputEscaper; unescape before json_encode/use. */ foreach (["space","days","data","visitors","heatmap","sensor","rooms","timeline","building","placements","roomDims","guidedTour","walls","doors","windows","shape","capacityUnits","furniture","tourObjects","plan","navBtns","stairs","corridorObjects","bootData","wtConfig"] as $__ev) { if (isset($$__ev)) { $$__ev = sfOutputEscaper::unescape($$__ev); } } ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-display-inline-block-width-1-638c { display:inline-block;width:120px;height:10px;border-radius:5px;background:linear-gradient(90deg,#dfe7ef,#4e9be8,#46c06b,#f4d03f,#e8553a); }
+  .exhibi-white-space-pre-wrap-d077 { white-space:pre-wrap; }
+  .exhibi-width-100-max-width-760px-di-ae49 { width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px; }
+</style>
 <?php
 /*
  * Exhibition Space — ANALYTICS dashboard (historical reading trends + visitors + heatmap).
@@ -119,7 +128,7 @@ $chartMetrics = ['lux' => __('Light (lux)'), 'temp_c' => __('Temperature (C)'), 
         <div class="small text-muted mb-2"><i class="fas fa-check-circle text-success me-1"></i><?php echo __('No conservation alerts.') ?></div>
       <?php endif ?>
       <div class="small mb-1"><?php echo __('Sensors POST readings to this endpoint with the space token:') ?></div>
-      <pre class="small bg-light p-2 rounded" style="white-space:pre-wrap">curl -X POST <?php echo esc_entities($u('recordReadings')) ?> \
+      <pre class="small bg-light p-2 rounded exhibi-white-space-pre-wrap-d077" >curl -X POST <?php echo esc_entities($u('recordReadings')) ?> \
   -H "X-Sensor-Token: <?php echo esc_entities($sensor['token']) ?>" -H "Content-Type: application/json" \
   -d '{"readings":[{"metric":"temp_c","value":21.5},{"metric":"humidity","value":52},{"metric":"lux","value":180}]}'</pre>
       <div class="d-flex align-items-center gap-2">
@@ -181,10 +190,10 @@ $chartMetrics = ['lux' => __('Light (lux)'), 'temp_c' => __('Temperature (C)'), 
   <div class="card mb-3">
     <div class="card-header py-2"><strong><i class="fas fa-fire me-1"></i><?php echo __('Visitor heatmap') ?></strong> <small class="text-muted"><?php echo __('rooms shaded by time spent; red dots = object attention') ?></small></div>
     <div class="card-body">
-      <canvas id="heatCanvas" style="width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px"></canvas>
+      <canvas id="heatCanvas" class="exhibi-width-100-max-width-760px-di-ae49"></canvas>
       <div class="small text-muted mt-2 d-flex align-items-center gap-2 justify-content-center">
         <span><?php echo __('Less time') ?></span>
-        <span style="display:inline-block;width:120px;height:10px;border-radius:5px;background:linear-gradient(90deg,#dfe7ef,#4e9be8,#46c06b,#f4d03f,#e8553a)"></span>
+        <span class="exhibi-display-inline-block-width-1-638c"></span>
         <span><?php echo __('More time') ?></span>
       </div>
     </div>

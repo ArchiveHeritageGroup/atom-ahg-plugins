@@ -1,4 +1,15 @@
 <?php use_helper('I18N'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-height-6px-3586 { height: 6px; }
+  .librar-max-height-600px-overflow-y--d31d { max-height: 600px; overflow-y: auto; }
+  .librar-max-width-100px-0032 { max-width: 100px; }
+  .librar-max-width-120px-508c { max-width: 120px; }
+  .librar-max-width-150px-7ecc { max-width: 150px; }
+</style>
 <div class="container-fluid mt-4">
 
   <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>
@@ -124,9 +135,9 @@
             <?php $pct = $workKeyStats['total'] > 0
                 ? round($workKeyStats['keyed'] / $workKeyStats['total'] * 100, 1)
                 : 0; ?>
-            <div class="progress" style="height: 6px;">
+            <div class="progress librar-height-6px-3586" >
               <div class="progress-bar bg-success" role="progressbar"
-                   style="width: <?php echo $pct; ?>%;" aria-valuenow="<?php echo $pct; ?>">
+                   data-ahg-style="width: <?php echo $pct; ?>%;" aria-valuenow="<?php echo $pct; ?>">
               </div>
             </div>
             <small class="text-muted"><?php echo $pct; ?>% keyed</small>
@@ -142,7 +153,7 @@
           <strong>Active Overrides</strong>
           <span class="badge bg-dark"><?php echo isset($overrides) ? count($overrides) : 0; ?></span>
         </div>
-        <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+        <div class="table-responsive librar-max-height-600px-overflow-y--d31d" >
           <table class="table table-sm table-hover mb-0">
             <thead class="table-light sticky-top">
               <tr>
@@ -161,7 +172,7 @@
                   <tr>
                     <td><a href="?item_id=<?php echo $row->library_item_id; ?>">
                         <?php echo $row->library_item_id; ?></a></td>
-                    <td style="max-width: 150px;" class="text-truncate"
+                    <td class="text-truncate librar-max-width-150px-7ecc" 
                         title="<?php echo esc_entities($row->title ?? ''); ?>">
                         <?php echo esc_entities($row->title ?? '-'); ?></td>
                     <td>
@@ -171,9 +182,9 @@
                       ?>
                       <span class="badge <?php echo $bc; ?> small"><?php echo $t; ?></span>
                     </td>
-                    <td style="max-width: 100px;" class="text-truncate">
+                    <td class="text-truncate librar-max-width-100px-0032" >
                       <code class="small"><?php echo esc_entities($row->target_work_key ?? '-'); ?></code></td>
-                    <td style="max-width: 120px;" class="text-truncate text-muted small"
+                    <td class="text-truncate text-muted small librar-max-width-120px-508c" 
                         title="<?php echo esc_entities($row->reason ?? ''); ?>">
                         <?php echo esc_entities($row->reason ?? '-'); ?></td>
                     <td class="small text-muted"><?php echo substr($row->created_at, 0, 10); ?></td>

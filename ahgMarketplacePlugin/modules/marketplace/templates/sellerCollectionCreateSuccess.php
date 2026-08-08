@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-max-height-120px-d53b { max-height: 120px; }
+</style>
 
 <?php
   $isEdit = isset($collection) && $collection;
@@ -49,7 +56,7 @@
             <label for="cover_image" class="form-label"><?php echo __('Cover Image'); ?></label>
             <?php if ($isEdit && $collection->cover_image_path): ?>
               <div class="mb-2">
-                <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="" class="rounded" style="max-height: 120px;">
+                <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="" class="rounded market-max-height-120px-d53b" >
               </div>
             <?php endif; ?>
             <input type="file" class="form-control" id="cover_image" name="cover_image" accept="image/*">

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-font-size-1rem-1f02 { font-size: 1rem; }
+</style>
 <?php slot('title') ?>
 <h1><i class="bi bi-eye text-primary me-2"></i><?php echo htmlspecialchars($report->name); ?></h1>
 <?php end_slot() ?>
@@ -85,7 +92,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <small class="opacity-75"><?php echo __('Generated'); ?></small>
-                        <h3 class="mb-0" style="font-size: 1rem;"><?php echo date('Y-m-d H:i'); ?></h3>
+                        <h3 class="mb-0 report-font-size-1rem-1f02" ><?php echo date('Y-m-d H:i'); ?></h3>
                     </div>
                     <i class="bi bi-clock fs-2 opacity-50"></i>
                 </div>

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-cursor-pointer-24b5 { cursor: pointer; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -69,7 +76,7 @@ $templates = isset($templates) && is_array($templates) ? $templates : (isset($te
     ?>
     <?php foreach ($defaultTemplates as $code => $tpl): ?>
     <div class="col-md-4 mb-3">
-      <div class="card h-100 template-card" data-template="<?php echo $code; ?>" role="button" style="cursor: pointer;">
+      <div class="card h-100 template-card" data-template="<?php echo $code; ?>" role="button" class="resear-cursor-pointer-24b5">
         <div class="card-body text-center">
           <div class="mb-3">
             <i class="<?php echo $tpl['icon']; ?> fa-2x text-<?php echo $tpl['color']; ?>"></i>

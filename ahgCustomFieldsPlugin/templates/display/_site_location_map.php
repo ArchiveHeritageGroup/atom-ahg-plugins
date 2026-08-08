@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .custom-height-320px-border-radius-3-10ee { height: 320px; border-radius: .375rem; }
+</style>
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
 
@@ -96,7 +103,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
   <h5 class="section-title border-bottom pb-2 mb-3"><?php echo __('Site location'); ?></h5>
 
   <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/leaflet.min.css">
-  <div id="<?php echo $mapId; ?>" class="mb-2" style="height: 320px; border-radius: .375rem;"></div>
+  <div id="<?php echo $mapId; ?>" class="mb-2 custom-height-320px-border-radius-3-10ee" ></div>
 
   <?php if ($showExact): ?>
     <p class="text-muted small mb-0">

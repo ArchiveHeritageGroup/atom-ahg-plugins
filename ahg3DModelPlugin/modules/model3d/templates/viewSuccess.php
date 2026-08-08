@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .3dmode-height-600px-position-relati-1ad5 { height: 600px; position: relative; }
+</style>
 <?php
 /**
  * 3D Model View Template
@@ -100,7 +107,7 @@ $metaRows = array_filter($metaRows, fn ($v) => $v !== '' && $v !== null);
 <!-- 3D Viewer -->
 <div class="card mb-4">
     <div class="card-body p-0">
-        <div class="model-viewer-wrapper" style="height: 600px; position: relative;">
+        <div class="model-viewer-wrapper 3dmode-height-600px-position-relati-1ad5" >
             <model-viewer
                 id="main-viewer"
                 src="<?php echo $modelUrl ?>"
@@ -121,7 +128,7 @@ $metaRows = array_filter($metaRows, fn ($v) => $v !== '' && $v !== null);
                 shadow-softness="<?php echo $model->shadow_softness ?>"
                 <?php if ($model->environment_image): ?>environment-image="/uploads/<?php echo $model->environment_image ?>"<?php endif ?>
                 <?php if ($model->skybox_image): ?>skybox-image="/uploads/<?php echo $model->skybox_image ?>"<?php endif ?>
-                style="width: 100%; height: 100%; background-color: <?php echo $model->background_color ?>;"
+                data-ahg-style="width: 100%; height: 100%; background-color: <?php echo $model->background_color ?>;"
             >
                 <!-- Hotspots -->
                 <?php foreach ($hotspots as $hotspot): ?>
@@ -130,7 +137,7 @@ $metaRows = array_filter($metaRows, fn ($v) => $v !== '' && $v !== null);
                         data-position="<?php echo $hotspot->position_x ?>m <?php echo $hotspot->position_y ?>m <?php echo $hotspot->position_z ?>m"
                         data-normal="<?php echo $hotspot->normal_x ?>m <?php echo $hotspot->normal_y ?>m <?php echo $hotspot->normal_z ?>m"
                         data-type="<?php echo $hotspot->hotspot_type ?>"
-                        style="--hotspot-color: <?php echo $hotspot->color ?>;">
+                        data-ahg-style="--hotspot-color: <?php echo $hotspot->color ?>;">
                     <div class="hotspot-annotation">
                         <?php if ($hotspot->title): ?>
                         <strong><?php echo esc_entities($hotspot->title) ?></strong>
@@ -243,7 +250,7 @@ $metaRows = array_filter($metaRows, fn ($v) => $v !== '' && $v !== null);
                     <?php foreach ($hotspots as $hotspot): ?>
                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                         <div>
-                            <span class="badge me-2" style="background-color: <?php echo $hotspot->color ?>">
+                            <span class="badge me-2" data-ahg-style="background-color: <?php echo $hotspot->color ?>">
                                 <?php echo ucfirst($hotspot->hotspot_type) ?>
                             </span>
                             <?php echo esc_entities($hotspot->title ?: 'Untitled') ?>

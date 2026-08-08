@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .aicond-display-none-cb45 { display:none; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -48,7 +55,7 @@
                     <input type="text" class="form-control form-control-sm" name="ai_condition_api_key" value="<?php echo esc_entities($settings['ai_condition_api_key']) ?>">
                 </div>
             </div>
-            <div id="testResult" style="display:none"></div>
+            <div id="testResult" class="aicond-display-none-cb45"></div>
         </div>
     </div>
 

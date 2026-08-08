@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-width-40px-4792 { width: 40px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Payouts'); ?> - <?php echo __('Marketplace Admin'); ?><?php end_slot(); ?>
 
@@ -68,7 +75,7 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th style="width: 40px;">
+              <th class="market-width-40px-4792">
                 <input type="checkbox" class="form-check-input" id="selectAll">
               </th>
               <th><?php echo __('Payout #'); ?></th>

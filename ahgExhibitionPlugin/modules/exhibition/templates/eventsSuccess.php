@@ -1,4 +1,12 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-display-none-224b { display: none; }
+  .exhibi-min-width-80px-f1d0 { min-width: 80px; }
+</style>
 <?php
 // Convert escaped array to raw array for PHP array functions
 $eventsRaw = $events ?? [];
@@ -71,7 +79,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
           <div class="card mb-3 <?php echo $isPast ? 'opacity-75' : ''; ?>">
             <div class="card-body">
               <div class="row align-items-center">
-                <div class="col-auto text-center" style="min-width: 80px;">
+                <div class="col-auto text-center exhibi-min-width-80px-f1d0" >
                   <div class="<?php echo $isToday ? 'bg-primary text-white' : ($isPast ? 'bg-secondary text-white' : 'bg-light'); ?> rounded p-2">
                     <div class="h4 mb-0"><?php echo date('d', strtotime($eventDate)); ?></div>
                     <small><?php echo date('M', strtotime($eventDate)); ?></small>
@@ -156,7 +164,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>
@@ -291,7 +299,7 @@ if ($eventsRaw instanceof sfOutputEscaperArrayDecorator) {
             </div>
           </div>
 
-          <div class="mb-3" id="addPriceRow" style="display: none;">
+          <div class="mb-3" id="addPriceRow" class="exhibi-display-none-224b">
             <label class="form-label">Ticket Price (ZAR)</label>
             <input type="number" name="ticket_price" class="form-control" min="0" step="0.01">
           </div>

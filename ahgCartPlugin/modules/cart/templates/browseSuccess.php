@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .cart-display-inline-3df0 { display: inline; }
+  .cart-display-none-224b { display: none; }
+  .cart-max-width-400px-fbe9 { max-width: 400px; }
+  .cart-min-width-100px-0b69 { min-width: 100px; }
+</style>
 
 <?php slot('title'); ?>
   <div class="d-flex align-items-center justify-content-between">
@@ -9,7 +19,7 @@
       <?php endif; ?>
     </h1>
     <?php if ($count > 0): ?>
-      <form action="<?php echo url_for(['module' => 'cart', 'action' => 'clear']); ?>" method="post" style="display: inline;">
+      <form action="<?php echo url_for(['module' => 'cart', 'action' => 'clear']); ?>" method="post" class="cart-display-inline-3df0">
         <button type="submit" class="btn btn-outline-danger btn-sm"
                 onclick="return confirm('<?php echo __('Clear all items from cart?'); ?>');">
           <i class="fas fa-trash me-1"></i><?php echo __('Clear Cart'); ?>
@@ -102,7 +112,7 @@
           <div class="product-rows" data-cart-id="<?php echo $item->id; ?>">
             <!-- Initial row -->
             <div class="product-row mb-2 d-flex align-items-center gap-2" data-row-index="0">
-              <select class="form-select product-select" style="max-width: 400px;" data-cart-id="<?php echo $item->id; ?>">
+              <select class="form-select product-select cart-max-width-400px-fbe9"  data-cart-id="<?php echo $item->id; ?>">
                 <option value=""><?php echo __('-- Select Product Type --'); ?></option>
                 <?php foreach ($productTypes as $type): ?>
                   <?php $price = $pricingLookup[$type->id] ?? 0; ?>
@@ -111,8 +121,8 @@
                   </option>
                 <?php endforeach; ?>
               </select>
-              <span class="row-price fw-bold text-success" style="min-width: 100px;">R 0.00</span>
-              <button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="<?php echo __('Remove'); ?>" style="display: none;">
+              <span class="row-price fw-bold text-success cart-min-width-100px-0b69" >R 0.00</span>
+              <button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="<?php echo __('Remove'); ?>" class="cart-display-none-224b">
                 <i class="fas fa-times"></i>
               </button>
             </div>
@@ -182,7 +192,7 @@
     <!-- Hidden template for new rows -->
     <template id="product-row-template">
       <div class="product-row mb-2 d-flex align-items-center gap-2">
-        <select class="form-select product-select" style="max-width: 400px;">
+        <select class="form-select product-select cart-max-width-400px-fbe9" >
           <option value=""><?php echo __('-- Select Product Type --'); ?></option>
           <?php foreach ($productTypes as $type): ?>
             <?php $price = $pricingLookup[$type->id] ?? 0; ?>
@@ -191,7 +201,7 @@
             </option>
           <?php endforeach; ?>
         </select>
-        <span class="row-price fw-bold text-success" style="min-width: 100px;">R 0.00</span>
+        <span class="row-price fw-bold text-success cart-min-width-100px-0b69" >R 0.00</span>
         <button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="<?php echo __('Remove'); ?>">
           <i class="fas fa-times"></i>
         </button>

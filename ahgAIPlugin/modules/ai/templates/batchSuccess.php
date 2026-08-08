@@ -153,7 +153,7 @@
                                 </div>
                                 <div class="progress progress-thin mb-2">
                                     <div class="progress-bar bg-<?php echo $batch->failed_items > 0 ? 'danger' : 'success'; ?>"
-                                         style="width: <?php echo $batch->progress_percent; ?>%"></div>
+                                         data-ahg-style="width: <?php echo $batch->progress_percent; ?>%"></div>
                                 </div>
                                 <small class="text-muted">
                                     <?php echo $batch->completed_items; ?>/<?php echo $batch->total_items; ?> completed

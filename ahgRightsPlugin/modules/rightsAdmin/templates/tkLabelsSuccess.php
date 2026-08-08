@@ -44,7 +44,7 @@
             
             <div class="col-md-6 col-lg-4 mb-3">
               <div class="d-flex align-items-start p-2 border rounded">
-                <span class="badge me-3 text-white" style="background-color: <?php echo esc_entities($label->color); ?>; min-width: 50px; padding: 8px;">
+                <span class="badge me-3 text-white" data-ahg-style="background-color: <?php echo esc_entities($label->color); ?>; min-width: 50px; padding: 8px;">
                   <?php echo esc_entities($label->code); ?>
                 </span>
                 <div class="small">
@@ -80,7 +80,7 @@
               <?php foreach ($assignments as $assign): ?>
               <tr>
                 <td>
-                  <span class="badge text-white" style="background-color: <?php echo esc_entities($assign->color); ?>;">
+                  <span class="badge text-white" data-ahg-style="background-color: <?php echo esc_entities($assign->color); ?>;">
                     <?php echo esc_entities($assign->code); ?>
                   </span>
                   <?php echo esc_entities($assign->label_name); ?>

@@ -1,10 +1,17 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .landin-max-width-600px-4d1e { max-width: 600px; }
+</style>
 <?php
 /**
  * Create User Dashboard
  */
 ?>
 
-<div class="container py-4" style="max-width: 600px;">
+<div class="container py-4 landin-max-width-600px-4d1e" >
   <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
       <li class="breadcrumb-item">

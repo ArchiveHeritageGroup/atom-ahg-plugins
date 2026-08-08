@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-font-size-0-9em-ef36 { font-size: 0.9em; }
+  .librar-width-200px-5c2d { width: 200px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Catalog Record'); ?></h1>
@@ -41,7 +49,7 @@
           <tbody>
             <?php if (!empty($item->material_type)): ?>
               <tr>
-                <th style="width: 200px;"><?php echo __('Material Type'); ?></th>
+                <th class="librar-width-200px-5c2d"><?php echo __('Material Type'); ?></th>
                 <td><span class="badge bg-info text-dark"><?php echo esc_entities($item->material_type); ?></span></td>
               </tr>
             <?php endif; ?>
@@ -135,7 +143,7 @@
         <div class="card-body">
           <?php foreach ($subjects as $subj): ?>
             <a href="<?php echo url_for(['module' => 'opac', 'action' => 'index']); ?>?q=<?php echo urlencode($subj->heading ?? ''); ?>&search_type=subject"
-               class="badge bg-secondary text-decoration-none me-1 mb-1" style="font-size: 0.9em;">
+               class="badge bg-secondary text-decoration-none me-1 mb-1 librar-font-size-0-9em-ef36" >
               <?php echo esc_entities($subj->heading ?? ''); ?>
             </a>
           <?php endforeach; ?>

@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-cursor-pointer-font-size-2re-27bc { cursor: pointer; font-size: 2rem; }
+  .market-width-100px-height-100px-33d7 { width: 100px; height: 100px; }
+  .market-width-100px-height-100px-obj-7c6b { width: 100px; height: 100px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Leave a Review'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -36,9 +45,9 @@
       <div class="card-body">
         <div class="d-flex">
           <?php if ($transaction->featured_image_path): ?>
-            <img src="<?php echo esc_entities($transaction->featured_image_path); ?>" alt="<?php echo esc_entities($transaction->title); ?>" class="rounded me-3" style="width: 100px; height: 100px; object-fit: cover;">
+            <img src="<?php echo esc_entities($transaction->featured_image_path); ?>" alt="<?php echo esc_entities($transaction->title); ?>" class="rounded me-3 market-width-100px-height-100px-obj-7c6b" >
           <?php else: ?>
-            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 100px; height: 100px;">
+            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3 market-width-100px-height-100px-33d7" >
               <i class="fas fa-image fa-2x text-muted"></i>
             </div>
           <?php endif; ?>
@@ -69,7 +78,7 @@
             <label class="form-label"><?php echo __('Rating'); ?> <span class="text-danger">*</span></label>
             <div id="star-rating" class="d-flex gap-1">
               <?php for ($s = 1; $s <= 5; $s++): ?>
-                <label class="star-label" style="cursor: pointer; font-size: 2rem;">
+                <label class="star-label market-cursor-pointer-font-size-2re-27bc" >
                   <input type="radio" name="rating" value="<?php echo $s; ?>" class="d-none" required>
                   <i class="far fa-star text-warning star-icon" data-star="<?php echo $s; ?>"></i>
                 </label>

@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .storag-height-1rem-369f { height: 1rem; }
+  .storag-max-width-32rem-fb50 { max-width: 32rem; }
+  .storag-min-width-12rem-d2ee { min-width: 12rem; }
+</style>
 <?php
 /*
  * heratio#145 — Strongroom browse (AtoM Heratio).
@@ -29,7 +38,7 @@ $capacityUnits = $sf_data->getRaw('capacityUnits');
 
   <form method="get" action="<?php echo url_for(['module' => 'strongroom', 'action' => 'browse']); ?>"
         class="mb-3" role="search">
-    <div class="input-group" style="max-width: 32rem;">
+    <div class="input-group storag-max-width-32rem-fb50" >
       <input type="search" name="q" value="<?php echo esc_specialchars($search); ?>"
              class="form-control" placeholder="<?php echo __('Search strongrooms'); ?>">
       <button type="submit" class="btn btn-outline-secondary"><?php echo __('Search'); ?></button>
@@ -48,7 +57,7 @@ $capacityUnits = $sf_data->getRaw('capacityUnits');
             <th><?php echo __('Name'); ?></th>
             <th><?php echo __('Location'); ?></th>
             <th><?php echo __('Capacity'); ?></th>
-            <th style="min-width: 12rem;"><?php echo __('Utilisation'); ?></th>
+            <th class="storag-min-width-12rem-d2ee"><?php echo __('Utilisation'); ?></th>
             <th class="text-end"><?php echo __('Occupants'); ?></th>
           </tr>
         </thead>
@@ -82,8 +91,8 @@ $capacityUnits = $sf_data->getRaw('capacityUnits');
               <?php if (null !== $pct) { ?>
                 <div class="progress" role="progressbar"
                      aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100"
-                     style="height: 1rem;">
-                  <div class="progress-bar <?php echo $barClass; ?>" style="width: <?php echo $pct; ?>%"><?php echo $pct; ?>%</div>
+                     class="storag-height-1rem-369f">
+                  <div class="progress-bar <?php echo $barClass; ?>" data-ahg-style="width: <?php echo $pct; ?>%"><?php echo $pct; ?>%</div>
                 </div>
                 <div class="small text-muted mt-1">
                   <?php echo rtrim(rtrim(number_format($used, 2), '0'), '.'); ?> / <?php echo rtrim(rtrim(number_format($capacity, 2), '0'), '.'); ?>&nbsp;<?php echo esc_specialchars($unitLabel); ?>

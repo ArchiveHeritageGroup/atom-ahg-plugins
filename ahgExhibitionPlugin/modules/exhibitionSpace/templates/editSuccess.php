@@ -1,4 +1,11 @@
 <?php /* heratio#146 PSIS port — Exhibition space create/edit */ ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-max-width-56rem-27b7 { max-width: 56rem; }
+</style>
 <?php $isNew = ($space === null); ?>
 <div class="container-fluid px-4 py-3 edit exhibition-space">
   <h1><i class="fas fa-palette me-2"></i><?php echo $isNew ? __('Add exhibition space') : __('Edit %1%', ['%1%' => $space->name]) ?></h1>
@@ -10,7 +17,7 @@
   <form method="post" action="<?php echo $isNew
       ? url_for(['module' => 'exhibitionSpace', 'action' => 'create'])
       : url_for(['module' => 'exhibitionSpace', 'action' => 'edit', 'slug' => $space->slug]) ?>"
-        class="mt-3" style="max-width: 56rem;">
+        class="mt-3 exhibi-max-width-56rem-27b7" >
 
     <div class="row g-3">
       <div class="col-md-8">

@@ -1,4 +1,23 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-display-none-position-fixed--c260 { display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center; }
+  .datami-font-family-monospace-font-s-1d87 { font-family:monospace; font-size:0.8rem; }
+  .datami-font-size-0-75rem-af89 { font-size: 0.75rem; }
+  .datami-height-280px-overflow-y-auto-c29c { height: 280px; overflow-y: auto; }
+  .datami-max-height-250px-overflow-y--39f8 { max-height: 250px; overflow-y: auto; }
+  .datami-max-height-60vh-overflow-y-a-be98 { max-height: 60vh; overflow-y: auto; }
+  .datami-max-width-200px-1a5c { max-width: 200px; }
+  .datami-width-40px-4792 { width: 40px; }
+  .datami-width-10-25fe { width:10%; }
+  .datami-width-12-7c03 { width:12%; }
+  .datami-width-14-6306 { width:14%; }
+  .datami-width-6-73fb { width:6%; }
+  .datami-width-7-5d37 { width:7%; }
+</style>
 <?php
 $rawMappings = $sf_data->getRaw('savedMappings');
 if (!is_array($rawMappings)) $rawMappings = [];
@@ -107,11 +126,11 @@ if (!is_array($rawMappings)) $rawMappings = [];
     </div>
     <div class="collapse show" id="dataPreviewCollapse">
       <div class="card-body p-0">
-        <div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-          <table class="table table-sm table-bordered table-striped mb-0" style="font-size: 0.75rem;">
+        <div class="table-responsive datami-max-height-250px-overflow-y--39f8" >
+          <table class="table table-sm table-bordered table-striped mb-0 datami-font-size-0-75rem-af89" >
             <thead class="table-dark sticky-top">
               <tr>
-                <th class="text-center" style="width: 40px;">#</th>
+                <th class="text-center datami-width-40px-4792" >#</th>
                 <?php foreach ($rawSourceFields as $field): ?>
                 <th class="text-nowrap"><?php echo htmlspecialchars($field) ?></th>
                 <?php endforeach ?>
@@ -125,7 +144,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
               <tr>
                 <td class="text-center text-muted"><?php echo $rowIndex + 1 ?></td>
                 <?php foreach ($rawSourceFields as $colIndex => $field): ?>
-                <td class="text-truncate" style="max-width: 200px;" title="<?php echo htmlspecialchars($row[$colIndex] ?? '') ?>">
+                <td class="text-truncate datami-max-width-200px-1a5c"  title="<?php echo htmlspecialchars($row[$colIndex] ?? '') ?>">
                   <?php echo htmlspecialchars(mb_substr($row[$colIndex] ?? '', 0, 80)) ?>
                   <?php if (strlen($row[$colIndex] ?? '') > 80): ?>...<?php endif ?>
                 </td>
@@ -174,19 +193,19 @@ if (!is_array($rawMappings)) $rawMappings = [];
     <input type="hidden" name="target_sector" id="targetSectorInput" value="<?php echo htmlspecialchars($targetType) ?>">
 
     <div class="card">
-      <div class="card-body p-0" style="max-height: 60vh; overflow-y: auto;">
+      <div class="card-body p-0 datami-max-height-60vh-overflow-y-a-be98" >
         <table class="table table-striped table-hover table-sm mb-0" id="mappingTable">
           <thead class="bg-primary text-white sticky-top">
             <tr>
-              <th style="width:14%">Source Field</th>
-              <th style="width:14%">Standard Field</th>
-              <th style="width:14%" class="ahg-column">AHG Extended</th>
-              <th style="width:10%">Constant</th>
-              <th style="width:7%" class="text-center">Prepend</th>
-              <th style="width:7%" class="text-center">Concat</th>
-              <th style="width:10%">Symbol</th>
-              <th style="width:7%" class="text-center">Include</th>
-              <th style="width:10%">Transform</th>
+              <th class="datami-width-14-6306">Source Field</th>
+              <th class="datami-width-14-6306">Standard Field</th>
+              <th class="ahg-column datami-width-14-6306" >AHG Extended</th>
+              <th class="datami-width-10-25fe">Constant</th>
+              <th class="text-center datami-width-7-5d37" >Prepend</th>
+              <th class="text-center datami-width-7-5d37" >Concat</th>
+              <th class="datami-width-10-25fe">Symbol</th>
+              <th class="text-center datami-width-7-5d37" >Include</th>
+              <th class="datami-width-10-25fe">Transform</th>
             </tr>
           </thead>
           <tbody>
@@ -225,11 +244,11 @@ if (!is_array($rawMappings)) $rawMappings = [];
             endif;
             ?>
             <tr data-row="<?php echo $i ?>">
-              <td style="width:14%">
+              <td class="datami-width-14-6306">
                 <input type="hidden" name="fields[<?php echo $i ?>][source_field]" value="<?php echo htmlspecialchars($row['source_field']) ?>">
                 <code class="small"><?php echo htmlspecialchars($row['source_field']) ?></code>
               </td>
-              <td style="width:14%">
+              <td class="datami-width-14-6306">
                 <select name="fields[<?php echo $i ?>][atom_field]" class="form-select form-select-sm atom-field-select">
                   <option value="">-- Skip --</option>
                   <?php foreach ($targetFields as $key => $label): ?>
@@ -241,7 +260,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
                   <?php endforeach ?>
                 </select>
               </td>
-              <td style="width:14%" class="ahg-column">
+              <td class="ahg-column datami-width-14-6306" >
                 <select name="fields[<?php echo $i ?>][ahg_field]" class="form-select form-select-sm ahg-field-select">
                   <option value="">-- None --</option>
                   <optgroup label="Provenance">
@@ -273,20 +292,20 @@ if (!is_array($rawMappings)) $rawMappings = [];
                   </optgroup>
                 </select>
               </td>
-              <td style="width:14%">
+              <td class="datami-width-14-6306">
                 <input type="text" name="fields[<?php echo $i ?>][constant_value]"
                        value="<?php echo htmlspecialchars($row['constant_value']) ?>"
                        class="form-control form-control-sm" placeholder="Constant...">
               </td>
-              <td style="width:7%" class="text-center">
+              <td class="text-center datami-width-7-5d37" >
                 <input type="checkbox" name="fields[<?php echo $i ?>][concat_constant]" value="1"
                        class="form-check-input" <?php echo $row['concat_constant'] ? 'checked' : '' ?>>
               </td>
-              <td style="width:7%" class="text-center">
+              <td class="text-center datami-width-7-5d37" >
                 <input type="checkbox" name="fields[<?php echo $i ?>][concatenate]" value="1"
                        class="form-check-input" <?php echo $row['concatenate'] ? 'checked' : '' ?>>
               </td>
-              <td style="width:14%">
+              <td class="datami-width-14-6306">
                 <select name="fields[<?php echo $i ?>][concat_symbol]" class="form-select form-select-sm">
                   <option value="|" <?php echo ($row['concat_symbol'] === '|') ? 'selected' : '' ?>>| (Pipe)</option>
                   <option value="\n" <?php echo ($row['concat_symbol'] === '\n' || $row['concat_symbol'] === "\n") ? 'selected' : '' ?>>↵ (Newline)</option>
@@ -296,11 +315,11 @@ if (!is_array($rawMappings)) $rawMappings = [];
                   <option value=" " <?php echo ($row['concat_symbol'] === ' ') ? 'selected' : '' ?>>Space</option>
                 </select>
               </td>
-              <td style="width:7%" class="text-center">
+              <td class="text-center datami-width-7-5d37" >
                 <input type="checkbox" name="fields[<?php echo $i ?>][include]" value="1"
                        class="form-check-input include-check" <?php echo $row['include'] ? 'checked' : '' ?>>
               </td>
-              <td style="width:7%">
+              <td class="datami-width-7-5d37">
                 <select name="fields[<?php echo $i ?>][transform]" class="form-select form-select-sm transform-select">
                   <option value="">None</option>
                   <option value="filename">Filename only</option>
@@ -410,7 +429,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
           <!-- Left: File browser -->
           <div class="col-md-6">
             <label class="form-label fw-bold"><i class="bi bi-folder me-1"></i>Existing Mappings</label>
-            <div class="border rounded bg-light" style="height: 280px; overflow-y: auto;">
+            <div class="border rounded bg-light datami-height-280px-overflow-y-auto-c29c" >
               <?php
               $groupedMappings = [];
               foreach ($rawMappings as $m) {
@@ -519,7 +538,7 @@ if (!is_array($rawMappings)) $rawMappings = [];
 </div>
 
 <!-- Loading Overlay -->
-<div id="loadingOverlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+<div id="loadingOverlay" class="datami-display-none-position-fixed--c260">
   <div class="bg-white rounded p-4 text-center shadow">
     <div class="spinner-border text-primary mb-2"></div>
     <div id="loadingText">Processing...</div>
@@ -675,12 +694,12 @@ document.addEventListener('DOMContentLoaded', function() {
     newRow.setAttribute("data-custom", "true");
     newRow.className = "table-info";
     newRow.innerHTML = `
-      <td style="width:14%">
+      <td class="datami-width-14-6306">
         <input type="hidden" name="fields[${rowIndex}][source_field]" value="_custom_${customFieldCount}" class="custom-source-hidden">
-        <input type="text" class="form-control form-control-sm custom-source-input" placeholder="Field name or leave empty..." style="font-family:monospace; font-size:0.8rem;">
+        <input type="text" class="form-control form-control-sm custom-source-input" placeholder="Field name or leave empty..." class="datami-font-family-monospace-font-s-1d87">
         <small class="text-muted">Optional source name</small>
       </td>
-      <td style="width:14%">
+      <td class="datami-width-14-6306">
         <select name="fields[${rowIndex}][atom_field]" class="form-select form-select-sm atom-field-select">
           <option value="">-- Select Target --</option>
           <optgroup label="Standard ISAD-G Fields">
@@ -699,16 +718,16 @@ document.addEventListener('DOMContentLoaded', function() {
           </optgroup>
         </select>
       </td>
-      <td style="width:14%">
+      <td class="datami-width-14-6306">
         <input type="text" name="fields[${rowIndex}][constant_value]" class="form-control form-control-sm" placeholder="Value (e.g., en, English)">
       </td>
-      <td style="width:7%" class="text-center">
+      <td class="text-center datami-width-7-5d37" >
         <input type="checkbox" name="fields[${rowIndex}][concat_constant]" value="1" class="form-check-input" checked>
       </td>
-      <td style="width:7%" class="text-center">
+      <td class="text-center datami-width-7-5d37" >
         <input type="checkbox" name="fields[${rowIndex}][concatenate]" value="1" class="form-check-input">
       </td>
-      <td style="width:12%">
+      <td class="datami-width-12-7c03">
         <select name="fields[${rowIndex}][concat_symbol]" class="form-select form-select-sm">
           <option value="|">| (Pipe)</option>
           <option value=";">; (Semicolon)</option>
@@ -717,10 +736,10 @@ document.addEventListener('DOMContentLoaded', function() {
           <option value=" ">Space</option>
         </select>
       </td>
-      <td style="width:6%" class="text-center">
+      <td class="text-center datami-width-6-73fb" >
         <input type="checkbox" name="fields[${rowIndex}][include]" value="1" class="form-check-input" checked>
       </td>
-      <td style="width:10%">
+      <td class="datami-width-10-25fe">
         <button type="button" class="btn btn-sm btn-outline-danger remove-custom-field">
           <i class="bi bi-trash"></i>
         </button>

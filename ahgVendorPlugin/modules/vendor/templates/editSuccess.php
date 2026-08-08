@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .vendor-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+</style>
 <?php
 $vendorRaw = isset($sf_data) ? $sf_data->getRaw('vendor') : $vendor;
 $serviceTypesRaw = isset($sf_data) ? $sf_data->getRaw('serviceTypes') : $serviceTypes;
@@ -209,7 +216,7 @@ $pageTitle = $isNew ? 'Add New Vendor' : 'Edit Vendor: ' . $vendorRaw->name;
                         <i class="fas fa-tools me-2"></i>Services Provided
                     </div>
                     <div class="card-body">
-                        <div class="services-list" style="max-height: 300px; overflow-y: auto;">
+                        <div class="services-list vendor-max-height-300px-overflow-y--3db9" >
                             <?php 
                             $vendorServiceIds = [];
                             if ($vendorServicesRaw) {

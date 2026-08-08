@@ -1,3 +1,11 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-background-linear-gradient-1-cc0c { background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%); }
+  .herita-background-linear-gradient-t-855f { background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%); }
+  .herita-max-width-600px-4d1e { max-width: 600px; }
+  .herita-z-index-10-354f { z-index: 10; }
+</style>
 {{--
   Hero Section partial.
 
@@ -27,25 +35,25 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
             <div class="heritage-hero-bg {{ $index === 0 ? 'active' : '' }} {{ $effectClass }}"
                  data-index="{{ $index }}"
                  data-duration="{{ $slideDuration }}"
-                 style="background-image: url('{{ $image['image_path'] }}');">
+                 data-ahg-style="background-image: url('{{ $image['image_path'] }}');">
             </div>
             @endforeach
         @else
-            <div class="heritage-hero-bg active" style="background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%);"></div>
+            <div class="heritage-hero-bg active herita-background-linear-gradient-1-cc0c" ></div>
         @endif
     </div>
 
     <!-- Gradient Overlay -->
     @if ($overlayType === 'gradient')
-    <div class="heritage-hero-overlay position-absolute top-0 start-0 w-100 h-100"
-         style="background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);"></div>
+    <div class="heritage-hero-overlay position-absolute top-0 start-0 w-100 h-100 herita-background-linear-gradient-t-855f"
+         ></div>
     @elseif ($overlayType === 'solid')
     <div class="heritage-hero-overlay position-absolute top-0 start-0 w-100 h-100"
-         style="background-color: {{ $overlayColor }}; opacity: {{ $overlayOpacity }};"></div>
+         data-ahg-style="background-color: {{ $overlayColor }}; opacity: {{ $overlayOpacity }};"></div>
     @endif
 
     <!-- Content -->
-    <div class="heritage-hero-content position-relative text-center text-white px-4" style="z-index: 10;">
+    <div class="heritage-hero-content position-relative text-center text-white px-4 herita-z-index-10-354f" >
 
         <!-- Tagline -->
         <h1 class="heritage-hero-tagline display-3 fw-bold mb-4">
@@ -54,13 +62,13 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
 
         <!-- Subtext -->
         @if ($subtext)
-        <p class="heritage-hero-subtext lead mb-5 mx-auto" style="max-width: 600px;">
+        <p class="heritage-hero-subtext lead mb-5 mx-auto herita-max-width-600px-4d1e" >
             {{ $subtext }}
         </p>
         @endif
 
         <!-- Search Box -->
-        <form action="{{ url_for(['module' => 'heritage', 'action' => 'search']) }}" method="get" class="heritage-search-form mx-auto mb-4" style="max-width: 600px;">
+        <form action="{{ url_for(['module' => 'heritage', 'action' => 'search']) }}" method="get" class="heritage-search-form mx-auto mb-4 herita-max-width-600px-4d1e" >
             <div class="input-group input-group-lg shadow-lg">
                 <input type="text"
                        name="q"
@@ -96,7 +104,7 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
 
     <!-- Image Caption (bottom) -->
     @if ($firstImage && ($firstImage['source_collection'] || $firstImage['photographer_credit']))
-    <div class="heritage-hero-caption position-absolute bottom-0 start-0 w-100 p-4 text-white" style="z-index: 10;" id="heritage-hero-caption">
+    <div class="heritage-hero-caption position-absolute bottom-0 start-0 w-100 p-4 text-white herita-z-index-10-354f"  id="heritage-hero-caption">
         <div class="container-xxl">
             @if ($firstImage['source_collection'])
             <small class="d-block opacity-75" id="caption-collection">
@@ -111,7 +119,7 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
     @endif
 
     <!-- Scroll Indicator -->
-    <div class="heritage-scroll-indicator position-absolute bottom-0 start-50 translate-middle-x pb-5" style="z-index: 10;">
+    <div class="heritage-scroll-indicator position-absolute bottom-0 start-50 translate-middle-x pb-5 herita-z-index-10-354f" >
         <a href="#heritage-explore" class="text-white text-decoration-none">
             <div class="d-flex flex-column align-items-center">
                 <span class="small mb-2">Explore</span>

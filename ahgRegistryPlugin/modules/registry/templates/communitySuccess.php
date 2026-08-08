@@ -1,4 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-height-120px-object-fit-cove-e004 { height: 120px; object-fit: cover; }
+  .regist-min-width-50px-2d75 { min-width: 50px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Community Hub'); ?><?php end_slot(); ?>
 
@@ -47,7 +55,7 @@
       <?php foreach ($recentDiscussions as $disc): ?>
       <div class="list-group-item px-0">
         <div class="d-flex align-items-start">
-          <div class="me-3 text-center" style="min-width: 50px;">
+          <div class="me-3 text-center regist-min-width-50px-2d75" >
             <div class="fw-bold text-primary"><?php echo (int) $disc->reply_count; ?></div>
             <small class="text-muted"><?php echo __('replies'); ?></small>
           </div>
@@ -94,7 +102,7 @@
         <div class="col">
           <div class="card h-100">
             <?php if (!empty($post->featured_image_path)): ?>
-            <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" style="height: 120px; object-fit: cover;">
+            <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" class="regist-height-120px-object-fit-cove-e004">
             <?php endif; ?>
             <div class="card-body py-2">
               <h6 class="card-title mb-1">

@@ -36,7 +36,7 @@
 
   <!-- Scrollable children list -->
   <?php if ($totalChildren > 0): ?>
-  <div class="holdings-scroll-container<?php echo $hasMany ? ' has-scroll' : ''; ?>" style="<?php echo $hasMany ? 'max-height: 300px; overflow-y: auto;' : ''; ?>">
+  <div class="holdings-scroll-container<?php echo $hasMany ? ' has-scroll' : ''; ?>" data-ahg-style="<?php echo $hasMany ? 'max-height: 300px; overflow-y: auto;' : ''; ?>">
     <ul class="list-group list-group-flush">
       <?php foreach ($children as $child): ?>
       <li class="list-group-item list-group-item-action ps-4 py-2">

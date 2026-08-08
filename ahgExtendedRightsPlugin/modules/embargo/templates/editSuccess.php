@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .extend-display-none-224b { display: none; }
+</style>
 <?php slot('title'); ?>
   <h1><?php echo __('Edit Embargo'); ?></h1>
   <p class="lead"><?php echo $resource->title ?? $resource->slug; ?></p>
@@ -106,7 +113,7 @@ $embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
             <?php echo __('This will create or update embargoes on all child records below this item.'); ?>
           </div>
         </div>
-        <div class="alert alert-warning mb-0" id="propagation-warning" style="display: none;">
+        <div class="alert alert-warning mb-0" id="propagation-warning" class="extend-display-none-224b">
           <i class="fas fa-exclamation-triangle me-2"></i>
           <?php echo __('Warning: This will create new embargoes on descendants that do not have one, and update those that do.'); ?>
         </div>

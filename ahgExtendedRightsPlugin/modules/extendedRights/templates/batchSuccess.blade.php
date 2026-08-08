@@ -1,3 +1,9 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .extend-display-none-93b8 { display:none; }
+  .extend-width-20px-height-20px-bbca { width:20px;height:20px; }
+</style>
 <!-- Tom Select CSS -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" @cspNonce>
 
@@ -134,7 +140,7 @@
                 <input type="checkbox" name="tk_label_ids[]" value="{{ $tk->id }}" class="form-check-input" id="tk_{{ $tk->id }}">
                 <label class="form-check-label" for="tk_{{ $tk->id }}">
                   @if (!empty($tk->icon_url))
-                  <img src="{{ $tk->icon_url }}" alt="" style="width:20px;height:20px;" class="me-1">
+                  <img src="{{ $tk->icon_url }}" alt="" class="me-1 extend-width-20px-height-20px-bbca" >
                   @endif
                   {{ $tk->name ?? $tk->code }}
                 </label>
@@ -147,7 +153,7 @@
     </div>
 
     <!-- Embargo Options (hidden by default) -->
-    <div id="embargo_options" class="card mb-4" style="display:none;">
+    <div id="embargo_options" class="card mb-4 extend-display-none-93b8" >
       <div class="card-header">
         <h5 class="mb-0">{{ __('Embargo Details') }}</h5>
       </div>

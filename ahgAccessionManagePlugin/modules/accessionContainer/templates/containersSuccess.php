@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .access-display-none-93b8 { display:none; }
+  .access-width-80px-8935 { width:80px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Containers'); ?> &mdash; <?php echo htmlspecialchars($accession['identifier'] ?? ''); ?></h1>
@@ -52,7 +60,7 @@
           </button>
         </div>
         <div class="col-12">
-          <div id="barcodeLookupResult" class="mt-2" style="display:none;"></div>
+          <div id="barcodeLookupResult" class="mt-2 access-display-none-93b8" ></div>
         </div>
       </div>
     </div>
@@ -66,7 +74,7 @@
   </div>
 
   <!-- Add Container form (initially hidden) -->
-  <div id="addContainerForm" class="card mb-4" style="display:none;">
+  <div id="addContainerForm" class="card mb-4 access-display-none-93b8" >
     <div class="card-header">
       <i class="fas fa-box me-2"></i><?php echo __('New container'); ?>
     </div>
@@ -230,7 +238,7 @@
           <?php endif; ?>
 
           <!-- Expandable items section -->
-          <div class="container-items-section" id="containerItems<?php echo $cId; ?>" style="display:none;">
+          <div class="container-items-section" id="containerItems<?php echo $cId; ?>" class="access-display-none-93b8">
             <hr>
             <h6 class="mb-3"><i class="fas fa-list me-1"></i><?php echo __('Items in this container'); ?></h6>
 
@@ -244,7 +252,7 @@
                       <th><?php echo __('Format'); ?></th>
                       <th><?php echo __('Date range'); ?></th>
                       <th><?php echo __('Linked IO'); ?></th>
-                      <th style="width:80px;"><?php echo __('Actions'); ?></th>
+                      <th class="access-width-80px-8935"><?php echo __('Actions'); ?></th>
                     </tr>
                   </thead>
                   <tbody>

@@ -121,7 +121,7 @@ $storylines = ($storylinesRaw instanceof sfOutputEscaperArrayDecorator) ? $story
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>

@@ -1,4 +1,11 @@
 <?php slot('title') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .donora-max-width-200px-1a5c { max-width: 200px; }
+</style>
   <?php echo __('Donor Management') ?>
 <?php end_slot() ?>
 
@@ -13,7 +20,7 @@
     </div>
     <div class="col-md-4">
       <div class="d-flex justify-content-end gap-2 align-items-center">
-        <select class="form-select" style="max-width: 200px;" onchange="if(this.value) location.href='?repository='+this.value; else location.href='?';">
+        <select class="form-select donora-max-width-200px-1a5c"  onchange="if(this.value) location.href='?repository='+this.value; else location.href='?';">
           <option value=""><?php echo __('All Repositories') ?></option>
           <?php foreach ($repositories as $repo): ?>
             <option value="<?php echo $repo->id ?>" <?php echo $selectedRepository == $repo->id ? 'selected' : '' ?>>
@@ -192,7 +199,7 @@
                       </td>
                       <td>
                         <?php if ($agreement->agreement_type_color): ?>
-                          <span class="badge" style="background-color: <?php echo $agreement->agreement_type_color ?>">
+                          <span class="badge" data-ahg-style="background-color: <?php echo $agreement->agreement_type_color ?>">
                             <?php echo esc_entities($agreement->agreement_type_name) ?>
                           </span>
                         <?php else: ?>

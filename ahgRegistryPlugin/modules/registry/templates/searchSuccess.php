@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-min-width-40px-text-align-ce-c9e7 { min-width: 40px; text-align: center; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Search Registry'); ?><?php end_slot(); ?>
 
@@ -64,7 +71,7 @@
   <?php $item = sfOutputEscaper::unescape($item); ?>
   <div class="list-group-item">
     <div class="d-flex align-items-start">
-      <div class="me-3" style="min-width: 40px; text-align: center;">
+      <div class="me-3 regist-min-width-40px-text-align-ce-c9e7" >
         <?php
           $entityType = $item->entity_type ?? '';
           $icons = [

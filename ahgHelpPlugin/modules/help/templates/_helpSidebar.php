@@ -1,10 +1,17 @@
 <?php use_helper('I18N') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .help-top-1rem-ca25 { top: 1rem; }
+</style>
 <?php
   // Categories are passed raw from the calling template
   $rawCategories = is_array($categories) ? $categories : sfOutputEscaper::unescape($categories);
 ?>
 
-<div class="help-sidebar sticky-top" style="top: 1rem;">
+<div class="help-sidebar sticky-top help-top-1rem-ca25" >
 
   <!-- Search -->
   <div class="mb-3">

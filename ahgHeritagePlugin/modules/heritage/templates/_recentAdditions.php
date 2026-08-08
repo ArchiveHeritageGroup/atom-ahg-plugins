@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-height-180px-648e { height: 180px; }
+  .herita-scroll-snap-type-x-mandatory-d0c2 { scroll-snap-type: x mandatory; }
+  .herita-width-180px-scroll-snap-alig-18be { width: 180px; scroll-snap-align: start; }
+  .herita-z-index-5-1549 { z-index: 5; }
+</style>
 <?php
 /**
  * Recent Additions partial.
@@ -19,11 +29,11 @@
 
         <!-- Horizontal Scroll Container -->
         <div class="heritage-recent-scroll position-relative">
-            <div class="d-flex gap-3 overflow-auto pb-3" style="scroll-snap-type: x mandatory;">
+            <div class="d-flex gap-3 overflow-auto pb-3 herita-scroll-snap-type-x-mandatory-d0c2" >
                 <?php foreach ($items as $item): ?>
                 <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $item['slug']]); ?>"
-                   class="heritage-recent-item flex-shrink-0 text-decoration-none"
-                   style="width: 180px; scroll-snap-align: start;">
+                   class="heritage-recent-item flex-shrink-0 text-decoration-none herita-width-180px-scroll-snap-alig-18be"
+                   >
 
                     <!-- Thumbnail -->
                     <?php
@@ -45,7 +55,7 @@
                         default => 'primary'
                     };
                     ?>
-                    <div class="heritage-recent-thumb rounded overflow-hidden mb-2" style="height: 180px;">
+                    <div class="heritage-recent-thumb rounded overflow-hidden mb-2 herita-height-180px-648e" >
                         <?php if (!empty($item['thumbnail'])): ?>
                         <img src="<?php echo esc_specialchars($item['thumbnail']); ?>"
                              alt="<?php echo esc_specialchars($item['title']); ?>"
@@ -69,11 +79,11 @@
 
             <!-- Scroll Indicators (optional, can be enhanced with JS) -->
             <button class="heritage-scroll-btn heritage-scroll-prev btn btn-light rounded-circle position-absolute start-0 top-50 translate-middle-y shadow d-none d-md-flex"
-                    aria-label="Previous" style="z-index: 5;">
+                    aria-label="Previous" class="herita-z-index-5-1549">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <button class="heritage-scroll-btn heritage-scroll-next btn btn-light rounded-circle position-absolute end-0 top-50 translate-middle-y shadow d-none d-md-flex"
-                    aria-label="Next" style="z-index: 5;">
+                    aria-label="Next" class="herita-z-index-5-1549">
                 <i class="fas fa-chevron-right"></i>
             </button>
         </div>

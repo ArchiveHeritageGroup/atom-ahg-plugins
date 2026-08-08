@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .auditt-width-35-3af6 { width: 35%; }
+</style>
 <?php
 /**
  * Audit Compare Modal - Shows old vs new values side by side
@@ -42,7 +49,7 @@
                 <table class="table table-sm table-striped mb-0" id="oldValuesTable">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 35%;"><?php echo __('Field') ?></th>
+                      <th class="auditt-width-35-3af6"><?php echo __('Field') ?></th>
                       <th><?php echo __('Value') ?></th>
                     </tr>
                   </thead>
@@ -60,7 +67,7 @@
                 <table class="table table-sm table-striped mb-0" id="newValuesTable">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 35%;"><?php echo __('Field') ?></th>
+                      <th class="auditt-width-35-3af6"><?php echo __('Field') ?></th>
                       <th><?php echo __('Value') ?></th>
                     </tr>
                   </thead>

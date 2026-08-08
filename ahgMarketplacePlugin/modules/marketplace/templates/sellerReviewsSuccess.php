@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-height-10px-977d { height: 10px; }
+  .market-width-40px-4792 { width: 40px; }
+  .market-width-50px-ae1f { width: 50px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('My Reviews'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -37,11 +46,11 @@
             $pct = $totalReviews > 0 ? round(($count / $totalReviews) * 100) : 0;
           ?>
           <div class="d-flex align-items-center mb-1">
-            <span class="small text-nowrap me-2" style="width: 50px;"><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
-            <div class="progress flex-grow-1" style="height: 10px;">
-              <div class="progress-bar bg-warning" style="width: <?php echo $pct; ?>%;"></div>
+            <span class="small text-nowrap me-2 market-width-50px-ae1f" ><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
+            <div class="progress flex-grow-1 market-height-10px-977d" >
+              <div class="progress-bar bg-warning" data-ahg-style="width: <?php echo $pct; ?>%;"></div>
             </div>
-            <span class="small text-muted ms-2" style="width: 40px;"><?php echo $count; ?></span>
+            <span class="small text-muted ms-2 market-width-40px-4792" ><?php echo $count; ?></span>
           </div>
         <?php endfor; ?>
       </div>

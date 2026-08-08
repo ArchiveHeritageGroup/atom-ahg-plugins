@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .vendor-max-height-80px-780c { max-height: 80px; }
+</style>
 <div class="container-xxl py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2 mb-0"><?php echo $isNew ? __('New Contract') : __('Edit Contract') ?></h1>
@@ -49,7 +56,7 @@
             <label class="form-label"><?php echo __('Contract Logo') ?></label>
             <?php if (!empty($contract->logo_path)): ?>
             <div class="mb-2">
-              <img src="/uploads<?php echo esc_entities($contract->logo_path) ?>" alt="Logo" class="img-thumbnail" style="max-height: 80px;">
+              <img src="/uploads<?php echo esc_entities($contract->logo_path) ?>" alt="Logo" class="img-thumbnail vendor-max-height-80px-780c" >
               <div class="form-check mt-1">
                 <input type="checkbox" name="remove_logo" id="remove_logo" class="form-check-input" value="1">
                 <label class="form-check-label text-danger" for="remove_logo"><?php echo __('Remove logo') ?></label>

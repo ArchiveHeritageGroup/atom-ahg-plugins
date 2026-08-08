@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .semant-width-60px-height-6px-c021 { width: 60px; height: 6px; }
+</style>
 <?php $term = $sf_data->getRaw('term'); ?>
 <?php $synonyms = $sf_data->getRaw('synonyms'); ?>
 
@@ -97,8 +104,8 @@
                                         <span class="badge bg-<?php echo $color; ?>"><?php echo $syn->relationship_type; ?></span>
                                     </td>
                                     <td>
-                                        <div class="progress" style="width: 60px; height: 6px;">
-                                            <div class="progress-bar" style="width: <?php echo ($syn->weight * 100); ?>%"></div>
+                                        <div class="progress semant-width-60px-height-6px-c021" >
+                                            <div class="progress-bar" data-ahg-style="width: <?php echo ($syn->weight * 100); ?>%"></div>
                                         </div>
                                         <small class="text-muted"><?php echo number_format($syn->weight, 2); ?></small>
                                     </td>

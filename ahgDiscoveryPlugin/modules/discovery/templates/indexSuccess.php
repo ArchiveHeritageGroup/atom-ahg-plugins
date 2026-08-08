@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .discov-color-barcolor-dbf4 { color:' + barColor + '; }
+  .discov-height-100-width-pct-backgro-531e { height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px; }
+  .discov-height-4px-width-60px-backgr-03f0 { height:4px;width:60px;background:#e9ecef;border-radius:2px;margin-top:2px; }
+  .discov-min-width-80px-4d01 { min-width:80px; }
+</style>
 
 <?php use_helper('I18N'); ?>
 
@@ -499,10 +509,10 @@ $initialQuery = $sf_data->getRaw('query') ?? '';
     if (typeof r.score === 'number') {
       var pct = Math.round(r.score * 100);
       var barColor = pct >= 70 ? '#198754' : pct >= 40 ? '#fd7e14' : '#6c757d';
-      html += '<span class="ms-2 flex-shrink-0 text-nowrap" style="min-width:80px;" title="Similarity: ' + pct + '%">';
-      html += '<small class="fw-bold" style="color:' + barColor + '">' + pct + '%</small>';
-      html += '<div style="height:4px;width:60px;background:#e9ecef;border-radius:2px;margin-top:2px;">';
-      html += '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:2px;"></div>';
+      html += '<span class="ms-2 flex-shrink-0 text-nowrap discov-min-width-80px-4d01"  title="Similarity: ' + pct + '%">';
+      html += '<small class="fw-bold discov-color-barcolor-dbf4" >' + pct + '%</small>';
+      html += '<div class="discov-height-4px-width-60px-backgr-03f0">';
+      html += '<div class="discov-height-100-width-pct-backgro-531e"></div>';
       html += '</div>';
       html += '</span>';
     }

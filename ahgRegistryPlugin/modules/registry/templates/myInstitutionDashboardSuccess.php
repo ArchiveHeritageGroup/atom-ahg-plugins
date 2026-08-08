@@ -1,4 +1,14 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-display-none-max-height-250p-fbb4 { display: none; max-height: 250px; overflow-y: auto; }
+  .regist-width-80px-height-80px-732c { width: 80px; height: 80px; }
+  .regist-width-80px-height-80px-objec-954a { width: 80px; height: 80px; object-fit: contain; }
+  .regist-width-auto-dc25 { width: auto; }
+</style>
 
 <?php slot('title'); ?><?php echo __('My Institution Dashboard'); ?><?php end_slot(); ?>
 
@@ -116,7 +126,7 @@
         </button>
       </div>
     </form>
-    <div id="admin-inst-results" class="list-group mt-2" style="display: none; max-height: 250px; overflow-y: auto;"></div>
+    <div id="admin-inst-results" class="list-group mt-2 regist-display-none-max-height-250p-fbb4" ></div>
   </div>
 </div>
 
@@ -229,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionClaim']); ?>" class="d-flex gap-2">
       <input type="hidden" name="institution_id" value="<?php echo (int) $institution->id; ?>">
       <?php if ($isAdmin): ?>
-      <select name="role" class="form-select form-select-sm" style="width: auto;">
+      <select name="role" class="form-select form-select-sm regist-width-auto-dc25" >
         <option value="owner"><?php echo __('as Owner'); ?></option>
         <option value="manager"><?php echo __('as Manager'); ?></option>
       </select>
@@ -271,9 +281,9 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="card-body">
     <div class="d-flex align-items-start">
       <?php if (!empty($institution->logo_path)): ?>
-        <img src="<?php echo htmlspecialchars($institution->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 80px; height: 80px; object-fit: contain;">
+        <img src="<?php echo htmlspecialchars($institution->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 regist-width-80px-height-80px-objec-954a" >
       <?php else: ?>
-        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+        <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-80px-height-80px-732c" >
           <i class="fas fa-university fa-2x text-muted"></i>
         </div>
       <?php endif; ?>

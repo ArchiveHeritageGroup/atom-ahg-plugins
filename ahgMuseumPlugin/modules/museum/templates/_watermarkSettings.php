@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-background-fff3cd-border-lef-d13a { background: #fff3cd; border-left-color: #ffc107; }
+  .museum-margin-left-10px-214d { margin-left: 10px; }
+  .museum-width-3em-height-1-5em-9dab { width: 3em; height: 1.5em; }
+</style>
 <?php
 /**
  * Watermark Settings Partial for Museum Plugin
@@ -69,14 +78,14 @@ $opacity = $watermarkSetting->opacity ?? 0.4;
           <input class="form-check-input" type="checkbox" role="switch" 
                  id="watermark_enabled" name="watermark_enabled" value="1"
                  <?php echo $watermarkEnabled ? 'checked' : ''; ?>
-                 style="width: 3em; height: 1.5em;">
-          <label class="form-check-label" for="watermark_enabled" style="margin-left: 10px;">
+                 class="museum-width-3em-height-1-5em-9dab">
+          <label class="form-check-label" for="watermark_enabled" class="museum-margin-left-10px-214d">
             <strong><?php echo __('Enable watermark for this object'); ?></strong>
           </label>
         </div>
       </div>
 
-      <div id="watermark-options" style="<?php echo $watermarkEnabled ? '' : 'display:none;'; ?>">
+      <div id="watermark-options" data-ahg-style="<?php echo $watermarkEnabled ? '' : 'display:none;'; ?>">
         
         <!-- System Watermark Type -->
         <div class="cco-field">
@@ -118,7 +127,7 @@ $opacity = $watermarkSetting->opacity ?? 0.4;
         <?php endif; ?>
 
         <!-- Upload NEW Custom Watermark -->
-        <div class="cco-field" style="background: #fff3cd; border-left-color: #ffc107;">
+        <div class="cco-field museum-background-fff3cd-border-lef-d13a" >
           <div class="field-header">
             <label><?php echo __('Upload NEW Custom Watermark'); ?></label>
           </div>

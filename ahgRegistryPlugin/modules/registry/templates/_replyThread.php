@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-display-none-224b { display: none; }
+  .regist-width-32px-height-32px-0269 { width: 32px; height: 32px; }
+</style>
 <?php
   // Variables: $reply (single reply) OR $replies (collection), $level (default 0), $discussionId, $groupSlug
   // Can be called recursively for nested replies
@@ -17,7 +25,7 @@
 <div class="card mb-2<?php echo $currentLevel > 0 ? ' ms-' . min($currentLevel * 3, 12) : ''; ?>" id="reply-<?php echo (int) ($r->id ?? 0); ?>">
   <div class="card-body py-2">
     <div class="d-flex align-items-start">
-      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 32px; height: 32px;">
+      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0 regist-width-32px-height-32px-0269" >
         <i class="fas fa-user text-muted small"></i>
       </div>
       <div class="flex-grow-1">
@@ -69,7 +77,7 @@
           <button type="button" class="btn btn-sm btn-outline-secondary reply-toggle-btn" data-reply-id="<?php echo (int) ($r->id ?? 0); ?>">
             <i class="fas fa-reply me-1"></i><?php echo __('Reply'); ?>
           </button>
-          <div class="reply-form mt-2" id="reply-form-<?php echo (int) ($r->id ?? 0); ?>" style="display: none;">
+          <div class="reply-form mt-2" id="reply-form-<?php echo (int) ($r->id ?? 0); ?>" class="regist-display-none-224b">
             <?php
               $formAction = isset($replyUrl) && $replyUrl
                 ? $replyUrl

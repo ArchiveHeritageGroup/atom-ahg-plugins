@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-object-fit-cover-max-height--4f95 { object-fit: cover; max-height: 200px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Blog & News'); ?><?php end_slot(); ?>
 
@@ -71,7 +78,7 @@
     <div class="row g-0">
       <?php if (!empty($post->featured_image_path)): ?>
       <div class="col-md-4">
-        <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="img-fluid rounded-start h-100" alt="" style="object-fit: cover; max-height: 200px;">
+        <img src="<?php echo htmlspecialchars($post->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="img-fluid rounded-start h-100" alt="" class="regist-object-fit-cover-max-height--4f95">
       </div>
       <?php endif; ?>
       <div class="col-md-<?php echo !empty($post->featured_image_path) ? '8' : '12'; ?>">

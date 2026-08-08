@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-background-color-var-ahg-pri-4332 { background-color: var(--ahg-primary, #005837); color: #fff; }
+</style>
 <?php
 $footerText = '';
 $showBranding = true;
@@ -18,7 +25,7 @@ try {
 } catch (Exception $e) {}
 ?>
 <?php if ($showBranding && !empty($footerText)): ?>
-<footer class="ahg-site-footer text-center py-3" role="contentinfo" style="background-color: var(--ahg-primary, #005837); color: #fff;">
+<footer class="ahg-site-footer text-center py-3" role="contentinfo" class="themeb-background-color-var-ahg-pri-4332">
   <small><?php echo esc_specialchars($footerText); ?></small>
   <div class="mt-1"><a href="<?php echo url_for(['module' => 'staticpage', 'action' => 'static', 'slug' => 'accessibility']); ?>" class="text-white-50 small"><?php echo __('Accessibility'); ?></a></div>
 </footer>

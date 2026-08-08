@@ -1,4 +1,14 @@
 <?php use_helper('Javascript') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-max-width-400px-6bdc { max-width: 400px; }
+  .datami-width-100px-b3a1 { width: 100px; }
+  .datami-width-150px-d990 { width: 150px; }
+  .datami-width-80px-db80 { width: 80px; }
+</style>
 
 <h1><?php echo __('Validate Import File') ?></h1>
 
@@ -146,9 +156,9 @@
             <table class="table table-sm table-striped">
                 <thead>
                     <tr>
-                        <th style="width: 80px"><?php echo __('Row') ?></th>
-                        <th style="width: 150px"><?php echo __('Column') ?></th>
-                        <th style="width: 100px"><?php echo __('Severity') ?></th>
+                        <th class="datami-width-80px-db80"><?php echo __('Row') ?></th>
+                        <th class="datami-width-150px-d990"><?php echo __('Column') ?></th>
+                        <th class="datami-width-100px-b3a1"><?php echo __('Severity') ?></th>
                         <th><?php echo __('Message') ?></th>
                     </tr>
                 </thead>
@@ -199,7 +209,7 @@
         if (!empty($violations)):
         ?>
         <h6 class="mt-4"><?php echo __('Issues by Rule') ?></h6>
-        <table class="table table-sm" style="max-width: 400px">
+        <table class="table table-sm datami-max-width-400px-6bdc" >
             <thead>
                 <tr>
                     <th><?php echo __('Rule') ?></th>

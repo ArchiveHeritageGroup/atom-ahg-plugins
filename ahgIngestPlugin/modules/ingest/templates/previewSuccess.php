@@ -1,3 +1,15 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ingest-cursor-pointer-58ab { cursor:pointer; }
+  .ingest-display-block-0adf { display:block; }
+  .ingest-height-4px-00f6 { height: 4px; }
+  .ingest-max-height-500px-overflow-y--9117 { max-height: 500px; overflow-y: auto; }
+  .ingest-width-75-d5ec { width: 75%; }
+  .ingest-width-14px-b42f { width:14px; }
+</style>
 <?php
 $session = $sf_data->getRaw('session');
 $tree = $sf_data->getRaw('tree') ?? [];
@@ -26,8 +38,8 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
         <div class="flex-fill"><span class="badge bg-primary rounded-pill">5</span><br><small class="fw-bold"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 75%"></div>
+    <div class="progress mt-2 ingest-height-4px-00f6" >
+        <div class="progress-bar ingest-width-75-d5ec" ></div>
     </div>
 </div>
 
@@ -69,7 +81,7 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
                     <i class="fas fa-expand-alt me-1"></i><?php echo __('Expand All') ?>
                 </button>
             </div>
-            <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+            <div class="card-body ingest-max-height-500px-overflow-y--9117" >
                 <?php if (!empty($tree)): ?>
                     <?php echo renderTree($tree); ?>
                 <?php else: ?>
@@ -145,7 +157,7 @@ $doCount = $sf_data->getRaw('doCount') ?? 0;
 function renderTree(array $nodes, int $depth = 0): string
 {
     $html = '<ul class="list-unstyled ' . ($depth > 0 ? 'ms-3 tree-children' : '') . '"' .
-            ($depth > 0 ? ' style="display:block;"' : '') . '>';
+            ($depth > 0 ? ' class="ingest-display-block-0adf"' : '') . '>';
 
     foreach ($nodes as $node) {
         $cls = 'text-success';
@@ -158,12 +170,12 @@ function renderTree(array $nodes, int $depth = 0): string
         $hasChildren = !empty($node['children']);
 
         $html .= '<li class="mb-1">';
-        $html .= '<div class="d-flex align-items-center tree-node" data-row="' . $node['row_number'] . '" style="cursor:pointer;">';
+        $html .= '<div class="d-flex align-items-center tree-node" data-row="' . $node['row_number'] . '" class="ingest-cursor-pointer-58ab">';
 
         if ($hasChildren) {
             $html .= '<i class="fas fa-caret-down me-1 tree-toggle"></i>';
         } else {
-            $html .= '<i class="fas fa-file me-1 text-muted" style="width:14px"></i>';
+            $html .= '<i class="fas fa-file me-1 text-muted ingest-width-14px-b42f" ></i>';
         }
 
         $html .= '<span class="' . $cls . '">';

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .author-height-160px-max-width-100-o-1437 { height: 160px; max-width: 100%; overflow: hidden; position: relative; border: 1px solid #dee2e6; border-radius: 4px; }
+</style>
 <?php
 /**
  * Partial: one candidate card for the middle column.
@@ -128,7 +135,7 @@ $compositeScore = $candidate->composite_score !== null ? (float) $candidate->com
       <div class="mt-2 ar-map" id="ar-map-cand-<?php echo (int) $candidate->id; ?>"
            data-lat="<?php echo (float) $coord['lat']; ?>"
            data-lng="<?php echo (float) $coord['lng']; ?>"
-           style="height: 160px; max-width: 100%; overflow: hidden; position: relative; border: 1px solid #dee2e6; border-radius: 4px;"></div>
+           class="author-height-160px-max-width-100-o-1437"></div>
     <?php endif; ?>
   </div>
 

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-height-20px-84ce { height: 20px; }
+</style>
 <?php
 /**
  * Heritage Custodian Batch Operations.
@@ -63,8 +70,8 @@ $total = $jobData['total'] ?? 0;
                         <td><?php echo esc_specialchars($job->job_type); ?></td>
                         <td>
                             <?php $progress = $job->total_items > 0 ? round(($job->processed_items / $job->total_items) * 100) : 0; ?>
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar" style="width: <?php echo $progress; ?>%"><?php echo $progress; ?>%</div>
+                            <div class="progress herita-height-20px-84ce" >
+                                <div class="progress-bar" data-ahg-style="width: <?php echo $progress; ?>%"><?php echo $progress; ?>%</div>
                             </div>
                             <small class="text-muted"><?php echo $job->processed_items; ?>/<?php echo $job->total_items; ?> items</small>
                         </td>

@@ -1,4 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+  .regist-width-40px-height-40px-objec-79db { width: 40px; height: 40px; object-fit: contain; }
+</style>
 
 <?php slot('title'); ?><?php echo __('My Favorites'); ?><?php end_slot(); ?>
 
@@ -30,9 +38,9 @@
       <a href="<?php echo url_for(['module' => 'registry', 'action' => 'institutionView', 'slug' => $inst->slug]); ?>" class="list-group-item list-group-item-action">
         <div class="d-flex align-items-center">
           <?php if (!empty($inst->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($inst->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($inst->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 regist-width-40px-height-40px-objec-79db" >
           <?php else: ?>
-            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fas fa-university text-muted"></i></div>
+            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-40px-height-40px-9a6a" ><i class="fas fa-university text-muted"></i></div>
           <?php endif; ?>
           <div class="flex-grow-1">
             <strong><?php echo htmlspecialchars($inst->name, ENT_QUOTES, 'UTF-8'); ?></strong>
@@ -60,9 +68,9 @@
       <a href="<?php echo url_for(['module' => 'registry', 'action' => 'vendorView', 'slug' => $v->slug]); ?>" class="list-group-item list-group-item-action">
         <div class="d-flex align-items-center">
           <?php if (!empty($v->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($v->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($v->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 regist-width-40px-height-40px-objec-79db" >
           <?php else: ?>
-            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fas fa-building text-muted"></i></div>
+            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-40px-height-40px-9a6a" ><i class="fas fa-building text-muted"></i></div>
           <?php endif; ?>
           <div class="flex-grow-1">
             <strong><?php echo htmlspecialchars($v->name, ENT_QUOTES, 'UTF-8'); ?></strong>
@@ -91,9 +99,9 @@
       <a href="<?php echo url_for(['module' => 'registry', 'action' => 'softwareView', 'slug' => $sw->slug]); ?>" class="list-group-item list-group-item-action">
         <div class="d-flex align-items-center">
           <?php if (!empty($sw->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($sw->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($sw->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 regist-width-40px-height-40px-objec-79db" >
           <?php else: ?>
-            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fas fa-cube text-muted"></i></div>
+            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-40px-height-40px-9a6a" ><i class="fas fa-cube text-muted"></i></div>
           <?php endif; ?>
           <div class="flex-grow-1">
             <strong><?php echo htmlspecialchars($sw->name, ENT_QUOTES, 'UTF-8'); ?></strong>
@@ -124,7 +132,7 @@
       <?php foreach ($groups as $g): ?>
       <a href="<?php echo url_for(['module' => 'registry', 'action' => 'groupView', 'slug' => $g->slug]); ?>" class="list-group-item list-group-item-action">
         <div class="d-flex align-items-center">
-          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="fas fa-users text-muted"></i></div>
+          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-40px-height-40px-9a6a" ><i class="fas fa-users text-muted"></i></div>
           <div class="flex-grow-1">
             <strong><?php echo htmlspecialchars($g->name, ENT_QUOTES, 'UTF-8'); ?></strong>
             <div class="small text-muted"><?php echo (int) ($g->member_count ?? 0); ?> <?php echo __('members'); ?></div>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-display-none-224b { display: none; }
+</style>
 <?php
 /**
  * AI Tools Section - Combined NER + Summarization
@@ -91,7 +98,7 @@ try {
     <?php endif; ?>
 
     <!-- Results Area -->
-    <div id="aiResultsArea" class="mt-2" style="display: none;"></div>
+    <div id="aiResultsArea" class="mt-2 ai-display-none-224b" ></div>
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

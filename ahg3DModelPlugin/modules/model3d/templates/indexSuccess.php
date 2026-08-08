@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .3dmode-width-50px-height-50px-4aa8 { width:50px;height:50px; }
+  .3dmode-width-50px-height-50px-objec-673e { width:50px;height:50px;object-fit:cover; }
+</style>
 <?php
 /**
  * 3D Model Index Template - List all models
@@ -49,9 +57,9 @@ $totalPages = $sf_data->getRaw('totalPages');
                 <tr>
                     <td>
                         <?php if ($model->thumbnail): ?>
-                        <img src="/uploads/<?php echo $model->thumbnail ?>" alt="" class="rounded" style="width:50px;height:50px;object-fit:cover;">
+                        <img src="/uploads/<?php echo $model->thumbnail ?>" alt="" class="rounded 3dmode-width-50px-height-50px-objec-673e" >
                         <?php else: ?>
-                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center" style="width:50px;height:50px;">
+                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center 3dmode-width-50px-height-50px-4aa8" >
                             <i class="fas fa-cube"></i>
                         </div>
                         <?php endif ?>

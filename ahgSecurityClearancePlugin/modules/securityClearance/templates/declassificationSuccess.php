@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-display-inline-5677 { display:inline; }
+</style>
 <?php
 /**
  * Declassification Management Template.
@@ -33,7 +40,7 @@
           <td><span class="badge bg-success"><?php echo esc_entities($dec->to_classification ?? 'Public') ?></span></td>
           <td><?php echo $dec->scheduled_date ?></td>
           <td>
-            <form action="/security/declassify/<?php echo $dec->object_id ?>" method="post" style="display:inline">
+            <form action="/security/declassify/<?php echo $dec->object_id ?>" method="post" class="securi-display-inline-5677">
               <input type="hidden" name="new_classification_id" value="<?php echo $dec->to_classification_id ?>">
               <input type="hidden" name="reason" value="Scheduled declassification">
               <button type="submit" class="btn btn-sm btn-success">

@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .spectr-display-none-224b { display: none; }
+  .spectr-height-100-587c { height: 100%; }
+  .spectr-height-calc-100vh-120px-0420 { height: calc(100vh - 120px); }
+</style>
 <?php
 /**
  * Condition Photos Template
@@ -112,7 +121,7 @@ use_javascript('/plugins/ahgSpectrumPlugin/web/js/condition-photos.js');
                                 </p>
                             </div>
                             <!-- Preview area -->
-                            <div id="photo-preview" class="row mt-3" style="display: none;"></div>
+                            <div id="photo-preview" class="row mt-3 spectr-display-none-224b" ></div>
                         </div>
                     </div>
                     
@@ -708,8 +717,8 @@ function deletePhoto(photoId) {
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-0" style="height: calc(100vh - 120px);">
-                <div id="annotator-container" style="height: 100%;"></div>
+            <div class="modal-body p-0 spectr-height-calc-100vh-120px-0420" >
+                <div id="annotator-container" class="spectr-height-100-587c"></div>
             </div>
             <div class="modal-footer">
                 <span id="annotation-status" class="text-muted me-auto"></span>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-height-200px-0921 { height: 200px; }
+</style>
 <?php
 /**
  * Heritage Analytics Search Insights.
@@ -173,7 +180,7 @@ $patterns = [
         <div class="row">
             <div class="col-md-8">
                 <h6>By Hour of Day</h6>
-                <div style="height: 200px;">
+                <div class="herita-height-200px-0921">
                     <canvas id="hourChart"></canvas>
                 </div>
             </div>

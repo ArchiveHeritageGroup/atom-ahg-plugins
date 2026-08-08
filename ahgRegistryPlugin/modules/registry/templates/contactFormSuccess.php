@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-display-none-224b { display: none; }
+</style>
 
 <?php slot('title'); ?><?php echo $contact ? __('Edit Contact') : __('Add Contact'); ?><?php end_slot(); ?>
 
@@ -136,7 +143,7 @@
     </form>
 
     <?php if ($contact && !empty($c->id)): ?>
-    <form id="delete-contact-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContactDelete', 'id' => (int) $c->id]); ?>" style="display: none;">
+    <form id="delete-contact-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionContactDelete', 'id' => (int) $c->id]); ?>" class="regist-display-none-224b">
     </form>
     <?php endif; ?>
 

@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .storag-height-1-5rem-5685 { height: 1.5rem; }
+  .storag-white-space-pre-wrap-4f5f { white-space: pre-wrap; }
+  .storag-width-6rem-e563 { width: 6rem; }
+</style>
 <?php
 /*
  * heratio#145 — Strongroom show (AtoM Heratio).
@@ -51,7 +60,7 @@ $barClass = null === $pct ? 'bg-secondary'
             <dd class="col-sm-8"><?php echo esc_specialchars($room->location_description ?: '—'); ?></dd>
 
             <dt class="col-sm-4"><?php echo __('Notes'); ?></dt>
-            <dd class="col-sm-8" style="white-space: pre-wrap;"><?php echo esc_specialchars($room->notes ?: '—'); ?></dd>
+            <dd class="col-sm-8 storag-white-space-pre-wrap-4f5f" ><?php echo esc_specialchars($room->notes ?: '—'); ?></dd>
           </dl>
         </div>
       </div>
@@ -63,8 +72,8 @@ $barClass = null === $pct ? 'bg-secondary'
           <?php if (null !== $capacity) { ?>
             <div class="progress mb-2" role="progressbar"
                  aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100"
-                 style="height: 1.5rem;">
-              <div class="progress-bar <?php echo $barClass; ?>" style="width: <?php echo $pct; ?>%"><?php echo $pct; ?>%</div>
+                 class="storag-height-1-5rem-5685">
+              <div class="progress-bar <?php echo $barClass; ?>" data-ahg-style="width: <?php echo $pct; ?>%"><?php echo $pct; ?>%</div>
             </div>
             <dl class="row mb-0 small">
               <dt class="col-6"><?php echo __('Total'); ?></dt>
@@ -100,7 +109,7 @@ $barClass = null === $pct ? 'bg-secondary'
             <th><?php echo __('Location'); ?></th>
             <th class="text-end"><?php echo __('Size used'); ?></th>
             <?php if ($sf_user->hasCredential('administrator')) { ?>
-              <th class="text-end" style="width: 6rem;"></th>
+              <th class="text-end storag-width-6rem-e563" ></th>
             <?php } ?>
           </tr></thead>
           <tbody>

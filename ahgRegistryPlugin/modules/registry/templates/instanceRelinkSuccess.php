@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-max-height-400px-overflow-y--f4d9 { max-height: 400px; overflow-y: auto; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Re-link Instance'); ?><?php end_slot(); ?>
 
@@ -52,7 +59,7 @@
           <div class="mb-3">
             <input type="text" class="form-control mb-3" id="inst-filter" placeholder="<?php echo __('Filter institutions...'); ?>">
           </div>
-          <div class="list-group" id="inst-list" style="max-height: 400px; overflow-y: auto;">
+          <div class="list-group" id="inst-list" class="regist-max-height-400px-overflow-y--f4d9">
             <?php foreach ($institutions as $inst): ?>
             <label class="list-group-item list-group-item-action d-flex align-items-center inst-item">
               <input type="radio" name="institution_id" value="<?php echo (int) $inst->id; ?>" class="form-check-input me-3" required>

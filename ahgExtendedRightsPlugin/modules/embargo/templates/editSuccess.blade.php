@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .extend-display-none-224b { display: none; }
+</style>
 
 @section('title')
   <h1>{{ __('Edit Embargo') }}</h1>
@@ -108,7 +113,7 @@ $embargoStatuses = $taxonomyService->getEmbargoStatuses(false);
             {{ __('This will create or update embargoes on all child records below this item.') }}
           </div>
         </div>
-        <div class="alert alert-warning mb-0" id="propagation-warning" style="display: none;">
+        <div class="alert alert-warning mb-0" id="propagation-warning" class="extend-display-none-224b">
           <i class="fas fa-exclamation-triangle me-2"></i>
           {{ __('Warning: This will create new embargoes on descendants that do not have one, and update those that do.') }}
         </div>

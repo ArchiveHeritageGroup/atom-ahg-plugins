@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-max-width-16rem-289f { max-width: 16rem; }
+  .settin-max-width-24rem-b0a2 { max-width: 24rem; }
+</style>
 
 @section('content')
 <div class="row">
@@ -57,7 +63,7 @@
 
           <div class="mb-3">
             <label class="form-label" for="auto_update_frequency">{{ __('Frequency') }}</label>
-            <select class="form-select" id="auto_update_frequency" name="auto_update_frequency" style="max-width: 16rem;">
+            <select class="form-select" id="auto_update_frequency" name="auto_update_frequency" class="settin-max-width-16rem-289f">
               <option value="daily" {{ $freq === 'daily' ? 'selected' : '' }}>{{ __('Daily (02:00)') }}</option>
               <option value="weekly" {{ $freq === 'weekly' ? 'selected' : '' }}>{{ __('Weekly (Sunday 02:00)') }}</option>
             </select>
@@ -66,7 +72,7 @@
 
           <div class="mb-3">
             <label class="form-label" for="auto_update_notify_email">{{ __('Notification email (optional)') }}</label>
-            <input type="email" class="form-control" id="auto_update_notify_email" name="auto_update_notify_email" value="{{ $email }}" placeholder="ops@example.org" style="max-width: 24rem;">
+            <input type="email" class="form-control" id="auto_update_notify_email" name="auto_update_notify_email" value="{{ $email }}" placeholder="ops@example.org" class="settin-max-width-24rem-b0a2">
             <div class="form-text">{{ __('Emailed on a successful update, a warning (skipped dirty repo), or a rollback. Requires a working mail command.') }}</div>
           </div>
         </div>

@@ -108,6 +108,88 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
 
         // Make the CSP helpers available to every template. See AhgCspHelper.php.
         $this->dispatcher->connect('context.load_factories', ['ahgCorePluginConfiguration', 'loadCoreHelpers']);
+
+        // Apply data-ahg-style declarations. See injectStyleApplier().
+        $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectStyleApplier']);
+    }
+
+    /**
+     * Apply the declarations carried in data-ahg-style.
+     *
+     * A style attribute is dropped outright by an enforcing Content Security
+     * Policy, and no nonce can rescue it - nonces apply to <style> and <script>
+     * elements. A fixed declaration can become a class, but a computed one cannot:
+     * a per-record width or an institution's own colour is not knowable when the
+     * stylesheet is written.
+     *
+     * CSP does not cover the CSSOM, so the declaration travels in a data attribute
+     * and is set as a property here. That is the one route that keeps a computed
+     * value working under the enforcing header.
+     *
+     * Injected once from core rather than as a script in each of the 178 templates
+     * that need it, so a template author writes data-ahg-style and nothing else.
+     */
+    public static function injectStyleApplier($event, $content)
+    {
+        if (!is_string($content) || false === stripos($content, 'data-ahg-style')) {
+            return $content;
+        }
+
+        if (false === stripos($content, '</body>')) {
+            return $content;
+        }
+
+        $nonce = sfConfig::get('csp_nonce', '');
+        $nonceAttr = $nonce ? ' '.preg_replace('/^nonce=/', 'nonce="', $nonce).'"' : '';
+
+        // setProperty rather than assigning cssText or the style attribute:
+        // writing the attribute back would be blocked by exactly the policy this
+        // exists to work with. Custom properties (--foo) are handled too, which
+        // is why the name is passed through untouched.
+        $js = <<<'APPLIER'
+(function () {
+  function apply(root) {
+    root.querySelectorAll('[data-ahg-style]').forEach(function (el) {
+      var decls = el.getAttribute('data-ahg-style');
+      if (!decls) { return; }
+      decls.split(';').forEach(function (decl) {
+        var i = decl.indexOf(':');
+        if (i < 1) { return; }
+        var name = decl.slice(0, i).trim();
+        var value = decl.slice(i + 1).trim();
+        if (!name || !value) { return; }
+        try { el.style.setProperty(name, value); } catch (e) {}
+      });
+      el.removeAttribute('data-ahg-style');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { apply(document); });
+  } else {
+    apply(document);
+  }
+
+  // Content added after load - autocompletes, modals, AJAX panels - carries the
+  // same attributes, so watch for it rather than leaving those elements bare.
+  if (window.MutationObserver) {
+    new MutationObserver(function (records) {
+      records.forEach(function (r) {
+        r.addedNodes.forEach(function (n) {
+          if (1 !== n.nodeType) { return; }
+          if (n.hasAttribute && n.hasAttribute('data-ahg-style')) { apply(n.parentNode || document); }
+          else if (n.querySelector && n.querySelector('[data-ahg-style]')) { apply(n); }
+        });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+})();
+APPLIER;
+
+        $script = "\n<script".$nonceAttr.">".$js."</script>\n";
+        $pos = stripos($content, '</body>');
+
+        return substr($content, 0, $pos).$script.substr($content, $pos);
     }
 
     /**

@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-width-140px-1417 { width: 140px; }
+</style>
 
 @php
 $logs = $historyData['logs'] ?? [];
@@ -73,7 +78,7 @@ $filters = $historyData['filters'] ?? [];
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 140px;">Timestamp</th>
+                        <th class="herita-width-140px-1417">Timestamp</th>
                         <th>User</th>
                         <th>Action</th>
                         <th>Object</th>

@@ -1,4 +1,12 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .sahra-max-height-220px-overflow-y--d8f2 { max-height:220px; overflow-y:auto; }
+  .sahra-z-index-1000-max-height-280p-4549 { z-index:1000; max-height:280px; overflow-y:auto; }
+</style>
 
 <div class="container">
   <div class="row">
@@ -61,7 +69,7 @@
               <input type="text" class="form-control" id="sahra-site-search" autocomplete="off" placeholder="Type at least 2 characters of the site title...">
               <input type="hidden" name="site_object_id" id="sahra-site-id">
               <input type="hidden" name="site_name" id="sahra-site-name">
-              <div id="sahra-site-results" class="list-group position-absolute w-100 shadow-sm d-none" style="z-index:1000; max-height:280px; overflow-y:auto;"></div>
+              <div id="sahra-site-results" class="list-group position-absolute w-100 shadow-sm d-none sahra-z-index-1000-max-height-280p-4549" ></div>
               <div id="sahra-site-chosen" class="form-text mt-2 d-none">
                 <i class="fas fa-check-circle text-success me-1"></i><span id="sahra-site-chosen-title"></span>
                 <button type="button" class="btn btn-link btn-sm p-0 ms-1" id="sahra-site-clear">change</button>
@@ -71,7 +79,7 @@
 
             <div id="sahra-areas-wrap" class="mb-3 d-none">
               <label class="form-label">Dig areas covered <small class="text-muted fw-normal">(child records of the site)</small></label>
-              <div id="sahra-areas" class="border rounded p-2" style="max-height:220px; overflow-y:auto;"></div>
+              <div id="sahra-areas" class="border rounded p-2 sahra-max-height-220px-overflow-y--d8f2" ></div>
             </div>
 
             <div class="row">

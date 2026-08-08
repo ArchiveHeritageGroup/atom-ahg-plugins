@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-auto-4f15 { width:auto; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'journal', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -39,7 +46,7 @@ $badge = function ($status) {
 
   <form method="post" class="d-inline-flex align-items-center gap-1 ms-auto">
     <input type="hidden" name="form_action" value="set_status">
-    <select name="status" class="form-select form-select-sm" style="width:auto">
+    <select name="status" class="form-select form-select-sm resear-width-auto-4f15" >
       <?php foreach (['draft', 'published', 'archived'] as $s): ?>
         <option value="<?php echo $s; ?>" <?php echo (($j['status'] ?? '') === $s) ? 'selected' : ''; ?>><?php echo __(ucfirst($s)); ?></option>
       <?php endforeach; ?>

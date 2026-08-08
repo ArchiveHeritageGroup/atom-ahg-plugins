@@ -1,4 +1,13 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .doi-height-20px-84ce { height: 20px; }
+  .doi-width-40-8e00 { width: 40%; }
+  .doi-width-50-cd77 { width: 50%; }
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -89,7 +98,7 @@
                                 <tr>
                                     <th>Month</th>
                                     <th class="text-end">DOIs Minted</th>
-                                    <th style="width: 50%"></th>
+                                    <th class="doi-width-50-cd77"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,8 +111,8 @@
                                         <td><?php echo htmlspecialchars($month->month) ?></td>
                                         <td class="text-end"><?php echo $month->count ?></td>
                                         <td>
-                                            <div class="progress" style="height: 20px;">
-                                                <div class="progress-bar bg-primary" style="width: <?php echo $percentage ?>%"></div>
+                                            <div class="progress doi-height-20px-84ce" >
+                                                <div class="progress-bar bg-primary" data-ahg-style="width: <?php echo $percentage ?>%"></div>
                                             </div>
                                         </td>
                                     </tr>
@@ -130,7 +139,7 @@
                                 <tr>
                                     <th>Repository</th>
                                     <th class="text-end">Count</th>
-                                    <th style="width: 40%"></th>
+                                    <th class="doi-width-40-8e00"></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,8 +152,8 @@
                                         <td><?php echo htmlspecialchars($repo->repository ?? 'No repository') ?></td>
                                         <td class="text-end"><?php echo $repo->count ?></td>
                                         <td>
-                                            <div class="progress" style="height: 20px;">
-                                                <div class="progress-bar bg-success" style="width: <?php echo $percentage ?>%"></div>
+                                            <div class="progress doi-height-20px-84ce" >
+                                                <div class="progress-bar bg-success" data-ahg-style="width: <?php echo $percentage ?>%"></div>
                                             </div>
                                         </td>
                                     </tr>

@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .loan-height-8px-d826 { height: 8px; }
+</style>
 
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
@@ -238,8 +245,8 @@
                 <span><?php echo $purposeInfo['label']; ?></span>
                 <span class="text-muted"><?php echo $count; ?> (<?php echo round(($count / $total) * 100); ?>%)</span>
               </div>
-              <div class="progress" style="height: 8px;">
-                <div class="progress-bar bg-<?php echo $purposeInfo['color']; ?>" style="width: <?php echo ($count / $total) * 100; ?>%"></div>
+              <div class="progress loan-height-8px-d826" >
+                <div class="progress-bar bg-<?php echo $purposeInfo['color']; ?>" data-ahg-style="width: <?php echo ($count / $total) * 100; ?>%"></div>
               </div>
             </div>
           <?php endforeach; ?>

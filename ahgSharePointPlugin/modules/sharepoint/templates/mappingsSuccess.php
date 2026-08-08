@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .sharep-display-none-93b8 { display:none; }
+  .sharep-width-14-6306 { width:14%; }
+  .sharep-width-18-bae1 { width:18%; }
+  .sharep-width-32-f451 { width:32%; }
+</style>
 <?php
 $drives = $sf_data->getRaw('drives');
 $templates = $sf_data->getRaw('templates');
@@ -156,10 +166,10 @@ foreach ($standardsAllFlat as $code => $info) {
     <table class="table" id="mappings-table">
         <thead>
             <tr>
-                <th style="width:32%"><?php echo __('SharePoint field') ?></th>
-                <th style="width:32%"><?php echo __('AtoM target') ?></th>
-                <th style="width:14%"><?php echo __('Transform') ?></th>
-                <th style="width:18%"><?php echo __('Default value') ?></th>
+                <th class="sharep-width-32-f451"><?php echo __('SharePoint field') ?></th>
+                <th class="sharep-width-32-f451"><?php echo __('AtoM target') ?></th>
+                <th class="sharep-width-14-6306"><?php echo __('Transform') ?></th>
+                <th class="sharep-width-18-bae1"><?php echo __('Default value') ?></th>
                 <th></th>
             </tr>
         </thead>
@@ -231,7 +241,7 @@ foreach ($standardsAllFlat as $code => $info) {
     </div>
 </form>
 
-<form id="delete-template-form" method="post" action="" style="display:none;">
+<form id="delete-template-form" method="post" action="" class="sharep-display-none-93b8">
     <input type="hidden" name="drive_id" value="<?php echo $selectedDriveId ?>">
     <input type="hidden" name="template_id" value="">
 </form>

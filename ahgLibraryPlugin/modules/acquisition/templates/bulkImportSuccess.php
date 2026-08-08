@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-cursor-pointer-58ab { cursor:pointer; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Bulk Import'); ?></h1>
@@ -76,7 +83,7 @@
 
           <?php if (!empty($rows)): ?>
             <details class="mb-3">
-              <summary class="text-primary" style="cursor:pointer;"><?php echo __('Preview results (%1%)', ['%1%' => count($rows)]); ?></summary>
+              <summary class="text-primary librar-cursor-pointer-58ab" ><?php echo __('Preview results (%1%)', ['%1%' => count($rows)]); ?></summary>
               <div class="table-responsive mt-2">
                 <table class="table table-sm table-hover">
                   <thead>

@@ -1,5 +1,12 @@
 <?php $r = $sf_data->getRaw('result'); $sealed = !empty($r['sealed']); $intact = !empty($r['intact']); ?>
-<div class="container py-4" style="max-width: 760px">
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .auditt-max-width-760px-0909 { max-width: 760px; }
+</style>
+<div class="container py-4 auditt-max-width-760px-0909" >
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="h2"><i class="fas fa-link me-2"></i><?php echo __('Audit trail integrity'); ?></span>
         <a href="<?php echo url_for('@auditTrail_browse'); ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Back to audit log'); ?></a>

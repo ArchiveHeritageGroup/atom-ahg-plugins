@@ -1,3 +1,15 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .author-width-11-b40e { width: 11%; }
+  .author-width-12-e6e1 { width: 12%; }
+  .author-width-14-d482 { width: 14%; }
+  .author-width-15-29bf { width: 15%; }
+  .author-width-20-4341 { width: 20%; }
+  .author-width-8-e1b0 { width: 8%; }
+</style>
 <?php
 /**
  * Authority Resolution - external lookup adapter settings (Task 6).
@@ -67,12 +79,12 @@
       <table class="table table-striped table-sm align-middle mb-0">
         <thead>
           <tr>
-            <th style="width: 14%"><?php echo __('Source'); ?></th>
-            <th style="width: 8%"><?php echo __('Enabled'); ?></th>
-            <th style="width: 11%"><?php echo __('Rate limit'); ?> <small class="text-muted">(/min)</small></th>
-            <th style="width: 12%"><?php echo __('Cache TTL'); ?> <small class="text-muted">(s)</small></th>
-            <th style="width: 15%"><?php echo __('License note'); ?></th>
-            <th style="width: 20%"><?php echo __('License URL'); ?></th>
+            <th class="author-width-14-d482"><?php echo __('Source'); ?></th>
+            <th class="author-width-8-e1b0"><?php echo __('Enabled'); ?></th>
+            <th class="author-width-11-b40e"><?php echo __('Rate limit'); ?> <small class="text-muted">(/min)</small></th>
+            <th class="author-width-12-e6e1"><?php echo __('Cache TTL'); ?> <small class="text-muted">(s)</small></th>
+            <th class="author-width-15-29bf"><?php echo __('License note'); ?></th>
+            <th class="author-width-20-4341"><?php echo __('License URL'); ?></th>
             <th><?php echo __('Description'); ?></th>
           </tr>
         </thead>

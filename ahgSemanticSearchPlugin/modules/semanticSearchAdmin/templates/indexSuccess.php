@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .semant-display-none-224b { display: none; }
+</style>
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -158,7 +165,7 @@
                             </a>
                         </div>
                     </div>
-                    <div id="sync-result" class="mt-3" style="display: none;">
+                    <div id="sync-result" class="mt-3 semant-display-none-224b" >
                         <div class="alert mb-0" role="alert"></div>
                     </div>
                 </div>
@@ -177,7 +184,7 @@
                             <i class="fas fa-search me-1"></i><?php echo __('Expand'); ?>
                         </button>
                     </div>
-                    <div id="expansion-result" style="display: none;">
+                    <div id="expansion-result" class="semant-display-none-224b">
                         <h6><?php echo __('Expansions:'); ?></h6>
                         <div id="expansion-terms"></div>
                     </div>

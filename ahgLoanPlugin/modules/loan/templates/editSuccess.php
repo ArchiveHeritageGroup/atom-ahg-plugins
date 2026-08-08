@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .loan-max-width-100px-0032 { max-width: 100px; }
+</style>
 
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
@@ -115,7 +122,7 @@
             <div class="col-md-6">
               <label class="form-label">Total Insurance Value</label>
               <div class="input-group">
-                <select name="insurance_currency" class="form-select" style="max-width: 100px;">
+                <select name="insurance_currency" class="form-select loan-max-width-100px-0032" >
                   <option value="ZAR" <?php echo ($loan['insurance_currency'] ?? 'ZAR') === 'ZAR' ? 'selected' : ''; ?>>ZAR</option>
                   <option value="USD" <?php echo ($loan['insurance_currency'] ?? '') === 'USD' ? 'selected' : ''; ?>>USD</option>
                   <option value="EUR" <?php echo ($loan['insurance_currency'] ?? '') === 'EUR' ? 'selected' : ''; ?>>EUR</option>

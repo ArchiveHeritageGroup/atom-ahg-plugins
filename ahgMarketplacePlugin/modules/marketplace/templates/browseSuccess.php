@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-max-height-200px-overflow-y--d98f { max-height: 200px; overflow-y: auto; }
+  .market-width-auto-dc25 { width: auto; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -60,7 +68,7 @@
 
         <div class="card mb-3">
           <div class="card-header fw-semibold"><?php echo __('Category'); ?></div>
-          <div class="card-body" style="max-height: 200px; overflow-y: auto;">
+          <div class="card-body market-max-height-200px-overflow-y--d98f" >
             <?php foreach ($categories as $cat): ?>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="category_id[]" value="<?php echo (int) $cat->id; ?>" id="cat-<?php echo (int) $cat->id; ?>"<?php echo (isset($filters['category_id']) && ((is_array($filters['category_id']) && in_array($cat->id, $filters['category_id'])) || $filters['category_id'] == $cat->id)) ? ' checked' : ''; ?>>
@@ -127,7 +135,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
       <div class="d-flex align-items-center gap-2">
         <label class="form-label mb-0 text-nowrap"><?php echo __('Sort by'); ?>:</label>
-        <select class="form-select form-select-sm" id="marketplace-sort" style="width: auto;">
+        <select class="form-select form-select-sm" id="marketplace-sort" class="market-width-auto-dc25">
           <?php $sortOptions = ['newest' => __('Newest'), 'price_asc' => __('Price: Low to High'), 'price_desc' => __('Price: High to Low'), 'popular' => __('Popular'), 'ending_soon' => __('Ending Soon')]; ?>
           <?php foreach ($sortOptions as $val => $label): ?>
             <option value="<?php echo $val; ?>"<?php echo (isset($filters['sort']) && $filters['sort'] === $val) ? ' selected' : ''; ?>><?php echo $label; ?></option>

@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .vendor-cursor-pointer-b202 { cursor:pointer; }
+  .vendor-width-120px-b15a { width: 120px; }
+</style>
 <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for('ahg_vend_index'); ?>">Vendor Management</a></li>
@@ -26,10 +34,10 @@
         <table class="table table-striped table-hover mb-0">
             <thead class="table-light">
                 <tr>
-                    <th class="sortable" data-sort="name" style="cursor:pointer">Name <i class="fas fa-sort text-muted"></i></th>
-                    <th class="sortable" data-sort="description" style="cursor:pointer">Description <i class="fas fa-sort text-muted"></i></th>
-                    <th class="sortable" data-sort="status" style="cursor:pointer">Status <i class="fas fa-sort text-muted"></i></th>
-                    <th class="text-end" style="width: 120px;">Actions</th>
+                    <th class="sortable" data-sort="name" class="vendor-cursor-pointer-b202">Name <i class="fas fa-sort text-muted"></i></th>
+                    <th class="sortable" data-sort="description" class="vendor-cursor-pointer-b202">Description <i class="fas fa-sort text-muted"></i></th>
+                    <th class="sortable" data-sort="status" class="vendor-cursor-pointer-b202">Status <i class="fas fa-sort text-muted"></i></th>
+                    <th class="text-end vendor-width-120px-b15a" >Actions</th>
                 </tr>
             </thead>
             <tbody>

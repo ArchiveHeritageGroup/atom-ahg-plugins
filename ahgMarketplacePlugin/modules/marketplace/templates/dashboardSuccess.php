@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-font-size-1-5rem-fa41 { font-size: 1.5rem; }
+  .market-object-fit-cover-3dc4 { object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Seller Dashboard'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -33,7 +41,7 @@
       <p class="mb-0 opacity-75"><?php echo __('Manage your listings, orders, and payouts from your seller dashboard.'); ?></p>
     </div>
     <?php if ($seller->avatar_path): ?>
-      <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle border border-2 border-white" width="64" height="64" style="object-fit: cover;">
+      <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle border border-2 border-white" width="64" height="64" class="market-object-fit-cover-3dc4">
     <?php endif; ?>
   </div>
 </div>
@@ -48,7 +56,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-tags text-primary mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-tags text-primary mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo number_format((int) ($stats->active_listings ?? 0)); ?></div>
             <small class="text-muted"><?php echo __('Active Listings'); ?></small>
           </div>
@@ -57,7 +65,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-shopping-cart text-success mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-shopping-cart text-success mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo number_format((int) ($seller->total_sales ?? 0)); ?></div>
             <small class="text-muted"><?php echo __('Total Sales'); ?></small>
           </div>
@@ -66,7 +74,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-coins text-warning mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-coins text-warning mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo esc_entities($seller->payout_currency ?? 'ZAR'); ?> <?php echo number_format((float) ($stats->total_revenue ?? 0), 2); ?></div>
             <small class="text-muted"><?php echo __('Revenue'); ?></small>
           </div>
@@ -75,7 +83,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-wallet text-info mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-wallet text-info mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo esc_entities($seller->payout_currency ?? 'ZAR'); ?> <?php echo number_format((float) ($stats->pending_payout ?? 0), 2); ?></div>
             <small class="text-muted"><?php echo __('Pending Payout'); ?></small>
           </div>
@@ -84,7 +92,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-users text-secondary mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-users text-secondary mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo number_format((int) ($stats->followers ?? 0)); ?></div>
             <small class="text-muted"><?php echo __('Followers'); ?></small>
           </div>

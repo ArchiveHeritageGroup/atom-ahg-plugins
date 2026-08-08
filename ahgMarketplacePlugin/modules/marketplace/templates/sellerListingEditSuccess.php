@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-display-none-224b { display: none; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Edit Listing'); ?>: <?php echo esc_entities($listing->title); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -143,7 +150,7 @@
         </div>
       </div>
 
-      <div class="mb-3" id="frame-description-group" style="<?php echo empty($listing->is_framed) ? 'display: none;' : ''; ?>">
+      <div class="mb-3" id="frame-description-group" data-ahg-style="<?php echo empty($listing->is_framed) ? 'display: none;' : ''; ?>">
         <label for="frame_description" class="form-label"><?php echo __('Frame Description'); ?></label>
         <input type="text" class="form-control" id="frame_description" name="frame_description" value="<?php echo esc_entities($listing->frame_description ?? ''); ?>" maxlength="255">
       </div>
@@ -201,7 +208,7 @@
         </div>
       </div>
 
-      <div id="auction-fields" style="display: none;">
+      <div id="auction-fields" class="market-display-none-224b">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="starting_bid" class="form-label"><?php echo __('Starting Bid'); ?></label>
@@ -218,7 +225,7 @@
         </div>
       </div>
 
-      <div id="offer-only-fields" style="display: none;">
+      <div id="offer-only-fields" class="market-display-none-224b">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="minimum_offer_only" class="form-label"><?php echo __('Minimum Offer'); ?></label>

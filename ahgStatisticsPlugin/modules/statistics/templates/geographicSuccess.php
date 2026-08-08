@@ -1,4 +1,15 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .statis-height-20px-84ce { height: 20px; }
+  .statis-width-150px-d990 { width: 150px; }
+  .statis-width-200px-fa48 { width: 200px; }
+  .statis-width-60px-d7a5 { width: 60px; }
+  .statis-width-80px-db80 { width: 80px; }
+</style>
 
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
@@ -42,12 +53,12 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 60px">#</th>
-                            <th style="width: 80px">Code</th>
+                            <th class="statis-width-60px-d7a5">#</th>
+                            <th class="statis-width-80px-db80">Code</th>
                             <th>Country</th>
-                            <th class="text-end" style="width: 150px">Total Requests</th>
-                            <th class="text-end" style="width: 150px">Unique Visitors</th>
-                            <th style="width: 200px">Distribution</th>
+                            <th class="text-end statis-width-150px-d990" >Total Requests</th>
+                            <th class="text-end statis-width-150px-d990" >Unique Visitors</th>
+                            <th class="statis-width-200px-fa48">Distribution</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,8 +74,8 @@
                                 <td class="text-end"><strong><?php echo number_format($row->total) ?></strong></td>
                                 <td class="text-end"><?php echo number_format($row->unique_visitors) ?></td>
                                 <td>
-                                    <div class="progress" style="height: 20px;">
-                                        <div class="progress-bar" style="width: <?php echo $percent ?>%"><?php echo $percent ?>%</div>
+                                    <div class="progress statis-height-20px-84ce" >
+                                        <div class="progress-bar" data-ahg-style="width: <?php echo $percent ?>%"><?php echo $percent ?>%</div>
                                     </div>
                                 </td>
                             </tr>

@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .aicond-display-none-cb45 { display:none; }
+  .aicond-z-index-1000-display-none-6e68 { z-index:1000;display:none; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -30,7 +38,7 @@
                 <label class="form-label"><?php echo __('Link to Object (optional)') ?></label>
                 <input type="text" class="form-control form-control-sm" id="objectSearch" placeholder="<?php echo __('Search by title...') ?>" autocomplete="off">
                 <input type="hidden" id="objectId" name="information_object_id" value="">
-                <div id="objectResults" class="list-group position-absolute" style="z-index:1000;display:none"></div>
+                <div id="objectResults" class="list-group position-absolute aicond-z-index-1000-display-none-6e68" ></div>
             </div>
 
             <!-- Condition Grade -->
@@ -73,7 +81,7 @@
                 <input type="file" class="form-control form-control-sm" id="imageFile" name="image_file" accept="image/*">
             </div>
 
-            <div id="submitAlert" style="display:none"></div>
+            <div id="submitAlert" class="aicond-display-none-cb45"></div>
 
             <button type="submit" class="btn btn-primary w-100" id="submitBtn">
                 <i class="fas fa-save me-1"></i><?php echo __('Save Assessment') ?>

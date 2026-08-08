@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-height-20px-edb7 { height:20px; }
+  .themeb-z-index-10-7179 { z-index:10; }
+</style>
 <?php
 /**
  * Rights Badge for Digital Objects
@@ -29,10 +37,10 @@ if (!$rights) {
 }
 ?>
 
-<div class="rights-badge position-absolute bottom-0 end-0 m-2" style="z-index:10;">
+<div class="rights-badge position-absolute bottom-0 end-0 m-2 themeb-z-index-10-7179" >
   <?php if ($rights->cc_code): ?>
     <a href="<?php echo $rights->cc_uri; ?>" target="_blank" title="<?php echo $rights->cc_code; ?>" class="d-inline-block">
-      <img src="<?php echo $rights->cc_icon; ?>" alt="<?php echo $rights->cc_code; ?>" style="height:20px;">
+      <img src="<?php echo $rights->cc_icon; ?>" alt="<?php echo $rights->cc_code; ?>" class="themeb-height-20px-edb7">
     </a>
   <?php elseif ($rights->rs_code): ?>
     <a href="<?php echo $rights->rs_uri; ?>" target="_blank" class="badge bg-dark text-decoration-none" title="<?php echo $rights->rs_code; ?>">

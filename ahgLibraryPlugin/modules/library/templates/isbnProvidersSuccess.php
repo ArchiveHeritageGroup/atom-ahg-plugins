@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-width-100px-ee04 { width:100px; }
+  .librar-width-120px-088c { width:120px; }
+  .librar-width-50px-9ab0 { width:50px; }
+</style>
 
 <?php slot('title') ?>
 <h1><i class="fas fa-book me-2"></i><?php echo __('ISBN Lookup Providers'); ?></h1>
@@ -26,12 +35,12 @@
     <table class="table table-striped table-hover mb-0">
       <thead>
         <tr>
-          <th style="width:50px"><?php echo __('Priority'); ?></th>
+          <th class="librar-width-50px-9ab0"><?php echo __('Priority'); ?></th>
           <th><?php echo __('Provider'); ?></th>
           <th><?php echo __('API Endpoint'); ?></th>
-          <th style="width:100px"><?php echo __('Rate Limit'); ?></th>
-          <th style="width:100px"><?php echo __('Status'); ?></th>
-          <th style="width:120px"><?php echo __('Actions'); ?></th>
+          <th class="librar-width-100px-ee04"><?php echo __('Rate Limit'); ?></th>
+          <th class="librar-width-100px-ee04"><?php echo __('Status'); ?></th>
+          <th class="librar-width-120px-088c"><?php echo __('Actions'); ?></th>
         </tr>
       </thead>
       <tbody>

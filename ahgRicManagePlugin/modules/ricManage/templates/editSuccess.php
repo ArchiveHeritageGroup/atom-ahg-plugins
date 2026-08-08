@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricman-width-30-59c8 { width:30%; }
+  .ricman-width-80px-8db8 { width:80px; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
@@ -72,7 +80,7 @@
                   <tr>
                     <th><?php echo __('Label'); ?></th>
                     <th><?php echo __('Value'); ?></th>
-                    <th style="width:80px"></th>
+                    <th class="ricman-width-80px-8db8"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -172,7 +180,7 @@
                       <th><?php echo __('Identifier'); ?></th>
                       <th><?php echo __('Level'); ?></th>
                       <th><?php echo __('Title'); ?></th>
-                      <th style="width:80px"></th>
+                      <th class="ricman-width-80px-8db8"></th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -462,9 +470,9 @@
             <table class="table table-sm" id="notes-table">
               <thead>
                 <tr>
-                  <th style="width:30%"><?php echo __('Type'); ?></th>
+                  <th class="ricman-width-30-59c8"><?php echo __('Type'); ?></th>
                   <th><?php echo __('Content'); ?></th>
-                  <th style="width:80px"></th>
+                  <th class="ricman-width-80px-8db8"></th>
                 </tr>
               </thead>
               <tbody>

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-font-size-1-5rem-fa41 { font-size: 1.5rem; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Marketplace Administration'); ?><?php end_slot(); ?>
 
@@ -37,7 +44,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-store text-primary mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-store text-primary mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo number_format((int) ($totalSellers ?? 0)); ?></div>
             <small class="text-muted"><?php echo __('Total Sellers'); ?></small>
           </div>
@@ -46,7 +53,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-tags text-info mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-tags text-info mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo number_format((int) ($totalListings ?? 0)); ?></div>
             <small class="text-muted"><?php echo __('Total Listings'); ?></small>
           </div>
@@ -55,7 +62,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-receipt text-success mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-receipt text-success mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0"><?php echo number_format((int) ($totalTransactions ?? 0)); ?></div>
             <small class="text-muted"><?php echo __('Total Transactions'); ?></small>
           </div>
@@ -64,7 +71,7 @@
       <div class="col-6 col-md">
         <div class="card h-100 text-center">
           <div class="card-body py-3">
-            <i class="fas fa-coins text-warning mb-1 d-block" style="font-size: 1.5rem;"></i>
+            <i class="fas fa-coins text-warning mb-1 d-block market-font-size-1-5rem-fa41" ></i>
             <div class="h4 mb-0">ZAR <?php echo number_format((float) ($totalRevenue ?? 0), 2); ?></div>
             <small class="text-muted"><?php echo __('Revenue'); ?></small>
           </div>

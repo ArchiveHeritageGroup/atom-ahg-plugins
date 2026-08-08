@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-width-100px-e3d2 { width: 100px; }
+</style>
 <?php slot('title') ?><?php echo __('Compliance Check') ?><?php end_slot() ?>
 
 <div class="container-fluid">
@@ -61,7 +68,7 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 100px;"><?php echo __('Code') ?></th>
+                        <th class="herita-width-100px-e3d2"><?php echo __('Code') ?></th>
                         <th><?php echo __('Check') ?></th>
                         <th><?php echo __('Reference') ?></th>
                         <th><?php echo __('Category') ?></th>

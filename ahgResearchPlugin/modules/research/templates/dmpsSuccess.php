@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-height-14px-e3eb { height:14px; }
+  .resear-min-width-120px-307c { min-width:120px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => 'dmps', 'unreadNotifications' => 0]) ?>
 <?php end_slot() ?>
@@ -34,8 +42,8 @@ $statusTone = ['draft' => 'secondary', 'active' => 'primary', 'final' => 'succes
           <td><?php echo htmlspecialchars((string) ($d->funder ?? '')); ?></td>
           <td><?php echo htmlspecialchars((string) ($d->project_title ?? '—')); ?></td>
           <td><span class="badge bg-<?php echo $statusTone[$d->status] ?? 'secondary'; ?>"><?php echo __(ucfirst((string) $d->status)); ?></span></td>
-          <td style="min-width:120px">
-            <div class="progress" style="height:14px"><div class="progress-bar<?php echo $pct < 100 ? ' bg-warning' : ' bg-success'; ?>" style="width:<?php echo (int) $pct; ?>%"><?php echo (int) $pct; ?>%</div></div>
+          <td class="resear-min-width-120px-307c">
+            <div class="progress resear-height-14px-e3eb" ><div class="progress-bar<?php echo $pct < 100 ? ' bg-warning' : ' bg-success'; ?>" data-ahg-style="width:<?php echo (int) $pct; ?>%"><?php echo (int) $pct; ?>%</div></div>
           </td>
           <td class="small text-muted"><?php echo htmlspecialchars((string) $d->updated_at); ?></td>
           <td class="text-end">

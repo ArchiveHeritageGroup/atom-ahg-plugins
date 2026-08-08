@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .integr-height-6px-3586 { height: 6px; }
+</style>
 <?php
 $stats = $sf_data->getRaw('stats') ?: [];
 $outcomeBreakdown = $sf_data->getRaw('outcomeBreakdown') ?: [];
@@ -59,8 +66,8 @@ $monthlyTrend = $sf_data->getRaw('monthlyTrend') ?: [];
             <span class="badge <?php echo $outcome === 'pass' ? 'bg-success' : 'bg-danger'; ?>"><?php echo $outcome; ?></span>
             <span><?php echo number_format($count); ?> (<?php echo $pct; ?>%)</span>
           </div>
-          <div class="progress" style="height: 6px;">
-            <div class="progress-bar <?php echo $outcome === 'pass' ? 'bg-success' : 'bg-danger'; ?>" style="width: <?php echo $pct; ?>%"></div>
+          <div class="progress integr-height-6px-3586" >
+            <div class="progress-bar <?php echo $outcome === 'pass' ? 'bg-success' : 'bg-danger'; ?>" data-ahg-style="width: <?php echo $pct; ?>%"></div>
           </div>
         </div>
       <?php endforeach; ?>

@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-max-height-200px-8de0 { max-height: 200px; }
+  .librar-max-height-400px-overflow-y--f4d9 { max-height: 400px; overflow-y: auto; }
+  .librar-max-height-250px-9a18 { max-height:250px; }
+  .librar-top-1rem-z-index-100-6fe2 { top: 1rem; z-index: 100; }
+</style>
 <?php
 $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
 $creatorRoles = $taxonomyService->getCreatorRoles(false);
@@ -461,7 +471,7 @@ $creatorRoles = $taxonomyService->getCreatorRoles(false);
     <div class="col-md-4">
 
       <!-- Actions -->
-      <section class="card mb-4 sticky-top" style="top: 1rem; z-index: 100;">
+      <section class="card mb-4 sticky-top librar-top-1rem-z-index-100-6fe2" >
         <div class="card-header bg-success text-white">
           <h5 class="mb-0"><i class="fas fa-save me-2"></i><?php echo __('Actions'); ?></h5>
         </div>
@@ -516,7 +526,7 @@ $creatorRoles = $taxonomyService->getCreatorRoles(false);
               $refPath = $refObj ? $refObj->getFullPath() : null;
               $displayPath = $refPath ?: $thumbPath ?: $digitalObject->getFullPath();
               if (strpos($mimeType, 'image') !== false && $displayPath): ?>
-              <img src="<?php echo $displayPath; ?>" alt="Cover" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;">
+              <img src="<?php echo $displayPath; ?>" alt="Cover" class="img-fluid rounded shadow-sm mb-2 librar-max-height-200px-8de0" >
               <div class="mt-2">
                 <a href="<?php echo url_for([$digitalObject, 'module' => 'digitalobject', 'action' => 'edit']); ?>" class="btn btn-sm btn-outline-primary">
                   <i class="fas fa-edit me-1"></i><?php echo __('Edit'); ?>
@@ -531,7 +541,7 @@ $creatorRoles = $taxonomyService->getCreatorRoles(false);
           <?php elseif (!empty($cleanIsbn)): ?>
             <div id="ol-cover-preview">
               <img src="/library/cover/<?php echo $cleanIsbn; ?>"
-                   alt="Cover" class="img-fluid rounded shadow-sm mb-2" style="max-height: 200px;"
+                   alt="Cover" class="img-fluid rounded shadow-sm mb-2 librar-max-height-200px-8de0" 
                    onerror="this.parentElement.innerHTML='<p class=\'text-muted\'>No Open Library cover found</p>'">
               <div class="mt-1"><small class="text-muted">Open Library Preview</small></div>
               <div class="mt-1"><small class="text-success"><i class="fas fa-info-circle me-1"></i>Will be saved to AtoM on save</small></div>
@@ -742,7 +752,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         var coverPreview = document.getElementById('cover-preview');
                         if (coverPreview && coverUrl) {
                             coverPreview.innerHTML = 
-                                '<img src="' + coverUrl + '" class="img-fluid rounded shadow-sm" style="max-height:250px">' +
+                                '<img src="' + coverUrl + '" class="img-fluid rounded shadow-sm librar-max-height-250px-9a18" >' +
                                 '<div class="mt-2"><small class="text-muted">Open Library</small></div>' +
                                 '<input type="hidden" name="cover_url" id="cover-url-input" value="' + escapeHtml(coverUrl) + '">';
                         }
@@ -776,7 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 var coverPreview = document.getElementById('cover-preview');
                 if (coverPreview) {
                     coverPreview.innerHTML =
-                        '<img src="/library/cover/' + isbn + '" class="img-fluid rounded shadow-sm" style="max-height:250px" onerror="this.style.display=\'none\'">' +
+                        '<img src="/library/cover/' + isbn + '" class="img-fluid rounded shadow-sm librar-max-height-250px-9a18"  onerror="this.style.display=\'none\'">' +
                         '<div class="mt-2"><small class="text-muted">Open Library</small></div>' +
                         '<input type="hidden" name="cover_url" id="cover-url-input" value="">';
                 }
@@ -939,7 +949,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 '<label class="form-check-label" for="select-all-suggestions"><strong><?php echo __('Select All'); ?></strong></label>' +
                             '</div>' +
                         '</div>' +
-                        '<div class="suggestions-list" style="max-height: 400px; overflow-y: auto;">' +
+                        '<div class="suggestions-list librar-max-height-400px-overflow-y--f4d9" >' +
                             suggestionRows +
                         '</div>' +
                     '</div>' +

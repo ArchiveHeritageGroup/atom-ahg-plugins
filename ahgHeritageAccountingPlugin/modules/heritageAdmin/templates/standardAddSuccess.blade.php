@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-text-transform-uppercase-90fe { text-transform: uppercase; }
+</style>
 
 @section('title', __('Accounting Standard'))
 
@@ -32,7 +37,7 @@ $isEdit = isset($standard) && $standard;
                                 <input type="text" name="code" class="form-control" required
                                        value="{{ $isEdit ? $standard->code : '' }}"
                                        placeholder="e.g. GRAP103, IPSAS45" maxlength="20"
-                                       style="text-transform: uppercase;">
+                                       class="herita-text-transform-uppercase-90fe">
                                 <small class="text-muted">{{ __('Unique identifier, uppercase') }}</small>
                             </div>
                             <div class="col-md-8">

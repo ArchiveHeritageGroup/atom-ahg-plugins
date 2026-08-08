@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-cursor-pointer-font-weight-7-5a82 { cursor:pointer;font-weight:700; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => 'offline', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -113,7 +120,7 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
                                     return '<label class="list-group-item d-flex align-items-center">'
                                         + '<input type="hidden" name="record_ids[]" value="' + id + '">'
                                         + '<span class="flex-grow-1">' + esc(picked[id]) + '</span>'
-                                        + '<span class="rec-del text-danger" data-id="' + id + '" style="cursor:pointer;font-weight:700">&times;</span></label>';
+                                        + '<span class="rec-del text-danger" data-id="' + id + '" class="resear-cursor-pointer-font-weight-7-5a82">&times;</span></label>';
                                 }).join('');
                         }
                         box.addEventListener('input', function () {

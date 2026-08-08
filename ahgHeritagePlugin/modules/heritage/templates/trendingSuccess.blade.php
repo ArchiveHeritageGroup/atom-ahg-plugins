@@ -1,3 +1,11 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-font-size-3rem-5afc { font-size: 3rem; }
+  .herita-height-180px-648e { height: 180px; }
+  .herita-height-180px-display-none-3271 { height: 180px; display: none; }
+  .herita-height-180px-object-fit-cove-b052 { height: 180px; object-fit: cover; }
+</style>
 @section('title')
   Trending Items
 @endsection
@@ -24,13 +32,13 @@
                 #{{ $index + 1 }}
               </span>
               @if(!empty($item['thumbnail']))
-                <img src="{{ $item['thumbnail'] }}" class="card-img-top" alt="{{ $item['title'] }}" style="height: 180px; object-fit: cover;" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
-                <div class="card-img-top bg-light align-items-center justify-content-center" style="height: 180px; display: none;">
-                  <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
+                <img src="{{ $item['thumbnail'] }}" class="card-img-top" alt="{{ $item['title'] }}" class="herita-height-180px-object-fit-cove-b052" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex';">
+                <div class="card-img-top bg-light align-items-center justify-content-center herita-height-180px-display-none-3271" >
+                  <i class="fas fa-file-alt text-muted herita-font-size-3rem-5afc" ></i>
                 </div>
               @else
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
-                  <i class="fas fa-file-alt text-muted" style="font-size: 3rem;"></i>
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center herita-height-180px-648e" >
+                  <i class="fas fa-file-alt text-muted herita-font-size-3rem-5afc" ></i>
                 </div>
               @endif
               <div class="card-body">

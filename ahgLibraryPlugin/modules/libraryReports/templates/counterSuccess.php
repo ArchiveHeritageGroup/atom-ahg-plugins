@@ -1,4 +1,13 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-font-size-9px-6d8d { font-size:9px; }
+  .librar-height-60px-99ba { height: 60px; }
+  .librar-max-height-500px-overflow-y--9117 { max-height: 500px; overflow-y: auto; }
+</style>
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
@@ -118,7 +127,7 @@
                     $maxVal = max(array_column($sparklineData, 'count') ?: [1]);
                     if ($maxVal <= 0) $maxVal = 1;
                 ?>
-                <div class="d-flex align-items-end gap-1" style="height: 60px;">
+                <div class="d-flex align-items-end gap-1 librar-height-60px-99ba" >
                     <?php foreach ($sparklineData as $day): ?>
                         <?php
                         $heightPct = round(($day['count'] / $maxVal) * 100);
@@ -126,9 +135,9 @@
                         $isToday = $day['date'] === date('Y-m-d');
                         ?>
                         <div class="flex-grow-1 text-center" title="<?php echo $day['date']; ?>: <?php echo $day['count']; ?> events">
-                            <div style="height:<?php echo max(2, $heightPct); ?>px; background: <?php echo $isToday ? '#0d6efd' : '#adb5bd'; ?>; border-radius: 2px 2px 0 0;"></div>
+                            <div data-ahg-style="height:<?php echo max(2, $heightPct); ?>px; background: <?php echo $isToday ? '#0d6efd' : '#adb5bd'; ?>; border-radius: 2px 2px 0 0;"></div>
                             <?php if ($date % 5 === 0 || $isToday): ?>
-                            <small class="d-block text-muted" style="font-size:9px;"><?php echo $date; ?></small>
+                            <small class="d-block text-muted librar-font-size-9px-6d8d" ><?php echo $date; ?></small>
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
@@ -155,7 +164,7 @@
                 <?php $reportData = sfOutputEscaper::unescape($reportData ?? []); ?>
                 <?php if (!empty($reportData) && is_array($reportData)): ?>
                 <!-- Data Table -->
-                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                <div class="table-responsive librar-max-height-500px-overflow-y--9117" >
                     <table class="table table-sm table-hover">
                         <thead class="table-light sticky-top">
                             <tr>

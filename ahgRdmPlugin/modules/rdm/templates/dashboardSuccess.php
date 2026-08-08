@@ -80,7 +80,7 @@
     <div class="col-6 col-md-3 col-xl">
       <div class="card h-100"><div class="card-body py-2 text-center">
         <div class="small text-muted"><i class="fas <?php echo $c[3]; ?> me-1"></i><?php echo $c[1]; ?></div>
-        <div class="h4 mb-0" style="color:<?php echo $c[2]; ?>"><?php echo (int) $k[$c[0]]; ?></div>
+        <div class="h4 mb-0" data-ahg-style="color:<?php echo $c[2]; ?>"><?php echo (int) $k[$c[0]]; ?></div>
       </div></div>
     </div>
   <?php endforeach; ?>
@@ -160,7 +160,7 @@
           <tr>
             <td class="small"><a href="<?php echo url_for('@rdm_datasets_show?id=' . $row->id); ?>"><?php echo esc_specialchars(mb_strimwidth((string) $row->title, 0, 40, '…')); ?></a></td>
             <td class="small text-muted"><?php echo esc_specialchars((string) $row->status); ?></td>
-            <td><?php echo $row->verdict ? '<span class="badge" style="background:' . ($verdictColors[$row->verdict] ?? '#6c757d') . '">' . esc_specialchars($row->verdict) . '</span>' : '<span class="text-muted small">not scanned</span>'; ?></td>
+            <td><?php echo $row->verdict ? '<span class="badge" data-ahg-style="background:' . ($verdictColors[$row->verdict] ?? '#6c757d') . '">' . esc_specialchars($row->verdict) . '</span>' : '<span class="text-muted small">not scanned</span>'; ?></td>
             <td class="small"><?php echo esc_specialchars($row->disposition ?? '—'); ?></td>
             <td class="small"><?php echo $row->doi ? '<code>' . esc_specialchars($row->doi) . '</code>' : '<span class="text-muted">—</span>'; ?></td>
             <td class="small text-muted"><?php echo esc_specialchars(substr((string) $row->created_at, 0, 10)); ?></td>

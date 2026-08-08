@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .integr-max-width-300px-4d14 { max-width:300px; }
+</style>
 @php
 $holds = $holds ?? [];
 $filterStatus = $filterStatus ?? '';
@@ -48,7 +53,7 @@ $filterStatus = $filterStatus ?? '';
               <tr>
                 <td>{{ $h->id }}</td>
                 <td>{{ $h->information_object_id }}</td>
-                <td class="text-truncate" style="max-width:300px">{{ $h->reason }}</td>
+                <td class="text-truncate integr-max-width-300px-4d14" >{{ $h->reason }}</td>
                 <td>{{ $h->placed_by }}</td>
                 <td>{{ $h->placed_at }}</td>
                 <td>

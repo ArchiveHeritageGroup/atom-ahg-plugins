@@ -1,4 +1,16 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-color-inherit-c610 { color: inherit; }
+  .settin-width-50px-padding-2px-7209 { width: 50px; padding: 2px; }
+  .settin-width-20-1008 { width:20%; }
+  .settin-width-26-baae { width:26%; }
+  .settin-width-27-6f68 { width:27%; }
+  .settin-width-70px-display-inline-bl-da5e { width:70px;display:inline-block; }
+  .settin-width-80px-display-inline-bl-9a8c { width:80px;display:inline-block; }
+  .settin-word-break-break-all-1083 { word-break: break-all; }
+</style>
 
 @section('content')
 <style @cspNonce>
@@ -161,7 +173,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_primary_color">{{ __('Primary Color') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_primary_color_picker" value="{{ e($settings['ahg_primary_color'] ?? '#1a5f7a') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_primary_color_picker" value="{{ e($settings['ahg_primary_color'] ?? '#1a5f7a') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_primary_color" name="settings[ahg_primary_color]" value="{{ e($settings['ahg_primary_color'] ?? '#1a5f7a') }}">
                                             </div>
                                         </div>
@@ -171,7 +183,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_secondary_color">{{ __('Secondary Color') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_secondary_color_picker" value="{{ e($settings['ahg_secondary_color'] ?? '#57837b') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_secondary_color_picker" value="{{ e($settings['ahg_secondary_color'] ?? '#57837b') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_secondary_color" name="settings[ahg_secondary_color]" value="{{ e($settings['ahg_secondary_color'] ?? '#57837b') }}">
                                             </div>
                                         </div>
@@ -184,7 +196,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_card_header_bg">{{ __('Card Header Background') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_bg_picker" value="{{ e($settings['ahg_card_header_bg'] ?? '#1a5f2a') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_bg_picker" value="{{ e($settings['ahg_card_header_bg'] ?? '#1a5f2a') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_card_header_bg" name="settings[ahg_card_header_bg]" value="{{ e($settings['ahg_card_header_bg'] ?? '#1a5f2a') }}">
                                             </div>
                                             <small class="form-text text-muted">{{ __('Background color for card headers') }}</small>
@@ -195,7 +207,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_card_header_text">{{ __('Card Header Text') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_text_picker" value="{{ e($settings['ahg_card_header_text'] ?? '#ffffff') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_card_header_text_picker" value="{{ e($settings['ahg_card_header_text'] ?? '#ffffff') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_card_header_text" name="settings[ahg_card_header_text]" value="{{ e($settings['ahg_card_header_text'] ?? '#ffffff') }}">
                                             </div>
                                             <small class="form-text text-muted">{{ __('Text color for card headers') }}</small>
@@ -206,7 +218,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_button_bg">{{ __('Button Background') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_button_bg_picker" value="{{ e($settings['ahg_button_bg'] ?? '#1a5f2a') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_button_bg_picker" value="{{ e($settings['ahg_button_bg'] ?? '#1a5f2a') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_button_bg" name="settings[ahg_button_bg]" value="{{ e($settings['ahg_button_bg'] ?? '#1a5f2a') }}">
                                             </div>
                                             <small class="form-text text-muted">{{ __('Background color for primary buttons') }}</small>
@@ -217,7 +229,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_button_text">{{ __('Button Text') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_button_text_picker" value="{{ e($settings['ahg_button_text'] ?? '#ffffff') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_button_text_picker" value="{{ e($settings['ahg_button_text'] ?? '#ffffff') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_button_text" name="settings[ahg_button_text]" value="{{ e($settings['ahg_button_text'] ?? '#ffffff') }}">
                                             </div>
                                             <small class="form-text text-muted">{{ __('Text color for primary buttons') }}</small>
@@ -228,7 +240,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_link_color">{{ __('Link Color') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_link_color_picker" value="{{ e($settings['ahg_link_color'] ?? '#1a5f2a') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_link_color_picker" value="{{ e($settings['ahg_link_color'] ?? '#1a5f2a') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_link_color" name="settings[ahg_link_color]" value="{{ e($settings['ahg_link_color'] ?? '#1a5f2a') }}">
                                             </div>
                                             <small class="form-text text-muted">{{ __('Color for hyperlinks') }}</small>
@@ -239,7 +251,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_sidebar_bg">{{ __('Sidebar Background') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_bg_picker" value="{{ e($settings['ahg_sidebar_bg'] ?? '#f8f9fa') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_bg_picker" value="{{ e($settings['ahg_sidebar_bg'] ?? '#f8f9fa') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_sidebar_bg" name="settings[ahg_sidebar_bg]" value="{{ e($settings['ahg_sidebar_bg'] ?? '#f8f9fa') }}">
                                             </div>
                                         </div>
@@ -249,7 +261,7 @@
                                         <label class="col-sm-3 col-form-label" for="ahg_sidebar_text">{{ __('Sidebar Text') }}</label>
                                         <div class="col-sm-9">
                                             <div class="input-group">
-                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_text_picker" value="{{ e($settings['ahg_sidebar_text'] ?? '#333333') }}" style="width: 50px; padding: 2px;">
+                                                <input type="color" class="form-control form-control-color" id="ahg_sidebar_text_picker" value="{{ e($settings['ahg_sidebar_text'] ?? '#333333') }}" class="settin-width-50px-padding-2px-7209">
                                                 <input type="text" class="form-control" id="ahg_sidebar_text" name="settings[ahg_sidebar_text]" value="{{ e($settings['ahg_sidebar_text'] ?? '#333333') }}">
                                             </div>
                                         </div>
@@ -260,12 +272,12 @@
                                         <label class="col-sm-3 col-form-label">{{ __('Preview') }}</label>
                                         <div class="col-sm-9">
                                             <div class="card" id="theme-preview-card">
-                                                <div class="card-header" id="preview-card-header" style="background-color: {{ e($settings['ahg_card_header_bg'] ?? '#1a5f2a') }}; color: {{ e($settings['ahg_card_header_text'] ?? '#ffffff') }};">
-                                                    <h6 class="mb-0" style="color: inherit;"><i class="fas fa-eye me-2"></i>Preview Header</h6>
+                                                <div class="card-header" id="preview-card-header" data-ahg-style="background-color: {{ e($settings['ahg_card_header_bg'] ?? '#1a5f2a') }}; color: {{ e($settings['ahg_card_header_text'] ?? '#ffffff') }};">
+                                                    <h6 class="mb-0 settin-color-inherit-c610" ><i class="fas fa-eye me-2"></i>Preview Header</h6>
                                                 </div>
                                                 <div class="card-body">
-                                                    <p>Sample text with <a href="#" id="preview-link" style="color: {{ e($settings['ahg_link_color'] ?? '#1a5f2a') }};">a link</a>.</p>
-                                                    <button type="button" class="btn" id="preview-button" style="background-color: {{ e($settings['ahg_button_bg'] ?? '#1a5f2a') }}; color: {{ e($settings['ahg_button_text'] ?? '#ffffff') }};">Sample Button</button>
+                                                    <p>Sample text with <a href="#" id="preview-link" data-ahg-style="color: {{ e($settings['ahg_link_color'] ?? '#1a5f2a') }};">a link</a>.</p>
+                                                    <button type="button" class="btn" id="preview-button" data-ahg-style="background-color: {{ e($settings['ahg_button_bg'] ?? '#1a5f2a') }}; color: {{ e($settings['ahg_button_text'] ?? '#ffffff') }};">Sample Button</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1035,7 +1047,7 @@
                                     <legend>{{ __('Field Mapping') }}</legend>
                                     <p class="text-muted">{{ __('Configure where extracted metadata is saved:') }}</p>
                                     <table class="table table-sm table-bordered">
-                                        <thead class="thead-dark"><tr><th style="width:20%">Metadata Source</th><th style="width:26%">Archives (ISAD)</th><th style="width:27%">Museum (Collections Procedures)</th><th style="width:27%">DAM</th></tr></thead>
+                                        <thead class="thead-dark"><tr><th class="settin-width-20-1008">Metadata Source</th><th class="settin-width-26-baae">Archives (ISAD)</th><th class="settin-width-27-6f68">Museum (Collections Procedures)</th><th class="settin-width-27-6f68">DAM</th></tr></thead>
                                         <tbody>
                                             <tr>
                                                 <td><i class="fas fa-heading text-muted"></i> Title</td>
@@ -2612,12 +2624,12 @@
                                             <tr data-rule-id="{{ $rule->id }}">
                                                 <td><strong>{{ $rule->material_type }}</strong></td>
                                                 <td>{{ $rule->patron_type === '*' ? __('All') : $rule->patron_type }}</td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][loan_period_days]" value="{{ $rule->loan_period_days }}" min="0" style="width:70px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][renewal_period_days]" value="{{ $rule->renewal_period_days }}" min="0" style="width:70px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][max_renewals]" value="{{ $rule->max_renewals }}" min="0" style="width:70px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][fine_per_day]" value="{{ $rule->fine_per_day }}" min="0" step="0.01" style="width:80px;display:inline-block"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][fine_cap]" value="{{ $rule->fine_cap ?? '' }}" min="0" step="0.01" style="width:80px;display:inline-block" placeholder="∞"></td>
-                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][grace_period_days]" value="{{ $rule->grace_period_days }}" min="0" style="width:70px;display:inline-block"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][loan_period_days]" value="{{ $rule->loan_period_days }}" min="0" class="settin-width-70px-display-inline-bl-da5e"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][renewal_period_days]" value="{{ $rule->renewal_period_days }}" min="0" class="settin-width-70px-display-inline-bl-da5e"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][max_renewals]" value="{{ $rule->max_renewals }}" min="0" class="settin-width-70px-display-inline-bl-da5e"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][fine_per_day]" value="{{ $rule->fine_per_day }}" min="0" step="0.01" class="settin-width-80px-display-inline-bl-9a8c"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][fine_cap]" value="{{ $rule->fine_cap ?? '' }}" min="0" step="0.01" class="settin-width-80px-display-inline-bl-9a8c" placeholder="∞"></td>
+                                                <td class="text-center"><input type="number" class="form-control form-control-sm text-center loan-field" name="loan_rule[{{ $rule->id }}][grace_period_days]" value="{{ $rule->grace_period_days }}" min="0" class="settin-width-70px-display-inline-bl-da5e"></td>
                                                 <td class="text-center">
                                                     <input type="checkbox" class="form-check-input loan-field" name="loan_rule[{{ $rule->id }}][is_loanable]" value="1" {{ $rule->is_loanable ? 'checked' : '' }}>
                                                 </td>
@@ -3167,7 +3179,7 @@
                                             <i class="fas fa-exclamation-triangle me-1"></i>
                                             {{ __('Rotation is not exposed here for safety. Run the rotation runbook via php symfony share-link:rotate-secret (future enhancement).') }}
                                         </div>
-                                        <code style="word-break: break-all;">
+                                        <code class="settin-word-break-break-all-1083">
                                             {{ isset($settings['share_link.hmac_secret']) && $settings['share_link.hmac_secret'] !== '' ? substr($settings['share_link.hmac_secret'], 0, 12) . '…' : __('(auto-generated on first share-link issue)') }}
                                         </code>
                                     </div>

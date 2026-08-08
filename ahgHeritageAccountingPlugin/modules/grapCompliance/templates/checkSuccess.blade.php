@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-width-100px-e3d2 { width: 100px; }
+</style>
 
 @section('title', __('Compliance Check'))
 
@@ -63,7 +68,7 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 100px;">{{ __('Code') }}</th>
+                        <th class="herita-width-100px-e3d2">{{ __('Code') }}</th>
                         <th>{{ __('Check') }}</th>
                         <th>{{ __('Reference') }}</th>
                         <th>{{ __('Category') }}</th>

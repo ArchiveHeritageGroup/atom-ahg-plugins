@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-z-index-2-9135 { z-index:2; }
+</style>
 <?php
 /**
  * _listingCard.php - Bootstrap 5 card component for a marketplace listing.
@@ -18,7 +25,7 @@ $badge = $typeBadges[$listing->listing_type] ?? ['bg-secondary', ucfirst(str_rep
 <div class="col">
   <div class="card mkt-card h-100 position-relative">
     <?php if ($listing->status === 'sold'): ?>
-      <div class="mkt-card-sold position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded" style="z-index:2;">
+      <div class="mkt-card-sold position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center rounded market-z-index-2-9135" >
         <span class="badge bg-dark fs-5 px-3 py-2"><?php echo __('SOLD'); ?></span>
       </div>
     <?php endif; ?>

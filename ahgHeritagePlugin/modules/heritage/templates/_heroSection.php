@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-background-linear-gradient-1-cc0c { background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%); }
+  .herita-background-linear-gradient-t-855f { background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%); }
+  .herita-max-width-600px-4d1e { max-width: 600px; }
+  .herita-z-index-10-354f { z-index: 10; }
+</style>
 <?php
 /**
  * Hero Section partial.
@@ -27,25 +37,25 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
             <div class="heritage-hero-bg <?php echo $index === 0 ? 'active' : ''; ?> <?php echo $effectClass; ?>"
                  data-index="<?php echo $index; ?>"
                  data-duration="<?php echo $slideDuration; ?>"
-                 style="background-image: url('<?php echo esc_specialchars($image['image_path']); ?>');">
+                 data-ahg-style="background-image: url('<?php echo esc_specialchars($image['image_path']); ?>');">
             </div>
             <?php endforeach; ?>
         <?php else: ?>
-            <div class="heritage-hero-bg active" style="background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%);"></div>
+            <div class="heritage-hero-bg active herita-background-linear-gradient-1-cc0c" ></div>
         <?php endif; ?>
     </div>
 
     <!-- Gradient Overlay -->
     <?php if ($overlayType === 'gradient'): ?>
-    <div class="heritage-hero-overlay position-absolute top-0 start-0 w-100 h-100"
-         style="background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);"></div>
+    <div class="heritage-hero-overlay position-absolute top-0 start-0 w-100 h-100 herita-background-linear-gradient-t-855f"
+         ></div>
     <?php elseif ($overlayType === 'solid'): ?>
     <div class="heritage-hero-overlay position-absolute top-0 start-0 w-100 h-100"
-         style="background-color: <?php echo esc_specialchars($overlayColor); ?>; opacity: <?php echo $overlayOpacity; ?>;"></div>
+         data-ahg-style="background-color: <?php echo esc_specialchars($overlayColor); ?>; opacity: <?php echo $overlayOpacity; ?>;"></div>
     <?php endif; ?>
 
     <!-- Content -->
-    <div class="heritage-hero-content position-relative text-center text-white px-4" style="z-index: 10;">
+    <div class="heritage-hero-content position-relative text-center text-white px-4 herita-z-index-10-354f" >
 
         <!-- Tagline -->
         <h1 class="heritage-hero-tagline display-3 fw-bold mb-4">
@@ -54,13 +64,13 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
 
         <!-- Subtext -->
         <?php if ($subtext): ?>
-        <p class="heritage-hero-subtext lead mb-5 mx-auto" style="max-width: 600px;">
+        <p class="heritage-hero-subtext lead mb-5 mx-auto herita-max-width-600px-4d1e" >
             <?php echo esc_specialchars($subtext); ?>
         </p>
         <?php endif; ?>
 
         <!-- Search Box -->
-        <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'search']); ?>" method="get" class="heritage-search-form mx-auto mb-4" style="max-width: 600px;">
+        <form action="<?php echo url_for(['module' => 'heritage', 'action' => 'search']); ?>" method="get" class="heritage-search-form mx-auto mb-4 herita-max-width-600px-4d1e" >
             <div class="input-group input-group-lg shadow-lg">
                 <input type="text"
                        name="q"
@@ -96,7 +106,7 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
 
     <!-- Image Caption (bottom) -->
     <?php if ($firstImage && ($firstImage['source_collection'] || $firstImage['photographer_credit'])): ?>
-    <div class="heritage-hero-caption position-absolute bottom-0 start-0 w-100 p-4 text-white" style="z-index: 10;" id="heritage-hero-caption">
+    <div class="heritage-hero-caption position-absolute bottom-0 start-0 w-100 p-4 text-white herita-z-index-10-354f"  id="heritage-hero-caption">
         <div class="container-xxl">
             <?php if ($firstImage['source_collection']): ?>
             <small class="d-block opacity-75" id="caption-collection">
@@ -111,7 +121,7 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
     <?php endif; ?>
 
     <!-- Scroll Indicator -->
-    <div class="heritage-scroll-indicator position-absolute bottom-0 start-50 translate-middle-x pb-5" style="z-index: 10;">
+    <div class="heritage-scroll-indicator position-absolute bottom-0 start-50 translate-middle-x pb-5 herita-z-index-10-354f" >
         <a href="#heritage-explore" class="text-white text-decoration-none">
             <div class="d-flex flex-column align-items-center">
                 <span class="small mb-2">Explore</span>

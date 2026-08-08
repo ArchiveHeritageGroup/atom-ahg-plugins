@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .spectr-max-height-150px-max-width-2-b3c8 { max-height: 150px; max-width: 200px; }
+</style>
 <?php
 /**
  * Condition Check Photos Button Partial
@@ -32,8 +39,8 @@ try {
             <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'conditionPhotos', 'slug' => $resource->slug, 'condition_id' => $conditionCheck['id']]); ?>">
                 <img src="/uploads/<?php echo $primaryPhoto['file_path']; ?>" 
                      alt="<?php echo htmlspecialchars($primaryPhoto['caption'] ?? 'Primary photo'); ?>"
-                     class="img-thumbnail"
-                     style="max-height: 150px; max-width: 200px;">
+                     class="img-thumbnail spectr-max-height-150px-max-width-2-b3c8"
+                     >
             </a>
         </div>
     <?php endif; ?>

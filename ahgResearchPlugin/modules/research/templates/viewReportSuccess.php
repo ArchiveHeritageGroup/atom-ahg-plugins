@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-cursor-pointer-24b5 { cursor: pointer; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -145,7 +152,7 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
           <?php if (!empty($thisSectionComments) || true): ?>
           <div class="card-footer bg-transparent">
             <details>
-              <summary class="text-muted small" style="cursor: pointer;">
+              <summary class="text-muted small resear-cursor-pointer-24b5" >
                 <i class="fas fa-comments me-1"></i><?php echo __('Comments'); ?> (<?php echo count($thisSectionComments); ?>)
               </summary>
               <div class="mt-2">

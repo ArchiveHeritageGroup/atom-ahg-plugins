@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-width-100px-height-100px-33d7 { width: 100px; height: 100px; }
+  .market-width-100px-height-100px-obj-7c6b { width: 100px; height: 100px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Respond to Offer'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -31,9 +39,9 @@
       <div class="card-body">
         <div class="d-flex">
           <?php if (!empty($listing->featured_image_path)): ?>
-            <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded me-3" style="width: 100px; height: 100px; object-fit: cover;">
+            <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded me-3 market-width-100px-height-100px-obj-7c6b" >
           <?php else: ?>
-            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 100px; height: 100px;">
+            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3 market-width-100px-height-100px-33d7" >
               <i class="fas fa-image fa-2x text-muted"></i>
             </div>
           <?php endif; ?>

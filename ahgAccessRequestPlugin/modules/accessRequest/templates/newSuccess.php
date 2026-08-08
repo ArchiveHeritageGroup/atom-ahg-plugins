@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .access-z-index-1000-max-height-280p-4549 { z-index:1000; max-height:280px; overflow-y:auto; }
+</style>
 <?php $n = sfConfig::get('csp_nonce', ''); $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>
 
 <div class="container mt-4">
@@ -103,8 +110,8 @@
                 <input type="text" class="form-control" id="ar-object-search" autocomplete="off"
                        placeholder="Type at least 2 characters of a title...">
                 <input type="hidden" name="object_id" id="ar-object-id" value="">
-                <div id="ar-object-results" class="list-group position-absolute w-100 shadow-sm d-none"
-                     style="z-index:1000; max-height:280px; overflow-y:auto;"></div>
+                <div id="ar-object-results" class="list-group position-absolute w-100 shadow-sm d-none access-z-index-1000-max-height-280p-4549"
+                     ></div>
                 <div id="ar-object-chosen" class="form-text mt-2 d-none">
                   <i class="fas fa-check-circle text-success me-1"></i>
                   <span id="ar-object-chosen-title"></span>

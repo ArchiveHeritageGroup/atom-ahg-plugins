@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .spectr-height-20px-84ce { height: 20px; }
+</style>
 <div class="mb-3">
     <a href="/admin/dashboard" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i>{{ __('Back to Dashboard') }}</a>
 </div>
@@ -97,8 +102,8 @@
                 $scoreClass = $score >= 80 ? 'success' : ($score >= 60 ? 'warning' : 'danger');
                 @endphp
                 <div class="display-1 text-{{ $scoreClass }}">{{ $score }}%</div>
-                <div class="progress mt-3" style="height: 20px;">
-                    <div class="progress-bar bg-{{ $scoreClass }}" style="width: {{ $score }}%"></div>
+                <div class="progress mt-3 spectr-height-20px-84ce" >
+                    <div class="progress-bar bg-{{ $scoreClass }}" data-ahg-style="width: {{ $score }}%"></div>
                 </div>
             </div>
         </div>

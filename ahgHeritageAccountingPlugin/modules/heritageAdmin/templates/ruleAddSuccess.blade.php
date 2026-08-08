@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-text-transform-uppercase-90fe { text-transform: uppercase; }
+</style>
 
 @section('title', __('Compliance Rule'))
 
@@ -53,7 +58,7 @@ $isEdit = isset($rule) && $rule;
                                 <label class="form-label">{{ __('Rule Code') }} <span class="text-danger">*</span></label>
                                 <input type="text" name="code" class="form-control" required
                                        value="{{ $isEdit ? $rule->code : '' }}"
-                                       placeholder="e.g. REC001" maxlength="50" style="text-transform: uppercase;">
+                                       placeholder="e.g. REC001" maxlength="50" class="herita-text-transform-uppercase-90fe">
                             </div>
                         </div>
 

@@ -1,4 +1,11 @@
 <?php echo get_component('default', 'updateCheck') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .multit-width-auto-dc25 { width: auto; }
+</style>
 
 <div class="container-fluid py-4">
   <div class="row">
@@ -181,7 +188,7 @@
                         <form action="<?php echo url_for('tenant_admin_update_user_role') ?>" method="post" class="d-inline update-role-form">
                           <input type="hidden" name="tenant_id" value="<?php echo $tenant->id ?>">
                           <input type="hidden" name="user_id" value="<?php echo $user->id ?>">
-                          <select name="role" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+                          <select name="role" class="form-select form-select-sm multit-width-auto-dc25"  onchange="this.form.submit()">
                             <?php foreach ($roles as $roleValue => $roleLabel): ?>
                               <option value="<?php echo $roleValue ?>" <?php echo $user->role === $roleValue ? 'selected' : '' ?>>
                                 <?php echo $roleLabel ?>

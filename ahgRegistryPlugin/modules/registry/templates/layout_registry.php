@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-max-width-180px-b65f { max-width: 180px; }
+  .regist-text-decoration-none-8fdc { text-decoration:none; }
+</style>
 <?php
   $n = sfConfig::get('csp_nonce', '');
   $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
@@ -325,7 +333,7 @@
       <!-- Right side: Search + Auth -->
       <form class="d-flex me-3" method="get" action="/registry/search">
         <div class="input-group input-group-sm">
-          <input type="text" class="form-control" name="q" placeholder="Search..." style="max-width: 180px;">
+          <input type="text" class="form-control" name="q" placeholder="Search..." class="regist-max-width-180px-b65f">
           <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
         </div>
       </form>
@@ -343,7 +351,7 @@
             <div class="dropdown-menu dropdown-menu-end reg-notif-menu" aria-labelledby="regNotifBellToggle">
               <div class="d-flex align-items-center justify-content-between px-3 py-2 border-bottom">
                 <strong>Notifications</strong>
-                <button type="button" class="btn btn-link btn-sm p-0" id="regNotifMarkAllRead" style="text-decoration:none;">Mark all read</button>
+                <button type="button" class="btn btn-link btn-sm p-0" id="regNotifMarkAllRead" class="regist-text-decoration-none-8fdc">Mark all read</button>
               </div>
               <div id="regNotifList" class="reg-notif-list">
                 <div class="text-muted small text-center p-3">Loading&hellip;</div>

@@ -1,4 +1,15 @@
 <?php decorate_with('layout_1col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-max-height-120px-d53b { max-height: 120px; }
+  .themeb-max-height-200px-8de0 { max-height: 200px; }
+  .themeb-max-height-400px-790d { max-height: 400px; }
+  .themeb-max-height-80px-780c { max-height: 80px; }
+  .themeb-min-height-200px-476a { min-height: 200px; }
+</style>
 
 <?php
 $resourceData = $sf_data->getRaw('resourceData');
@@ -58,13 +69,13 @@ elseif ($resourceData->media_type_id == $MEDIA_IMAGE) $mediaIcon = 'fa-image';
           <div class="card-header bg-dark text-white">
             <h5 class="mb-0"><i class="fas fa-eye me-2"></i><?php echo __('Preview') ?></h5>
           </div>
-          <div class="card-body text-center bg-light" style="min-height: 200px;">
+          <div class="card-body text-center bg-light themeb-min-height-200px-476a" >
             <?php if ($resourceData->media_type_id == $MEDIA_IMAGE && ($refSrc || $thumbSrc)): ?>
-              <img src="<?php echo $refSrc ?: $thumbSrc ?>" class="img-fluid rounded shadow" style="max-height: 400px;" alt="">
+              <img src="<?php echo $refSrc ?: $thumbSrc ?>" class="img-fluid rounded shadow themeb-max-height-400px-790d"  alt="">
             <?php elseif (in_array($resourceData->media_type_id, [$MEDIA_VIDEO, $MEDIA_AUDIO])): ?>
               <?php echo get_component('digitalobject', 'show', ['resource' => QubitDigitalObject::getById($resourceData->id), 'usageType' => QubitTerm::REFERENCE_ID]) ?>
             <?php elseif ($thumbSrc): ?>
-              <img src="<?php echo $thumbSrc ?>" class="img-fluid rounded" style="max-height: 200px;" alt="">
+              <img src="<?php echo $thumbSrc ?>" class="img-fluid rounded themeb-max-height-200px-8de0"  alt="">
             <?php else: ?>
               <div class="py-5 text-muted">
                 <i class="fas <?php echo $mediaIcon ?> fa-4x mb-3"></i>
@@ -133,7 +144,7 @@ elseif ($resourceData->media_type_id == $MEDIA_IMAGE) $mediaIcon = 'fa-image';
               <div class="row align-items-center">
                 <?php if ($refSrc): ?>
                 <div class="col-md-3 text-center mb-3 mb-md-0">
-                  <img src="<?php echo $refSrc ?>" class="img-thumbnail" style="max-height: 120px;" alt="">
+                  <img src="<?php echo $refSrc ?>" class="img-thumbnail themeb-max-height-120px-d53b"  alt="">
                 </div>
                 <?php endif; ?>
                 <div class="col">
@@ -162,7 +173,7 @@ elseif ($resourceData->media_type_id == $MEDIA_IMAGE) $mediaIcon = 'fa-image';
               <div class="row align-items-center">
                 <?php if ($thumbSrc): ?>
                 <div class="col-md-2 text-center mb-3 mb-md-0">
-                  <img src="<?php echo $thumbSrc ?>" class="img-thumbnail" style="max-height: 80px;" alt="">
+                  <img src="<?php echo $thumbSrc ?>" class="img-thumbnail themeb-max-height-80px-780c"  alt="">
                 </div>
                 <?php endif; ?>
                 <div class="col">

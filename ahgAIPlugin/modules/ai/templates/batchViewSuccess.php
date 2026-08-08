@@ -1,4 +1,16 @@
 <?php decorate_with('layout_2col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+  .ai-width-100px-b3a1 { width: 100px; }
+  .ai-width-200px-fa48 { width: 200px; }
+  .ai-width-60px-d7a5 { width: 60px; }
+  .ai-width-80px-db80 { width: 80px; }
+  .ai-width-auto-a12b { width: auto; }
+</style>
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
@@ -114,10 +126,10 @@
                 <span id="progressPercent"><?php echo number_format($batch->progress_percent, 1); ?>%</span>
             </div>
             <div class="progress progress-lg">
-                <div class="progress-bar bg-success" id="progressBar" style="width: <?php echo $batch->progress_percent; ?>%">
+                <div class="progress-bar bg-success" id="progressBar" data-ahg-style="width: <?php echo $batch->progress_percent; ?>%">
                 </div>
                 <?php if ($batch->failed_items > 0): ?>
-                    <div class="progress-bar bg-danger" id="failedBar" style="width: <?php echo ($batch->failed_items / $batch->total_items * 100); ?>%">
+                    <div class="progress-bar bg-danger" id="failedBar" data-ahg-style="width: <?php echo ($batch->failed_items / $batch->total_items * 100); ?>%">
                     </div>
                 <?php endif; ?>
             </div>
@@ -174,7 +186,7 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <span><i class="fas fa-list me-2"></i><?php echo __('Jobs'); ?> (<?php echo count($jobs); ?>)</span>
         <div>
-            <select id="statusFilter" class="form-select form-select-sm d-inline-block" style="width: auto" onchange="filterJobs()">
+            <select id="statusFilter" class="form-select form-select-sm d-inline-block ai-width-auto-a12b"  onchange="filterJobs()">
                 <option value=""><?php echo __('All Status'); ?></option>
                 <option value="pending"><?php echo __('Pending'); ?></option>
                 <option value="queued"><?php echo __('Queued'); ?></option>
@@ -189,13 +201,13 @@
             <table class="table table-hover mb-0" id="jobsTable">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 60px"><?php echo __('ID'); ?></th>
+                        <th class="ai-width-60px-d7a5"><?php echo __('ID'); ?></th>
                         <th><?php echo __('Object'); ?></th>
-                        <th style="width: 100px"><?php echo __('Task'); ?></th>
-                        <th style="width: 100px"><?php echo __('Status'); ?></th>
-                        <th style="width: 80px"><?php echo __('Attempts'); ?></th>
-                        <th style="width: 100px"><?php echo __('Time'); ?></th>
-                        <th style="width: 200px"><?php echo __('Error'); ?></th>
+                        <th class="ai-width-100px-b3a1"><?php echo __('Task'); ?></th>
+                        <th class="ai-width-100px-b3a1"><?php echo __('Status'); ?></th>
+                        <th class="ai-width-80px-db80"><?php echo __('Attempts'); ?></th>
+                        <th class="ai-width-100px-b3a1"><?php echo __('Time'); ?></th>
+                        <th class="ai-width-200px-fa48"><?php echo __('Error'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -278,7 +290,7 @@
         <i class="fas fa-history me-2"></i><?php echo __('Recent Activity'); ?>
     </div>
     <div class="card-body p-0">
-        <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+        <div class="list-group list-group-flush ai-max-height-300px-overflow-y--3db9" >
             <?php foreach ($logs as $log): ?>
                 <?php
                 $logIcon = match($log->event_type) {

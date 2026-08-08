@@ -1,4 +1,12 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .reques-width-100px-e3d2 { width: 100px; }
+  .reques-width-80px-588c { width: 80px; }
+</style>
 <?php decorate_with('layout_1col.php'); ?>
 
 <?php slot('title'); ?>
@@ -71,14 +79,14 @@
         <table class="table table-striped table-hover mb-0">
           <thead class="table-light">
             <tr>
-              <th style="width: 100px;"><?php echo __('Status'); ?></th>
+              <th class="reques-width-100px-e3d2"><?php echo __('Status'); ?></th>
               <th><?php echo __('Archival Description'); ?></th>
               <th><?php echo __('Requester'); ?></th>
               <th><?php echo __('Contact'); ?></th>
               <th><?php echo __('Institution'); ?></th>
               <th><?php echo __('Need By'); ?></th>
               <th><?php echo __('Created'); ?></th>
-              <th style="width: 80px;"><?php echo __('Action'); ?></th>
+              <th class="reques-width-80px-588c"><?php echo __('Action'); ?></th>
             </tr>
           </thead>
           <tbody>

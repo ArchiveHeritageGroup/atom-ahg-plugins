@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .author-position-sticky-bottom-0-z-i-7d00 { position:sticky;bottom:0;z-index:1020; }
+  .author-width-1-0359 { width:1%; }
+  .author-width-16rem-1f56 { width:16rem; }
+  .author-width-auto-d3b6 { width:auto; }
+</style>
 <?php
 /**
  * Authority Resolution - pending queue list (Task 5).
@@ -149,7 +159,7 @@
       <table class="table table-hover table-striped mb-0 align-middle">
         <thead>
           <tr>
-            <th style="width:1%;">
+            <th class="author-width-1-0359">
               <input type="checkbox" class="form-check-input" id="ar-check-all"
                      title="<?php echo __('Select all on this page'); ?>">
             </th>
@@ -290,7 +300,7 @@
   </form><!-- /#ar-batch-form -->
 
   <!-- Sticky batch-assign bar -->
-  <div id="ar-batch-bar" class="d-none" style="position:sticky;bottom:0;z-index:1020;">
+  <div id="ar-batch-bar" class="d-none author-position-sticky-bottom-0-z-i-7d00" >
     <div class="card border-primary shadow mt-2">
       <div class="card-body py-2 d-flex flex-wrap align-items-center gap-2">
         <span class="fw-bold">
@@ -299,13 +309,13 @@
         </span>
         <div class="ms-auto d-flex flex-wrap align-items-center gap-2">
           <label for="ar-batch-archivist" class="form-label mb-0 small"><?php echo __('Assign to'); ?>:</label>
-          <select id="ar-batch-archivist" class="form-select form-select-sm" style="width:auto;">
+          <select id="ar-batch-archivist" class="form-select form-select-sm author-width-auto-d3b6" >
             <option value=""><?php echo __('Select an archivist...'); ?></option>
             <?php foreach (($archivists ?: []) as $a): ?>
               <option value="<?php echo (int) $a['id']; ?>"><?php echo htmlspecialchars((string) $a['display']); ?></option>
             <?php endforeach; ?>
           </select>
-          <input type="text" id="ar-batch-reason" class="form-control form-control-sm" style="width:16rem;"
+          <input type="text" id="ar-batch-reason" class="form-control form-control-sm author-width-16rem-1f56" 
                  placeholder="<?php echo __('Reason / message (optional)'); ?>"
                  aria-label="<?php echo __('Reason / message (optional)'); ?>">
           <button type="button" id="ar-batch-submit" class="btn btn-sm btn-primary">

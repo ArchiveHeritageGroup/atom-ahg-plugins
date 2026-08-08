@@ -19,9 +19,9 @@
           <div class="col-md-6 col-lg-4">
             <a href="{{ url_for(['module' => 'heritage', 'action' => 'explore', 'category' => $cat['code']]) }}"
                class="card h-100 text-decoration-none explore-card"
-               style="background-color: {{ $cat['background_color'] }}; color: {{ $cat['text_color'] }};">
+               data-ahg-style="background-color: {{ $cat['background_color'] }}; color: {{ $cat['text_color'] }};">
               @if($cat['cover_image'])
-                <div class="card-img-top" style="height: 150px; background: url('{{ $cat['cover_image'] }}') center/cover;"></div>
+                <div class="card-img-top" data-ahg-style="height: 150px; background: url('{{ $cat['cover_image'] }}') center/cover;"></div>
               @endif
               <div class="card-body">
                 <div class="d-flex align-items-center mb-2">

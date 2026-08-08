@@ -1,8 +1,17 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-margin-bottom-1rem-4986 { margin-bottom: 1rem; }
+  .report-margin-top-1rem-988c { margin-top: 1rem; }
+  .report-width-100-8588 { width:100%; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Browse Authority Record/Actor Report'); ?></h1>
-  <div style="margin-bottom: 1rem;">
+  <div class="report-margin-bottom-1rem-4986">
     <a href="<?php echo url_for(['module' => 'reports', 'action' => 'reportSelect']); ?>" class="c-btn">
       <i class="fa fa-arrow-left"></i> <?php echo __("Back to Reports"); ?>
     </a>
@@ -49,8 +58,8 @@
         <input class="c-btn c-btn-submit" type="submit" value="<?php echo __('Search'); ?>"/>
       </section>
 
-      <div style="margin-top: 1rem;">
-        <button type="button" onclick="exportTableToCSV()" class="c-btn" style="width:100%;">
+      <div class="report-margin-top-1rem-988c">
+        <button type="button" onclick="exportTableToCSV()" class="c-btn report-width-100-8588" >
           <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
         </button>
       </div>

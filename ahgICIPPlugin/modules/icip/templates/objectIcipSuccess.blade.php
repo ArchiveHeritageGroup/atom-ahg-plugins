@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .icip-min-width-200px-a066 { min-width: 200px; }
+</style>
 
 @section('content')
 <div class="container-xxl">
@@ -220,7 +225,7 @@
                     @else
                         <div class="d-flex flex-wrap gap-3">
                             @foreach ($labels as $label)
-                                <div class="icip-tk-label-card p-2 border rounded" style="min-width: 200px;">
+                                <div class="icip-tk-label-card p-2 border rounded icip-min-width-200px-a066" >
                                     <div class="d-flex align-items-center">
                                         <span class="badge {{ $label->category === 'TK' ? 'icip-tk-label' : 'icip-bc-label' }} me-2">
                                             {{ strtoupper($label->label_code) }}

@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-display-none-93b8 { display:none; }
+  .settin-width-40px-a922 { width:40px; }
+</style>
 
 @section('content')
 <div class="row">
@@ -392,7 +398,7 @@
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th class="settin-width-40px-a922"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -421,11 +427,11 @@
             </div>
 
             <!-- Library fields -->
-            <div id="sector-fields-library" class="sector-fields" style="display:none;">
+            <div id="sector-fields-library" class="sector-fields settin-display-none-93b8" >
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th class="settin-width-40px-a922"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -450,11 +456,11 @@
             </div>
 
             <!-- Museum fields -->
-            <div id="sector-fields-museum" class="sector-fields" style="display:none;">
+            <div id="sector-fields-museum" class="sector-fields settin-display-none-93b8" >
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th class="settin-width-40px-a922"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -479,11 +485,11 @@
             </div>
 
             <!-- Gallery fields -->
-            <div id="sector-fields-gallery" class="sector-fields" style="display:none;">
+            <div id="sector-fields-gallery" class="sector-fields settin-display-none-93b8" >
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th class="settin-width-40px-a922"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>
@@ -508,11 +514,11 @@
             </div>
 
             <!-- DAM fields -->
-            <div id="sector-fields-dam" class="sector-fields" style="display:none;">
+            <div id="sector-fields-dam" class="sector-fields settin-display-none-93b8" >
               <table class="table table-sm table-hover">
                 <thead class="table-light">
                   <tr>
-                    <th style="width:40px;"></th>
+                    <th class="settin-width-40px-a922"></th>
                     <th>Source Field</th>
                     <th><i class="fas fa-arrow-right text-muted"></i> Save To (Target)</th>
                   </tr>

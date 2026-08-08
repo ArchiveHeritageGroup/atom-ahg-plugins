@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .access-height-24px-7745 { height: 24px; }
+  .access-max-width-400px-fbe9 { max-width: 400px; }
+</style>
 
 <?php
   $rawAccession          = $sf_data->getRaw('accession');
@@ -52,10 +60,10 @@
           <?php echo $clPct; ?>%
         </span>
       </div>
-      <div class="progress" style="height: 24px;">
+      <div class="progress access-height-24px-7745" >
         <div class="progress-bar bg-<?php echo $barColor; ?>"
              role="progressbar"
-             style="width: <?php echo $clPct; ?>%"
+             data-ahg-style="width: <?php echo $clPct; ?>%"
              aria-valuenow="<?php echo $clPct; ?>"
              aria-valuemin="0"
              aria-valuemax="100">
@@ -73,7 +81,7 @@
       </div>
       <div class="card-body">
         <div class="d-flex gap-2">
-          <select id="checklist-template-select" class="form-select" style="max-width: 400px;">
+          <select id="checklist-template-select" class="form-select access-max-width-400px-fbe9" >
             <option value=""><?php echo __('Select a checklist template...'); ?></option>
             <?php foreach ($templatesArr as $tpl): ?>
               <option value="<?php echo htmlspecialchars($tpl->id); ?>">

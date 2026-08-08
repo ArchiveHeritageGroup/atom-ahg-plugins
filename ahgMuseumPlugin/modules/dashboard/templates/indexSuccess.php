@@ -1,4 +1,13 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-background-17a2b8-color-fff--21db { background:#17a2b8;color:#fff;padding:8px 15px;border-radius:4px;text-decoration:none; }
+  .museum-color-27ae60-b082 { color:#27ae60; }
+  .museum-color-2ecc71-bcc6 { color:#2ecc71; }
+</style>
 
 <h1 class="dashboard-title">Data Quality Dashboard</h1>
 
@@ -241,7 +250,7 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
         <?php endforeach; ?>
     </select>
     <button type="submit"><?php echo __('Filter'); ?></button>
-    <a href="?export=csv" class="btn" style="background:#17a2b8;color:#fff;padding:8px 15px;border-radius:4px;text-decoration:none;">
+    <a href="?export=csv" class="btn museum-background-17a2b8-color-fff--21db" >
         <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
     </a>
 </form>
@@ -269,9 +278,9 @@ $categoryLabels = $sf_data->getRaw('categoryLabels') ?? [];
 <!-- Grade Distribution -->
 <div class="stats-row">
     <div class="stat-box">
-        <div class="value" style="color:#27ae60;"><?php echo $gradeDistribution['A'] ?? 0; ?></div>
+        <div class="value museum-color-27ae60-b082" ><?php echo $gradeDistribution['A'] ?? 0; ?></div>
         <div class="label"><?php echo __('Grade A (Excellent)'); ?></div>
     </div>
     <div class="stat-box">
-        <div class="value" style="color:#2ecc71;"><?php echo $gradeDistribution['B'] ?? 0; ?></div>
+        <div class="value museum-color-2ecc71-bcc6" ><?php echo $gradeDistribution['B'] ?? 0; ?></div>
         <div class="label"><?php

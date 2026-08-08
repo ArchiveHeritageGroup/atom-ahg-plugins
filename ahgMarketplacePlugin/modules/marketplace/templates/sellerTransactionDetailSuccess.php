@@ -1,4 +1,16 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-flex-1-49cd { flex: 1; }
+  .market-font-size-0-5rem-vertical-al-0911 { font-size: 0.5rem; vertical-align: middle; }
+  .market-width-200px-5c2d { width: 200px; }
+  .market-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+  .market-width-80px-height-80px-732c { width: 80px; height: 80px; }
+  .market-width-80px-height-80px-objec-02c4 { width: 80px; height: 80px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Transaction Detail'); ?> - <?php echo esc_entities($transaction->transaction_number); ?><?php end_slot(); ?>
 
@@ -51,8 +63,8 @@
           $isActive = ($idx !== false && $idx <= $currentIdx);
           $isCurrent = ($key === $transaction->status);
         ?>
-        <div class="text-center" style="flex: 1;">
-          <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-1 <?php echo $isActive ? 'bg-primary text-white' : 'bg-light text-muted'; ?>" style="width: 40px; height: 40px;">
+        <div class="text-center market-flex-1-49cd" >
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-1 <?php echo $isActive ? 'bg-primary text-white' : 'bg-light text-muted'; ?> market-width-40px-height-40px-9a6a" >
             <i class="fas <?php echo $step['icon']; ?>"></i>
           </div>
           <div class="small <?php echo $isCurrent ? 'fw-bold' : ''; ?>"><?php echo $step['label']; ?></div>
@@ -71,7 +83,7 @@
       <div class="card-body">
         <table class="table table-sm table-borderless mb-0">
           <tr>
-            <td class="text-muted" style="width: 200px;"><?php echo __('Transaction Number'); ?></td>
+            <td class="text-muted market-width-200px-5c2d" ><?php echo __('Transaction Number'); ?></td>
             <td class="fw-semibold"><?php echo esc_entities($transaction->transaction_number); ?></td>
           </tr>
           <tr>
@@ -111,9 +123,9 @@
       <div class="card-body">
         <div class="d-flex">
           <?php if (!empty($listing->featured_image_path)): ?>
-            <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded me-3" style="width: 80px; height: 80px; object-fit: cover;">
+            <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded me-3 market-width-80px-height-80px-objec-02c4" >
           <?php else: ?>
-            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3 market-width-80px-height-80px-732c" >
               <i class="fas fa-image fa-2x text-muted"></i>
             </div>
           <?php endif; ?>
@@ -212,34 +224,34 @@
           <h6 class="mb-3"><?php echo __('Delivery Timeline'); ?></h6>
           <ul class="list-unstyled">
             <li class="mb-2">
-              <i class="fas fa-circle text-success me-2" style="font-size: 0.5rem; vertical-align: middle;"></i>
+              <i class="fas fa-circle text-success me-2 market-font-size-0-5rem-vertical-al-0911" ></i>
               <strong class="small"><?php echo __('Created'); ?></strong>
               <span class="small text-muted ms-2"><?php echo date('d M Y H:i', strtotime($transaction->created_at)); ?></span>
             </li>
             <?php if ($transaction->paid_at): ?>
               <li class="mb-2">
-                <i class="fas fa-circle text-success me-2" style="font-size: 0.5rem; vertical-align: middle;"></i>
+                <i class="fas fa-circle text-success me-2 market-font-size-0-5rem-vertical-al-0911" ></i>
                 <strong class="small"><?php echo __('Paid'); ?></strong>
                 <span class="small text-muted ms-2"><?php echo date('d M Y H:i', strtotime($transaction->paid_at)); ?></span>
               </li>
             <?php endif; ?>
             <?php if ($transaction->shipped_at): ?>
               <li class="mb-2">
-                <i class="fas fa-circle text-success me-2" style="font-size: 0.5rem; vertical-align: middle;"></i>
+                <i class="fas fa-circle text-success me-2 market-font-size-0-5rem-vertical-al-0911" ></i>
                 <strong class="small"><?php echo __('Shipped'); ?></strong>
                 <span class="small text-muted ms-2"><?php echo date('d M Y H:i', strtotime($transaction->shipped_at)); ?></span>
               </li>
             <?php endif; ?>
             <?php if ($transaction->delivered_at): ?>
               <li class="mb-2">
-                <i class="fas fa-circle text-success me-2" style="font-size: 0.5rem; vertical-align: middle;"></i>
+                <i class="fas fa-circle text-success me-2 market-font-size-0-5rem-vertical-al-0911" ></i>
                 <strong class="small"><?php echo __('Delivered'); ?></strong>
                 <span class="small text-muted ms-2"><?php echo date('d M Y H:i', strtotime($transaction->delivered_at)); ?></span>
               </li>
             <?php endif; ?>
             <?php if ($transaction->completed_at): ?>
               <li class="mb-2">
-                <i class="fas fa-circle text-success me-2" style="font-size: 0.5rem; vertical-align: middle;"></i>
+                <i class="fas fa-circle text-success me-2 market-font-size-0-5rem-vertical-al-0911" ></i>
                 <strong class="small"><?php echo __('Completed'); ?></strong>
                 <span class="small text-muted ms-2"><?php echo date('d M Y H:i', strtotime($transaction->completed_at)); ?></span>
               </li>

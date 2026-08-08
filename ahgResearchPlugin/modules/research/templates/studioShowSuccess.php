@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-white-space-pre-wrap-d077 { white-space:pre-wrap; }
+  .resear-white-space-pre-wrap-line-he-b9d0 { white-space:pre-wrap; line-height:1.6; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -67,16 +75,16 @@ $nonceAttr = $nonce ? preg_replace('/^nonce=/', 'nonce="', $nonce) . '"' : '';
                     <script <?php echo $nonceAttr; ?>>mermaid.initialize({ startOnLoad: true });</script>
                 <?php elseif ($artefact->output_type === 'spreadsheet'): ?>
                     <div class="markdown-body" id="studio-body">
-                        <pre class="bg-light p-3" style="white-space:pre-wrap"><?php echo htmlspecialchars($body); ?></pre>
+                        <pre class="bg-light p-3 resear-white-space-pre-wrap-d077" ><?php echo htmlspecialchars($body); ?></pre>
                     </div>
                 <?php else: ?>
-                    <div class="markdown-body" id="studio-body" style="white-space:pre-wrap; line-height:1.6"><?php echo htmlspecialchars($body); ?></div>
+                    <div class="markdown-body" id="studio-body" class="resear-white-space-pre-wrap-line-he-b9d0"><?php echo htmlspecialchars($body); ?></div>
                 <?php endif; ?>
 
                 <?php if (!empty($artefact->audio_transcript) && $artefact->output_type === 'audio'): ?>
                     <hr>
                     <h6>Audio transcript</h6>
-                    <pre class="bg-light p-3" style="white-space:pre-wrap"><?php echo htmlspecialchars($artefact->audio_transcript); ?></pre>
+                    <pre class="bg-light p-3 resear-white-space-pre-wrap-d077" ><?php echo htmlspecialchars($artefact->audio_transcript); ?></pre>
                 <?php endif; ?>
             </div>
         </div>

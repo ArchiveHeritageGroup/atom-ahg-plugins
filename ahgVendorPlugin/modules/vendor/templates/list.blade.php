@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .vendor-display-none-224b { display: none; }
+</style>
 
 @section('content')
 <div class="container-fluid px-4">
@@ -164,7 +169,7 @@
 </div>
 
 {{-- Delete Form (hidden) --}}
-<form id="deleteVendorForm" method="post" action="" style="display: none;">
+<form id="deleteVendorForm" method="post" action="" class="vendor-display-none-224b">
     <input type="hidden" name="_method" value="POST">
 </form>
 

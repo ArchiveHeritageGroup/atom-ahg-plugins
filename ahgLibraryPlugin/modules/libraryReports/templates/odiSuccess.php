@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-width-40-51d4 { width:40%; }
+</style>
 
 <?php slot('title'); ?>
   <h1><i class="fas fa-clipboard-check me-2"></i><?php echo __('ODI Metadata Quality Scorecard'); ?></h1>
@@ -22,7 +29,7 @@
     <div class="card-header bg-light"><h5 class="mb-0"><?php echo __('Field fill rates'); ?></h5></div>
     <div class="table-responsive">
       <table class="table table-striped mb-0 align-middle">
-        <thead class="table-light"><tr><th><?php echo __('Field'); ?></th><th class="text-end"><?php echo __('Filled'); ?></th><th style="width:40%"><?php echo __('Coverage'); ?></th></tr></thead>
+        <thead class="table-light"><tr><th><?php echo __('Field'); ?></th><th class="text-end"><?php echo __('Filled'); ?></th><th class="librar-width-40-51d4"><?php echo __('Coverage'); ?></th></tr></thead>
         <tbody>
           <?php foreach ($sc['fields'] as $f): ?>
             <tr>
@@ -30,7 +37,7 @@
               <td class="text-end"><?php echo (int) $f['filled']; ?> / <?php echo (int) $sc['total']; ?></td>
               <td>
                 <div class="progress" role="progressbar" aria-valuenow="<?php echo $f['pct']; ?>" aria-valuemin="0" aria-valuemax="100">
-                  <div class="progress-bar <?php echo $f['pct'] >= 80 ? 'bg-success' : ($f['pct'] >= 50 ? 'bg-warning' : 'bg-danger'); ?>" style="width: <?php echo $f['pct']; ?>%"><?php echo $f['pct']; ?>%</div>
+                  <div class="progress-bar <?php echo $f['pct'] >= 80 ? 'bg-success' : ($f['pct'] >= 50 ? 'bg-warning' : 'bg-danger'); ?>" data-ahg-style="width: <?php echo $f['pct']; ?>%"><?php echo $f['pct']; ?>%</div>
                 </div>
               </td>
             </tr>

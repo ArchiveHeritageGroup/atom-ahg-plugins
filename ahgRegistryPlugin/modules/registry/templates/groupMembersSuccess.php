@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-36px-height-36px-min-w-d2c3 { width: 36px; height: 36px; min-width: 36px; }
+</style>
 
 <?php $groupDetail = sfOutputEscaper::unescape($group['group']); ?>
 <?php $members = sfOutputEscaper::unescape($members ?? []); ?>
@@ -63,7 +70,7 @@
       <tr data-role="<?php echo htmlspecialchars($m->role ?? 'member', ENT_QUOTES, 'UTF-8'); ?>">
         <td>
           <div class="d-flex align-items-center">
-            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; min-width: 36px;">
+            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 regist-width-36px-height-36px-min-w-d2c3" >
               <i class="fas fa-user text-muted small"></i>
             </div>
             <div>

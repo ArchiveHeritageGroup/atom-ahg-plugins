@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-display-none-224b { display: none; }
+</style>
 <?php slot('title') ?>
 <h1><i class="bi bi-clock text-primary me-2"></i><?php echo __('Report Schedule'); ?></h1>
 <?php end_slot() ?>
@@ -53,7 +60,7 @@
                         </select>
                     </div>
 
-                    <div class="mb-3" id="weeklyOptions" style="display: none;">
+                    <div class="mb-3" id="weeklyOptions" class="report-display-none-224b">
                         <label class="form-label"><?php echo __('Day of Week'); ?></label>
                         <select class="form-select" name="day_of_week">
                             <option value="1"><?php echo __('Monday'); ?></option>
@@ -66,7 +73,7 @@
                         </select>
                     </div>
 
-                    <div class="mb-3" id="monthlyOptions" style="display: none;">
+                    <div class="mb-3" id="monthlyOptions" class="report-display-none-224b">
                         <label class="form-label"><?php echo __('Day of Month'); ?></label>
                         <select class="form-select" name="day_of_month">
                             <?php for ($i = 1; $i <= 28; $i++): ?>
@@ -83,7 +90,7 @@
 
                     </div><!-- end recurringOptions -->
 
-                    <div id="triggerOptions" style="display: none;">
+                    <div id="triggerOptions" class="report-display-none-224b">
                         <div class="mb-3">
                             <label class="form-label"><?php echo __('Trigger Event'); ?></label>
                             <select class="form-select" name="trigger_event">

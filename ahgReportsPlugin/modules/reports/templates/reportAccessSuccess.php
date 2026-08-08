@@ -1,4 +1,13 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-display-none-9c76 { display: none; }
+  .report-width-110px-e822 { width: 110px; }
+  .report-width-250px-e8db { width: 250px; }
+</style>
 
 <?php slot('title'); ?>
   <h1 class="multiline">
@@ -31,7 +40,7 @@ input[type="date"] {
 
 			<?php echo $form->renderHiddenFields(); ?>
 
-			<div id='typeOfReport' style="display: none">
+			<div id='typeOfReport' class="report-display-none-9c76">
 				<?php echo $form->className->label('Types of Reports')->renderRow(); ?>
 			</div>
 
@@ -76,8 +85,8 @@ input[type="date"] {
   <table class="table table-bordered" border="1" cellpadding="0" cellspacing="0" bordercolor="#999999">
     <thead>
       <tr>
-		<th style="width: 110px"><?php echo __('Identifier'); ?></th>
-		<th style="width: 250px"><?php echo __('Title'); ?></th>
+		<th class="report-width-110px-e822"><?php echo __('Identifier'); ?></th>
+		<th class="report-width-250px-e8db"><?php echo __('Title'); ?></th>
 		<th><?php echo __('Refusal'); ?></th>
 		<th><?php echo __('Sensitive'); ?></th>
 		<th><?php echo __('Publish'); ?></th>
@@ -86,9 +95,9 @@ input[type="date"] {
 
 
         <?php if ('CREATED_AT' != $form->getValue('dateOf')) { ?>
-          <th style="width: 110px"><?php echo __('Updated'); ?></th>
+          <th class="report-width-110px-e822"><?php echo __('Updated'); ?></th>
         <?php } else { ?>
-          <th style="width: 110px"><?php echo __('Created'); ?></th>
+          <th class="report-width-110px-e822"><?php echo __('Created'); ?></th>
         <?php } ?>
       </tr>
     </thead><tbody>

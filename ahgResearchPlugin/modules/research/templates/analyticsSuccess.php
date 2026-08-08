@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-height-140px-gap-4px-542e { height:140px; gap:4px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -62,11 +69,11 @@ $maxDaily = max(array_map(fn ($x) => $x['count'], $d['daily_series'] ?: [['count
                 <?php if (empty($d['daily_series'])): ?>
                     <p class="text-muted mb-0">No activity in this period.</p>
                 <?php else: ?>
-                    <div class="d-flex align-items-end" style="height:140px; gap:4px;">
+                    <div class="d-flex align-items-end resear-height-140px-gap-4px-542e" >
                         <?php foreach ($d['daily_series'] as $row): ?>
                             <div class="flex-grow-1 d-flex flex-column align-items-center">
                                 <div title="<?php echo htmlspecialchars($row['date']); ?>: <?php echo (int) $row['count']; ?>"
-                                     style="background:#0d6efd; width:100%; height:<?php echo max(2, round(120 * $row['count'] / max(1, $maxDaily))); ?>px;"></div>
+                                     data-ahg-style="background:#0d6efd; width:100%; height:<?php echo max(2, round(120 * $row['count'] / max(1, $maxDaily))); ?>px;"></div>
                             </div>
                         <?php endforeach; ?>
                     </div>

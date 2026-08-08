@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .icip-height-10px-977d { height: 10px; }
+</style>
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
@@ -76,8 +83,8 @@
                                     <span><?php echo $info['label'] ?></span>
                                     <span><?php echo $status->count ?> (<?php echo $percent ?>%)</span>
                                 </div>
-                                <div class="progress" style="height: 10px;">
-                                    <div class="progress-bar <?php echo $info['class'] ?>" role="progressbar" style="width: <?php echo $percent ?>%"></div>
+                                <div class="progress icip-height-10px-977d" >
+                                    <div class="progress-bar <?php echo $info['class'] ?>" role="progressbar" data-ahg-style="width: <?php echo $percent ?>%"></div>
                                 </div>
                             </div>
                         <?php endforeach ?>

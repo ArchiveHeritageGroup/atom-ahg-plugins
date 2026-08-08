@@ -1,4 +1,12 @@
 <?php echo get_component('default', 'updateCheck') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .multit-height-30px-margin-right-10p-2ac6 { height: 30px; margin-right: 10px; }
+  .multit-max-height-150px-4ca3 { max-height: 150px; }
+</style>
 
 <div class="container-fluid py-4">
   <div class="row">
@@ -44,7 +52,7 @@
             <div class="card-body text-center">
               <?php if (!empty($branding['logo'])): ?>
                 <div class="mb-3">
-                  <img src="<?php echo $branding['logo'] ?>" alt="Logo" class="img-fluid" style="max-height: 150px;">
+                  <img src="<?php echo $branding['logo'] ?>" alt="Logo" class="img-fluid multit-max-height-150px-4ca3" >
                 </div>
                 <form action="<?php echo url_for('tenant_branding_logo_upload') ?>?delete=1" method="post" class="d-inline">
                   <input type="hidden" name="repository_id" value="<?php echo $repository->id ?>">
@@ -179,28 +187,28 @@
           <div class="row">
             <div class="col-md-6">
               <h6>Buttons</h6>
-              <button class="btn btn-primary me-2" style="background-color: <?php echo $branding['primary_color'] ?? '#336699' ?>; border-color: <?php echo $branding['primary_color'] ?? '#336699' ?>;">Primary Button</button>
-              <button class="btn btn-secondary me-2" style="background-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>; border-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>;">Secondary</button>
-              <button class="btn" style="background-color: <?php echo $branding['button_color'] ?? '#198754' ?>; border-color: <?php echo $branding['button_color'] ?? '#198754' ?>; color: white;">Action</button>
+              <button class="btn btn-primary me-2" data-ahg-style="background-color: <?php echo $branding['primary_color'] ?? '#336699' ?>; border-color: <?php echo $branding['primary_color'] ?? '#336699' ?>;">Primary Button</button>
+              <button class="btn btn-secondary me-2" data-ahg-style="background-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>; border-color: <?php echo $branding['secondary_color'] ?? '#6c757d' ?>;">Secondary</button>
+              <button class="btn" data-ahg-style="background-color: <?php echo $branding['button_color'] ?? '#198754' ?>; border-color: <?php echo $branding['button_color'] ?? '#198754' ?>; color: white;">Action</button>
             </div>
             <div class="col-md-6">
               <h6>Links</h6>
-              <p>This is a <a href="#" style="color: <?php echo $branding['link_color'] ?? '#0d6efd' ?>;">sample link</a> with your configured color.</p>
+              <p>This is a <a href="#" data-ahg-style="color: <?php echo $branding['link_color'] ?? '#0d6efd' ?>;">sample link</a> with your configured color.</p>
             </div>
           </div>
           <hr>
           <h6>Header Preview</h6>
-          <nav class="navbar navbar-dark p-2 rounded" style="background-color: <?php echo $branding['header_bg_color'] ?? '#212529' ?>;">
-            <span class="navbar-brand mb-0 h1" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
+          <nav class="navbar navbar-dark p-2 rounded" data-ahg-style="background-color: <?php echo $branding['header_bg_color'] ?? '#212529' ?>;">
+            <span class="navbar-brand mb-0 h1" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
               <?php if (!empty($branding['logo'])): ?>
-                <img src="<?php echo $branding['logo'] ?>" alt="Logo" style="height: 30px; margin-right: 10px;">
+                <img src="<?php echo $branding['logo'] ?>" alt="Logo" class="multit-height-30px-margin-right-10p-2ac6">
               <?php endif; ?>
               <?php echo esc_specialchars($repository->name ?: 'Repository Name') ?>
             </span>
-            <span style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
-              <a href="#" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Home</a>
-              <a href="#" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Browse</a>
-              <a href="#" style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none;">About</a>
+            <span data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>;">
+              <a href="#" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Home</a>
+              <a href="#" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none; margin-right: 15px;">Browse</a>
+              <a href="#" data-ahg-style="color: <?php echo $branding['header_text_color'] ?? '#ffffff' ?>; text-decoration: none;">About</a>
             </span>
           </nav>
         </div>

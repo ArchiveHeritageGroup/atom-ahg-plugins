@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-display-none-224b { display: none; }
+  .market-display-none-93b8 { display:none; }
+  .market-z-index-1050-max-height-250p-db35 { z-index:1050; max-height:250px; overflow-y:auto; display:none; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Create New Listing'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -44,7 +53,7 @@
       <div class="mb-0 position-relative">
         <label for="io_search" class="form-label"><?php echo __('Search by title'); ?></label>
         <input type="text" class="form-control" id="io_search" autocomplete="off" placeholder="<?php echo __('Start typing to search archival records...'); ?>" value="<?php echo $pf ? esc_entities($pf->title) : ''; ?>">
-        <div id="io_results" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; max-height:250px; overflow-y:auto; display:none;"></div>
+        <div id="io_results" class="list-group position-absolute w-100 shadow-sm market-z-index-1050-max-height-250p-db35" ></div>
         <div class="form-text"><?php echo __('Search and select an existing record to auto-fill title, description, and metadata.'); ?></div>
         <?php if ($pf): ?>
           <div class="mt-2" id="io_linked">
@@ -52,7 +61,7 @@
             <button type="button" class="btn btn-sm btn-link text-danger" id="io_unlink"><i class="fas fa-times"></i> <?php echo __('Unlink'); ?></button>
           </div>
         <?php else: ?>
-          <div class="mt-2" id="io_linked" style="display:none;">
+          <div class="mt-2" id="io_linked" class="market-display-none-93b8">
             <span class="badge bg-info" id="io_linked_label"></span>
             <button type="button" class="btn btn-sm btn-link text-danger" id="io_unlink"><i class="fas fa-times"></i> <?php echo __('Unlink'); ?></button>
           </div>
@@ -164,7 +173,7 @@
         </div>
       </div>
 
-      <div class="mb-3" id="frame-description-group" style="display: none;">
+      <div class="mb-3" id="frame-description-group" class="market-display-none-224b">
         <label for="frame_description" class="form-label"><?php echo __('Frame Description'); ?></label>
         <input type="text" class="form-control" id="frame_description" name="frame_description" value="<?php echo esc_entities($sf_request->getParameter('frame_description', '')); ?>" maxlength="255">
       </div>
@@ -225,7 +234,7 @@
       </div>
 
       <!-- Auction fields -->
-      <div id="auction-fields" style="display: none;">
+      <div id="auction-fields" class="market-display-none-224b">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="starting_bid" class="form-label"><?php echo __('Starting Bid'); ?></label>
@@ -245,7 +254,7 @@
       </div>
 
       <!-- Offer-only fields -->
-      <div id="offer-only-fields" style="display: none;">
+      <div id="offer-only-fields" class="market-display-none-224b">
         <div class="row mb-3">
           <div class="col-md-4">
             <label for="minimum_offer_only" class="form-label"><?php echo __('Minimum Offer'); ?></label>

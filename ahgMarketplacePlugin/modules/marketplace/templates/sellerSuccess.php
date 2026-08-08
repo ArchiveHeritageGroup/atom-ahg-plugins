@@ -1,4 +1,21 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-font-size-0-85rem-e799 { font-size: 0.85rem; }
+  .market-height-140px-e380 { height: 140px; }
+  .market-height-160px-af45 { height: 160px; }
+  .market-height-160px-object-fit-cove-fad1 { height: 160px; object-fit: cover; }
+  .market-height-200px-0921 { height: 200px; }
+  .market-height-8px-d826 { height: 8px; }
+  .market-margin-top-50px-position-rel-0cac { margin-top: -50px; position: relative; z-index: 1; }
+  .market-object-fit-cover-3dc4 { object-fit: cover; }
+  .market-width-100px-height-100px-33d7 { width: 100px; height: 100px; }
+  .market-width-30px-ec5c { width: 30px; }
+  .market-width-45px-eba0 { width: 45px; }
+</style>
 
 <?php slot('title'); ?><?php echo esc_entities($seller->display_name); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -20,18 +37,18 @@
 <!-- Banner + avatar -->
 <div class="position-relative mb-4">
   <?php if ($seller->banner_path): ?>
-    <div class="rounded overflow-hidden" style="height: 200px;">
-      <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="w-100 h-100" style="object-fit: cover;">
+    <div class="rounded overflow-hidden market-height-200px-0921" >
+      <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="w-100 h-100 market-object-fit-cover-3dc4" >
     </div>
   <?php else: ?>
-    <div class="rounded bg-secondary" style="height: 140px;"></div>
+    <div class="rounded bg-secondary market-height-140px-e380" ></div>
   <?php endif; ?>
 
-  <div class="d-flex align-items-end ms-4" style="margin-top: -50px; position: relative; z-index: 1;">
+  <div class="d-flex align-items-end ms-4 market-margin-top-50px-position-rel-0cac" >
     <?php if ($seller->avatar_path): ?>
-      <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle border border-3 border-white shadow" width="100" height="100" style="object-fit: cover;">
+      <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle border border-3 border-white shadow" width="100" height="100" class="market-object-fit-cover-3dc4">
     <?php else: ?>
-      <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center border border-3 border-white shadow" style="width: 100px; height: 100px;">
+      <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center border border-3 border-white shadow market-width-100px-height-100px-33d7" >
         <i class="fas fa-user fa-2x"></i>
       </div>
     <?php endif; ?>
@@ -74,7 +91,7 @@
         <div class="h5 mb-0">
           <?php if ($seller->average_rating > 0): ?>
             <?php for ($s = 1; $s <= 5; $s++): ?>
-              <i class="fa<?php echo $s <= round($seller->average_rating) ? 's' : 'r'; ?> fa-star text-warning" style="font-size: 0.85rem;"></i>
+              <i class="fa<?php echo $s <= round($seller->average_rating) ? 's' : 'r'; ?> fa-star text-warning market-font-size-0-85rem-e799" ></i>
             <?php endfor; ?>
           <?php else: ?>
             &mdash;
@@ -187,9 +204,9 @@
           <div class="col">
             <div class="card h-100">
               <?php if ($col->cover_image_path): ?>
-                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" style="height: 160px; object-fit: cover;">
+                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" class="market-height-160px-object-fit-cove-fad1">
               <?php else: ?>
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 160px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center market-height-160px-af45" >
                   <i class="fas fa-layer-group fa-2x text-muted"></i>
                 </div>
               <?php endif; ?>
@@ -231,11 +248,11 @@
             <?php $count = isset($ratingStats[$star]) ? (int) $ratingStats[$star] : 0; ?>
             <?php $pct = $seller->rating_count > 0 ? round(($count / $seller->rating_count) * 100) : 0; ?>
             <div class="d-flex align-items-center mb-1">
-              <span class="small text-nowrap me-2" style="width: 45px;"><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
-              <div class="progress flex-grow-1" style="height: 8px;">
-                <div class="progress-bar bg-warning" style="width: <?php echo $pct; ?>%;"></div>
+              <span class="small text-nowrap me-2 market-width-45px-eba0" ><?php echo $star; ?> <i class="fas fa-star text-warning small"></i></span>
+              <div class="progress flex-grow-1 market-height-8px-d826" >
+                <div class="progress-bar bg-warning" data-ahg-style="width: <?php echo $pct; ?>%;"></div>
               </div>
-              <span class="small text-muted ms-2" style="width: 30px;"><?php echo $count; ?></span>
+              <span class="small text-muted ms-2 market-width-30px-ec5c" ><?php echo $count; ?></span>
             </div>
           <?php endfor; ?>
         </div>

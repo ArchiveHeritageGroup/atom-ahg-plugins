@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-48px-height-48px-143e { width: 48px; height: 48px; }
+  .regist-width-48px-height-48px-objec-8bfb { width: 48px; height: 48px; object-fit: contain; }
+</style>
 <?php
   $vtBg = [
     'developer' => 'bg-primary',
@@ -18,9 +26,9 @@
     <div class="card-body">
       <div class="d-flex align-items-start mb-2">
         <?php if (!empty($item->logo_path)): ?>
-          <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0" style="width: 48px; height: 48px; object-fit: contain;">
+          <img src="<?php echo htmlspecialchars($item->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 flex-shrink-0 regist-width-48px-height-48px-objec-8bfb" >
         <?php else: ?>
-          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+          <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center flex-shrink-0 regist-width-48px-height-48px-143e" >
             <i class="fas fa-handshake text-muted"></i>
           </div>
         <?php endif; ?>

@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-width-35-aeef { width:35%; }
+  .librar-width-40-51d4 { width:40%; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('ILL Request'); ?></h1>
@@ -40,7 +48,7 @@
         <div class="card-body">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:35%"><?php echo __('Title'); ?></th>
+              <th class="text-muted librar-width-35-aeef" ><?php echo __('Title'); ?></th>
               <td class="fw-bold"><?php echo esc_entities($req->title ?? '-'); ?></td>
             </tr>
             <tr>
@@ -77,7 +85,7 @@
         <div class="card-body">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Direction'); ?></th>
+              <th class="text-muted librar-width-40-51d4" ><?php echo __('Direction'); ?></th>
               <td>
                 <?php
                   $dir = $req->direction ?? '';
@@ -102,7 +110,7 @@
             <h6 class="fw-bold"><?php echo __('Patron'); ?></h6>
             <table class="table table-sm mb-0">
               <tr>
-                <th class="text-muted" style="width:40%"><?php echo __('Name'); ?></th>
+                <th class="text-muted librar-width-40-51d4" ><?php echo __('Name'); ?></th>
                 <td><?php echo esc_entities(trim(($req->first_name ?? '') . ' ' . ($req->last_name ?? '')) ?: '-'); ?></td>
               </tr>
               <tr>
@@ -130,7 +138,7 @@
         <div class="col-md-6">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Status'); ?></th>
+              <th class="text-muted librar-width-40-51d4" ><?php echo __('Status'); ?></th>
               <td>
                 <?php
                   $st = $req->status ?? '';
@@ -160,7 +168,7 @@
         <div class="col-md-6">
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Sent date'); ?></th>
+              <th class="text-muted librar-width-40-51d4" ><?php echo __('Sent date'); ?></th>
               <td><?php echo esc_entities($req->sent_date ?? '-'); ?></td>
             </tr>
             <tr>

@@ -73,7 +73,7 @@
             </td>
             <td><?php echo esc_entities(truncate_text($contract->title, 50)) ?></td>
             <td>
-              <span class="badge" style="background-color: <?php echo $contract->type_color ?>">
+              <span class="badge" data-ahg-style="background-color: <?php echo $contract->type_color ?>">
                 <?php echo esc_entities($contract->contract_type_name) ?>
               </span>
             </td>

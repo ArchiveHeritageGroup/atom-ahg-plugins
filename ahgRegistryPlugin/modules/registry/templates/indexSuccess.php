@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-max-width-500px-15ac { max-width:500px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('AtoM Community Hub'); ?><?php end_slot(); ?>
 
@@ -13,7 +20,7 @@
       <h1 class="h3 fw-bold mb-1"><?php echo __('AtoM Community Hub'); ?></h1>
       <p class="mb-2 small opacity-75"><?php echo __('The global directory for AtoM institutions, vendors, and archival software.'); ?></p>
       <form method="get" action="<?php echo url_for(['module' => 'registry', 'action' => 'search']); ?>">
-        <div class="input-group input-group-sm" style="max-width:500px;">
+        <div class="input-group input-group-sm regist-max-width-500px-15ac" >
           <input type="text" class="form-control" name="q" placeholder="<?php echo __('Search institutions, vendors, software...'); ?>">
           <button type="submit" class="btn btn-light">
             <i class="fas fa-search"></i>

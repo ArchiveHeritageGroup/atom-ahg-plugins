@@ -1,3 +1,14 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-margin-top-20px-194b { margin-top: 20px; }
+  .displa-width-100px-ee04 { width:100px; }
+  .displa-width-120px-088c { width:120px; }
+  .displa-width-250px-9600 { width:250px; }
+  .displa-width-80px-8db8 { width:80px; }
+</style>
 <!DOCTYPE html>
 <html>
 <head>
@@ -50,11 +61,11 @@
   <table>
     <thead>
       <tr>
-        <th style="width:120px">Identifier</th>
+        <th class="displa-width-120px-088c">Identifier</th>
         <th>Title</th>
-        <th style="width:100px">Level</th>
-        <th style="width:80px">Type</th>
-        <th style="width:250px">Scope and Content</th>
+        <th class="displa-width-100px-ee04">Level</th>
+        <th class="displa-width-80px-8db8">Type</th>
+        <th class="displa-width-250px-9600">Scope and Content</th>
       </tr>
     </thead>
     <tbody>
@@ -70,7 +81,7 @@
     </tbody>
   </table>
 
-  <div class="meta" style="margin-top: 20px;">
+  <div class="meta displa-margin-top-20px-194b" >
     <em>Printed from GLAM Display System</em>
   </div>
 </body>

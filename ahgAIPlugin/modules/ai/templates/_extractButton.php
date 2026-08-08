@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-display-none-224b { display: none; }
+</style>
 <?php
 /**
  * NER Extract Button - Include on information object show page
@@ -9,7 +16,7 @@
         <i class="bi bi-cpu me-1"></i>Extract Entities (NER)
     </button>
     
-    <div id="nerResults" class="mt-3" style="display: none;">
+    <div id="nerResults" class="mt-3 ai-display-none-224b" >
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="bi bi-list-check me-1"></i>Extracted Entities</span>

@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .spectr-font-size-11pt-0089 { font-size: 11pt; }
+  .spectr-max-width-300px-c0dc { max-width: 300px; }
+</style>
 
 @section('sidebar')
   {!! get_component('informationobject', 'contextMenu') !!}
@@ -272,8 +278,8 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         <div class="card">
             <div class="card-header">{{ __('Preview') }}</div>
             <div class="card-body text-center">
-                <div class="label-preview" id="labelContent" style="max-width: 300px;">
-                    <div id="labelTitle" class="fw-bold mb-2" style="font-size: 11pt;">
+                <div class="label-preview" id="labelContent" class="spectr-max-width-300px-c0dc">
+                    <div id="labelTitle" class="fw-bold mb-2 spectr-font-size-11pt-0089" >
                         {{ $resource->title ?? $resource->slug }}
                     </div>
 

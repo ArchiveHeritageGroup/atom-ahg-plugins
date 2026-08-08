@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-width-64px-height-64px-objec-0daa { width: 64px; height: 64px; object-fit: cover; }
+</style>
 <?php
 /**
  * Entity Detail Panel partial.
@@ -26,16 +33,16 @@ $typeColors = [
     <!-- Entity Header -->
     <div class="d-flex align-items-start mb-3">
         <?php if (!empty($entity->image_url)): ?>
-        <img src="<?php echo esc_specialchars($entity->image_url); ?>" alt="" class="rounded me-3" style="width: 64px; height: 64px; object-fit: cover;">
+        <img src="<?php echo esc_specialchars($entity->image_url); ?>" alt="" class="rounded me-3 herita-width-64px-height-64px-objec-0daa" >
         <?php else: ?>
-        <div class="rounded me-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: <?php echo $typeColors[$entity->entity_type] ?? '#999'; ?>;">
+        <div class="rounded me-3 d-flex align-items-center justify-content-center" data-ahg-style="width: 64px; height: 64px; background-color: <?php echo $typeColors[$entity->entity_type] ?? '#999'; ?>;">
             <i class="bi bi-<?php echo $entity->entity_type === 'person' ? 'person' : ($entity->entity_type === 'organization' ? 'building' : ($entity->entity_type === 'place' ? 'geo-alt' : 'calendar')); ?> text-white fs-3"></i>
         </div>
         <?php endif; ?>
         <div class="flex-grow-1">
             <h4 class="mb-1"><?php echo esc_specialchars($entity->display_label ?? $entity->canonical_value); ?></h4>
             <div class="d-flex gap-2">
-                <span class="badge" style="background-color: <?php echo $typeColors[$entity->entity_type] ?? '#999'; ?>;">
+                <span class="badge" data-ahg-style="background-color: <?php echo $typeColors[$entity->entity_type] ?? '#999'; ?>;">
                     <?php echo ucfirst(esc_specialchars($entity->entity_type)); ?>
                 </span>
                 <?php if ($entity->confidence_avg >= 0.9): ?>
@@ -112,7 +119,7 @@ $typeColors = [
         <div class="d-flex flex-wrap gap-1">
             <?php foreach (array_slice($relatedEntities, 0, 10) as $related): ?>
             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'entity', 'type' => $related['entity_type'], 'value' => $related['value']]); ?>"
-               class="badge text-decoration-none" style="background-color: <?php echo $typeColors[$related['entity_type']] ?? '#999'; ?>;">
+               class="badge text-decoration-none" data-ahg-style="background-color: <?php echo $typeColors[$related['entity_type']] ?? '#999'; ?>;">
                 <?php echo esc_specialchars($related['label']); ?>
                 <span class="badge bg-light text-dark ms-1"><?php echo $related['co_occurrences']; ?></span>
             </a>

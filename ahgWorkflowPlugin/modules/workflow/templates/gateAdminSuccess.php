@@ -1,4 +1,12 @@
 <?php use_helper('Url'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .workfl-width-120px-d44c { width: 120px; }
+  .workfl-width-40px-274c { width: 40px; }
+</style>
 
 <div class="container-fluid py-4">
   <nav aria-label="breadcrumb">
@@ -26,14 +34,14 @@
       <table class="table table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 40px"></th>
+            <th class="workfl-width-40px-274c"></th>
             <th>Rule Name</th>
             <th>Type</th>
             <th>Severity</th>
             <th>Field</th>
             <th>Scope</th>
             <th>Order</th>
-            <th style="width: 120px">Actions</th>
+            <th class="workfl-width-120px-d44c">Actions</th>
           </tr>
         </thead>
         <tbody>

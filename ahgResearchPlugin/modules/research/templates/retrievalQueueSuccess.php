@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-30px-ec5c { width: 30px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -23,7 +30,7 @@
                class="card text-decoration-none h-100 <?php echo ($currentQueue && $currentQueue->code === $code) ? 'border-primary border-2' : '' ?>">
                 <div class="card-body text-center">
                     <i class="fas fa-<?php echo htmlspecialchars($queue['icon']) ?> fa-2x mb-2"
-                       style="color: <?php echo htmlspecialchars($queue['color']) ?>" aria-hidden="true"></i>
+                       data-ahg-style="color: <?php echo htmlspecialchars($queue['color']) ?>" aria-hidden="true"></i>
                     <h3 class="mb-0"><?php echo $queue['count'] ?></h3>
                     <small class="text-muted"><?php echo htmlspecialchars($queue['name']) ?></small>
                 </div>
@@ -37,7 +44,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0">
                 <i class="fas fa-<?php echo htmlspecialchars($currentQueue->icon) ?> me-2"
-                   style="color: <?php echo htmlspecialchars($currentQueue->color) ?>" aria-hidden="true"></i>
+                   data-ahg-style="color: <?php echo htmlspecialchars($currentQueue->color) ?>" aria-hidden="true"></i>
                 <?php echo htmlspecialchars($currentQueue->name) ?>
             </h5>
             <div>
@@ -61,7 +68,7 @@
                         <caption class="visually-hidden">List of material retrieval requests with status, priority, and actions</caption>
                         <thead>
                             <tr>
-                                <th scope="col" style="width: 30px;">
+                                <th scope="col" class="resear-width-30px-ec5c">
                                     <input type="checkbox" id="selectAll" class="form-check-input" aria-label="Select all requests">
                                 </th>
                                 <th scope="col">Request</th>

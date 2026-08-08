@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .spectr-height-20px-84ce { height: 20px; }
+</style>
 
 <div class="mb-3">
     <a href="/admin/dashboard" class="btn btn-secondary"><i class="fas fa-arrow-left me-1"></i><?php echo __('Back to Dashboard'); ?></a>
@@ -99,8 +106,8 @@
                 $scoreClass = $score >= 80 ? 'success' : ($score >= 60 ? 'warning' : 'danger');
                 ?>
                 <div class="display-1 text-<?php echo $scoreClass; ?>"><?php echo $score; ?>%</div>
-                <div class="progress mt-3" style="height: 20px;">
-                    <div class="progress-bar bg-<?php echo $scoreClass; ?>" style="width: <?php echo $score; ?>%"></div>
+                <div class="progress mt-3 spectr-height-20px-84ce" >
+                    <div class="progress-bar bg-<?php echo $scoreClass; ?>" data-ahg-style="width: <?php echo $score; ?>%"></div>
                 </div>
             </div>
         </div>

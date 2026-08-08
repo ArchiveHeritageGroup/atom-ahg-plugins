@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-display-none-93b8 { display:none; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -62,7 +69,7 @@
                 <div id="fieldsContainer">
                     <!-- Dynamic field rows inserted here -->
                 </div>
-                <div id="noFieldsMsg" class="text-center text-muted py-3" style="display:none;">
+                <div id="noFieldsMsg" class="text-center text-muted py-3 resear-display-none-93b8" >
                     <i class="fas fa-info-circle me-1"></i><?php echo __('No fields defined. Click "Add Field" to begin.'); ?>
                 </div>
             </div>
@@ -88,7 +95,7 @@
 </form>
 
 <?php if ($template): ?>
-<form method="post" id="deleteForm" style="display:none;">
+<form method="post" id="deleteForm" class="resear-display-none-93b8">
     <input type="hidden" name="form_action" value="delete">
 </form>
 <?php endif; ?>

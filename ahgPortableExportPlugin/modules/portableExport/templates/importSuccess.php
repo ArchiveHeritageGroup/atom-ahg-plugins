@@ -1,3 +1,14 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .portab-display-none-93b8 { display:none; }
+  .portab-height-25px-bd56 { height: 25px; }
+  .portab-max-height-300px-overflow-y--cadd { max-height:300px; overflow-y:auto; }
+  .portab-width-0-1f28 { width: 0%; }
+  .portab-width-30-59c8 { width:30%; }
+</style>
 <?php
 $imports = sfOutputEscaper::unescape($imports ?? []);
 $cspNonce = sfConfig::get('csp_nonce', '');
@@ -79,12 +90,12 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           <button type="button" class="btn btn-primary" id="btn-validate">
             <i class="bi bi-shield-check me-1"></i><?php echo __('Validate Archive'); ?>
           </button>
-          <span id="validate-spinner" class="spinner-border spinner-border-sm ms-2" style="display:none;"></span>
+          <span id="validate-spinner" class="spinner-border spinner-border-sm ms-2 portab-display-none-93b8" ></span>
         </div>
 
         <!-- Validation Result -->
-        <div id="validation-result" style="display:none;" class="mt-3">
-          <div id="validation-success" style="display:none;">
+        <div id="validation-result" class="mt-3 portab-display-none-93b8" >
+          <div id="validation-success" class="portab-display-none-93b8">
             <div class="alert alert-success mb-3">
               <i class="bi bi-check-circle me-1"></i> <?php echo __('Archive validated successfully.'); ?>
             </div>
@@ -93,7 +104,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
                 <h6><?php echo __('Archive Summary'); ?></h6>
                 <table class="table table-sm mb-0" id="validation-summary">
                   <tbody>
-                    <tr><th style="width:30%"><?php echo __('Source'); ?></th><td id="val-source">-</td></tr>
+                    <tr><th class="portab-width-30-59c8"><?php echo __('Source'); ?></th><td id="val-source">-</td></tr>
                     <tr><th><?php echo __('Framework'); ?></th><td id="val-framework">-</td></tr>
                     <tr><th><?php echo __('Export Date'); ?></th><td id="val-date">-</td></tr>
                     <tr><th><?php echo __('Schema Version'); ?></th><td id="val-version">-</td></tr>
@@ -105,7 +116,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
               </div>
             </div>
           </div>
-          <div id="validation-failure" style="display:none;">
+          <div id="validation-failure" class="portab-display-none-93b8">
             <div class="alert alert-danger">
               <i class="bi bi-exclamation-triangle me-1"></i> <?php echo __('Validation failed.'); ?>
               <ul id="validation-errors" class="mb-0 mt-2"></ul>
@@ -113,7 +124,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           </div>
         </div>
 
-        <div class="d-flex justify-content-end mt-4" id="step1-next" style="display:none;">
+        <div class="d-flex justify-content-end mt-4" id="step1-next" class="portab-display-none-93b8">
           <button type="button" class="btn btn-primary import-next" data-next="2">
             <?php echo __('Next: Configure'); ?> <i class="bi bi-arrow-right ms-1"></i>
           </button>
@@ -121,7 +132,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
       </div>
 
       <!-- Step 2: Configure -->
-      <div class="import-panel" data-step="2" style="display:none;">
+      <div class="import-panel" data-step="2" class="portab-display-none-93b8">
         <h5 class="mb-3"><i class="bi bi-sliders me-2"></i><?php echo __('Import Configuration'); ?></h5>
         <p class="text-muted mb-3"><?php echo __('Choose how records should be imported.'); ?></p>
 
@@ -152,7 +163,7 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           </div>
         </div>
 
-        <div class="alert alert-warning" id="replace-warning" style="display:none;">
+        <div class="alert alert-warning" id="replace-warning" class="portab-display-none-93b8">
           <i class="bi bi-exclamation-triangle me-1"></i>
           <strong><?php echo __('Warning:'); ?></strong> <?php echo __('Replace mode will clear existing records before importing. This cannot be undone. Use with extreme caution.'); ?>
         </div>
@@ -173,11 +184,11 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
       </div>
 
       <!-- Step 3: Progress -->
-      <div class="import-panel" data-step="3" style="display:none;">
+      <div class="import-panel" data-step="3" class="portab-display-none-93b8">
         <h5 class="mb-3"><i class="bi bi-hourglass-split me-2"></i><?php echo __('Import Progress'); ?></h5>
 
-        <div class="progress mb-3" style="height: 25px;">
-          <div id="import-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;">0%</div>
+        <div class="progress mb-3 portab-height-25px-bd56" >
+          <div id="import-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" class="portab-width-0-1f28">0%</div>
         </div>
 
         <div class="row text-center mb-3" id="import-stats">
@@ -215,23 +226,23 @@ $nonceAttr = $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce) . '"' :
           </div>
         </div>
 
-        <div id="import-completed" style="display:none;" class="mt-3">
+        <div id="import-completed" class="mt-3 portab-display-none-93b8" >
           <div class="alert alert-success">
             <i class="bi bi-check-circle me-1"></i>
             <span id="import-completed-msg"></span>
           </div>
         </div>
 
-        <div id="import-failed" style="display:none;" class="mt-3">
+        <div id="import-failed" class="mt-3 portab-display-none-93b8" >
           <div class="alert alert-danger">
             <i class="bi bi-exclamation-triangle me-1"></i>
             <span id="import-failed-msg"></span>
           </div>
         </div>
 
-        <div id="import-error-log" style="display:none;" class="mt-3">
+        <div id="import-error-log" class="mt-3 portab-display-none-93b8" >
           <h6><?php echo __('Error Log'); ?></h6>
-          <pre class="bg-light p-3 small" id="import-error-log-content" style="max-height:300px; overflow-y:auto;"></pre>
+          <pre class="bg-light p-3 small" id="import-error-log-content" class="portab-max-height-300px-overflow-y--cadd"></pre>
         </div>
       </div>
 

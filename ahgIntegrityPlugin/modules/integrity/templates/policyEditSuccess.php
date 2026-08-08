@@ -46,7 +46,7 @@ $repositories = $sf_data->getRaw('repositories') ?: [];
               <?php endforeach; ?>
             </select>
           </div>
-          <div class="col-md-4" id="repoField" style="display:<?php echo ($policy->scope_type ?? 'global') === 'repository' ? 'block' : 'none'; ?>">
+          <div class="col-md-4" id="repoField" data-ahg-style="display:<?php echo ($policy->scope_type ?? 'global') === 'repository' ? 'block' : 'none'; ?>">
             <label class="form-label"><?php echo __('Repository'); ?></label>
             <select name="repository_id" class="form-select">
               <option value=""><?php echo __('Select...'); ?></option>

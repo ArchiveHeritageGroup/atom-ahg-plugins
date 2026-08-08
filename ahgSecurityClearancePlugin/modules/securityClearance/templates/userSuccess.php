@@ -1,4 +1,12 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-background-color-6f42c1-colo-6594 { background-color:#6f42c1;color:white; }
+  .securi-background-color-fd7e14-colo-fff5 { background-color:#fd7e14;color:white; }
+</style>
 
 <div class="row">
   <div class="col-md-12">
@@ -35,7 +43,7 @@
                     <i class="fas fa-info-circle fa-2x me-3"></i>
                     <div>
                       <strong><?php echo __('Current Clearance:'); ?></strong> 
-                      <span class="badge fs-6" style="background-color: <?php echo $clearance->classificationColor; ?>;">
+                      <span class="badge fs-6" data-ahg-style="background-color: <?php echo $clearance->classificationColor; ?>;">
                         <?php echo $clearance->classificationName; ?>
                       </span>
                       <br>
@@ -66,7 +74,7 @@
                     <?php foreach ($classifications as $c): ?>
                       <option value="<?php echo $c->id; ?>" 
                               <?php echo ($clearance && $clearance->classificationId == $c->id) ? 'selected' : ''; ?>
-                              style="background-color: <?php echo $c->color; ?>20;">
+                              data-ahg-style="background-color: <?php echo $c->color; ?>20;">
                         <?php echo $c->name; ?> (<?php echo __('Level %1%', ['%1%' => $c->level]); ?>)
                       </option>
                     <?php endforeach; ?>
@@ -127,9 +135,9 @@
               <li class="list-group-item d-flex justify-content-between"><span class="badge bg-success">Public</span><small class="text-muted">Level 0</small></li>
               <li class="list-group-item d-flex justify-content-between"><span class="badge bg-info">Internal</span><small class="text-muted">Level 1</small></li>
               <li class="list-group-item d-flex justify-content-between"><span class="badge bg-warning text-dark">Restricted</span><small class="text-muted">Level 2</small></li>
-              <li class="list-group-item d-flex justify-content-between"><span class="badge" style="background-color:#fd7e14;color:white;">Confidential</span><small class="text-muted">Level 3</small></li>
+              <li class="list-group-item d-flex justify-content-between"><span class="badge securi-background-color-fd7e14-colo-fff5" >Confidential</span><small class="text-muted">Level 3</small></li>
               <li class="list-group-item d-flex justify-content-between"><span class="badge bg-danger">Secret</span><small class="text-muted">Level 4</small></li>
-              <li class="list-group-item d-flex justify-content-between"><span class="badge" style="background-color:#6f42c1;color:white;">Top Secret</span><small class="text-muted">Level 5</small></li>
+              <li class="list-group-item d-flex justify-content-between"><span class="badge securi-background-color-6f42c1-colo-6594" >Top Secret</span><small class="text-muted">Level 5</small></li>
             </ul>
           </div>
 

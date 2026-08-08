@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .timeli-max-width-300px-2c34 { max-width:300px; }
+</style>
 <?php
 /** @var object $tokenRow */
 /** @var string $issuerName */
@@ -117,7 +124,7 @@ $publicUrl = $request->getUriPrefix() . '/share/' . $tokenRow->token;
         <td><?php echo esc_entities($a->accessed_at) ?></td>
         <td><i class="fas <?php echo $icon ?> me-1"></i><?php echo esc_entities($label) ?></td>
         <td><?php echo esc_entities($a->ip_address ?? '—') ?></td>
-        <td class="text-truncate" style="max-width:300px;"><?php echo esc_entities($a->user_agent ?? '—') ?></td>
+        <td class="text-truncate timeli-max-width-300px-2c34" ><?php echo esc_entities($a->user_agent ?? '—') ?></td>
       </tr>
     <?php endforeach ?>
   </tbody>

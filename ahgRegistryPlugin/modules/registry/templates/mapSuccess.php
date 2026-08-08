@@ -1,4 +1,18 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-background-color-color-font--8bd5 { background-color: ' + color + '; font-size: 10px; }
+  .regist-background-color-color-width-f9f5 { background-color: ' + color + '; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); }
+  .regist-background-color-vendorcolor-7698 { background-color: ' + vendorColor + '; width: 12px; height: 12px; border-radius: 2px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transform: rotate(45deg); }
+  .regist-font-size-10px-5d76 { font-size: 10px; }
+  .regist-height-600px-ff89 { height: 600px; }
+  .regist-max-height-555px-overflow-y--376e { max-height: 555px; overflow-y: auto; }
+  .regist-min-width-200px-a066 { min-width: 200px; }
+  .regist-width-10px-height-10px-borde-78b8 { width: 10px; height: 10px; border-radius: 50%; background: ' + color + '; margin-right: 8px; flex-shrink: 0; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Institutions Map'); ?><?php end_slot(); ?>
 
@@ -28,7 +42,7 @@
 
   <!-- Map -->
   <div class="col-lg-9 mb-4">
-    <div id="registry-map" class="border rounded" style="height: 600px;"></div>
+    <div id="registry-map" class="border rounded regist-height-600px-ff89" ></div>
   </div>
 
   <!-- Sidebar: institution list -->
@@ -38,7 +52,7 @@
         <?php echo __('Institutions'); ?>
         <span class="badge bg-primary ms-1" id="map-count">0</span>
       </div>
-      <div class="card-body p-0" style="max-height: 555px; overflow-y: auto;">
+      <div class="card-body p-0 regist-max-height-555px-overflow-y--376e" >
         <div class="list-group list-group-flush" id="institution-list">
           <!-- Populated by JavaScript -->
         </div>
@@ -104,14 +118,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var icon = L.divIcon({
       className: 'registry-marker',
-      html: '<div style="background-color: ' + color + '; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3);"></div>',
+      html: '<div class="regist-background-color-color-width-f9f5"></div>',
       iconSize: [16, 16],
       iconAnchor: [8, 8]
     });
 
-    var popupContent = '<div style="min-width: 200px;">'
+    var popupContent = '<div class="regist-min-width-200px-a066">'
       + '<strong>' + escapeHtml(inst.name) + '</strong>'
-      + '<br><span class="badge" style="background-color: ' + color + '; font-size: 10px;">' + typeLabel + '</span>';
+      + '<br><span class="badge regist-background-color-color-font--8bd5" >' + typeLabel + '</span>';
 
     if (inst.city || inst.country) {
       popupContent += '<br><small class="text-muted">' + escapeHtml([inst.city, inst.country].filter(Boolean).join(', ')) + '</small>';
@@ -135,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
       item.className = 'list-group-item list-group-item-action py-2';
       item.href = '#';
       item.innerHTML = '<div class="d-flex align-items-center">'
-        + '<div style="width: 10px; height: 10px; border-radius: 50%; background: ' + color + '; margin-right: 8px; flex-shrink: 0;"></div>'
+        + '<div class="regist-width-10px-height-10px-borde-78b8"></div>'
         + '<div class="small">'
         + '<strong>' + escapeHtml(inst.name) + '</strong>'
         + (inst.city ? '<br><span class="text-muted">' + escapeHtml(inst.city) + '</span>' : '')
@@ -163,14 +177,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var vIcon = L.divIcon({
       className: 'registry-marker',
-      html: '<div style="background-color: ' + vendorColor + '; width: 12px; height: 12px; border-radius: 2px; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transform: rotate(45deg);"></div>',
+      html: '<div class="regist-background-color-vendorcolor-7698"></div>',
       iconSize: [16, 16],
       iconAnchor: [8, 8]
     });
 
-    var popup = '<div style="min-width: 200px;">'
+    var popup = '<div class="regist-min-width-200px-a066">'
       + '<strong>' + escapeHtml(v.name) + '</strong>'
-      + '<br><span class="badge bg-success" style="font-size: 10px;"><i class="fas fa-building me-1"></i>' + typeLabel + '</span>';
+      + '<br><span class="badge bg-success regist-font-size-10px-5d76" ><i class="fas fa-building me-1"></i>' + typeLabel + '</span>';
 
     if (v.city || v.country) {
       popup += '<br><small class="text-muted">' + escapeHtml([v.city, v.country].filter(Boolean).join(', ')) + '</small>';

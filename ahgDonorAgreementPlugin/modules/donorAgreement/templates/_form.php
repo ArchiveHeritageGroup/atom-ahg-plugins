@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .donora-max-height-80px-780c { max-height: 80px; }
+  .donora-top-1rem-ca25 { top: 1rem; }
+</style>
 <?php
 /**
  * Donor Agreement Form Partial
@@ -60,7 +68,7 @@ $reminderTypes = $taxonomyService->getReminderTypes(false);
                 <label class="form-label"><?php echo __('Agreement Logo') ?></label>
                 <?php if (!empty($agreement->logo_path)): ?>
                 <div class="mb-2">
-                  <img src="<?php echo esc_entities($agreement->logo_path) ?>" alt="Logo" class="img-thumbnail" style="max-height: 80px;">
+                  <img src="<?php echo esc_entities($agreement->logo_path) ?>" alt="Logo" class="img-thumbnail donora-max-height-80px-780c" >
                   <div class="form-check mt-1">
                     <input type="checkbox" name="remove_logo" id="remove_logo" class="form-check-input" value="1">
                     <label class="form-check-label text-danger" for="remove_logo"><?php echo __('Remove logo') ?></label>
@@ -653,7 +661,7 @@ $reminderTypes = $taxonomyService->getReminderTypes(false);
 
       <!-- Sidebar -->
       <div class="col-lg-4">
-        <div class="card mb-4 sticky-top" style="top: 1rem;">
+        <div class="card mb-4 sticky-top donora-top-1rem-ca25" >
           <div class="card-header bg-success text-white">
             <h5 class="mb-0"><i class="fas fa-cog me-2"></i><?php echo __('Status & Actions') ?></h5>
           </div>

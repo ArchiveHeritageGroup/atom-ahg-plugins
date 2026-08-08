@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-height-20px-84ce { height: 20px; }
+  .market-width-36px-height-36px-objec-16a6 { width: 36px; height: 36px; object-fit: cover; }
+  .market-width-40-5172 { width: 40%; }
+  .market-width-50px-ae1f { width: 50px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Seller Analytics'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -62,7 +72,7 @@
             <th><?php echo __('Month'); ?></th>
             <th class="text-end"><?php echo __('Revenue'); ?></th>
             <th class="text-end"><?php echo __('Sales Count'); ?></th>
-            <th style="width: 40%;"><?php echo __(''); ?></th>
+            <th class="market-width-40-5172"><?php echo __(''); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -79,8 +89,8 @@
               <td class="text-end fw-semibold"><?php echo esc_entities($seller->payout_currency ?? 'ZAR'); ?> <?php echo number_format((float) $row->revenue, 2); ?></td>
               <td class="text-end"><?php echo (int) $row->sales_count; ?></td>
               <td>
-                <div class="progress" style="height: 20px;">
-                  <div class="progress-bar bg-primary" style="width: <?php echo $pct; ?>%;"></div>
+                <div class="progress market-height-20px-84ce" >
+                  <div class="progress-bar bg-primary" data-ahg-style="width: <?php echo $pct; ?>%;"></div>
                 </div>
               </td>
             </tr>
@@ -103,7 +113,7 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 50px;">#</th>
+            <th class="market-width-50px-ae1f">#</th>
             <th><?php echo __('Item'); ?></th>
             <th class="text-end"><?php echo __('Revenue'); ?></th>
             <th class="text-end"><?php echo __('Sales'); ?></th>
@@ -116,7 +126,7 @@
               <td>
                 <div class="d-flex align-items-center">
                   <?php if (!empty($item->featured_image_path)): ?>
-                    <img src="<?php echo esc_entities($item->featured_image_path); ?>" alt="" class="rounded me-2" style="width: 36px; height: 36px; object-fit: cover;">
+                    <img src="<?php echo esc_entities($item->featured_image_path); ?>" alt="" class="rounded me-2 market-width-36px-height-36px-objec-16a6" >
                   <?php endif; ?>
                   <span><?php echo esc_entities($item->title ?? '-'); ?></span>
                 </div>

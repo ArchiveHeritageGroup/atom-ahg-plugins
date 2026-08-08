@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-height-200px-0921 { height: 200px; }
+</style>
 
 @php
 // Helper to convert Symfony escaped arrays to plain arrays
@@ -170,7 +175,7 @@ $patterns = [
         <div class="row">
             <div class="col-md-8">
                 <h6>By Hour of Day</h6>
-                <div style="height: 200px;">
+                <div class="herita-height-200px-0921">
                     <canvas id="hourChart"></canvas>
                 </div>
             </div>

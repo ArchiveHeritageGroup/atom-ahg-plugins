@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .integr-height-6px-3586 { height: 6px; }
+</style>
 @php
 $stats = $stats ?? [];
 $outcomeBreakdown = $outcomeBreakdown ?? [];
@@ -65,8 +70,8 @@ $monthlyTrend = $monthlyTrend ?? [];
                   <span class="badge {{ $outcome === 'pass' ? 'bg-success' : 'bg-danger' }}">{{ $outcome }}</span>
                   <span>{{ number_format($count) }} ({{ $pct }}%)</span>
                 </div>
-                <div class="progress" style="height: 6px;">
-                  <div class="progress-bar {{ $outcome === 'pass' ? 'bg-success' : 'bg-danger' }}" style="width: {{ $pct }}%"></div>
+                <div class="progress integr-height-6px-3586" >
+                  <div class="progress-bar {{ $outcome === 'pass' ? 'bg-success' : 'bg-danger' }}" data-ahg-style="width: {{ $pct }}%"></div>
                 </div>
               </div>
             @endforeach

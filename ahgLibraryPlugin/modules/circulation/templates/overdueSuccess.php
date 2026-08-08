@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-max-height-300px-overflow-au-5828 { max-height:300px; overflow:auto; font-size:12px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Overdue Items'); ?></h1>
@@ -40,7 +47,7 @@
           <i class="fas fa-check-circle me-2"></i>
           <?php if (strpos($sendResult, '{') === 0): ?>
             <strong><?php echo __('Dry run preview:'); ?></strong><br>
-            <pre class="mb-0 mt-2" style="max-height:300px; overflow:auto; font-size:12px;"><?php echo $sendResult; ?></pre>
+            <pre class="mb-0 mt-2 librar-max-height-300px-overflow-au-5828" ><?php echo $sendResult; ?></pre>
           <?php else: ?>
             <?php echo $sendResult; ?>
           <?php endif; ?>

@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .integr-max-width-300px-4d14 { max-width:300px; }
+</style>
 @php
 $run = $run ?? null;
 $ledgerEntries = $ledgerEntries ?? [];
@@ -97,7 +102,7 @@ $outcomeBreakdown = $outcomeBreakdown ?? [];
               <tr class="{{ $e->outcome !== 'pass' ? 'table-danger' : '' }}">
                 <td>{{ $e->digital_object_id }}</td>
                 <td><span class="badge {{ $e->outcome === 'pass' ? 'bg-success' : 'bg-danger' }}">{{ $e->outcome }}</span></td>
-                <td class="text-truncate" style="max-width:300px" title="{{ $e->file_path ?? '' }}">{{ basename($e->file_path ?? '—') }}</td>
+                <td class="text-truncate integr-max-width-300px-4d14"  title="{{ $e->file_path ?? '' }}">{{ basename($e->file_path ?? '—') }}</td>
                 <td>{{ $e->file_size ? number_format($e->file_size) : '—' }}</td>
                 <td>
                   @if ($e->hash_match === null) —

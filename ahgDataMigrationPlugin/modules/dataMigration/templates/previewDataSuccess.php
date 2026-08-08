@@ -1,4 +1,11 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-max-height-70vh-overflow-aut-3333 { max-height: 70vh; overflow: auto; }
+</style>
 <?php 
 $rawData = $sf_data->getRaw('transformedData');
 if (!is_array($rawData)) $rawData = [];
@@ -23,7 +30,7 @@ $allFields = array_unique($allFields);
       <?php if (empty($rawData)): ?>
         <div class="alert alert-warning m-3">No data to preview. Check your field mappings.</div>
       <?php else: ?>
-      <div class="table-responsive" style="max-height: 70vh; overflow: auto;">
+      <div class="table-responsive datami-max-height-70vh-overflow-aut-3333" >
         <table class="table table-striped table-hover table-sm mb-0">
           <thead class="table-light sticky-top">
             <tr>

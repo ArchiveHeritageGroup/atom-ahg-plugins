@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-auto-d3b6 { width:auto; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -91,7 +98,7 @@ $statuses = ['draft', 'scheduled', 'delivered', 'published', 'archived'];
 <!-- Status quick-set -->
 <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureStatus', 'id' => $id]); ?>" class="d-flex align-items-center gap-2 mb-4">
     <label class="form-label mb-0">Status</label>
-    <select name="status" class="form-select form-select-sm" style="width:auto;">
+    <select name="status" class="form-select form-select-sm resear-width-auto-d3b6" >
         <?php foreach ($statuses as $s): ?>
             <option value="<?php echo $s; ?>" <?php echo $status === $s ? 'selected' : ''; ?>><?php echo ucfirst($s); ?></option>
         <?php endforeach; ?>

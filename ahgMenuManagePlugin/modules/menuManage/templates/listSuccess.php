@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .menuma-width-100px-e3d2 { width: 100px; }
+  .menuma-width-140px-1417 { width: 140px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Menus'); ?></h1>
@@ -26,8 +34,8 @@
         <tr>
           <th><?php echo __('Name / Label'); ?></th>
           <th><?php echo __('Path'); ?></th>
-          <th class="text-center" style="width: 100px;"><?php echo __('Reorder'); ?></th>
-          <th class="text-end" style="width: 140px;"><?php echo __('Actions'); ?></th>
+          <th class="text-center menuma-width-100px-e3d2" ><?php echo __('Reorder'); ?></th>
+          <th class="text-end menuma-width-140px-1417" ><?php echo __('Actions'); ?></th>
         </tr>
       </thead>
       <tbody>

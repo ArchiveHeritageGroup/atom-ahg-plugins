@@ -1,4 +1,12 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-max-height-500px-3b01 { max-height:500px; }
+  .themeb-text-align-center-7023 { text-align: center; }
+</style>
 <?php $hasIiifPlayer = false; try { use_helper('Media'); $hasIiifPlayer = function_exists('render_media_player'); } catch (Exception $e) {} ?>
 
 <?php if (QubitTerm::MASTER_ID == $usageType) { ?>
@@ -33,14 +41,14 @@
       ]); ?>
     <?php } else { ?>
       <?php // Native HTML5 player (no ahgIiifPlugin) ?>
-      <video controls class="w-100" style="max-height:500px;" preload="metadata">
+      <video controls class="w-100 themeb-max-height-500px-3b01"  preload="metadata">
         <source src="<?php echo public_path($representation->getFullPath()); ?>" type="<?php echo htmlspecialchars($resource->mimeType); ?>">
         Your browser does not support video playback.
       </video>
     <?php } ?>
 
   <?php } else { ?>
-    <div style="text-align: center">
+    <div class="themeb-text-align-center-7023">
       <?php echo image_tag($representation->getFullPath(), ['style' => 'border: #999 1px solid', 'alt' => '']); ?>
     </div>
   <?php } ?>

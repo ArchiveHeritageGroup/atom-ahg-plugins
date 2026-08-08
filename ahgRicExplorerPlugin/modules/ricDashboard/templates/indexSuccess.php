@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricexp-display-none-224b { display: none; }
+  .ricexp-display-none-93b8 { display:none; }
+  .ricexp-max-height-150px-overflow-y--0c60 { max-height:150px; overflow-y:auto; font-size:0.7rem; }
+  .ricexp-min-height-200px-476a { min-height: 200px; }
+</style>
 
 <?php slot('title'); ?>
   <div class="float-end">
@@ -114,24 +124,24 @@
   <div class="col-md-8">
     <div class="card h-100">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Record Activity (7 Days)'); ?></h5></div>
-      <div class="card-body position-relative" style="min-height: 200px;">
+      <div class="card-body position-relative ricexp-min-height-200px-476a" >
         <div id="chart-loading-1" class="text-center py-5">
           <div class="spinner-border text-primary"></div>
           <p class="mt-2 text-muted"><?php echo __('Loading chart...'); ?></p>
         </div>
-        <canvas id="syncTrendChart" height="200" style="display:none;"></canvas>
+        <canvas id="syncTrendChart" height="200" class="ricexp-display-none-93b8"></canvas>
       </div>
     </div>
   </div>
   <div class="col-md-4">
     <div class="card h-100">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Operations by Type'); ?></h5></div>
-      <div class="card-body position-relative" style="min-height: 200px;">
+      <div class="card-body position-relative ricexp-min-height-200px-476a" >
         <div id="chart-loading-2" class="text-center py-5">
           <div class="spinner-border text-primary"></div>
           <p class="mt-2 text-muted"><?php echo __('Loading chart...'); ?></p>
         </div>
-        <canvas id="operationsChart" height="200" style="display:none;"></canvas>
+        <canvas id="operationsChart" height="200" class="ricexp-display-none-93b8"></canvas>
       </div>
     </div>
   </div>
@@ -160,7 +170,7 @@
         <button type="button" class="btn btn-success w-100 mb-2" onclick="runManualSync()" id="sync-btn">
           <i class="fa fa-sync-alt"></i> <?php echo __('Sync to Fuseki'); ?>
         </button>
-        <div id="sync-status" class="mb-2" style="display:none;"></div>
+        <div id="sync-status" class="mb-2 ricexp-display-none-93b8" ></div>
         <hr>
         <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="runIntegrityCheck()">
           <i class="fa fa-check-circle"></i> <?php echo __('Run Integrity Check'); ?>
@@ -181,7 +191,7 @@
     <?php include_partial("ricDashboard/externalLinks"); ?>
 
     <!-- Integrity Results -->
-    <div class="card mt-3" id="integrity-results" style="display: none;">
+    <div class="card mt-3" id="integrity-results" class="ricexp-display-none-224b">
       <div class="card-header"><h5 class="mb-0"><?php echo __('Integrity Check Results'); ?></h5></div>
       <div class="card-body" id="integrity-content"></div>
     </div>
@@ -466,7 +476,7 @@ function pollSyncProgress() {
         const icon = hasError ? 'exclamation-triangle' : 'check-circle';
 
         statusDiv.innerHTML = '<div class="alert ' + alertClass + ' py-1 small mb-0"><i class="fa fa-' + icon + '"></i> Sync complete</div>' +
-          '<pre class="small mt-1 mb-0 p-2 bg-dark text-light" style="max-height:150px; overflow-y:auto; font-size:0.7rem;">' +
+          '<pre class="small mt-1 mb-0 p-2 bg-dark text-light ricexp-max-height-150px-overflow-y--0c60" >' +
           (data.output || 'No output') + '</pre>';
 
         // Refresh dashboard data

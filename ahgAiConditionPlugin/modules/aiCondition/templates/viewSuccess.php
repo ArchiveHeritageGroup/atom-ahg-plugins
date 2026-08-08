@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .aicond-pointer-events-none-1f5d { pointer-events:none; }
+</style>
 
 <?php
 require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Helpers/AiConditionHelper.php';
@@ -82,7 +89,7 @@ require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlu
                 <?php elseif ($assessment->image_path): ?>
                 <div class="position-relative d-inline-block">
                     <img src="/uploads/<?php echo esc_entities($assessment->image_path) ?>" alt="Original" class="img-fluid rounded" id="baseImage">
-                    <canvas id="overlayCanvas" class="position-absolute top-0 start-0" style="pointer-events:none"></canvas>
+                    <canvas id="overlayCanvas" class="position-absolute top-0 start-0 aicond-pointer-events-none-1f5d" ></canvas>
                 </div>
                 <?php else: ?>
                 <div class="alert alert-secondary"><?php echo __('No image available') ?></div>
@@ -109,7 +116,7 @@ require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlu
                     <div class="list-group-item py-2">
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
-                                <span class="badge" style="background-color:<?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::damageColor($dmg->damage_type) ?>">
+                                <span class="badge" data-ahg-style="background-color:<?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::damageColor($dmg->damage_type) ?>">
                                     <?php echo ucfirst(str_replace('_', ' ', $dmg->damage_type)) ?>
                                 </span>
                                 <?php echo \ahgAiConditionPlugin\Helpers\AiConditionHelper::severityBadge($dmg->severity) ?>

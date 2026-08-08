@@ -1,4 +1,13 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-font-size-3rem-color-ccc-4b77 { font-size: 3rem; color: #ccc; }
+  .datami-height-20px-84ce { height: 20px; }
+  .datami-min-width-120px-0758 { min-width: 120px; }
+</style>
 
 <div class="container-fluid py-4">
   <div class="row justify-content-center">
@@ -79,13 +88,13 @@
                       };
                     ?>"><?php echo ucfirst($job->status) ?></span>
                   </td>
-                  <td style="min-width: 120px;">
+                  <td class="datami-min-width-120px-0758">
                     <?php 
                       $percent = $job->total_records > 0 ? round(($job->processed_records / $job->total_records) * 100) : 0;
                     ?>
-                    <div class="progress" style="height: 20px;">
+                    <div class="progress datami-height-20px-84ce" >
                       <div class="progress-bar <?php echo $job->status === 'running' ? 'progress-bar-striped progress-bar-animated' : '' ?>" 
-                           style="width: <?php echo $percent ?>%">
+                           data-ahg-style="width: <?php echo $percent ?>%">
                         <?php echo $percent ?>%
                       </div>
                     </div>
@@ -119,7 +128,7 @@
           </div>
           <?php else: ?>
           <div class="text-center py-5">
-            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <i class="bi bi-inbox datami-font-size-3rem-color-ccc-4b77" ></i>
             <p class="text-muted mt-2">No migration jobs yet</p>
             <a href="<?php echo url_for(['module' => 'dataMigration', 'action' => 'index']) ?>" class="btn btn-primary">
               <i class="bi bi-plus-circle me-1"></i> Start New Import

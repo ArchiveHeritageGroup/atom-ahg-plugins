@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-max-width-200px-1a5c { max-width: 200px; }
+</style>
 <?php
 /**
  * GLAM Advanced Search Panel - Full ISAD(G) Fields with Sector Groupings
@@ -269,7 +276,7 @@ $currentLevels = isset($levelsBySector[$currentType]) && !empty($levelsBySector[
                   }
                   foreach ($activeFieldSearches as $idx => $fs): ?>
                   <div class="input-group mb-2 field-search-row">
-                    <select class="form-select field-select" style="max-width: 200px;" onchange="this.nextElementSibling.name = this.value">
+                    <select class="form-select field-select displa-max-width-200px-1a5c"  onchange="this.nextElementSibling.name = this.value">
                       <?php foreach ($fieldSearchOptions as $key => $label): ?>
                         <option value="<?php echo $key; ?>" <?php echo $fs['field'] === $key ? 'selected' : ''; ?>><?php echo $label; ?></option>
                       <?php endforeach; ?>

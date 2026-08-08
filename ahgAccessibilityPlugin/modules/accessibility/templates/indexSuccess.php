@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .access-height-8px-a50d { height:8px; }
+  .access-max-width-380px-ffad { max-width:380px; }
+</style>
 <?php
 $counts = $sf_data->getRaw('counts') ?: ['total' => 0, 'with_alt' => 0, 'missing' => 0, 'percent' => 0];
 $result = $sf_data->getRaw('result') ?: ['items' => [], 'total' => 0, 'page' => 1, 'pages' => 1];
@@ -18,8 +26,8 @@ $pct = (float) ($counts['percent'] ?? 0);
     <div class="col-md-3 mb-2"><div class="card h-100"><div class="card-body"><div class="text-muted small text-uppercase"><?php echo __('Coverage') ?></div><div class="display-6"><?php echo $pct ?>%</div></div></div></div>
   </div>
 
-  <div class="progress mb-4" style="height:8px;" role="progressbar" aria-label="<?php echo __('Alt text coverage') ?>" aria-valuenow="<?php echo $pct ?>" aria-valuemin="0" aria-valuemax="100">
-    <div class="progress-bar bg-success" style="width: <?php echo $pct ?>%;"></div>
+  <div class="progress mb-4 access-height-8px-a50d"  role="progressbar" aria-label="<?php echo __('Alt text coverage') ?>" aria-valuenow="<?php echo $pct ?>" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar bg-success" data-ahg-style="width: <?php echo $pct ?>%;"></div>
   </div>
 
   <form method="get" action="<?php echo $indexUrl ?>" class="row g-2 mb-3">
@@ -48,7 +56,7 @@ $pct = (float) ($counts['percent'] ?? 0);
             <td class="small text-muted"><?php echo esc_entities((string) $r->name) ?></td>
             <td>
               <?php if ($r->alt_text !== null && $r->alt_text !== ''): ?>
-                <span class="text-truncate d-inline-block" style="max-width:380px;" title="<?php echo esc_entities((string) $r->alt_text) ?>"><?php echo esc_entities((string) $r->alt_text) ?></span>
+                <span class="text-truncate d-inline-block access-max-width-380px-ffad"  title="<?php echo esc_entities((string) $r->alt_text) ?>"><?php echo esc_entities((string) $r->alt_text) ?></span>
               <?php else: ?>
                 <span class="badge bg-danger"><?php echo __('missing') ?></span>
               <?php endif ?>

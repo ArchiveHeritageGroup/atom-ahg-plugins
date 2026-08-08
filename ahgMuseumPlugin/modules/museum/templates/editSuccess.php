@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-display-none-224b { display: none; }
+  .museum-max-width-350px-white-space--4d57 { max-width:350px;white-space:normal; }
+</style>
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
@@ -24,7 +32,7 @@
     <div class="progress-container">
       <div class="progress">
         <div class="progress-bar <?php echo $completeness >= 80 ? 'bg-success' : ($completeness >= 50 ? 'bg-warning' : 'bg-danger'); ?>"
-             style="width: <?php echo $completeness; ?>%">
+             data-ahg-style="width: <?php echo $completeness; ?>%">
         </div>
       </div>
       <span class="completeness-value"><?php echo $completeness; ?>%</span>
@@ -572,7 +580,7 @@ document.addEventListener("DOMContentLoaded", function() {
             <div class="field-input">
               <?php echo $form[$fieldName]->render(); ?>
             </div>
-            <div class="field-help" id="help-<?php echo $fieldName; ?>" style="display: none;">
+            <div class="field-help" id="help-<?php echo $fieldName; ?>" class="museum-display-none-224b">
               <div class="help-content">
                 <p class="help-text"><?php echo __($fieldDef['helpText']); ?></p>
                 <?php if (!empty($fieldDef['longHelp'])): ?>
@@ -818,7 +826,7 @@ document.addEventListener("DOMContentLoaded", function() {
               html += '<div class="text-muted small">' + escape(item.broader) + '</div>';
             }
             if (item.scopeNote) {
-              html += '<div class="text-muted small" style="max-width:350px;white-space:normal;">' + escape(item.scopeNote.substring(0, 80)) + (item.scopeNote.length > 80 ? '...' : '') + '</div>';
+              html += '<div class="text-muted small museum-max-width-350px-white-space--4d57" >' + escape(item.scopeNote.substring(0, 80)) + (item.scopeNote.length > 80 ? '...' : '') + '</div>';
             }
             html += '</div>';
             return html;

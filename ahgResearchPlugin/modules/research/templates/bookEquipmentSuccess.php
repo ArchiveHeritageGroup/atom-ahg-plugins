@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-min-width-150px-684a { min-width: 150px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -72,7 +79,7 @@ $bookedEquipment = isset($bookedEquipment) && is_array($bookedEquipment) ? $book
                 <input type="hidden" name="form_action" value="book">
                 <input type="hidden" name="equipment_id" value="<?php echo $eq->id; ?>">
                 <div class="mb-2">
-                  <input type="text" name="purpose" class="form-control form-control-sm" placeholder="<?php echo __('Purpose (optional)'); ?>" style="min-width: 150px;">
+                  <input type="text" name="purpose" class="form-control form-control-sm" placeholder="<?php echo __('Purpose (optional)'); ?>" class="resear-min-width-150px-684a">
                 </div>
                 <button type="submit" class="btn btn-sm btn-primary w-100"><i class="fas fa-plus me-1"></i><?php echo __('Book'); ?></button>
               </form>

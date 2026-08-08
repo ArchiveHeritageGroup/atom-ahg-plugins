@@ -1,4 +1,56 @@
 <?php /* AtoM escaping_strategy=true wraps action vars in sfOutputEscaper; unescape before json_encode/use. */ foreach (["space","days","data","visitors","heatmap","sensor","rooms","timeline","building","placements","roomDims","guidedTour","walls","doors","windows","shape","capacityUnits","furniture","tourObjects","plan","navBtns","stairs","corridorObjects","bootData","wtConfig"] as $__ev) { if (isset($$__ev)) { $$__ev = sfOutputEscaper::unescape($$__ev); } } ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-border-0-width-100-height-10-8adf { border:0;width:100%;height:100%; }
+  .exhibi-display-none-93b8 { display:none; }
+  .exhibi-display-none-background-rgba-6258 { display:none;background:rgba(255,255,255,.08);border-radius:.4rem;padding:6px 8px; }
+  .exhibi-font-size-2rem-ba2c { font-size:2rem; }
+  .exhibi-max-height-22vh-overflow-aut-3c76 { max-height:22vh;overflow:auto; }
+  .exhibi-max-height-30vh-overflow-y-a-5d4d { max-height:30vh;overflow-y:auto; }
+  .exhibi-position-absolute-bottom-18p-a5ca { position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:8;display:none;text-align:center;width:90%;max-width:360px; }
+  .exhibi-position-absolute-bottom-34p-5be0 { position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:7;display:none; }
+  .exhibi-position-absolute-bottom-64p-c9a1 { position:absolute;bottom:64px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:86%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5); }
+  .exhibi-position-absolute-bottom-8px-7049 { position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:7;display:none; }
+  .exhibi-position-absolute-bottom-8px-8307 { position:absolute;bottom:8px;left:8px;z-index:4;color:#ccc;font-size:.8rem; }
+  .exhibi-position-absolute-bottom-90p-14b4 { position:absolute;bottom:90px;left:50%;transform:translateX(-50%);z-index:7;display:none; }
+  .exhibi-position-absolute-inset-0-ba-d002 { position:absolute;inset:0;background:#ff0000;opacity:0;z-index:9;pointer-events:none;display:none; }
+  .exhibi-position-absolute-inset-0-di-63b0 { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:5;cursor:pointer; }
+  .exhibi-position-absolute-inset-0-wi-c512 { position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff; }
+  .exhibi-position-absolute-inset-0-z--1127 { position:absolute;inset:0;z-index:20;background:#000;display:none; }
+  .exhibi-position-absolute-inset-0-z--7e23 { position:absolute;inset:0;z-index:20;display:none;background:rgba(10,12,15,.96); }
+  .exhibi-position-absolute-left-50-bo-945b { position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;max-width:520px;width:92%;max-height:38vh;overflow-y:auto;display:none;background:rgba(20,22,26,.85);color:#fff;border-radius:.5rem;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,.45); }
+  .exhibi-position-absolute-top-10px-l-2e2a { position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;opacity:.9;box-shadow:0 2px 8px rgba(0,0,0,.45);cursor:pointer; }
+  .exhibi-position-absolute-top-10px-r-427e { position:absolute;top:10px;right:10px;z-index:21; }
+  .exhibi-position-absolute-top-46-lef-d628 { position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);z-index:10;display:none;text-align:center; }
+  .exhibi-position-absolute-top-46px-l-c335 { position:absolute;top:46px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:80%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5); }
+  .exhibi-position-absolute-top-46px-l-60c9 { position:absolute;top:46px;left:8px;z-index:7;width:230px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5); }
+  .exhibi-position-absolute-top-46px-r-b3bc { position:absolute;top:46px;right:8px;z-index:6;max-width:260px;display:none; }
+  .exhibi-position-absolute-top-46px-r-0566 { position:absolute;top:46px;right:8px;z-index:7;width:260px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5); }
+  .exhibi-position-absolute-top-46px-r-0748 { position:absolute;top:46px;right:8px;z-index:8;width:240px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5); }
+  .exhibi-position-absolute-top-50-lef-c841 { position:absolute;top:50%;left:50%;height:120px;margin-top:-110px;transform:translateX(-50%);z-index:4;display:none;pointer-events:none;opacity:.92;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+  .exhibi-position-absolute-top-50-lef-b8e3 { position:absolute;top:50%;left:50%;margin:-12px 0 0 -11px;z-index:5;display:none;pointer-events:none;color:#fff;font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.8); }
+  .exhibi-position-absolute-top-50-lef-2126 { position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#000;border:2px solid rgba(255,255,255,.85);box-sizing:border-box;z-index:4;display:none;pointer-events:none; }
+  .exhibi-position-absolute-top-8px-ri-ac85 { position:absolute;top:8px;right:10px; }
+  .exhibi-position-absolute-top-8px-ri-849b { position:absolute;top:8px;right:10px;z-index:21;display:flex;gap:6px; }
+  .exhibi-position-absolute-top-8px-ri-327e { position:absolute;top:8px;right:116px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-329c { position:absolute;top:8px;right:156px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-7eeb { position:absolute;top:8px;right:192px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-a546 { position:absolute;top:8px;right:228px;z-index:6;opacity:.9;display:none; }
+  .exhibi-position-absolute-top-8px-ri-255a { position:absolute;top:8px;right:264px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-175e { position:absolute;top:8px;right:300px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-5f7e { position:absolute;top:8px;right:336px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-aa0b { position:absolute;top:8px;right:372px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-a8ab { position:absolute;top:8px;right:408px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-d70d { position:absolute;top:8px;right:444px;z-index:6;opacity:.9;display:none; }
+  .exhibi-position-absolute-top-8px-ri-fc5c { position:absolute;top:8px;right:44px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-ba98 { position:absolute;top:8px;right:80px;z-index:6;opacity:.85; }
+  .exhibi-position-absolute-top-8px-ri-8a0e { position:absolute;top:8px;right:8px;z-index:6;opacity:.85; }
+  .exhibi-position-relative-width-100--b1e7 { position:relative;width:100%;height:70vh;min-height:420px;background:#1a1d21;border-radius:0;overflow:hidden; }
+  .exhibi-white-space-nowrap-8b2d { white-space:nowrap; }
+</style>
 <?php
 /*
  * Exhibition Space — first-person 3D walkthrough (three.js).
@@ -102,46 +154,46 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
         <span class="small text-muted"><?php echo __('Click to enter. Move: W A S D. Look: mouse. Select: click an object. Exit: Esc.') ?></span>
       </div>
       <div class="card-body p-0">
-        <div id="room" style="position:relative;width:100%;height:70vh;min-height:420px;background:#1a1d21;border-radius:0;overflow:hidden;">
-          <div id="roomBlocker" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:5;cursor:pointer;">
+        <div id="room" class="exhibi-position-relative-width-100--b1e7">
+          <div id="roomBlocker" class="exhibi-position-absolute-inset-0-di-63b0">
             <div class="text-center text-white">
-              <div style="font-size:2rem;"><i class="fas fa-vr-cardboard"></i></div>
+              <div class="exhibi-font-size-2rem-ba2c"><i class="fas fa-vr-cardboard"></i></div>
               <div class="fw-bold mt-2"><?php echo __('Click to enter the gallery') ?></div>
               <div class="small text-white-50 mt-1"><?php echo __('W A S D to walk, mouse to look, click an object for details, Esc to exit') ?></div>
               <div class="small text-white-50"><?php echo __('Press H any time for the full controls') ?></div>
             </div>
           </div>
-          <div id="roomCrosshair" style="position:absolute;top:50%;left:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#000;border:2px solid rgba(255,255,255,.85);box-sizing:border-box;z-index:4;display:none;pointer-events:none;"></div>
-          <img id="figurePointer" alt="" style="position:absolute;top:50%;left:50%;height:120px;margin-top:-110px;transform:translateX(-50%);z-index:4;display:none;pointer-events:none;opacity:.92;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5));">
-          <div id="figureHint" class="bg-dark text-white px-2 py-1 rounded small" style="position:absolute;bottom:90px;left:50%;transform:translateX(-50%);z-index:7;display:none;"><i class="fas fa-person-walking me-1"></i><?php echo __('Wheel: change person - click: place (this view only)') ?></div>
-          <div id="objectPointer" style="position:absolute;top:50%;left:50%;margin:-12px 0 0 -11px;z-index:5;display:none;pointer-events:none;color:#fff;font-size:22px;text-shadow:0 1px 3px rgba(0,0,0,.8);"><i class="fas fa-hand-pointer"></i></div>
-          <div id="roomLoading" style="position:absolute;bottom:8px;left:8px;z-index:4;color:#ccc;font-size:.8rem;"><?php echo __('Loading gallery...') ?></div>
-          <div id="wtAlarm" style="position:absolute;inset:0;background:#ff0000;opacity:0;z-index:9;pointer-events:none;display:none;"></div>
-          <div id="wtAlarmBar" style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);z-index:10;display:none;text-align:center;">
+          <div id="roomCrosshair" class="exhibi-position-absolute-top-50-lef-2126"></div>
+          <img id="figurePointer" alt="" class="exhibi-position-absolute-top-50-lef-c841">
+          <div id="figureHint" class="bg-dark text-white px-2 py-1 rounded small exhibi-position-absolute-bottom-90p-14b4" ><i class="fas fa-person-walking me-1"></i><?php echo __('Wheel: change person - click: place (this view only)') ?></div>
+          <div id="objectPointer" class="exhibi-position-absolute-top-50-lef-b8e3"><i class="fas fa-hand-pointer"></i></div>
+          <div id="roomLoading" class="exhibi-position-absolute-bottom-8px-8307"><?php echo __('Loading gallery...') ?></div>
+          <div id="wtAlarm" class="exhibi-position-absolute-inset-0-ba-d002"></div>
+          <div id="wtAlarmBar" class="exhibi-position-absolute-top-46-lef-d628">
             <div class="bg-danger text-white px-4 py-2 rounded-pill shadow fw-bold"><i class="fas fa-triangle-exclamation me-2"></i><span id="wtAlarmText"></span></div>
             <button type="button" id="wtAlarmOff" class="btn btn-light btn-sm rounded-pill mt-2 shadow"><i class="fas fa-bell-slash me-1"></i><?php echo __('Silence alarm') ?></button>
           </div>
-          <div id="wtHeight" class="bg-dark text-white px-2 py-1 rounded small" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);z-index:7;display:none;"></div>
-          <div id="wtNarr" class="bg-primary text-white px-2 py-1 rounded small" style="position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:7;display:none;"><i class="fas fa-volume-high me-1"></i><?php echo __('Reading description... (Esc to stop)') ?></div>
-          <button id="roomHelpBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:8px;z-index:6;opacity:.85;" title="<?php echo __('Controls') ?>"><i class="fas fa-question"></i></button>
-          <button id="roomMapBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:44px;z-index:6;opacity:.85;" title="<?php echo __('Building map') ?>"><i class="fas fa-map"></i></button>
-          <button id="roomLiveBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:80px;z-index:6;opacity:.85;" title="<?php echo __('Live data') ?>"><i class="fas fa-temperature-half"></i></button>
-          <button id="wtPeopleBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:116px;z-index:6;opacity:.85;" title="<?php echo __('People here') ?>"><i class="fas fa-users"></i> <span id="wtPeopleCount">1</span></button>
-          <button id="wtTorchBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:156px;z-index:6;opacity:.85;" title="<?php echo __('Torch (F)') ?>"><i class="fas fa-lightbulb"></i></button>
-          <button id="wtGraffitiBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:192px;z-index:6;opacity:.85;" title="<?php echo __('Graffiti: click a wall to tag it') ?>"><i class="fas fa-spray-can"></i></button>
-          <button id="wtTourPlayBtn" type="button" class="btn btn-sm btn-success" style="position:absolute;top:8px;right:228px;z-index:6;opacity:.9;display:none;" title="<?php echo __('Play guided tour') ?>"><i class="fas fa-play"></i></button>
-          <button id="wtStealBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:264px;z-index:6;opacity:.85;" title="<?php echo __('Steal mode: click an object to trigger the alarm') ?>"><i class="fas fa-mask"></i></button>
-          <button id="wtFigureBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:300px;z-index:6;opacity:.85;" title="<?php echo __('Figures: wheel to pick a person, click to place') ?>"><i class="fas fa-person-walking"></i></button>
-          <button id="wtSunBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:336px;z-index:6;opacity:.85;" title="<?php echo __('Sun & shadows (off / morning / noon / afternoon)') ?>"><i class="fas fa-sun"></i></button>
-          <button id="wtNightBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:372px;z-index:6;opacity:.85;" title="<?php echo __('Night mode (walk with the flashlight) - N') ?>"><i class="fas fa-moon"></i></button>
-          <button id="wtFsBtn" type="button" class="btn btn-sm btn-dark" style="position:absolute;top:8px;right:408px;z-index:6;opacity:.85;" title="<?php echo __('Fullscreen') ?>"><i class="fas fa-expand"></i></button>
-          <button id="wt360Btn" type="button" class="btn btn-sm btn-info" style="position:absolute;top:8px;right:444px;z-index:6;opacity:.9;display:none;" title="<?php echo __('360 / Matterport view of this room') ?>"><i class="fas fa-vr-cardboard me-1"></i>360</button>
-          <div id="wt360Overlay" style="position:absolute;inset:0;z-index:20;background:#000;display:none;">
-            <iframe id="wt360Frame" src="" allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer" allowfullscreen style="border:0;width:100%;height:100%;"></iframe>
-            <button id="wt360Close" type="button" class="btn btn-light btn-sm rounded-pill shadow" style="position:absolute;top:10px;right:10px;z-index:21;"><i class="fas fa-times me-1"></i><?php echo __('Close 360 view') ?></button>
+          <div id="wtHeight" class="bg-dark text-white px-2 py-1 rounded small exhibi-position-absolute-bottom-8px-7049" ></div>
+          <div id="wtNarr" class="bg-primary text-white px-2 py-1 rounded small exhibi-position-absolute-bottom-34p-5be0" ><i class="fas fa-volume-high me-1"></i><?php echo __('Reading description... (Esc to stop)') ?></div>
+          <button id="roomHelpBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-8a0e"  title="<?php echo __('Controls') ?>"><i class="fas fa-question"></i></button>
+          <button id="roomMapBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-fc5c"  title="<?php echo __('Building map') ?>"><i class="fas fa-map"></i></button>
+          <button id="roomLiveBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-ba98"  title="<?php echo __('Live data') ?>"><i class="fas fa-temperature-half"></i></button>
+          <button id="wtPeopleBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-327e"  title="<?php echo __('People here') ?>"><i class="fas fa-users"></i> <span id="wtPeopleCount">1</span></button>
+          <button id="wtTorchBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-329c"  title="<?php echo __('Torch (F)') ?>"><i class="fas fa-lightbulb"></i></button>
+          <button id="wtGraffitiBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-7eeb"  title="<?php echo __('Graffiti: click a wall to tag it') ?>"><i class="fas fa-spray-can"></i></button>
+          <button id="wtTourPlayBtn" type="button" class="btn btn-sm btn-success exhibi-position-absolute-top-8px-ri-a546"  title="<?php echo __('Play guided tour') ?>"><i class="fas fa-play"></i></button>
+          <button id="wtStealBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-255a"  title="<?php echo __('Steal mode: click an object to trigger the alarm') ?>"><i class="fas fa-mask"></i></button>
+          <button id="wtFigureBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-175e"  title="<?php echo __('Figures: wheel to pick a person, click to place') ?>"><i class="fas fa-person-walking"></i></button>
+          <button id="wtSunBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-5f7e"  title="<?php echo __('Sun & shadows (off / morning / noon / afternoon)') ?>"><i class="fas fa-sun"></i></button>
+          <button id="wtNightBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-aa0b"  title="<?php echo __('Night mode (walk with the flashlight) - N') ?>"><i class="fas fa-moon"></i></button>
+          <button id="wtFsBtn" type="button" class="btn btn-sm btn-dark exhibi-position-absolute-top-8px-ri-a8ab"  title="<?php echo __('Fullscreen') ?>"><i class="fas fa-expand"></i></button>
+          <button id="wt360Btn" type="button" class="btn btn-sm btn-info exhibi-position-absolute-top-8px-ri-d70d"  title="<?php echo __('360 / Matterport view of this room') ?>"><i class="fas fa-vr-cardboard me-1"></i>360</button>
+          <div id="wt360Overlay" class="exhibi-position-absolute-inset-0-z--1127">
+            <iframe id="wt360Frame" src="" allow="fullscreen; xr-spatial-tracking; gyroscope; accelerometer" allowfullscreen class="exhibi-border-0-width-100-height-10-8adf"></iframe>
+            <button id="wt360Close" type="button" class="btn btn-light btn-sm rounded-pill shadow exhibi-position-absolute-top-10px-r-427e" ><i class="fas fa-times me-1"></i><?php echo __('Close 360 view') ?></button>
           </div>
-          <div id="wtTourBanner" class="bg-dark text-white px-3 py-2 rounded small" style="position:absolute;bottom:64px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:86%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);">
-            <div id="wtTourText" style="max-height:30vh;overflow-y:auto;"></div>
+          <div id="wtTourBanner" class="bg-dark text-white px-3 py-2 rounded small exhibi-position-absolute-bottom-64p-c9a1" >
+            <div id="wtTourText" class="exhibi-max-height-30vh-overflow-y-a-5d4d"></div>
             <div class="mt-2 text-nowrap">
               <button type="button" id="wtTourTextBtn" class="btn btn-sm btn-outline-light py-0" title="<?php echo __('Show/hide narration text') ?>"><i class="fas fa-closed-captioning"></i></button>
               <button type="button" id="wtTourPrevBtn" class="btn btn-sm btn-outline-light py-0" title="<?php echo __('Previous stop') ?>"><i class="fas fa-step-backward"></i></button>
@@ -150,27 +202,27 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
               <button type="button" id="wtTourStopBtn" class="btn btn-sm btn-outline-light py-0"><i class="fas fa-stop"></i></button>
             </div>
           </div>
-          <div id="wtTourQuick" style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);z-index:8;display:none;text-align:center;width:90%;max-width:360px;">
+          <div id="wtTourQuick" class="exhibi-position-absolute-bottom-18p-a5ca">
             <select id="wtTourQuickSel" class="form-select form-select-sm mb-2 d-none"></select>
             <button type="button" id="wtTourQuickBtn" class="btn btn-success btn-lg rounded-pill shadow w-100"><i class="fas fa-play me-2"></i><?php echo __('Start guided tour') ?></button>
           </div>
-          <div id="wtPeople" class="bg-dark text-white p-2 rounded small" style="position:absolute;top:46px;right:8px;z-index:8;width:240px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
+          <div id="wtPeople" class="bg-dark text-white p-2 rounded small exhibi-position-absolute-top-46px-r-0748" >
             <div class="d-flex justify-content-between align-items-center mb-1"><span class="fw-bold"><i class="fas fa-users me-1"></i><?php echo __('In this exhibition') ?></span><button type="button" id="wtPeopleClose" class="btn-close btn-close-white btn-sm" aria-label="<?php echo __('Close') ?>"></button></div>
             <input id="wtNameInput" class="form-control form-control-sm mb-2" placeholder="<?php echo __('Your name') ?>" maxlength="40">
             <div id="wtPeopleList"></div>
-            <button id="wtFollowBtn" type="button" class="btn btn-sm btn-warning w-100 mt-2" style="display:none;"><i class="fas fa-shoe-prints me-1"></i><?php echo __('Follow the docent') ?></button>
+            <button id="wtFollowBtn" type="button" class="btn btn-sm btn-warning w-100 mt-2 exhibi-display-none-93b8" ><i class="fas fa-shoe-prints me-1"></i><?php echo __('Follow the docent') ?></button>
           </div>
-          <div id="wtHereNow" class="bg-dark text-white px-2 py-1 rounded-pill small" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:7;opacity:.9;box-shadow:0 2px 8px rgba(0,0,0,.45);cursor:pointer;" title="<?php echo __('People in this exhibition right now') ?>"><i class="fas fa-users me-1"></i><span id="wtHereNowN">1</span> <span id="wtHereNowLbl"><?php echo __('here now') ?></span></div>
-          <div id="wtDocentBanner" class="bg-primary text-white px-3 py-2 rounded small" style="position:absolute;top:46px;left:50%;transform:translateX(-50%);z-index:7;display:none;max-width:80%;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.5);"></div>
-          <div id="wtLive" class="bg-dark text-white p-2 rounded small" style="position:absolute;top:46px;left:8px;z-index:7;width:230px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
+          <div id="wtHereNow" class="bg-dark text-white px-2 py-1 rounded-pill small exhibi-position-absolute-top-10px-l-2e2a"  title="<?php echo __('People in this exhibition right now') ?>"><i class="fas fa-users me-1"></i><span id="wtHereNowN">1</span> <span id="wtHereNowLbl"><?php echo __('here now') ?></span></div>
+          <div id="wtDocentBanner" class="bg-primary text-white px-3 py-2 rounded small exhibi-position-absolute-top-46px-l-c335" ></div>
+          <div id="wtLive" class="bg-dark text-white p-2 rounded small exhibi-position-absolute-top-46px-l-60c9" >
             <div class="fw-bold mb-1"><i class="fas fa-temperature-half me-1"></i><?php echo __('Live conditions') ?></div>
             <div id="wtLiveBody"></div>
           </div>
-          <div id="wtMinimap" class="bg-dark text-white p-2 rounded" style="position:absolute;top:46px;right:8px;z-index:7;width:260px;display:none;box-shadow:0 4px 16px rgba(0,0,0,.5);">
+          <div id="wtMinimap" class="bg-dark text-white p-2 rounded exhibi-position-absolute-top-46px-r-0566" >
             <div class="d-flex justify-content-between align-items-center mb-1"><span class="small fw-bold"><i class="fas fa-map me-1"></i><?php echo __('Building — tap a room to enter') ?></span><button type="button" id="wtMiniClose" class="btn-close btn-close-white btn-sm" aria-label="<?php echo __('Close') ?>"></button></div>
             <div id="wtMiniSvg"></div>
           </div>
-          <div id="roomHelp" class="bg-dark text-white p-3 rounded small" style="position:absolute;top:46px;right:8px;z-index:6;max-width:260px;display:none;">
+          <div id="roomHelp" class="bg-dark text-white p-3 rounded small exhibi-position-absolute-top-46px-r-b3bc" >
             <div class="fw-bold mb-2"><i class="fas fa-gamepad me-1"></i><?php echo __('Controls') ?></div>
             <ul class="mb-0 ps-3">
               <li><?php echo __('Click gallery to enter') ?></li>
@@ -191,7 +243,7 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
               <li><?php echo __('Exit gallery: Esc') ?></li>
               <li class="mt-1 text-info"><?php echo __('Touch: drag to look, pinch to zoom, tap an object, tap a numbered button to travel') ?></li>
             </ul>
-            <div class="mt-2" id="wtTourPick" style="display:none;">
+            <div class="mt-2" id="wtTourPick" class="exhibi-display-none-93b8">
               <label class="form-label mb-1"><i class="fas fa-route me-1"></i><?php echo __('Guided tour') ?></label>
               <select id="wtTourSel" class="form-select form-select-sm"></select>
             </div>
@@ -200,10 +252,10 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
               <select id="wtVoiceSel" class="form-select form-select-sm"><option value=""><?php echo __('Default') ?></option></select>
             </div>
           </div>
-          <div id="wtInlay" style="position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:6;max-width:520px;width:92%;max-height:38vh;overflow-y:auto;display:none;background:rgba(20,22,26,.85);color:#fff;border-radius:.5rem;padding:14px 16px;box-shadow:0 4px 16px rgba(0,0,0,.45);">
-            <button type="button" id="inlayClose" class="btn-close btn-close-white" style="position:absolute;top:8px;right:10px;" aria-label="<?php echo __('Close') ?>"></button>
+          <div id="wtInlay" class="exhibi-position-absolute-left-50-bo-945b">
+            <button type="button" id="inlayClose" class="btn-close btn-close-white exhibi-position-absolute-top-8px-ri-ac85"  aria-label="<?php echo __('Close') ?>"></button>
             <h6 id="inlayTitle" class="fw-bold mb-1 pe-4"></h6>
-            <p id="inlayDesc" class="small mb-2" style="max-height:22vh;overflow:auto;"></p>
+            <p id="inlayDesc" class="small mb-2 exhibi-max-height-22vh-overflow-aut-3c76" ></p>
             <a id="inlayRec" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-light"><i class="fas fa-external-link-alt me-1"></i><?php echo __('View full record') ?> <span class="badge bg-secondary ms-1">V</span></a>
             <div id="wtAsk" class="mt-2">
               <div class="input-group input-group-sm">
@@ -211,22 +263,22 @@ $jsonFlags = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JS
                 <button id="wtAskBtn" type="button" class="btn btn-info" title="<?php echo __('Ask') ?>"><i class="fas fa-comment-dots"></i></button>
               </div>
               <div id="wtAskChips" class="d-flex flex-wrap gap-1 mt-1"></div>
-              <div id="wtAskAnswer" class="small mt-2" style="display:none;background:rgba(255,255,255,.08);border-radius:.4rem;padding:6px 8px;"></div>
+              <div id="wtAskAnswer" class="small mt-2 exhibi-display-none-background-rgba-6258" ></div>
             </div>
-            <div id="wtRelated" class="mt-2" style="display:none;">
+            <div id="wtRelated" class="mt-2 exhibi-display-none-93b8" >
               <div class="small text-white-50 mb-1"><i class="fas fa-wand-magic-sparkles me-1"></i><?php echo __('You might also like') ?></div>
               <div id="wtRelatedItems" class="d-flex flex-wrap gap-1"></div>
             </div>
           </div>
-          <div id="recOverlay" style="position:absolute;inset:0;z-index:20;display:none;background:rgba(10,12,15,.96);">
-            <div style="position:absolute;top:8px;right:10px;z-index:21;display:flex;gap:6px;">
+          <div id="recOverlay" class="exhibi-position-absolute-inset-0-z--7e23">
+            <div class="exhibi-position-absolute-top-8px-ri-849b">
               <a id="recOpenTab" href="#" target="_blank" rel="noopener" class="btn btn-sm btn-light" title="<?php echo __('Open in new tab') ?>"><i class="fas fa-external-link-alt"></i></a>
               <button type="button" id="recClose" class="btn btn-sm btn-warning fw-semibold" title="<?php echo __('Back to the gallery') ?>"><i class="fas fa-arrow-left me-1"></i><?php echo __('Back to gallery') ?></button>
             </div>
-            <iframe id="recFrame" title="<?php echo __('Full record') ?>" style="position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;"></iframe>
+            <iframe id="recFrame" title="<?php echo __('Full record') ?>" class="exhibi-position-absolute-inset-0-wi-c512"></iframe>
           </div>
         </div>
-        <div id="roomNav" class="d-flex gap-1 p-2 overflow-auto border-top bg-light" style="white-space:nowrap;"></div>
+        <div id="roomNav" class="d-flex gap-1 p-2 overflow-auto border-top bg-light exhibi-white-space-nowrap-8b2d" ></div>
       </div>
     </div>
 

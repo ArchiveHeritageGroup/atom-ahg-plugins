@@ -1,4 +1,15 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-cursor-pointer-58ab { cursor:pointer; }
+  .themeb-display-none-224b { display: none; }
+  .themeb-height-6px-3586 { height: 6px; }
+  .themeb-min-height-60px-max-height-3-d4e2 { min-height: 60px; max-height: 300px; overflow-y: auto; }
+  .themeb-width-0-7590 { width: 0%; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
@@ -107,7 +118,7 @@
           </h2>
           <div id="merge-collapse" class="accordion-collapse collapse" aria-labelledby="merge-heading">
             <div class="accordion-body">
-              <div id="tpmAlert" class="alert" style="display: none;"></div>
+              <div id="tpmAlert" class="alert themeb-display-none-224b" ></div>
 
               <input type="hidden" id="tpmJobId" value="">
 
@@ -145,20 +156,20 @@
                 </div>
               </div>
 
-              <div id="tpmDropZone" class="border border-2 border-dashed rounded p-4 text-center bg-light mb-3" style="cursor:pointer;">
+              <div id="tpmDropZone" class="border border-2 border-dashed rounded p-4 text-center bg-light mb-3 themeb-cursor-pointer-58ab" >
                 <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
                 <h6><?php echo __('Drag and drop images here'); ?></h6>
                 <p class="text-muted small mb-0"><?php echo __('TIFF, JPEG, PNG, BMP, GIF'); ?></p>
                 <input type="file" id="tpmFileInput" class="d-none" multiple accept=".tif,.tiff,.jpg,.jpeg,.png,.bmp,.gif">
               </div>
 
-              <div id="tpmProgressContainer" class="mb-3" style="display: none;">
+              <div id="tpmProgressContainer" class="mb-3 themeb-display-none-224b" >
                 <div class="d-flex justify-content-between mb-1">
                   <small class="text-muted"><?php echo __('Uploading...'); ?></small>
                   <small id="tpmProgressText" class="text-muted"></small>
                 </div>
-                <div class="progress" style="height: 6px;">
-                  <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                <div class="progress themeb-height-6px-3586" >
+                  <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated themeb-width-0-7590" ></div>
                 </div>
               </div>
 
@@ -166,12 +177,12 @@
                 <small class="text-muted"><strong><?php echo __('Pages'); ?></strong> <span id="tpmFileCount" class="badge bg-secondary">0</span></small>
                 <small class="text-muted"><i class="fas fa-arrows-alt me-1"></i><?php echo __('Drag to reorder'); ?></small>
               </div>
-              <div id="tpmFileList" class="border rounded bg-white mb-3" style="min-height: 60px; max-height: 300px; overflow-y: auto;">
+              <div id="tpmFileList" class="border rounded bg-white mb-3 themeb-min-height-60px-max-height-3-d4e2" >
                 <div class="text-muted text-center py-3"><i class="fas fa-images me-1"></i><?php echo __('No files uploaded yet'); ?></div>
               </div>
 
               <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-outline-danger btn-sm" id="tpmClearBtn" style="display: none;">
+                <button type="button" class="btn btn-outline-danger btn-sm" id="tpmClearBtn" class="themeb-display-none-224b">
                   <i class="fas fa-trash me-1"></i><?php echo __('Clear'); ?>
                 </button>
                 <button type="button" class="btn btn-primary" id="tpmCreateBtn" disabled>

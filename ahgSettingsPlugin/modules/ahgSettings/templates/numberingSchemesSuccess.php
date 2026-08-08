@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-width-auto-dc25 { width: auto; }
+</style>
 
 <?php slot('sidebar'); ?>
   <?php echo get_component('ahgSettings', 'menu'); ?>
@@ -13,7 +20,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <form method="get" class="d-inline-flex gap-2">
-      <select name="sector" class="form-select form-select-sm" style="width: auto;">
+      <select name="sector" class="form-select form-select-sm settin-width-auto-dc25" >
         <option value=""><?php echo __('All Sectors'); ?></option>
         <?php foreach ($sectors as $code => $label): ?>
           <option value="<?php echo $code; ?>" <?php echo $sectorFilter === $code ? 'selected' : ''; ?>>

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-display-inline-3df0 { display: inline; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Getty Vocabulary Links'); ?></h1>
@@ -149,7 +156,7 @@
         <td><?php echo number_format($link->confidence * 100, 0); ?>%</td>
         <td>
           <?php if ($link->status !== 'confirmed'): ?>
-          <form method="post" style="display: inline;">
+          <form method="post" class="museum-display-inline-3df0">
             <input type="hidden" name="link_id" value="<?php echo $link->id; ?>">
             <button type="submit" name="form_action" value="confirm" class="btn btn-sm btn-success">
               <?php echo __('Confirm'); ?>
@@ -157,7 +164,7 @@
           </form>
           <?php endif; ?>
           <?php if ($link->status !== 'rejected'): ?>
-          <form method="post" style="display: inline;">
+          <form method="post" class="museum-display-inline-3df0">
             <input type="hidden" name="link_id" value="<?php echo $link->id; ?>">
             <button type="submit" name="form_action" value="reject" class="btn btn-sm btn-danger">
               <?php echo __('Reject'); ?>

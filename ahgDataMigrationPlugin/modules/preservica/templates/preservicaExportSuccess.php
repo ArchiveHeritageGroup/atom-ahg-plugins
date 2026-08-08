@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-display-none-224b { display: none; }
+</style>
 <div class="container-fluid px-4">
   <h1 class="mt-4">
     <i class="bi bi-archive me-2"></i>
@@ -131,7 +138,7 @@
                     <strong>Entire Repository</strong>
                   </label>
                 </div>
-                <div class="ms-4 mt-2" id="repository_options" style="display: none;">
+                <div class="ms-4 mt-2" id="repository_options" class="datami-display-none-224b">
                   <label for="repository_id" class="form-label">Repository</label>
                   <select class="form-select" id="repository_id" name="repository_id">
                     <option value="">-- Select Repository --</option>

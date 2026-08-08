@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .storag-max-width-48rem-d234 { max-width: 48rem; }
+</style>
 <?php
 /*
  * heratio#145 — Strongroom create/edit (one template for both, switches on $room).
@@ -39,7 +46,7 @@ $formAction = $isNew
     </div>
   <?php } ?>
 
-  <form method="post" action="<?php echo $formAction; ?>" class="mt-3" style="max-width: 48rem;">
+  <form method="post" action="<?php echo $formAction; ?>" class="mt-3 storag-max-width-48rem-d234" >
     <div class="mb-3">
       <label for="sr_name" class="form-label fw-semibold"><?php echo __('Name'); ?> <span class="text-danger">*</span></label>
       <input type="text" id="sr_name" name="name" class="form-control" required maxlength="255"

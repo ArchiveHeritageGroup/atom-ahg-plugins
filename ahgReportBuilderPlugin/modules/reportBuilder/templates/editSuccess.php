@@ -1,4 +1,16 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-cursor-grab-7074 { cursor: grab; }
+  .report-display-none-224b { display: none; }
+  .report-font-size-0-65rem-12e5 { font-size: 0.65rem; }
+  .report-max-height-400px-overflow-y--f4d9 { max-height: 400px; overflow-y: auto; }
+  .report-min-height-500px-background--f316 { min-height: 500px; background: #f8f9fa; }
+  .report-z-index-1020-eb3d { z-index: 1020; }
+</style>
 <?php slot('title') ?>
 <h1><i class="bi bi-pencil-square text-primary me-2"></i><?php echo __('Report Designer'); ?></h1>
 <?php end_slot() ?>
@@ -28,7 +40,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
 <?php endif; ?>
 
 <!-- Toolbar -->
-<div class="bg-light border-bottom py-2 px-3 mb-4 sticky-top" style="z-index: 1020;">
+<div class="bg-light border-bottom py-2 px-3 mb-4 sticky-top report-z-index-1020-eb3d" >
     <div class="d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center gap-3">
             <a href="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'index']); ?>" class="btn btn-sm btn-outline-secondary">
@@ -201,7 +213,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                 </button>
             </div>
             <div class="collapse show" id="columnsCollapse">
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                <div class="card-body p-0 report-max-height-400px-overflow-y--f4d9" >
                     <div class="p-2">
                         <input type="text" class="form-control form-control-sm" id="columnSearch" placeholder="<?php echo __('Search columns...'); ?>">
                     </div>
@@ -214,7 +226,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                                 <input class="form-check-input me-2 column-checkbox" type="checkbox" value="<?php echo $key; ?>"
                                        <?php echo in_array($key, $rawColumns) ? 'checked' : ''; ?>>
                                 <span class="small"><?php echo $col['label']; ?></span>
-                                <span class="badge bg-secondary float-end" style="font-size: 0.65rem;"><?php echo $col['type']; ?></span>
+                                <span class="badge bg-secondary float-end report-font-size-0-65rem-12e5" ><?php echo $col['type']; ?></span>
                             </label>
                             <?php endforeach; ?>
                         </div>
@@ -284,7 +296,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                     </button>
                 </div>
             </div>
-            <div class="card-body" id="designerCanvas" style="min-height: 500px; background: #f8f9fa;">
+            <div class="card-body" id="designerCanvas" class="report-min-height-500px-background--f316">
                 <!-- Layout blocks will be rendered here -->
                 <div class="layout-blocks" id="layoutBlocks">
                     <?php foreach ($rawLayout['blocks'] ?? [] as $index => $block): ?>
@@ -363,7 +375,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
                 <ul class="list-group list-group-flush sortable-list" id="selectedColumns">
                     <?php foreach ($rawColumns as $col): ?>
                     <li class="list-group-item list-group-item-action py-2 d-flex justify-content-between align-items-center sortable-item" data-column="<?php echo $col; ?>">
-                        <div class="d-flex align-items-center flex-grow-1 drag-handle" style="cursor: grab;">
+                        <div class="d-flex align-items-center flex-grow-1 drag-handle report-cursor-grab-7074" >
                             <i class="bi bi-grip-vertical text-muted me-2"></i>
                             <span class="small"><?php echo $allColumns[$col]['label'] ?? $col; ?></span>
                         </div>
@@ -378,7 +390,7 @@ $rawAllColumns = $sf_data->getRaw('allColumns');
         </div>
 
         <!-- Chart Configuration (shown when chart is selected) -->
-        <div class="card mb-3" id="chartConfigPanel" style="display: none;">
+        <div class="card mb-3" id="chartConfigPanel" class="report-display-none-224b">
             <div class="card-header py-2">
                 <i class="bi bi-bar-chart me-1"></i><?php echo __('Chart Settings'); ?>
             </div>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-cursor-pointer-24b5 { cursor: pointer; }
+</style>
 <?php
   $n = sfConfig::get('csp_nonce', '');
   $na = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
@@ -18,7 +25,7 @@
       <?php echo __('Max size: %1% MB', ['%1%' => (int) $maxSizeMb]); ?>
     </small>
   </div>
-  <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" name="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" id="file-input-<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" style="cursor: pointer;">
+  <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" name="<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" id="file-input-<?php echo htmlspecialchars($name, ENT_QUOTES, 'UTF-8'); ?>" class="regist-cursor-pointer-24b5">
 </div>
 
 <script <?php echo $na; ?>>

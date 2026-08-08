@@ -1,4 +1,18 @@
 <?php use_helper('I18N') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ftp-cursor-pointer-border-color--ff5f { cursor:pointer; border-color:#0d6efd!important; }
+  .ftp-display-none-93b8 { display:none; }
+  .ftp-height-8px-c984 { height:8px; }
+  .ftp-max-width-50-6d61 { max-width:50%; }
+  .ftp-width-0-9c33 { width:0%; }
+  .ftp-width-120px-088c { width:120px; }
+  .ftp-width-180px-1dfd { width:180px; }
+  .ftp-width-80px-8db8 { width:80px; }
+</style>
 
 <?php slot('title') ?>
   <?php echo __('FTP Upload') ?>
@@ -47,7 +61,7 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div id="drop-zone" class="border border-2 border-dashed rounded p-5 text-center mb-3" style="cursor:pointer; border-color:#0d6efd!important;">
+                <div id="drop-zone" class="border border-2 border-dashed rounded p-5 text-center mb-3 ftp-cursor-pointer-border-color--ff5f" >
                     <i class="fa fa-cloud-upload-alt fa-3x text-muted mb-3 d-block"></i>
                     <p class="lead mb-1"><?php echo __('Drag and drop files here') ?></p>
                     <p class="text-muted"><?php echo __('or click to browse') ?></p>
@@ -98,7 +112,7 @@
         </div>
 
         <!-- Combined PDFs ready to link to a record -->
-        <div class="card mb-4" id="ready-link-card" style="display:none;">
+        <div class="card mb-4" id="ready-link-card" class="ftp-display-none-93b8">
             <div class="card-header">
                 <h5 class="mb-0"><i class="fa fa-link me-2"></i><?php echo __('Combined PDFs - link to a record') ?></h5>
             </div>
@@ -132,9 +146,9 @@
                         <thead>
                             <tr>
                                 <th><?php echo __('Filename') ?></th>
-                                <th class="text-end" style="width:120px"><?php echo __('Size') ?></th>
-                                <th style="width:180px"><?php echo __('Modified') ?></th>
-                                <th class="text-center" style="width:80px"><?php echo __('Actions') ?></th>
+                                <th class="text-end ftp-width-120px-088c" ><?php echo __('Size') ?></th>
+                                <th class="ftp-width-180px-1dfd"><?php echo __('Modified') ?></th>
+                                <th class="text-center ftp-width-80px-8db8" ><?php echo __('Actions') ?></th>
                             </tr>
                         </thead>
                         <tbody id="files-tbody">
@@ -352,12 +366,12 @@
         // Build progress UI
         var html = '<div id="' + domId + '" class="mb-3 border rounded p-3">' +
             '<div class="d-flex justify-content-between align-items-center mb-1">' +
-                '<span class="text-truncate fw-semibold" style="max-width:50%"><i class="fa fa-file me-1"></i>' + escapeHtml(file.name) + '</span>' +
+                '<span class="text-truncate fw-semibold ftp-max-width-50-6d61" ><i class="fa fa-file me-1"></i>' + escapeHtml(file.name) + '</span>' +
                 '<span class="text-muted small">' + formatBytes(file.size) + ' &middot; ' + totalChunks + ' chunk' + (totalChunks > 1 ? 's' : '') + '</span>' +
                 '<span class="upload-status badge bg-primary">0%</span>' +
             '</div>' +
-            '<div class="progress mb-2" style="height:8px">' +
-                '<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%"></div>' +
+            '<div class="progress mb-2 ftp-height-8px-c984" >' +
+                '<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" class="ftp-width-0-9c33"></div>' +
             '</div>' +
             '<div class="upload-detail text-muted small"></div>' +
             '<div class="upload-actions mt-1">' +

@@ -1,4 +1,13 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .statis-width-100px-b3a1 { width: 100px; }
+  .statis-width-120px-d44c { width: 120px; }
+  .statis-width-60px-d7a5 { width: 60px; }
+</style>
 
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
@@ -67,11 +76,11 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 60px">Rank</th>
+                            <th class="statis-width-60px-d7a5">Rank</th>
                             <th>Title</th>
-                            <th class="text-end" style="width: 120px">Total</th>
-                            <th class="text-end" style="width: 120px">Unique</th>
-                            <th style="width: 100px">Actions</th>
+                            <th class="text-end statis-width-120px-d44c" >Total</th>
+                            <th class="text-end statis-width-120px-d44c" >Unique</th>
+                            <th class="statis-width-100px-b3a1">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

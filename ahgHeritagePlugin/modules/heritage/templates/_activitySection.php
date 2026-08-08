@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+</style>
 <?php
 /**
  * Community Activity partial.
@@ -25,8 +32,8 @@
                             <div class="d-flex align-items-start">
                                 <!-- Avatar -->
                                 <div class="heritage-avatar flex-shrink-0 me-3">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                         style="width: 40px; height: 40px;">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center herita-width-40px-height-40px-9a6a"
+                                         >
                                         <?php echo strtoupper(substr($activity['user'] ?? 'A', 0, 1)); ?>
                                     </div>
                                 </div>

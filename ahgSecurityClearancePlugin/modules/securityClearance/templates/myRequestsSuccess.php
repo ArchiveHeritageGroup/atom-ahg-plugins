@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-display-inline-5677 { display:inline; }
+</style>
 <?php
 /**
  * My Access Requests Template.
@@ -9,13 +16,13 @@
 <?php if ($clearance): ?>
 <div class="alert alert-info">
   <strong><?php echo __('Your Clearance:') ?></strong>
-  <span class="badge" style="background-color: <?php echo $clearance->color ?>">
+  <span class="badge" data-ahg-style="background-color: <?php echo $clearance->color ?>">
     <?php echo esc_entities($clearance->name) ?>
   </span>
   <?php if ($clearance->expiry_date): ?>
     | <?php echo __('Expires:') ?> <?php echo $clearance->expiry_date ?>
     <?php if ('pending' !== $clearance->renewal_status): ?>
-      <form action="/security/renewal/request" method="post" style="display:inline">
+      <form action="/security/renewal/request" method="post" class="securi-display-inline-5677">
         <button type="submit" class="btn btn-sm btn-warning ms-2">
           <?php echo __('Request Renewal') ?>
         </button>

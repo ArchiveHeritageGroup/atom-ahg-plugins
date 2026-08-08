@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-font-size-0-9rem-2554 { font-size:0.9rem; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -54,7 +61,7 @@
     <?php $meta = $sectionMeta[$sectionCode]; ?>
     <div class="accordion-item section-block" data-section="<?php echo $sectionCode ?>" id="section-<?php echo $sectionCode ?>">
         <h2 class="accordion-header">
-            <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?php echo $sectionCode ?>" style="font-size:0.9rem">
+            <button class="accordion-button collapsed py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-<?php echo $sectionCode ?>" class="settin-font-size-0-9rem-2554">
                 <i class="fas <?php echo $meta['icon'] ?> fa-fw me-2 text-muted"></i>
                 <?php echo $meta['label'] ?>
                 <span class="badge bg-secondary ms-2"><?php echo $meta['count'] ?></span>

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-width-250px-fa35 { width: 250px; }
+</style>
 <?php slot('title') ?>
 <h1><i class="bi bi-bar-chart-line text-primary me-2"></i><?php echo __('Report Builder'); ?></h1>
 <?php end_slot() ?>
@@ -65,7 +72,7 @@
         </a>
     </div>
     <div>
-        <input type="text" class="form-control" id="searchReports" placeholder="<?php echo __('Search reports...'); ?>" style="width: 250px;">
+        <input type="text" class="form-control" id="searchReports" placeholder="<?php echo __('Search reports...'); ?>" class="report-width-250px-fa35">
     </div>
 </div>
 

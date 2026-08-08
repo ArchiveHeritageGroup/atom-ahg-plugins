@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-max-width-200px-1a5c { max-width: 200px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Instances'); ?><?php end_slot(); ?>
 
@@ -45,7 +52,7 @@
           <td><strong><?php echo htmlspecialchars($inst->name ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></td>
           <td>
             <?php if (!empty($inst->url)): ?>
-              <a href="<?php echo htmlspecialchars($inst->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block" style="max-width: 200px;">
+              <a href="<?php echo htmlspecialchars($inst->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block regist-max-width-200px-1a5c" >
                 <?php echo htmlspecialchars(preg_replace('#^https?://#', '', $inst->url), ENT_QUOTES, 'UTF-8'); ?>
               </a>
             <?php else: ?>
@@ -124,7 +131,7 @@
           <td><strong><?php echo htmlspecialchars($oi->name ?? '', ENT_QUOTES, 'UTF-8'); ?></strong></td>
           <td>
             <?php if (!empty($oi->url)): ?>
-              <a href="<?php echo htmlspecialchars($oi->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block" style="max-width: 200px;">
+              <a href="<?php echo htmlspecialchars($oi->url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener" class="text-truncate d-inline-block regist-max-width-200px-1a5c" >
                 <?php echo htmlspecialchars(preg_replace('#^https?://#', '', $oi->url), ENT_QUOTES, 'UTF-8'); ?>
               </a>
             <?php else: ?>

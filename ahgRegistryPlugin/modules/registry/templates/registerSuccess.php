@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-max-height-280px-overflow-y--13fb { max-height:280px;overflow-y:auto; }
+</style>
 
 <?php slot('title'); ?>Create Account — AtoM Registry<?php end_slot(); ?>
 
@@ -48,7 +55,7 @@
                 <hr>
                 <h6 class="small fw-semibold mb-2"><i class="fas fa-users me-1 text-info"></i> Join User Groups (optional)</h6>
                 <p class="text-muted small mb-2">Select groups to join when you create your account.</p>
-                <div class="row row-cols-1 g-2 mb-3" style="max-height:280px;overflow-y:auto;">
+                <div class="row row-cols-1 g-2 mb-3 regist-max-height-280px-overflow-y--13fb" >
                   <?php foreach ($groups as $g): ?>
                     <div class="col">
                       <div class="form-check border rounded p-2 ps-4">

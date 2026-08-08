@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-display-none-93b8 { display:none; }
+  .librar-max-width-100px-68e7 { max-width:100px; }
+  .librar-max-width-500px-15ac { max-width:500px; }
+</style>
 
 <?php slot('title'); ?>
   <h1>
@@ -157,10 +166,10 @@
       <?php echo __('Enter host/port/database and click "Test" to verify connectivity '
         . 'before saving. For saved targets, use the "Test" button on the index page.'); ?>
     </p>
-    <div class="input-group" style="max-width:500px;">
+    <div class="input-group librar-max-width-500px-15ac" >
       <input type="text" class="form-control" id="test-host" placeholder="Host"
              value="<?php echo esc_entities($target['host'] ?? ''); ?>">
-      <input type="number" class="form-control" id="test-port" placeholder="Port" style="max-width:100px;"
+      <input type="number" class="form-control" id="test-port" placeholder="Port" class="librar-max-width-100px-68e7"
              value="<?php echo esc_entities($target['port'] ?? 210); ?>">
       <input type="text" class="form-control" id="test-db" placeholder="Database"
              value="<?php echo esc_entities($target['database'] ?? ''); ?>">
@@ -169,7 +178,7 @@
         <i class="fas fa-plug me-1"></i><?php echo __('Test'); ?>
       </button>
     </div>
-    <div id="test-result" class="mt-2 small" style="display:none;"></div>
+    <div id="test-result" class="mt-2 small librar-display-none-93b8" ></div>
   </div>
 </div>
 

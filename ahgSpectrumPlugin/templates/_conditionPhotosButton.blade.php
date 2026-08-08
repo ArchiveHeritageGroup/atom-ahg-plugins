@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .spectr-max-height-150px-max-width-2-b3c8 { max-height: 150px; max-width: 200px; }
+</style>
 @php
 $photoCount = 0;
 $primaryPhoto = null;
@@ -19,8 +24,8 @@ try {
             <a href="{{ url_for(['module' => 'spectrum', 'action' => 'conditionPhotos', 'slug' => $resource->slug, 'condition_id' => $conditionCheck['id']]) }}">
                 <img src="/uploads/{{ $primaryPhoto['file_path'] }}"
                      alt="{{ $primaryPhoto['caption'] ?? 'Primary photo' }}"
-                     class="img-thumbnail"
-                     style="max-height: 150px; max-width: 200px;">
+                     class="img-thumbnail spectr-max-height-150px-max-width-2-b3c8"
+                     >
             </a>
         </div>
     @endif

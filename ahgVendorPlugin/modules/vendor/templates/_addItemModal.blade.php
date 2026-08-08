@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .vendor-display-none-224b { display: none; }
+</style>
 {{-- Add/Link Item Modal --}}
 <div class="modal fade" id="addItemModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -23,7 +28,7 @@
                     </div>
 
                     {{-- Selected Item Display --}}
-                    <div id="selectedItemCard" class="card bg-light mb-4" style="display: none;">
+                    <div id="selectedItemCard" class="card bg-light mb-4 vendor-display-none-224b" >
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>

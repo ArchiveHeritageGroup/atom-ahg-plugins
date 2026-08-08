@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-font-size-0-65rem-line-heigh-e768 { font-size: 0.65rem; line-height: 1.2; word-break: break-word; overflow-wrap: break-word; }
+  .report-min-height-140px-4e80 { min-height: 140px; }
+  .report-word-break-break-word-a4d2 { word-break: break-word; }
+</style>
 <?php slot('title') ?>
 <h1><i class="bi bi-plus-circle text-primary me-2"></i><?php echo __('Create New Report'); ?></h1>
 <?php end_slot() ?>
@@ -47,10 +56,10 @@
                             <?php foreach ($dataSources as $key => $source): ?>
                             <div class="col">
                                 <input type="radio" class="btn-check" name="data_source" id="source_<?php echo $key; ?>" value="<?php echo $key; ?>" <?php echo $key === 'information_object' ? 'checked' : ''; ?>>
-                                <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 data-source-btn" for="source_<?php echo $key; ?>" style="min-height: 140px;">
+                                <label class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3 data-source-btn" for="source_<?php echo $key; ?>" class="report-min-height-140px-4e80">
                                     <i class="bi <?php echo $source['icon']; ?> fs-2 mb-2"></i>
-                                    <span class="fw-bold text-center" style="word-break: break-word;"><?php echo $source['label']; ?></span>
-                                    <small class="text-muted mt-1 text-center px-1 d-block" style="font-size: 0.65rem; line-height: 1.2; word-break: break-word; overflow-wrap: break-word;"><?php echo $source['description']; ?></small>
+                                    <span class="fw-bold text-center report-word-break-break-word-a4d2" ><?php echo $source['label']; ?></span>
+                                    <small class="text-muted mt-1 text-center px-1 d-block report-font-size-0-65rem-line-heigh-e768" ><?php echo $source['description']; ?></small>
                                 </label>
                             </div>
                             <?php endforeach; ?>

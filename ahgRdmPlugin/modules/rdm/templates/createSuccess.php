@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .rdm-max-width-640px-7f45 { max-width:640px; }
+</style>
 
 <?php slot('title'); ?>
   <h1>New research dataset</h1>
@@ -8,7 +15,7 @@
   <div class="alert alert-danger"><?php echo $sf_user->getFlash('error'); ?></div>
 <?php endif; ?>
 
-<form method="post" action="<?php echo url_for('@rdm_datasets_create'); ?>" class="mt-3" style="max-width:640px;">
+<form method="post" action="<?php echo url_for('@rdm_datasets_create'); ?>" class="mt-3 rdm-max-width-640px-7f45" >
   <div class="mb-3">
     <label class="form-label" for="title">Title <span class="text-danger">*</span></label>
     <input type="text" class="form-control" id="title" name="title" required maxlength="500"

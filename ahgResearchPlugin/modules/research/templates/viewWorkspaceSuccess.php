@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-auto-d3b6 { width:auto; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -208,7 +215,7 @@ try {
                                 <form method="post" class="d-inline">
                                     <input type="hidden" name="form_action" value="change_role">
                                     <input type="hidden" name="member_id" value="<?php echo (int) $member->id; ?>">
-                                    <select name="role" class="form-select form-select-sm d-inline-block" style="width:auto;" onchange="this.form.submit();">
+                                    <select name="role" class="form-select form-select-sm d-inline-block resear-width-auto-d3b6"  onchange="this.form.submit();">
                                         <?php foreach (['viewer', 'member', 'editor', 'admin'] as $r): ?>
                                         <option value="<?php echo $r; ?>" <?php echo ($member->role === $r) ? 'selected' : ''; ?>><?php echo ucfirst($r); ?></option>
                                         <?php endforeach; ?>

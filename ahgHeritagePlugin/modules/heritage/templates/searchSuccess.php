@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-max-height-180px-width-100-c1fa { max-height: 180px; width: 100%; }
+  .herita-min-height-150px-7b39 { min-height: 150px; }
+</style>
 <?php
 /**
  * Heritage Search Results Page.
@@ -256,8 +264,8 @@ $filters = $toArray($filters ?? []);
                         <?php if (!empty($result['thumbnail'])): ?>
                         <img src="<?php echo esc_specialchars($result['thumbnail']); ?>"
                              alt="<?php echo esc_specialchars($result['title']); ?>"
-                             class="img-fluid rounded-start h-100 object-fit-cover"
-                             style="max-height: 180px; width: 100%;"
+                             class="img-fluid rounded-start h-100 object-fit-cover herita-max-height-180px-width-100-c1fa"
+                             
                              loading="lazy"
                              onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'bg-light h-100 d-flex align-items-center justify-content-center text-muted rounded-start\' style=\'min-height: 150px;\'><i class=\'fas fa-image fs-1\'></i></div>';">
                         <?php else: ?>
@@ -280,7 +288,7 @@ $filters = $toArray($filters ?? []);
                             default => 'bg-secondary'
                         };
                         ?>
-                        <div class="<?php echo $bgClass; ?> bg-opacity-25 h-100 d-flex align-items-center justify-content-center rounded-start" style="min-height: 150px;">
+                        <div class="<?php echo $bgClass; ?> bg-opacity-25 h-100 d-flex align-items-center justify-content-center rounded-start herita-min-height-150px-7b39" >
                             <i class="fas <?php echo $iconClass; ?> fs-1 text-<?php echo str_replace('bg-', '', $bgClass); ?>"></i>
                         </div>
                         <?php endif; ?>

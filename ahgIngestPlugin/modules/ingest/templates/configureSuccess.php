@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ingest-display-none-93b8 { display:none; }
+  .ingest-height-4px-00f6 { height: 4px; }
+  .ingest-width-8-e1b0 { width: 8%; }
+</style>
 <?php
 $session = isset($session) ? $sf_data->getRaw('session') : null;
 $repositories = $sf_data->getRaw('repositories') ?? [];
@@ -39,8 +48,8 @@ $entityTypeVal = $session->entity_type ?? 'description';
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 8%"></div>
+    <div class="progress mt-2 ingest-height-4px-00f6" >
+        <div class="progress-bar ingest-width-8-e1b0" ></div>
     </div>
 </div>
 
@@ -155,7 +164,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
 
                     <!-- Existing parent search (shown when 'existing' selected) -->
-                    <div id="existing-parent-panel" class="mb-3" style="display:none;">
+                    <div id="existing-parent-panel" class="mb-3 ingest-display-none-93b8" >
                         <label for="parent_search" class="form-label"><?php echo __('Search for parent record') ?></label>
                         <input type="text" class="form-control" id="parent_search"
                                placeholder="<?php echo __('Type to search...') ?>" autocomplete="off">
@@ -164,7 +173,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
                     </div>
 
                     <!-- New parent fields (shown when 'new' selected) -->
-                    <div id="new-parent-panel" style="display:none;">
+                    <div id="new-parent-panel" class="ingest-display-none-93b8">
                         <div class="mb-3">
                             <label for="new_parent_title" class="form-label"><?php echo __('New parent title') ?></label>
                             <input type="text" class="form-control" id="new_parent_title" name="new_parent_title"
@@ -380,7 +389,7 @@ $entityTypeVal = $session->entity_type ?? 'description';
 
             <!-- Translation language row (shown when translate checked) -->
             <?php if ($svcAvail['translate']): ?>
-            <div id="translate-lang-panel" class="row mt-2" style="display:none;">
+            <div id="translate-lang-panel" class="row mt-2 ingest-display-none-93b8" >
                 <div class="col-md-4">
                     <label for="process_translate_lang" class="form-label"><?php echo __('Translate to') ?></label>
                     <select class="form-select form-select-sm" id="process_translate_lang" name="process_translate_lang">

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-height-460px-overflow-y-auto-7ffa { height: 460px; overflow-y: auto; }
+</style>
 <?php
 /* Researcher Copilot (#149) — persistent research workspace. */
 $n = sfConfig::get('csp_nonce', '');
@@ -28,7 +35,7 @@ $available = !empty($aiAvailable);
         <a id="rc-export" class="btn btn-outline-secondary btn-sm disabled" href="#"><i class="fas fa-download me-1"></i><?php echo __('Export') ?></a>
         <button id="rc-delete" class="btn btn-outline-danger btn-sm" disabled><i class="fas fa-trash"></i></button>
       </div>
-      <div id="rc-log" class="border rounded p-3 mb-3 bg-light" style="height: 460px; overflow-y: auto;">
+      <div id="rc-log" class="border rounded p-3 mb-3 bg-light ai-height-460px-overflow-y-auto-7ffa" >
         <div class="text-muted small text-center mt-5" id="rc-empty"><?php echo __('Start a new question, or open a saved session on the left.') ?></div>
       </div>
       <form id="rc-form" class="input-group">

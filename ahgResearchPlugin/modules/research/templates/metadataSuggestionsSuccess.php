@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-max-width-340px-white-space--a6df { max-width:340px;white-space:pre-wrap; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'metadataSuggestions', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -70,7 +77,7 @@ $suggestUrl = url_for(['module' => 'research', 'action' => 'metadataSuggestions'
                             <?php endif; ?>
                         </td>
                         <td><span class="badge bg-light text-dark"><?php echo htmlspecialchars($s->field); ?></span></td>
-                        <td style="max-width:340px;white-space:pre-wrap"><?php echo htmlspecialchars($s->suggestion); ?></td>
+                        <td class="resear-max-width-340px-white-space--a6df"><?php echo htmlspecialchars($s->suggestion); ?></td>
                         <td class="small"><?php echo htmlspecialchars(trim(($s->first_name ?? '') . ' ' . ($s->last_name ?? '')) ?: '—'); ?></td>
                         <td class="small text-muted"><?php echo $s->created_at ? date('d M Y', strtotime($s->created_at)) : ''; ?></td>
                         <?php if ($status === 'open'): ?>

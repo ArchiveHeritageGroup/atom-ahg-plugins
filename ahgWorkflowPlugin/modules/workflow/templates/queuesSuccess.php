@@ -1,4 +1,15 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .workfl-background-color-rgba-220-53-1aa4 { background-color: rgba(220,53,69,0.1); }
+  .workfl-background-color-rgba-253-12-6468 { background-color: rgba(253,126,20,0.1); }
+  .workfl-background-color-rgba-255-19-e21b { background-color: rgba(255,193,7,0.1); }
+  .workfl-background-color-rgba-40-167-9a3e { background-color: rgba(40,167,69,0.1); }
+  .workfl-color-fd7e14-378a { color:#fd7e14; }
+</style>
 
 <?php include_partial('workflow/accessibilityHelpers') ?>
 
@@ -22,7 +33,7 @@
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(40,167,69,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-40-167-9a3e" >
                 <div class="card-body py-2">
                     <div class="h4 mb-0 text-success"><?php echo $overview['on_track'] ?? 0 ?></div>
                     <small class="text-muted">On Track</small>
@@ -30,7 +41,7 @@
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(255,193,7,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-255-19-e21b" >
                 <div class="card-body py-2">
                     <div class="h4 mb-0 text-warning"><?php echo $overview['at_risk'] ?? 0 ?></div>
                     <small class="text-muted">At Risk</small>
@@ -38,15 +49,15 @@
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(253,126,20,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-253-12-6468" >
                 <div class="card-body py-2">
-                    <div class="h4 mb-0" style="color:#fd7e14"><?php echo $overview['overdue'] ?? 0 ?></div>
+                    <div class="h4 mb-0 workfl-color-fd7e14-378a" ><?php echo $overview['overdue'] ?? 0 ?></div>
                     <small class="text-muted">Overdue</small>
                 </div>
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(220,53,69,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-220-53-1aa4" >
                 <div class="card-body py-2">
                     <div class="h4 mb-0 text-danger"><?php echo $overview['breached'] ?? 0 ?></div>
                     <small class="text-muted">Breached</small>
@@ -69,8 +80,8 @@
             <?php $q = $queueStat['queue'] ?>
             <div class="col-md-4 col-lg-3">
                 <div class="card h-100">
-                    <div class="card-header d-flex align-items-center" style="border-left: 4px solid <?php echo esc_entities($q->color ?? '#6c757d') ?>;">
-                        <i class="fas <?php echo esc_entities($q->icon ?? 'fa-inbox') ?> me-2" style="color: <?php echo esc_entities($q->color ?? '#6c757d') ?>"></i>
+                    <div class="card-header d-flex align-items-center" data-ahg-style="border-left: 4px solid <?php echo esc_entities($q->color ?? '#6c757d') ?>;">
+                        <i class="fas <?php echo esc_entities($q->icon ?? 'fa-inbox') ?> me-2" data-ahg-style="color: <?php echo esc_entities($q->color ?? '#6c757d') ?>"></i>
                         <strong><?php echo esc_entities($q->name) ?></strong>
                     </div>
                     <div class="card-body">

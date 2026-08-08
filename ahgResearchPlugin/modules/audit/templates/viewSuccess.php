@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-30-ee68 { width:30%; }
+</style>
 <?php slot('title') ?>
 <h1><i class="fas fa-history text-primary me-2"></i>Audit Entry #<?php echo $entry->id; ?></h1>
 <?php end_slot() ?>
@@ -10,7 +17,7 @@
       <div class="card-header"><i class="fas fa-info-circle me-2"></i>Entry Details</div>
       <div class="card-body">
         <table class="table table-bordered mb-0">
-          <tr><th style="width:30%;">Date/Time</th><td><?php echo $entry->created_at; ?></td></tr>
+          <tr><th class="resear-width-30-ee68">Date/Time</th><td><?php echo $entry->created_at; ?></td></tr>
           <tr><th>User</th><td><?php echo htmlspecialchars($entry->user_name ?? 'System'); ?></td></tr>
           <tr><th>Action</th><td><span class="badge bg-<?php echo match($entry->action) { 'create'=>'success', 'update'=>'warning', 'delete'=>'danger', default=>'secondary' }; ?>"><?php echo ucfirst($entry->action); ?></span></td></tr>
           <tr><th>Table</th><td><code><?php echo $entry->table_name; ?></code></td></tr>

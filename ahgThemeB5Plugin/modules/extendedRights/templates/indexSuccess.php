@@ -1,4 +1,12 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-background-color-1a4d2e-colo-902c { background-color: #1a4d2e; color: white; }
+  .themeb-width-20px-height-20px-b53b { width: 20px; height: 20px; }
+</style>
 <?php
 // Query the database directly to bypass Symfony's sfOutputEscaper pipeline
 // which corrupts Laravel Collections and grouped arrays.
@@ -146,7 +154,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
       <!-- TK Labels -->
       <div class="col-md-4 mb-4">
         <div class="card h-100" id="tk-labels">
-          <div class="card-header" style="background-color: #1a4d2e; color: white;">
+          <div class="card-header themeb-background-color-1a4d2e-colo-902c" >
             <h5 class="mb-0">Traditional Knowledge Labels</h5>
           </div>
           <div class="card-body">
@@ -156,7 +164,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                 <?php foreach ($tkLabelsRaw as $tk): ?>
                   <li class="mb-2">
                     <?php if (!empty($tk->icon_url)): ?>
-                      <img src="<?php echo htmlspecialchars($tk->icon_url); ?>" alt="" style="width: 20px; height: 20px;" class="me-1">
+                      <img src="<?php echo htmlspecialchars($tk->icon_url); ?>" alt="" class="me-1 themeb-width-20px-height-20px-b53b" >
                     <?php endif; ?>
                     <?php if (!empty($tk->uri)): ?>
                       <a href="<?php echo htmlspecialchars($tk->uri); ?>" target="_blank">

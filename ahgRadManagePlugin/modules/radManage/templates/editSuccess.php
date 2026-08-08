@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .radman-width-30-59c8 { width:30%; }
+  .radman-width-80px-8db8 { width:80px; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
@@ -131,7 +139,7 @@
                       <th><?php echo __('Identifier'); ?></th>
                       <th><?php echo __('Level'); ?></th>
                       <th><?php echo __('Title'); ?></th>
-                      <th style="width:80px"></th>
+                      <th class="radman-width-80px-8db8"></th>
                     </tr>
                   </thead>
                   <tbody></tbody>
@@ -164,7 +172,7 @@
               <label class="form-label"><?php echo __('Alternative identifier(s)'); ?></label>
               <?php $rawAltIds = $rawIo['alternativeIdentifiers'] ?? []; ?>
               <table class="table table-sm" id="altids-table">
-                <thead><tr><th><?php echo __('Label'); ?></th><th><?php echo __('Value'); ?></th><th style="width:80px"></th></tr></thead>
+                <thead><tr><th><?php echo __('Label'); ?></th><th><?php echo __('Value'); ?></th><th class="radman-width-80px-8db8"></th></tr></thead>
                 <tbody>
                   <?php if (!empty($rawAltIds)) { ?>
                     <?php foreach ($rawAltIds as $aiIdx => $ai) { ?>
@@ -508,7 +516,7 @@
             <?php $rawNotes = $rawIo['notes']; ?>
             <label class="form-label"><?php echo __('Other notes'); ?></label>
             <table class="table table-sm" id="notes-table">
-              <thead><tr><th style="width:30%"><?php echo __('Type'); ?></th><th><?php echo __('Content'); ?></th><th style="width:80px"></th></tr></thead>
+              <thead><tr><th class="radman-width-30-59c8"><?php echo __('Type'); ?></th><th><?php echo __('Content'); ?></th><th class="radman-width-80px-8db8"></th></tr></thead>
               <tbody>
                 <?php if (!empty($rawNotes)) { ?>
                   <?php foreach ($rawNotes as $nIdx => $note) { ?>

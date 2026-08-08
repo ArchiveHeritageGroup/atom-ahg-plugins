@@ -1,3 +1,10 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .access-height-20px-84ce { height: 20px; }
+  .access-max-width-300px-c0dc { max-width: 300px; }
+  .access-width-40px-4792 { width: 40px; }
+</style>
 @php decorate_with('layout_1col') @endphp
 
 @php
@@ -275,10 +282,10 @@
           <span><?php echo __('Progress'); ?>: {{ $clCompleted }}/{{ $clTotal }}</span>
           <span>{{ $clPct }}%</span>
         </div>
-        <div class="progress" style="height: 20px;">
+        <div class="progress access-height-20px-84ce" >
           <div class="progress-bar bg-{{ $clPct >= 100 ? 'success' : ($clPct >= 50 ? 'info' : 'warning') }}"
                role="progressbar"
-               style="width: {{ $clPct }}%"
+               data-ahg-style="width: {{ $clPct }}%"
                aria-valuenow="{{ $clPct }}"
                aria-valuemin="0"
                aria-valuemax="100">
@@ -290,7 +297,7 @@
       {{-- Apply template --}}
       @if (count($checklistTemplates ?? []) > 0)
         <div class="d-flex gap-2 mb-3">
-          <select id="checklist-template-select" class="form-select form-select-sm" style="max-width: 300px;">
+          <select id="checklist-template-select" class="form-select form-select-sm access-max-width-300px-c0dc" >
             <option value=""><?php echo __('Select a checklist template...'); ?></option>
             @foreach ($checklistTemplates as $tpl)
               <option value="{{ $tpl->id }}">{{ e($tpl->name) }}</option>
@@ -483,7 +490,7 @@
               $evStyle = $eventIcons[$evType] ?? ['icon' => 'fas fa-circle', 'color' => 'secondary'];
             @endphp
             <div class="d-flex mb-3">
-              <div class="flex-shrink-0 me-3 text-center" style="width: 40px;">
+              <div class="flex-shrink-0 me-3 text-center access-width-40px-4792" >
                 <span class="text-{{ $evStyle['color'] }}">
                   <i class="{{ $evStyle['icon'] }} fa-lg"></i>
                 </span>

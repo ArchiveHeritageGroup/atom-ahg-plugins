@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .extend-background-color-1a4d2e-colo-902c { background-color: #1a4d2e; color: white; }
+</style>
 @php
 $rsData = $rightsStatements ?? [];
 $ccData = $ccLicenses ?? [];
@@ -66,7 +71,7 @@ $statsData = $stats ?? [];
     <!-- TK Labels -->
     <div class="col-md-4 mb-4">
       <div class="card h-100">
-        <div class="card-header" style="background-color: #1a4d2e; color: white;">
+        <div class="card-header extend-background-color-1a4d2e-colo-902c" >
           <h5 class="mb-0">{{ __('Traditional Knowledge Labels') }}</h5>
         </div>
         <div class="card-body">
@@ -80,7 +85,7 @@ $statsData = $stats ?? [];
                 @foreach ($items as $tk)
                   <li class="mb-2">
                     @if (!empty($tk->color))
-                      <span style="display:inline-block;width:12px;height:12px;background:{{ $tk->color }};border-radius:2px;margin-right:5px;"></span>
+                      <span data-ahg-style="display:inline-block;width:12px;height:12px;background:{{ $tk->color }};border-radius:2px;margin-right:5px;"></span>
                     @endif
                     <a href="{{ $tk->uri ?? '' }}" target="_blank">
                       {{ $tk->name ?? $tk->code ?? 'Unknown' }}

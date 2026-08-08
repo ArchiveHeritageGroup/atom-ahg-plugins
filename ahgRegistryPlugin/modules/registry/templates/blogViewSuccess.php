@@ -1,4 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-max-height-400px-object-fit--fcd4 { max-height: 400px; object-fit: cover; }
+  .regist-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+</style>
 
 <?php $detail = $post; ?>
 
@@ -19,7 +27,7 @@
     <!-- Featured image -->
     <?php if (!empty($detail->featured_image_path)): ?>
     <div class="mb-4 rounded-3 overflow-hidden">
-      <img src="<?php echo htmlspecialchars($detail->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="img-fluid w-100" style="max-height: 400px; object-fit: cover;">
+      <img src="<?php echo htmlspecialchars($detail->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="img-fluid w-100 regist-max-height-400px-object-fit--fcd4" >
     </div>
     <?php endif; ?>
 
@@ -28,7 +36,7 @@
 
     <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
       <div class="d-flex align-items-center">
-        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2 regist-width-40px-height-40px-9a6a" >
           <i class="fas fa-user text-muted"></i>
         </div>
         <div>

@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .spectr-background-color-17a2b8-impo-ddd4 { background-color: #17a2b8 !important; }
+  .spectr-height-10px-977d { height: 10px; }
+  .spectr-width-100px-height-100px-33d7 { width: 100px; height: 100px; }
+</style>
 
 <?php slot('title'); ?>
 <h1><i class="fas fa-tasks me-2"></i><?php echo __('Collections Procedures Workflow Dashboard'); ?></h1>
@@ -67,7 +76,7 @@
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-info me-2">&nbsp;</span> <?php echo __('Received / Documented / Reported'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-primary me-2">&nbsp;</span> <?php echo __('In Progress / Examining / Investigating'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-warning text-dark me-2">&nbsp;</span> <?php echo __('Review / Under Review / Assessed'); ?></li>
-                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-cyan me-2" style="background-color: #17a2b8 !important;">&nbsp;</span> <?php echo __('Approved / Scheduled / Quoted'); ?></li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-cyan me-2 spectr-background-color-17a2b8-impo-ddd4" >&nbsp;</span> <?php echo __('Approved / Scheduled / Quoted'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-success me-2">&nbsp;</span> <?php echo __('Completed / Resolved / Accessioned'); ?></li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-secondary me-2">&nbsp;</span> <?php echo __('Disposed / Closed'); ?></li>
             </ul>
@@ -81,15 +90,15 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center">
-                        <div class="rounded-circle bg-white text-info d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                        <div class="rounded-circle bg-white text-info d-inline-flex align-items-center justify-content-center spectr-width-100px-height-100px-33d7" >
                             <span class="h3 mb-0"><?php echo $overallCompletion['percentage']; ?>%</span>
                         </div>
                     </div>
                     <div class="col-md-9">
                         <h3><?php echo __('Overall Workflow Completion'); ?></h3>
                         <p class="mb-0"><?php echo $overallCompletion['completed']; ?> <?php echo __('of'); ?> <?php echo $overallCompletion['total']; ?> <?php echo __('procedures completed'); ?></p>
-                        <div class="progress mt-2" style="height: 10px;">
-                            <div class="progress-bar bg-white" style="width: <?php echo $overallCompletion['percentage']; ?>%"></div>
+                        <div class="progress mt-2 spectr-height-10px-977d" >
+                            <div class="progress-bar bg-white" data-ahg-style="width: <?php echo $overallCompletion['percentage']; ?>%"></div>
                         </div>
                     </div>
                 </div>

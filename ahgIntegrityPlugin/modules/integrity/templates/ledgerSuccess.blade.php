@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .integr-max-width-250px-9df1 { max-width:250px; }
+</style>
 @php
 $entries = $entries ?? [];
 $filterOutcome = $filterOutcome ?? null;
@@ -79,7 +84,7 @@ $filterDateTo = $filterDateTo ?? null;
                 </td>
                 <td>{{ $e->digital_object_id }}</td>
                 <td><span class="badge {{ $e->outcome === 'pass' ? 'bg-success' : 'bg-danger' }}">{{ $e->outcome }}</span></td>
-                <td class="text-truncate" style="max-width:250px" title="{{ $e->file_path ?? '' }}">{{ basename($e->file_path ?? '—') }}</td>
+                <td class="text-truncate integr-max-width-250px-9df1"  title="{{ $e->file_path ?? '' }}">{{ basename($e->file_path ?? '—') }}</td>
                 <td>{{ $e->file_size ? number_format($e->file_size) : '—' }}</td>
                 <td>{!! $e->file_exists ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>' !!}</td>
                 <td>

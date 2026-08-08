@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-width-120px-b15a { width: 120px; }
+</style>
 
 <?php
 // Check for PII redaction (for PDFs)
@@ -46,7 +53,7 @@ if ($isPdf && in_array('ahgPrivacyPlugin', sfProjectConfiguration::getActive()->
 
   <?php } else { ?>
 
-    <div class="digitalObject text-center" style="width: 120px;">
+    <div class="digitalObject text-center themeb-width-120px-b15a" >
 
       <?php if (isset($link)) { ?>
         <?php if ($hasPiiRedaction): ?>

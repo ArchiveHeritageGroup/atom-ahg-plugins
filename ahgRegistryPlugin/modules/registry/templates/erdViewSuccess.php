@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-78em-overflow-x--f273 { font-size: 0.78em; overflow-x: auto; background: #1a1a2e; }
+  .regist-max-height-800px-913e { max-height: 800px; }
+  .regist-width-30px-ec5c { width: 30px; }
+</style>
 
 <?php slot('title'); ?><?php echo sfOutputEscaper::unescape($erd->display_name); ?> — <?php echo __('Schema & ERD'); ?><?php end_slot(); ?>
 
@@ -85,7 +94,7 @@
   <div class="card-body text-center p-3">
     <?php if ($_isImg): ?>
       <a href="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank">
-        <img src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo $erd->display_name; ?> ERD" class="img-fluid rounded" style="max-height: 800px;">
+        <img src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo $erd->display_name; ?> ERD" class="img-fluid rounded regist-max-height-800px-913e" >
       </a>
     <?php elseif ($_ext === 'pdf'): ?>
       <embed src="<?php echo htmlspecialchars($_imgPath, ENT_QUOTES, 'UTF-8'); ?>" type="application/pdf" width="100%" height="700px" class="rounded border">
@@ -105,7 +114,7 @@
     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo !empty($erd->diagram_image) ? __('ASCII Diagram (Detail)') : __('Entity Relationship Diagram'); ?></h5>
   </div>
   <div class="card-body p-0">
-    <pre class="p-4 mb-0 text-white" style="font-size: 0.78em; overflow-x: auto; background: #1a1a2e;"><?php echo htmlspecialchars($erd->diagram, ENT_QUOTES, 'UTF-8'); ?></pre>
+    <pre class="p-4 mb-0 text-white regist-font-size-0-78em-overflow-x--f273" ><?php echo htmlspecialchars($erd->diagram, ENT_QUOTES, 'UTF-8'); ?></pre>
   </div>
 </div>
 <?php endif; ?>
@@ -161,7 +170,7 @@
     <table class="table table-sm table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th style="width: 30px;"></th>
+          <th class="regist-width-30px-ec5c"></th>
           <th><?php echo __('Column'); ?></th>
           <th><?php echo __('Type'); ?></th>
           <th><?php echo __('Nullable'); ?></th>

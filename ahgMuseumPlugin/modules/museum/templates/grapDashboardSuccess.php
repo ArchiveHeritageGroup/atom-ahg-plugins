@@ -1,3 +1,26 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-display-grid-grid-template-c-274c { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+  .museum-display-grid-grid-template-c-3cbe { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 20px; }
+  .museum-display-grid-grid-template-c-f91a { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .museum-display-grid-grid-template-c-108b { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+  .museum-font-size-12px-color-666-f8b8 { font-size: 12px; color: #666; }
+  .museum-font-size-14px-color-666-4945 { font-size: 14px; color: #666; }
+  .museum-font-size-20px-font-weight-b-4737 { font-size: 20px; font-weight: bold; }
+  .museum-font-size-20px-font-weight-b-ead8 { font-size: 20px; font-weight: bold; color: #28a745; }
+  .museum-font-size-20px-font-weight-b-32ef { font-size: 20px; font-weight: bold; color: #dc3545; }
+  .museum-font-size-24px-font-weight-b-18d0 { font-size: 24px; font-weight: bold; color: #11998e; }
+  .museum-font-size-24px-font-weight-b-c2b2 { font-size: 24px; font-weight: bold; color: #667eea; }
+  .museum-font-size-24px-font-weight-b-217a { font-size: 24px; font-weight: bold; color: #f5576c; }
+  .museum-height-20px-84ce { height: 20px; }
+  .museum-height-40px-cc03 { height: 40px; }
+  .museum-margin-bottom-20px-7002 { margin-bottom: 20px; }
+  .museum-margin-top-20px-194b { margin-top: 20px; }
+  .museum-text-align-center-padding-15-bd21 { text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px; }
+</style>
 <?php
 /**
  * GRAP Dashboard Template
@@ -167,7 +190,7 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
 <div class="grap-dashboard">
 
     <!-- Action Buttons -->
-    <div style="margin-bottom: 20px;">
+    <div class="museum-margin-bottom-20px-7002">
         <a href="<?php echo url_for(['module' => 'cco', 'action' => 'grapExportReport']); ?>" class="btn btn-primary"><?php echo __('Export Full Report'); ?></a>
         <a href="<?php echo url_for(['module' => 'cco', 'action' => 'browse']); ?>" class="btn btn-secondary"><?php echo __('Browse Objects'); ?></a>
     </div>
@@ -205,7 +228,7 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
     <div class="stat-card">
         <h3>Recognition Status (GRAP 103 para 7-21)</h3>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="museum-display-grid-grid-template-c-f91a">
             <div>
                 <h4>Recognised: <?php echo $stats['recognised']; ?></h4>
                 <div class="progress-bar">
@@ -213,7 +236,7 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
                     $recognisedPct = $stats['total_objects'] > 0 ?
                         ($stats['recognised'] / $stats['total_objects']) * 100 : 0;
                     ?>
-                    <div class="progress-fill green" style="width: <?php echo $recognisedPct; ?>%">
+                    <div class="progress-fill green" data-ahg-style="width: <?php echo $recognisedPct; ?>%">
                         <?php echo round($recognisedPct, 1); ?>%
                     </div>
                 </div>
@@ -226,7 +249,7 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
                     $notRecognisedPct = $stats['total_objects'] > 0 ?
                         ($stats['not_recognised'] / $stats['total_objects']) * 100 : 0;
                     ?>
-                    <div class="progress-fill orange" style="width: <?php echo $notRecognisedPct; ?>%">
+                    <div class="progress-fill orange" data-ahg-style="width: <?php echo $notRecognisedPct; ?>%">
                         <?php echo round($notRecognisedPct, 1); ?>%
                     </div>
                 </div>
@@ -266,8 +289,8 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
                     <td><?php echo number_format($data->count); ?></td>
                     <td>R <?php echo number_format($data->total_value, 2); ?></td>
                     <td>
-                        <div class="progress-bar" style="height: 20px;">
-                            <div class="progress-fill" style="width: <?php echo $pct; ?>%">
+                        <div class="progress-bar museum-height-20px-84ce" >
+                            <div class="progress-fill" data-ahg-style="width: <?php echo $pct; ?>%">
                                 <?php echo round($pct, 1); ?>%
                             </div>
                         </div>
@@ -282,26 +305,26 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
     <div class="stat-card">
         <h3>Depreciation Analysis (GRAP 103 para 22-28)</h3>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 24px; font-weight: bold; color: #667eea;">
+        <div class="museum-display-grid-grid-template-c-274c">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-24px-font-weight-b-c2b2">
                     R <?php echo number_format($stats['total_accumulated_depreciation'], 0); ?>
                 </div>
-                <div style="font-size: 14px; color: #666;">Total Accumulated Depreciation</div>
+                <div class="museum-font-size-14px-color-666-4945">Total Accumulated Depreciation</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 24px; font-weight: bold; color: #11998e;">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-24px-font-weight-b-18d0">
                     R <?php echo number_format($stats['total_value'], 0); ?>
                 </div>
-                <div style="font-size: 14px; color: #666;">Gross Asset Value</div>
+                <div class="museum-font-size-14px-color-666-4945">Gross Asset Value</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 24px; font-weight: bold; color: #f5576c;">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-24px-font-weight-b-217a">
                     R <?php echo number_format($stats['net_book_value'], 0); ?>
                 </div>
-                <div style="font-size: 14px; color: #666;">Net Book Value</div>
+                <div class="museum-font-size-14px-color-666-4945">Net Book Value</div>
             </div>
         </div>
 
@@ -339,33 +362,33 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
     <div class="stat-card">
         <h3>Revaluation Status (GRAP 103 para 29-39)</h3>
         
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px;">
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+        <div class="museum-display-grid-grid-template-c-108b">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-20px-font-weight-b-4737">
                     <?php echo number_format($revaluationStats['with_revaluation']); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">With Revaluation</div>
+                <div class="museum-font-size-12px-color-666-f8b8">With Revaluation</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-20px-font-weight-b-4737">
                     <?php echo number_format($revaluationStats['without_revaluation']); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">No Revaluation</div>
+                <div class="museum-font-size-12px-color-666-f8b8">No Revaluation</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-20px-font-weight-b-4737">
                     <?php echo number_format($revaluationStats['revalued_last_year']); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Revalued Last Year</div>
+                <div class="museum-font-size-12px-color-666-f8b8">Revalued Last Year</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold;">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-20px-font-weight-b-4737">
                     R <?php echo number_format($revaluationStats['total_revaluation_amount'], 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Total Revaluation</div>
+                <div class="museum-font-size-12px-color-666-f8b8">Total Revaluation</div>
             </div>
         </div>
     </div>
@@ -382,40 +405,40 @@ function grap_object_url(int $objectId, string $module = 'cco', string $action =
         </div>
         <?php endif; ?>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 20px;">
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold; color: #dc3545;">
+        <div class="museum-display-grid-grid-template-c-3cbe">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-20px-font-weight-b-32ef">
                     R <?php echo number_format($insuranceStats['total_required'], 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Required Coverage</div>
+                <div class="museum-font-size-12px-color-666-f8b8">Required Coverage</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold; color: #28a745;">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div class="museum-font-size-20px-font-weight-b-ead8">
                     R <?php echo number_format($insuranceStats['total_actual'], 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">Actual Coverage</div>
+                <div class="museum-font-size-12px-color-666-f8b8">Actual Coverage</div>
             </div>
             
-            <div style="text-align: center; padding: 15px; background: #f5f5f5; border-radius: 8px;">
-                <div style="font-size: 20px; font-weight: bold; color: <?php echo $insuranceStats['gap'] > 0 ? '#dc3545' : '#28a745'; ?>;">
+            <div class="museum-text-align-center-padding-15-bd21">
+                <div data-ahg-style="font-size: 20px; font-weight: bold; color: <?php echo $insuranceStats['gap'] > 0 ? '#dc3545' : '#28a745'; ?>;">
                     R <?php echo number_format(abs($insuranceStats['gap']), 0); ?>
                 </div>
-                <div style="font-size: 12px; color: #666;">
+                <div class="museum-font-size-12px-color-666-f8b8">
                     <?php echo $insuranceStats['gap'] > 0 ? 'Shortfall' : 'Surplus'; ?>
                 </div>
             </div>
         </div>
 
-        <div style="margin-top: 20px;">
-            <div class="progress-bar" style="height: 40px;">
+        <div class="museum-margin-top-20px-194b">
+            <div class="progress-bar museum-height-40px-cc03" >
                 <?php
                 $coveragePct = $insuranceStats['total_required'] > 0 ?
                     ($insuranceStats['total_actual'] / $insuranceStats['total_required']) * 100 : 0;
                 $coveragePct = min($coveragePct, 100);
                 $colorClass = $coveragePct >= 90 ? 'green' : 'orange';
                 ?>
-                <div class="progress-fill <?php echo $colorClass; ?>" style="width: <?php echo $coveragePct; ?>%">
+                <div class="progress-fill <?php echo $colorClass; ?>" data-ahg-style="width: <?php echo $coveragePct; ?>%">
                     <?php echo round($coveragePct, 1); ?>% Coverage
                 </div>
             </div>

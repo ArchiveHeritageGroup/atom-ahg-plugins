@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .icip-background-color-228b22-colo-41f9 { background-color: #228B22; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
+  .icip-background-color-8b4513-colo-2959 { background-color: #8B4513; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
+</style>
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
@@ -31,7 +39,7 @@
                             <?php if ($type->category === 'TK'): ?>
                                 <div class="col-md-6 mb-3">
                                     <div class="d-flex align-items-start">
-                                        <div class="icip-tk-label-icon me-2" style="background-color: #8B4513; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
+                                        <div class="icip-tk-label-icon me-2 icip-background-color-8b4513-colo-2959" >
                                             <?php echo strtoupper($type->code) ?>
                                         </div>
                                         <div>
@@ -56,7 +64,7 @@
                             <?php if ($type->category === 'BC'): ?>
                                 <div class="col-md-6 mb-3">
                                     <div class="d-flex align-items-start">
-                                        <div class="icip-tk-label-icon me-2" style="background-color: #228B22; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
+                                        <div class="icip-tk-label-icon me-2 icip-background-color-228b22-colo-41f9" >
                                             <?php echo strtoupper($type->code) ?>
                                         </div>
                                         <div>

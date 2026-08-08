@@ -1,4 +1,17 @@
 <?php /* AtoM escaping_strategy=true wraps action vars in sfOutputEscaper; unescape before json_encode/use. */ foreach (["space","days","data","visitors","heatmap","sensor","rooms","timeline","building","placements","roomDims","guidedTour","walls","doors","windows","shape","capacityUnits","furniture","tourObjects","plan","navBtns","stairs","corridorObjects","bootData","wtConfig"] as $__ev) { if (isset($$__ev)) { $$__ev = sfOutputEscaper::unescape($$__ev); } } ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-border-0-0123 { border:0; }
+  .exhibi-max-height-220px-overflow-au-e86e { max-height:220px;overflow:auto; }
+  .exhibi-max-width-160px-8ddd { max-width:160px; }
+  .exhibi-position-absolute-top-10px-r-9408 { position:absolute;top:10px;right:10px;z-index:6;background:#fff;border:1px solid #adb5bd;border-radius:6px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);width:172px; }
+  .exhibi-position-relative-4cb8 { position:relative; }
+  .exhibi-width-100-background-f4f4f4--99c3 { width:100%;background:#f4f4f4;border-radius:0 0 .375rem .375rem;overflow:hidden; }
+  .exhibi-width-52px-1dd1 { width:52px; }
+</style>
 <?php
 /*
  * Exhibition Space — Digital Twin Builder (Konva.js 2D floor-plan builder).
@@ -106,7 +119,7 @@ $bootData = [
 
       <div class="card mb-3">
         <div class="card-header py-2"><strong><i class="fas fa-list me-1"></i><?php echo __('Objects in this space') ?></strong> <span class="badge bg-secondary" id="objCount">0</span></div>
-        <div class="card-body p-2" style="max-height:220px;overflow:auto;">
+        <div class="card-body p-2 exhibi-max-height-220px-overflow-au-e86e" >
           <div id="objList" class="small text-muted"><?php echo __('None yet.') ?></div>
         </div>
       </div>
@@ -165,7 +178,7 @@ $bootData = [
             <button type="button" id="modeFloor" class="btn btn-primary"><?php echo __('Floor view') ?></button>
             <button type="button" id="modeWall" class="btn btn-outline-primary"><?php echo __('Wall view') ?></button>
           </div>
-          <select id="wvWall" class="form-select form-select-sm d-none" style="max-width:160px;">
+          <select id="wvWall" class="form-select form-select-sm d-none exhibi-max-width-160px-8ddd" >
             <option value="north"><?php echo __('Back wall') ?></option>
             <option value="south"><?php echo __('Front wall') ?></option>
             <option value="west"><?php echo __('Left wall') ?></option>
@@ -174,14 +187,14 @@ $bootData = [
           <button type="button" id="wvAddWin" class="btn btn-sm btn-outline-info d-none" title="<?php echo __('Add a window to this wall - then drag it to position, double-click to remove') ?>"><i class="fas fa-window-maximize me-1"></i><?php echo __('Add window') ?></button>
           <span class="small text-muted"><span id="saveState"><?php echo __('All changes saved') ?></span> <i id="saveIcon" class="fas fa-check text-success ms-1"></i></span>
         </div>
-        <div class="card-body p-0" style="position:relative;">
-          <div id="stageWrap" style="width:100%;background:#f4f4f4;border-radius:0 0 .375rem .375rem;overflow:hidden;"></div>
+        <div class="card-body p-0 exhibi-position-relative-4cb8" >
+          <div id="stageWrap" class="exhibi-width-100-background-f4f4f4--99c3"></div>
           <!-- Wall-view window editor: appears when a window is clicked -->
-          <div id="winEdit" class="d-none" style="position:absolute;top:10px;right:10px;z-index:6;background:#fff;border:1px solid #adb5bd;border-radius:6px;padding:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);width:172px;">
+          <div id="winEdit" class="d-none exhibi-position-absolute-top-10px-r-9408" >
             <div class="small fw-bold mb-2"><i class="fas fa-window-maximize me-1 text-info"></i><?php echo __('Window') ?></div>
-            <div class="input-group input-group-sm mb-1"><span class="input-group-text" style="width:52px"><?php echo __('Width') ?></span><input type="number" id="winEditW" class="form-control" min="0.4" max="6" step="0.1"><span class="input-group-text">m</span></div>
-            <div class="input-group input-group-sm mb-1"><span class="input-group-text" style="width:52px"><?php echo __('Sill') ?></span><input type="number" id="winEditSill" class="form-control" min="0" max="3" step="0.1"><span class="input-group-text">m</span></div>
-            <div class="input-group input-group-sm mb-2"><span class="input-group-text" style="width:52px"><?php echo __('Height') ?></span><input type="number" id="winEditH" class="form-control" min="0.3" max="3.5" step="0.1"><span class="input-group-text">m</span></div>
+            <div class="input-group input-group-sm mb-1"><span class="input-group-text exhibi-width-52px-1dd1" ><?php echo __('Width') ?></span><input type="number" id="winEditW" class="form-control" min="0.4" max="6" step="0.1"><span class="input-group-text">m</span></div>
+            <div class="input-group input-group-sm mb-1"><span class="input-group-text exhibi-width-52px-1dd1" ><?php echo __('Sill') ?></span><input type="number" id="winEditSill" class="form-control" min="0" max="3" step="0.1"><span class="input-group-text">m</span></div>
+            <div class="input-group input-group-sm mb-2"><span class="input-group-text exhibi-width-52px-1dd1" ><?php echo __('Height') ?></span><input type="number" id="winEditH" class="form-control" min="0.3" max="3.5" step="0.1"><span class="input-group-text">m</span></div>
             <button type="button" id="winEditDel" class="btn btn-sm btn-danger w-100 mb-1"><i class="fas fa-trash me-1"></i><?php echo __('Remove window') ?></button>
             <button type="button" id="winEditClose" class="btn btn-sm btn-outline-secondary w-100"><?php echo __('Done') ?></button>
           </div>
@@ -233,7 +246,7 @@ $bootData = [
             <div class="card-header py-2"><strong><i class="fas fa-share-nodes me-1"></i><?php echo __('Share') ?></strong></div>
             <div class="card-body small">
               <label class="form-label mb-1"><?php echo __('Embed this walkthrough') ?></label>
-              <textarea id="embedSnippet" class="form-control form-control-sm" rows="3" readonly>&lt;iframe src="<?php echo esc_entities(url_for(['module' => 'exhibitionSpace', 'action' => 'walkthrough', 'slug' => $space->slug], true)) ?>" width="100%" height="600" style="border:0" allowfullscreen&gt;&lt;/iframe&gt;</textarea>
+              <textarea id="embedSnippet" class="form-control form-control-sm" rows="3" readonly>&lt;iframe src="<?php echo esc_entities(url_for(['module' => 'exhibitionSpace', 'action' => 'walkthrough', 'slug' => $space->slug], true)) ?>" width="100%" height="600" class="exhibi-border-0-0123" allowfullscreen&gt;&lt;/iframe&gt;</textarea>
               <button type="button" id="embedCopy" class="btn btn-sm btn-outline-primary w-100 mt-1"><i class="fas fa-copy me-1"></i><?php echo __('Copy embed code') ?></button>
             </div>
           </div>

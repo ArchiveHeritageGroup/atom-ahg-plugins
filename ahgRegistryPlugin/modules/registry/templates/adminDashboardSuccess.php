@@ -1,4 +1,14 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-border-left-color-6f42c1-imp-e8ed { border-left-color: #6f42c1 !important; }
+  .regist-border-left-color-fd7e14-imp-a9c1 { border-left-color: #fd7e14 !important; }
+  .regist-color-6f42c1-8c42 { color: #6f42c1; }
+  .regist-color-fd7e14-31bd { color: #fd7e14; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Registry Admin'); ?><?php end_slot(); ?>
 
@@ -87,14 +97,14 @@
   </div>
 
   <div class="col">
-    <div class="card h-100 border-start border-purple border-4" style="border-left-color: #6f42c1 !important;">
+    <div class="card h-100 border-start border-purple border-4 regist-border-left-color-6f42c1-imp-e8ed" >
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <div class="text-muted small mb-1"><?php echo __('Groups'); ?></div>
             <div class="h3 mb-0"><?php echo number_format($stats['groups'] ?? 0); ?></div>
           </div>
-          <i class="fas fa-users fa-2x opacity-50" style="color: #6f42c1;"></i>
+          <i class="fas fa-users fa-2x opacity-50 regist-color-6f42c1-8c42" ></i>
         </div>
       </div>
     </div>
@@ -134,14 +144,14 @@
   </div>
 
   <div class="col">
-    <div class="card h-100 border-start border-4" style="border-left-color: #fd7e14 !important;">
+    <div class="card h-100 border-start border-4 regist-border-left-color-fd7e14-imp-a9c1" >
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <div class="text-muted small mb-1"><?php echo __('Reviews'); ?></div>
             <div class="h3 mb-0"><?php echo number_format($stats['reviews'] ?? 0); ?></div>
           </div>
-          <i class="fas fa-star fa-2x opacity-50" style="color: #fd7e14;"></i>
+          <i class="fas fa-star fa-2x opacity-50 regist-color-fd7e14-31bd" ></i>
         </div>
       </div>
     </div>
@@ -274,7 +284,7 @@
   <div class="col">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminGroups']); ?>" class="card text-decoration-none h-100">
       <div class="card-body text-center">
-        <i class="fas fa-users fa-2x mb-2" style="color: #6f42c1;"></i>
+        <i class="fas fa-users fa-2x mb-2 regist-color-6f42c1-8c42" ></i>
         <h6 class="card-title"><?php echo __('Manage Groups'); ?></h6>
       </div>
     </a>
@@ -301,7 +311,7 @@
   <div class="col">
     <a href="<?php echo url_for(['module' => 'registry', 'action' => 'adminSubscribers']); ?>" class="card text-decoration-none h-100">
       <div class="card-body text-center">
-        <i class="fas fa-envelope-open-text fa-2x mb-2" style="color: #fd7e14;"></i>
+        <i class="fas fa-envelope-open-text fa-2x mb-2 regist-color-fd7e14-31bd" ></i>
         <h6 class="card-title"><?php echo __('Subscribers'); ?></h6>
       </div>
     </a>

@@ -1,3 +1,10 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .spectr-background-color-1a5f2a-40c1 { background-color: #1a5f2a; }
+  .spectr-background-color-d4a200-c16c { background-color: #d4a200; }
+  .spectr-color-fff-421b { color: #fff; }
+</style>
 <h1 class="h3 mb-4"><i class="fas fa-file-alt me-2"></i>{{ __('Privacy Template Library') }}</h1>
 
 <div class="mb-3">
@@ -51,8 +58,8 @@ $categories = [
     @endphp
     <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100 template-card">
-            <div class="card-header" style="background-color: {{ $info['color'] }};">
-                <h6 class="mb-0" style="color: #fff;"><i class="fas {{ $info['icon'] }} me-2" style="color: #fff;"></i>{{ __($info['label']) }}</h6>
+            <div class="card-header" data-ahg-style="background-color: {{ $info['color'] }};">
+                <h6 class="mb-0 spectr-color-fff-421b" ><i class="fas {{ $info['icon'] }} me-2 spectr-color-fff-421b" ></i>{{ __($info['label']) }}</h6>
             </div>
             <ul class="list-group list-group-flush">
             @if(count($catTemplates) > 0)
@@ -101,8 +108,8 @@ $categories = [
             <form method="post" action="/admin/privacy/templates" enctype="multipart/form-data">
 <input type="hidden" name="_ahg_csrf_token" value="{{ class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '' }}">
                 <input type="hidden" name="form_action" value="upload">
-                <div class="modal-header" style="background-color: #1a5f2a;">
-                    <h5 class="modal-title" style="color: #fff;"><i class="fas fa-upload me-2"></i>Upload Template</h5>
+                <div class="modal-header spectr-background-color-1a5f2a-40c1" >
+                    <h5 class="modal-title spectr-color-fff-421b" ><i class="fas fa-upload me-2"></i>Upload Template</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -145,8 +152,8 @@ $categories = [
 <input type="hidden" name="_ahg_csrf_token" value="{{ class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '' }}">
                 <input type="hidden" name="form_action" value="replace">
                 <input type="hidden" name="id" id="replace_id">
-                <div class="modal-header" style="background-color: #d4a200;">
-                    <h5 class="modal-title" style="color: #fff;"><i class="fas fa-sync me-2"></i>Replace Template</h5>
+                <div class="modal-header spectr-background-color-d4a200-c16c" >
+                    <h5 class="modal-title spectr-color-fff-421b" ><i class="fas fa-sync me-2"></i>Replace Template</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">

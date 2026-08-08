@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .author-height-20px-687c { height:20px; }
+</style>
 <?php
 /**
  * Embeddable panel: Completeness score gauge for actor view pages.
@@ -23,10 +30,10 @@ $color = $levelColors[$level] ?? 'secondary';
   <div class="card-body py-2">
     <div class="d-flex align-items-center">
       <div class="flex-grow-1 me-2">
-        <div class="progress" style="height:20px">
+        <div class="progress author-height-20px-687c" >
           <div class="progress-bar bg-<?php echo $color; ?>"
                role="progressbar"
-               style="width:<?php echo $score; ?>%"
+               data-ahg-style="width:<?php echo $score; ?>%"
                aria-valuenow="<?php echo $score; ?>"
                aria-valuemin="0" aria-valuemax="100">
             <?php echo $score; ?>%

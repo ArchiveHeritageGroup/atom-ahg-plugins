@@ -1,4 +1,12 @@
 <?php decorate_with('layout_3col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .spectr-font-size-11pt-0089 { font-size: 11pt; }
+  .spectr-max-width-300px-c0dc { max-width: 300px; }
+</style>
 
 <?php slot('sidebar'); ?>
   <?php include_component('informationobject', 'contextMenu'); ?>
@@ -288,8 +296,8 @@ $sectorLabel = $sectorLabels[$sector] ?? __('Record');
         <div class="card">
             <div class="card-header"><?php echo __('Preview'); ?></div>
             <div class="card-body text-center">
-                <div class="label-preview" id="labelContent" style="max-width: 300px;">
-                    <div id="labelTitle" class="fw-bold mb-2" style="font-size: 11pt;">
+                <div class="label-preview" id="labelContent" class="spectr-max-width-300px-c0dc">
+                    <div id="labelTitle" class="fw-bold mb-2 spectr-font-size-11pt-0089" >
                         <?php echo esc_entities($resource->title ?? $resource->slug); ?>
                     </div>
                     

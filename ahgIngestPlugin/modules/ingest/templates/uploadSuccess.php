@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ingest-display-none-93b8 { display:none; }
+  .ingest-height-4px-00f6 { height: 4px; }
+  .ingest-max-height-360px-overflow-y--0e50 { max-height: 360px; overflow-y: auto; }
+  .ingest-width-25-3ea1 { width: 25%; }
+</style>
 <?php
 $session = $sf_data->getRaw('session');
 $files = $sf_data->getRaw('files') ?? [];
@@ -27,8 +37,8 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 25%"></div>
+    <div class="progress mt-2 ingest-height-4px-00f6" >
+        <div class="progress-bar ingest-width-25-3ea1" ></div>
     </div>
 </div>
 
@@ -77,7 +87,7 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
                                     <input type="file" class="form-control mt-3" id="ingest_file" name="ingest_file"
                                            accept=".csv,.zip,.xml,.ead">
                                 </div>
-                                <div id="file-info" class="alert alert-info" style="display:none;"></div>
+                                <div id="file-info" class="alert alert-info ingest-display-none-93b8" ></div>
                             </div>
 
                             <hr>
@@ -87,7 +97,7 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
                                 <input type="file" class="form-control" id="ingest_folder" name="ingest_folder[]"
                                        webkitdirectory directory multiple>
                                 <small class="text-muted"><?php echo __('Pick a folder on your computer — every file inside is uploaded as a batch of digital objects (no CSV required).') ?></small>
-                                <div id="folder-info" class="alert alert-info mt-2" style="display:none;"></div>
+                                <div id="folder-info" class="alert alert-info mt-2 ingest-display-none-93b8" ></div>
                             </div>
 
                             <hr>
@@ -163,7 +173,7 @@ $spDrives = $sf_data->getRaw('sp_drives') ?? [];
 
                             <div class="mb-3">
                                 <label class="form-label"><?php echo __('Items') ?></label>
-                                <div id="sp-tree" class="border rounded p-3" style="max-height: 360px; overflow-y: auto;">
+                                <div id="sp-tree" class="border rounded p-3 ingest-max-height-360px-overflow-y--0e50" >
                                     <small class="text-muted"><?php echo __('Select a drive to browse files') ?></small>
                                 </div>
                                 <small class="text-muted"><?php echo __('Tick the files to import; folders expand on click.') ?></small>

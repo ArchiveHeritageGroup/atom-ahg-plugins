@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-display-none-9c76 { display: none; }
+  .report-width-110px-e822 { width: 110px; }
+</style>
 
 <?php slot('title'); ?>
   <h1 class="multiline">
@@ -24,7 +32,7 @@
 
 			<?php echo $form->renderHiddenFields(); ?>
 
-			<div id='divTypeOfReport' style="display: none"> 
+			<div id='divTypeOfReport' class="report-display-none-9c76"> 
 				<?php echo $form->className->label('Types of Reports')->renderRow(); ?>
 			</div>
 
@@ -74,9 +82,9 @@
 		<th><?php echo __('Forms'); ?></th>
   
         <?php if ('CREATED_AT' != $form->getValue('dateOf')) { ?>
-          <th style="width: 110px"><?php echo __('Updated'); ?></th>
+          <th class="report-width-110px-e822"><?php echo __('Updated'); ?></th>
         <?php } else { ?>
-          <th style="width: 110px"><?php echo __('Created'); ?></th>
+          <th class="report-width-110px-e822"><?php echo __('Created'); ?></th>
         <?php } ?>
       </tr>
     </thead><tbody>

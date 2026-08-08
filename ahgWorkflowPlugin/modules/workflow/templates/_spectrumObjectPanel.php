@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .workfl-opacity-0-3-aa01 { opacity:0.3; }
+</style>
 <?php /* Collections Procedures Phase C3 — per-object panel partial (PSIS port).
 
   Embed from any IO-view template via:
@@ -42,7 +49,7 @@
               <?php elseif ($entry['status'] === 'rejected'): ?>
                 <i class="fas fa-times-circle"></i>
               <?php else: ?>
-                <i class="fas fa-circle text-muted" style="opacity:0.3"></i>
+                <i class="fas fa-circle text-muted workfl-opacity-0-3-aa01" ></i>
               <?php endif ?>
             </span>
           </div>

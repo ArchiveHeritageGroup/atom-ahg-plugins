@@ -42,7 +42,7 @@ switch ($classification->classificationLevel) {
     <?php endif; ?>
   </div>
   <div class="ms-auto">
-    <span class="badge" style="background-color: <?php echo $classification->classificationColor; ?>; font-size: 1rem;">
+    <span class="badge" data-ahg-style="background-color: <?php echo $classification->classificationColor; ?>; font-size: 1rem;">
       <?php echo __('Level %1%', ['%1%' => $classification->classificationLevel]); ?>
     </span>
   </div>

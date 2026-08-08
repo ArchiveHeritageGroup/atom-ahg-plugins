@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-min-width-280px-1f44 { min-width: 280px; }
+</style>
 <?php
 /**
  * User menu with conditional plugin checks
@@ -89,7 +96,7 @@ $sahraTotal = $sahraEndorseCount + $sahraReviewCount;
   <button class="btn btn-sm atom-btn-secondary dropdown-toggle" type="button" id="user-menu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
     <i class="fas fa-sign-in-alt me-1"></i><?php echo $menuLabels['login'] ?? __('Log in'); ?>
   </button>
-  <div class="dropdown-menu dropdown-menu-lg-end mt-2 p-3" aria-labelledby="user-menu" style="min-width: 280px;">
+  <div class="dropdown-menu dropdown-menu-lg-end mt-2 p-3" aria-labelledby="user-menu" class="themeb-min-width-280px-1f44">
     <h6 class="dropdown-header px-0"><?php echo __('Have an account?'); ?></h6>
     <?php echo $form->renderFormTag(url_for(['module' => 'user', 'action' => 'login']), ['class' => 'mt-2']); ?>
       <?php echo $form->renderHiddenFields(); ?>

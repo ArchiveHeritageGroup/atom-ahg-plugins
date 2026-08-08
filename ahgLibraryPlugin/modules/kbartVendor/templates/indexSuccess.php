@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-display-inline-5f8f { display:inline; }
+</style>
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
@@ -131,7 +138,7 @@
                     <td class="text-center">
                         <div class="btn-group btn-group-sm" role="group">
                             <!-- Fetch Now -->
-                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'fetch', 'id' => $vendor->id]); ?>" style="display:inline;">
+                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'fetch', 'id' => $vendor->id]); ?>" class="librar-display-inline-5f8f">
                                 <button type="submit" class="btn btn-success btn-sm" title="<?php echo __('Fetch Now'); ?>" onclick="return confirm('<?php echo __('Fetch KBART feed now?'); ?>');">
                                     <i class="fas fa-sync"></i>
                                 </button>
@@ -143,14 +150,14 @@
                             </a>
 
                             <!-- Toggle Active -->
-                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'toggle', 'id' => $vendor->id]); ?>" style="display:inline;">
+                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'toggle', 'id' => $vendor->id]); ?>" class="librar-display-inline-5f8f">
                                 <button type="submit" class="btn btn-warning btn-sm" title="<?php echo $vendor->active ? __('Disable') : __('Enable'); ?>">
                                     <i class="fas fa-toggle-<?php echo $vendor->active ? 'on' : 'off'; ?>"></i>
                                 </button>
                             </form>
 
                             <!-- Delete -->
-                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'delete', 'id' => $vendor->id]); ?>" style="display:inline;" onsubmit="return confirm('<?php echo __('Delete vendor'); ?>: <?php echo htmlspecialchars($vendor->name); ?>?');">
+                            <form method="POST" action="<?php echo url_for(['module' => 'kbartVendor', 'action' => 'delete', 'id' => $vendor->id]); ?>" class="librar-display-inline-5f8f" onsubmit="return confirm('<?php echo __('Delete vendor'); ?>: <?php echo htmlspecialchars($vendor->name); ?>?');">
                                 <button type="submit" class="btn btn-danger btn-sm" title="<?php echo __('Delete'); ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>

@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-white-space-pre-wrap-4f5f { white-space: pre-wrap; }
+  .herita-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+</style>
 
 @php
 // Helper to convert Symfony escaped arrays to plain arrays
@@ -63,7 +69,7 @@ $versions = $contribution['versions'] ?? [];
             <img src="{{ $contributor['avatar_url'] }}"
                  class="rounded-circle me-2" width="40" height="40" alt="">
             @else
-            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2 herita-width-40px-height-40px-9a6a" >
                 <i class="fas fa-user text-primary"></i>
             </div>
             @endif
@@ -152,7 +158,7 @@ $versions = $contribution['versions'] ?? [];
         <h6 class="text-muted mb-3">Contribution Content</h6>
 
         @if ($type['code'] === 'transcription')
-        <div class="bg-light border rounded p-3 font-monospace" style="white-space: pre-wrap;">{{ $content['text'] ?? '' }}</div>
+        <div class="bg-light border rounded p-3 font-monospace herita-white-space-pre-wrap-4f5f" >{{ $content['text'] ?? '' }}</div>
         @if (!empty($content['notes']))
         <div class="mt-2">
             <small class="text-muted"><strong>Notes:</strong> {{ $content['notes'] }}</small>

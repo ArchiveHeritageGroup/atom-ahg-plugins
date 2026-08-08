@@ -1,3 +1,19 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-background-color-1d6a52-6fae { background-color: #1d6a52; }
+  .displa-background-f8f9fa-6083 { background:#f8f9fa; }
+  .displa-cursor-pointer-b202 { cursor:pointer; }
+  .displa-height-120px-overflow-hidden-5b4f { height:120px;overflow:hidden; }
+  .displa-max-height-100px-object-fit--e752 { max-height:100px;object-fit:contain; }
+  .displa-max-height-120px-object-fit--fb3c { max-height:120px;object-fit:cover; }
+  .displa-max-width-180px-7428 { max-width:180px; }
+  .displa-width-100px-ee04 { width:100px; }
+  .displa-width-50px-height-50px-objec-673e { width:50px;height:50px;object-fit:cover; }
+  .displa-width-60px-c5ac { width:60px; }
+</style>
 <?php
 /**
  * Embedded GLAM Browse - for landing page AJAX loading
@@ -102,7 +118,7 @@ function getEmbeddedItemUrl($obj) {
     <?php if ($showSidebar): ?>
     <!-- Facets Sidebar -->
     <div class="col-lg-3 col-md-4">
-      <div class="card mb-3" style="background-color: #1d6a52;">
+      <div class="card mb-3 displa-background-color-1d6a52-6fae" >
         <div class="card-body py-2 text-white text-center">
           <i class="fas fa-filter"></i> <?php echo __('Filter by:'); ?>
         </div>
@@ -111,7 +127,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- GLAM Type Facet -->
       <?php if (!empty($types)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetType" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetType" class="displa-cursor-pointer-b202">
           <strong><?php echo __('GLAM Type'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse show" id="embFacetType">
@@ -140,7 +156,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- Repository Facet -->
       <?php if (!empty($repositories)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetRepo" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetRepo" class="displa-cursor-pointer-b202">
           <strong><?php echo __('Repository'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse" id="embFacetRepo">
@@ -153,7 +169,7 @@ function getEmbeddedItemUrl($obj) {
             <?php foreach ($repositories as $repo): ?>
               <?php $isActive = $repoFilter == $repo->id; ?>
               <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['repo']) : buildEmbeddedUrl($fp, ['repo' => $repo->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['repo']) : buildEmbeddedUrl($fp, ['repo' => $repo->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?> displa-max-width-180px-7428" >
                   <?php echo esc_entities($repo->name) ?>
                 </a>
                 <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $repo->count ?></span>
@@ -167,7 +183,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- Subject Facet -->
       <?php if (!empty($subjects)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetSubject" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetSubject" class="displa-cursor-pointer-b202">
           <strong><?php echo __('Subject'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse" id="embFacetSubject">
@@ -180,7 +196,7 @@ function getEmbeddedItemUrl($obj) {
             <?php foreach ($subjects as $subject): ?>
               <?php $isActive = $subjectFilter == $subject->id; ?>
               <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['subject']) : buildEmbeddedUrl($fp, ['subject' => $subject->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['subject']) : buildEmbeddedUrl($fp, ['subject' => $subject->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?> displa-max-width-180px-7428" >
                   <?php echo esc_entities($subject->name) ?>
                 </a>
                 <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $subject->count ?></span>
@@ -194,7 +210,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- Level Facet -->
       <?php if (!empty($levels)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetLevel" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetLevel" class="displa-cursor-pointer-b202">
           <strong><?php echo __('Level'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse" id="embFacetLevel">
@@ -221,7 +237,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- Creator Facet -->
       <?php if (!empty($creators)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetCreator" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetCreator" class="displa-cursor-pointer-b202">
           <strong><?php echo __('Creator'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse" id="embFacetCreator">
@@ -234,7 +250,7 @@ function getEmbeddedItemUrl($obj) {
             <?php foreach ($creators as $creator): ?>
               <?php $isActive = $creatorFilter == $creator->id; ?>
               <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['creator']) : buildEmbeddedUrl($fp, ['creator' => $creator->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['creator']) : buildEmbeddedUrl($fp, ['creator' => $creator->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?> displa-max-width-180px-7428" >
                   <?php echo esc_entities($creator->name) ?>
                 </a>
                 <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $creator->count ?></span>
@@ -248,7 +264,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- Place Facet -->
       <?php if (!empty($places)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetPlace" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetPlace" class="displa-cursor-pointer-b202">
           <strong><?php echo __('Place'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse" id="embFacetPlace">
@@ -261,7 +277,7 @@ function getEmbeddedItemUrl($obj) {
             <?php foreach ($places as $place): ?>
               <?php $isActive = $placeFilter == $place->id; ?>
               <li class="list-group-item d-flex justify-content-between align-items-center py-1 <?php echo $isActive ? 'active' : '' ?>">
-                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['place']) : buildEmbeddedUrl($fp, ['place' => $place->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?>" style="max-width:180px">
+                <a href="<?php echo $isActive ? buildEmbeddedUrl($fp, [], ['place']) : buildEmbeddedUrl($fp, ['place' => $place->id]) ?>" class="text-decoration-none small text-truncate <?php echo $isActive ? 'text-white' : '' ?> displa-max-width-180px-7428" >
                   <?php echo esc_entities($place->name) ?>
                 </a>
                 <span class="badge bg-<?php echo $isActive ? 'light text-dark' : 'secondary' ?> rounded-pill"><?php echo $place->count ?></span>
@@ -275,7 +291,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- Media Type Facet -->
       <?php if (!empty($mediaTypes)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetMedia" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetMedia" class="displa-cursor-pointer-b202">
           <strong><?php echo __('Media type'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse" id="embFacetMedia">
@@ -303,7 +319,7 @@ function getEmbeddedItemUrl($obj) {
       <!-- Language Facet - CLOSED by default -->
       <?php if (!empty($languages)): ?>
       <div class="card mb-2">
-        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetLang" style="cursor:pointer">
+        <div class="card-header bg-light py-2" data-bs-toggle="collapse" data-bs-target="#embFacetLang" class="displa-cursor-pointer-b202">
           <strong><?php echo __('Language'); ?></strong> <i class="fas fa-chevron-down float-end"></i>
         </div>
         <div class="collapse" id="embFacetLang">
@@ -427,9 +443,9 @@ function getEmbeddedItemUrl($obj) {
             <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
               <div class="col">
                 <div class="card h-100 shadow-sm">
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height:120px;overflow:hidden;">
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center displa-height-120px-overflow-hidden-5b4f" >
                     <?php if ($obj->thumbnail): ?>
-                      <a href="<?php echo getEmbeddedItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid" style="max-height:120px;object-fit:cover;"></a>
+                      <a href="<?php echo getEmbeddedItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid displa-max-height-120px-object-fit--fb3c" ></a>
                     <?php else: ?>
                       <a href="<?php echo getEmbeddedItemUrl($obj) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-3x text-<?php echo $cfg['color'] ?>"></i></a>
                     <?php endif ?>
@@ -449,10 +465,10 @@ function getEmbeddedItemUrl($obj) {
           <table class="table table-hover table-sm">
             <thead class="table-light">
               <tr>
-                <th style="width:60px"></th>
+                <th class="displa-width-60px-c5ac"></th>
                 <th><?php echo __('Title'); ?></th>
-                <th style="width:100px"><?php echo __('Level'); ?></th>
-                <th style="width:100px"><?php echo __('Type'); ?></th>
+                <th class="displa-width-100px-ee04"><?php echo __('Level'); ?></th>
+                <th class="displa-width-100px-ee04"><?php echo __('Type'); ?></th>
               </tr>
             </thead>
             <tbody>
@@ -463,7 +479,7 @@ function getEmbeddedItemUrl($obj) {
                   <tr>
                     <td class="text-center">
                       <?php if ($obj->thumbnail): ?>
-                        <img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded" style="width:50px;height:50px;object-fit:cover;">
+                        <img src="<?php echo $obj->thumbnail ?>" alt="" class="rounded displa-width-50px-height-50px-objec-673e" >
                       <?php else: ?>
                         <i class="fas <?php echo $cfg['icon'] ?> fa-2x text-<?php echo $cfg['color'] ?>"></i>
                       <?php endif ?>
@@ -489,9 +505,9 @@ function getEmbeddedItemUrl($obj) {
           <?php foreach ($objects as $obj): $cfg = $typeConfig[$obj->object_type] ?? ['icon' => 'fa-file', 'color' => 'secondary', 'label' => 'Unknown']; ?>
             <div class="card mb-2 shadow-sm">
               <div class="row g-0">
-                <div class="col-md-2 d-flex align-items-center justify-content-center p-2" style="background:#f8f9fa;">
+                <div class="col-md-2 d-flex align-items-center justify-content-center p-2 displa-background-f8f9fa-6083" >
                   <?php if ($obj->thumbnail): ?>
-                    <a href="<?php echo getEmbeddedItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid rounded" style="max-height:100px;object-fit:contain;"></a>
+                    <a href="<?php echo getEmbeddedItemUrl($obj) ?>"><img src="<?php echo $obj->thumbnail ?>" alt="" class="img-fluid rounded displa-max-height-100px-object-fit--e752" ></a>
                   <?php else: ?>
                     <a href="<?php echo getEmbeddedItemUrl($obj) ?>"><i class="fas <?php echo $cfg['icon'] ?> fa-3x text-<?php echo $cfg['color'] ?>"></i></a>
                   <?php endif ?>

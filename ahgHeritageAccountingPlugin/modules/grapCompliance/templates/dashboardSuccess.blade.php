@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-height-10px-977d { height: 10px; }
+</style>
 
 @section('title', __('Compliance Dashboard'))
 
@@ -91,8 +96,8 @@
                                 <span class="text-success">{{ __('Compliant') }}</span>
                                 <span>{{ $compliantPct }}%</span>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-success" style="width: {{ $compliantPct }}%"></div>
+                            <div class="progress herita-height-10px-977d" >
+                                <div class="progress-bar bg-success" data-ahg-style="width: {{ $compliantPct }}%"></div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -100,8 +105,8 @@
                                 <span class="text-warning">{{ __('Partially Compliant') }}</span>
                                 <span>{{ $partialPct }}%</span>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-warning" style="width: {{ $partialPct }}%"></div>
+                            <div class="progress herita-height-10px-977d" >
+                                <div class="progress-bar bg-warning" data-ahg-style="width: {{ $partialPct }}%"></div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -109,8 +114,8 @@
                                 <span class="text-danger">{{ __('Non-Compliant') }}</span>
                                 <span>{{ $nonPct }}%</span>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-danger" style="width: {{ $nonPct }}%"></div>
+                            <div class="progress herita-height-10px-977d" >
+                                <div class="progress-bar bg-danger" data-ahg-style="width: {{ $nonPct }}%"></div>
                             </div>
                         </div>
                     @else

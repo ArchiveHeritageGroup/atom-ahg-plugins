@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-display-none-224b { display: none; }
+  .themeb-height-6px-3586 { height: 6px; }
+  .themeb-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+  .themeb-width-0-7590 { width: 0%; }
+</style>
 <?php
 /**
  * Digital Object Actions - includes TIFF to PDF Merge
@@ -48,7 +58,7 @@ $resourceSlug = $resource->slug ?? null;
 
             <div class="modal-body">
                 <!-- Alert area -->
-                <div id="tpmAlert" class="alert" style="display: none;"></div>
+                <div id="tpmAlert" class="alert themeb-display-none-224b" ></div>
 
                 <!-- Hidden fields -->
                 <input type="hidden" id="tpmInformationObjectId" value="<?php echo $resourceId; ?>">
@@ -96,14 +106,14 @@ $resourceSlug = $resource->slug ?? null;
                 </div>
 
                 <!-- Progress Bar -->
-                <div id="tpmProgressContainer" class="mb-3" style="display: none;">
+                <div id="tpmProgressContainer" class="mb-3 themeb-display-none-224b" >
                     <div class="d-flex justify-content-between mb-1">
                         <small class="text-muted">Uploading...</small>
                         <small id="tpmProgressText" class="text-muted"></small>
                     </div>
-                    <div class="progress" style="height: 6px;">
+                    <div class="progress themeb-height-6px-3586" >
                         <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                             role="progressbar" style="width: 0%"></div>
+                             role="progressbar" class="themeb-width-0-7590"></div>
                     </div>
                 </div>
 
@@ -120,7 +130,7 @@ $resourceSlug = $resource->slug ?? null;
                             Drag to reorder pages
                         </small>
                     </div>
-                    <div id="tpmFileList" class="border rounded" style="max-height: 300px; overflow-y: auto;">
+                    <div id="tpmFileList" class="border rounded themeb-max-height-300px-overflow-y--3db9" >
                         <div class="text-muted text-center py-4">No files uploaded yet</div>
                     </div>
                 </div>

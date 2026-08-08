@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .access-max-width-80px-752b { max-width: 80px; }
+</style>
 @php decorate_with('layout_1col') @endphp
 
 @slot('title')
@@ -185,7 +190,7 @@
           <div class="mb-3">
             <label class="form-label">{{ __('Value') }} <span class="text-danger">*</span></label>
             <div class="input-group">
-              <select name="currency" class="form-select" style="max-width: 80px;">
+              <select name="currency" class="form-select access-max-width-80px-752b" >
                 @foreach (['ZAR', 'USD', 'EUR', 'GBP'] as $cur)
                 <option value="{{ $cur }}">{{ $cur }}</option>
                 @endforeach

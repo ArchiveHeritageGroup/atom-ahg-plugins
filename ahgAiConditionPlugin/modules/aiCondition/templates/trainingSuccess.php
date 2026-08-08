@@ -1,4 +1,15 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .aicond-cursor-pointer-border-color--a3ca { cursor:pointer;border-color:#adb5bd !important; }
+  .aicond-display-none-cb45 { display:none; }
+  .aicond-height-6px-339f { height:6px; }
+  .aicond-width-pct-8ad8 { width:' + pct + '%; }
+  .aicond-width-0-9c33 { width:0%; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -58,18 +69,18 @@
             <i class="fas fa-info-circle me-1"></i>
             <?php echo __('Expected format: ZIP file containing an <code>images/</code> directory (JPG/PNG files) and an <code>annotations/</code> directory (JSON files with damage type and bounding box coordinates).') ?>
         </div>
-        <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3" style="cursor:pointer;border-color:#adb5bd !important">
+        <div id="dropZone" class="border border-2 border-dashed rounded p-4 text-center mb-3 aicond-cursor-pointer-border-color--a3ca" >
             <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2 d-block"></i>
             <p class="text-muted mb-1"><?php echo __('Drag and drop a ZIP file here, or click to browse') ?></p>
-            <input type="file" id="trainingFile" accept=".zip" style="display:none">
+            <input type="file" id="trainingFile" accept=".zip" class="aicond-display-none-cb45">
         </div>
-        <div id="uploadProgress" style="display:none">
-            <div class="progress mb-2" style="height:6px">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" id="uploadProgressBar" style="width:0%"></div>
+        <div id="uploadProgress" class="aicond-display-none-cb45">
+            <div class="progress mb-2 aicond-height-6px-339f" >
+                <div class="progress-bar progress-bar-striped progress-bar-animated" id="uploadProgressBar" class="aicond-width-0-9c33"></div>
             </div>
             <p class="text-center small text-muted" id="uploadProgressText"><?php echo __('Uploading...') ?></p>
         </div>
-        <div id="uploadResult" style="display:none"></div>
+        <div id="uploadResult" class="aicond-display-none-cb45"></div>
     </div>
 </div>
 
@@ -171,7 +182,7 @@ function loadTrainingStatus() {
         if (status === 'training' && d.current_epoch != null && d.total_epochs) {
             var pct = Math.round((d.current_epoch / d.total_epochs) * 100);
             html += '<tr><td class="text-muted"><?php echo __('Progress') ?></td><td>'
-                + '<div class="progress" style="height:6px"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:' + pct + '%"></div></div>'
+                + '<div class="progress aicond-height-6px-339f" ><div class="progress-bar progress-bar-striped progress-bar-animated aicond-width-pct-8ad8" ></div></div>'
                 + '<span class="small">' + d.current_epoch + ' / ' + d.total_epochs + ' <?php echo __('epochs') ?></span>'
                 + '</td></tr>';
         }

@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-60px-902c { width: 60px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Users'); ?> — Admin<?php end_slot(); ?>
 
@@ -62,7 +69,7 @@
     <table class="table table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th style="width: 60px;"><?php echo __('ID'); ?></th>
+          <th class="regist-width-60px-902c"><?php echo __('ID'); ?></th>
           <th><?php echo __('Name'); ?></th>
           <th><?php echo __('Username'); ?></th>
           <th><?php echo __('Email'); ?></th>

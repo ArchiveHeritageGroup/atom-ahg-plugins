@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .icip-max-width-100px-0032 { max-width: 100px; }
+</style>
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
@@ -176,7 +183,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Display Order</label>
-                            <input type="number" name="display_order" class="form-control" value="100" style="max-width: 100px;">
+                            <input type="number" name="display_order" class="form-control" value="100" class="icip-max-width-100px-0032">
                         </div>
 
                         <button type="submit" class="btn btn-primary">

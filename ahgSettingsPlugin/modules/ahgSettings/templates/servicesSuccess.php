@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-max-height-400px-overflow-y--f4d9 { max-height: 400px; overflow-y: auto; }
+  .settin-min-width-200px-padding-10px-56f8 { min-width: 200px; padding: 10px 15px; font-size: 1rem; }
+</style>
 
 <?php slot('sidebar'); ?>
   <?php echo get_component('ahgSettings', 'menu'); ?>
@@ -191,7 +199,7 @@ $serviceHistory = $sf_data->getRaw('serviceHistory');
 
             <div class="mb-3">
               <label class="form-label" for="check_interval"><?php echo __('Check interval'); ?></label>
-              <select class="form-select" id="check_interval" name="check_interval" style="min-width: 200px; padding: 10px 15px; font-size: 1rem;">
+              <select class="form-select" id="check_interval" name="check_interval" class="settin-min-width-200px-padding-10px-56f8">
                 <?php
                 $intervals = [
                     '1' => __('1 minute'),
@@ -256,7 +264,7 @@ $serviceHistory = $sf_data->getRaw('serviceHistory');
           <i class="bi bi-clock-history me-2"></i>
           <?php echo __('Recent Events'); ?>
         </div>
-        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+        <div class="card-body settin-max-height-400px-overflow-y--f4d9" >
           <?php if (empty($serviceHistory)): ?>
             <p class="text-muted mb-0"><?php echo __('No events recorded yet.'); ?></p>
           <?php else: ?>

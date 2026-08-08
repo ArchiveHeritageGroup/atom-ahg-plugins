@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .landin-max-height-50px-035b { max-height: 50px; }
+</style>
 <?php
 /**
  * Header Section Block Template
@@ -14,7 +21,7 @@ $displayTitle = !empty($customTitle) ? $customTitle : $siteTitle;
 ?>
 
 <header class="landing-header <?php echo $sticky ? 'sticky-top' : '' ?>" 
-        style="background-color: <?php echo esc_entities($bgColor) ?>;">
+        data-ahg-style="background-color: <?php echo esc_entities($bgColor) ?>;">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center py-3">
       
@@ -23,7 +30,7 @@ $displayTitle = !empty($customTitle) ? $customTitle : $siteTitle;
         <?php if ($showLogo): ?>
           <a href="/" class="me-3">
             <?php if (file_exists(sfConfig::get('sf_upload_dir').'/logos/logo.png')): ?>
-              <img src="/uploads/logos/logo.png" alt="Logo" style="max-height: 50px;">
+              <img src="/uploads/logos/logo.png" alt="Logo" class="landin-max-height-50px-035b">
             <?php else: ?>
               <div class="bg-primary text-white rounded p-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">

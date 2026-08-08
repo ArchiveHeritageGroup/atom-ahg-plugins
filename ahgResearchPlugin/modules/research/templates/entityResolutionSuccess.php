@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-60px-height-6px-6dda { width:60px;height:6px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -87,9 +94,9 @@
                 <td>
                     <?php if ($p->confidence !== null): ?>
                     <div class="d-flex align-items-center gap-1">
-                        <div class="progress" style="width:60px;height:6px">
+                        <div class="progress resear-width-60px-height-6px-6dda" >
                             <?php $pct = round((float)$p->confidence * 100); $color = $pct >= 80 ? 'success' : ($pct >= 50 ? 'warning' : 'danger'); ?>
-                            <div class="progress-bar bg-<?php echo $color; ?>" style="width:<?php echo $pct; ?>%"></div>
+                            <div class="progress-bar bg-<?php echo $color; ?>" data-ahg-style="width:<?php echo $pct; ?>%"></div>
                         </div>
                         <small><?php echo $pct; ?>%</small>
                     </div>

@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .icip-display-none-224b { display: none; }
+</style>
 
 @section('content')
 <div class="container-xxl">
@@ -102,7 +107,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" id="customTextGroup" style="display: none;">
+                        <div class="mb-3" id="customTextGroup" class="icip-display-none-224b">
                             <label class="form-label">Custom Restriction Text</label>
                             <textarea name="custom_restriction_text" class="form-control" rows="2"></textarea>
                         </div>

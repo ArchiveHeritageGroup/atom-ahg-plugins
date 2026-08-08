@@ -1,6 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-width-100-199b { width: 100%; }
+</style>
 <h1><?php echo __('Audit Trail'); ?></h1>
 
-<table class="sticky-enabled" style="width: 100%;">
+<table class="sticky-enabled report-width-100-199b" >
   <thead>
     <tr>
       <th>
@@ -8,7 +15,7 @@
       </th>
     </tr>
   </thead>
-  <tbody style="width: 100%;">    
+  <tbody class="report-width-100-199b">    
 	<section class="actions mb-3">
 		<input class="c-btn c-btn-submit" type="button" onclick="history.back();" value="<?php echo __('Back'); ?>">
 	</section>
@@ -23,7 +30,7 @@
        <tr class="<?php echo 0 == @++$row % 2 ? 'even' : 'odd'; ?>">
         <td>
     		<?php echo '<hr>'; ?>
-			<table border=1 style="width: 100%;">
+			<table border=1 class="report-width-100-199b">
 			<tr>
 			<td colspan=3><?php echo __('Archival Description'); ?>
 			</td>

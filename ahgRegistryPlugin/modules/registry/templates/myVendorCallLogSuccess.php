@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-6em-7632 { font-size: 0.6em; }
+  .regist-width-40px-4792 { width: 40px; }
+  .regist-width-90px-459f { width: 90px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Call & Issue Log'); ?><?php end_slot(); ?>
 
@@ -104,14 +113,14 @@
   <table class="table table-hover align-middle">
     <thead class="table-light">
       <tr>
-        <th style="width: 40px;"></th>
+        <th class="regist-width-40px-4792"></th>
         <th><?php echo __('Subject'); ?></th>
         <th><?php echo __('Contact'); ?></th>
         <th><?php echo __('Status'); ?></th>
         <th><?php echo __('Priority'); ?></th>
         <th><?php echo __('Follow-up'); ?></th>
         <th><?php echo __('Date'); ?></th>
-        <th style="width: 90px;"></th>
+        <th class="regist-width-90px-459f"></th>
       </tr>
     </thead>
     <tbody>
@@ -126,9 +135,9 @@
           <td class="text-center">
             <i class="fas <?php echo $icon; ?> text-muted" title="<?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $log->interaction_type ?? '')), ENT_QUOTES, 'UTF-8'); ?>"></i>
             <?php if ($log->direction === 'inbound'): ?>
-              <i class="fas fa-arrow-down text-info" style="font-size: 0.6em;" title="Inbound"></i>
+              <i class="fas fa-arrow-down text-info regist-font-size-0-6em-7632"  title="Inbound"></i>
             <?php else: ?>
-              <i class="fas fa-arrow-up text-success" style="font-size: 0.6em;" title="Outbound"></i>
+              <i class="fas fa-arrow-up text-success regist-font-size-0-6em-7632"  title="Outbound"></i>
             <?php endif; ?>
           </td>
           <td>

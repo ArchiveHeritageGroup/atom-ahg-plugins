@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .inform-max-height-400px-790d { max-height: 400px; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
@@ -39,7 +46,7 @@
           </div>
           <div class="card-body text-center">
             <?php if ($referenceUrl) { ?>
-              <img src="<?php echo $referenceUrl; ?>" alt="<?php echo esc_specialchars($rawProps['altText']); ?>" class="img-fluid rounded" style="max-height: 400px;">
+              <img src="<?php echo $referenceUrl; ?>" alt="<?php echo esc_specialchars($rawProps['altText']); ?>" class="img-fluid rounded inform-max-height-400px-790d" >
             <?php } elseif ($thumbnailUrl) { ?>
               <img src="<?php echo $thumbnailUrl; ?>" alt="<?php echo esc_specialchars($rawProps['altText']); ?>" class="img-fluid rounded">
             <?php } ?>

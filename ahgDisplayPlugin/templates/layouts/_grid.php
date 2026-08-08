@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-background-linear-gradient-t-72d2 { background: linear-gradient(transparent, rgba(0,0,0,0.8)); }
+  .displa-height-180px-object-fit-cove-b052 { height: 180px; object-fit: cover; }
+</style>
 <?php
 /**
  * Grid layout - thumbnail grid for photos/DAM
@@ -8,12 +16,12 @@
         <?php if ($digitalObject): ?>
         <div class="card-img-wrapper position-relative overflow-hidden">
             <img src="<?php echo $digitalObject->path; ?>" 
-                 class="card-img-top" 
-                 style="height: 180px; object-fit: cover;"
+                 class="card-img-top displa-height-180px-object-fit-cove-b052" 
+                 
                  alt="<?php echo $object->title ?? ''; ?>"
                  loading="lazy">
             <div class="card-img-overlay d-flex flex-column justify-content-end p-0">
-                <div class="bg-gradient-dark p-2" style="background: linear-gradient(transparent, rgba(0,0,0,0.8));">
+                <div class="bg-gradient-dark p-2 displa-background-linear-gradient-t-72d2" >
                     <div class="btn-group btn-group-sm">
                         <?php if (in_array('view', $data['actions'])): ?>
                         <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $object->slug]); ?>" 

@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-object-fit-cover-3dc4 { object-fit: cover; }
+  .market-width-100-height-120px-objec-e6dd { width: 100%; height: 120px; object-fit: cover; }
+  .market-width-200px-5c2d { width: 200px; }
+  .market-width-80px-height-80px-732c { width: 80px; height: 80px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Review Listing'); ?> - <?php echo __('Marketplace Admin'); ?><?php end_slot(); ?>
 
@@ -48,7 +58,7 @@
           <div class="row g-2">
             <?php foreach ($images as $img): ?>
               <div class="col-4 col-md-3">
-                <img src="<?php echo esc_entities($img->image_path); ?>" alt="<?php echo esc_entities($img->alt_text ?? ''); ?>" class="img-fluid rounded border" style="width: 100%; height: 120px; object-fit: cover;">
+                <img src="<?php echo esc_entities($img->image_path); ?>" alt="<?php echo esc_entities($img->alt_text ?? ''); ?>" class="img-fluid rounded border market-width-100-height-120px-objec-e6dd" >
               </div>
             <?php endforeach; ?>
           </div>
@@ -65,7 +75,7 @@
         <table class="table table-sm mb-0">
           <tbody>
             <tr>
-              <th style="width: 200px;"><?php echo __('Listing Number'); ?></th>
+              <th class="market-width-200px-5c2d"><?php echo __('Listing Number'); ?></th>
               <td><?php echo esc_entities($listing->listing_number); ?></td>
             </tr>
             <tr>
@@ -177,9 +187,9 @@
       </div>
       <div class="card-body text-center">
         <?php if ($seller->avatar_path): ?>
-          <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle mb-3" width="80" height="80" style="object-fit: cover;">
+          <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle mb-3" width="80" height="80" class="market-object-fit-cover-3dc4">
         <?php else: ?>
-          <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+          <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 market-width-80px-height-80px-732c" >
             <i class="fas fa-user fa-2x text-muted"></i>
           </div>
         <?php endif; ?>

@@ -1,4 +1,16 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .rdm-height-6px-8902 { height:6px; }
+  .rdm-max-width-140px-1fc4 { max-width:140px; }
+  .rdm-max-width-180px-9384 { max-width:180px; }
+  .rdm-max-width-240px-a11e { max-width:240px; }
+  .rdm-max-width-640px-7f45 { max-width:640px; }
+  .rdm-max-width-760px-686a { max-width:760px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo esc_specialchars($dataset->title); ?></h1>
@@ -102,7 +114,7 @@
           <td>
             <?php if ($fd->review_status === 'pending'): ?>
               <form method="post" action="<?php echo url_for('@rdm_datasets_finding_resolve?id=' . $dataset->id . '&fid=' . $fd->id); ?>" class="d-flex gap-1">
-                <input type="text" name="note" class="form-control form-control-sm" placeholder="note (optional)" style="max-width:140px;">
+                <input type="text" name="note" class="form-control form-control-sm" placeholder="note (optional)" class="rdm-max-width-140px-1fc4">
                 <button name="decision" value="confirm" class="btn btn-sm btn-outline-danger" title="Confirm real PII">Confirm</button>
                 <button name="decision" value="dismiss" class="btn btn-sm btn-outline-secondary" title="False positive">Dismiss</button>
               </form>
@@ -139,7 +151,7 @@
       </a>
     </p>
   <?php endif; ?>
-  <form method="post" action="<?php echo url_for('@rdm_datasets_disposition?id=' . $dataset->id); ?>" class="row g-2" style="max-width:760px;">
+  <form method="post" action="<?php echo url_for('@rdm_datasets_disposition?id=' . $dataset->id); ?>" class="row g-2 rdm-max-width-760px-686a" >
     <div class="col-auto">
       <select name="disposition" class="form-select form-select-sm">
         <option value="restrict">Restrict access</option>
@@ -171,8 +183,8 @@
             <span class="text-muted small">· <?php echo (int) $dmp['completeness']; ?>% complete</span>
           <?php endif; ?>
         </p>
-        <div class="progress mb-2" style="height:6px;">
-          <div class="progress-bar" role="progressbar" style="width:<?php echo (int) ($dmp['completeness'] ?? 0); ?>%"></div>
+        <div class="progress mb-2 rdm-height-6px-8902" >
+          <div class="progress-bar" role="progressbar" data-ahg-style="width:<?php echo (int) ($dmp['completeness'] ?? 0); ?>%"></div>
         </div>
         <?php if (!empty($dmp['show_url'])): ?>
           <a class="btn btn-sm btn-outline-secondary" href="<?php echo esc_specialchars($dmp['show_url']); ?>"><i class="fas fa-up-right-from-square"></i> Open DMP</a>
@@ -200,10 +212,10 @@
           <input type="hidden" name="mode" value="create">
           <div class="col-auto">
             <label class="form-label small mb-0">Or create a new DMP</label>
-            <input type="text" name="title" class="form-control form-control-sm" placeholder="DMP title" style="max-width:240px;">
+            <input type="text" name="title" class="form-control form-control-sm" placeholder="DMP title" class="rdm-max-width-240px-a11e">
           </div>
           <div class="col-auto">
-            <input type="text" name="funder" class="form-control form-control-sm" placeholder="Funder (optional)" style="max-width:180px;">
+            <input type="text" name="funder" class="form-control form-control-sm" placeholder="Funder (optional)" class="rdm-max-width-180px-9384">
           </div>
           <div class="col-auto"><button class="btn btn-sm btn-outline-primary">Create &amp; link</button></div>
         </form>
@@ -245,7 +257,7 @@
 
 <h2 class="h4">Deposit files</h2>
 <form method="post" enctype="multipart/form-data"
-      action="<?php echo url_for('@rdm_datasets_deposit?id=' . $dataset->id); ?>" class="mt-2" style="max-width:640px;">
+      action="<?php echo url_for('@rdm_datasets_deposit?id=' . $dataset->id); ?>" class="mt-2 rdm-max-width-640px-7f45" >
   <div class="mb-3">
     <input type="file" class="form-control" name="files[]" multiple required>
     <div class="form-text">Each file becomes a child record with a master digital object under this dataset.</div>

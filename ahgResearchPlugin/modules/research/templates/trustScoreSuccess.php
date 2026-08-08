@@ -1,4 +1,15 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-height-6px-8902 { height:6px; }
+  .resear-height-8px-a50d { height:8px; }
+  .resear-width-140px-height-140px-99fb { width:140px;height:140px; }
+  .resear-width-140px-height-140px-tra-0944 { width:140px;height:140px;transform:rotate(-90deg); }
+  .resear-width-40-51d4 { width:40%; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -56,8 +67,8 @@ if ($qualityCount > 0) {
     <div class="col-md-4">
         <div class="card border-<?php echo $scoreColor; ?>">
             <div class="card-body text-center">
-                <div class="position-relative d-inline-block mb-3" style="width:140px;height:140px;">
-                    <svg viewBox="0 0 36 36" style="width:140px;height:140px;transform:rotate(-90deg);">
+                <div class="position-relative d-inline-block mb-3 resear-width-140px-height-140px-99fb" >
+                    <svg viewBox="0 0 36 36" class="resear-width-140px-height-140px-tra-0944">
                         <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e9ecef" stroke-width="3"/>
                         <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                               fill="none" stroke="var(--bs-<?php echo $scoreColor; ?>)" stroke-width="3"
@@ -86,8 +97,8 @@ if ($qualityCount > 0) {
                         </span>
                         <span class="fw-bold"><?php echo $sourceWeight; ?>/40</span>
                     </div>
-                    <div class="progress" style="height:8px;">
-                        <div class="progress-bar bg-primary" style="width:<?php echo round($sourceWeight / 40 * 100); ?>%"></div>
+                    <div class="progress resear-height-8px-a50d" >
+                        <div class="progress-bar bg-primary" data-ahg-style="width:<?php echo round($sourceWeight / 40 * 100); ?>%"></div>
                     </div>
                 </div>
                 <!-- Completeness -->
@@ -100,8 +111,8 @@ if ($qualityCount > 0) {
                         </span>
                         <span class="fw-bold"><?php echo $completenessWeight; ?>/30</span>
                     </div>
-                    <div class="progress" style="height:8px;">
-                        <div class="progress-bar bg-info" style="width:<?php echo round($completenessWeight / 30 * 100); ?>%"></div>
+                    <div class="progress resear-height-8px-a50d" >
+                        <div class="progress-bar bg-info" data-ahg-style="width:<?php echo round($completenessWeight / 30 * 100); ?>%"></div>
                     </div>
                 </div>
                 <!-- Quality Metrics -->
@@ -112,8 +123,8 @@ if ($qualityCount > 0) {
                         </span>
                         <span class="fw-bold"><?php echo $qualityScore; ?>/30</span>
                     </div>
-                    <div class="progress" style="height:8px;">
-                        <div class="progress-bar bg-warning" style="width:<?php echo round($qualityScore / 30 * 100); ?>%"></div>
+                    <div class="progress resear-height-8px-a50d" >
+                        <div class="progress-bar bg-warning" data-ahg-style="width:<?php echo round($qualityScore / 30 * 100); ?>%"></div>
                     </div>
                 </div>
                 <?php if (!$assessment): ?>
@@ -171,7 +182,7 @@ if ($qualityCount > 0) {
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-sm">
-                <thead><tr><th>Metric</th><th>Value</th><th style="width:40%">Score</th><th>Service</th><th>Date</th></tr></thead>
+                <thead><tr><th>Metric</th><th>Value</th><th class="resear-width-40-51d4">Score</th><th>Service</th><th>Date</th></tr></thead>
                 <tbody>
                 <?php foreach ($qualityMetrics as $m):
                     $pct = round((float) $m->metric_value * 100, 1);
@@ -190,8 +201,8 @@ if ($qualityCount > 0) {
                         </td>
                         <td class="fw-bold"><?php echo $pct; ?>%</td>
                         <td>
-                            <div class="progress" style="height:6px;">
-                                <div class="progress-bar bg-<?php echo $barColor; ?>" style="width:<?php echo $pct; ?>%"></div>
+                            <div class="progress resear-height-6px-8902" >
+                                <div class="progress-bar bg-<?php echo $barColor; ?>" data-ahg-style="width:<?php echo $pct; ?>%"></div>
                             </div>
                         </td>
                         <td><small class="text-muted"><?php echo htmlspecialchars($m->source_service ?? '-'); ?></small></td>

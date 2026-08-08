@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-color-color-2c27 { color:' + color + '; }
+  .resear-min-width-200px-bd1c { min-width:200px; }
+</style>
 <?php
 /**
  * Research Favorite heart button partial with folder picker
@@ -47,7 +55,7 @@ $uid = 'rfav-' . uniqid();
             title="<?php echo __('Choose folder'); ?>">
         <span class="visually-hidden"><?php echo __('Choose folder'); ?></span>
     </button>
-    <ul class="dropdown-menu dropdown-menu-end" id="<?php echo $uid; ?>-menu" style="min-width:200px;">
+    <ul class="dropdown-menu dropdown-menu-end" id="<?php echo $uid; ?>-menu" class="resear-min-width-200px-bd1c">
         <li><h6 class="dropdown-header"><i class="fas fa-folder me-1"></i><?php echo __('Add to folder'); ?></h6></li>
         <li><hr class="dropdown-divider"></li>
         <li class="px-3 py-1 text-muted small"><?php echo __('Loading folders...'); ?></li>
@@ -144,7 +152,7 @@ $uid = 'rfav-' . uniqid();
                         a.href = '#';
                         var icon = f.icon || 'fa-folder';
                         var color = f.color || '#6c757d';
-                        a.innerHTML = '<i class="fas ' + icon + ' me-2" style="color:' + color + ';"></i>' +
+                        a.innerHTML = '<i class="fas ' + icon + ' me-2 resear-color-color-2c27" ></i>' +
                                       escH(f.name) +
                                       (f.item_count ? ' <span class="badge bg-secondary ms-1">' + f.item_count + '</span>' : '');
                         (function(fId) {

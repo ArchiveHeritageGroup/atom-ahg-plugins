@@ -1,4 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-78em-overflow-x--a44f { font-size: 0.78em; overflow-x: auto; background: #f8f9fa; }
+  .regist-width-30px-ec5c { width: 30px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Standards Schema & ERD'); ?><?php end_slot(); ?>
 
@@ -52,7 +60,7 @@
     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Entity Relationship Diagram'); ?></h5>
   </div>
   <div class="card-body p-0">
-    <pre class="p-4 mb-0" style="font-size: 0.78em; overflow-x: auto; background: #f8f9fa;">
+    <pre class="p-4 mb-0 regist-font-size-0-78em-overflow-x--a44f" >
 ┌─────────────────────────────────┐
 │        registry_standard        │
 ├─────────────────────────────────┤
@@ -160,7 +168,7 @@
     <table class="table table-sm table-hover mb-0">
       <thead class="table-light">
         <tr>
-          <th style="width: 30px;"></th>
+          <th class="regist-width-30px-ec5c"></th>
           <th><?php echo __('Column'); ?></th>
           <th><?php echo __('Type'); ?></th>
           <th><?php echo __('Nullable'); ?></th>

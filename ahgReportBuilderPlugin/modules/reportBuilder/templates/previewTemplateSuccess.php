@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-width-140px-2f01 { width:140px; }
+</style>
 <?php slot('title') ?>
 <h1><i class="bi bi-eye text-primary me-2"></i><?php echo __('Template Preview'); ?></h1>
 <?php end_slot() ?>
@@ -60,7 +67,7 @@ $sectionTypeIcons = [
                 <h6 class="card-title text-muted mb-3"><i class="bi bi-info-circle me-1"></i><?php echo __('Template Details'); ?></h6>
                 <table class="table table-sm mb-0">
                     <tr>
-                        <td class="text-muted" style="width:140px"><?php echo __('Category'); ?></td>
+                        <td class="text-muted report-width-140px-2f01" ><?php echo __('Category'); ?></td>
                         <td><strong><?php echo htmlspecialchars($rawTemplate->category ?? 'Custom'); ?></strong></td>
                     </tr>
                     <tr>

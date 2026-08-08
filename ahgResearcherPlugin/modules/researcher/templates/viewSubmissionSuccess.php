@@ -1,4 +1,12 @@
 <?php $n = sfConfig::get('csp_nonce', ''); $nattr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-display-inline-5677 { display:inline; }
+  .resear-font-size-1-5rem-fa41 { font-size: 1.5rem; }
+</style>
 
 <div class="container-fluid py-3">
 
@@ -85,7 +93,7 @@
         <div class="card-body p-0">
           <?php if (empty($items)): ?>
             <div class="text-center text-muted py-4">
-              <i class="bi bi-inbox" style="font-size: 1.5rem;"></i>
+              <i class="bi bi-inbox resear-font-size-1-5rem-fa41" ></i>
               <p class="mt-2 mb-0">No items yet.
                 <?php if (in_array($submission->status, ['draft', 'returned'])): ?>
                   <a href="<?php echo url_for(['module' => 'researcher', 'action' => 'addItem', 'id' => $submission->id]) ?>">Add your first item</a>.
@@ -145,7 +153,7 @@
                     <td class="text-end">
                       <?php if (in_array($submission->status, ['draft', 'returned'])): ?>
                         <form method="post" action="<?php echo url_for(['module' => 'researcher', 'action' => 'deleteItem', 'id' => $submission->id, 'itemId' => $item->id]) ?>"
-                              style="display:inline" onsubmit="return confirm('Delete this item?')">
+                              class="resear-display-inline-5677" onsubmit="return confirm('Delete this item?')">
                           <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
                             <i class="bi bi-trash"></i>
                           </button>

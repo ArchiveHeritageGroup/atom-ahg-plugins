@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-background-color-5bc0de-colo-5981 { background-color: #5bc0de; color: white; }
+  .securi-background-color-5cb85c-colo-982c { background-color: #5cb85c; color: white; }
+  .securi-background-color-d9534f-colo-6d20 { background-color: #d9534f; color: white; }
+  .securi-background-color-f0ad4e-colo-346e { background-color: #f0ad4e; color: white; }
+</style>
 
 <?php slot('title'); ?>
 <h1><?php echo __('Access Requests'); ?></h1>
@@ -14,7 +24,7 @@
 <!-- Stats Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #f0ad4e; color: white;">
+        <div class="card text-center securi-background-color-f0ad4e-colo-346e" >
             <div class="card-body">
                 <h2><?php echo $pendingCount; ?></h2>
                 <small><?php echo __('Pending'); ?></small>
@@ -22,7 +32,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #5cb85c; color: white;">
+        <div class="card text-center securi-background-color-5cb85c-colo-982c" >
             <div class="card-body">
                 <h2><?php echo $approvedTodayCount; ?></h2>
                 <small><?php echo __('Approved Today'); ?></small>
@@ -30,7 +40,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #d9534f; color: white;">
+        <div class="card text-center securi-background-color-d9534f-colo-6d20" >
             <div class="card-body">
                 <h2><?php echo $deniedTodayCount; ?></h2>
                 <small><?php echo __('Denied Today'); ?></small>
@@ -38,7 +48,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center" style="background-color: #5bc0de; color: white;">
+        <div class="card text-center securi-background-color-5bc0de-colo-5981" >
             <div class="card-body">
                 <h2><?php echo $thisMonthCount; ?></h2>
                 <small><?php echo __('This Month'); ?></small>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .icip-display-none-224b { display: none; }
+</style>
 <div class="container-xxl">
     <nav aria-label="breadcrumb" class="mb-3">
         <ol class="breadcrumb">
@@ -99,7 +106,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-3" id="customTextGroup" style="display: none;">
+                        <div class="mb-3" id="customTextGroup" class="icip-display-none-224b">
                             <label class="form-label">Custom Restriction Text</label>
                             <textarea name="custom_restriction_text" class="form-control" rows="2"></textarea>
                         </div>

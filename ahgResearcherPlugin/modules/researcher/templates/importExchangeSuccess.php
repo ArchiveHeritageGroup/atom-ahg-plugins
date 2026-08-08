@@ -1,4 +1,11 @@
 <?php $n = sfConfig::get('csp_nonce', ''); $nattr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-display-none-93b8 { display:none; }
+</style>
 
 <div class="container-fluid py-3">
 
@@ -101,7 +108,7 @@
             </div>
 
             <!-- Preview area -->
-            <div id="previewArea" class="mb-3" style="display:none;">
+            <div id="previewArea" class="mb-3 resear-display-none-93b8" >
               <div class="card bg-light">
                 <div class="card-body small">
                   <h6><i class="bi bi-eye me-2"></i>File Preview</h6>

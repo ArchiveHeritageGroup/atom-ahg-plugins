@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-max-height-100px-196f { max-height: 100px; }
+  .herita-max-width-80px-max-height-50-b365 { max-width: 80px; max-height: 50px; object-fit: cover; }
+  .herita-width-100px-e3d2 { width: 100px; }
+</style>
 <?php
 /**
  * Heritage Admin Hero Slides Management.
@@ -84,7 +93,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                         <?php if ($editSlideData && !empty($editSlideData['image_path'])): ?>
                             <div class="mb-2">
                                 <img src="<?php echo htmlspecialchars($editSlideData['image_path']); ?>"
-                                     class="img-thumbnail" style="max-height: 100px;" alt="Current image">
+                                     class="img-thumbnail herita-max-height-100px-196f"  alt="Current image">
                                 <br><small class="text-muted">Current image</small>
                             </div>
                         <?php endif; ?>
@@ -296,7 +305,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th style="width: 100px;">Image</th>
+                                <th class="herita-width-100px-e3d2">Image</th>
                                 <th>Title</th>
                                 <th>Position</th>
                                 <th>Order</th>
@@ -312,7 +321,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                                     <td>
                                         <?php if (!empty($slide['image_path'])): ?>
                                             <img src="<?php echo htmlspecialchars($slide['image_path']); ?>"
-                                                 class="img-thumbnail" style="max-width: 80px; max-height: 50px; object-fit: cover;"
+                                                 class="img-thumbnail herita-max-width-80px-max-height-50-b365" 
                                                  alt="<?php echo htmlspecialchars($slide['image_alt'] ?? 'Hero slide'); ?>">
                                         <?php else: ?>
                                             <span class="text-muted"><i class="fas fa-image"></i></span>

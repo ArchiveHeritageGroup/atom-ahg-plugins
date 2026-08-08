@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-width-140px-display-inline-f-cf9a { width:140px; display:inline-flex !important; }
+  .librar-width-40-51d4 { width:40%; }
+  .librar-width-50px-68db { width:50px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Purchase Order'); ?></h1>
@@ -54,7 +63,7 @@
       <div class="col-md-6">
         <table class="table table-sm table-borderless mb-0">
           <tr>
-            <th class="text-muted" style="width:40%"><?php echo __('Vendor'); ?></th>
+            <th class="text-muted librar-width-40-51d4" ><?php echo __('Vendor'); ?></th>
             <td class="fw-bold"><?php echo esc_entities($rawOrder->vendor_name ?? '-'); ?></td>
           </tr>
           <tr>
@@ -70,7 +79,7 @@
       <div class="col-md-6">
         <table class="table table-sm table-borderless mb-0">
           <tr>
-            <th class="text-muted" style="width:40%"><?php echo __('Type'); ?></th>
+            <th class="text-muted librar-width-40-51d4" ><?php echo __('Type'); ?></th>
             <td><?php echo esc_entities(ucfirst($rawOrder->order_type ?? '-')); ?></td>
           </tr>
           <tr>
@@ -143,10 +152,10 @@
                   <?php if (($line->line_status ?? '') !== 'received'): ?>
                     <form method="post" action="<?php echo url_for(['module' => 'acquisition', 'action' => 'receive']); ?>" class="d-inline">
                       <input type="hidden" name="order_line_id" value="<?php echo (int) $line->id; ?>">
-                      <div class="input-group input-group-sm" style="width:140px; display:inline-flex !important;">
+                      <div class="input-group input-group-sm librar-width-140px-display-inline-f-cf9a" >
                         <input type="number" class="form-control form-control-sm" name="quantity_received" value="1" min="1"
                                max="<?php echo max(1, (int) $line->quantity - (int) $line->quantity_received); ?>"
-                               style="width:50px;">
+                               class="librar-width-50px-68db">
                         <button type="submit" class="btn btn-sm btn-outline-success" title="<?php echo __('Receive'); ?>">
                           <i class="fas fa-check"></i>
                         </button>

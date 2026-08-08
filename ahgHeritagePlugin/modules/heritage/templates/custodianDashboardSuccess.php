@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-max-width-200px-1a5c { max-width: 200px; }
+</style>
 <?php
 /**
  * Heritage Custodian Dashboard.
@@ -142,7 +149,7 @@ $activitySummary = $dashboardData['activity_summary'] ?? [];
                         <span class="badge bg-light text-dark ms-2"><?php echo $log->action; ?></span>
                     </div>
                     <?php if ($log->object_title): ?>
-                    <small class="text-truncate" style="max-width: 200px;"><?php echo esc_specialchars($log->object_title); ?></small>
+                    <small class="text-truncate herita-max-width-200px-1a5c" ><?php echo esc_specialchars($log->object_title); ?></small>
                     <?php endif; ?>
                 </div>
             </div>

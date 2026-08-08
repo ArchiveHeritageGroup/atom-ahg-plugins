@@ -1,4 +1,12 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .doi-max-width-200px-1a5c { max-width: 200px; }
+  .doi-width-40px-4792 { width: 40px; }
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -51,7 +59,7 @@
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th style="width: 40px;">
+                                <th class="doi-width-40px-4792">
                                     <input type="checkbox" class="form-check-input" id="check-all">
                                 </th>
                                 <th>Title</th>
@@ -84,7 +92,7 @@
                     <div class="row align-items-center">
                         <div class="col">
                             <label class="form-label">Initial DOI State</label>
-                            <select name="state" class="form-select" style="max-width: 200px;">
+                            <select name="state" class="form-select doi-max-width-200px-1a5c" >
                                 <option value="findable">Findable (Recommended)</option>
                                 <option value="registered">Registered</option>
                                 <option value="draft">Draft</option>

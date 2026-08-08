@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-width-64px-height-64px-objec-0daa { width: 64px; height: 64px; object-fit: cover; }
+</style>
 <?php
 use_helper('Heritage');
 
@@ -16,16 +21,16 @@ $typeColors = [
     <!-- Entity Header -->
     <div class="d-flex align-items-start mb-3">
         @if(!empty($entity->image_url))
-        <img src="{{ $entity->image_url }}" alt="" class="rounded me-3" style="width: 64px; height: 64px; object-fit: cover;">
+        <img src="{{ $entity->image_url }}" alt="" class="rounded me-3 herita-width-64px-height-64px-objec-0daa" >
         @else
-        <div class="rounded me-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background-color: {{ $typeColors[$entity->entity_type] ?? '#999' }};">
+        <div class="rounded me-3 d-flex align-items-center justify-content-center" data-ahg-style="width: 64px; height: 64px; background-color: {{ $typeColors[$entity->entity_type] ?? '#999' }};">
             <i class="bi bi-{{ $entity->entity_type === 'person' ? 'person' : ($entity->entity_type === 'organization' ? 'building' : ($entity->entity_type === 'place' ? 'geo-alt' : 'calendar')) }} text-white fs-3"></i>
         </div>
         @endif
         <div class="flex-grow-1">
             <h4 class="mb-1">{{ $entity->display_label ?? $entity->canonical_value }}</h4>
             <div class="d-flex gap-2">
-                <span class="badge" style="background-color: {{ $typeColors[$entity->entity_type] ?? '#999' }};">
+                <span class="badge" data-ahg-style="background-color: {{ $typeColors[$entity->entity_type] ?? '#999' }};">
                     {{ ucfirst($entity->entity_type) }}
                 </span>
                 @if($entity->confidence_avg >= 0.9)
@@ -102,7 +107,7 @@ $typeColors = [
         <div class="d-flex flex-wrap gap-1">
             @foreach(array_slice($relatedEntities, 0, 10) as $related)
             <a href="{{ url_for(['module' => 'heritage', 'action' => 'entity', 'type' => $related['entity_type'], 'value' => $related['value']]) }}"
-               class="badge text-decoration-none" style="background-color: {{ $typeColors[$related['entity_type']] ?? '#999' }};">
+               class="badge text-decoration-none" data-ahg-style="background-color: {{ $typeColors[$related['entity_type']] ?? '#999' }};">
                 {{ $related['label'] }}
                 <span class="badge bg-light text-dark ms-1">{{ $related['co_occurrences'] }}</span>
             </a>

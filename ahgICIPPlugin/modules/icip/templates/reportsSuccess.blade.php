@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .icip-height-10px-977d { height: 10px; }
+</style>
 
 @section('content')
 <div class="container-xxl">
@@ -78,8 +83,8 @@
                                     <span>{{ $info['label'] }}</span>
                                     <span>{{ $status->count }} ({{ $percent }}%)</span>
                                 </div>
-                                <div class="progress" style="height: 10px;">
-                                    <div class="progress-bar {{ $info['class'] }}" role="progressbar" style="width: {{ $percent }}%"></div>
+                                <div class="progress icip-height-10px-977d" >
+                                    <div class="progress-bar {{ $info['class'] }}" role="progressbar" data-ahg-style="width: {{ $percent }}%"></div>
                                 </div>
                             </div>
                         @endforeach

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-max-height-500px-3b01 { max-height:500px; }
+</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -176,7 +183,7 @@ if ($rawShare) {
                     <!-- Image Section -->
                     <?php if (!empty($section->image_url)): ?>
                     <div class="text-center">
-                        <img src="<?php echo htmlspecialchars($section->image_url); ?>" class="img-fluid rounded" alt="<?php echo htmlspecialchars($sectionTitle); ?>" style="max-height:500px;">
+                        <img src="<?php echo htmlspecialchars($section->image_url); ?>" class="img-fluid rounded" alt="<?php echo htmlspecialchars($sectionTitle); ?>" class="report-max-height-500px-3b01">
                     </div>
                     <?php endif; ?>
 

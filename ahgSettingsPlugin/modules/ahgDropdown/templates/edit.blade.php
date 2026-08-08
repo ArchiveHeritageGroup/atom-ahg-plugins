@@ -1,4 +1,11 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-width-120px-b15a { width: 120px; }
+  .settin-width-40px-4792 { width: 40px; }
+  .settin-width-80px-588c { width: 80px; }
+</style>
 
 @section('content')
 <div class="row">
@@ -65,13 +72,13 @@
           <table class="table table-hover align-middle mb-0">
             <thead>
               <tr>
-                <th style="width: 40px;"></th>
+                <th class="settin-width-40px-4792"></th>
                 <th>{{ __('Label') }}</th>
                 <th>{{ __('Code') }}</th>
-                <th style="width: 80px;">{{ __('Color') }}</th>
-                <th style="width: 80px;">{{ __('Default') }}</th>
-                <th style="width: 80px;">{{ __('Active') }}</th>
-                <th style="width: 120px;">{{ __('Actions') }}</th>
+                <th class="settin-width-80px-588c">{{ __('Color') }}</th>
+                <th class="settin-width-80px-588c">{{ __('Default') }}</th>
+                <th class="settin-width-80px-588c">{{ __('Active') }}</th>
+                <th class="settin-width-120px-b15a">{{ __('Actions') }}</th>
               </tr>
             </thead>
             <tbody id="termsTable">

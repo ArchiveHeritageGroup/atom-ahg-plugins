@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-font-size-2rem-letter-spacin-5cf0 { font-size: 2rem; letter-spacing: 0.5rem; }
+  .securi-max-width-220px-f70f { max-width: 220px; }
+</style>
 <?php
 /**
  * Two-Factor Authentication Setup Template.
@@ -28,7 +36,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         <p class="text-muted"><?php echo __('Open your authenticator app (Google Authenticator, Authy, or Microsoft Authenticator) and scan this QR code:') ?></p>
 
         <div class="text-center my-4">
-          <img src="<?php echo esc_entities($qrCodeUrl) ?>" alt="QR Code" class="border rounded p-2" style="max-width: 220px;">
+          <img src="<?php echo esc_entities($qrCodeUrl) ?>" alt="QR Code" class="border rounded p-2 securi-max-width-220px-f70f" >
         </div>
 
         <div class="mb-4">
@@ -56,7 +64,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
                 <input type="text" name="code" class="form-control form-control-lg text-center"
                        maxlength="6" pattern="\d{6}" placeholder="000000" required
                        autocomplete="one-time-code" inputmode="numeric"
-                       style="font-size: 2rem; letter-spacing: 0.5rem;">
+                       class="securi-font-size-2rem-letter-spacin-5cf0">
               </div>
               <div class="d-grid">
                 <button type="submit" class="btn btn-success btn-lg">

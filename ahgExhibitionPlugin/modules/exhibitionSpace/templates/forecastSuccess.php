@@ -1,4 +1,17 @@
 <?php /* AtoM escaping_strategy=true wraps action vars in sfOutputEscaper; unescape before json_encode/use. */ foreach (["space","days","data","visitors","heatmap","sensor","rooms","timeline","building","placements","roomDims","guidedTour","walls","doors","windows","shape","capacityUnits","furniture","tourObjects","plan","navBtns","stairs","corridorObjects","bootData","wtConfig"] as $__ev) { if (isset($$__ev)) { $$__ev = sfOutputEscaper::unescape($$__ev); } } ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-display-inline-block-width-1-dac9 { display:inline-block;width:10px;height:10px;border-radius:2px;background:#46c06b; }
+  .exhibi-display-inline-block-width-1-7a9b { display:inline-block;width:10px;height:10px;border-radius:2px;background:#e8553a; }
+  .exhibi-display-inline-block-width-1-2b93 { display:inline-block;width:10px;height:10px;border-radius:2px;background:#eef1f4; }
+  .exhibi-display-inline-block-width-1-967c { display:inline-block;width:10px;height:10px;border-radius:2px;background:#f4d03f; }
+  .exhibi-max-width-760px-margin-0-aut-1347 { max-width:760px;margin:0 auto; }
+  .exhibi-min-width-120px-307c { min-width:120px; }
+  .exhibi-width-100-max-width-760px-di-ae49 { width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px; }
+</style>
 <?php
 /*
  * Exhibition Space — CONSERVATION FORECAST (simulation & prediction).
@@ -60,16 +73,16 @@ $badgeMap = ['ok' => 'success', 'warn' => 'warning', 'alert' => 'danger', 'none'
   <div class="card mb-3">
     <div class="card-header py-2"><strong><i class="fas fa-clock-rotate-left me-1"></i><?php echo __('Conservation time machine') ?></strong> <small class="text-muted"><?php echo __('drag time; rooms shade by conservation status') ?></small></div>
     <div class="card-body">
-      <canvas id="tlCanvas" style="width:100%;max-width:760px;display:block;margin:0 auto;background:#f8f9fa;border-radius:6px"></canvas>
-      <div class="d-flex align-items-center gap-2 mt-2" style="max-width:760px;margin:0 auto">
+      <canvas id="tlCanvas" class="exhibi-width-100-max-width-760px-di-ae49"></canvas>
+      <div class="d-flex align-items-center gap-2 mt-2 exhibi-max-width-760px-margin-0-aut-1347" >
         <input type="range" id="tlSlider" class="form-range flex-grow-1" min="0" max="0" step="1">
-        <span id="tlLabel" class="badge bg-secondary" style="min-width:120px"></span>
+        <span id="tlLabel" class="badge bg-secondary exhibi-min-width-120px-307c" ></span>
       </div>
       <div class="small text-muted mt-1 d-flex gap-3 justify-content-center">
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#46c06b"></span> <?php echo __('OK') ?></span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#f4d03f"></span> <?php echo __('Watch') ?></span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#e8553a"></span> <?php echo __('At risk') ?></span>
-        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#eef1f4"></span> <?php echo __('No data') ?></span>
+        <span><span class="exhibi-display-inline-block-width-1-dac9"></span> <?php echo __('OK') ?></span>
+        <span><span class="exhibi-display-inline-block-width-1-967c"></span> <?php echo __('Watch') ?></span>
+        <span><span class="exhibi-display-inline-block-width-1-7a9b"></span> <?php echo __('At risk') ?></span>
+        <span><span class="exhibi-display-inline-block-width-1-2b93"></span> <?php echo __('No data') ?></span>
       </div>
     </div>
   </div>

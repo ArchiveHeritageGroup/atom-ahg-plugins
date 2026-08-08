@@ -1,4 +1,13 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .extend-background-color-1a4d2e-colo-902c { background-color: #1a4d2e; color: white; }
+  .extend-height-20px-84ce { height: 20px; }
+  .extend-width-20px-height-20px-b53b { width: 20px; height: 20px; }
+</style>
 <?php
 // With ->values()->all() in the action, template vars are plain PHP arrays
 // of stdClass objects, which Symfony's escaper wraps correctly.
@@ -49,7 +58,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                   <li class="mb-2">
                     <?php if (!empty($rs->icon_filename)): ?>
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/rights/<?php echo $rs->icon_filename; ?>"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-width-20px-height-20px-b53b" >
                     <?php endif; ?>
                     <?php if (!empty($rs->uri)): ?>
                       <a href="<?php echo htmlspecialchars($rs->uri); ?>" target="_blank" title="<?php echo htmlspecialchars($rs->description ?? ''); ?>">
@@ -83,7 +92,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                   <li class="mb-2">
                     <?php if (!empty($cc->icon_filename)): ?>
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/cc/<?php echo $cc->icon_filename; ?>"
-                           alt="" style="height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-height-20px-84ce" >
                     <?php endif; ?>
                     <?php if (!empty($cc->uri)): ?>
                       <a href="<?php echo htmlspecialchars($cc->uri); ?>" target="_blank" title="<?php echo htmlspecialchars($cc->description ?? ''); ?>">
@@ -105,7 +114,7 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
       <!-- TK Labels -->
       <div class="col-md-4 mb-4">
         <div class="card h-100" id="tk-labels">
-          <div class="card-header" style="background-color: #1a4d2e; color: white;">
+          <div class="card-header extend-background-color-1a4d2e-colo-902c" >
             <h5 class="mb-0">Traditional Knowledge Labels</h5>
           </div>
           <div class="card-body">
@@ -117,10 +126,10 @@ $statsRaw = isset($sf_data) ? $sf_data->getRaw('stats') : (isset($stats) ? $stat
                   <li class="mb-2">
                     <?php if (!empty($tk->icon_filename)): ?>
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/tk/<?php echo $tk->icon_filename; ?>"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-width-20px-height-20px-b53b" >
                     <?php elseif (!empty($tk->icon_url)): ?>
                       <img src="<?php echo htmlspecialchars($tk->icon_url); ?>"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-width-20px-height-20px-b53b" >
                     <?php endif; ?>
                     <?php if (!empty($tk->uri)): ?>
                       <a href="<?php echo htmlspecialchars($tk->uri); ?>" target="_blank">

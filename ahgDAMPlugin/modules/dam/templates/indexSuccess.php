@@ -1,4 +1,17 @@
 <?php decorate_with('layout_2col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dam-background-color-17a2b8-colo-46f1 { background-color: #17a2b8; color: white; }
+  .dam-background-color-28a745-colo-4040 { background-color: #28a745; color: white; }
+  .dam-background-color-6c757d-colo-29cb { background-color: #6c757d; color: white; }
+  .dam-background-color-6f42c1-colo-c3a8 { background-color: #6f42c1; color: white; }
+  .dam-background-color-var-ahg-pri-8a74 { background-color: var(--ahg-primary, #005837); color: var(--ahg-card-header-text, #fff); }
+  .dam-max-height-400px-790d { max-height: 400px; }
+  .dam-width-200px-5c2d { width: 200px; }
+</style>
 <?php use_helper('Date'); ?>
 <?php require_once sfConfig::get('sf_plugins_dir').'/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php'; ?>
 <?php $rawResource = sfOutputEscaper::unescape($resource); ?>
@@ -60,7 +73,7 @@
                   include_component('digitalobject', 'showVideo', ['resource' => $digitalObject, 'usageType' => QubitTerm::REFERENCE_ID]);
               } elseif (strpos($mimeType, 'image') !== false && $displayPath) {
                   echo '<a href="' . $masterPath . '" target="_blank">';
-                  echo '<img src="' . $displayPath . '" alt="' . esc_entities($resource->title ?? $resource->slug) . '" class="img-fluid rounded shadow-sm" style="max-height: 400px;">';
+                  echo '<img src="' . $displayPath . '" alt="' . esc_entities($resource->title ?? $resource->slug) . '" class="img-fluid rounded shadow-sm dam-max-height-400px-790d" >';
                   echo '</a>';
               } else {
                   echo '<a href="' . $masterPath . '" target="_blank" class="btn btn-outline-primary">';
@@ -247,7 +260,7 @@
             <table class="table table-sm table-striped">
               <?php foreach ($credits as $credit): ?>
               <tr>
-                <td class="fw-bold" style="width: 200px;"><?php echo esc_entities($credit['role']); ?></td>
+                <td class="fw-bold dam-width-200px-5c2d" ><?php echo esc_entities($credit['role']); ?></td>
                 <td><?php echo esc_entities($credit['name']); ?></td>
               </tr>
               <?php endforeach; ?>
@@ -316,7 +329,7 @@
   <!-- IPTC Artwork -->
   <?php if ($iptc && (!empty($iptc->artwork_title) || !empty($iptc->artwork_creator))): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #6f42c1; color: white;">
+    <div class="card-header dam-background-color-6f42c1-colo-c3a8" >
       <h4 class="mb-0"><i class="fas fa-palette"></i> <?php echo __('IPTC - Artwork / Object in Image'); ?></h4>
     </div>
     <div class="card-body">
@@ -402,7 +415,7 @@
   ?>
   <?php if (count($versions) > 0): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #17a2b8; color: white;">
+    <div class="card-header dam-background-color-17a2b8-colo-46f1" >
       <h4 class="mb-0"><i class="fas fa-language"></i> <?php echo __('Alternative Versions'); ?></h4>
     </div>
     <div class="card-body">
@@ -438,7 +451,7 @@
   ?>
   <?php if (count($holdings) > 0): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #6c757d; color: white;">
+    <div class="card-header dam-background-color-6c757d-colo-29cb" >
       <h4 class="mb-0"><i class="fas fa-film"></i> <?php echo __('Format Holdings & Access'); ?></h4>
     </div>
     <div class="card-body">
@@ -499,7 +512,7 @@
   ?>
   <?php if (count($links) > 0): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: #28a745; color: white;">
+    <div class="card-header dam-background-color-28a745-colo-4040" >
       <h4 class="mb-0"><i class="fas fa-external-link-alt"></i> <?php echo __('External References'); ?></h4>
     </div>
     <div class="card-body">
@@ -569,7 +582,7 @@
   ?>
   <?php if ($hasSubjects || $hasPlaces || $hasGenres || $hasNames): ?>
   <section class="card mb-3">
-    <div class="card-header" style="background-color: var(--ahg-primary, #005837); color: var(--ahg-card-header-text, #fff);">
+    <div class="card-header dam-background-color-var-ahg-pri-8a74" >
       <h4 class="mb-0"><i class="fas fa-tags me-2"></i><?php echo __('Access Points'); ?></h4>
     </div>
     <div class="card-body">

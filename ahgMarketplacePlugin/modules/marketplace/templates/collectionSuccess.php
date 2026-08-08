@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-max-height-300px-a0b0 { max-height: 300px; }
+  .market-object-fit-cover-max-height--9d0c { object-fit: cover; max-height: 300px; }
+</style>
 
 <?php slot('title'); ?><?php echo esc_entities($collection->title); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -13,8 +21,8 @@
 
 <!-- Cover image banner -->
 <?php if ($collection->cover_image_path): ?>
-  <div class="rounded overflow-hidden mb-4" style="max-height: 300px;">
-    <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="<?php echo esc_entities($collection->title); ?>" class="w-100" style="object-fit: cover; max-height: 300px;">
+  <div class="rounded overflow-hidden mb-4 market-max-height-300px-a0b0" >
+    <img src="<?php echo esc_entities($collection->cover_image_path); ?>" alt="<?php echo esc_entities($collection->title); ?>" class="w-100 market-object-fit-cover-max-height--9d0c" >
   </div>
 <?php endif; ?>
 

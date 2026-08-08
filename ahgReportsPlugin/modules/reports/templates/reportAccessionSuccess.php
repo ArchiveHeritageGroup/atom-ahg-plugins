@@ -1,4 +1,15 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-margin-bottom-1rem-4986 { margin-bottom: 1rem; }
+  .report-margin-bottom-1rem-font-size-3781 { margin-bottom: 1rem; font-size: 0.85rem; }
+  .report-margin-top-1rem-988c { margin-top: 1rem; }
+  .report-max-height-600px-overflow-au-9c5b { max-height: 600px; overflow: auto; }
+  .report-width-100-8588 { width:100%; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Browse Accession Report'); ?></h1>
@@ -8,8 +19,8 @@
 
   <section class="sidebar-widget">
     
-    <div style="margin-bottom: 1rem;">
-      <a href="<?php echo url_for(['module' => 'reports', 'action' => 'reportSelect']); ?>" class="c-btn" style="width:100%;">
+    <div class="report-margin-bottom-1rem-4986">
+      <a href="<?php echo url_for(['module' => 'reports', 'action' => 'reportSelect']); ?>" class="c-btn report-width-100-8588" >
         <i class="fa fa-arrow-left"></i> <?php echo __('Back to Reports'); ?>
       </a>
     </div>
@@ -49,8 +60,8 @@
         <input class="c-btn c-btn-submit" type="submit" value="<?php echo __('Search'); ?>"/>
       </section>
 
-      <div style="margin-top: 1rem;">
-        <button type="button" onclick="exportTableToCSV()" class="c-btn" style="width:100%;">
+      <div class="report-margin-top-1rem-988c">
+        <button type="button" onclick="exportTableToCSV()" class="c-btn report-width-100-8588" >
           <i class="fa fa-download"></i> <?php echo __('Export CSV'); ?>
         </button>
       </div>
@@ -69,7 +80,7 @@
       <?php echo __('Found %1% results', ['%1%' => $total]); ?>
     </div>
 
-    <div style="margin-bottom: 1rem; font-size: 0.85rem;">
+    <div class="report-margin-bottom-1rem-font-size-3781">
       <strong><?php echo __('Show/Hide Columns'); ?>:</strong><br/>
       <label><input type="checkbox" onclick="toggleColumn(0)" checked> <?php echo __('Identifier'); ?></label>
       <label><input type="checkbox" onclick="toggleColumn(1)" checked> <?php echo __('Title'); ?></label>
@@ -127,7 +138,7 @@
     }
     </script>
 
-    <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+    <div class="table-responsive report-max-height-600px-overflow-au-9c5b" >
       <table id="reportTable" class="table table-bordered table-striped table-sm">
         <thead>
           <tr>

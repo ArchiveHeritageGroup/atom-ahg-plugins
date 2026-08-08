@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-visibility-hidden-0e2b { visibility: hidden; }
+</style>
 <?php
 /**
  * Tree/Hierarchy View Partial
@@ -26,7 +33,7 @@ function renderTreeNode($node, $module, $level = 0) {
                     <i class="bi bi-chevron-right"></i>
                 </span>
             <?php else: ?>
-                <span class="tree-toggle" style="visibility: hidden;">
+                <span class="tree-toggle themeb-visibility-hidden-0e2b" >
                     <i class="bi bi-chevron-right"></i>
                 </span>
             <?php endif; ?>

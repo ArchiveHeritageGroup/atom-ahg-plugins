@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dam-cursor-pointer-58ab { cursor:pointer; }
+  .dam-display-none-93b8 { display:none; }
+  .dam-max-width-200px-1a5c { max-width: 200px; }
+</style>
 <?php slot('title'); ?>
   <div class="multiline-header d-flex align-items-center mb-3">
     <i class="fas fa-plus-circle fa-2x text-success me-3"></i>
@@ -118,7 +127,7 @@
             <label class="form-label fw-bold"><?php echo __('Genre'); ?></label>
             <input type="text" class="form-control" name="genre" placeholder="<?php echo __('e.g., Documentary, Portrait'); ?>">
           </div>
-          <div class="col-md-4 mb-3 field-video field-audio" style="display:none;">
+          <div class="col-md-4 mb-3 field-video field-audio dam-display-none-93b8" >
             <label class="form-label fw-bold"><?php echo __('Color Type'); ?></label>
             <select class="form-select" name="color_type">
               <option value=""><?php echo __('-- Select --'); ?></option>
@@ -133,7 +142,7 @@
     </div>
 
     <!-- Film/Video Production -->
-    <div class="card mb-3 field-video" style="display:none;">
+    <div class="card mb-3 field-video dam-display-none-93b8" >
       <div class="card-header bg-danger text-white">
         <i class="fas fa-film"></i> <?php echo __('Production Details'); ?>
       </div>
@@ -174,7 +183,7 @@
     </div>
 
     <!-- Production Credits -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio dam-display-none-93b8" >
       <div class="card-header bg-info text-white">
         <i class="fas fa-users"></i> <?php echo __('Production Credits'); ?>
       </div>
@@ -211,7 +220,7 @@
     </div>
 
     <!-- Language -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio dam-display-none-93b8" >
       <div class="card-header bg-secondary text-white">
         <i class="fas fa-language"></i> <?php echo __('Language'); ?>
       </div>
@@ -231,7 +240,7 @@
 
     <!-- IPTC Creator -->
     <div class="card mb-3">
-      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#creatorSection" style="cursor:pointer;">
+      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#creatorSection" class="dam-cursor-pointer-58ab">
         <i class="fas fa-user"></i> <?php echo __('IPTC - Creator / Photographer'); ?>
         <i class="fas fa-chevron-down float-end"></i>
       </div>
@@ -277,7 +286,7 @@
 
     <!-- IPTC Content -->
     <div class="card mb-3">
-      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#contentSection" style="cursor:pointer;">
+      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#contentSection" class="dam-cursor-pointer-58ab">
         <i class="fas fa-file-alt"></i> <?php echo __('IPTC - Content Description'); ?>
         <i class="fas fa-chevron-down float-end"></i>
       </div>
@@ -288,9 +297,9 @@
             <input type="text" name="iptc_headline" class="form-control">
             <small class="text-muted"><?php echo __('Brief synopsis or summary'); ?></small>
           </div>
-          <div class="mb-3 field-video field-audio" style="display:none;">
+          <div class="mb-3 field-video field-audio dam-display-none-93b8" >
             <label class="form-label"><?php echo __('Running Time'); ?> <small class="text-muted">(<?php echo __('Minutes'); ?>)</small></label>
-            <div class="input-group" style="max-width: 200px;">
+            <div class="input-group dam-max-width-200px-1a5c" >
               <input type="number" class="form-control" name="iptc_duration_minutes" min="1">
               <span class="input-group-text"><?php echo __('min'); ?></span>
             </div>
@@ -324,7 +333,7 @@
 
     <!-- IPTC Location -->
     <div class="card mb-3">
-      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#locationSection" style="cursor:pointer;">
+      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#locationSection" class="dam-cursor-pointer-58ab">
         <i class="fas fa-map-marker-alt"></i> <?php echo __('IPTC - Location'); ?>
         <i class="fas fa-chevron-down float-end"></i>
       </div>
@@ -358,7 +367,7 @@
               <input type="text" name="iptc_country_code" class="form-control" maxlength="3" placeholder="ISO 3166-1 alpha-3">
             </div>
           </div>
-          <div class="row field-video field-audio" style="display:none;">
+          <div class="row field-video field-audio dam-display-none-93b8" >
             <div class="col-md-6 mb-3">
               <label class="form-label"><?php echo __('Production Country'); ?></label>
               <input type="text" name="iptc_production_country" class="form-control" placeholder="e.g., Netherlands, South Africa">
@@ -375,7 +384,7 @@
 
     <!-- IPTC Copyright -->
     <div class="card mb-3">
-      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#copyrightSection" style="cursor:pointer;">
+      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#copyrightSection" class="dam-cursor-pointer-58ab">
         <i class="fas fa-copyright"></i> <?php echo __('IPTC - Copyright & Rights'); ?>
         <i class="fas fa-chevron-down float-end"></i>
       </div>
@@ -427,7 +436,7 @@
 
     <!-- IPTC Releases -->
     <div class="card mb-3">
-      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#releasesSection" style="cursor:pointer;">
+      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#releasesSection" class="dam-cursor-pointer-58ab">
         <i class="fas fa-file-signature"></i> <?php echo __('IPTC - Model & Property Releases'); ?>
         <i class="fas fa-chevron-down float-end"></i>
       </div>
@@ -471,7 +480,7 @@
 
     <!-- IPTC Artwork -->
     <div class="card mb-3">
-      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#artworkSection" style="cursor:pointer;">
+      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#artworkSection" class="dam-cursor-pointer-58ab">
         <i class="fas fa-palette"></i> <?php echo __('IPTC - Artwork / Object in Image'); ?>
         <i class="fas fa-chevron-down float-end"></i>
       </div>
@@ -508,7 +517,7 @@
 
     <!-- IPTC Administrative -->
     <div class="card mb-3">
-      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#adminSection" style="cursor:pointer;">
+      <div class="card-header bg-light" data-bs-toggle="collapse" data-bs-target="#adminSection" class="dam-cursor-pointer-58ab">
         <i class="fas fa-cogs"></i> <?php echo __('IPTC - Administrative'); ?>
         <i class="fas fa-chevron-down float-end"></i>
       </div>

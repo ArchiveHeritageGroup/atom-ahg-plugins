@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .privac-background-linear-gradient-1-8c20 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .privac-max-width-400px-height-10px-d842 { max-width: 400px; height: 10px; }
+</style>
 
 @section('content')
 <div class="container-fluid py-4">
@@ -74,7 +80,7 @@ $currentJurisdiction = $sf_request->getParameter('jurisdiction', 'all');
     <!-- Compliance Score -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card bg-gradient privac-background-linear-gradient-1-8c20" >
                 <div class="card-body text-white text-center py-4">
                     <h5 class="mb-3">
                         @if($currentJurisdiction !== 'all' && isset($jurisdictions[$currentJurisdiction]))
@@ -83,8 +89,8 @@ $currentJurisdiction = $sf_request->getParameter('jurisdiction', 'all');
                         {{ __('Compliance Score') }}
                     </h5>
                     <div class="display-1 fw-bold">{{ $stats['compliance_score'] ?? 0 }}%</div>
-                    <div class="progress mt-3 mx-auto" style="max-width: 400px; height: 10px;">
-                        <div class="progress-bar bg-light" style="width: {{ $stats['compliance_score'] ?? 0 }}%"></div>
+                    <div class="progress mt-3 mx-auto privac-max-width-400px-height-10px-d842" >
+                        <div class="progress-bar bg-light" data-ahg-style="width: {{ $stats['compliance_score'] ?? 0 }}%"></div>
                     </div>
                 </div>
             </div>

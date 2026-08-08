@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .versio-width-22-b94a { width:22%; }
+</style>
 <?php
 /** @var string $entityType */
 /** @var int    $entityId */
@@ -182,7 +189,7 @@ if (!empty($scalars)): ?>
     <table class="table table-sm mb-0">
         <thead class="table-light">
             <tr>
-                <th style="width:22%"><?php echo __('Field') ?></th>
+                <th class="versio-width-22-b94a"><?php echo __('Field') ?></th>
                 <th class="vc-side old"><?php echo sprintf(__('v%d (old)'), $v1) ?></th>
                 <th class="vc-side new"><?php echo sprintf(__('v%d (new)'), $v2) ?></th>
             </tr>
@@ -222,7 +229,7 @@ foreach ($byCulture as $culture => $rows): ?>
     <table class="table table-sm mb-0">
         <thead class="table-light">
             <tr>
-                <th style="width:22%"><?php echo __('Field') ?></th>
+                <th class="versio-width-22-b94a"><?php echo __('Field') ?></th>
                 <th class="vc-side old"><?php echo sprintf(__('v%d (old)'), $v1) ?></th>
                 <th class="vc-side new"><?php echo sprintf(__('v%d (new)'), $v2) ?></th>
             </tr>

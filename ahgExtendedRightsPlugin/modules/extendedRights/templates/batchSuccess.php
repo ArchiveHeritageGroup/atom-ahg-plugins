@@ -1,4 +1,12 @@
 <?php use_helper('Javascript'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .extend-display-none-93b8 { display:none; }
+  .extend-width-20px-height-20px-bbca { width:20px;height:20px; }
+</style>
 
 <!-- Tom Select CSS -->
 <link href="/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css" rel="stylesheet" <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
@@ -136,7 +144,7 @@
                 <input type="checkbox" name="tk_label_ids[]" value="<?php echo $tk->id; ?>" class="form-check-input" id="tk_<?php echo $tk->id; ?>">
                 <label class="form-check-label" for="tk_<?php echo $tk->id; ?>">
                   <?php if (!empty($tk->icon_url)): ?>
-                  <img src="<?php echo $tk->icon_url; ?>" alt="" style="width:20px;height:20px;" class="me-1">
+                  <img src="<?php echo $tk->icon_url; ?>" alt="" class="me-1 extend-width-20px-height-20px-bbca" >
                   <?php endif; ?>
                   <?php echo $tk->name ?? $tk->code; ?>
                 </label>
@@ -149,7 +157,7 @@
     </div>
 
     <!-- Embargo Options (hidden by default) -->
-    <div id="embargo_options" class="card mb-4" style="display:none;">
+    <div id="embargo_options" class="card mb-4 extend-display-none-93b8" >
       <div class="card-header">
         <h5 class="mb-0"><?php echo __('Embargo Details'); ?></h5>
       </div>

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-max-width-860px-3fc9 { max-width: 860px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'targetJournals', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -32,7 +39,7 @@ $formUrl = $journal
     : url_for(['module' => 'research', 'action' => 'targetJournalBuilder']);
 ?>
 
-<div style="max-width: 860px;">
+<div class="resear-max-width-860px-3fc9">
   <form method="post" action="<?php echo $formUrl; ?>">
     <div class="mb-3"><label class="form-label"><?php echo __('Title'); ?> <span class="text-danger">*</span></label>
       <input name="title" class="form-control" required value="<?php echo $v('title'); ?>"></div>

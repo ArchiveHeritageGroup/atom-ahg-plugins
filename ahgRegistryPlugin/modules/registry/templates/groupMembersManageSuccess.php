@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-auto-dc25 { width: auto; }
+</style>
 
 <?php $group = sfOutputEscaper::unescape($group); ?>
 <?php $members = sfOutputEscaper::unescape($members ?? []); ?>
@@ -65,7 +72,7 @@
               <form method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'groupMembersManage', 'id' => $group->id]); ?>" class="d-inline">
                 <input type="hidden" name="form_action" value="update_role">
                 <input type="hidden" name="member_email" value="<?php echo htmlspecialchars($m->email ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-                <select class="form-select form-select-sm d-inline-block" name="member_role" style="width: auto;" onchange="this.form.submit()">
+                <select class="form-select form-select-sm d-inline-block" name="member_role" class="regist-width-auto-dc25" onchange="this.form.submit()">
                   <?php $allRoles = ['organizer' => __('Organizer'), 'co_organizer' => __('Co-organizer'), 'speaker' => __('Speaker'), 'sponsor' => __('Sponsor'), 'member' => __('Member')];
                     foreach ($allRoles as $rv => $rl): ?>
                     <option value="<?php echo $rv; ?>"<?php echo $rv === $role ? ' selected' : ''; ?>><?php echo $rl; ?></option>

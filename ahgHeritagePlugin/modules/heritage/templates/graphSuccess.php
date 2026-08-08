@@ -1,3 +1,20 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-background-color-4e79a7-2be7 { background-color: #4e79a7; }
+  .herita-background-color-59a14f-94a9 { background-color: #59a14f; }
+  .herita-background-color-76b7b2-2796 { background-color: #76b7b2; }
+  .herita-background-color-b07aa1-eb00 { background-color: #b07aa1; }
+  .herita-background-color-e15759-02e9 { background-color: #e15759; }
+  .herita-background-color-ff9da7-bddf { background-color: #ff9da7; }
+  .herita-background-color-colorscale--0fe7 { background-color: ${colorScale[entity.type] || '#999'}; }
+  .herita-display-none-224b { display: none; }
+  .herita-height-600px-width-100-9020 { height: 600px; width: 100%; }
+  .herita-width-180px-21b9 { width: 180px; }
+  .herita-width-70px-4043 { width: 70px; }
+</style>
 <?php
 /**
  * Knowledge Graph Visualization.
@@ -58,7 +75,7 @@ use_helper('Heritage');
 
                             <!-- Search -->
                             <div class="col-auto">
-                                <input type="text" id="graph-search" class="form-control form-control-sm" placeholder="Search entities..." style="width: 180px;">
+                                <input type="text" id="graph-search" class="form-control form-control-sm" placeholder="Search entities..." class="herita-width-180px-21b9">
                             </div>
 
                             <!-- Min Occurrences -->
@@ -66,7 +83,7 @@ use_helper('Heritage');
                                 <label class="form-label mb-0 small text-muted">Min occurrences:</label>
                             </div>
                             <div class="col-auto">
-                                <input type="number" id="min-occurrences" class="form-control form-control-sm" value="1" min="1" max="100" style="width: 70px;">
+                                <input type="number" id="min-occurrences" class="form-control form-control-sm" value="1" min="1" max="100" class="herita-width-70px-4043">
                             </div>
 
                             <!-- Refresh Button -->
@@ -85,12 +102,12 @@ use_helper('Heritage');
                 <div class="card shadow-sm">
                     <div class="card-body py-2">
                         <div class="d-flex flex-wrap gap-3 small">
-                            <span><span class="badge rounded-pill" style="background-color: #4e79a7;">Person</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #59a14f;">Organization</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #e15759;">Place</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #b07aa1;">Date</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #76b7b2;">Event</span></span>
-                            <span><span class="badge rounded-pill" style="background-color: #ff9da7;">Work</span></span>
+                            <span><span class="badge rounded-pill herita-background-color-4e79a7-2be7" >Person</span></span>
+                            <span><span class="badge rounded-pill herita-background-color-59a14f-94a9" >Organization</span></span>
+                            <span><span class="badge rounded-pill herita-background-color-e15759-02e9" >Place</span></span>
+                            <span><span class="badge rounded-pill herita-background-color-b07aa1-eb00" >Date</span></span>
+                            <span><span class="badge rounded-pill herita-background-color-76b7b2-2796" >Event</span></span>
+                            <span><span class="badge rounded-pill herita-background-color-ff9da7-bddf" >Work</span></span>
                         </div>
                     </div>
                 </div>
@@ -102,8 +119,8 @@ use_helper('Heritage');
             <div class="col-md-8">
                 <div class="card shadow-sm">
                     <div class="card-body p-0 position-relative">
-                        <div id="graph-container" style="height: 600px; width: 100%;"></div>
-                        <div id="graph-loading" class="position-absolute top-50 start-50 translate-middle" style="display: none;">
+                        <div id="graph-container" class="herita-height-600px-width-100-9020"></div>
+                        <div id="graph-loading" class="position-absolute top-50 start-50 translate-middle herita-display-none-224b" >
                             <div class="spinner-border text-primary" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
@@ -134,7 +151,7 @@ use_helper('Heritage');
 
             <!-- Entity Detail Panel -->
             <div class="col-md-4">
-                <div id="entity-panel" class="card shadow-sm" style="display: none;">
+                <div id="entity-panel" class="card shadow-sm herita-display-none-224b" >
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0" id="entity-panel-title">Entity Details</h5>
                         <button type="button" class="btn-close" id="close-entity-panel" aria-label="Close"></button>
@@ -339,7 +356,7 @@ use_helper('Heritage');
         const content = document.getElementById('entity-panel-content');
         content.innerHTML = `
             <div class="mb-3">
-                <span class="badge" style="background-color: ${colorScale[entity.type] || '#999'};">${entity.type}</span>
+                <span class="badge herita-background-color-colorscale--0fe7" >${entity.type}</span>
                 <span class="badge bg-light text-dark ms-1">${entity.occurrences} occurrences</span>
             </div>
             <dl class="row small mb-3">

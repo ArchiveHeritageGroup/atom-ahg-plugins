@@ -1,4 +1,12 @@
 <?php use_helper('Text') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-background-color-6610f2-ed77 { background-color: #6610f2; }
+  .museum-width-100-min-height-400px-o-11bf { width: 100%; min-height: 400px; overflow-x: auto; }
+</style>
 
 <div class="row">
   <div class="col-md-12">
@@ -62,7 +70,7 @@
         </h5>
       </div>
       <div class="card-body">
-        <div id="timeline-container" style="width: 100%; min-height: 400px; overflow-x: auto;">
+        <div id="timeline-container" class="museum-width-100-min-height-400px-o-11bf">
           <svg id="provenance-timeline"></svg>
         </div>
         
@@ -71,7 +79,7 @@
             <span class="badge bg-primary"><?php echo __('Creation') ?></span>
             <span class="badge bg-secondary"><?php echo __('Accumulation') ?></span>
             <span class="badge bg-info"><?php echo __('Collection') ?></span>
-            <span class="badge" style="background-color: #6610f2;"><?php echo __('Contribution') ?></span>
+            <span class="badge museum-background-color-6610f2-ed77" ><?php echo __('Contribution') ?></span>
             <span class="badge bg-success"><?php echo __('Verified Custody') ?></span>
             <span class="badge bg-warning text-dark"><?php echo __('Unverified Custody') ?></span>
           </div>

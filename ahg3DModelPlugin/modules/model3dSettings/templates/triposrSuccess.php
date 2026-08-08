@@ -155,7 +155,7 @@ function isTripoSettingEnabled($settings, $key) {
             </div>
 
             <!-- Remote GPU Configuration -->
-            <div class="card mb-4" id="remote_config_card" style="display: <?php echo getTripoSetting($settings, 'triposr_mode') == 'remote' ? 'block' : 'none' ?>;">
+            <div class="card mb-4" id="remote_config_card" data-ahg-style="display: <?php echo getTripoSetting($settings, 'triposr_mode') == 'remote' ? 'block' : 'none' ?>;">
                 <div class="card-header bg-light">
                     <h5 class="mb-0"><i class="fas fa-server me-2"></i>Remote GPU Server</h5>
                 </div>

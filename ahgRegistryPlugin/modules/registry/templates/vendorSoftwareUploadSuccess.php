@@ -1,4 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-cursor-pointer-24b5 { cursor: pointer; }
+  .regist-min-height-200px-cursor-poin-70c4 { min-height: 200px; cursor: pointer; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Upload Software Package'); ?> - <?php echo htmlspecialchars($software->name ?? '', ENT_QUOTES, 'UTF-8'); ?><?php end_slot(); ?>
 
@@ -37,7 +45,7 @@
         <div class="card-body">
 
           <!-- Drag-drop upload zone -->
-          <div class="border border-2 border-dashed rounded p-5 text-center mb-3 position-relative" id="upload-drop-zone" style="min-height: 200px; cursor: pointer;">
+          <div class="border border-2 border-dashed rounded p-5 text-center mb-3 position-relative" id="upload-drop-zone" class="regist-min-height-200px-cursor-poin-70c4">
             <div id="upload-preview">
               <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
               <h5><?php echo __('Drag and drop your package here'); ?></h5>
@@ -50,7 +58,7 @@
                 <span class="badge bg-light text-dark border">.bz2</span>
               </div>
             </div>
-            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="upload-file" name="package" accept=".zip,.tar.gz,.tgz,.gz,.bz2" style="cursor: pointer;">
+            <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="upload-file" name="package" accept=".zip,.tar.gz,.tgz,.gz,.bz2" class="regist-cursor-pointer-24b5">
           </div>
 
           <div class="row g-3">

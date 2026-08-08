@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-max-height-500px-background--d3e7 { max-height: 500px; background: #000; }
+</style>
 <?php use_helper('AhgMedia'); ?>
 
 <?php
@@ -36,7 +43,7 @@ if ($mediaTypeId == 137 && ahg_needs_streaming($resource)) {
       <i class="fas fa-info-circle me-1"></i>
       <strong><?php echo ahg_get_format_name($mimeType); ?></strong> - Streaming via server transcoding (original file preserved)
     </div>
-    <video controls preload="metadata" class="mw-100" style="max-height: 500px; background: #000;">
+    <video controls preload="metadata" class="mw-100 themeb-max-height-500px-background--d3e7" >
       <source src="/media/stream/<?php echo $resource->id; ?>" type="video/mp4">
       Your browser does not support video playback.
     </video>

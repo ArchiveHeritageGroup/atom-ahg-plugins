@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-height-120px-68c0 { height: 120px; }
+  .librar-max-height-120px-max-width-1-f029 { max-height: 120px; max-width: 100%; }
+  .librar-width-auto-dc25 { width: auto; }
+</style>
 
 <?php slot('title'); ?>
   <h1><i class="fas fa-book-open me-2"></i><?php echo __('Library Catalog'); ?></h1>
@@ -84,7 +93,7 @@
       <input type="hidden" name="search_type" value="<?php echo esc_entities($searchType); ?>">
       <input type="hidden" name="material_type" value="<?php echo esc_entities($materialType); ?>">
       <input type="hidden" name="frbr_cluster" value="<?php echo $frbrCluster ? '1' : '0'; ?>">
-      <select name="sort" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="this.form.submit()">
+      <select name="sort" class="form-select form-select-sm d-inline-block librar-width-auto-dc25"  onchange="this.form.submit()">
         <option value="relevance" <?php echo $sort === 'relevance' ? 'selected' : ''; ?>><?php echo __('Sort: Relevance'); ?></option>
         <option value="title" <?php echo $sort === 'title' ? 'selected' : ''; ?>><?php echo __('Sort: Title A-Z'); ?></option>
         <option value="date_desc" <?php echo $sort === 'date_desc' ? 'selected' : ''; ?>><?php echo __('Sort: Newest'); ?></option>
@@ -397,9 +406,9 @@
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <?php if (!empty($item->cover_url)): ?>
-                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
+                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2 librar-max-height-120px-max-width-1-f029" >
               <?php else: ?>
-                <div class="bg-light d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                <div class="bg-light d-flex align-items-center justify-content-center mb-2 librar-height-120px-68c0" >
                   <i class="fas fa-book fa-3x text-muted"></i>
                 </div>
               <?php endif; ?>
@@ -426,9 +435,9 @@
           <div class="card h-100 shadow-sm">
             <div class="card-body text-center">
               <?php if (!empty($item->cover_url)): ?>
-                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2" style="max-height: 120px; max-width: 100%;">
+                <img src="<?php echo esc_entities($item->cover_url); ?>" alt="" class="mb-2 librar-max-height-120px-max-width-1-f029" >
               <?php else: ?>
-                <div class="bg-light d-flex align-items-center justify-content-center mb-2" style="height: 120px;">
+                <div class="bg-light d-flex align-items-center justify-content-center mb-2 librar-height-120px-68c0" >
                   <i class="fas fa-book fa-3x text-muted"></i>
                 </div>
               <?php endif; ?>

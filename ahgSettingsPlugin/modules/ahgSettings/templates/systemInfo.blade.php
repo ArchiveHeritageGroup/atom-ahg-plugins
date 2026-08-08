@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-width-150px-c251 { width: 150px; }
+</style>
 
 @section('content')
 <div class="row">
@@ -133,7 +138,7 @@ $doiStats = $doiStats ?? [];
           </div>
           <div class="progress progress-thin mb-1">
             <div class="progress-bar bg-{{ $disk['percent'] > 90 ? 'danger' : ($disk['percent'] > 75 ? 'warning' : 'success') }}"
-                 style="width: {{ $disk['percent'] }}%"></div>
+                 data-ahg-style="width: {{ $disk['percent'] }}%"></div>
           </div>
           <small class="text-muted">
             {{ $disk['used'] }} used of {{ $disk['total'] }} ({{ $disk['free'] }} free)
@@ -207,7 +212,7 @@ $doiStats = $doiStats ?? [];
     <div class="row g-3">
       @foreach ($exportFormats['formats'] as $format)
         <div class="col-md-4 col-lg-3">
-          <div class="card software-card h-100" style="border-left-color: {{ $format['status'] === 'ok' ? '#198754' : '#fd7e14' }};">
+          <div class="card software-card h-100" data-ahg-style="border-left-color: {{ $format['status'] === 'ok' ? '#198754' : '#fd7e14' }};">
             <div class="card-body py-2 px-3">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -257,7 +262,7 @@ $doiStats = $doiStats ?? [];
           <h6><i class="bi bi-bar-chart me-1"></i> DOI Statistics</h6>
           <table class="table table-sm table-borderless mb-0">
             <tr>
-              <td class="text-muted" style="width: 150px;">Total DOIs</td>
+              <td class="text-muted settin-width-150px-c251" >Total DOIs</td>
               <td><strong>{{ number_format($doiStats['total']) }}</strong></td>
             </tr>
             <tr>
@@ -303,7 +308,7 @@ $doiStats = $doiStats ?? [];
             <h6><i class="bi bi-gear me-1"></i> Configuration</h6>
             <table class="table table-sm table-borderless mb-0">
               <tr>
-                <td class="text-muted" style="width: 150px;">DOI Prefix</td>
+                <td class="text-muted settin-width-150px-c251" >DOI Prefix</td>
                 <td><code>{{ htmlspecialchars($doiStats['config']['prefix']) }}</code></td>
               </tr>
               <tr>

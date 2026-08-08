@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-height-20px-84ce { height: 20px; }
+</style>
 
 @php
 $jobs = $jobData['jobs'] ?? [];
@@ -67,8 +72,8 @@ $total = $jobData['total'] ?? 0;
                         </td>
                         <td>{{ $job->job_type }}</td>
                         <td>
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar" style="width: {{ $progress }}%">{{ $progress }}%</div>
+                            <div class="progress herita-height-20px-84ce" >
+                                <div class="progress-bar" data-ahg-style="width: {{ $progress }}%">{{ $progress }}%</div>
                             </div>
                             <small class="text-muted">{{ $job->processed_items }}/{{ $job->total_items }} items</small>
                         </td>

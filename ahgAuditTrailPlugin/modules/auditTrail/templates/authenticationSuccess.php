@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .auditt-max-height-400px-790d { max-height: 400px; }
+</style>
 
 <?php slot('title') ?>
   <h1><?php echo __('Authentication Audit Log') ?></h1>
@@ -9,7 +16,7 @@
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header bg-success text-white"><h5 class="mb-0"><?php echo __('Recent Logins') ?></h5></div>
-      <div class="table-responsive" style="max-height: 400px;">
+      <div class="table-responsive auditt-max-height-400px-790d" >
         <table class="table table-hover table-sm mb-0">
           <thead class="table-light"><tr><th><?php echo __('Time') ?></th><th><?php echo __('User') ?></th><th><?php echo __('IP') ?></th></tr></thead>
           <tbody>
@@ -31,7 +38,7 @@
   <div class="col-lg-6 mb-4">
     <div class="card">
       <div class="card-header bg-danger text-white"><h5 class="mb-0"><?php echo __('Suspicious Activity') ?> <span class="badge bg-light text-dark"><?php echo count($suspiciousActivity) ?></span></h5></div>
-      <div class="table-responsive" style="max-height: 400px;">
+      <div class="table-responsive auditt-max-height-400px-790d" >
         <table class="table table-hover table-sm mb-0">
           <thead class="table-light"><tr><th><?php echo __('Time') ?></th><th><?php echo __('Event') ?></th><th><?php echo __('Username') ?></th><th><?php echo __('IP') ?></th></tr></thead>
           <tbody>

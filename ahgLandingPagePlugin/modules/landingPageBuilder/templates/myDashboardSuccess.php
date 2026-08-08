@@ -85,7 +85,7 @@ $rawBlocks = $blocks instanceof sfOutputEscaperIteratorDecorator ? $blocks->getR
       ?>
       <div class="col-md-<?php echo $colSpan ?>">
         <div class="<?php echo implode(' ', $blockClasses) ?>"
-             style="<?php echo implode('; ', $blockStyles) ?>"
+             data-ahg-style="<?php echo implode('; ', $blockStyles) ?>"
              data-block-id="<?php echo $rawBlock->id ?>">
           <?php
           $templateFile = '_block_' . $rawBlock->machine_name . '.php';
@@ -122,7 +122,7 @@ $rawBlocks = $blocks instanceof sfOutputEscaperIteratorDecorator ? $blocks->getR
       $containerClass = $rawBlock->container_type ?? 'container';
   ?>
     <section class="<?php echo implode(' ', $sectionClasses) ?>"
-             style="<?php echo implode('; ', $sectionStyles) ?>"
+             data-ahg-style="<?php echo implode('; ', $sectionStyles) ?>"
              data-block-id="<?php echo $rawBlock->id ?>">
       <?php if ($rawBlock->machine_name !== 'hero_banner' && $containerClass !== 'fluid'): ?>
       <div class="<?php echo $containerClass ?>">

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-auto-d3b6 { width:auto; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -208,7 +215,7 @@ $currentLogType = $_GET['log_type'] ?? '';
 <div class="card mb-3">
     <div class="card-body py-2">
         <form method="get" class="d-flex gap-2 align-items-center">
-            <select name="log_type" class="form-select form-select-sm" style="width:auto;" onchange="this.form.submit();">
+            <select name="log_type" class="form-select form-select-sm resear-width-auto-d3b6"  onchange="this.form.submit();">
                 <option value="">All Types (<?php echo array_sum(array_column($logTypes, 'cnt')); ?>)</option>
                 <?php foreach ($logTypes as $lt): ?>
                 <option value="<?php echo htmlspecialchars($lt->activity_type); ?>" <?php echo $currentLogType === $lt->activity_type ? 'selected' : ''; ?>><?php echo ucfirst(str_replace('_', ' ', $lt->activity_type)); ?> (<?php echo $lt->cnt; ?>)</option>

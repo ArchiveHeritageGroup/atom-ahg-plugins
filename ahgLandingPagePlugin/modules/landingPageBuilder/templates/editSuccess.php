@@ -1,4 +1,15 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .landin-cursor-grab-7074 { cursor: grab; }
+  .landin-cursor-pointer-24b5 { cursor: pointer; }
+  .landin-min-height-calc-100vh-56px-o-93e3 { min-height: calc(100vh - 56px); overflow-y: auto; }
+  .landin-width-280px-min-height-calc--f5fd { width: 280px; min-height: calc(100vh - 56px); }
+  .landin-width-350px-display-none-4b09 { width: 350px; display: none; }
+</style>
 
 <div class="landing-page-builder">
   <!-- Header Toolbar -->
@@ -59,7 +70,7 @@
 
   <div class="builder-main d-flex">
     <!-- Block Palette (Left Sidebar) -->
-    <div class="builder-palette bg-light border-end" style="width: 280px; min-height: calc(100vh - 56px);">
+    <div class="builder-palette bg-light border-end landin-width-280px-min-height-calc--f5fd" >
       <div class="p-3">
         <h6 class="text-uppercase text-muted small mb-3">+ Add Block</h6>
         
@@ -89,11 +100,11 @@
                          draggable="true"
                          data-type-id="<?php echo $type->id ?>"
                          data-machine-name="<?php echo $type->machine_name ?>">
-                      <div class="drag-handle bg-secondary bg-opacity-25 px-2 py-2 rounded-start" 
-                           style="cursor: grab;" title="Drag to canvas">
+                      <div class="drag-handle bg-secondary bg-opacity-25 px-2 py-2 rounded-start landin-cursor-grab-7074" 
+                            title="Drag to canvas">
                         ⋮⋮
                       </div>
-                      <div class="card-body py-2 px-2 flex-grow-1" style="cursor: pointer;" title="Click to add">
+                      <div class="card-body py-2 px-2 flex-grow-1 landin-cursor-pointer-24b5"  title="Click to add">
                         <div class="small fw-medium"><?php echo $type->label ?></div>
                       </div>
                     </div>
@@ -107,7 +118,7 @@
     </div>
 
     <!-- Canvas (Center) -->
-    <div class="builder-canvas flex-grow-1 bg-white" style="min-height: calc(100vh - 56px); overflow-y: auto;">
+    <div class="builder-canvas flex-grow-1 bg-white landin-min-height-calc-100vh-56px-o-93e3" >
       <div class="canvas-header bg-light border-bottom p-2 d-flex align-items-center justify-content-between">
         <span class="small text-muted">
           <i class="bi bi-grid-3x3"></i> Canvas
@@ -140,7 +151,7 @@
     </div>
 
     <!-- Block Config Panel (Right Sidebar) -->
-    <div class="builder-config bg-light border-start" id="config-panel" style="width: 350px; display: none;">
+    <div class="builder-config bg-light border-start" id="config-panel" class="landin-width-350px-display-none-4b09">
       <div class="config-header border-bottom p-3 d-flex align-items-center justify-content-between">
         <h6 class="mb-0">
           <i class="bi bi-sliders"></i> <span id="config-title">Block Settings</span>

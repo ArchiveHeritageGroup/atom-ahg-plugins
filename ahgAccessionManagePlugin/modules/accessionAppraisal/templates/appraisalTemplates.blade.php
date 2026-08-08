@@ -1,3 +1,9 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .access-display-none-93b8 { display:none; }
+  .access-width-80px-8935 { width:80px; }
+</style>
 @php decorate_with('layout_1col') @endphp
 
 @slot('title')
@@ -90,7 +96,7 @@
               </tr>
               {{-- Expandable criteria detail --}}
               @if ($criteriaCount > 0)
-              <tr class="criteria-row" id="criteria_{{ $t->id }}" style="display:none;">
+              <tr class="criteria-row" id="criteria_{{ $t->id }}" class="access-display-none-93b8">
                 <td colspan="5" class="bg-light">
                   <div class="px-3 py-2">
                     <strong class="small text-uppercase text-muted">{{ __('Criteria:') }}</strong>
@@ -98,7 +104,7 @@
                       <thead>
                         <tr class="text-muted small">
                           <th>{{ __('Criterion') }}</th>
-                          <th style="width:80px;">{{ __('Weight') }}</th>
+                          <th class="access-width-80px-8935">{{ __('Weight') }}</th>
                           <th>{{ __('Description') }}</th>
                         </tr>
                       </thead>

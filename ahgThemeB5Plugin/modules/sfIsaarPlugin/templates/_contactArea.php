@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-display-none-93b8 { display:none; }
+</style>
 <?php
 /**
  * Extended Contact information area for authority records
@@ -64,7 +71,7 @@ $titles = ['Mr', 'Mrs', 'Ms', 'Miss', 'Dr', 'Prof', 'Rev', 'Hon', 'Sir', 'Dame',
     <div class="card mb-4">
       <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="bi bi-telephone me-2"></i><?php echo __('Contact'); ?> #<span class="contact-number"><?php echo $index + 1; ?></span></h5>
-        <button type="button" class="btn btn-sm btn-outline-light remove-contact" <?php echo $index === 0 && $contacts->count() === 1 ? 'style="display:none;"' : ''; ?>>
+        <button type="button" class="btn btn-sm btn-outline-light remove-contact" <?php echo $index === 0 && $contacts->count() === 1 ? 'class="themeb-display-none-93b8"' : ''; ?>>
           <i class="bi bi-trash"></i> <?php echo __('Remove'); ?>
         </button>
       </div>

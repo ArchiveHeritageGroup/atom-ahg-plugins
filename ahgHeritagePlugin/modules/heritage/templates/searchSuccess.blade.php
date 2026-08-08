@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-max-height-180px-width-100-c1fa { max-height: 180px; width: 100%; }
+  .herita-min-height-150px-7b39 { min-height: 150px; }
+</style>
 
 @php
 // Helper to deeply convert Symfony escaped arrays to plain arrays
@@ -251,8 +257,8 @@ $filters = $toArray($filters ?? []);
                         @if (!empty($result['thumbnail']))
                         <img src="{{ $result['thumbnail'] }}"
                              alt="{{ $result['title'] }}"
-                             class="img-fluid rounded-start h-100 object-fit-cover"
-                             style="max-height: 180px; width: 100%;"
+                             class="img-fluid rounded-start h-100 object-fit-cover herita-max-height-180px-width-100-c1fa"
+                             
                              loading="lazy"
                              onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'bg-light h-100 d-flex align-items-center justify-content-center text-muted rounded-start\' style=\'min-height: 150px;\'><i class=\'fas fa-image fs-1\'></i></div>';">
                         @else
@@ -275,7 +281,7 @@ $filters = $toArray($filters ?? []);
                             default => 'bg-secondary'
                         };
                         @endphp
-                        <div class="{{ $bgClass }} bg-opacity-25 h-100 d-flex align-items-center justify-content-center rounded-start" style="min-height: 150px;">
+                        <div class="{{ $bgClass }} bg-opacity-25 h-100 d-flex align-items-center justify-content-center rounded-start herita-min-height-150px-7b39" >
                             <i class="fas {{ $iconClass }} fs-1 text-{{ str_replace('bg-', '', $bgClass) }}"></i>
                         </div>
                         @endif

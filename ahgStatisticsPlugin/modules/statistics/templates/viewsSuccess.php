@@ -1,4 +1,11 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .statis-max-height-400px-overflow-y--f4d9 { max-height: 400px; overflow-y: auto; }
+</style>
 
 <div class="container-fluid px-4 py-3">
     <nav aria-label="breadcrumb" class="mb-3">
@@ -58,7 +65,7 @@
                 <div class="card-header">
                     <h5 class="mb-0">Data Table</h5>
                 </div>
-                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                <div class="card-body p-0 statis-max-height-400px-overflow-y--f4d9" >
                     <table class="table table-sm table-hover mb-0">
                         <thead class="table-light sticky-top">
                             <tr>

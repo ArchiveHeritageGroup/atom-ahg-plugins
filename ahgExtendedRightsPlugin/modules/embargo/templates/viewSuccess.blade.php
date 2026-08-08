@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .extend-display-inline-5f8f { display:inline; }
+  .extend-display-none-93b8 { display:none; }
+</style>
 
 @section('sidebar')
   <div class="sidebar-widget">
@@ -137,7 +143,7 @@
                 @endif
               </td>
               <td>
-                <form method="post" action="{{ url_for(['module' => 'embargo', 'action' => 'removeException', 'id' => $exception['id'], 'embargo_id' => $embargo['id']]) }}" style="display:inline;">
+                <form method="post" action="{{ url_for(['module' => 'embargo', 'action' => 'removeException', 'id' => $exception['id'], 'embargo_id' => $embargo['id']]) }}" class="extend-display-inline-5f8f">
                   <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('{{ __('Are you sure?') }}');">
                     <i class="fas fa-trash"></i>
                   </button>
@@ -236,7 +242,7 @@
             <input type="number" name="exception_id" id="exception_id" class="form-control">
           </div>
 
-          <div id="ip_range_fields" style="display:none;">
+          <div id="ip_range_fields" class="extend-display-none-93b8">
             <div class="mb-3">
               <label for="ip_range_start" class="form-label">{{ __('IP Range Start') }}</label>
               <input type="text" name="ip_range_start" id="ip_range_start" class="form-control" placeholder="192.168.1.1">

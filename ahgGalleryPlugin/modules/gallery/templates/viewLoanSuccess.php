@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .galler-width-auto-4f15 { width:auto; }
+</style>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'gallery', 'action' => 'dashboard']); ?>">Gallery</a></li>
@@ -14,7 +21,7 @@
     </div>
     <form method="post" class="d-flex gap-2">
         <input type="hidden" name="do" value="update_status">
-        <select name="status" class="form-select form-select-sm" style="width:auto">
+        <select name="status" class="form-select form-select-sm galler-width-auto-4f15" >
             <?php foreach (['inquiry', 'requested', 'approved', 'agreed', 'in_transit_out', 'on_loan', 'in_transit_return', 'returned', 'cancelled', 'declined'] as $s): ?>
                 <option value="<?php echo $s; ?>" <?php echo $loan->status === $s ? 'selected' : ''; ?>><?php echo ucfirst(str_replace('_', ' ', $s)); ?></option>
             <?php endforeach; ?>

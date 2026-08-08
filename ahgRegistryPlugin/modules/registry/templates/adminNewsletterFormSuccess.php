@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-min-height-300px-f144 { min-height:300px; }
+</style>
 
 <?php slot('title'); ?><?php echo $newsletter ? __('Edit Newsletter') : __('New Newsletter'); ?> — Admin<?php end_slot(); ?>
 
@@ -88,7 +95,7 @@
                 <button class="ql-clean"></button>
               </span>
             </div>
-            <div id="editor-container" style="min-height:300px;"></div>
+            <div id="editor-container" class="regist-min-height-300px-f144"></div>
             <textarea name="content" id="nl-content" class="d-none"><?php echo htmlspecialchars($newsletter->content ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
           </div>
 

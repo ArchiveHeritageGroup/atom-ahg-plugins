@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-height-180px-648e { height: 180px; }
+  .market-height-180px-object-fit-cove-b052 { height: 180px; object-fit: cover; }
+  .market-height-200px-0921 { height: 200px; }
+  .market-height-200px-object-fit-cove-e98b { height: 200px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Live Auctions'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -26,11 +36,11 @@
           <div class="card h-100 border-danger">
             <?php if (isset($auc->featured_image_path) && $auc->featured_image_path): ?>
               <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-                <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" style="height: 180px; object-fit: cover;">
+                <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" class="market-height-180px-object-fit-cove-b052">
               </a>
             <?php else: ?>
               <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center market-height-180px-648e" >
                   <i class="fas fa-gavel fa-2x text-muted"></i>
                 </div>
               </a>
@@ -69,11 +79,11 @@
         <div class="card h-100">
           <?php if (isset($auc->featured_image_path) && $auc->featured_image_path): ?>
             <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-              <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" style="height: 200px; object-fit: cover;">
+              <img src="<?php echo esc_entities($auc->featured_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($auc->title); ?>" class="market-height-200px-object-fit-cove-e98b">
             </a>
           <?php else: ?>
             <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'listing', 'slug' => $auc->slug]); ?>">
-              <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+              <div class="card-img-top bg-light d-flex align-items-center justify-content-center market-height-200px-0921" >
                 <i class="fas fa-gavel fa-2x text-muted"></i>
               </div>
             </a>

@@ -1,4 +1,12 @@
 <?php echo get_component('default', 'updateCheck') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .multit-width-150px-c251 { width: 150px; }
+  .multit-width-200px-5c2d { width: 200px; }
+</style>
 
 <div class="container-fluid py-4">
   <div class="row">
@@ -87,13 +95,13 @@
             Tenants
           </h5>
           <form class="d-flex gap-2" method="get" action="<?php echo url_for('tenant_admin') ?>">
-            <select name="status" class="form-select form-select-sm" style="width: 150px;">
+            <select name="status" class="form-select form-select-sm multit-width-150px-c251" >
               <option value="">All Status</option>
               <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : '' ?>>Active</option>
               <option value="trial" <?php echo $statusFilter === 'trial' ? 'selected' : '' ?>>Trial</option>
               <option value="suspended" <?php echo $statusFilter === 'suspended' ? 'selected' : '' ?>>Suspended</option>
             </select>
-            <input type="text" name="search" class="form-control form-control-sm" style="width: 200px;" placeholder="Search..." value="<?php echo esc_specialchars($searchFilter) ?>">
+            <input type="text" name="search" class="form-control form-control-sm multit-width-200px-5c2d"  placeholder="Search..." value="<?php echo esc_specialchars($searchFilter) ?>">
             <button type="submit" class="btn btn-sm btn-light">
               <i class="fas fa-search"></i>
             </button>

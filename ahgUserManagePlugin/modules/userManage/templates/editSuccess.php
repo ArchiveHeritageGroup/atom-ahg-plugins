@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .userma-height-5px-9d49 { height: 5px; }
+  .userma-width-0-1f28 { width: 0%; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
@@ -70,8 +78,8 @@
                 </label>
                 <input type="password" class="form-control" id="new_pw" name="new_pw"
                        <?php echo $isNew ? 'required' : ''; ?> autocomplete="new-password">
-                <div class="progress mt-1" style="height: 5px;" id="passwordStrengthBar">
-                  <div class="progress-bar" role="progressbar" style="width: 0%;" id="passwordStrengthFill"></div>
+                <div class="progress mt-1 userma-height-5px-9d49"  id="passwordStrengthBar">
+                  <div class="progress-bar" role="progressbar" class="userma-width-0-1f28" id="passwordStrengthFill"></div>
                 </div>
                 <div class="form-text" id="passwordStrengthText">
                   <?php if (!$isNew) { ?>

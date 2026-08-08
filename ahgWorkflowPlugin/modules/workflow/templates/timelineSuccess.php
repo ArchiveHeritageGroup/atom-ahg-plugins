@@ -71,7 +71,7 @@
                 <div class="card mb-2">
                     <div class="card-body py-2 px-3">
                         <div class="d-flex align-items-start">
-                            <span class="badge me-3 mt-1" style="background-color: <?php echo $color ?>; min-width: 120px;">
+                            <span class="badge me-3 mt-1" data-ahg-style="background-color: <?php echo $color ?>; min-width: 120px;">
                                 <i class="fas <?php echo $icon ?> me-1"></i><?php echo esc_entities($label) ?>
                             </span>
                             <div class="flex-grow-1">

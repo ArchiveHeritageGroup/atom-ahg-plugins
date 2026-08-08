@@ -1,4 +1,13 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dedupe-width-140px-1417 { width: 140px; }
+  .dedupe-width-40px-4792 { width: 40px; }
+  .dedupe-width-80px-588c { width: 80px; }
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -87,16 +96,16 @@
                 <table class="table table-hover mb-0">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">
+                            <th class="dedupe-width-40px-4792">
                                 <input type="checkbox" class="form-check-input" id="checkAll">
                             </th>
-                            <th style="width: 80px;">Score</th>
+                            <th class="dedupe-width-80px-588c">Score</th>
                             <th>Record A</th>
                             <th>Record B</th>
                             <th>Method</th>
                             <th>Status</th>
                             <th>Detected</th>
-                            <th style="width: 140px;">Actions</th>
+                            <th class="dedupe-width-140px-1417">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

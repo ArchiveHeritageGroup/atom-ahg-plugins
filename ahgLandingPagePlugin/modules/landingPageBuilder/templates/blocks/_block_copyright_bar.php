@@ -18,19 +18,19 @@ if ($showVersion && defined('qubitConfiguration::VERSION')) {
     $atomVersion = ' ' . qubitConfiguration::VERSION;
 }
 ?>
-<div class="copyright-bar py-2<?php echo $sticky ? ' sticky-bottom' : '' ?>" style="background-color: <?php echo esc_entities($bgColor) ?>; color: <?php echo esc_entities($textColor) ?>;<?php echo $sticky ? ' position: sticky; bottom: 0; z-index: 1000;' : '' ?>">
+<div class="copyright-bar py-2<?php echo $sticky ? ' sticky-bottom' : '' ?>" data-ahg-style="background-color: <?php echo esc_entities($bgColor) ?>; color: <?php echo esc_entities($textColor) ?>;<?php echo $sticky ? ' position: sticky; bottom: 0; z-index: 1000;' : '' ?>">
   <div class="container">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small">
       <span><?php echo esc_entities($copyright) ?></span>
       <span>
         <?php if (!empty($poweredBy)): ?>
-          Powered by <a href="<?php echo esc_entities($poweredByUrl) ?>" class="text-decoration-none" style="color: <?php echo esc_entities($textColor) ?>;" target="_blank"><?php echo esc_entities($poweredBy . $atomVersion) ?></a>
+          Powered by <a href="<?php echo esc_entities($poweredByUrl) ?>" class="text-decoration-none" data-ahg-style="color: <?php echo esc_entities($textColor) ?>;" target="_blank"><?php echo esc_entities($poweredBy . $atomVersion) ?></a>
         <?php endif ?>
         <?php if (!empty($poweredBy) && !empty($enhancedBy)): ?>
           <span class="mx-1">|</span>
         <?php endif ?>
         <?php if (!empty($enhancedBy)): ?>
-          Enhanced by <a href="<?php echo esc_entities($enhancedByUrl) ?>" class="text-decoration-none" style="color: <?php echo esc_entities($textColor) ?>;" target="_blank"><?php echo esc_entities($enhancedBy) ?></a>
+          Enhanced by <a href="<?php echo esc_entities($enhancedByUrl) ?>" class="text-decoration-none" data-ahg-style="color: <?php echo esc_entities($textColor) ?>;" target="_blank"><?php echo esc_entities($enhancedBy) ?></a>
         <?php endif ?>
       </span>
     </div>

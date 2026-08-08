@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-width-80px-height-80px-732c { width: 80px; height: 80px; }
+  .market-width-80px-height-80px-objec-02c4 { width: 80px; height: 80px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Following'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -57,9 +65,9 @@
         <div class="card h-100 text-center">
           <div class="card-body">
             <?php if ($seller->avatar_path): ?>
-              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="<?php echo esc_entities($seller->display_name); ?>" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="<?php echo esc_entities($seller->display_name); ?>" class="rounded-circle mb-3 market-width-80px-height-80px-objec-02c4" >
             <?php else: ?>
-              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3 market-width-80px-height-80px-732c" >
                 <i class="fas fa-user fa-2x"></i>
               </div>
             <?php endif; ?>

@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+</style>
 <section class="heritage-activity py-5">
     <div class="container-xxl">
 
@@ -17,8 +22,8 @@
                             <div class="d-flex align-items-start">
                                 <!-- Avatar -->
                                 <div class="heritage-avatar flex-shrink-0 me-3">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                         style="width: 40px; height: 40px;">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center herita-width-40px-height-40px-9a6a"
+                                         >
                                         {{ strtoupper(substr($activity['user'] ?? 'A', 0, 1)) }}
                                     </div>
                                 </div>

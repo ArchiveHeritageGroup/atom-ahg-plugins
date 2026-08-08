@@ -1,4 +1,12 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .privac-font-size-1-5rem-fa41 { font-size: 1.5rem; }
+  .privac-width-50px-ae1f { width: 50px; }
+</style>
 
 <div class="container-fluid py-4">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
@@ -114,7 +122,7 @@
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50px;"></th>
+                            <th class="privac-width-50px-ae1f"></th>
                             <th><?php echo __('Code'); ?></th>
                             <th><?php echo __('Name'); ?></th>
                             <th><?php echo __('Country'); ?></th>
@@ -129,7 +137,7 @@
                         <tr<?php echo ($activeJurisdiction && $activeJurisdiction->code === $j->code) ? ' class="table-primary"' : ''; ?>>
                             <td class="text-center">
                                 <?php if ($j->icon): ?>
-                                <span style="font-size: 1.5rem;"><?php echo $j->icon; ?></span>
+                                <span class="privac-font-size-1-5rem-fa41"><?php echo $j->icon; ?></span>
                                 <?php endif; ?>
                             </td>
                             <td>

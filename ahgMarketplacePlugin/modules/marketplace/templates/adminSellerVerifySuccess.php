@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-max-height-200px-object-fit--43af { max-height: 200px; object-fit: cover; }
+  .market-object-fit-cover-3dc4 { object-fit: cover; }
+  .market-width-200px-5c2d { width: 200px; }
+  .market-width-80px-height-80px-732c { width: 80px; height: 80px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Verify Seller'); ?> - <?php echo __('Marketplace Admin'); ?><?php end_slot(); ?>
 
@@ -47,7 +57,7 @@
     <!-- Banner -->
     <?php if ($seller->banner_path): ?>
       <div class="card mb-4">
-        <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="card-img-top" style="max-height: 200px; object-fit: cover;">
+        <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="card-img-top market-max-height-200px-object-fit--43af" >
       </div>
     <?php endif; ?>
 
@@ -59,9 +69,9 @@
       <div class="card-body">
         <div class="d-flex align-items-center mb-4">
           <?php if ($seller->avatar_path): ?>
-            <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-3" width="80" height="80" style="object-fit: cover;">
+            <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-3" width="80" height="80" class="market-object-fit-cover-3dc4">
           <?php else: ?>
-            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px;">
+            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3 market-width-80px-height-80px-732c" >
               <i class="fas fa-user fa-2x text-muted"></i>
             </div>
           <?php endif; ?>
@@ -74,7 +84,7 @@
         <table class="table table-sm mb-0">
           <tbody>
             <tr>
-              <th style="width: 200px;"><?php echo __('Seller Type'); ?></th>
+              <th class="market-width-200px-5c2d"><?php echo __('Seller Type'); ?></th>
               <td><span class="badge bg-secondary"><?php echo esc_entities(ucfirst($seller->seller_type ?? '-')); ?></span></td>
             </tr>
             <tr>

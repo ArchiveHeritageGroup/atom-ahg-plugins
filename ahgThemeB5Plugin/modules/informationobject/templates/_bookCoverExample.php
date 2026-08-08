@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-max-height-300px-a0b0 { max-height: 300px; }
+</style>
 <?php
 /**
  * Example: Display book cover in information object view.
@@ -27,7 +34,7 @@ if (!$isbn): ?>
              alt="<?php echo __('Book cover'); ?>"
              class="img-fluid rounded shadow-sm"
              loading="lazy"
-             style="max-height: 300px;"
+             class="themeb-max-height-300px-a0b0"
              onerror="this.onerror=null; this.src='/plugins/ahgThemeB5Plugin/images/no-cover.png';">
     </a>
     

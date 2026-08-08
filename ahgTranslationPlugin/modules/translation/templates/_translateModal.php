@@ -1,4 +1,15 @@
 <?php use_helper('I18N') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .transl-display-none-93b8 { display:none; }
+  .transl-display-none-white-space-pre-164d { display:none; white-space:pre-wrap; }
+  .transl-max-height-75vh-overflow-y-a-364b { max-height: 75vh; overflow-y: auto; }
+  .transl-max-height-150px-d373 { max-height:150px; }
+  .transl-max-height-150px-overflow-y--ea8b { max-height:150px;overflow-y:auto; }
+</style>
 
 <?php
   $objectId = (int)$objectId;
@@ -88,7 +99,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="<?php echo __('Close') ?>"></button>
       </div>
 
-      <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+      <div class="modal-body transl-max-height-75vh-overflow-y-a-364b" >
 
         <!-- STEP 1: Field Selection -->
         <div class="ahg-step-1">
@@ -198,7 +209,7 @@
         </div>
 
         <!-- STEP 2: Review Translations -->
-        <div class="ahg-step-2" style="display:none;">
+        <div class="ahg-step-2 transl-display-none-93b8" >
           <div class="alert alert-warning py-2 mb-3">
             <i class="fas fa-eye me-1"></i>
             <strong><?php echo __('Review Translations') ?></strong> - Edit if needed, then click "Approve & Save" to apply.
@@ -211,7 +222,7 @@
 
         <!-- Status Messages -->
         <div class="mt-3">
-          <div class="alert py-2 mb-0 ahg-translate-status" style="display:none; white-space:pre-wrap;"></div>
+          <div class="alert py-2 mb-0 ahg-translate-status transl-display-none-white-space-pre-164d" ></div>
         </div>
       </div>
 
@@ -227,7 +238,7 @@
         </div>
 
         <!-- Step 2 buttons -->
-        <div class="ahg-step-2-buttons" style="display:none;">
+        <div class="ahg-step-2-buttons transl-display-none-93b8" >
           <button type="button" class="btn btn-outline-secondary ahg-back-to-step1">
             <i class="fas fa-arrow-left me-1"></i><?php echo __('Back') ?>
           </button>
@@ -356,7 +367,7 @@
                 <div class="row">
                   <div class="col-md-6">
                     <label class="form-label fw-bold text-muted">Source Text</label>
-                    <div class="border rounded p-2 bg-light" style="max-height:150px;overflow-y:auto;">
+                    <div class="border rounded p-2 bg-light transl-max-height-150px-overflow-y--ea8b" >
                       ${escapeHtml(r.sourceText || '(empty)')}
                     </div>
                   </div>
@@ -365,7 +376,7 @@
                       <i class="fas fa-arrow-right me-1"></i>Translation
                     </label>
                     <textarea class="form-control ahg-translated-text" data-field="${r.field}" data-draft-id="${r.draft_id}"
-                              rows="4" style="max-height:150px;">${escapeHtml(r.translation || '')}</textarea>
+                              rows="4" class="transl-max-height-150px-d373">${escapeHtml(r.translation || '')}</textarea>
                   </div>
                 </div>
               ` : `

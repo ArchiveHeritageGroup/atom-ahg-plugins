@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-7em-0ac1 { font-size: 0.7em; }
+  .regist-width-10px-height-10px-8ea1 { width: 10px; height: 10px; }
+</style>
 <?php
   $statusColors = [
     'online' => 'success',
@@ -17,7 +25,7 @@
       <div class="d-flex align-items-start">
         <!-- Status indicator -->
         <div class="me-2 mt-1 flex-shrink-0">
-          <span class="d-inline-block rounded-circle bg-<?php echo $sColor; ?>" style="width: 10px; height: 10px;" title="<?php echo htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>"></span>
+          <span class="d-inline-block rounded-circle bg-<?php echo $sColor; ?> regist-width-10px-height-10px-8ea1"  title="<?php echo htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>"></span>
         </div>
 
         <div class="flex-grow-1 min-width-0">
@@ -26,7 +34,7 @@
           <?php if (!empty($inst->url)): ?>
             <br><a href="<?php echo htmlspecialchars($inst->url, ENT_QUOTES, 'UTF-8'); ?>" class="small text-decoration-none" target="_blank" rel="noopener">
               <?php echo htmlspecialchars(preg_replace('#^https?://#', '', $inst->url), ENT_QUOTES, 'UTF-8'); ?>
-              <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
+              <i class="fas fa-external-link-alt ms-1 regist-font-size-0-7em-0ac1" ></i>
             </a>
           <?php endif; ?>
 

@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-max-height-300px-overflow-au-1bc6 { max-height:300px; overflow:auto; }
+  .resear-max-height-400px-overflow-au-1cbf { max-height:400px; overflow:auto; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -65,7 +73,7 @@
 <!-- Data Items -->
 <div class="card mb-4">
     <div class="card-header"><h5 class="mb-0">Items (<?php echo count($roCrate['items'] ?? []); ?>)</h5></div>
-    <div class="card-body" style="max-height:400px; overflow:auto;">
+    <div class="card-body resear-max-height-400px-overflow-au-1cbf" >
         <?php if (!empty($roCrate['items'])): ?>
         <div class="table-responsive">
             <table class="table table-sm mb-0">
@@ -91,7 +99,7 @@
 <?php if (!empty($roCrate['assertions'])): ?>
 <div class="card mb-4">
     <div class="card-header"><h5 class="mb-0">Assertions (<?php echo count($roCrate['assertions']); ?>)</h5></div>
-    <div class="card-body" style="max-height:300px; overflow:auto;">
+    <div class="card-body resear-max-height-300px-overflow-au-1bc6" >
         <div class="table-responsive">
             <table class="table table-sm mb-0">
                 <thead><tr><th>Type</th><th>Predicate</th><th>Status</th></tr></thead>

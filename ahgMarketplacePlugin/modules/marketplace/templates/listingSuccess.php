@@ -1,4 +1,15 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-max-height-500px-object-fit--932b { max-height: 500px; object-fit: contain; }
+  .market-min-height-400px-45b4 { min-height: 400px; }
+  .market-object-fit-cover-3dc4 { object-fit: cover; }
+  .market-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+  .market-width-80px-height-80px-curso-eb22 { width: 80px; height: 80px; cursor: pointer; }
+</style>
 
 <?php slot('title'); ?><?php echo esc_entities($listing->title); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -46,11 +57,11 @@
           if (!$primaryImage && count($thumbs) > 0) { $primaryImage = $thumbs[0]; }
         }
       ?>
-      <div class="border rounded overflow-hidden bg-light text-center" style="min-height: 400px;">
+      <div class="border rounded overflow-hidden bg-light text-center market-min-height-400px-45b4" >
         <?php if ($primaryImage): ?>
-          <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="img-fluid" id="main-image" style="max-height: 500px; object-fit: contain;">
+          <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="img-fluid" id="main-image" class="market-max-height-500px-object-fit--932b">
         <?php elseif ($listing->featured_image_path): ?>
-          <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="img-fluid" id="main-image" style="max-height: 500px; object-fit: contain;">
+          <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="<?php echo esc_entities($listing->title); ?>" class="img-fluid" id="main-image" class="market-max-height-500px-object-fit--932b">
         <?php else: ?>
           <div class="d-flex align-items-center justify-content-center h-100 py-5">
             <i class="fas fa-image fa-5x text-muted"></i>
@@ -70,8 +81,8 @@
     <?php if (count($thumbs) > 1): ?>
       <div class="d-flex flex-wrap gap-2">
         <?php foreach ($thumbs as $idx => $thumb): ?>
-          <div class="border rounded overflow-hidden listing-thumb" style="width: 80px; height: 80px; cursor: pointer;" data-src="<?php echo esc_entities($thumb->file_path); ?>">
-            <img src="<?php echo esc_entities($thumb->file_path); ?>" alt="<?php echo esc_entities($thumb->caption ?? __('Image %1%', ['%1%' => $idx + 1])); ?>" class="w-100 h-100" style="object-fit: cover;">
+          <div class="border rounded overflow-hidden listing-thumb market-width-80px-height-80px-curso-eb22"  data-src="<?php echo esc_entities($thumb->file_path); ?>">
+            <img src="<?php echo esc_entities($thumb->file_path); ?>" alt="<?php echo esc_entities($thumb->caption ?? __('Image %1%', ['%1%' => $idx + 1])); ?>" class="w-100 h-100 market-object-fit-cover-3dc4" >
           </div>
         <?php endforeach; ?>
       </div>
@@ -176,9 +187,9 @@
         <div class="card-body">
           <div class="d-flex align-items-center mb-2">
             <?php if ($seller->avatar_path): ?>
-              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-2" width="40" height="40" class="market-object-fit-cover-3dc4">
             <?php else: ?>
-              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2 market-width-40px-height-40px-9a6a" >
                 <i class="fas fa-user"></i>
               </div>
             <?php endif; ?>
@@ -320,7 +331,7 @@
         <div class="tab-pane fade" id="panel-seller" role="tabpanel">
           <div class="d-flex align-items-start">
             <?php if ($seller->avatar_path): ?>
-              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
+              <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle me-3" width="60" height="60" class="market-object-fit-cover-3dc4">
             <?php endif; ?>
             <div>
               <h6>

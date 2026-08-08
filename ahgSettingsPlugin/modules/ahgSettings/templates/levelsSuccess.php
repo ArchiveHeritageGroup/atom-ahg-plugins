@@ -1,4 +1,12 @@
 <?php use_helper('Javascript'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-width-100px-e3d2 { width: 100px; }
+  .settin-width-80px-588c { width: 80px; }
+</style>
 
 <div class="container-fluid py-4">
   <div class="row">
@@ -107,8 +115,8 @@
                   <thead>
                     <tr>
                       <th><?php echo __('Level'); ?></th>
-                      <th style="width: 100px;"><?php echo __('Order'); ?></th>
-                      <th style="width: 80px;"><?php echo __('Actions'); ?></th>
+                      <th class="settin-width-100px-e3d2"><?php echo __('Order'); ?></th>
+                      <th class="settin-width-80px-588c"><?php echo __('Actions'); ?></th>
                     </tr>
                   </thead>
                   <tbody>

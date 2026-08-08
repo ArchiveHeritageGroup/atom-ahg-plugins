@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dedupe-height-20px-84ce { height: 20px; }
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -82,9 +89,9 @@
                                         <td><span class="text-success"><?php echo $stat->merged; ?></span></td>
                                         <td><span class="text-secondary"><?php echo $stat->dismissed; ?></span></td>
                                         <td>
-                                            <div class="progress" style="height: 20px;">
+                                            <div class="progress dedupe-height-20px-84ce" >
                                                 <div class="progress-bar bg-success" role="progressbar"
-                                                     style="width: <?php echo $rate; ?>%">
+                                                     data-ahg-style="width: <?php echo $rate; ?>%">
                                                     <?php echo $rate; ?>%
                                                 </div>
                                             </div>

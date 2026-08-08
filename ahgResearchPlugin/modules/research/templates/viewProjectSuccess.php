@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-28px-height-28px-displ-f66a { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -225,7 +232,7 @@
                         <div class="timeline-date text-muted fw-bold small mb-2 mt-3"><?php echo $itemDate; ?></div>
                     <?php endif; ?>
                     <div class="d-flex align-items-start mb-2 ms-3">
-                        <span class="badge bg-<?php echo $item->color; ?> rounded-circle p-1 me-2 mt-1" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+                        <span class="badge bg-<?php echo $item->color; ?> rounded-circle p-1 me-2 mt-1 resear-width-28px-height-28px-displ-f66a" >
                             <i class="fas fa-<?php echo $item->icon; ?> fa-xs"></i>
                         </span>
                         <div>

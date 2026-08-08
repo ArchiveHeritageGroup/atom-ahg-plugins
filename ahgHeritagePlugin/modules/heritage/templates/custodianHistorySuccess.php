@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-width-140px-1417 { width: 140px; }
+</style>
 <?php
 /**
  * Heritage Custodian Audit History.
@@ -76,7 +83,7 @@ $filters = $historyData['filters'] ?? [];
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 140px;">Timestamp</th>
+                        <th class="herita-width-140px-1417">Timestamp</th>
                         <th>User</th>
                         <th>Action</th>
                         <th>Object</th>

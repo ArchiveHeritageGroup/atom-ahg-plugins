@@ -1,4 +1,11 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .privac-width-100px-e3d2 { width: 100px; }
+  .privac-width-120px-b15a { width: 120px; }
+  .privac-width-150px-c251 { width: 150px; }
+</style>
 
 @section('content')
 <div class="container-fluid py-4">
@@ -154,9 +161,9 @@ $badges = [
                             <thead class="table-light">
                                 <tr>
                                     <th>Object</th>
-                                    <th class="text-center" style="width: 100px;">PII Count</th>
-                                    <th style="width: 150px;">Scanned</th>
-                                    <th style="width: 120px;">Actions</th>
+                                    <th class="text-center privac-width-100px-e3d2" >PII Count</th>
+                                    <th class="privac-width-150px-c251">Scanned</th>
+                                    <th class="privac-width-120px-b15a">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

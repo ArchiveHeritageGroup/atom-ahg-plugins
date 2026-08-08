@@ -1,4 +1,14 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-max-height-200px-8de0 { max-height: 200px; }
+  .regist-object-fit-cover-max-height--4f95 { object-fit: cover; max-height: 200px; }
+  .regist-width-64px-height-64px-516f { width: 64px; height: 64px; }
+  .regist-width-64px-height-64px-objec-97bb { width: 64px; height: 64px; object-fit: contain; }
+</style>
 
 <?php $detail = $group['group']; ?>
 
@@ -22,8 +32,8 @@
 
 <!-- Banner -->
 <?php if (!empty($detail->banner_path)): ?>
-<div class="mb-4 rounded-3 overflow-hidden" style="max-height: 200px;">
-  <img src="<?php echo htmlspecialchars($detail->banner_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="w-100" style="object-fit: cover; max-height: 200px;">
+<div class="mb-4 rounded-3 overflow-hidden regist-max-height-200px-8de0" >
+  <img src="<?php echo htmlspecialchars($detail->banner_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="w-100 regist-object-fit-cover-max-height--4f95" >
 </div>
 <?php endif; ?>
 
@@ -33,9 +43,9 @@
 
     <div class="d-flex align-items-start mb-4">
       <?php if (!empty($detail->logo_path)): ?>
-      <img src="<?php echo htmlspecialchars($detail->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 64px; height: 64px; object-fit: contain;">
+      <img src="<?php echo htmlspecialchars($detail->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 regist-width-64px-height-64px-objec-97bb" >
       <?php else: ?>
-      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-64px-height-64px-516f" >
         <i class="fas fa-users fa-2x text-muted"></i>
       </div>
       <?php endif; ?>

@@ -1,4 +1,11 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .federa-display-none-224b { display: none; }
+</style>
 
 <div class="container-fluid py-3">
   <!-- Header -->
@@ -148,7 +155,7 @@
         </div>
 
         <!-- Test Results -->
-        <div class="card mb-4" id="testResultCard" style="display: none;">
+        <div class="card mb-4" id="testResultCard" class="federa-display-none-224b">
           <div class="card-header">
             <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Connection Test</h6>
           </div>

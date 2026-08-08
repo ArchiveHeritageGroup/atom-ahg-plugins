@@ -1,4 +1,12 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .sahra-height-1px-1cec { height:1px; }
+  .sahra-width-38px-height-38px-5308 { width:38px;height:38px; }
+</style>
 <?php $p = $permit; ?>
 
 <div class="container">
@@ -30,12 +38,12 @@
           <div class="d-flex justify-content-between text-center mb-4">
             <?php $i = 0; foreach ($steps as $key => $lbl): ?>
               <div class="flex-fill">
-                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center <?php echo ($curIdx >= $i) ? 'bg-success text-white' : 'bg-light text-muted'; ?>" style="width:38px;height:38px;">
+                <div class="rounded-circle mx-auto d-flex align-items-center justify-content-center <?php echo ($curIdx >= $i) ? 'bg-success text-white' : 'bg-light text-muted'; ?> sahra-width-38px-height-38px-5308" >
                   <?php echo ($curIdx > $i) ? '<i class="fas fa-check"></i>' : ($i + 1); ?>
                 </div>
                 <small class="<?php echo ($curIdx >= $i) ? 'fw-bold' : 'text-muted'; ?>"><?php echo $lbl; ?></small>
               </div>
-              <?php if ($i < count($steps) - 1): ?><div class="align-self-center flex-fill border-top mx-1" style="height:1px;"></div><?php endif; ?>
+              <?php if ($i < count($steps) - 1): ?><div class="align-self-center flex-fill border-top mx-1 sahra-height-1px-1cec" ></div><?php endif; ?>
             <?php $i++; endforeach; ?>
           </div>
 

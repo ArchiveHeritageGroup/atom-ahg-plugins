@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-text-transform-uppercase-90fe { text-transform: uppercase; }
+</style>
 <?php $isEdit = isset($standard) && $standard; ?>
 
 <div class="container-fluid py-4">
@@ -27,7 +34,7 @@
                                 <input type="text" name="code" class="form-control" required 
                                        value="<?php echo $isEdit ? esc_entities($standard->code) : ''; ?>"
                                        placeholder="e.g. GRAP103, IPSAS45" maxlength="20"
-                                       style="text-transform: uppercase;">
+                                       class="herita-text-transform-uppercase-90fe">
                                 <small class="text-muted"><?php echo __('Unique identifier, uppercase'); ?></small>
                             </div>
                             <div class="col-md-8">

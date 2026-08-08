@@ -1,4 +1,13 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+  .exhibi-width-2px-height-30px-backgr-5bcb { width: 2px; height: 30px; background: #dee2e6; margin: 5px auto; }
+  .exhibi-width-40px-height-40px-font--fbb2 { width: 40px; height: 40px; font-weight: bold; }
+</style>
 <?php
 // Convert escaped array to raw array for PHP array functions
 $stopsRaw = $storyline['stops'] ?? [];
@@ -62,12 +71,12 @@ if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
             <div class="card-body">
               <div class="d-flex">
                 <div class="stop-number me-3">
-                  <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                       style="width: 40px; height: 40px; font-weight: bold;">
+                  <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center exhibi-width-40px-height-40px-font--fbb2"
+                       >
                     <?php echo $stop['stop_order']; ?>
                   </div>
                   <?php if ($index < count($stops) - 1): ?>
-                    <div class="stop-connector" style="width: 2px; height: 30px; background: #dee2e6; margin: 5px auto;"></div>
+                    <div class="stop-connector exhibi-width-2px-height-30px-backgr-5bcb" ></div>
                   <?php endif; ?>
                 </div>
                 <div class="flex-grow-1">
@@ -177,7 +186,7 @@ if ($stopsRaw instanceof sfOutputEscaperArrayDecorator) {
       <div class="card-header">
         <h5 class="mb-0">Available Objects</h5>
       </div>
-      <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+      <div class="card-body exhibi-max-height-300px-overflow-y--3db9" >
         <?php if (!empty($exhibitionObjects)): ?>
           <ul class="list-unstyled small mb-0">
             <?php foreach ($exhibitionObjects as $obj): ?>

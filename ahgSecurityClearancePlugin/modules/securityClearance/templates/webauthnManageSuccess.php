@@ -1,5 +1,12 @@
 <?php $keys = $sf_data->getRaw('passkeys'); $n = sfConfig::get('csp_nonce', ''); $nonce = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>
-<div class="container py-4" style="max-width: 760px">
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-max-width-760px-0909 { max-width: 760px; }
+</style>
+<div class="container py-4 securi-max-width-760px-0909" >
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="h2"><i class="fas fa-fingerprint me-2"></i><?php echo __('Passkeys (WebAuthn / FIDO2)'); ?></span>
         <div class="btn-group">

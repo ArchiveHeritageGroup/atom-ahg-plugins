@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .report-display-none-9c76 { display: none; }
+  .report-width-110px-e822 { width: 110px; }
+</style>
 
 @section('title')
   <h1 class="multiline">
@@ -24,7 +30,7 @@
 
 			{!! $form->renderHiddenFields() !!}
 
-			<div id='divTypeOfReport' style="display: none">
+			<div id='divTypeOfReport' class="report-display-none-9c76">
 				{!! $form->className->label('Types of Reports')->renderRow() !!}
 			</div>
 
@@ -78,9 +84,9 @@
 		<th>{{ __('Forms') }}</th>
 
         @if ('CREATED_AT' != $form->getValue('dateOf'))
-          <th style="width: 110px">{{ __('Updated') }}</th>
+          <th class="report-width-110px-e822">{{ __('Updated') }}</th>
         @else
-          <th style="width: 110px">{{ __('Created') }}</th>
+          <th class="report-width-110px-e822">{{ __('Created') }}</th>
         @endif
       </tr>
     </thead><tbody>

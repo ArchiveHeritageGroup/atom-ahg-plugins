@@ -1,4 +1,12 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .report-margin-bottom-1rem-font-size-3781 { margin-bottom: 1rem; font-size: 0.85rem; }
+  .report-margin-top-1rem-988c { margin-top: 1rem; }
+  .report-max-height-600px-overflow-au-9c5b { max-height: 600px; overflow: auto; }
+  .report-width-100-8588 { width:100%; }
+</style>
 
 @section('title')
   <h1>{{ __('Browse Donor Report') }}</h1>
@@ -38,8 +46,8 @@
         <input class="c-btn c-btn-submit" type="submit" value="{{ __('Search') }}"/>
       </section>
 
-      <div style="margin-top: 1rem;">
-        <button type="button" onclick="exportTableToCSV()" class="c-btn" style="width:100%;">
+      <div class="report-margin-top-1rem-988c">
+        <button type="button" onclick="exportTableToCSV()" class="c-btn report-width-100-8588" >
           <i class="fa fa-download"></i> {{ __('Export CSV') }}
         </button>
       </div>
@@ -58,7 +66,7 @@
       {{ __('Found %1% results', ['%1%' => $total]) }}
     </div>
 
-    <div style="margin-bottom: 1rem; font-size: 0.85rem;">
+    <div class="report-margin-bottom-1rem-font-size-3781">
       <strong>{{ __('Show/Hide Columns') }}:</strong><br/>
       <label><input type="checkbox" onclick="toggleColumn(0)" checked> Authorized Form Of Name</label>
       <label><input type="checkbox" onclick="toggleColumn(1)" checked> Created</label>
@@ -110,7 +118,7 @@
     }
     </script>
 
-    <div class="table-responsive" style="max-height: 600px; overflow: auto;">
+    <div class="table-responsive report-max-height-600px-overflow-au-9c5b" >
       <table id="reportTable" class="table table-bordered table-striped table-sm">
         <thead>
           <tr>

@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-height-18px-949a { height:18px; }
+  .resear-white-space-pre-wrap-d077 { white-space:pre-wrap; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => 'dmps', 'unreadNotifications' => 0]) ?>
 <?php end_slot() ?>
@@ -35,15 +43,15 @@ $viewUrl = url_for(['module' => 'research', 'action' => 'dmpView', 'id' => $d->i
   </div>
 </div>
 
-<div class="progress mb-4" style="height:18px">
-  <div class="progress-bar<?php echo $pct < 100 ? ' bg-warning' : ' bg-success'; ?>" style="width:<?php echo $pct; ?>%"><?php echo $pct; ?>% <?php echo __('complete'); ?></div>
+<div class="progress mb-4 resear-height-18px-949a" >
+  <div class="progress-bar<?php echo $pct < 100 ? ' bg-warning' : ' bg-success'; ?>" data-ahg-style="width:<?php echo $pct; ?>%"><?php echo $pct; ?>% <?php echo __('complete'); ?></div>
 </div>
 
 <?php foreach (DmpService::SECTIONS as $col => $label): $text = trim((string) ($d->$col ?? '')); ?>
   <div class="card mb-3"><div class="card-body">
     <h5><?php echo __($label); ?></h5>
     <?php if ('' !== $text): ?>
-      <p class="mb-0" style="white-space:pre-wrap"><?php echo htmlspecialchars($text); ?></p>
+      <p class="mb-0 resear-white-space-pre-wrap-d077" ><?php echo htmlspecialchars($text); ?></p>
     <?php else: ?>
       <p class="text-muted fst-italic mb-0"><?php echo __('Not yet documented.'); ?></p>
     <?php endif; ?>

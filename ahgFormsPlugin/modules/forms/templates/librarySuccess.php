@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .forms-display-inline-5f8f { display:inline; }
+</style>
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
@@ -37,7 +44,7 @@
                         <?php if ($item['installed']): ?>
                             <span class="text-success"><i class="fas fa-check me-1"></i>Already installed</span>
                         <?php else: ?>
-                            <form method="post" action="<?php echo url_for(['module' => 'forms', 'action' => 'libraryInstall', 'id' => $item['id']]) ?>" style="display:inline;">
+                            <form method="post" action="<?php echo url_for(['module' => 'forms', 'action' => 'libraryInstall', 'id' => $item['id']]) ?>" class="forms-display-inline-5f8f">
                                 <button type="submit" class="btn btn-primary btn-sm">
                                     <i class="fas fa-download me-1"></i> Install
                                 </button>

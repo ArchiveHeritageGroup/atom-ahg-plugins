@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .integr-max-width-300px-4d14 { max-width:300px; }
+</style>
 <?php
 $holds = $sf_data->getRaw('holds') ?: [];
 $filterStatus = $sf_data->getRaw('filterStatus') ?: '';
@@ -45,7 +52,7 @@ $filterStatus = $sf_data->getRaw('filterStatus') ?: '';
                 <tr>
                   <td><?php echo $h->id; ?></td>
                   <td><?php echo $h->information_object_id; ?></td>
-                  <td class="text-truncate" style="max-width:300px"><?php echo htmlspecialchars($h->reason); ?></td>
+                  <td class="text-truncate integr-max-width-300px-4d14" ><?php echo htmlspecialchars($h->reason); ?></td>
                   <td><?php echo htmlspecialchars($h->placed_by); ?></td>
                   <td><?php echo $h->placed_at; ?></td>
                   <td><span class="badge <?php echo $h->status === 'active' ? 'bg-danger' : 'bg-secondary'; ?>"><?php echo $h->status; ?></span></td>

@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .cart-width-100px-e3d2 { width: 100px; }
+  .cart-width-150px-c251 { width: 150px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><i class="fas fa-store me-2"></i><?php echo __('E-Commerce Settings'); ?></h1>
@@ -212,8 +220,8 @@
                   <tr>
                     <th><?php echo __('Product Type'); ?></th>
                     <th><?php echo __('Type'); ?></th>
-                    <th class="text-center" style="width: 100px;"><?php echo __('Active'); ?></th>
-                    <th style="width: 150px;"><?php echo __('Price'); ?> (<?php echo $settings->currency ?? 'ZAR'; ?>)</th>
+                    <th class="text-center cart-width-100px-e3d2" ><?php echo __('Active'); ?></th>
+                    <th class="cart-width-150px-c251"><?php echo __('Price'); ?> (<?php echo $settings->currency ?? 'ZAR'; ?>)</th>
                   </tr>
                 </thead>
                 <tbody>

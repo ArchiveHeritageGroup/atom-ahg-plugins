@@ -1,4 +1,14 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-cursor-move-ba72 { cursor: move; }
+  .exhibi-display-none-224b { display: none; }
+  .exhibi-max-height-200px-overflow-y--d98f { max-height: 200px; overflow-y: auto; }
+  .exhibi-width-60px-902c { width: 60px; }
+</style>
 <?php
 // Convert escaped arrays to raw arrays for PHP array functions
 $objectsRaw = $objects ?? [];
@@ -58,7 +68,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
           <table class="table table-hover mb-0">
             <thead>
               <tr>
-                <th style="width: 60px;"></th>
+                <th class="exhibi-width-60px-902c"></th>
                 <th>Object</th>
                 <th>Section</th>
                 <th>Location</th>
@@ -71,7 +81,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
               <?php foreach ($objects as $object): ?>
                 <tr data-id="<?php echo $object['id']; ?>">
                   <td class="text-center">
-                    <i class="fas fa-grip-vertical text-muted drag-handle" style="cursor: move;"></i>
+                    <i class="fas fa-grip-vertical text-muted drag-handle exhibi-cursor-move-ba72" ></i>
                   </td>
                   <td>
                     <a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'index', 'slug' => $object['object_slug']]); ?>">
@@ -165,7 +175,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
       <div class="card-body">
         <h6><?php echo htmlspecialchars($exhibition['title']); ?></h6>
         <p class="small text-muted mb-2">
-          <span class="badge" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
             <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
           </span>
         </p>
@@ -226,7 +236,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
           <div class="mb-3">
             <label class="form-label">Search Objects</label>
             <input type="text" id="objectSearch" class="form-control" placeholder="Search by title, number, or description...">
-            <div id="searchResults" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+            <div id="searchResults" class="list-group mt-2 exhibi-max-height-200px-overflow-y--d98f" ></div>
             <input type="hidden" name="museum_object_id" id="selectedObjectId" required>
             <div id="selectedObject" class="alert alert-info mt-2 d-none"></div>
           </div>
@@ -259,7 +269,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
             <input type="checkbox" class="form-check-input" name="requires_loan" id="addRequiresLoan" value="1" onchange="document.getElementById('addLenderFields').style.display = this.checked ? 'block' : 'none';">
             <label class="form-check-label" for="addRequiresLoan"><?php echo __('Requires loan from another institution'); ?></label>
           </div>
-          <div id="addLenderFields" style="display: none;">
+          <div id="addLenderFields" class="exhibi-display-none-224b">
             <div class="mb-3">
               <label class="form-label"><?php echo __('Lender Institution'); ?></label>
               <input type="text" name="lender_institution" class="form-control" placeholder="<?php echo __('Institution lending the object'); ?>">
@@ -319,7 +329,7 @@ $sections = ($sectionsRaw instanceof sfOutputEscaperArrayDecorator) ? $sectionsR
             <input type="checkbox" class="form-check-input" name="requires_loan" id="editRequiresLoan" value="1" onchange="document.getElementById('editLenderFields').style.display = this.checked ? 'block' : 'none';">
             <label class="form-check-label" for="editRequiresLoan"><?php echo __('Requires loan from another institution'); ?></label>
           </div>
-          <div id="editLenderFields" style="display: none;">
+          <div id="editLenderFields" class="exhibi-display-none-224b">
             <div class="mb-3">
               <label class="form-label"><?php echo __('Lender Institution'); ?></label>
               <input type="text" name="lender_institution" id="editLenderInstitution" class="form-control" placeholder="<?php echo __('Institution lending the object'); ?>">

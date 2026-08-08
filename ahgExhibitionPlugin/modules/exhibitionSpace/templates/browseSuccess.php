@@ -1,4 +1,12 @@
 <?php /* heratio#146 PSIS port — Exhibition spaces browse (Heratio parity: AI Tools + pagination + actions) */ ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-height-8px-min-width-6rem-1c09 { height: 8px; min-width: 6rem; }
+  .exhibi-max-width-32rem-fb50 { max-width: 32rem; }
+</style>
 <?php
 $pageUrl = function ($p) use ($search) {
     $params = ['module' => 'exhibitionSpace', 'action' => 'browse', 'page' => $p];
@@ -34,7 +42,7 @@ $pageUrl = function ($p) use ($search) {
   <?php endif ?>
 
   <form method="get" action="<?php echo url_for(['module' => 'exhibitionSpace', 'action' => 'browse']) ?>" class="mb-3" role="search">
-    <div class="input-group input-group-sm" style="max-width: 32rem;">
+    <div class="input-group input-group-sm exhibi-max-width-32rem-fb50" >
       <input type="search" name="subquery" class="form-control" placeholder="<?php echo __('Search by name or building...') ?>" value="<?php echo esc_entities($search) ?>">
       <button type="submit" class="btn btn-outline-primary"><i class="fas fa-search"></i></button>
       <?php if ($search !== ''): ?>
@@ -77,8 +85,8 @@ $pageUrl = function ($p) use ($search) {
                 <?php if ($row->capacity_value !== null && (float) $row->capacity_value > 0): ?>
                   <?php $pct = min(100, ((float) $row->used_units_today / (float) $row->capacity_value) * 100); ?>
                   <div class="d-flex align-items-center gap-2">
-                    <div class="progress flex-grow-1" style="height: 8px; min-width: 6rem;">
-                      <div class="progress-bar <?php echo $pct >= 90 ? 'bg-danger' : ($pct >= 70 ? 'bg-warning' : 'bg-success') ?>" style="width: <?php echo $pct ?>%"></div>
+                    <div class="progress flex-grow-1 exhibi-height-8px-min-width-6rem-1c09" >
+                      <div class="progress-bar <?php echo $pct >= 90 ? 'bg-danger' : ($pct >= 70 ? 'bg-warning' : 'bg-success') ?>" data-ahg-style="width: <?php echo $pct ?>%"></div>
                     </div>
                     <small class="text-muted"><?php echo (float) $row->used_units_today ?> / <?php echo (float) $row->capacity_value ?></small>
                   </div>

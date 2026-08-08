@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .vendor-display-none-224b { display: none; }
+</style>
 <?php 
 $vendorsRaw = isset($sf_data) ? $sf_data->getRaw('vendors') : $vendors;
 $serviceTypesRaw = isset($sf_data) ? $sf_data->getRaw('serviceTypes') : $serviceTypes;
@@ -111,7 +118,7 @@ $errorsRaw = isset($sf_data) ? $sf_data->getRaw('errors') : $errors;
 
                         <!-- Selected Items Table -->
                         <div id="selectedItemsContainer">
-                            <table class="table table-sm" id="selectedItemsTable" style="display: none;">
+                            <table class="table table-sm" id="selectedItemsTable" class="vendor-display-none-224b">
                                 <thead class="table-light">
                                     <tr>
                                         <th>Item</th>

@@ -1,4 +1,13 @@
 <?php use_helper('I18N'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .custom-cursor-grab-2621 { cursor:grab; }
+  .custom-width-100px-ee04 { width:100px; }
+  .custom-width-30px-342e { width:30px; }
+</style>
 
 <div class="container-fluid py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -42,7 +51,7 @@
                     <table class="table table-hover table-sm mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th style="width:30px"></th>
+                                <th class="custom-width-30px-342e"></th>
                                 <th>Key</th>
                                 <th>Label</th>
                                 <th>Type</th>
@@ -52,13 +61,13 @@
                                 <th class="text-center">Public</th>
                                 <th class="text-center">Repeat</th>
                                 <th class="text-center">Active</th>
-                                <th style="width:100px">Actions</th>
+                                <th class="custom-width-100px-ee04">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="cf-sortable" data-entity-type="<?php echo htmlspecialchars($entityType); ?>">
                             <?php foreach ($definitions as $def): ?>
                                 <tr data-id="<?php echo $def->id; ?>" class="<?php echo $def->is_active ? '' : 'table-secondary'; ?>">
-                                    <td class="cf-drag-handle" style="cursor:grab" title="Drag to reorder">
+                                    <td class="cf-drag-handle custom-cursor-grab-2621"  title="Drag to reorder">
                                         <i class="bi bi-grip-vertical"></i>
                                     </td>
                                     <td><code><?php echo htmlspecialchars($def->field_key); ?></code></td>

@@ -1,3 +1,9 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .access-height-6px-3586 { height: 6px; }
+  .access-width-100-be70 { width: 100%; }
+</style>
 @php decorate_with('layout_1col') @endphp
 
 @php
@@ -72,8 +78,8 @@
         </div>
       </form>
       <div id="upload-progress" class="mt-2 d-none">
-        <div class="progress" style="height: 6px;">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+        <div class="progress access-height-6px-3586" >
+          <div class="progress-bar progress-bar-striped progress-bar-animated access-width-100-be70" ></div>
         </div>
         <small class="text-muted"><?php echo __('Uploading...'); ?></small>
       </div>

@@ -1,4 +1,11 @@
 <?php decorate_with($sf_request->getParameter('view') === 'full' ? 'layout_1col' : 'layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-display-none-cb45 { display:none; }
+</style>
 <?php use_helper('Date') ?>
 <?php
 // Get limit from action (respects hits_per_page setting)
@@ -517,7 +524,7 @@ function getItemUrl($obj) {
 <?php slot('before-content'); ?>
 <style <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 /* Semantic-search modal backdrop: hidden by default via this (nonce'd) stylesheet.
-   It must NOT rely on an inline style="display:none" attribute - CSP style-src
+   It must NOT rely on an inline class="displa-display-none-cb45" attribute - CSP style-src
    drops inline style attributes, which left this transparent full-screen backdrop
    (position:fixed, z-index:1050) covering the page and swallowing every click, so
    browse loaded but was completely unresponsive. The open/close JS toggles

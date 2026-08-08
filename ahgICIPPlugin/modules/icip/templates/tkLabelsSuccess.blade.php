@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .icip-background-color-228b22-colo-41f9 { background-color: #228B22; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
+  .icip-background-color-8b4513-colo-2959 { background-color: #8B4513; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem; }
+</style>
 
 @section('content')
 <div class="container-xxl">
@@ -34,7 +40,7 @@
                             @if ($type->category === 'TK')
                                 <div class="col-md-6 mb-3">
                                     <div class="d-flex align-items-start">
-                                        <div class="icip-tk-label-icon me-2" style="background-color: #8B4513; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
+                                        <div class="icip-tk-label-icon me-2 icip-background-color-8b4513-colo-2959" >
                                             {{ strtoupper($type->code) }}
                                         </div>
                                         <div>
@@ -59,7 +65,7 @@
                             @if ($type->category === 'BC')
                                 <div class="col-md-6 mb-3">
                                     <div class="d-flex align-items-start">
-                                        <div class="icip-tk-label-icon me-2" style="background-color: #228B22; color: white; padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;">
+                                        <div class="icip-tk-label-icon me-2 icip-background-color-228b22-colo-41f9" >
                                             {{ strtoupper($type->code) }}
                                         </div>
                                         <div>

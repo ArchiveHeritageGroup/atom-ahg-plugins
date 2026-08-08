@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-40px-a922 { width:40px; }
+  .resear-width-auto-d3b6 { width:auto; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -26,7 +34,7 @@
                 <label for="selectAll" class="form-check-label">Select All</label>
             </div>
             <div class="d-flex gap-2">
-                <select name="new_status" class="form-select form-select-sm" style="width:auto;">
+                <select name="new_status" class="form-select form-select-sm resear-width-auto-d3b6" >
                     <option value="verified">Verify</option>
                     <option value="disputed">Dispute</option>
                     <option value="retracted">Retract</option>
@@ -40,7 +48,7 @@
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th style="width:40px;"></th>
+                    <th class="resear-width-40px-a922"></th>
                     <th>Subject</th>
                     <th>Predicate</th>
                     <th>Object</th>

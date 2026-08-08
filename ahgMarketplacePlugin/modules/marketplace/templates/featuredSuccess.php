@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-height-200px-0921 { height: 200px; }
+  .market-height-200px-object-fit-cove-e98b { height: 200px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Featured'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -40,9 +48,9 @@
           <a href="<?php echo url_for(['module' => 'marketplace', 'action' => 'collection', 'slug' => $col->slug]); ?>" class="text-decoration-none">
             <div class="card h-100 border-0 shadow-sm">
               <?php if ($col->cover_image_path): ?>
-                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" style="height: 200px; object-fit: cover;">
+                <img src="<?php echo esc_entities($col->cover_image_path); ?>" class="card-img-top" alt="<?php echo esc_entities($col->title); ?>" class="market-height-200px-object-fit-cove-e98b">
               <?php else: ?>
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center market-height-200px-0921" >
                   <i class="fas fa-layer-group fa-3x text-muted"></i>
                 </div>
               <?php endif; ?>

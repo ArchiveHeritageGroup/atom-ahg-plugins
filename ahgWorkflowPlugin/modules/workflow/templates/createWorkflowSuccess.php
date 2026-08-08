@@ -1,4 +1,11 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .workfl-display-none-cb45 { display:none; }
+</style>
 
 <?php include_partial('workflow/accessibilityHelpers') ?>
 
@@ -39,15 +46,15 @@
                                 </select>
                                 <small class="form-text text-muted">Where this workflow applies</small>
                             </div>
-                            <div class="col-md-6" id="scope_id_container" style="display:none">
+                            <div class="col-md-6" id="scope_id_container" class="workfl-display-none-cb45">
                                 <label for="scope_id" class="form-label">Select Target</label>
-                                <select class="form-select" id="scope_id_repo" name="scope_id" style="display:none">
+                                <select class="form-select" id="scope_id_repo" name="scope_id" class="workfl-display-none-cb45">
                                     <option value="">Select repository...</option>
                                     <?php foreach ($repositories as $repo): ?>
                                         <option value="<?php echo $repo->id ?>"><?php echo esc_entities($repo->name) ?></option>
                                     <?php endforeach ?>
                                 </select>
-                                <select class="form-select" id="scope_id_collection" name="scope_id" style="display:none">
+                                <select class="form-select" id="scope_id_collection" name="scope_id" class="workfl-display-none-cb45">
                                     <option value="">Select collection...</option>
                                     <?php foreach ($collections as $col): ?>
                                         <option value="<?php echo $col->id ?>"><?php echo esc_entities($col->name) ?></option>

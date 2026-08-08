@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .access-width-60px-height-6px-c021 { width: 60px; height: 6px; }
+</style>
 @php decorate_with('layout_1col') @endphp
 
 @slot('title')
@@ -93,8 +98,8 @@
                   @if ($totalValue > 0)
                   @php $pct = ($amount / $totalValue) * 100; @endphp
                   <div class="d-flex align-items-center justify-content-end">
-                    <div class="progress me-2" style="width: 60px; height: 6px;">
-                      <div class="progress-bar bg-primary" style="width: {{ $pct }}%"></div>
+                    <div class="progress me-2 access-width-60px-height-6px-c021" >
+                      <div class="progress-bar bg-primary" data-ahg-style="width: {{ $pct }}%"></div>
                     </div>
                     <span class="small">{{ number_format($pct, 1) }}%</span>
                   </div>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .record-max-width-240px-dd76 { max-width:240px; }
+</style>
 <?php
 $rows = $sf_data->getRaw('rows');
 $counts = $sf_data->getRaw('counts');
@@ -45,7 +52,7 @@ $badge = ['captured' => 'secondary', 'classified' => 'warning', 'declared' => 's
                 <?php if ($e->status !== 'declared'): ?>
                 <form method="post" class="d-flex gap-1 align-items-center" action="<?php echo url_for(['module' => 'recordsManage', 'action' => 'emailCapture']); ?>">
                     <input type="hidden" name="do" value="classify"><input type="hidden" name="id" value="<?php echo $e->id; ?>">
-                    <select name="fileplan_node_id" class="form-select form-select-sm" style="max-width:240px" required>
+                    <select name="fileplan_node_id" class="form-select form-select-sm record-max-width-240px-dd76"  required>
                         <option value=""><?php echo __('— file-plan node —'); ?></option>
                         <?php foreach ((array) $nodes as $n): ?><option value="<?php echo $n->id; ?>" <?php echo $e->fileplan_node_id == $n->id ? 'selected' : ''; ?>><?php echo str_repeat('— ', (int) $n->depth).htmlspecialchars($n->code.' '.$n->title); ?></option><?php endforeach; ?>
                     </select>

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-height-20px-84ce { height: 20px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -47,9 +54,9 @@
                 <td><span class="badge bg-light text-dark"><?php echo htmlspecialchars($j->extraction_type); ?></span></td>
                 <td><span class="badge bg-<?php echo match($j->status) { 'queued' => 'secondary', 'running' => 'primary', 'completed' => 'success', 'failed' => 'danger', default => 'dark' }; ?> job-status"><?php echo ucfirst($j->status); ?></span></td>
                 <td>
-                    <div class="progress" style="height: 20px;">
+                    <div class="progress resear-height-20px-84ce" >
                         <?php $pct = $j->total_items > 0 ? round(($j->processed_items / $j->total_items) * 100) : 0; ?>
-                        <div class="progress-bar job-progress" style="width: <?php echo $pct; ?>%"><?php echo (int) $j->processed_items; ?>/<?php echo (int) $j->total_items; ?></div>
+                        <div class="progress-bar job-progress" data-ahg-style="width: <?php echo $pct; ?>%"><?php echo (int) $j->processed_items; ?>/<?php echo (int) $j->total_items; ?></div>
                     </div>
                 </td>
                 <td><?php echo $j->created_at; ?></td>

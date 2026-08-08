@@ -1,4 +1,13 @@
 <?php $n = sfConfig::get('csp_nonce', ''); $nattr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-font-size-1-5rem-fa41 { font-size: 1.5rem; }
+  .resear-font-size-2rem-1e52 { font-size: 2rem; }
+  .resear-font-size-0-65rem-8f18 { font-size:0.65rem; }
+</style>
 
 <div class="container-fluid py-3">
 
@@ -90,7 +99,7 @@
         <div class="card-body p-0">
           <?php if (empty($recent)): ?>
             <div class="text-center text-muted py-5">
-              <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+              <i class="bi bi-inbox resear-font-size-2rem-1e52" ></i>
               <p class="mt-2 mb-0">No submissions yet. Create your first submission to get started.</p>
             </div>
           <?php else: ?>
@@ -187,9 +196,9 @@
                   $projStatusColors = ['active' => 'success', 'planning' => 'info', 'on_hold' => 'warning', 'completed' => 'secondary'];
                   $pc = $projStatusColors[$proj->status] ?? 'secondary';
                 ?>
-                <br><span class="badge bg-<?php echo $pc ?>" style="font-size:0.65rem;"><?php echo ucfirst($proj->status) ?></span>
+                <br><span class="badge bg-<?php echo $pc ?> resear-font-size-0-65rem-8f18" ><?php echo ucfirst($proj->status) ?></span>
                 <?php if (!empty($proj->project_type)): ?>
-                  <span class="badge bg-light text-dark" style="font-size:0.65rem;"><?php echo ucfirst($proj->project_type) ?></span>
+                  <span class="badge bg-light text-dark resear-font-size-0-65rem-8f18" ><?php echo ucfirst($proj->project_type) ?></span>
                 <?php endif ?>
               </div>
             </div>
@@ -253,7 +262,7 @@
       <?php if (!$researcherProfile): ?>
       <div class="card mb-3">
         <div class="card-body text-center text-muted">
-          <i class="bi bi-person-plus" style="font-size: 1.5rem;"></i>
+          <i class="bi bi-person-plus resear-font-size-1-5rem-fa41" ></i>
           <p class="small mt-2 mb-2">Register as a researcher to link your research workspace.</p>
           <a href="<?php echo url_for(['module' => 'research', 'action' => 'publicRegister']) ?>" class="btn btn-sm btn-outline-success">
             <i class="bi bi-person-plus me-1"></i>Register

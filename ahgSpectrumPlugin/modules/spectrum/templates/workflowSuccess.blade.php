@@ -1,4 +1,11 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .spectr-margin-top-15px-d9ba { margin-top: -15px; }
+  .spectr-max-width-80px-font-size-0-7-4378 { max-width: 80px; font-size: 0.7rem; }
+  .spectr-min-width-30px-2429 { min-width: 30px; }
+</style>
 
 @php
 use Illuminate\Database\Capsule\Manager as DB;
@@ -130,15 +137,15 @@ if ($users->isEmpty()) {
                             };
                             @endphp
                         <div class="text-center">
-                            <span class="badge {{ $badgeClass }} d-block mb-1" style="min-width: 30px;">
+                            <span class="badge {{ $badgeClass }} d-block mb-1 spectr-min-width-30px-2429" >
                                 {{ $step['order'] }}
                             </span>
-                            <small class="d-block" style="max-width: 80px; font-size: 0.7rem;">
+                            <small class="d-block spectr-max-width-80px-font-size-0-7-4378" >
                                 {{ $step['name'] }}
                             </small>
                         </div>
                         @if ($index < count($steps) - 1)
-                        <div class="d-flex align-items-center" style="margin-top: -15px;">
+                        <div class="d-flex align-items-center spectr-margin-top-15px-d9ba" >
                             <i class="fas fa-arrow-right text-muted"></i>
                         </div>
                         @endif

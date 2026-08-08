@@ -1,4 +1,14 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-8em-c402 { font-size: 0.8em; }
+  .regist-max-height-300px-a0b0 { max-height: 300px; }
+  .regist-min-width-200px-a066 { min-width: 200px; }
+  .regist-width-380px-max-height-350px-eea7 { width: 380px; max-height: 350px; overflow-y: auto; }
+</style>
 
 <?php
   $isNew = empty($erd);
@@ -159,7 +169,7 @@
                   </span>
                   <i class="fas fa-chevron-down ms-2 small"></i>
                 </button>
-                <div class="dropdown-menu p-2" style="width: 380px; max-height: 350px; overflow-y: auto;">
+                <div class="dropdown-menu p-2 regist-width-380px-max-height-350px-eea7" >
                   <input type="text" class="form-control form-control-sm mb-2" id="iconSearch" placeholder="<?php echo __('Search icons...'); ?>">
                   <div class="row row-cols-4 g-1" id="iconGrid">
                     <?php foreach ($_icons as $cls => $lbl): ?>
@@ -192,16 +202,16 @@
               <div class="dropdown">
                 <button class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-between" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>
-                    <span class="d-inline-block rounded-circle me-2" id="colorSwatch" style="width:14px;height:14px;background:<?php echo $_colors[$_currentColor][1] ?? '#0d6efd'; ?>;vertical-align:middle;"></span>
+                    <span class="d-inline-block rounded-circle me-2" id="colorSwatch" data-ahg-style="width:14px;height:14px;background:<?php echo $_colors[$_currentColor][1] ?? '#0d6efd'; ?>;vertical-align:middle;"></span>
                     <span id="colorLabel"><?php echo $_colors[$_currentColor][0] ?? ucfirst($_currentColor); ?></span>
                   </span>
                   <i class="fas fa-chevron-down ms-2 small"></i>
                 </button>
-                <div class="dropdown-menu p-2" style="min-width: 200px;">
+                <div class="dropdown-menu p-2 regist-min-width-200px-a066" >
                   <?php foreach ($_colors as $cVal => $cMeta): ?>
                   <button type="button" class="dropdown-item d-flex align-items-center py-2 <?php echo ($cVal === $_currentColor) ? 'active' : ''; ?>"
                           onclick="selectColor('<?php echo $cVal; ?>', '<?php echo $cMeta[0]; ?>', '<?php echo $cMeta[1]; ?>', this)">
-                    <span class="d-inline-block rounded-circle me-2 flex-shrink-0" style="width:16px;height:16px;background:<?php echo $cMeta[1]; ?>;border:1px solid rgba(0,0,0,.15);"></span>
+                    <span class="d-inline-block rounded-circle me-2 flex-shrink-0" data-ahg-style="width:16px;height:16px;background:<?php echo $cMeta[1]; ?>;border:1px solid rgba(0,0,0,.15);"></span>
                     <?php echo $cMeta[0]; ?>
                   </button>
                   <?php endforeach; ?>
@@ -258,7 +268,7 @@
             ?>
             <div id="diagramPreview">
             <?php if ($isImage): ?>
-              <img src="<?php echo htmlspecialchars($imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="ERD Diagram" class="img-fluid rounded border" style="max-height: 300px;">
+              <img src="<?php echo htmlspecialchars($imgPath, ENT_QUOTES, 'UTF-8'); ?>" alt="ERD Diagram" class="img-fluid rounded border regist-max-height-300px-a0b0" >
             <?php else: ?>
               <a href="<?php echo htmlspecialchars($imgPath, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" class="btn btn-outline-primary btn-sm">
                 <i class="fas fa-file-pdf me-1"></i><?php echo basename($imgPath); ?>
@@ -275,7 +285,7 @@
       <div class="card mb-4">
         <div class="card-header"><h5 class="mb-0"><?php echo __('ASCII ERD Diagram'); ?></h5></div>
         <div class="card-body">
-          <textarea class="form-control font-monospace" name="diagram" rows="15" style="font-size: 0.8em;" placeholder="Paste ASCII diagram here..."><?php echo htmlspecialchars($e->diagram ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+          <textarea class="form-control font-monospace" name="diagram" rows="15" class="regist-font-size-0-8em-c402" placeholder="Paste ASCII diagram here..."><?php echo htmlspecialchars($e->diagram ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
           <div class="form-text"><?php echo __('Optional ASCII art ERD diagram. Displayed in a &lt;pre&gt; block.'); ?></div>
         </div>
       </div>

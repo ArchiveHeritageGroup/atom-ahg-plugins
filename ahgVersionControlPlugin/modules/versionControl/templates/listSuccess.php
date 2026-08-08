@@ -1,3 +1,14 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .versio-width-140px-2f01 { width:140px; }
+  .versio-width-170px-3924 { width:170px; }
+  .versio-width-36px-a4f3 { width:36px; }
+  .versio-width-60px-c5ac { width:60px; }
+  .versio-width-84px-306e { width:84px; }
+</style>
 <?php
 /** @var string $entityType */
 /** @var int    $entityId */
@@ -48,13 +59,13 @@
 <table class="table table-sm vc-list">
     <thead>
         <tr>
-            <th style="width:36px"></th>
-            <th style="width:84px"><?php echo __('Version') ?></th>
-            <th style="width:170px"><?php echo __('Date') ?></th>
-            <th style="width:140px"><?php echo __('User') ?></th>
+            <th class="versio-width-36px-a4f3"></th>
+            <th class="versio-width-84px-306e"><?php echo __('Version') ?></th>
+            <th class="versio-width-170px-3924"><?php echo __('Date') ?></th>
+            <th class="versio-width-140px-2f01"><?php echo __('User') ?></th>
             <th><?php echo __('Summary') ?></th>
-            <th style="width:170px"><?php echo __('Changes') ?></th>
-            <th style="width:60px"></th>
+            <th class="versio-width-170px-3924"><?php echo __('Changes') ?></th>
+            <th class="versio-width-60px-c5ac"></th>
         </tr>
     </thead>
     <tbody>

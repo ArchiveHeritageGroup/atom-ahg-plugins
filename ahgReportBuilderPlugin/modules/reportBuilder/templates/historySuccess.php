@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-display-inline-5f8f { display:inline; }
+  .report-width-0-height-20px-margin-t-b3f2 { width:0;height:20px;margin-top:4px; }
+  .report-width-32px-height-32px-7f60 { width:32px;height:32px; }
+  .report-width-40px-a922 { width:40px; }
+</style>
 <?php slot('title') ?>
 <h1><i class="bi bi-clock-history text-primary me-2"></i><?php echo __('Version History'); ?></h1>
 <?php end_slot() ?>
@@ -78,13 +88,13 @@ $rawVersions = $sf_data->getRaw('versions');
             <div class="list-group-item <?php echo $isCurrent ? 'bg-light' : ''; ?>">
                 <div class="d-flex">
                     <!-- Timeline indicator -->
-                    <div class="me-3 text-center" style="width:40px;">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto <?php echo $isCurrent ? 'bg-primary text-white' : 'bg-light border'; ?>"
-                             style="width:32px;height:32px;">
+                    <div class="me-3 text-center report-width-40px-a922" >
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto <?php echo $isCurrent ? 'bg-primary text-white' : 'bg-light border'; ?> report-width-32px-height-32px-7f60"
+                             >
                             <small class="fw-bold"><?php echo htmlspecialchars($version->version_number ?? (count($rawVersions) - $index)); ?></small>
                         </div>
                         <?php if ($index < count($rawVersions) - 1): ?>
-                        <div class="border-start mx-auto" style="width:0;height:20px;margin-top:4px;"></div>
+                        <div class="border-start mx-auto report-width-0-height-20px-margin-t-b3f2" ></div>
                         <?php endif; ?>
                     </div>
                     <!-- Version details -->
@@ -146,7 +156,7 @@ $rawVersions = $sf_data->getRaw('versions');
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><?php echo __('Cancel'); ?></button>
-                <form id="restoreForm" method="post" action="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'restoreVersion']); ?>" style="display:inline;">
+                <form id="restoreForm" method="post" action="<?php echo url_for(['module' => 'reportBuilder', 'action' => 'restoreVersion']); ?>" class="report-display-inline-5f8f">
                     <input type="hidden" name="report_id" value="<?php echo $rawReport->id; ?>">
                     <input type="hidden" name="version_id" id="restoreVersionId" value="">
                     <button type="submit" class="btn btn-warning"><i class="bi bi-arrow-counterclockwise me-1"></i><?php echo __('Restore'); ?></button>

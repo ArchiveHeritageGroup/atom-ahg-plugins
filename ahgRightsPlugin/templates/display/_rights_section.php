@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .rights-width-80px-588c { width: 80px; }
+</style>
 <?php
 /**
  * Rights section for detail layouts
@@ -75,7 +82,7 @@ $slug = $object->slug ?? '';
             <div class="d-flex flex-wrap gap-1">
                 <?php foreach ($tkLabels as $label): ?>
                     <span class="badge" 
-                          style="background-color: <?php echo $label['color'] ?? '#666'; ?>;"
+                          data-ahg-style="background-color: <?php echo $label['color'] ?? '#666'; ?>;"
                           title="<?php echo esc_entities($label['description'] ?? ''); ?>">
                         <?php echo esc_entities($label['name']); ?>
                     </span>
@@ -100,7 +107,7 @@ $slug = $object->slug ?? '';
                         <th><?php echo __('Acts'); ?></th>
                         <th><?php echo __('Period'); ?></th>
                         <?php if ($canEdit): ?>
-                            <th class="d-print-none" style="width: 80px;"></th>
+                            <th class="d-print-none rights-width-80px-588c" ></th>
                         <?php endif; ?>
                     </tr>
                 </thead>

@@ -341,7 +341,7 @@ function isSettingEnabled($settings, $key) {
                         </div>
                     </div>
 
-                    <div id="triposr_remote_config" style="display: <?php echo getSetting($settings, 'triposr_mode') == 'remote' ? 'block' : 'none' ?>;">
+                    <div id="triposr_remote_config" data-ahg-style="display: <?php echo getSetting($settings, 'triposr_mode') == 'remote' ? 'block' : 'none' ?>;">
                         <div class="alert alert-info small mb-3">
                             <i class="fas fa-info-circle me-1"></i>
                             Configure remote GPU server for faster processing. The local server will auto-fallback if remote fails.

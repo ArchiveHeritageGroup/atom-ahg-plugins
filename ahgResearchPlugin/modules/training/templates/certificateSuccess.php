@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-letter-spacing-2em-4826 { letter-spacing:.2em; }
+  .resear-max-width-720px-1d57 { max-width: 720px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('training/trainingSidebar', ['active' => $sidebarActive ?? 'training']) ?>
 <?php end_slot() ?>
@@ -16,9 +24,9 @@ $issued = !empty($cert['issued_at']) ? date('j F Y', strtotime((string) $cert['i
 <?php end_slot() ?>
 
 <?php slot('content') ?>
-<div class="card border-success shadow-sm mx-auto" style="max-width: 720px;">
+<div class="card border-success shadow-sm mx-auto resear-max-width-720px-1d57" >
   <div class="card-body text-center p-5">
-    <p class="text-uppercase text-muted mb-1" style="letter-spacing:.2em;"><?php echo __('Certificate of completion'); ?></p>
+    <p class="text-uppercase text-muted mb-1 resear-letter-spacing-2em-4826" ><?php echo __('Certificate of completion'); ?></p>
     <h2 class="my-4"><?php echo htmlspecialchars((string) ($course['title'] ?? '')); ?></h2>
     <p class="mb-1"><?php echo __('This certifies that'); ?></p>
     <h3 class="mb-4"><?php echo htmlspecialchars((string) ($enrol['learner_name'] ?? '')); ?></h3>

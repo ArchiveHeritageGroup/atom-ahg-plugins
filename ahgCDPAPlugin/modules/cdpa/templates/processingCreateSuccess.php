@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .cdpa-display-none-93b8 { display:none; }
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -119,7 +126,7 @@
                                 <label class="form-check-label" for="health_data">Health data</label>
                             </div>
                         </div>
-                        <div class="col-12" id="cross_border_safeguards_container" style="display:none;">
+                        <div class="col-12" id="cross_border_safeguards_container" class="cdpa-display-none-93b8">
                             <label class="form-label">Cross-border Safeguards</label>
                             <textarea name="cross_border_safeguards" class="form-control" rows="2"></textarea>
                         </div>

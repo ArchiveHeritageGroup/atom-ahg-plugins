@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-7em-0ac1 { font-size: 0.7em; }
+</style>
 <?php
   $catBg = [
     'descriptive' => 'bg-primary',
@@ -73,7 +80,7 @@
       <?php if (!empty($sectors)): ?>
       <div class="mb-2">
         <?php foreach ($sectors as $s): ?>
-          <span class="badge bg-light text-dark border me-1" style="font-size: 0.7em;"><?php echo htmlspecialchars(ucfirst($s), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge bg-light text-dark border me-1 regist-font-size-0-7em-0ac1" ><?php echo htmlspecialchars(ucfirst($s), ENT_QUOTES, 'UTF-8'); ?></span>
         <?php endforeach; ?>
       </div>
       <?php endif; ?>

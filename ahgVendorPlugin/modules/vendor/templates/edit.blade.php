@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .vendor-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+</style>
 
 @section('content')
 <div class="container-fluid px-4">
@@ -207,7 +212,7 @@
                         <i class="fas fa-tools me-2"></i>Services Provided
                     </div>
                     <div class="card-body">
-                        <div class="services-list" style="max-height: 300px; overflow-y: auto;">
+                        <div class="services-list vendor-max-height-300px-overflow-y--3db9" >
                             @php
                             $vendorServiceIds = [];
                             if ($vendorServices) {

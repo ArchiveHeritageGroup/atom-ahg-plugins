@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .access-height-20px-84ce { height: 20px; }
+  .access-max-width-300px-c0dc { max-width: 300px; }
+  .access-width-40px-4792 { width: 40px; }
+</style>
 
 <?php
   $rawAccession        = $sf_data->getRaw('accession');
@@ -286,11 +295,11 @@
           <span><?php echo __('Progress'); ?>: <?php echo $clCompleted; ?>/<?php echo $clTotal; ?></span>
           <span><?php echo $clPct; ?>%</span>
         </div>
-        <div class="progress" style="height: 20px;">
+        <div class="progress access-height-20px-84ce" >
           <?php $barColor = $clPct >= 100 ? 'success' : ($clPct >= 50 ? 'info' : 'warning'); ?>
           <div class="progress-bar bg-<?php echo $barColor; ?>"
                role="progressbar"
-               style="width: <?php echo $clPct; ?>%"
+               data-ahg-style="width: <?php echo $clPct; ?>%"
                aria-valuenow="<?php echo $clPct; ?>"
                aria-valuemin="0"
                aria-valuemax="100">
@@ -302,7 +311,7 @@
       <!-- Apply template -->
       <?php if (count($templatesArr) > 0): ?>
         <div class="d-flex gap-2 mb-3">
-          <select id="checklist-template-select" class="form-select form-select-sm" style="max-width: 300px;">
+          <select id="checklist-template-select" class="form-select form-select-sm access-max-width-300px-c0dc" >
             <option value=""><?php echo __('Select a checklist template...'); ?></option>
             <?php foreach ($templatesArr as $tpl): ?>
               <option value="<?php echo htmlspecialchars($tpl->id); ?>"><?php echo htmlspecialchars($tpl->name); ?></option>
@@ -494,7 +503,7 @@
               $evStyle = $eventIcons[$evType] ?? ['icon' => 'fas fa-circle', 'color' => 'secondary'];
             ?>
             <div class="d-flex mb-3">
-              <div class="flex-shrink-0 me-3 text-center" style="width: 40px;">
+              <div class="flex-shrink-0 me-3 text-center access-width-40px-4792" >
                 <span class="text-<?php echo $evStyle['color']; ?>">
                   <i class="<?php echo $evStyle['icon']; ?> fa-lg"></i>
                 </span>

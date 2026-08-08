@@ -1,3 +1,9 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .access-height-24px-7745 { height: 24px; }
+  .access-max-width-400px-fbe9 { max-width: 400px; }
+</style>
 @php decorate_with('layout_1col') @endphp
 
 @php
@@ -42,10 +48,10 @@
           {{ $clPct }}%
         </span>
       </div>
-      <div class="progress" style="height: 24px;">
+      <div class="progress access-height-24px-7745" >
         <div class="progress-bar bg-{{ $clPct >= 100 ? 'success' : ($clPct >= 50 ? 'info' : 'warning') }}"
              role="progressbar"
-             style="width: {{ $clPct }}%"
+             data-ahg-style="width: {{ $clPct }}%"
              aria-valuenow="{{ $clPct }}"
              aria-valuemin="0"
              aria-valuemax="100">
@@ -63,7 +69,7 @@
       </div>
       <div class="card-body">
         <div class="d-flex gap-2">
-          <select id="checklist-template-select" class="form-select" style="max-width: 400px;">
+          <select id="checklist-template-select" class="form-select access-max-width-400px-fbe9" >
             <option value=""><?php echo __('Select a checklist template...'); ?></option>
             @foreach ($checklistTemplates as $tpl)
               <option value="{{ $tpl->id }}">

@@ -42,11 +42,11 @@ foreach ($statuses as $procId => $procStatus) {
 
         <div class="progress-bar-container">
             <div class="progress">
-                <div class="progress-bar bg-success" style="width: {{ ($progress['completed'] / $progress['total']) * 100 }}%"
+                <div class="progress-bar bg-success" data-ahg-style="width: {{ ($progress['completed'] / $progress['total']) * 100 }}%"
                      title="{{ __('%1% completed', ['%1%' => $progress['completed']]) }}"></div>
-                <div class="progress-bar bg-primary" style="width: {{ ($progress['inProgress'] / $progress['total']) * 100 }}%"
+                <div class="progress-bar bg-primary" data-ahg-style="width: {{ ($progress['inProgress'] / $progress['total']) * 100 }}%"
                      title="{{ __('%1% in progress', ['%1%' => $progress['inProgress']]) }}"></div>
-                <div class="progress-bar bg-danger" style="width: {{ ($progress['overdue'] / $progress['total']) * 100 }}%"
+                <div class="progress-bar bg-danger" data-ahg-style="width: {{ ($progress['overdue'] / $progress['total']) * 100 }}%"
                      title="{{ __('%1% overdue', ['%1%' => $progress['overdue']]) }}"></div>
             </div>
         </div>
@@ -87,7 +87,7 @@ foreach ($statuses as $procId => $procStatus) {
                              data-status="{{ $procStatus['status'] }}">
 
                             <div class="procedure-status-indicator"
-                                 style="background-color: {{ $statusColors[$procStatus['status']] }}"></div>
+                                 data-ahg-style="background-color: {{ $statusColors[$procStatus['status']] }}"></div>
 
                             <div class="procedure-info">
                                 <span class="procedure-name">
@@ -139,7 +139,7 @@ foreach ($statuses as $procId => $procStatus) {
                     <li class="timeline-event">
                         <span class="event-time">{{ date('d M H:i', strtotime($event['timestamp'])) }}</span>
                         <span class="event-procedure">{{ $event['procedureLabel'] }}</span>
-                        <span class="event-status" style="color: {{ $statusColors[$event['newStatus']] }}">
+                        <span class="event-status" data-ahg-style="color: {{ $statusColors[$event['newStatus']] }}">
                             {{ ucfirst(str_replace('_', ' ', $event['newStatus'])) }}
                         </span>
                         @if($event['notes'])

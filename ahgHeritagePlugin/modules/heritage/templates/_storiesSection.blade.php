@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-height-200px-0921 { height: 200px; }
+</style>
 <section class="heritage-stories py-5 bg-light">
     <div class="container-xxl">
 
@@ -15,7 +20,7 @@
             <div class="col-md-6 col-lg-4">
                 <article class="card heritage-story-card h-100 border-0 shadow-sm overflow-hidden">
                     <!-- Cover Image -->
-                    <div class="heritage-story-image position-relative" style="height: 200px;">
+                    <div class="heritage-story-image position-relative herita-height-200px-0921" >
                         @if(!empty($story['cover_image']))
                         <img src="{{ $story['cover_image'] }}"
                              alt="{{ $story['title'] }}"

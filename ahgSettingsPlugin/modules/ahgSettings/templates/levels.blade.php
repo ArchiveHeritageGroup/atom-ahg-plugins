@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-width-100px-e3d2 { width: 100px; }
+  .settin-width-80px-588c { width: 80px; }
+</style>
 
 @section('content')
 <div class="container-fluid py-4">
@@ -106,8 +112,8 @@
                   <thead>
                     <tr>
                       <th>{{ __('Level') }}</th>
-                      <th style="width: 100px;">{{ __('Order') }}</th>
-                      <th style="width: 80px;">{{ __('Actions') }}</th>
+                      <th class="settin-width-100px-e3d2">{{ __('Order') }}</th>
+                      <th class="settin-width-80px-588c">{{ __('Actions') }}</th>
                     </tr>
                   </thead>
                   <tbody>

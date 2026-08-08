@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-40px-a922 { width:40px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage ERD Documentation'); ?><?php end_slot(); ?>
 
@@ -32,7 +39,7 @@
   <table class="table table-sm table-hover">
     <thead class="table-light">
       <tr>
-        <th style="width:40px;">#</th>
+        <th class="regist-width-40px-a922">#</th>
         <th><?php echo __('Plugin'); ?></th>
         <th><?php echo __('Display Name'); ?></th>
         <th><?php echo __('Category'); ?></th>

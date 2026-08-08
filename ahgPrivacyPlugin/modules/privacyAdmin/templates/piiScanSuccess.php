@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .privac-width-100px-e3d2 { width: 100px; }
+  .privac-width-120px-b15a { width: 120px; }
+  .privac-width-150px-c251 { width: 150px; }
+</style>
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1><i class="fas fa-user-shield me-2"></i>PII Detection Scanner</h1>
@@ -151,9 +160,9 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Object</th>
-                                    <th class="text-center" style="width: 100px;">PII Count</th>
-                                    <th style="width: 150px;">Scanned</th>
-                                    <th style="width: 120px;">Actions</th>
+                                    <th class="text-center privac-width-100px-e3d2" >PII Count</th>
+                                    <th class="privac-width-150px-c251">Scanned</th>
+                                    <th class="privac-width-120px-b15a">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>

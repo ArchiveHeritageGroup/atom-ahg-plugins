@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dcmana-width-80px-8db8 { width:80px; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
@@ -301,7 +308,7 @@
                       <th><?php echo __('Identifier'); ?></th>
                       <th><?php echo __('Level'); ?></th>
                       <th><?php echo __('Title'); ?></th>
-                      <th style="width:80px"></th>
+                      <th class="dcmana-width-80px-8db8"></th>
                     </tr>
                   </thead>
                   <tbody></tbody>

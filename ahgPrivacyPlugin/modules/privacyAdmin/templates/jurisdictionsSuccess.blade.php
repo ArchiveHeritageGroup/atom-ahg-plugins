@@ -1,4 +1,10 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .privac-font-size-1-5rem-fa41 { font-size: 1.5rem; }
+  .privac-width-50px-ae1f { width: 50px; }
+</style>
 
 @section('content')
 <div class="container-fluid py-4">
@@ -115,7 +121,7 @@ $regionIcons = [
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 50px;"></th>
+                            <th class="privac-width-50px-ae1f"></th>
                             <th>{{ __('Code') }}</th>
                             <th>{{ __('Name') }}</th>
                             <th>{{ __('Country') }}</th>
@@ -130,7 +136,7 @@ $regionIcons = [
                         <tr{{ ($activeJurisdiction && $activeJurisdiction->code === $j->code) ? ' class="table-primary"' : '' }}>
                             <td class="text-center">
                                 @if($j->icon)
-                                <span style="font-size: 1.5rem;">{{ $j->icon }}</span>
+                                <span class="privac-font-size-1-5rem-fa41">{{ $j->icon }}</span>
                                 @endif
                             </td>
                             <td>

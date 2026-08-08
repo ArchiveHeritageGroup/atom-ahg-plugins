@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-max-height-500px-overflow-y--9117 { max-height: 500px; overflow-y: auto; }
+</style>
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
@@ -139,7 +146,7 @@
                 <strong><?php echo __('SUSHI Harvest Access Log'); ?></strong>
                 <span class="badge bg-dark"><?php echo count($accessLog ?? []); ?></span>
             </div>
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+            <div class="table-responsive librar-max-height-500px-overflow-y--9117" >
                 <table class="table table-sm table-hover mb-0">
                     <thead class="table-light sticky-top">
                         <tr>

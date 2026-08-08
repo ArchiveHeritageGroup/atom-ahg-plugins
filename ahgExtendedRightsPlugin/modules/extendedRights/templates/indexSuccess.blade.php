@@ -1,3 +1,10 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .extend-background-color-1a4d2e-colo-902c { background-color: #1a4d2e; color: white; }
+  .extend-height-20px-84ce { height: 20px; }
+  .extend-width-20px-height-20px-b53b { width: 20px; height: 20px; }
+</style>
 <div class="row">
   <div class="col-md-3">
     <div class="sidebar">
@@ -36,7 +43,7 @@
                   <li class="mb-2">
                     @if (!empty($rs->icon_filename))
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/rights/{{ $rs->icon_filename }}"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-width-20px-height-20px-b53b" >
                     @endif
                     @if (!empty($rs->uri))
                       <a href="{{ $rs->uri }}" target="_blank" title="{{ $rs->description ?? '' }}">
@@ -69,7 +76,7 @@
                   <li class="mb-2">
                     @if (!empty($cc->icon_filename))
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/cc/{{ $cc->icon_filename }}"
-                           alt="" style="height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-height-20px-84ce" >
                     @endif
                     @if (!empty($cc->uri))
                       <a href="{{ $cc->uri }}" target="_blank" title="{{ $cc->description ?? '' }}">
@@ -91,7 +98,7 @@
       <!-- TK Labels -->
       <div class="col-md-4 mb-4">
         <div class="card h-100" id="tk-labels">
-          <div class="card-header" style="background-color: #1a4d2e; color: white;">
+          <div class="card-header extend-background-color-1a4d2e-colo-902c" >
             <h5 class="mb-0">Traditional Knowledge Labels</h5>
           </div>
           <div class="card-body">
@@ -102,10 +109,10 @@
                   <li class="mb-2">
                     @if (!empty($tk->icon_filename))
                       <img src="/plugins/ahgExtendedRightsPlugin/web/images/tk/{{ $tk->icon_filename }}"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-width-20px-height-20px-b53b" >
                     @elseif (!empty($tk->icon_url))
                       <img src="{{ $tk->icon_url }}"
-                           alt="" style="width: 20px; height: 20px;" class="me-1">
+                           alt="" class="me-1 extend-width-20px-height-20px-b53b" >
                     @endif
                     @if (!empty($tk->uri))
                       <a href="{{ $tk->uri }}" target="_blank">

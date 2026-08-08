@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-width-auto-dc25 { width: auto; }
+</style>
 
 @section('content')
 <div class="row">
@@ -11,7 +16,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
       <div>
         <form method="get" class="d-inline-flex gap-2">
-          <select name="sector" class="form-select form-select-sm" style="width: auto;">
+          <select name="sector" class="form-select form-select-sm settin-width-auto-dc25" >
             <option value="">{{ __('All Sectors') }}</option>
             @foreach ($sectors as $code => $label)
               <option value="{{ $code }}" {{ $sectorFilter === $code ? 'selected' : '' }}>

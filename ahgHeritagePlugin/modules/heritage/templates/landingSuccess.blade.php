@@ -1,4 +1,15 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-background-linear-gradient-1-cc0c { background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%); }
+  .herita-column-span-all-3e74 { column-span: all; }
+  .herita-font-size-0-75em-1851 { font-size: 0.75em; }
+  .herita-font-size-3rem-color-rgba-25-701c { font-size: 3rem; color: rgba(255,255,255,0.5); }
+  .herita-height-calc-100vh-280px-min--0385 { height: calc(100vh - 280px); min-height: 450px; }
+  .herita-margin-0-width-100-max-width-b57c { margin: 0; width: 100%; max-width: none; }
+  .herita-opacity-0-8-font-size-0-875r-88ec { opacity: 0.8; font-size: 0.875rem; }
+</style>
 
 <?php
 // Helper to unwrap Symfony escaper objects
@@ -58,12 +69,12 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
 @endsection
 
 @section('content')
-<div class="heritage-landing" style="margin: 0; width: 100%; max-width: none;">
+<div class="heritage-landing herita-margin-0-width-100-max-width-b57c" >
 
     <!-- ================================================================
          Section 1: Hero (Full Viewport)
          ================================================================ -->
-    <section class="heritage-hero" id="heritage-hero" style="height: calc(100vh - 280px); min-height: 450px;">
+    <section class="heritage-hero" id="heritage-hero" class="herita-height-calc-100vh-280px-min--0385">
 
         <!-- Background Images -->
         <div class="heritage-hero-backgrounds">
@@ -72,11 +83,11 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                 <div class="heritage-hero-bg {{ $index === 0 ? 'active' : '' }} {{ ($image['ken_burns'] ?? 1) ? 'kenburns' : '' }}"
                      data-index="{{ $index }}"
                      data-duration="{{ $image['display_duration'] ?? 8 }}"
-                     style="background-image: url('{{ $image['image_path'] ?? '' }}');">
+                     data-ahg-style="background-image: url('{{ $image['image_path'] ?? '' }}');">
                 </div>
                 @endforeach
             @else
-                <div class="heritage-hero-bg active" style="background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%);"></div>
+                <div class="heritage-hero-bg active herita-background-linear-gradient-1-cc0c" ></div>
             @endif
         </div>
 
@@ -199,12 +210,12 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                              alt="{{ $collection['name'] }}"
                              loading="lazy"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="main-image fallback-gradient" style="background: {{ $placeholderGradients[$index % 6] }}; height: 280px; display: none; align-items: center; justify-content: center;">
-                            <i class="fas {{ $collectionIcon }}" style="font-size: 3rem; color: rgba(255,255,255,0.5);"></i>
+                        <div class="main-image fallback-gradient" data-ahg-style="background: {{ $placeholderGradients[$index % 6] }}; height: 280px; display: none; align-items: center; justify-content: center;">
+                            <i class="fas {{ $collectionIcon }} herita-font-size-3rem-color-rgba-25-701c" ></i>
                         </div>
                         @else
-                        <div class="main-image" style="background: {{ $placeholderGradients[$index % 6] }}; height: 280px; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas {{ $collectionIcon }}" style="font-size: 3rem; color: rgba(255,255,255,0.5);"></i>
+                        <div class="main-image" data-ahg-style="background: {{ $placeholderGradients[$index % 6] }}; height: 280px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas {{ $collectionIcon }} herita-font-size-3rem-color-rgba-25-701c" ></i>
                         </div>
                         @endif
                     </div>
@@ -212,7 +223,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                         <h3 class="heritage-card-title">{{ $collection['name'] ?? 'Untitled Collection' }}</h3>
                         <p class="heritage-card-subtitle">{{ substr($collection['description'] ?? '', 0, 60) }}{{ strlen($collection['description'] ?? '') > 60 ? '...' : '' }}</p>
                         <span class="heritage-card-count">
-                            <i class="fas {{ $collectionIcon }} me-1" style="font-size: 0.75em;"></i>
+                            <i class="fas {{ $collectionIcon }} me-1 herita-font-size-0-75em-1851" ></i>
                             {{ number_format($collection['item_count'] ?? 0) }} items
                         </span>
                     </div>
@@ -312,7 +323,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
             ?>
             <a href="{{ url_for(['module' => 'heritage', 'action' => 'timeline', 'period_id' => $period->id]) }}"
                class="heritage-timeline-marker"
-               style="left: {{ $position }}%;"
+               data-ahg-style="left: {{ $position }}%;"
                title="{{ $period->name }}">
                 <div class="heritage-timeline-label">
                     <span class="heritage-period-name">{{ $period->short_name ?? $period->name }}</span>
@@ -404,7 +415,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                 @endif
                 @endforeach
             @else
-                <p class="text-muted text-center w-100 py-4" style="column-span: all;">No recent items with images found</p>
+                <p class="text-muted text-center w-100 py-4 herita-column-span-all-3e74" >No recent items with images found</p>
             @endif
         </div>
     </section>
@@ -467,7 +478,7 @@ $firstHero = !empty($heroImagesArray) ? $heroImagesArray[0] : null;
                         </div>
                         @endforeach
                     @else
-                        <p style="opacity: 0.8; font-size: 0.875rem;">Be the first to contribute!</p>
+                        <p class="herita-opacity-0-8-font-size-0-875r-88ec">Be the first to contribute!</p>
                     @endif
                 </div>
             </div>

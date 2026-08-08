@@ -1,4 +1,11 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .report-display-none-9c76 { display: none; }
+  .report-width-110px-e822 { width: 110px; }
+  .report-width-250px-e8db { width: 250px; }
+</style>
 
 @section('title')
   <h1 class="multiline">
@@ -31,7 +38,7 @@ input[type="date"] {
 
 			{!! $form->renderHiddenFields() !!}
 
-			<div id='typeOfReport' style="display: none">
+			<div id='typeOfReport' class="report-display-none-9c76">
 				{!! $form->className->label('Types of Reports')->renderRow() !!}
 			</div>
 
@@ -76,8 +83,8 @@ input[type="date"] {
   <table class="table table-bordered" border="1" cellpadding="0" cellspacing="0" bordercolor="#999999">
     <thead>
       <tr>
-		<th style="width: 110px">{{ __('Identifier') }}</th>
-		<th style="width: 250px">{{ __('Title') }}</th>
+		<th class="report-width-110px-e822">{{ __('Identifier') }}</th>
+		<th class="report-width-250px-e8db">{{ __('Title') }}</th>
 		<th>{{ __('Refusal') }}</th>
 		<th>{{ __('Sensitive') }}</th>
 		<th>{{ __('Publish') }}</th>
@@ -86,9 +93,9 @@ input[type="date"] {
 
 
         @if ('CREATED_AT' != $form->getValue('dateOf'))
-          <th style="width: 110px">{{ __('Updated') }}</th>
+          <th class="report-width-110px-e822">{{ __('Updated') }}</th>
         @else
-          <th style="width: 110px">{{ __('Created') }}</th>
+          <th class="report-width-110px-e822">{{ __('Created') }}</th>
         @endif
       </tr>
     </thead><tbody>

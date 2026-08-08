@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-display-none-93b8 { display:none; }
+</style>
 <?php
 /**
  * Search Enhancement Panel
@@ -160,7 +167,7 @@ $savedSearches = $isAuthenticated ? $searchService->getSavedSearches($userId) : 
             <?php echo __('Notify me of new results'); ?>
           </label>
         </div>
-        <div class="mb-3" id="notify-frequency-group" style="display:none;">
+        <div class="mb-3" id="notify-frequency-group" class="themeb-display-none-93b8">
           <label class="form-label"><?php echo __('Notification frequency'); ?></label>
           <select id="save-search-frequency" class="form-select">
             <option value="daily"><?php echo __('Daily'); ?></option>

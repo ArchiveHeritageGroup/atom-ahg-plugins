@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-width-50px-height-50px-objec-dea7 { width: 50px; height: 50px; object-fit: cover; }
+</style>
 <?php
 /**
  * List layout - tabular view for libraries/search
@@ -6,7 +13,7 @@
 <tr class="list-item" data-id="<?php echo $object->id; ?>">
     <?php if ($digitalObject && $data['thumbnail_size'] !== 'none'): ?>
     <td width="60">
-        <img src="<?php echo $digitalObject->path; ?>" class="rounded" style="width: 50px; height: 50px; object-fit: cover;" alt="">
+        <img src="<?php echo $digitalObject->path; ?>" class="rounded displa-width-50px-height-50px-objec-dea7"  alt="">
     </td>
     <?php endif; ?>
     

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-height-25px-bd56 { height: 25px; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex flex-column mb-3">
@@ -190,9 +197,9 @@
             <small class="text-muted"><?php echo __('Available'); ?></small>
           </div>
         </div>
-        <div class="progress mb-2" style="height: 25px;">
+        <div class="progress mb-2 themeb-height-25px-bd56" >
           <div class="progress-bar <?php echo $barClass; ?>" role="progressbar" 
-               style="width: <?php echo $percent; ?>%;">
+               data-ahg-style="width: <?php echo $percent; ?>%;">
             <?php echo $percent; ?>% <?php echo __('used'); ?>
           </div>
         </div>
@@ -225,9 +232,9 @@
             <small class="text-muted"><?php echo __('Available'); ?></small>
           </div>
         </div>
-        <div class="progress" style="height: 25px;">
+        <div class="progress themeb-height-25px-bd56" >
           <div class="progress-bar <?php echo $barClassLm; ?>" role="progressbar" 
-               style="width: <?php echo $percentLm; ?>%;">
+               data-ahg-style="width: <?php echo $percentLm; ?>%;">
             <?php echo $percentLm; ?>% <?php echo __('used'); ?>
           </div>
         </div>

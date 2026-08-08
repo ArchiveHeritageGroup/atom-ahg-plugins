@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .custom-display-none-93b8 { display:none; }
+  .custom-max-width-120px-8c92 { max-width:120px; }
+</style>
 <?php
 /**
  * Reusable form partial for custom field definition create/edit.
@@ -66,7 +74,7 @@ $indexUrl = url_for(['module' => 'customFieldAdmin', 'action' => 'index']);
             </div>
 
             <!-- Dropdown taxonomy selector (shown only when type=dropdown) -->
-            <div class="mb-3" id="cf-dropdown-taxonomy-wrap" style="display:none;">
+            <div class="mb-3" id="cf-dropdown-taxonomy-wrap" class="custom-display-none-93b8">
                 <label for="cf-dropdown-taxonomy" class="form-label">Dropdown Taxonomy</label>
                 <select class="form-select" id="cf-dropdown-taxonomy" name="dropdown_taxonomy">
                     <option value="">— Select taxonomy —</option>
@@ -117,7 +125,7 @@ $indexUrl = url_for(['module' => 'customFieldAdmin', 'action' => 'index']);
             <div class="mb-3">
                 <label for="cf-sort-order" class="form-label">Sort Order</label>
                 <input type="number" class="form-control" id="cf-sort-order" name="sort_order"
-                       value="<?php echo (int) ($def->sort_order ?? 0); ?>" style="max-width:120px">
+                       value="<?php echo (int) ($def->sort_order ?? 0); ?>" class="custom-max-width-120px-8c92">
             </div>
         </div>
 

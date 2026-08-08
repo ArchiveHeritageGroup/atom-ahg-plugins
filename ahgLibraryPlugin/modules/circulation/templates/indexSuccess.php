@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-width-40-51d4 { width:40%; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Circulation — Checkout Station'); ?></h1>
@@ -155,7 +162,7 @@
         <?php if ($rawPatron): ?>
           <table class="table table-sm mb-0">
             <tr>
-              <th class="text-muted" style="width:40%"><?php echo __('Name'); ?></th>
+              <th class="text-muted librar-width-40-51d4" ><?php echo __('Name'); ?></th>
               <td class="fw-bold"><?php echo esc_entities($rawPatron->name); ?></td>
             </tr>
             <tr>

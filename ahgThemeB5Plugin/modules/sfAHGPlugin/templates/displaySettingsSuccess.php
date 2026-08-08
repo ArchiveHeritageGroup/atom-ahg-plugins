@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-width-10-1c30 { width: 10%; }
+  .themeb-width-15-c7ee { width: 15%; }
+  .themeb-width-20-f6f6 { width: 20%; }
+</style>
 <?php
 /**
  * Admin Display Mode Settings
@@ -56,12 +65,12 @@ $moduleLabels = [
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 20%;"><?php echo __('Module'); ?></th>
-                            <th style="width: 20%;"><?php echo __('Default Mode'); ?></th>
-                            <th style="width: 20%;"><?php echo __('Available Modes'); ?></th>
-                            <th style="width: 10%;"><?php echo __('Per Page'); ?></th>
-                            <th style="width: 15%;"><?php echo __('Options'); ?></th>
-                            <th style="width: 15%;"><?php echo __('Actions'); ?></th>
+                            <th class="themeb-width-20-f6f6"><?php echo __('Module'); ?></th>
+                            <th class="themeb-width-20-f6f6"><?php echo __('Default Mode'); ?></th>
+                            <th class="themeb-width-20-f6f6"><?php echo __('Available Modes'); ?></th>
+                            <th class="themeb-width-10-1c30"><?php echo __('Per Page'); ?></th>
+                            <th class="themeb-width-15-c7ee"><?php echo __('Options'); ?></th>
+                            <th class="themeb-width-15-c7ee"><?php echo __('Actions'); ?></th>
                         </tr>
                     </thead>
                     <tbody>

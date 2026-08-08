@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .access-display-none-93b8 { display:none; }
+  .access-width-80px-8935 { width:80px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Appraisal Templates'); ?></h1>
@@ -93,7 +101,7 @@
               </tr>
               <!-- Expandable criteria detail -->
               <?php if ($criteriaCount > 0): ?>
-              <tr class="criteria-row" id="criteria_<?php echo htmlspecialchars($t->id); ?>" style="display:none;">
+              <tr class="criteria-row" id="criteria_<?php echo htmlspecialchars($t->id); ?>" class="access-display-none-93b8">
                 <td colspan="5" class="bg-light">
                   <div class="px-3 py-2">
                     <strong class="small text-uppercase text-muted"><?php echo __('Criteria:'); ?></strong>
@@ -101,7 +109,7 @@
                       <thead>
                         <tr class="text-muted small">
                           <th><?php echo __('Criterion'); ?></th>
-                          <th style="width:80px;"><?php echo __('Weight'); ?></th>
+                          <th class="access-width-80px-8935"><?php echo __('Weight'); ?></th>
                           <th><?php echo __('Description'); ?></th>
                         </tr>
                       </thead>

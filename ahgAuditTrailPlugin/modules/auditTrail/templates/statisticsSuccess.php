@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .auditt-width-auto-dc25 { width: auto; }
+</style>
 
 <?php slot('title') ?>
   <h1><?php echo __('Audit Statistics') ?></h1>
@@ -16,7 +23,7 @@
 <div class="mb-4">
   <form method="get" class="d-inline-flex gap-2 align-items-center">
     <label class="form-label mb-0"><?php echo __('Time Period:') ?></label>
-    <select name="days" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+    <select name="days" class="form-select form-select-sm auditt-width-auto-dc25"  onchange="this.form.submit()">
       <option value="7" <?php echo $dateRangeRaw['days'] == 7 ? 'selected' : '' ?>><?php echo __('Last 7 days') ?></option>
       <option value="30" <?php echo $dateRangeRaw['days'] == 30 ? 'selected' : '' ?>><?php echo __('Last 30 days') ?></option>
       <option value="90" <?php echo $dateRangeRaw['days'] == 90 ? 'selected' : '' ?>><?php echo __('Last 90 days') ?></option>

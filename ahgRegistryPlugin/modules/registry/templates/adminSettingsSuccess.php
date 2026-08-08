@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-margin-top-2px-f520 { margin-top: -2px; }
+  .regist-max-width-200px-1a5c { max-width: 200px; }
+  .regist-max-width-500px-d994 { max-width: 500px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Registry Settings'); ?><?php end_slot(); ?>
 
@@ -242,17 +251,17 @@ function _render_setting_field($setting, $friendlyLabels, $key) {
     <?php endif; ?>
 
     <?php if (!empty($setting->description)): ?>
-      <div class="form-text mb-1" style="margin-top: -2px;"><?php echo htmlspecialchars($setting->description, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="form-text mb-1 regist-margin-top-2px-f520" ><?php echo htmlspecialchars($setting->description, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
     <?php if ('boolean' === $settingType): ?>
       <!-- already rendered above -->
     <?php elseif ('number' === $settingType): ?>
-      <input type="number" class="form-control" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" value="<?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?>" style="max-width: 200px;">
+      <input type="number" class="form-control" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" value="<?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?>" class="regist-max-width-200px-1a5c">
     <?php elseif ('json' === $settingType): ?>
       <textarea class="form-control font-monospace" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" rows="4"><?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
     <?php elseif (strpos($setting->setting_key, 'secret') !== false || strpos($setting->setting_key, 'password') !== false): ?>
-      <div class="input-group" style="max-width: 500px;">
+      <div class="input-group regist-max-width-500px-d994" >
         <input type="password" class="form-control" id="<?php echo $fieldId; ?>" name="<?php echo $fieldName; ?>" value="<?php echo htmlspecialchars($setting->setting_value ?? '', ENT_QUOTES, 'UTF-8'); ?>">
         <button class="btn btn-outline-secondary" type="button" onclick="var i=document.getElementById('<?php echo $fieldId; ?>'); i.type = i.type==='password' ? 'text' : 'password';"><i class="fas fa-eye"></i></button>
       </div>

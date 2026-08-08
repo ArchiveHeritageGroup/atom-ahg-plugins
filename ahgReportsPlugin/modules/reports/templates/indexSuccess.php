@@ -1,4 +1,27 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .report-background-color-059669-impo-5d31 { background-color: #059669 !important; }
+  .report-background-color-0d6efd-impo-be65 { background-color: #0d6efd !important; }
+  .report-background-color-0dcaf0-impo-463a { background-color: #0dcaf0 !important; }
+  .report-background-color-17a2b8-impo-ddd4 { background-color: #17a2b8 !important; }
+  .report-background-color-198754-impo-8a96 { background-color: #198754 !important; }
+  .report-background-color-20c997-impo-53c6 { background-color: #20c997 !important; }
+  .report-background-color-28a745-impo-fb40 { background-color: #28a745 !important; }
+  .report-background-color-6610f2-impo-bbfa { background-color: #6610f2 !important; }
+  .report-background-color-6c757d-impo-2b77 { background-color: #6c757d !important; }
+  .report-background-color-6f42c1-impo-83ec { background-color: #6f42c1 !important; }
+  .report-background-color-795548-impo-e70b { background-color: #795548 !important; }
+  .report-background-color-7c3aed-impo-12ba { background-color: #7c3aed !important; }
+  .report-background-color-dc3545-impo-91aa { background-color: #dc3545 !important; }
+  .report-background-color-e83e8c-impo-a7b0 { background-color: #e83e8c !important; }
+  .report-background-color-fd7e14-impo-4b52 { background-color: #fd7e14 !important; }
+  .report-background-color-ffc107-impo-bb34 { background-color: #ffc107 !important; color: #000 !important; }
+  .report-color-000-important-1e25 { color: #000 !important; }
+</style>
 
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
@@ -234,7 +257,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- Library Column -->
         <div class="col-md-4" id="library">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #795548 !important;">
+                <div class="card-header text-white report-background-color-795548-impo-e70b" >
                     <h5 class="mb-0"><i class="fas fa-book me-2"></i><?php echo __('Library'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -263,7 +286,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- Approval Workflow -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                <div class="card-header text-white report-background-color-6610f2-impo-bbfa" >
                     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Approval Workflow'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -282,7 +305,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- Spectrum Workflow -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                <div class="card-header text-white report-background-color-0d6efd-impo-be65" >
                     <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i><?php echo __('Collections Procedures Workflow'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -308,7 +331,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                <div class="card-header text-white report-background-color-0d6efd-impo-be65" >
                     <h5 class="mb-0"><i class="fas fa-graduation-cap me-2"></i><?php echo __('Research Services'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -328,7 +351,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                <div class="card-header text-white report-background-color-6610f2-impo-bbfa" >
                     <h5 class="mb-0"><i class="fas fa-brain me-2"></i><?php echo __('Knowledge Platform'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -345,7 +368,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($isAdmin): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #198754 !important;">
+                <div class="card-header text-white report-background-color-198754-impo-8a96" >
                     <h5 class="mb-0"><i class="fas fa-user-check me-2"></i><?php echo __('Research Admin'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -365,7 +388,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                <div class="card-header text-white report-background-color-0d6efd-impo-be65" >
                     <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Access Requests'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -505,7 +528,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- Rights & Licensing -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header bg-purple text-white" style="background-color: #6f42c1 !important;">
+                <div class="card-header bg-purple text-white report-background-color-6f42c1-impo-83ec" >
                     <h5 class="mb-0"><i class="fas fa-gavel me-2"></i><?php echo __('Rights & Licensing'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -528,7 +551,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- Embargo Management -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #e83e8c !important;">
+                <div class="card-header text-white report-background-color-e83e8c-impo-a7b0" >
                     <h5 class="mb-0"><i class="fas fa-lock me-2"></i><?php echo __('Embargo Management'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -548,7 +571,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- Rights Vocabularies -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #20c997 !important;">
+                <div class="card-header text-white report-background-color-20c997-impo-53c6" >
                     <h5 class="mb-0"><i class="fas fa-book-open me-2"></i><?php echo __('Rights Vocabularies'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -579,7 +602,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasVendor): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #fd7e14 !important;">
+                <div class="card-header text-white report-background-color-fd7e14-impo-4b52" >
                     <h5 class="mb-0"><i class="fas fa-building me-2"></i><?php echo __('Vendor Management'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -606,7 +629,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasDonor): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #198754 !important;">
+                <div class="card-header text-white report-background-color-198754-impo-8a96" >
                     <h5 class="mb-0"><i class="fas fa-handshake me-2"></i><?php echo __('Donor Management'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -624,7 +647,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasMarketplace): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #7c3aed !important;">
+                <div class="card-header text-white report-background-color-7c3aed-impo-12ba" >
                     <h5 class="mb-0"><i class="fas fa-store-alt me-2"></i><?php echo __('Marketplace'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -639,7 +662,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #059669 !important;">
+                <div class="card-header text-white report-background-color-059669-impo-5d31" >
                     <h5 class="mb-0"><i class="fas fa-cash-register me-2"></i><?php echo __('Sales & Payouts'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -656,7 +679,7 @@ $canManage = $isAdmin || $isEditor;
         <?php elseif ($hasCart): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #059669 !important;">
+                <div class="card-header text-white report-background-color-059669-impo-5d31" >
                     <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i><?php echo __('E-Commerce'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -679,7 +702,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasForms): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #198754 !important;">
+                <div class="card-header text-white report-background-color-198754-impo-8a96" >
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i><?php echo __('Form Templates'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -695,7 +718,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasDoi): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0dcaf0 !important;">
+                <div class="card-header text-white report-background-color-0dcaf0-impo-463a" >
                     <h5 class="mb-0"><i class="fas fa-link me-2"></i><?php echo __('DOI Management'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -711,7 +734,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasRic): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6f42c1 !important;">
+                <div class="card-header text-white report-background-color-6f42c1-impo-83ec" >
                     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i><?php echo __('Records in Contexts (RiC)'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -732,7 +755,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasDataMigration): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #fd7e14 !important;">
+                <div class="card-header text-white report-background-color-fd7e14-impo-4b52" >
                     <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i><?php echo __('Data Migration'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -748,7 +771,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasIngest): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0dcaf0 !important;">
+                <div class="card-header text-white report-background-color-0dcaf0-impo-463a" >
                     <h5 class="mb-0"><i class="fas fa-file-import me-2"></i><?php echo __('Data Ingest'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -810,7 +833,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6c757d !important;">
+                <div class="card-header text-white report-background-color-6c757d-impo-2b77" >
                     <h5 class="mb-0"><i class="fas fa-landmark me-2"></i><?php echo __('Heritage Management'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -831,7 +854,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasDedupe): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #dc3545 !important;">
+                <div class="card-header text-white report-background-color-dc3545-impo-91aa" >
                     <h5 class="mb-0"><i class="fas fa-clone me-2"></i><?php echo __('Duplicate Detection'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -847,7 +870,7 @@ $canManage = $isAdmin || $isEditor;
         <?php if ($hasPreservation): ?>
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #17a2b8 !important;">
+                <div class="card-header text-white report-background-color-17a2b8-impo-ddd4" >
                     <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('Digital Preservation'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -861,7 +884,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                <div class="card-header text-white report-background-color-6610f2-impo-bbfa" >
                     <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i><?php echo __('Format Registry'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -875,7 +898,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #28a745 !important;">
+                <div class="card-header text-white report-background-color-28a745-impo-fb40" >
                     <h5 class="mb-0"><i class="fas fa-fingerprint me-2"></i><?php echo __('Checksums & Integrity'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -898,7 +921,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- CDPA - Data Protection -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #198754 !important;">
+                <div class="card-header text-white report-background-color-198754-impo-8a96" >
                     <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i><?php echo __('CDPA Data Protection'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -923,7 +946,7 @@ $canManage = $isAdmin || $isEditor;
         <!-- NAZ - National Archives -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                <div class="card-header text-white report-background-color-0d6efd-impo-be65" >
                     <h5 class="mb-0"><i class="fas fa-landmark me-2"></i><?php echo __('NAZ Archives'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -948,8 +971,8 @@ $canManage = $isAdmin || $isEditor;
         <!-- IPSAS - Heritage Assets -->
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #ffc107 !important; color: #000 !important;">
-                    <h5 class="mb-0" style="color: #000 !important;"><i class="fas fa-coins me-2"></i><?php echo __('IPSAS Heritage Assets'); ?></h5>
+                <div class="card-header text-white report-background-color-ffc107-impo-bb34" >
+                    <h5 class="mb-0 report-color-000-important-1e25" ><i class="fas fa-coins me-2"></i><?php echo __('IPSAS Heritage Assets'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
@@ -975,7 +998,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6c757d !important;">
+                <div class="card-header text-white report-background-color-6c757d-impo-2b77" >
                     <h5 class="mb-0"><i class="fas fa-monument me-2"></i><?php echo __('NMMZ Monuments'); ?></h5>
                 </div>
                 <ul class="list-group list-group-flush">

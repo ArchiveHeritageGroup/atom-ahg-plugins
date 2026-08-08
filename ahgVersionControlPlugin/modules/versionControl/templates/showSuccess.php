@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .versio-width-30-59c8 { width:30%; }
+</style>
 <?php
 /** @var string $entityType */
 /** @var int    $entityId */
@@ -136,7 +143,7 @@ $cf = is_array($snapshot['custom_fields'] ?? null) ? $snapshot['custom_fields'] 
             <tbody>
             <?php foreach ($base as $k => $val): ?>
                 <tr>
-                    <th style="width:30%"><code><?php echo esc_entities((string) $k) ?></code></th>
+                    <th class="versio-width-30-59c8"><code><?php echo esc_entities((string) $k) ?></code></th>
                     <td><?php echo esc_entities(is_scalar($val) || $val === null ? (string) $val : json_encode($val)) ?></td>
                 </tr>
             <?php endforeach ?>
@@ -152,7 +159,7 @@ $cf = is_array($snapshot['custom_fields'] ?? null) ? $snapshot['custom_fields'] 
                     <?php foreach ($row as $k => $val): ?>
                         <?php if ($k === 'culture' || $k === 'id' || $val === null || $val === '') continue; ?>
                         <tr>
-                            <th style="width:30%"><code><?php echo esc_entities((string) $k) ?></code></th>
+                            <th class="versio-width-30-59c8"><code><?php echo esc_entities((string) $k) ?></code></th>
                             <td><?php echo nl2br(esc_entities(is_scalar($val) ? (string) $val : json_encode($val))) ?></td>
                         </tr>
                     <?php endforeach ?>

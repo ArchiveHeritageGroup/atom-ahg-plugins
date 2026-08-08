@@ -1,8 +1,15 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .report-margin-bottom-1rem-4986 { margin-bottom: 1rem; }
+  .report-margin-top-1rem-988c { margin-top: 1rem; }
+  .report-width-100-8588 { width:100%; }
+</style>
 
 @section('title')
   <h1>{!! __('Browse Authority Record/Actor Report') !!}</h1>
-  <div style="margin-bottom: 1rem;">
+  <div class="report-margin-bottom-1rem-4986">
     <a href="{{ url_for(['module' => 'reports', 'action' => 'reportSelect']) }}" class="c-btn">
       <i class="fa fa-arrow-left"></i> {{ __("Back to Reports") }}
     </a>
@@ -49,8 +56,8 @@
         <input class="c-btn c-btn-submit" type="submit" value="{{ __('Search') }}"/>
       </section>
 
-      <div style="margin-top: 1rem;">
-        <button type="button" onclick="exportTableToCSV()" class="c-btn" style="width:100%;">
+      <div class="report-margin-top-1rem-988c">
+        <button type="button" onclick="exportTableToCSV()" class="c-btn report-width-100-8588" >
           <i class="fa fa-download"></i> {{ __('Export CSV') }}
         </button>
       </div>

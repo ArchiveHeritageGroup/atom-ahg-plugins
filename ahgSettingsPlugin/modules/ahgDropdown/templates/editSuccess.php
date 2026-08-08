@@ -1,4 +1,13 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-width-120px-b15a { width: 120px; }
+  .settin-width-40px-4792 { width: 40px; }
+  .settin-width-80px-588c { width: 80px; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -66,13 +75,13 @@
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
-                        <th style="width: 40px;"></th>
+                        <th class="settin-width-40px-4792"></th>
                         <th><?php echo __('Label') ?></th>
                         <th><?php echo __('Code') ?></th>
-                        <th style="width: 80px;"><?php echo __('Color') ?></th>
-                        <th style="width: 80px;"><?php echo __('Default') ?></th>
-                        <th style="width: 80px;"><?php echo __('Active') ?></th>
-                        <th style="width: 120px;"><?php echo __('Actions') ?></th>
+                        <th class="settin-width-80px-588c"><?php echo __('Color') ?></th>
+                        <th class="settin-width-80px-588c"><?php echo __('Default') ?></th>
+                        <th class="settin-width-80px-588c"><?php echo __('Active') ?></th>
+                        <th class="settin-width-120px-b15a"><?php echo __('Actions') ?></th>
                     </tr>
                 </thead>
                 <tbody id="termsTable">

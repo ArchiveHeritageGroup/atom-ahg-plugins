@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .metada-max-width-16rem-289f { max-width: 16rem; }
+  .metada-width-30-65d0 { width: 30%; }
+  .metada-width-32-dd5f { width: 32%; }
+</style>
 
 <?php slot('title') ?>
   <h1><?php echo __('Extracted Metadata'); ?></h1>
@@ -101,7 +110,7 @@
                 <table class="table table-sm table-striped mb-0">
                   <thead class="table-light">
                     <tr>
-                      <th style="width: 30%"><?php echo __('Field'); ?></th>
+                      <th class="metada-width-30-65d0"><?php echo __('Field'); ?></th>
                       <th><?php echo __('Value'); ?></th>
                     </tr>
                   </thead>
@@ -155,7 +164,7 @@
             <i class="bi bi-card-list me-1"></i><?php echo __('Full embedded metadata'); ?>
             <span class="badge bg-secondary ms-1"><?php echo (int) $fullTagCount ?> <?php echo __('tags'); ?></span>
           </strong>
-          <input type="search" id="ahgMetaFilter" class="form-control form-control-sm" style="max-width: 16rem;"
+          <input type="search" id="ahgMetaFilter" class="form-control form-control-sm metada-max-width-16rem-289f" 
                  placeholder="<?php echo __('Filter tags…'); ?>" autocomplete="off">
         </div>
         <?php if (!empty($gpsGatedForViewer)): ?>
@@ -178,7 +187,7 @@
                 <tbody>
                   <?php foreach ((array) $tags as $tag => $value): ?>
                     <tr class="ahg-meta-row">
-                      <td style="width: 32%;"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
+                      <td class="metada-width-32-dd5f"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
                       <td class="small">
                         <?php
                         if (is_array($value)) {

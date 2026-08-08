@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .jobsma-height-18px-7f47 { height: 18px; }
+  .jobsma-width-120px-b15a { width: 120px; }
+  .jobsma-width-60px-902c { width: 60px; }
+  .jobsma-width-auto-dc25 { width: auto; }
+</style>
 <?php use_helper('Date'); ?>
 
 <?php slot('title'); ?>
@@ -96,7 +106,7 @@
 
     <!-- Queue filter -->
     <div class="ms-auto d-flex gap-2 align-items-center">
-      <select id="queueFilter" class="form-select form-select-sm" style="width: auto;">
+      <select id="queueFilter" class="form-select form-select-sm jobsma-width-auto-dc25" >
         <option value=""><?php echo __('All queues'); ?></option>
         <?php foreach ($sf_data->getRaw('queueNames') as $qKey => $qLabel): ?>
           <option value="<?php echo esc_specialchars($qKey); ?>" <?php echo ($currentQueue === $qKey) ? 'selected' : ''; ?>>
@@ -129,7 +139,7 @@
       <table class="table table-bordered table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 60px;"><?php echo __('ID'); ?></th>
+            <th class="jobsma-width-60px-902c"><?php echo __('ID'); ?></th>
             <th><?php echo __('Job Type'); ?></th>
             <th><?php echo __('Queue'); ?></th>
             <th><?php echo __('Status'); ?></th>
@@ -137,7 +147,7 @@
             <th><?php echo __('User'); ?></th>
             <th><?php echo __('Created'); ?></th>
             <th><?php echo __('Duration'); ?></th>
-            <th style="width: 120px;"><?php echo __('Actions'); ?></th>
+            <th class="jobsma-width-120px-b15a"><?php echo __('Actions'); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -172,9 +182,9 @@
               <td>
                 <?php if ($job->progress_total > 0): ?>
                   <?php $pct = round($job->progress_current / $job->progress_total * 100); ?>
-                  <div class="progress" style="height: 18px;" title="<?php echo esc_specialchars($job->progress_message ?? ''); ?>">
+                  <div class="progress jobsma-height-18px-7f47"  title="<?php echo esc_specialchars($job->progress_message ?? ''); ?>">
                     <div class="progress-bar <?php echo ($job->status === 'failed') ? 'bg-danger' : ''; ?>"
-                         role="progressbar" style="width: <?php echo $pct; ?>%"
+                         role="progressbar" data-ahg-style="width: <?php echo $pct; ?>%"
                          aria-valuenow="<?php echo $pct; ?>" aria-valuemin="0" aria-valuemax="100">
                       <?php echo $pct; ?>%
                     </div>

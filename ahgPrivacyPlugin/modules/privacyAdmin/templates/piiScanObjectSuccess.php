@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .privac-height-20px-84ce { height: 20px; }
+</style>
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -81,12 +88,12 @@
                     else echo 'bg-success';
                 ?> fs-5"><?php echo $scanResult['risk_score']; ?>/100</span>
             </div>
-            <div class="progress" style="height: 20px;">
+            <div class="progress privac-height-20px-84ce" >
                 <div class="progress-bar <?php
                     if ($scanResult['risk_score'] >= 70) echo 'bg-danger';
                     elseif ($scanResult['risk_score'] >= 40) echo 'bg-warning';
                     else echo 'bg-success';
-                ?>" role="progressbar" style="width: <?php echo $scanResult['risk_score']; ?>%"></div>
+                ?>" role="progressbar" data-ahg-style="width: <?php echo $scanResult['risk_score']; ?>%"></div>
             </div>
         </div>
     </div>

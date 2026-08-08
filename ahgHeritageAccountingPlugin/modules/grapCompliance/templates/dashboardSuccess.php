@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-height-10px-977d { height: 10px; }
+</style>
 <?php slot('title') ?><?php echo __('Compliance Dashboard') ?><?php end_slot() ?>
 
 <div class="container-fluid">
@@ -91,8 +98,8 @@
                                 <span class="text-success"><?php echo __('Compliant') ?></span>
                                 <span><?php echo $compliantPct ?>%</span>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-success" style="width: <?php echo $compliantPct ?>%"></div>
+                            <div class="progress herita-height-10px-977d" >
+                                <div class="progress-bar bg-success" data-ahg-style="width: <?php echo $compliantPct ?>%"></div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -100,8 +107,8 @@
                                 <span class="text-warning"><?php echo __('Partially Compliant') ?></span>
                                 <span><?php echo $partialPct ?>%</span>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-warning" style="width: <?php echo $partialPct ?>%"></div>
+                            <div class="progress herita-height-10px-977d" >
+                                <div class="progress-bar bg-warning" data-ahg-style="width: <?php echo $partialPct ?>%"></div>
                             </div>
                         </div>
                         <div class="mb-3">
@@ -109,8 +116,8 @@
                                 <span class="text-danger"><?php echo __('Non-Compliant') ?></span>
                                 <span><?php echo $nonPct ?>%</span>
                             </div>
-                            <div class="progress" style="height: 10px;">
-                                <div class="progress-bar bg-danger" style="width: <?php echo $nonPct ?>%"></div>
+                            <div class="progress herita-height-10px-977d" >
+                                <div class="progress-bar bg-danger" data-ahg-style="width: <?php echo $nonPct ?>%"></div>
                             </div>
                         </div>
                     <?php else: ?>

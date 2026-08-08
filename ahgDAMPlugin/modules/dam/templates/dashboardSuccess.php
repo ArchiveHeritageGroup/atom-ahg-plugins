@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dam-background-color-dc3545-f687 { background-color: #dc3545; }
+  .dam-background-color-ffc107-bea8 { background-color: #ffc107; }
+  .dam-width-100px-ee04 { width:100px; }
+  .dam-width-150px-9578 { width:150px; }
+</style>
 <?php
 require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper/AhgLaravelHelper.php';
 ?>
@@ -14,7 +24,7 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
 <?php end_slot(); ?>
 
 <?php slot('sidebar'); ?>
-  <div class="card mb-3" style="background-color: #dc3545;">
+  <div class="card mb-3 dam-background-color-dc3545-f687" >
     <div class="card-body py-2 text-white text-center">
       <i class="fas fa-cog"></i> <?php echo __('DAM Actions'); ?>
     </div>
@@ -39,7 +49,7 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
   </div>
 
   <?php if (ahg_is_plugin_enabled('ahgLoanPlugin')): ?>
-  <div class="card mb-3" style="background-color: #ffc107;">
+  <div class="card mb-3 dam-background-color-ffc107-bea8" >
     <div class="card-body py-2 text-dark text-center">
       <i class="fas fa-exchange-alt"></i> <?php echo __('Licensing'); ?>
     </div>
@@ -183,8 +193,8 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
           <thead class="table-light">
             <tr>
               <th><?php echo __('Title'); ?></th>
-              <th style="width:150px"><?php echo __('Identifier'); ?></th>
-              <th style="width:100px"></th>
+              <th class="dam-width-150px-9578"><?php echo __('Identifier'); ?></th>
+              <th class="dam-width-100px-ee04"></th>
             </tr>
           </thead>
           <tbody>

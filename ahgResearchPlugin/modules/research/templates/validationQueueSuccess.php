@@ -1,4 +1,13 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-max-height-400px-overflow-au-9e96 { max-height:400px;overflow:auto;white-space:pre-wrap; }
+  .resear-width-100px-ee04 { width:100px; }
+  .resear-width-60px-height-6px-6dda { width:60px;height:6px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -57,7 +66,7 @@
             </div>
             <div class="col-auto">
                 <label class="form-label form-label-sm mb-0">Min Confidence</label>
-                <input type="number" name="min_confidence" class="form-control form-control-sm" style="width:100px" min="0" max="1" step="0.01" value="<?php echo htmlspecialchars($sf_request->getParameter('min_confidence', '')); ?>" placeholder="0.00">
+                <input type="number" name="min_confidence" class="form-control form-control-sm resear-width-100px-ee04"  min="0" max="1" step="0.01" value="<?php echo htmlspecialchars($sf_request->getParameter('min_confidence', '')); ?>" placeholder="0.00">
             </div>
             <div class="col-auto"><button type="submit" class="btn btn-sm btn-primary">Filter</button></div>
         </form>
@@ -99,9 +108,9 @@
                 <td>
                     <?php if (isset($item->confidence)): ?>
                     <div class="d-flex align-items-center gap-1">
-                        <div class="progress" style="width:60px;height:6px">
+                        <div class="progress resear-width-60px-height-6px-6dda" >
                             <?php $pct = round((float)$item->confidence * 100); $color = $pct >= 80 ? 'success' : ($pct >= 50 ? 'warning' : 'danger'); ?>
-                            <div class="progress-bar bg-<?php echo $color; ?>" style="width:<?php echo $pct; ?>%"></div>
+                            <div class="progress-bar bg-<?php echo $color; ?>" data-ahg-style="width:<?php echo $pct; ?>%"></div>
                         </div>
                         <small><?php echo $pct; ?>%</small>
                     </div>
@@ -142,7 +151,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header"><h5 class="modal-title">Data Preview</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body"><pre id="previewData" class="bg-light p-3 rounded" style="max-height:400px;overflow:auto;white-space:pre-wrap"></pre></div>
+            <div class="modal-body"><pre id="previewData" class="bg-light p-3 rounded resear-max-height-400px-overflow-au-9e96" ></pre></div>
         </div>
     </div>
 </div>

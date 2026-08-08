@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .forms-display-none-224b { display: none; }
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -165,7 +172,7 @@
                         <i class="fas fa-mouse-pointer fa-2x mb-2"></i>
                         <p>Select a field to edit its properties</p>
                     </div>
-                    <form id="field-properties-form" style="display: none;">
+                    <form id="field-properties-form" class="forms-display-none-224b">
                         <input type="hidden" id="prop-field-id" name="field_id">
 
                         <div class="mb-3">

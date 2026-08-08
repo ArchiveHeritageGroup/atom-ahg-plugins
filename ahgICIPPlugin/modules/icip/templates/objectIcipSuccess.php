@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .icip-min-width-200px-a066 { min-width: 200px; }
+</style>
 <?php
 // AtoM escaping wraps action variables in sfOutputEscaper decorators. Object
 // property reads survive that, but native array functions (array_slice below)
@@ -233,7 +240,7 @@ $restrictionTypes = $sf_data->getRaw('restrictionTypes');
                     <?php else: ?>
                         <div class="d-flex flex-wrap gap-3">
                             <?php foreach ($labels as $label): ?>
-                                <div class="icip-tk-label-card p-2 border rounded" style="min-width: 200px;">
+                                <div class="icip-tk-label-card p-2 border rounded icip-min-width-200px-a066" >
                                     <div class="d-flex align-items-center">
                                         <span class="badge <?php echo $label->category === 'TK' ? 'icip-tk-label' : 'icip-bc-label' ?> me-2">
                                             <?php echo strtoupper($label->label_code) ?>

@@ -19,7 +19,7 @@
           <?php if ($classification): ?>
           <p class="mt-3">
             <strong><?php echo __('Required Classification:') ?></strong>
-            <span class="badge" style="background-color: <?php echo $classification->color ?>">
+            <span class="badge" data-ahg-style="background-color: <?php echo $classification->color ?>">
               <?php echo esc_entities($classification->name) ?>
             </span>
           </p>

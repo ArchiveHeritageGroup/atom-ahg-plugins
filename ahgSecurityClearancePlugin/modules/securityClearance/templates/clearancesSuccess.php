@@ -40,7 +40,7 @@
             <small class="text-muted"><?php echo esc_entities($c->email) ?></small>
           </td>
           <td>
-            <span class="badge" style="background-color: <?php echo $c->color ?>">
+            <span class="badge" data-ahg-style="background-color: <?php echo $c->color ?>">
               <?php echo esc_entities($c->clearance_name) ?>
             </span>
             <br><small>Level <?php echo $c->level ?></small>

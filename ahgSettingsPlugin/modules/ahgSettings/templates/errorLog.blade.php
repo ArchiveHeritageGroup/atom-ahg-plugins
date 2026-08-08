@@ -1,4 +1,18 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .settin-max-height-300px-overflow-au-27dc { max-height: 300px; overflow: auto; }
+  .settin-max-width-160px-e722 { max-width: 160px; }
+  .settin-width-100px-b3a1 { width: 100px; }
+  .settin-width-120px-d44c { width: 120px; }
+  .settin-width-140px-90f9 { width: 140px; }
+  .settin-width-160px-e7e3 { width: 160px; }
+  .settin-width-40px-274c { width: 40px; }
+  .settin-width-70px-1ba5 { width: 70px; }
+  .settin-word-break-break-all-c5a9 { word-break: break-all; }
+  .settin-word-break-break-word-d893 { word-break: break-word; }
+</style>
 
 @section('content')
 <h1><i class="fas fa-exclamation-triangle text-danger me-2"></i>{{ __('System Error Log') }}</h1>
@@ -91,13 +105,13 @@
     <table class="table table-sm table-hover mb-0">
       <thead class="table-dark">
         <tr>
-          <th style="width: 40px">#</th>
-          <th style="width: 140px">{{ __('Time') }}</th>
-          <th style="width: 70px">{{ __('Level') }}</th>
+          <th class="settin-width-40px-274c">#</th>
+          <th class="settin-width-140px-90f9">{{ __('Time') }}</th>
+          <th class="settin-width-70px-1ba5">{{ __('Level') }}</th>
           <th>{{ __('Error') }}</th>
-          <th style="width: 160px">{{ __('Location') }}</th>
-          <th style="width: 120px">{{ __('Client') }}</th>
-          <th style="width: 100px">{{ __('Actions') }}</th>
+          <th class="settin-width-160px-e7e3">{{ __('Location') }}</th>
+          <th class="settin-width-120px-d44c">{{ __('Client') }}</th>
+          <th class="settin-width-100px-b3a1">{{ __('Actions') }}</th>
         </tr>
       </thead>
       <tbody>
@@ -126,9 +140,9 @@
           </td>
           <td>
             <div class="fw-bold small">{{ e($err->exception_class ?? '') }}</div>
-            <div class="small" style="word-break: break-word">{{ e($err->message) }}</div>
+            <div class="small settin-word-break-break-word-d893" >{{ e($err->message) }}</div>
             @if ($err->url)
-              <div class="small text-muted" style="word-break: break-all">
+              <div class="small text-muted settin-word-break-break-all-c5a9" >
                 <span class="badge bg-light text-dark">{{ $err->http_method ?? 'GET' }}</span>
                 {{ e($err->url) }}
               </div>
@@ -137,7 +151,7 @@
               <div class="small text-success"><i class="fas fa-check me-1"></i>Resolved {{ $err->resolved_at }}</div>
             @endif
           </td>
-          <td class="small text-truncate" style="max-width: 160px" title="{{ e($err->file ?? '') }}">
+          <td class="small text-truncate settin-max-width-160px-e722"  title="{{ e($err->file ?? '') }}">
             {{ $err->file ? basename($err->file) . ':' . $err->line : '-' }}
           </td>
           <td class="small">
@@ -176,7 +190,7 @@
         @if ($err->trace)
         <tr class="collapse" id="trace-{{ $err->id }}">
           <td colspan="7">
-            <pre class="bg-dark text-light p-2 rounded small mb-0" style="max-height: 300px; overflow: auto">{{ e($err->trace) }}</pre>
+            <pre class="bg-dark text-light p-2 rounded small mb-0 settin-max-height-300px-overflow-au-27dc" >{{ e($err->trace) }}</pre>
             @if ($err->user_agent)
               <small class="text-muted">UA: {{ e(substr($err->user_agent, 0, 150)) }}</small>
             @endif

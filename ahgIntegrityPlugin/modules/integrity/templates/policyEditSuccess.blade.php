@@ -46,7 +46,7 @@ $repositories = $repositories ?? [];
               @endforeach
             </select>
           </div>
-          <div class="col-md-4" id="repoField" style="display:{{ ($policy->scope_type ?? 'global') === 'repository' ? 'block' : 'none' }}">
+          <div class="col-md-4" id="repoField" data-ahg-style="display:{{ ($policy->scope_type ?? 'global') === 'repository' ? 'block' : 'none' }}">
             <label class="form-label">{{ __('Repository') }}</label>
             <select name="repository_id" class="form-select">
               <option value="">{{ __('Select...') }}</option>
@@ -55,7 +55,7 @@ $repositories = $repositories ?? [];
               @endforeach
             </select>
           </div>
-          <div class="col-md-4" id="hierarchyField" style="display:{{ ($policy->scope_type ?? 'global') === 'hierarchy' ? 'block' : 'none' }}">
+          <div class="col-md-4" id="hierarchyField" data-ahg-style="display:{{ ($policy->scope_type ?? 'global') === 'hierarchy' ? 'block' : 'none' }}">
             <label class="form-label">{{ __('Information Object ID') }}</label>
             <input type="number" name="information_object_id" class="form-control" value="{{ $policy->information_object_id ?? '' }}">
           </div>

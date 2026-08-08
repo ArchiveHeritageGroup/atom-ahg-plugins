@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricexp-height-520px-e33f { height: 520px; }
+</style>
 <?php
 /* Provenance graph (#149 strand 3) — chain of custody + authenticity. */
 $n = sfConfig::get('csp_nonce', '');
@@ -43,7 +50,7 @@ $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
     <?php else: ?>
     <div class="row g-3">
       <div class="col-lg-8">
-        <div id="prov-cy" style="height: 520px;" class="border rounded bg-light"></div>
+        <div id="prov-cy" class="border rounded bg-light ricexp-height-520px-e33f" ></div>
         <div class="form-text"><?php echo __('Arrows show the direction of custody transfer. Drag nodes to rearrange.') ?></div>
       </div>
       <div class="col-lg-4">

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-max-width-720px-5c99 { max-width: 720px; }
+</style>
 <?php
 $roles = $sf_data->getRaw('roles');
 $required = array_map('intval', $sf_data->getRaw('requiredRoles'));
@@ -9,7 +16,7 @@ $descriptions = [
     103 => 'Translators',
 ];
 ?>
-<div class="container py-4" style="max-width: 720px">
+<div class="container py-4 securi-max-width-720px-5c99" >
     <div class="d-flex justify-content-between align-items-center mb-4">
         <span class="h2"><i class="fas fa-user-shield me-2"></i><?php echo __('Per-role MFA policy'); ?></span>
         <a href="<?php echo url_for(['module' => 'securityClearance', 'action' => 'twoFactor']); ?>" class="btn btn-outline-secondary btn-sm"><?php echo __('Back to 2FA'); ?></a>

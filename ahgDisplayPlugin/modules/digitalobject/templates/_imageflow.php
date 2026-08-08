@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-width-120px-height-120px-bac-7f2c { width:120px;height:120px;background:#f8f9fa; }
+</style>
 <?php
 // Resolve URLs for carousel items using Laravel Query Builder
 // The base component provides $thumbnails where each $item->parent is the master digital object
@@ -133,7 +140,7 @@ function _getFileIcon($path, $extIconMap, $imageExts)
             ?>
             <a title="<?php echo esc_entities($title); ?>" href="<?php echo $href; ?>">
               <?php if ($iconClass): ?>
-              <span class="img-thumbnail mx-2 d-inline-flex align-items-center justify-content-center" style="width:120px;height:120px;background:#f8f9fa;">
+              <span class="img-thumbnail mx-2 d-inline-flex align-items-center justify-content-center displa-width-120px-height-120px-bac-7f2c" >
                 <i class="<?php echo $iconClass; ?> fa-3x text-secondary"></i>
               </span>
               <?php else: ?>

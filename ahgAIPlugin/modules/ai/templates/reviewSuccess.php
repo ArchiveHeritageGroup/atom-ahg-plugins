@@ -1,3 +1,15 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-font-size-4rem-b0c6 { font-size: 4rem; }
+  .ai-height-25px-bd56 { height: 25px; }
+  .ai-width-progress-8099 { width: ' + progress + '%; }
+  .ai-width-120px-d44c { width: 120px; }
+  .ai-width-220px-dc0b { width: 220px; }
+  .ai-width-3rem-height-3rem-be74 { width: 3rem; height: 3rem; }
+</style>
 <?php
   // When the Authority Resolution Engine is installed, the per-object "Review"
   // button feeds into the evidence-based authority-resolution queue (matching
@@ -37,9 +49,9 @@
                 <thead class="table-light">
                     <tr>
                         <th>Object</th>
-                        <th class="text-center" style="width: 120px">Pending</th>
-                        <th class="text-center" style="width: 120px">Approved</th>
-                        <th style="width: 220px">Actions</th>
+                        <th class="text-center ai-width-120px-d44c" >Pending</th>
+                        <th class="text-center ai-width-120px-d44c" >Approved</th>
+                        <th class="ai-width-220px-dc0b">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -431,10 +443,10 @@ function processBatch(batches, batchIndex, results, total) {
     // Update progress display
     document.getElementById('reviewModalBody').innerHTML = 
         '<div class="text-center py-4">' +
-        '<div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>' +
+        '<div class="spinner-border text-primary mb-3 ai-width-3rem-height-3rem-be74" ></div>' +
         '<h5>Processing Entities...</h5>' +
-        '<div class="progress my-3" style="height: 25px;">' +
-        '<div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: ' + progress + '%">' + progress + '%</div>' +
+        '<div class="progress my-3 ai-height-25px-bd56" >' +
+        '<div class="progress-bar progress-bar-striped progress-bar-animated bg-success ai-width-progress-8099" >' + progress + '%</div>' +
         '</div>' +
         '<p class="text-muted mb-1">' + processed + ' of ' + total + ' processed</p>' +
         '<p class="small"><span class="text-success">' + results.success + ' succeeded</span> | <span class="text-danger">' + results.failed + ' failed</span></p>' +
@@ -445,7 +457,7 @@ function processBatch(batches, batchIndex, results, total) {
         setTimeout(function() {
             document.getElementById('reviewModalBody').innerHTML = 
                 '<div class="text-center py-5">' +
-                '<i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>' +
+                '<i class="fas fa-check-circle text-success ai-font-size-4rem-b0c6" ></i>' +
                 '<h4 class="mt-3">Processing Complete</h4>' +
                 '<p class="text-muted">' + results.success + ' succeeded, ' + results.failed + ' failed</p>' +
                 (results.errors.length > 0 ? '<details class="text-start"><summary class="text-danger">Show errors</summary><pre class="small bg-light p-2 mt-2">' + results.errors.join('\n') + '</pre></details>' : '') +

@@ -1,4 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+  .regist-width-40px-height-40px-objec-79db { width: 40px; height: 40px; object-fit: contain; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Software Products'); ?><?php end_slot(); ?>
 
@@ -31,9 +39,9 @@
       <div class="card-body">
         <div class="d-flex align-items-start mb-2">
           <?php if (!empty($sw->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($sw->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($sw->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2 regist-width-40px-height-40px-objec-79db" >
           <?php else: ?>
-            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center regist-width-40px-height-40px-9a6a" >
               <i class="fas fa-laptop-code text-muted"></i>
             </div>
           <?php endif; ?>

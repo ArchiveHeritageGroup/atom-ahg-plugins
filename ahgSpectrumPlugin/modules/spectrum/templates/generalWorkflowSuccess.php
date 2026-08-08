@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .spectr-margin-top-15px-d9ba { margin-top: -15px; }
+  .spectr-max-width-80px-font-size-0-7-4378 { max-width: 80px; font-size: 0.7rem; }
+  .spectr-min-width-30px-2429 { min-width: 30px; }
+</style>
 <?php
 decorate_with('layout_1col');
 use Illuminate\Database\Capsule\Manager as DB;
@@ -124,15 +133,15 @@ $users = DB::table('user')
                             };
                         ?>
                         <div class="text-center">
-                            <span class="badge <?php echo $badgeClass; ?> d-block mb-1" style="min-width: 30px;">
+                            <span class="badge <?php echo $badgeClass; ?> d-block mb-1 spectr-min-width-30px-2429" >
                                 <?php echo $step['order']; ?>
                             </span>
-                            <small class="d-block" style="max-width: 80px; font-size: 0.7rem;">
+                            <small class="d-block spectr-max-width-80px-font-size-0-7-4378" >
                                 <?php echo esc_entities($step['name']); ?>
                             </small>
                         </div>
                         <?php if ($index < count($steps) - 1): ?>
-                        <div class="d-flex align-items-center" style="margin-top: -15px;">
+                        <div class="d-flex align-items-center spectr-margin-top-15px-d9ba" >
                             <i class="fas fa-arrow-right text-muted"></i>
                         </div>
                         <?php endif; ?>

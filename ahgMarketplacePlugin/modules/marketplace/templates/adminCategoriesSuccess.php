@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-display-none-224b { display: none; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Categories'); ?> - <?php echo __('Marketplace Admin'); ?><?php end_slot(); ?>
 
@@ -139,7 +146,7 @@
               </tr>
 
               <!-- Edit modal -->
-              <tr style="display: none;"><td colspan="6">
+              <tr class="market-display-none-224b"><td colspan="6">
                 <div class="modal fade" id="editCat<?php echo (int) $cat->id; ?>" tabindex="-1" aria-hidden="true">
                   <div class="modal-dialog">
                     <div class="modal-content">

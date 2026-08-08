@@ -1,13 +1,21 @@
-<div class="section" id="alternative-identifiers-table"<?php echo 0 < count($alternativeIdentifiers) ? '' : 'style="display:none"'; ?>>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-display-none-cb45 { display:none; }
+  .museum-width-50-cd77 { width: 50%; }
+</style>
+<div class="section" id="alternative-identifiers-table"<?php echo 0 < count($alternativeIdentifiers) ? '' : 'class="museum-display-none-cb45"'; ?>>
 
   <h3><?php echo __('Alternative identifier(s)'); ?></h3>
 
   <table class="table table-bordered multiRow">
     <thead>
       <tr>
-        <th style="width: 50%">
+        <th class="museum-width-50-cd77">
           <?php echo __('Label'); ?>
-        </th><th style="width: 50%">
+        </th><th class="museum-width-50-cd77">
           <?php echo __('Identifier'); ?>
         </th>
       </tr>

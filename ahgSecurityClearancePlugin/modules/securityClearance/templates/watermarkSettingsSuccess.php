@@ -1,4 +1,15 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-height-150px-display-flex-fl-0b3d { height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+  .securi-max-width-100px-max-height-8-8631 { max-width: 100px; max-height: 80px; object-fit: contain; }
+  .securi-max-width-200px-1a5c { max-width: 200px; }
+  .securi-max-width-80px-max-height-60-a7df { max-width: 80px; max-height: 60px; object-fit: contain; }
+  .securi-padding-top-25px-5156 { padding-top: 25px; }
+</style>
 
 <?php slot('sidebar'); ?>
   <div class="card mb-3">
@@ -96,7 +107,7 @@
 
       <div class="mb-3">
         <label for="watermark_min_size" class="form-label"><?php echo __('Minimum Image Size'); ?></label>
-        <div class="input-group" style="max-width: 200px;">
+        <div class="input-group securi-max-width-200px-1a5c" >
           <input type="number" class="form-control" id="watermark_min_size" 
                  name="watermark_min_size" value="<?php echo $minSize; ?>" min="0">
           <span class="input-group-text">px</span>
@@ -143,7 +154,7 @@
           <input type="file" class="form-control" id="custom_watermark_file" name="custom_watermark_file" accept="image/png,image/jpeg,image/gif">
           <small class="text-muted"><?php echo __('Supported: PNG, JPEG, GIF. Recommended: transparent PNG.'); ?></small>
         </div>
-        <div class="col-md-2 d-flex align-items-center" style="padding-top: 25px;">
+        <div class="col-md-2 d-flex align-items-center securi-padding-top-25px-5156" >
           <button type="submit" name="upload_watermark" value="1" class="btn btn-success">
             <i class="fas fa-upload me-1"></i> <?php echo __('Upload'); ?>
           </button>
@@ -158,7 +169,7 @@
         <div class="col-md-3 mb-3">
           <div class="card h-100">
             <div class="card-body text-center p-2">
-              <img src="/uploads/watermarks/<?php echo $cw->filename; ?>" alt="<?php echo $cw->name; ?>" style="max-width: 80px; max-height: 60px; object-fit: contain;">
+              <img src="/uploads/watermarks/<?php echo $cw->filename; ?>" alt="<?php echo $cw->name; ?>" class="securi-max-width-80px-max-height-60-a7df">
               <p class="mb-1 mt-2"><small><strong><?php echo $cw->name; ?></strong></small></p>
               <p class="mb-1"><small class="text-muted"><?php echo $cw->position; ?> / <?php echo $cw->opacity; ?></small></p>
               <div class="form-check">
@@ -203,10 +214,10 @@
         <?php foreach ($watermarkTypes as $wtype): ?>
           <?php if ($wtype->image_file): ?>
           <div class="col-md-3 mb-3 text-center">
-            <div class="border rounded p-2" style="height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div class="border rounded p-2 securi-height-150px-display-flex-fl-0b3d" >
               <img src="/images/watermarks/<?php echo $wtype->image_file; ?>" 
                    alt="<?php echo $wtype->name; ?>" 
-                   style="max-width: 100px; max-height: 80px; object-fit: contain;">
+                   class="securi-max-width-100px-max-height-8-8631">
               <p class="mb-0 mt-2"><small><strong><?php echo $wtype->name; ?></strong></small></p>
               <p class="mb-0"><small class="text-muted"><?php echo $wtype->code; ?></small></p>
             </div>

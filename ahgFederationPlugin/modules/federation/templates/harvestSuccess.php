@@ -1,4 +1,14 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .federa-display-none-224b { display: none; }
+  .federa-height-25px-bd56 { height: 25px; }
+  .federa-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+  .federa-width-0-7590 { width: 0%; }
+</style>
 
 <div class="container-fluid py-3">
   <!-- Header -->
@@ -94,7 +104,7 @@
               <button type="button" class="btn btn-primary" id="startHarvestBtn" onclick="startHarvest()">
                 <i class="bi bi-play-fill me-1"></i> Start Harvest
               </button>
-              <button type="button" class="btn btn-outline-secondary" disabled id="stopHarvestBtn" onclick="stopHarvest()" style="display: none;">
+              <button type="button" class="btn btn-outline-secondary" disabled id="stopHarvestBtn" onclick="stopHarvest()" class="federa-display-none-224b">
                 <i class="bi bi-stop-fill me-1"></i> Stop
               </button>
             </div>
@@ -103,13 +113,13 @@
       </div>
 
       <!-- Progress -->
-      <div class="card mb-4" id="progressCard" style="display: none;">
+      <div class="card mb-4" id="progressCard" class="federa-display-none-224b">
         <div class="card-header">
           <h6 class="mb-0"><i class="bi bi-hourglass-split me-2"></i>Harvest Progress</h6>
         </div>
         <div class="card-body">
-          <div class="progress mb-3" style="height: 25px;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" style="width: 0%">
+          <div class="progress mb-3 federa-height-25px-bd56" >
+            <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" class="federa-width-0-7590">
               <span id="progressText">Starting...</span>
             </div>
           </div>
@@ -139,7 +149,7 @@
       </div>
 
       <!-- Result -->
-      <div class="card mb-4" id="resultCard" style="display: none;">
+      <div class="card mb-4" id="resultCard" class="federa-display-none-224b">
         <div class="card-header" id="resultHeader">
           <h6 class="mb-0"><i class="bi bi-check-circle me-2"></i>Harvest Complete</h6>
         </div>
@@ -279,7 +289,7 @@
         <div class="card-header">
           <h6 class="mb-0"><i class="bi bi-collection me-2"></i>Available Sets (<?php echo count($sets) ?>)</h6>
         </div>
-        <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+        <div class="card-body p-0 federa-max-height-300px-overflow-y--3db9" >
           <ul class="list-group list-group-flush">
             <?php foreach (array_slice($sets, 0, 20) as $set): ?>
             <li class="list-group-item py-2">

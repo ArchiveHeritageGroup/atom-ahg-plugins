@@ -1,4 +1,14 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-background-typecolors-node-t-15f3 { background:'+(typeColors[node.type]||'#76b7b2')+'; }
+  .resear-width-100-height-600px-backg-79b9 { width:100%; height:600px; background:#fafafa; }
+  .resear-width-160px-64fa { width:160px; }
+  .resear-width-auto-d3b6 { width:auto; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -13,8 +23,8 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2">Knowledge Graph</h1>
     <div class="d-flex gap-2">
-        <input type="text" id="nodeSearch" class="form-control form-control-sm" style="width:160px;" placeholder="Search nodes...">
-        <select id="filterType" class="form-select form-select-sm" style="width:auto;">
+        <input type="text" id="nodeSearch" class="form-control form-control-sm resear-width-160px-64fa"  placeholder="Search nodes...">
+        <select id="filterType" class="form-select form-select-sm resear-width-auto-d3b6" >
             <option value="">All Types</option>
             <option value="biographical">Biographical</option>
             <option value="chronological">Chronological</option>
@@ -46,7 +56,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-body p-0 position-relative">
-                <div id="graphContainer" style="width:100%; height:600px; background:#fafafa;"></div>
+                <div id="graphContainer" class="resear-width-100-height-600px-backg-79b9"></div>
                 <div class="position-absolute bottom-0 end-0 p-2 d-flex gap-1">
                     <button id="zoomIn" class="btn btn-sm btn-light border" title="Zoom in"><i class="fas fa-plus"></i></button>
                     <button id="zoomOut" class="btn btn-sm btn-light border" title="Zoom out"><i class="fas fa-minus"></i></button>
@@ -141,7 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return s===node.id||t===node.id;
         });
         var h = '<h6>'+esc(node.label)+'</h6>';
-        h += '<p class="mb-1"><span class="badge" style="background:'+(typeColors[node.type]||'#76b7b2')+'">'+esc(node.type||'unknown')+'</span></p>';
+        h += '<p class="mb-1"><span class="badge resear-background-typecolors-node-t-15f3" >'+esc(node.type||'unknown')+'</span></p>';
         h += '<p class="mb-2 text-muted small">ID: '+node.id+' | Connections: '+conns.length+'</p>';
         if (conns.length) {
             h += '<hr><h6 class="small">Connections</h6><ul class="list-unstyled small">';

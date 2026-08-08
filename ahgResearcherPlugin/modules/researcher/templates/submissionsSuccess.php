@@ -1,4 +1,11 @@
 <?php $n = sfConfig::get('csp_nonce', ''); $nattr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-font-size-2rem-1e52 { font-size: 2rem; }
+</style>
 
 <div class="container-fluid py-3">
 
@@ -43,7 +50,7 @@
     <div class="card-body p-0">
       <?php if (empty($submissions)): ?>
         <div class="text-center text-muted py-5">
-          <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+          <i class="bi bi-inbox resear-font-size-2rem-1e52" ></i>
           <p class="mt-2 mb-0">No submissions found.</p>
         </div>
       <?php else: ?>

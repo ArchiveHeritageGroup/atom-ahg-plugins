@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-height-100px-background-line-dcb5 { height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .regist-height-160px-object-fit-cove-fad1 { height: 160px; object-fit: cover; }
+</style>
 <?php
   $authorTypeBg = [
     'admin' => 'bg-danger',
@@ -12,9 +20,9 @@
 <div class="col">
   <div class="card h-100">
     <?php if (!empty($item->featured_image_path)): ?>
-      <img src="<?php echo htmlspecialchars($item->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" style="height: 160px; object-fit: cover;">
+      <img src="<?php echo htmlspecialchars($item->featured_image_path, ENT_QUOTES, 'UTF-8'); ?>" class="card-img-top" alt="" class="regist-height-160px-object-fit-cove-fad1">
     <?php else: ?>
-      <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+      <div class="card-img-top d-flex align-items-center justify-content-center regist-height-100px-background-line-dcb5" >
         <i class="fas fa-newspaper fa-2x text-white opacity-50"></i>
       </div>
     <?php endif; ?>
@@ -41,7 +49,7 @@
         <small class="text-muted">
           <?php echo htmlspecialchars($item->author_name ?? '', ENT_QUOTES, 'UTF-8'); ?>
           <?php if (!empty($at)): ?>
-            <span class="badge <?php echo $atClass; ?>" style="<?php echo $atStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $at)), ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="badge <?php echo $atClass; ?>" data-ahg-style="<?php echo $atStyle; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $at)), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
         </small>
         <small class="text-muted">

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-width-30-59c8 { width:30%; }
+</style>
 <?php
 /**
  * ISBN / DOI / ISSN Resolver — lookup page.
@@ -105,7 +112,7 @@
     for (var i = 0; i < rows.length; i++) {
       var val = rows[i][1];
       if (!val) continue;
-      html += '<tr><th style="width:30%" class="text-end text-muted">' + rows[i][0] + ':</th>';
+      html += '<tr><th class="text-end text-muted librar-width-30-59c8" >' + rows[i][0] + ':</th>';
       html += '<td>' + val + '</td></tr>';
     }
     html += '</table>';

@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-max-height-70vh-object-fit-c-f3cd { max-height: 70vh; object-fit: contain; }
+  .displa-top-20px-9ad9 { top: 20px; }
+</style>
 <?php
 /**
  * Gallery layout - artwork/hero image view
@@ -14,7 +22,7 @@ $siblings = $data['siblings'] ?? [];
                     <img src="<?php echo $digitalObject->path; ?>" 
                          class="img-fluid" 
                          alt="<?php echo $object->title ?? ''; ?>"
-                         style="max-height: 70vh; object-fit: contain;">
+                         class="displa-max-height-70vh-object-fit-c-f3cd">
                 </a>
             </div>
             <?php endif; ?>
@@ -41,7 +49,7 @@ $siblings = $data['siblings'] ?? [];
         </div>
         
         <div class="col-lg-4">
-            <div class="artwork-details sticky-top" style="top: 20px;">
+            <div class="artwork-details sticky-top displa-top-20px-9ad9" >
                 <?php // Artist ?>
                 <?php if (!empty($fields['identity']['artist'])): ?>
                 <h4 class="artist-name mb-1"><?php echo $fields['identity']['artist']['value']; ?></h4>

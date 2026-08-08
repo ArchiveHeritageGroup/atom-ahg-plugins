@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-width-160px-df7d { width:160px; }
+  .ai-width-42px-7aa7 { width:42px; }
+</style>
 <?php
 /* AI Cataloguer (#149) — full-record draft review + apply. */
 $hasDraft = is_array($draft) && !empty($draft);
@@ -44,7 +52,7 @@ $entityBuckets = ['persons' => 'People', 'organizations' => 'Organisations', 'pl
         </div>
         <div class="table-responsive"><table class="table table-sm align-middle mb-0">
           <thead class="table-light"><tr>
-            <th style="width:42px"></th><th style="width:160px"><?php echo __('Field') ?></th>
+            <th class="ai-width-42px-7aa7"></th><th class="ai-width-160px-df7d"><?php echo __('Field') ?></th>
             <th><?php echo __('AI draft') ?></th><th class="text-muted"><?php echo __('Current value') ?></th>
           </tr></thead>
           <tbody>

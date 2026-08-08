@@ -1,3 +1,14 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .spectr-font-size-0-7rem-1982 { font-size:0.7rem; }
+  .spectr-font-weight-normal-6c28 { font-weight:normal; }
+  .spectr-margin-top-15px-d9ba { margin-top: -15px; }
+  .spectr-max-width-90px-font-size-0-7-8f30 { max-width: 90px; font-size: 0.7rem; }
+  .spectr-min-width-30px-2429 { min-width: 30px; }
+</style>
 <?php 
 decorate_with('layout_1col');
 use Illuminate\Database\Capsule\Manager as DB;
@@ -157,15 +168,15 @@ if ($users->isEmpty()) {
                             $stateLabel = $stateLabels[$stateKey] ?? ucwords(str_replace('_', ' ', $stateKey));
                         ?>
                         <div class="text-center">
-                            <span class="badge <?php echo $badgeClass; ?> d-block mb-1" style="min-width: 30px;">
+                            <span class="badge <?php echo $badgeClass; ?> d-block mb-1 spectr-min-width-30px-2429" >
                                 <?php echo $sIndex + 1; ?>
                             </span>
-                            <small class="d-block" style="max-width: 90px; font-size: 0.7rem;">
+                            <small class="d-block spectr-max-width-90px-font-size-0-7-8f30" >
                                 <?php echo esc_entities($stateLabel); ?>
                             </small>
                         </div>
                         <?php if ($sIndex < $lastStateIndex): ?>
-                        <div class="d-flex align-items-center" style="margin-top: -15px;">
+                        <div class="d-flex align-items-center spectr-margin-top-15px-d9ba" >
                             <i class="fas fa-arrow-right text-muted"></i>
                         </div>
                         <?php endif; ?>
@@ -190,7 +201,7 @@ if ($users->isEmpty()) {
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">
                             <i class="fas fa-list-check me-1"></i><?php echo __('Procedure steps'); ?>
-                            <span class="badge <?php echo $stepsLinear ? 'bg-info' : 'bg-light text-dark'; ?> ms-1" style="font-weight:normal;"><?php echo $stepsLinear ? __('Linear') : __('Checklist'); ?></span>
+                            <span class="badge <?php echo $stepsLinear ? 'bg-info' : 'bg-light text-dark'; ?> ms-1 spectr-font-weight-normal-6c28" ><?php echo $stepsLinear ? __('Linear') : __('Checklist'); ?></span>
                         </h6>
                         <span class="badge <?php echo ($totalSteps > 0 && $doneCount === $totalSteps) ? 'bg-success' : 'bg-secondary'; ?>"><?php echo $doneCount; ?>/<?php echo $totalSteps; ?> <?php echo __('done'); ?></span>
                     </div>
@@ -213,7 +224,7 @@ if ($users->isEmpty()) {
                             <input class="form-check-input" type="checkbox" name="steps_done[]" value="<?php echo esc_entities($step['key']); ?>" id="step_<?php echo esc_entities($step['key']); ?>" <?php echo $done ? 'checked' : ''; ?> <?php echo $locked ? 'disabled' : ''; ?>>
                             <label class="form-check-label <?php echo $locked ? 'text-muted' : ''; ?>" for="step_<?php echo esc_entities($step['key']); ?>">
                                 <?php echo esc_entities($step['name']); ?>
-                                <?php if ($locked): ?><i class="fas fa-lock text-muted ms-1" style="font-size:0.7rem;"></i><?php endif; ?>
+                                <?php if ($locked): ?><i class="fas fa-lock text-muted ms-1 spectr-font-size-0-7rem-1982" ></i><?php endif; ?>
                                 <?php if ($done && $st->completed_at): ?>
                                 <small class="text-muted">&mdash; <?php echo esc_entities(substr((string) $st->completed_at, 0, 10)); ?></small>
                                 <?php endif; ?>

@@ -1,4 +1,16 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .discov-font-size-0-78rem-d050 { font-size: 0.78rem; }
+  .discov-font-size-0-7rem-dcab { font-size: 0.7rem; }
+  .discov-font-size-0-88rem-e729 { font-size: 0.88rem; }
+  .discov-height-4px-width-60px-backgr-97d5 { height: 4px; width: 60px; background: #e9ecef; border-radius: 2px; margin-top: 2px; }
+  .discov-min-width-70px-956d { min-width: 70px; }
+  .discov-width-auto-dc25 { width: auto; }
+</style>
 
 <?php use_helper('I18N'); ?>
 
@@ -49,7 +61,7 @@ $searchPerformed = (bool) ($searchPerformed ?? false);
         <!-- Type Filter -->
         <div class="mt-3 d-flex align-items-center gap-2">
           <small class="text-muted me-1"><i class="fas fa-filter me-1"></i><?php echo __('Document type:'); ?></small>
-          <select id="pageindex-type" name="type" class="form-select form-select-sm" style="width: auto;">
+          <select id="pageindex-type" name="type" class="form-select form-select-sm discov-width-auto-dc25" >
             <option value="all"<?php echo $initialType === 'all' ? ' selected' : ''; ?>><?php echo __('All'); ?></option>
             <option value="ead"<?php echo $initialType === 'ead' ? ' selected' : ''; ?>><?php echo __('EAD Finding Aids'); ?></option>
             <option value="pdf"<?php echo $initialType === 'pdf' ? ' selected' : ''; ?>><?php echo __('PDF Documents'); ?></option>
@@ -150,7 +162,7 @@ $searchPerformed = (bool) ($searchPerformed ?? false);
             <!-- Breadcrumb Path -->
             <?php if (!empty($match['breadcrumb'])): ?>
             <nav class="mb-1">
-              <ol class="breadcrumb breadcrumb-sm mb-0" style="font-size: 0.78rem;">
+              <ol class="breadcrumb breadcrumb-sm mb-0 discov-font-size-0-78rem-d050" >
                 <?php foreach ($match['breadcrumb'] as $i => $crumb): ?>
                   <?php $isLast = ($i === count($match['breadcrumb']) - 1); ?>
                   <li class="breadcrumb-item<?php echo $isLast ? ' active' : ''; ?>">
@@ -169,7 +181,7 @@ $searchPerformed = (bool) ($searchPerformed ?? false);
 
             <!-- Node Summary -->
             <?php if (!empty($match['node_summary'])): ?>
-            <div class="text-muted mt-1" style="font-size: 0.88rem;">
+            <div class="text-muted mt-1 discov-font-size-0-88rem-e729" >
               <?php echo htmlspecialchars($match['node_summary'], ENT_QUOTES, 'UTF-8'); ?>
             </div>
             <?php endif; ?>
@@ -185,7 +197,7 @@ $searchPerformed = (bool) ($searchPerformed ?? false);
             <?php if (!empty($match['node_keywords'])): ?>
             <div class="mt-1">
               <?php foreach ($match['node_keywords'] as $kw): ?>
-                <span class="badge bg-light text-muted me-1" style="font-size: 0.7rem;"><?php echo htmlspecialchars($kw, ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="badge bg-light text-muted me-1 discov-font-size-0-7rem-dcab" ><?php echo htmlspecialchars($kw, ENT_QUOTES, 'UTF-8'); ?></span>
               <?php endforeach; ?>
             </div>
             <?php endif; ?>
@@ -197,10 +209,10 @@ $searchPerformed = (bool) ($searchPerformed ?? false);
             $pct = (int) round($relevance * 100);
             $barColor = $pct >= 70 ? '#198754' : ($pct >= 40 ? '#fd7e14' : '#6c757d');
           ?>
-          <div class="ms-3 flex-shrink-0 text-end" style="min-width: 70px;" title="<?php echo __('Relevance:'); ?> <?php echo $pct; ?>%">
-            <span class="fw-bold" style="color: <?php echo $barColor; ?>;"><?php echo $pct; ?>%</span>
-            <div style="height: 4px; width: 60px; background: #e9ecef; border-radius: 2px; margin-top: 2px;">
-              <div style="height: 100%; width: <?php echo $pct; ?>%; background: <?php echo $barColor; ?>; border-radius: 2px;"></div>
+          <div class="ms-3 flex-shrink-0 text-end discov-min-width-70px-956d"  title="<?php echo __('Relevance:'); ?> <?php echo $pct; ?>%">
+            <span class="fw-bold" data-ahg-style="color: <?php echo $barColor; ?>;"><?php echo $pct; ?>%</span>
+            <div class="discov-height-4px-width-60px-backgr-97d5">
+              <div data-ahg-style="height: 100%; width: <?php echo $pct; ?>%; background: <?php echo $barColor; ?>; border-radius: 2px;"></div>
             </div>
           </div>
         </div>

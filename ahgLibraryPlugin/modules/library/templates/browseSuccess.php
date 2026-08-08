@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-cursor-pointer-list-style-no-c980 { cursor:pointer; list-style:none; }
+  .librar-font-size-1rem-e4c3 { font-size:1rem; }
+  .librar-height-100px-overflow-hidden-68cc { height: 100px; overflow: hidden; }
+  .librar-max-height-100px-width-auto-c8f4 { max-height: 100px; width: auto; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Library'); ?></h1>
@@ -96,11 +106,11 @@
              data-work-key="<?php echo esc_entities($workKey ?: ''); ?>">
 
           <?php /* Cover */ ?>
-          <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-               style="height: 100px; overflow: hidden;">
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center librar-height-100px-overflow-hidden-68cc"
+               >
             <?php if (!empty($cleanIsbn)): ?>
               <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg?default=false"
-                   alt="Cover" class="img-fluid" style="max-height: 100px; width: auto;"
+                   alt="Cover" class="img-fluid librar-max-height-100px-width-auto-c8f4" 
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php else: ?>
               <i class="fas fa-book fa-4x text-muted"></i>
@@ -108,7 +118,7 @@
           </div>
 
           <div class="card-body">
-            <h5 class="card-title" style="font-size:1rem;">
+            <h5 class="card-title librar-font-size-1rem-e4c3" >
               <?php if (!empty($primarySlug)): ?>
                 <a href="<?php echo url_for(['module' => 'library', 'action' => 'index', 'slug' => $primarySlug]); ?>"
                    class="text-decoration-none">
@@ -153,7 +163,7 @@
             <?php if ($count > 1): ?>
               <div class="manifestations-panel mt-2 border-top pt-2">
                 <details class="frbr-manifestations">
-                  <summary class="small text-primary fw-bold" style="cursor:pointer; list-style:none;">
+                  <summary class="small text-primary fw-bold librar-cursor-pointer-list-style-no-c980" >
                     <i class="fas fa-chevron-down me-1"></i>
                     <?php echo __('Show editions (%1%)', ['%1%' => $count]); ?>
                   </summary>
@@ -242,11 +252,11 @@
       ?>
       <div class="col-md-6 col-lg-4 mb-4">
         <div class="card h-100 shadow-sm">
-          <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
-               style="height: 100px; overflow: hidden;">
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center librar-height-100px-overflow-hidden-68cc"
+               >
             <?php if (!empty($cleanIsbn)): ?>
               <img src="https://covers.openlibrary.org/b/isbn/<?php echo $cleanIsbn; ?>-M.jpg?default=false"
-                   alt="Cover" class="img-fluid" style="max-height: 100px; width: auto;"
+                   alt="Cover" class="img-fluid librar-max-height-100px-width-auto-c8f4" 
                    onerror="this.parentElement.innerHTML='<i class=\'fas fa-book fa-4x text-muted\'></i>'">
             <?php else: ?>
               <i class="fas fa-book fa-4x text-muted"></i>

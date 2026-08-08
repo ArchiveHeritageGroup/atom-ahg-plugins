@@ -1,4 +1,15 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .aicond-height-10px-0e59 { height:10px; }
+  .aicond-height-12px-616a { height:12px; }
+  .aicond-min-width-100px-0b55 { min-width:100px; }
+  .aicond-min-width-120px-307c { min-width:120px; }
+  .aicond-min-width-40px-f3e7 { min-width:40px; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -95,13 +106,13 @@
                     $icon = $gradeIcons[$grade] ?? 'fa-question';
                 ?>
                 <div class="d-flex align-items-center mb-3">
-                    <span class="badge bg-<?php echo $color ?> me-2" style="min-width:100px">
+                    <span class="badge bg-<?php echo $color ?> me-2 aicond-min-width-100px-0b55" >
                         <i class="fas <?php echo $icon ?> me-1"></i><?php echo ucfirst($grade) ?>
                     </span>
-                    <div class="progress flex-grow-1" style="height:12px">
-                        <div class="progress-bar bg-<?php echo $color ?>" style="width:<?php echo $pct ?>%"></div>
+                    <div class="progress flex-grow-1 aicond-height-12px-616a" >
+                        <div class="progress-bar bg-<?php echo $color ?>" data-ahg-style="width:<?php echo $pct ?>%"></div>
                     </div>
-                    <span class="ms-2 fw-bold" style="min-width:40px"><?php echo $count ?></span>
+                    <span class="ms-2 fw-bold aicond-min-width-40px-f3e7" ><?php echo $count ?></span>
                     <span class="ms-1 text-muted small">(<?php echo $pct ?>%)</span>
                 </div>
                 <?php endforeach; ?>
@@ -131,13 +142,13 @@
                         $srcIcon = $sourceIcons[$src->source] ?? 'fa-question';
                 ?>
                 <div class="d-flex align-items-center mb-3">
-                    <span class="badge bg-<?php echo $srcColor ?> me-2" style="min-width:120px">
+                    <span class="badge bg-<?php echo $srcColor ?> me-2 aicond-min-width-120px-307c" >
                         <i class="fas <?php echo $srcIcon ?> me-1"></i><?php echo ucfirst(str_replace('_', ' ', $src->source)) ?>
                     </span>
-                    <div class="progress flex-grow-1" style="height:12px">
-                        <div class="progress-bar bg-<?php echo $srcColor ?>" style="width:<?php echo $srcPct ?>%"></div>
+                    <div class="progress flex-grow-1 aicond-height-12px-616a" >
+                        <div class="progress-bar bg-<?php echo $srcColor ?>" data-ahg-style="width:<?php echo $srcPct ?>%"></div>
                     </div>
-                    <span class="ms-2 fw-bold" style="min-width:40px"><?php echo $src->count ?></span>
+                    <span class="ms-2 fw-bold aicond-min-width-40px-f3e7" ><?php echo $src->count ?></span>
                 </div>
                 <?php endforeach;
                 endif; ?>
@@ -169,9 +180,9 @@
                         $dmgColor = $damageColors[$dmg->damage_type] ?? '#6c757d';
                 ?>
                 <div class="d-flex align-items-center mb-2">
-                    <span class="badge me-2" style="min-width:110px;background:<?php echo $dmgColor ?>"><?php echo ucfirst(str_replace('_', ' ', $dmg->damage_type)) ?></span>
-                    <div class="progress flex-grow-1" style="height:10px">
-                        <div class="progress-bar" style="width:<?php echo $dmgPct ?>%;background:<?php echo $dmgColor ?>"></div>
+                    <span class="badge me-2" data-ahg-style="min-width:110px;background:<?php echo $dmgColor ?>"><?php echo ucfirst(str_replace('_', ' ', $dmg->damage_type)) ?></span>
+                    <div class="progress flex-grow-1 aicond-height-10px-0e59" >
+                        <div class="progress-bar" data-ahg-style="width:<?php echo $dmgPct ?>%;background:<?php echo $dmgColor ?>"></div>
                     </div>
                     <span class="ms-2 small fw-bold"><?php echo $dmg->count ?></span>
                 </div>

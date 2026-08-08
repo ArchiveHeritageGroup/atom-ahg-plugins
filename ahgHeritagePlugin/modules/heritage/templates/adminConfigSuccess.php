@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-height-120px-object-fit-cove-e004 { height: 120px; object-fit: cover; }
+  .herita-width-30px-ec5c { width: 30px; }
+</style>
 <?php
 /**
  * Heritage Admin Configuration Page.
@@ -190,7 +198,7 @@ $secondaryColor = $config->secondary_color ?? '';
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th style="width: 30px;"></th>
+                            <th class="herita-width-30px-ec5c"></th>
                             <th>Filter</th>
                             <th>Source</th>
                             <th class="text-center">Landing</th>
@@ -283,7 +291,7 @@ $secondaryColor = $config->secondary_color ?? '';
                 <div class="col-md-4">
                     <div class="card h-100">
                         <img src="<?php echo esc_specialchars($image['image_path'] ?? ''); ?>"
-                             class="card-img-top" style="height: 120px; object-fit: cover;"
+                             class="card-img-top herita-height-120px-object-fit-cove-e004" 
                              alt="Hero image">
                         <div class="card-body p-2">
                             <small class="text-muted">

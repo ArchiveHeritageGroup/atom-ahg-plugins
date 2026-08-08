@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-max-width-200px-1a5c { max-width: 200px; }
+</style>
 
 @php
 $recentActivity = $dashboardData['recent_activity'] ?? [];
@@ -139,7 +144,7 @@ $activitySummary = $dashboardData['activity_summary'] ?? [];
                         <span class="badge bg-light text-dark ms-2">{{ $log->action }}</span>
                     </div>
                     @if ($log->object_title)
-                    <small class="text-truncate" style="max-width: 200px;">{{ $log->object_title }}</small>
+                    <small class="text-truncate herita-max-width-200px-1a5c" >{{ $log->object_title }}</small>
                     @endif
                 </div>
             </div>

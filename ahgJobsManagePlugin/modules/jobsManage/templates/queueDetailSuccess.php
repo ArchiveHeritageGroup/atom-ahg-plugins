@@ -1,4 +1,15 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .jobsma-height-24px-7745 { height: 24px; }
+  .jobsma-max-height-200px-overflow-y--d98f { max-height: 200px; overflow-y: auto; }
+  .jobsma-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+  .jobsma-width-120px-b15a { width: 120px; }
+  .jobsma-width-160px-7534 { width: 160px; }
+</style>
 <?php use_helper('Date'); ?>
 
 <?php slot('title'); ?>
@@ -111,9 +122,9 @@
       <div class="card-header"><strong><?php echo __('Progress'); ?></strong></div>
       <div class="card-body">
         <?php $pct = round($rawJob->progress_current / $rawJob->progress_total * 100); ?>
-        <div class="progress mb-2" style="height: 24px;">
+        <div class="progress mb-2 jobsma-height-24px-7745" >
           <div class="progress-bar <?php echo ($rawJob->status === 'failed') ? 'bg-danger' : 'bg-success'; ?>"
-               role="progressbar" style="width: <?php echo $pct; ?>%">
+               role="progressbar" data-ahg-style="width: <?php echo $pct; ?>%">
             <?php echo (int) $rawJob->progress_current; ?> / <?php echo (int) $rawJob->progress_total; ?> (<?php echo $pct; ?>%)
           </div>
         </div>
@@ -136,7 +147,7 @@
         <?php if ($rawJob->error_trace): ?>
           <details class="mt-2">
             <summary><?php echo __('Stack trace'); ?></summary>
-            <pre class="bg-light p-2 mt-1 small" style="max-height: 300px; overflow-y: auto;"><?php echo esc_specialchars($rawJob->error_trace); ?></pre>
+            <pre class="bg-light p-2 mt-1 small jobsma-max-height-300px-overflow-y--3db9" ><?php echo esc_specialchars($rawJob->error_trace); ?></pre>
           </details>
         <?php endif; ?>
       </div>
@@ -148,7 +159,7 @@
     <div class="card mb-4">
       <div class="card-header"><strong><?php echo __('Payload'); ?></strong></div>
       <div class="card-body">
-        <pre class="bg-light p-2 small mb-0" style="max-height: 200px; overflow-y: auto;"><?php echo esc_specialchars(json_encode(json_decode($rawJob->payload), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+        <pre class="bg-light p-2 small mb-0 jobsma-max-height-200px-overflow-y--d98f" ><?php echo esc_specialchars(json_encode(json_decode($rawJob->payload), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
       </div>
     </div>
   <?php endif; ?>
@@ -158,7 +169,7 @@
     <div class="card mb-4">
       <div class="card-header"><strong><?php echo __('Result'); ?></strong></div>
       <div class="card-body">
-        <pre class="bg-light p-2 small mb-0" style="max-height: 200px; overflow-y: auto;"><?php echo esc_specialchars(json_encode(json_decode($rawJob->result_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
+        <pre class="bg-light p-2 small mb-0 jobsma-max-height-200px-overflow-y--d98f" ><?php echo esc_specialchars(json_encode(json_decode($rawJob->result_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)); ?></pre>
       </div>
     </div>
   <?php endif; ?>
@@ -173,8 +184,8 @@
           <table class="table table-sm table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width: 160px;"><?php echo __('Time'); ?></th>
-                <th style="width: 120px;"><?php echo __('Event'); ?></th>
+                <th class="jobsma-width-160px-7534"><?php echo __('Time'); ?></th>
+                <th class="jobsma-width-120px-b15a"><?php echo __('Event'); ?></th>
                 <th><?php echo __('Message'); ?></th>
               </tr>
             </thead>

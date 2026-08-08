@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-cursor-pointer-24b5 { cursor: pointer; }
+  .regist-max-height-100px-max-width-2-2b05 { max-height: 100px; max-width: 200px; }
+  .regist-min-height-120px-cursor-poin-6f8e { min-height: 120px; cursor: pointer; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Register Institution'); ?><?php end_slot(); ?>
 
@@ -62,13 +71,13 @@
             </div>
             <div class="col-12">
               <label for="reg-logo" class="form-label"><?php echo __('Logo'); ?></label>
-              <div class="border rounded p-3 text-center position-relative" id="logo-drop-zone" style="min-height: 120px; cursor: pointer;">
+              <div class="border rounded p-3 text-center position-relative" id="logo-drop-zone" class="regist-min-height-120px-cursor-poin-6f8e">
                 <div id="logo-preview-area">
                   <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                   <p class="mb-1"><?php echo __('Drag and drop your logo here, or click to browse'); ?></p>
                   <small class="text-muted"><?php echo __('PNG, JPG, SVG. Max 2MB. Recommended: 200x200px.'); ?></small>
                 </div>
-                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="reg-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" style="cursor: pointer;">
+                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="reg-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" class="regist-cursor-pointer-24b5">
               </div>
             </div>
           </div>
@@ -329,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.target.files && e.target.files[0]) {
         var reader = new FileReader();
         reader.onload = function(ev) {
-          previewArea.innerHTML = '<img src="' + ev.target.result + '" alt="Logo preview" style="max-height: 100px; max-width: 200px;" class="mb-2"><br><small class="text-muted">' + e.target.files[0].name + '</small>';
+          previewArea.innerHTML = '<img src="' + ev.target.result + '" alt="Logo preview" class="mb-2 regist-max-height-100px-max-width-2-2b05" ><br><small class="text-muted">' + e.target.files[0].name + '</small>';
         };
         reader.readAsDataURL(e.target.files[0]);
       }

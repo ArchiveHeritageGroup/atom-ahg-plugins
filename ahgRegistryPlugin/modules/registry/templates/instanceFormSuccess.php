@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-display-none-224b { display: none; }
+  .regist-width-15-c7ee { width: 15%; }
+  .regist-width-40-5172 { width: 40%; }
+</style>
 
 <?php slot('title'); ?><?php echo $instance ? __('Edit Instance') : __('Add Instance'); ?><?php end_slot(); ?>
 
@@ -267,8 +276,8 @@
             <table class="table table-sm">
               <thead class="table-light">
                 <tr>
-                  <th style="width: 40%;"><?php echo __('Feature'); ?></th>
-                  <th style="width: 15%;" class="text-center"><?php echo __('In Use?'); ?></th>
+                  <th class="regist-width-40-5172"><?php echo __('Feature'); ?></th>
+                  <th class="text-center regist-width-15-c7ee" ><?php echo __('In Use?'); ?></th>
                   <th><?php echo __('Comments'); ?></th>
                 </tr>
               </thead>
@@ -327,7 +336,7 @@
     </form>
 
     <?php if ($instance): ?>
-    <form id="delete-instance-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceDelete', 'id' => (int) $instance->id]); ?>" style="display: none;">
+    <form id="delete-instance-form" method="post" action="<?php echo url_for(['module' => 'registry', 'action' => 'myInstitutionInstanceDelete', 'id' => (int) $instance->id]); ?>" class="regist-display-none-224b">
     </form>
     <?php endif; ?>
 

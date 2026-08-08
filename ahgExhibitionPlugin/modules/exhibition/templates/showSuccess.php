@@ -1,4 +1,14 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-height-8px-d826 { height: 8px; }
+  .exhibi-width-50px-height-50px-font--e44b { width: 50px; height: 50px; font-size: 1.2rem; }
+  .exhibi-width-50px-height-50px-font--6868 { width: 50px; height: 50px; font-size: 1.2rem; display: none; }
+  .exhibi-width-50px-height-50px-objec-dea7 { width: 50px; height: 50px; object-fit: cover; }
+</style>
 
 <div class="row">
   <div class="col-md-8">
@@ -54,7 +64,7 @@
       <div class="card-body">
         <div class="d-flex justify-content-between align-items-center">
           <div>
-            <span class="badge fs-6" style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
+            <span class="badge fs-6" data-ahg-style="background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>">
               <?php echo $exhibition['status_info']['label'] ?? $exhibition['status']; ?>
             </span>
             <span class="badge bg-secondary ms-2"><?php echo $exhibition['type_label']; ?></span>
@@ -72,7 +82,7 @@
                     <a class="dropdown-item transition-link" href="#"
                        data-status="<?php echo $transition; ?>"
                        data-label="<?php echo $statusInfo['label'] ?? $transition; ?>">
-                      <span class="badge me-2" style="background-color: <?php echo $statusInfo['color'] ?? '#999'; ?>">&nbsp;</span>
+                      <span class="badge me-2" data-ahg-style="background-color: <?php echo $statusInfo['color'] ?? '#999'; ?>">&nbsp;</span>
                       <?php echo $statusInfo['label'] ?? $transition; ?>
                     </a>
                   </li>
@@ -90,8 +100,8 @@
           ];
           $currentProgress = $progress[$exhibition['status']] ?? 0;
         ?>
-        <div class="progress mt-3" style="height: 8px;">
-          <div class="progress-bar" role="progressbar" style="width: <?php echo $currentProgress; ?>%; background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>"></div>
+        <div class="progress mt-3 exhibi-height-8px-d826" >
+          <div class="progress-bar" role="progressbar" data-ahg-style="width: <?php echo $currentProgress; ?>%; background-color: <?php echo $exhibition['status_info']['color'] ?? '#999'; ?>"></div>
         </div>
       </div>
     </div>
@@ -165,11 +175,11 @@
           <?php foreach (array_slice($objectsArray, 0, 5) as $obj): ?>
             <div class="list-group-item d-flex align-items-center">
               <?php if (!empty($obj['thumbnail_url'])): ?>
-                <img src="<?php echo htmlspecialchars($obj['thumbnail_url']); ?>" alt="" class="me-3 rounded" style="width: 50px; height: 50px; object-fit: cover;"
+                <img src="<?php echo htmlspecialchars($obj['thumbnail_url']); ?>" alt="" class="me-3 rounded exhibi-width-50px-height-50px-objec-dea7" 
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="me-3 bg-secondary text-white align-items-center justify-content-center rounded" style="width: 50px; height: 50px; font-size: 1.2rem; display: none;">📦</div>
+                <div class="me-3 bg-secondary text-white align-items-center justify-content-center rounded exhibi-width-50px-height-50px-font--6868" >📦</div>
               <?php else: ?>
-                <div class="me-3 bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="width: 50px; height: 50px; font-size: 1.2rem;">
+                <div class="me-3 bg-secondary text-white d-flex align-items-center justify-content-center rounded exhibi-width-50px-height-50px-font--e44b" >
                   📦
                 </div>
               <?php endif; ?>

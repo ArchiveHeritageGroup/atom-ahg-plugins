@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-right-230px-background-6c757-e34b { right: 230px; background: #6c757d; }
+</style>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,7 +46,7 @@
 </head>
 <body>
 
-<a href="javascript:history.back()" class="print-btn" style="right: 230px; background: #6c757d;"><i class="fas fa-arrow-left"></i> Back</a>
+<a href="javascript:history.back()" class="print-btn resear-right-230px-background-6c757-e34b" ><i class="fas fa-arrow-left"></i> Back</a>
 <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print / Save PDF</button>
 
 <div class="header">

@@ -1,4 +1,15 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-max-height-60px-max-width-60-665b { max-height:60px; max-width:60px; }
+  .librar-width-160px-df7d { width:160px; }
+  .librar-width-50px-9ab0 { width:50px; }
+  .librar-width-70px-f95e { width:70px; }
+  .librar-width-80px-8db8 { width:80px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><i class="fas fa-barcode me-2"></i><?php echo __('Batch Capture — ISBN Lookup'); ?></h1>
@@ -147,14 +158,14 @@
         <table class="table table-hover table-striped mb-0">
           <thead class="table-light">
             <tr>
-              <th style="width:50px" class="text-center"><?php echo __('Include'); ?></th>
-              <th style="width:80px"><?php echo __('Cover'); ?></th>
+              <th class="text-center librar-width-50px-9ab0" ><?php echo __('Include'); ?></th>
+              <th class="librar-width-80px-8db8"><?php echo __('Cover'); ?></th>
               <th><?php echo __('ISBN'); ?></th>
               <th><?php echo __('Title'); ?></th>
               <th><?php echo __('Author(s)'); ?></th>
               <th><?php echo __('Publisher'); ?></th>
-              <th style="width:80px"><?php echo __('Year'); ?></th>
-              <th style="width:70px"><?php echo __('Pages'); ?></th>
+              <th class="librar-width-80px-8db8"><?php echo __('Year'); ?></th>
+              <th class="librar-width-70px-f95e"><?php echo __('Pages'); ?></th>
             </tr>
           </thead>
           <tbody>
@@ -166,7 +177,7 @@
                 <td class="align-middle">
                   <?php if (!empty($result['cover_url'])): ?>
                     <img src="<?php echo esc_entities($result['cover_url']); ?>" alt="Cover"
-                         style="max-height:60px; max-width:60px" class="rounded shadow-sm">
+                         class="rounded shadow-sm librar-max-height-60px-max-width-60-665b" >
                   <?php else: ?>
                     <span class="text-muted"><i class="fas fa-book fa-2x"></i></span>
                   <?php endif; ?>
@@ -174,7 +185,7 @@
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][isbn]"
-                         value="<?php echo esc_entities($result['isbn'] ?? $result['isbn_input'] ?? ''); ?>" style="width:160px">
+                         value="<?php echo esc_entities($result['isbn'] ?? $result['isbn_input'] ?? ''); ?>" class="librar-width-160px-df7d">
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][title]"
@@ -193,11 +204,11 @@
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][year]"
-                         value="<?php echo esc_entities($result['date_of_publication'] ?? ''); ?>" style="width:80px">
+                         value="<?php echo esc_entities($result['date_of_publication'] ?? ''); ?>" class="librar-width-80px-8db8">
                 </td>
                 <td class="align-middle">
                   <input type="text" class="form-control form-control-sm" name="items[<?php echo $idx; ?>][pages]"
-                         value="<?php echo esc_entities(str_replace(' pages', '', $result['extent'] ?? '')); ?>" style="width:70px">
+                         value="<?php echo esc_entities(str_replace(' pages', '', $result['extent'] ?? '')); ?>" class="librar-width-70px-f95e">
                 </td>
               </tr>
               <!-- Hidden fields for additional data -->

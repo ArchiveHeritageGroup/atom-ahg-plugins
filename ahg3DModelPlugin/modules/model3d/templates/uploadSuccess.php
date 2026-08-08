@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .3dmode-display-none-93b8 { display:none; }
+</style>
 <?php
 /**
  * 3D Model Upload Template
@@ -39,7 +46,7 @@ $formatList = is_array($allowedFormats) ? $allowedFormats : ['glb', 'gltf', 'usd
                                     Supported formats: <?php echo strtoupper(implode(', ', $formatList)) ?>
                                 </p>
                             </div>
-                            <div class="upload-preview" id="upload-preview" style="display:none;">
+                            <div class="upload-preview" id="upload-preview" class="3dmode-display-none-93b8">
                                 <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
                                 <p class="mb-0" id="file-name"></p>
                                 <p class="text-muted small" id="file-size"></p>

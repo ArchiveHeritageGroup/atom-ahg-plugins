@@ -1,4 +1,11 @@
 <?php $n = sfConfig::get('csp_nonce', ''); $nattr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-display-none-position-absolu-33be { display:none; position:absolute; z-index:999; max-height:200px; overflow-y:auto; }
+</style>
 
 <div class="container-fluid py-3">
 
@@ -65,7 +72,7 @@
               <input type="hidden" name="parent_object_id" id="parentObjectId" value="">
               <input type="text" class="form-control" id="parentSearch" placeholder="Type to search for a parent record..." autocomplete="off">
               <small class="text-muted">Place this submission under an existing archival record. Leave blank for root level.</small>
-              <div id="parentResults" class="list-group mt-1" style="display:none; position:absolute; z-index:999; max-height:200px; overflow-y:auto;"></div>
+              <div id="parentResults" class="list-group mt-1 resear-display-none-position-absolu-33be" ></div>
             </div>
 
             <hr>

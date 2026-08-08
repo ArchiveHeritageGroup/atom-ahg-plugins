@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ingest-display-none-224b { display: none; }
+  .ingest-height-24px-7745 { height: 24px; }
+  .ingest-height-4px-00f6 { height: 4px; }
+  .ingest-width-100-be70 { width: 100%; }
+</style>
 <?php
 $session = $sf_data->getRaw('session');
 $job = $sf_data->getRaw('job');
@@ -24,8 +34,8 @@ $job = $sf_data->getRaw('job');
         <div class="flex-fill"><span class="badge bg-success rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-primary rounded-pill">6</span><br><small class="fw-bold"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 100%"></div>
+    <div class="progress mt-2 ingest-height-4px-00f6" >
+        <div class="progress-bar ingest-width-100-be70" ></div>
     </div>
 </div>
 
@@ -48,13 +58,13 @@ $job = $sf_data->getRaw('job');
                 </h5>
             </div>
             <div class="card-body">
-                <div class="progress mb-3" style="height: 24px;">
+                <div class="progress mb-3 ingest-height-24px-7745" >
                     <div class="progress-bar progress-bar-striped progress-bar-animated" id="commit-progress"
-                         style="width: <?php echo $pct ?>%">
+                         data-ahg-style="width: <?php echo $pct ?>%">
                         <?php echo $pct ?>%
                     </div>
                 </div>
-                <div id="post-processing-info" class="alert alert-info mb-3" style="display: none;">
+                <div id="post-processing-info" class="alert alert-info mb-3 ingest-display-none-224b" >
                     <i class="fas fa-cogs me-2"></i>
                     <?php echo __('Records created. Running post-processing (derivatives, packages, indexing)...') ?>
                 </div>

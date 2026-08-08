@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-height-250px-d19b { height: 250px; }
+</style>
 
 @php
 // Helper to convert Symfony escaped arrays to plain arrays
@@ -153,7 +158,7 @@ $trends = [
     </div>
     <div class="card-body">
         @if (!empty($trends['searches']))
-        <div style="height: 250px;">
+        <div class="herita-height-250px-d19b">
             <canvas id="trendsChart"></canvas>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/chart.js" @cspNonce></script>

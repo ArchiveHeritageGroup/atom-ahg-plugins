@@ -1,3 +1,15 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ingest-height-4px-00f6 { height: 4px; }
+  .ingest-width-10-828e { width: 10%; }
+  .ingest-width-15-29bf { width: 15%; }
+  .ingest-width-20-4341 { width: 20%; }
+  .ingest-width-58-885d { width: 58%; }
+  .ingest-width-8-e1b0 { width: 8%; }
+</style>
 <?php
 $session = $sf_data->getRaw('session');
 $stats = $sf_data->getRaw('stats') ?? [];
@@ -26,8 +38,8 @@ $rowCount = $sf_data->getRaw('rowCount') ?? 0;
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">5</span><br><small class="text-muted"><?php echo __('Preview') ?></small></div>
         <div class="flex-fill"><span class="badge bg-secondary rounded-pill">6</span><br><small class="text-muted"><?php echo __('Commit') ?></small></div>
     </div>
-    <div class="progress mt-2" style="height: 4px;">
-        <div class="progress-bar" style="width: 58%"></div>
+    <div class="progress mt-2 ingest-height-4px-00f6" >
+        <div class="progress-bar ingest-width-58-885d" ></div>
     </div>
 </div>
 
@@ -78,11 +90,11 @@ $rowCount = $sf_data->getRaw('rowCount') ?? 0;
             <table class="table table-sm table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 8%"><?php echo __('Row') ?></th>
-                        <th style="width: 10%"><?php echo __('Severity') ?></th>
-                        <th style="width: 15%"><?php echo __('Field') ?></th>
+                        <th class="ingest-width-8-e1b0"><?php echo __('Row') ?></th>
+                        <th class="ingest-width-10-828e"><?php echo __('Severity') ?></th>
+                        <th class="ingest-width-15-29bf"><?php echo __('Field') ?></th>
                         <th><?php echo __('Message') ?></th>
-                        <th style="width: 20%"><?php echo __('Actions') ?></th>
+                        <th class="ingest-width-20-4341"><?php echo __('Actions') ?></th>
                     </tr>
                 </thead>
                 <tbody>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-height-200px-0921 { height: 200px; }
+</style>
 <?php
 /**
  * Featured Stories partial.
@@ -23,7 +30,7 @@
             <div class="col-md-6 col-lg-4">
                 <article class="card heritage-story-card h-100 border-0 shadow-sm overflow-hidden">
                     <!-- Cover Image -->
-                    <div class="heritage-story-image position-relative" style="height: 200px;">
+                    <div class="heritage-story-image position-relative herita-height-200px-0921" >
                         <?php if (!empty($story['cover_image'])): ?>
                         <img src="<?php echo esc_specialchars($story['cover_image']); ?>"
                              alt="<?php echo esc_specialchars($story['title']); ?>"

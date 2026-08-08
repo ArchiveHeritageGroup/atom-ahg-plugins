@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .author-max-width-200px-3831 { max-width:200px; }
+</style>
 
 <?php
   $rawConfig = $sf_data->getRaw('config');
@@ -105,7 +112,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label"><?php echo __('Minimum confidence threshold'); ?></label>
-          <input type="number" name="config[ner_auto_stub_threshold]" class="form-control" style="max-width:200px"
+          <input type="number" name="config[ner_auto_stub_threshold]" class="form-control author-max-width-200px-3831" 
                  value="<?php echo htmlspecialchars(cfgVal($cfg, 'ner_auto_stub_threshold', '0.85')); ?>"
                  min="0" max="1" step="0.05">
         </div>
@@ -126,7 +133,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label"><?php echo __('Deduplication threshold (0-1)'); ?></label>
-          <input type="number" name="config[dedup_threshold]" class="form-control" style="max-width:200px"
+          <input type="number" name="config[dedup_threshold]" class="form-control author-max-width-200px-3831" 
                  value="<?php echo htmlspecialchars(cfgVal($cfg, 'dedup_threshold', '0.80')); ?>"
                  min="0" max="1" step="0.05">
         </div>

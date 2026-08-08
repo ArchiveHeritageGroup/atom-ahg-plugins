@@ -1,4 +1,15 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .discov-font-size-0-68rem-0fb5 { font-size: 0.68rem; }
+  .discov-font-size-0-7rem-dcab { font-size: 0.7rem; }
+  .discov-font-size-0-82rem-a278 { font-size: 0.82rem; }
+  .discov-font-size-0-9rem-33dd { font-size: 0.9rem; }
+  .discov-width-14px-display-inline-bl-e770 { width: 14px; display: inline-block; }
+</style>
 
 <?php use_helper('I18N'); ?>
 
@@ -148,7 +159,7 @@ function renderTreeNode(array $node, int $depth): string
     $indent = $depth * 1.25;
     $collapseId = 'tree-node-' . preg_replace('/[^a-zA-Z0-9_-]/', '-', $id);
 
-    $html = '<div class="tree-node" style="margin-left: ' . $indent . 'rem;">';
+    $html = '<div class="tree-node" data-ahg-style="margin-left: ' . $indent . 'rem;">';
 
     // Node header
     $html .= '<div class="tree-node-header d-flex align-items-start py-1">';
@@ -158,32 +169,32 @@ function renderTreeNode(array $node, int $depth): string
         $html .= '<i class="fas fa-caret-' . ($depth < 2 ? 'down' : 'right') . ' tree-caret"></i>';
         $html .= '</a>';
     } else {
-        $html .= '<span class="me-1" style="width: 14px; display: inline-block;"></span>';
+        $html .= '<span class="me-1 discov-width-14px-display-inline-bl-e770" ></span>';
     }
 
     // Level badge
     if (!empty($level)) {
-        $html .= '<span class="badge bg-light text-muted me-1" style="font-size: 0.68rem;">' . $level . '</span>';
+        $html .= '<span class="badge bg-light text-muted me-1 discov-font-size-0-68rem-0fb5" >' . $level . '</span>';
     }
 
     // Title
-    $html .= '<span class="fw-semibold" style="font-size: 0.9rem;">' . $title . '</span>';
+    $html .= '<span class="fw-semibold discov-font-size-0-9rem-33dd" >' . $title . '</span>';
 
     // Node ID
-    $html .= '<small class="text-muted ms-2" style="font-size: 0.7rem;">' . $id . '</small>';
+    $html .= '<small class="text-muted ms-2 discov-font-size-0-7rem-dcab" >' . $id . '</small>';
 
     $html .= '</div>';
 
     // Node details (summary + keywords) -- collapsed for deeper nodes
     if (!empty($summary) || !empty($keywords)) {
-        $html .= '<div class="tree-node-details ms-3 mb-1" style="font-size: 0.82rem;">';
+        $html .= '<div class="tree-node-details ms-3 mb-1 discov-font-size-0-82rem-a278" >';
         if (!empty($summary)) {
             $html .= '<div class="text-muted">' . $summary . '</div>';
         }
         if (!empty($keywords)) {
             $html .= '<div class="mt-1">';
             foreach ($keywords as $kw) {
-                $html .= '<span class="badge bg-light text-muted me-1" style="font-size: 0.68rem;">' . htmlspecialchars($kw, ENT_QUOTES, 'UTF-8') . '</span>';
+                $html .= '<span class="badge bg-light text-muted me-1 discov-font-size-0-68rem-0fb5" >' . htmlspecialchars($kw, ENT_QUOTES, 'UTF-8') . '</span>';
             }
             $html .= '</div>';
         }

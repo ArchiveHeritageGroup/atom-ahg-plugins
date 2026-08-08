@@ -1,4 +1,11 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .doi-max-height-400px-overflow-au-95e9 { max-height: 400px; overflow: auto; }
+</style>
 
 <div class="container-fluid">
     <div class="row mb-4">
@@ -95,7 +102,7 @@
                         <h5 class="mb-0">DataCite Metadata</h5>
                     </div>
                     <div class="card-body">
-                        <pre class="mb-0" style="max-height: 400px; overflow: auto;"><code><?php echo htmlspecialchars(json_encode(json_decode($doi->metadata_json), JSON_PRETTY_PRINT)) ?></code></pre>
+                        <pre class="mb-0 doi-max-height-400px-overflow-au-95e9" ><code><?php echo htmlspecialchars(json_encode(json_decode($doi->metadata_json), JSON_PRETTY_PRINT)) ?></code></pre>
                     </div>
                 </div>
             <?php endif ?>

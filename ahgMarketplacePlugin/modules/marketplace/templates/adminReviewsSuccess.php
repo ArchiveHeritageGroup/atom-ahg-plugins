@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-max-width-200px-overflow-hid-3bdd { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .market-width-40px-4792 { width: 40px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Reviews'); ?> - <?php echo __('Marketplace Admin'); ?><?php end_slot(); ?>
 
@@ -69,7 +77,7 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 40px;"><?php echo __('ID'); ?></th>
+            <th class="market-width-40px-4792"><?php echo __('ID'); ?></th>
             <th><?php echo __('Seller'); ?></th>
             <th><?php echo __('Reviewer'); ?></th>
             <th><?php echo __('Rating'); ?></th>
@@ -92,7 +100,7 @@
                 <?php endfor; ?>
               </td>
               <td class="small"><?php echo esc_entities($review->title ?? '-'); ?></td>
-              <td class="small" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <td class="small market-max-width-200px-overflow-hid-3bdd" >
                 <?php echo esc_entities(mb_substr($review->comment ?? '', 0, 80)); ?>
                 <?php if (mb_strlen($review->comment ?? '') > 80): ?>...<?php endif; ?>
               </td>

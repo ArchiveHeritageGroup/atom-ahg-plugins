@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricexp-width-320px-7525 { width:320px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><i class="fa fa-check-circle"></i> <?php echo __('RiC-O SHACL Validation'); ?></h1>
@@ -32,7 +39,7 @@
       <?php endif; ?>
     </div>
     <form method="post" action="<?php echo url_for(['module' => 'ricShacl', 'action' => 'run']); ?>" class="d-flex gap-2">
-      <input type="text" name="graph" class="form-control form-control-sm" style="width:320px"
+      <input type="text" name="graph" class="form-control form-control-sm ricexp-width-320px-7525" 
              placeholder="<?php echo __('Optional named graph URI (blank = all)'); ?>">
       <button type="submit" class="btn btn-primary btn-sm">
         <i class="fa fa-play"></i> <?php echo __('Run validation'); ?>

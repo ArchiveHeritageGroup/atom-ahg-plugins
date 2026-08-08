@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-max-width-80-133e { max-width: 80%; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -54,12 +61,12 @@
                     <div class="d-flex mb-3 <?php echo $msg->sender_type === 'staff' ? '' : 'flex-row-reverse' ?>">
                         <div class="flex-shrink-0 me-3 <?php echo $msg->sender_type !== 'staff' ? 'ms-3 me-0' : '' ?>">
                             <div class="rounded-circle d-flex align-items-center justify-content-center"
-                                 style="width: 40px; height: 40px; background-color: <?php echo $msg->sender_type === 'staff' ? '#0d6efd' : '#198754' ?>; color: white;"
+                                 data-ahg-style="width: 40px; height: 40px; background-color: <?php echo $msg->sender_type === 'staff' ? '#0d6efd' : '#198754' ?>; color: white;"
                                  aria-hidden="true">
                                 <i class="fas fa-<?php echo $msg->sender_type === 'staff' ? 'user-tie' : 'user' ?>"></i>
                             </div>
                         </div>
-                        <div class="flex-grow-1" style="max-width: 80%;">
+                        <div class="flex-grow-1 resear-max-width-80-133e" >
                             <div class="card <?php echo $msg->is_internal ? 'border-warning' : '' ?>">
                                 <div class="card-body py-2 px-3">
                                     <div class="d-flex justify-content-between mb-1">

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .author-max-height-320px-overflow-y--ede4 { max-height: 320px; overflow-y: auto; }
+</style>
 <?php
 /**
  * Partial: "Link to a different authority" modal.
@@ -27,7 +34,7 @@
             <input type="text" id="ar-link-different-search" class="form-control"
                    placeholder="<?php echo __('Type a name...'); ?>" autocomplete="off"
                    data-entity-type="<?php echo htmlspecialchars((string) $mention->entity_type); ?>">
-            <div id="ar-link-different-results" class="list-group mt-2" style="max-height: 320px; overflow-y: auto;"></div>
+            <div id="ar-link-different-results" class="list-group mt-2 author-max-height-320px-overflow-y--ede4" ></div>
           </div>
 
           <input type="hidden" name="authority_id" id="ar-link-different-authority-id" value="">

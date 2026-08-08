@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .integr-max-width-400px-88ef { max-width:400px; }
+</style>
 @php
 $stats = $stats ?? (object)[];
 $recentRuns = $recentRuns ?? [];
@@ -375,7 +380,7 @@ $filterRepositoryId = $filterRepositoryId ?? null;
               <tr>
                 <td>{{ $f->digital_object_id }}</td>
                 <td><span class="badge bg-danger">{{ $f->outcome }}</span></td>
-                <td class="text-truncate" style="max-width:400px">{{ $f->file_path ?? "\xE2\x80\x94" }}</td>
+                <td class="text-truncate integr-max-width-400px-88ef" >{{ $f->file_path ?? "\xE2\x80\x94" }}</td>
                 <td>{{ $f->verified_at }}</td>
               </tr>
             @endforeach

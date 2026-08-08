@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-text-transform-uppercase-90fe { text-transform: uppercase; }
+</style>
 <?php $isEdit = isset($rule) && $rule; ?>
 
 <div class="container-fluid py-4">
@@ -48,7 +55,7 @@
                                 <label class="form-label"><?php echo __('Rule Code'); ?> <span class="text-danger">*</span></label>
                                 <input type="text" name="code" class="form-control" required
                                        value="<?php echo $isEdit ? esc_entities($rule->code) : ''; ?>"
-                                       placeholder="e.g. REC001" maxlength="50" style="text-transform: uppercase;">
+                                       placeholder="e.g. REC001" maxlength="50" class="herita-text-transform-uppercase-90fe">
                             </div>
                         </div>
 

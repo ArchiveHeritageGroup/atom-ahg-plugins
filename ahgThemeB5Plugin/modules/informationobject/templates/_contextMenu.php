@@ -1,4 +1,11 @@
 <?php if ($sf_user->getAttribute('search-realm') && sfConfig::get('app_enable_institutional_scoping')) { ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-list-style-none-margin-left--b4ad { list-style:none; margin-left:-1rem; }
+</style>
   <?php include_component('repository', 'holdingsInstitution', ['resource' => QubitRepository::getById($sf_user->getAttribute('search-realm'))]); ?>
 <?php } else { ?>
   <?php echo get_component('repository', 'logo'); ?>
@@ -145,7 +152,7 @@ if (isset($resource)) {
       </a>
     </li>
     <?php /* Handwriting Recognition - commented out for now
-    <li class="mt-2" style="list-style:none; margin-left:-1rem;"><span class="fw-semibold text-secondary"><?php echo __('Handwriting Recognition'); ?></span></li>
+    <li class="mt-2 themeb-list-style-none-margin-left--b4ad" ><span class="fw-semibold text-secondary"><?php echo __('Handwriting Recognition'); ?></span></li>
     <li>
       <a href="#" onclick="extractHandwriting(<?php echo $resource->id ?>, 'all'); return false;">
         <i class="bi bi-pencil me-1"></i><?php echo __('Extract All (HTR)'); ?>

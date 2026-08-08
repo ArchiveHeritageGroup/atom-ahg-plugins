@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .landin-display-none-224b { display: none; }
+</style>
 <?php
 /**
  * GLAM Browser Block - AJAX Version
@@ -27,10 +34,10 @@ $showSidebar = $config['show_sidebar'] ?? true;
   </div>
 
   <!-- Content loaded via AJAX -->
-  <div class="glam-browser-content" style="display: none;"></div>
+  <div class="glam-browser-content landin-display-none-224b" ></div>
 
   <!-- Error state -->
-  <div class="glam-browser-error" style="display: none;">
+  <div class="glam-browser-error landin-display-none-224b" >
     <div class="alert alert-warning">
       <i class="fas fa-exclamation-triangle me-2"></i>
       Unable to load browse interface.

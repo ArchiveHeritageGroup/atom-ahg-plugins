@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-cursor-pointer-24b5 { cursor: pointer; }
+  .regist-max-height-80px-max-width-20-d6b1 { max-height: 80px; max-width: 200px; }
+  .regist-min-height-100px-cursor-poin-64e1 { min-height: 100px; cursor: pointer; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Edit Institution'); ?><?php end_slot(); ?>
 
@@ -71,17 +80,17 @@
               <label for="edit-logo" class="form-label"><?php echo __('Logo'); ?></label>
               <?php if (!empty($f->logo_path)): ?>
                 <div class="mb-2">
-                  <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo __('Current logo'); ?>" class="rounded border" style="max-height: 80px; max-width: 200px;">
+                  <img src="<?php echo htmlspecialchars($f->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo __('Current logo'); ?>" class="rounded border regist-max-height-80px-max-width-20-d6b1" >
                   <small class="text-muted d-block mt-1"><?php echo __('Current logo. Upload a new file to replace.'); ?></small>
                 </div>
               <?php endif; ?>
-              <div class="border rounded p-3 text-center position-relative" id="logo-drop-zone" style="min-height: 100px; cursor: pointer;">
+              <div class="border rounded p-3 text-center position-relative" id="logo-drop-zone" class="regist-min-height-100px-cursor-poin-64e1">
                 <div id="logo-preview-area">
                   <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
                   <p class="mb-0 small"><?php echo __('Drag and drop a new logo, or click to browse'); ?></p>
                   <small class="text-muted"><?php echo __('PNG, JPG, SVG. Max 2MB.'); ?></small>
                 </div>
-                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="edit-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" style="cursor: pointer;">
+                <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" id="edit-logo" name="logo" accept="image/png,image/jpeg,image/svg+xml" class="regist-cursor-pointer-24b5">
               </div>
             </div>
           </div>
@@ -465,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (e.target.files && e.target.files[0]) {
         var reader = new FileReader();
         reader.onload = function(ev) {
-          previewArea.innerHTML = '<img src="' + ev.target.result + '" alt="Preview" style="max-height: 80px; max-width: 200px;" class="mb-1"><br><small class="text-muted">' + e.target.files[0].name + '</small>';
+          previewArea.innerHTML = '<img src="' + ev.target.result + '" alt="Preview" class="mb-1 regist-max-height-80px-max-width-20-d6b1" ><br><small class="text-muted">' + e.target.files[0].name + '</small>';
         };
         reader.readAsDataURL(e.target.files[0]);
       }

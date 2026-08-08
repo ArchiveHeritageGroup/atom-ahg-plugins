@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-bottom-10px-right-10px-z-ind-4826 { bottom: 10px; right: 10px; z-index: 10; }
+  .themeb-width-100-height-400px-backg-3d71 { width: 100%; height: 400px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 8px; position: relative; }
+  .themeb-width-100-height-100-backgro-42ae { width:100%;height:100%;background:transparent;border-radius:8px; }
+  .themeb-width-100-height-100-border--dbe7 { width:100%;height:100%;border-radius:8px; }
+</style>
 <?php
 /**
  * 3D Model Viewer Component - AHG Theme
@@ -15,7 +25,7 @@ $viewerId = 'viewer-' . uniqid();
       <span class="badge bg-primary"><i class="fas fa-cube me-1"></i><?php echo esc_entities($resource->name); ?> (3D)</span>
     </div>
     
-    <div id="<?php echo $viewerId; ?>-container" style="width: 100%; height: 400px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 8px; position: relative;">
+    <div id="<?php echo $viewerId; ?>-container" class="themeb-width-100-height-400px-backg-3d71">
       <?php if (in_array($ext, ['glb', 'gltf'])): ?>
         <script type="module" src="/plugins/ahgCorePlugin/web/js/vendor/model-viewer.min.js"></script>
         <model-viewer 
@@ -26,14 +36,14 @@ $viewerId = 'viewer-' . uniqid();
           auto-rotate
           shadow-intensity="1"
           exposure="1"
-          style="width:100%;height:100%;background:transparent;border-radius:8px;">
+          class="themeb-width-100-height-100-backgro-42ae">
           <div slot="poster" class="d-flex flex-column align-items-center justify-content-center h-100 text-white">
             <div class="spinner-border text-primary mb-3" role="status"></div>
             <span><?php echo __('Loading 3D model...'); ?></span>
           </div>
         </model-viewer>
       <?php else: ?>
-        <div id="<?php echo $viewerId; ?>-threejs" style="width:100%;height:100%;border-radius:8px;"></div>
+        <div id="<?php echo $viewerId; ?>-threejs" class="themeb-width-100-height-100-border--dbe7"></div>
         <script src="/plugins/ahg3DModelPlugin/web/vendor/threejs/three.min.js"></script>
         <script src="/plugins/ahg3DModelPlugin/web/vendor/threejs/OBJLoader.js"></script>
         <script src="/plugins/ahg3DModelPlugin/web/vendor/threejs/STLLoader.js"></script>
@@ -79,7 +89,7 @@ $viewerId = 'viewer-' . uniqid();
         </script>
       <?php endif; ?>
       
-      <button onclick="open3DFullscreen('<?php echo esc_entities($fullPath); ?>', '<?php echo $ext; ?>')" class="btn btn-sm btn-primary position-absolute" style="bottom: 10px; right: 10px; z-index: 10;">
+      <button onclick="open3DFullscreen('<?php echo esc_entities($fullPath); ?>', '<?php echo $ext; ?>')" class="btn btn-sm btn-primary position-absolute themeb-bottom-10px-right-10px-z-ind-4826" >
         <i class="fas fa-expand me-1"></i><?php echo __('Fullscreen'); ?>
       </button>
     </div>

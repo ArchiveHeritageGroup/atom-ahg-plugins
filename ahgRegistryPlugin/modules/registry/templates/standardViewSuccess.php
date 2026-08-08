@@ -1,4 +1,12 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-5em-vertical-ali-e42a { font-size: 0.5em; vertical-align: middle; }
+  .regist-font-size-0-7em-0ac1 { font-size: 0.7em; }
+</style>
 
 <?php
   $_raw = sfOutputEscaper::unescape($standard);
@@ -60,7 +68,7 @@
         <h1 class="h3 mb-1">
           <?php echo htmlspecialchars($detail->name, ENT_QUOTES, 'UTF-8'); ?>
           <?php if (!empty($detail->acronym)): ?>
-            <span class="badge bg-light text-dark border ms-2" style="font-size: 0.5em; vertical-align: middle;"><?php echo htmlspecialchars($detail->acronym, ENT_QUOTES, 'UTF-8'); ?></span>
+            <span class="badge bg-light text-dark border ms-2 regist-font-size-0-5em-vertical-ali-e42a" ><?php echo htmlspecialchars($detail->acronym, ENT_QUOTES, 'UTF-8'); ?></span>
           <?php endif; ?>
         </h1>
         <?php if ($_isAdmin): ?>
@@ -206,7 +214,7 @@
         <li class="list-group-item">
           <i class="fas fa-globe me-2 text-muted"></i>
           <a href="<?php echo htmlspecialchars($detail->website_url, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
-            <?php echo __('Official Website'); ?> <i class="fas fa-external-link-alt ms-1" style="font-size: 0.7em;"></i>
+            <?php echo __('Official Website'); ?> <i class="fas fa-external-link-alt ms-1 regist-font-size-0-7em-0ac1" ></i>
           </a>
         </li>
         <?php endif; ?>

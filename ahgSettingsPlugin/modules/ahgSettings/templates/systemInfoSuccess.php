@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-width-150px-c251 { width: 150px; }
+</style>
 
 <?php slot('sidebar'); ?>
   <?php echo get_component('ahgSettings', 'menu'); ?>
@@ -135,7 +142,7 @@ $doiStats = $sf_data->getRaw('doiStats');
           </div>
           <div class="progress progress-thin mb-1">
             <div class="progress-bar bg-<?php echo $disk['percent'] > 90 ? 'danger' : ($disk['percent'] > 75 ? 'warning' : 'success'); ?>"
-                 style="width: <?php echo $disk['percent']; ?>%"></div>
+                 data-ahg-style="width: <?php echo $disk['percent']; ?>%"></div>
           </div>
           <small class="text-muted">
             <?php echo $disk['used']; ?> used of <?php echo $disk['total']; ?> (<?php echo $disk['free']; ?> free)
@@ -209,7 +216,7 @@ $doiStats = $sf_data->getRaw('doiStats');
     <div class="row g-3">
       <?php foreach ($exportFormats['formats'] as $format): ?>
         <div class="col-md-4 col-lg-3">
-          <div class="card software-card h-100" style="border-left-color: <?php echo $format['status'] === 'ok' ? '#198754' : '#fd7e14'; ?>;">
+          <div class="card software-card h-100" data-ahg-style="border-left-color: <?php echo $format['status'] === 'ok' ? '#198754' : '#fd7e14'; ?>;">
             <div class="card-body py-2 px-3">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -259,7 +266,7 @@ $doiStats = $sf_data->getRaw('doiStats');
           <h6><i class="bi bi-bar-chart me-1"></i> DOI Statistics</h6>
           <table class="table table-sm table-borderless mb-0">
             <tr>
-              <td class="text-muted" style="width: 150px;">Total DOIs</td>
+              <td class="text-muted settin-width-150px-c251" >Total DOIs</td>
               <td><strong><?php echo number_format($doiStats['total']); ?></strong></td>
             </tr>
             <tr>
@@ -305,7 +312,7 @@ $doiStats = $sf_data->getRaw('doiStats');
             <h6><i class="bi bi-gear me-1"></i> Configuration</h6>
             <table class="table table-sm table-borderless mb-0">
               <tr>
-                <td class="text-muted" style="width: 150px;">DOI Prefix</td>
+                <td class="text-muted settin-width-150px-c251" >DOI Prefix</td>
                 <td><code><?php echo htmlspecialchars($doiStats['config']['prefix']); ?></code></td>
               </tr>
               <tr>

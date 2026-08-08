@@ -19,9 +19,9 @@
         @foreach ($collections as $collection)
           <div class="col-md-6 {{ $collection['is_featured'] ? 'col-lg-6' : 'col-lg-4' }}">
             <div class="card h-100 collection-card {{ $collection['is_featured'] ? 'featured' : '' }}"
-                 @if ($collection['background_color'])style="border-left: 4px solid {{ $collection['background_color'] }};"@endif>
+                 @if ($collection['background_color'])data-ahg-style="border-left: 4px solid {{ $collection['background_color'] }};"@endif>
               @if ($collection['cover_image'])
-                <div class="card-img-top position-relative" style="height: {{ $collection['is_featured'] ? '250px' : '180px' }}; background: url('{{ $collection['cover_image'] }}') center/cover;">
+                <div class="card-img-top position-relative" data-ahg-style="height: {{ $collection['is_featured'] ? '250px' : '180px' }}; background: url('{{ $collection['cover_image'] }}') center/cover;">
                   @if ($collection['is_featured'])
                     <span class="position-absolute top-0 start-0 badge bg-warning text-dark m-2">
                       <i class="fas fa-star-fill me-1"></i>Featured

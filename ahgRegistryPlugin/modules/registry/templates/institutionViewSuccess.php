@@ -1,4 +1,16 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-height-300px-54b8 { height: 300px; }
+  .regist-height-6px-3586 { height: 6px; }
+  .regist-max-height-250px-1acc { max-height: 250px; }
+  .regist-object-fit-cover-max-height--2eeb { object-fit: cover; max-height: 250px; }
+  .regist-width-80px-height-80px-732c { width: 80px; height: 80px; }
+  .regist-width-80px-height-80px-objec-954a { width: 80px; height: 80px; object-fit: contain; }
+</style>
 
 <?php $detail = $institution['institution']; ?>
 
@@ -17,8 +29,8 @@
 
 <!-- Banner -->
 <?php if (!empty($detail->banner_path)): ?>
-<div class="mb-4 rounded-3 overflow-hidden" style="max-height: 250px;">
-  <img src="<?php echo htmlspecialchars($detail->banner_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="w-100" style="object-fit: cover; max-height: 250px;">
+<div class="mb-4 rounded-3 overflow-hidden regist-max-height-250px-1acc" >
+  <img src="<?php echo htmlspecialchars($detail->banner_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="w-100 regist-object-fit-cover-max-height--2eeb" >
 </div>
 <?php endif; ?>
 
@@ -28,9 +40,9 @@
 
     <div class="d-flex align-items-start mb-4">
       <?php if (!empty($detail->logo_path)): ?>
-      <img src="<?php echo htmlspecialchars($detail->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 80px; height: 80px; object-fit: contain;">
+      <img src="<?php echo htmlspecialchars($detail->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 regist-width-80px-height-80px-objec-954a" >
       <?php else: ?>
-      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+      <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-80px-height-80px-732c" >
         <i class="fas fa-university fa-2x text-muted"></i>
       </div>
       <?php endif; ?>
@@ -145,8 +157,8 @@
           <div class="col-sm-4">
             <strong><?php echo __('Digitization'); ?></strong><br>
             <?php echo (int) $detail->digitization_percentage; ?>%
-            <div class="progress mt-1" style="height: 6px;">
-              <div class="progress-bar" style="width: <?php echo (int) $detail->digitization_percentage; ?>%"></div>
+            <div class="progress mt-1 regist-height-6px-3586" >
+              <div class="progress-bar" data-ahg-style="width: <?php echo (int) $detail->digitization_percentage; ?>%"></div>
             </div>
           </div>
           <?php endif; ?>
@@ -236,7 +248,7 @@
     <div class="card mb-4">
       <div class="card-header fw-semibold"><?php echo __('Location'); ?></div>
       <div class="card-body p-0">
-        <div id="institution-map" style="height: 300px;"></div>
+        <div id="institution-map" class="regist-height-300px-54b8"></div>
       </div>
     </div>
     <link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/leaflet.min.css" />

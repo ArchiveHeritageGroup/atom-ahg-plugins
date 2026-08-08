@@ -1,4 +1,12 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-height-25px-bd56 { height: 25px; }
+  .datami-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+</style>
 
 <div class="container-fluid py-4">
   <div class="row justify-content-center">
@@ -66,9 +74,9 @@
                 echo $percent;
               ?>%</span>
             </div>
-            <div class="progress" style="height: 25px;">
+            <div class="progress datami-height-25px-bd56" >
               <div id="progressBar" class="progress-bar progress-bar-striped <?php echo $job->status === 'running' ? 'progress-bar-animated' : '' ?>" 
-                   role="progressbar" style="width: <?php echo $percent ?>%">
+                   role="progressbar" data-ahg-style="width: <?php echo $percent ?>%">
               </div>
             </div>
           </div>
@@ -132,7 +140,7 @@
           <i class="bi bi-exclamation-triangle me-2"></i>
           Errors (<?php echo count($errors) ?>)
         </div>
-        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+        <div class="card-body datami-max-height-300px-overflow-y--3db9" >
           <ul class="list-unstyled mb-0">
             <?php foreach (array_slice($errors, 0, 50) as $error): ?>
               <li class="text-danger small mb-1">

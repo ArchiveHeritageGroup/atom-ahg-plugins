@@ -1,4 +1,18 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dam-background-color-17a2b8-colo-46f1 { background-color: #17a2b8; color: white; }
+  .dam-background-color-28a745-colo-4040 { background-color: #28a745; color: white; }
+  .dam-background-color-6c757d-colo-29cb { background-color: #6c757d; color: white; }
+  .dam-background-color-6f42c1-colo-c3a8 { background-color: #6f42c1; color: white; }
+  .dam-display-none-93b8 { display:none; }
+  .dam-max-width-16rem-289f { max-width: 16rem; }
+  .dam-max-width-200px-1a5c { max-width: 200px; }
+  .dam-width-32-dd5f { width: 32%; }
+</style>
 
 <?php slot('title'); ?>
   <div class="multiline-header d-flex align-items-center mb-3">
@@ -70,7 +84,7 @@
             <label class="form-label fw-bold"><?php echo __('Genre'); ?></label>
             <input type="text" class="form-control" name="genre" id="genreInput" value="<?php echo esc_entities($iptc->genre ?? ''); ?>" placeholder="<?php echo __('e.g., Documentary, Drama, Portrait'); ?>">
           </div>
-          <div class="col-md-4 mb-3 field-video field-audio" style="display:none;">
+          <div class="col-md-4 mb-3 field-video field-audio dam-display-none-93b8" >
             <label class="form-label fw-bold"><?php echo __('Color Type'); ?></label>
             <select class="form-select" name="color_type">
               <option value=""><?php echo __('-- Select --'); ?></option>
@@ -128,7 +142,7 @@
     </div>
 
     <!-- Film/Video Production (Only for video types) -->
-    <div class="card mb-3 field-video" style="display:none;">
+    <div class="card mb-3 field-video dam-display-none-93b8" >
       <div class="card-header bg-danger text-white">
         <i class="fas fa-film"></i> <?php echo __('Production Details'); ?>
       </div>
@@ -169,7 +183,7 @@
     </div>
 
     <!-- Production Credits (Video/Audio) -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio dam-display-none-93b8" >
       <div class="card-header bg-info text-white">
         <i class="fas fa-users"></i> <?php echo __('Production Credits'); ?>
       </div>
@@ -223,7 +237,7 @@
     </div>
 
     <!-- Audio/Video Language -->
-    <div class="card mb-3 field-video field-audio" style="display:none;">
+    <div class="card mb-3 field-video field-audio dam-display-none-93b8" >
       <div class="card-header bg-secondary text-white">
         <i class="fas fa-language"></i> <?php echo __('Language'); ?>
       </div>
@@ -253,7 +267,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label"><?php echo __('Running Time'); ?> <small class="text-muted">(<?php echo __('Minutes, for video/audio'); ?>)</small></label>
-          <div class="input-group" style="max-width: 200px;">
+          <div class="input-group dam-max-width-200px-1a5c" >
             <input type="number" class="form-control" name="duration_minutes" min="1" value="<?php echo esc_entities($iptc->duration_minutes ?? ''); ?>">
             <span class="input-group-text"><?php echo __('min'); ?></span>
           </div>
@@ -492,7 +506,7 @@
 
     <!-- Artwork/Object (for reproductions - photo only) -->
     <div class="card mb-3 field-photo field-artwork">
-      <div class="card-header" style="background-color: #6f42c1; color: white;">
+      <div class="card-header dam-background-color-6f42c1-colo-c3a8" >
         <i class="fas fa-palette"></i> <?php echo __('Artwork / Object in Image'); ?> <small>(<?php echo __('for reproductions'); ?>)</small>
       </div>
       <div class="card-body">
@@ -525,7 +539,7 @@
 
     <!-- Alternative Versions -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #17a2b8; color: white;">
+      <div class="card-header dam-background-color-17a2b8-colo-46f1" >
         <i class="fas fa-language"></i> <?php echo __('Alternative Versions'); ?>
       </div>
       <div class="card-body">
@@ -572,7 +586,7 @@
 
     <!-- Format Holdings -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #6c757d; color: white;">
+      <div class="card-header dam-background-color-6c757d-colo-29cb" >
         <i class="fas fa-film"></i> <?php echo __('Format Holdings & Access'); ?>
       </div>
       <div class="card-body">
@@ -631,7 +645,7 @@
 
     <!-- External Links (ESAT, IMDb, etc.) -->
     <div class="card mb-3">
-      <div class="card-header" style="background-color: #28a745; color: white;">
+      <div class="card-header dam-background-color-28a745-colo-4040" >
         <i class="fas fa-external-link-alt"></i> <?php echo __('External References'); ?>
       </div>
       <div class="card-body">
@@ -788,7 +802,7 @@
           <i class="fas fa-list me-1"></i><?php echo __('Full embedded metadata'); ?>
           <span class="badge bg-secondary ms-1"><?php echo (int) $fullEmbeddedCount ?> <?php echo __('tags'); ?></span>
         </strong>
-        <input type="search" id="ahgFullMetaFilter" class="form-control form-control-sm" style="max-width: 16rem;"
+        <input type="search" id="ahgFullMetaFilter" class="form-control form-control-sm dam-max-width-16rem-289f" 
                placeholder="<?php echo __('Filter tags…'); ?>" autocomplete="off">
       </div>
       <?php if (!empty($fullEmbeddedGated)): ?>
@@ -807,7 +821,7 @@
               <tbody>
                 <?php foreach ((array) $tags as $tag => $value): ?>
                   <tr class="ahg-meta-row">
-                    <td style="width: 32%;"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
+                    <td class="dam-width-32-dd5f"><code class="small"><?php echo htmlspecialchars((string) $tag) ?></code></td>
                     <td class="small"><?php
                       if (is_array($value)) {
                           echo htmlspecialchars(json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));

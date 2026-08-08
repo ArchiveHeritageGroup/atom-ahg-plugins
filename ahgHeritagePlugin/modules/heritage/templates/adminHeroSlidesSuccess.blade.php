@@ -1,4 +1,11 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-max-height-100px-196f { max-height: 100px; }
+  .herita-max-width-80px-max-height-50-b365 { max-width: 80px; max-height: 50px; object-fit: cover; }
+  .herita-width-100px-e3d2 { width: 100px; }
+</style>
 
 @php
 // Helper function to unwrap Symfony escaper objects
@@ -80,7 +87,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                         @if ($editSlideData && !empty($editSlideData['image_path']))
                             <div class="mb-2">
                                 <img src="{{ $editSlideData['image_path'] }}"
-                                     class="img-thumbnail" style="max-height: 100px;" alt="Current image">
+                                     class="img-thumbnail herita-max-height-100px-196f"  alt="Current image">
                                 <br><small class="text-muted">Current image</small>
                             </div>
                         @endif
@@ -291,7 +298,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                     <table class="table table-hover align-middle">
                         <thead>
                             <tr>
-                                <th style="width: 100px;">Image</th>
+                                <th class="herita-width-100px-e3d2">Image</th>
                                 <th>Title</th>
                                 <th>Position</th>
                                 <th>Order</th>
@@ -307,7 +314,7 @@ $editSlideData = isset($editSlide) && $editSlide ? $unwrap($editSlide) : null;
                                     <td>
                                         @if (!empty($slide['image_path']))
                                             <img src="{{ $slide['image_path'] }}"
-                                                 class="img-thumbnail" style="max-width: 80px; max-height: 50px; object-fit: cover;"
+                                                 class="img-thumbnail herita-max-width-80px-max-height-50-b365" 
                                                  alt="{{ $slide['image_alt'] ?? 'Hero slide' }}">
                                         @else
                                             <span class="text-muted"><i class="fas fa-image"></i></span>

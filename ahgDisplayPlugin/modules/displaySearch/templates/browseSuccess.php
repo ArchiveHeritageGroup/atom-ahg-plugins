@@ -1,4 +1,11 @@
 <?php use_helper('Display'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-width-auto-dc25 { width: auto; }
+</style>
 <?php $requestParams = $sf_request->getParameterHolder()->getAll(); ?>
 
 <div class="container-fluid">
@@ -115,7 +122,7 @@
                     </div>
                     
                     <!-- Sort -->
-                    <select class="form-select form-select-sm" style="width: auto;" onchange="location=this.value">
+                    <select class="form-select form-select-sm displa-width-auto-dc25"  onchange="location=this.value">
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_asc'])); ?>" <?php echo ($params['sort'] ?? '') === 'title_asc' ? 'selected' : ''; ?>>Title A-Z</option>
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'title_desc'])); ?>" <?php echo ($params['sort'] ?? '') === 'title_desc' ? 'selected' : ''; ?>>Title Z-A</option>
                         <option value="?<?php echo http_build_query(array_merge($requestParams, ['sort' => 'date_desc'])); ?>" <?php echo ($params['sort'] ?? '') === 'date_desc' ? 'selected' : ''; ?>>Date Newest</option>

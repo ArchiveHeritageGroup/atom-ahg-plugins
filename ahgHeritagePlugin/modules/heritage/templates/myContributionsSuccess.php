@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-width-80px-height-80px-732c { width: 80px; height: 80px; }
+</style>
 <?php
 /**
  * My Contributions.
@@ -38,7 +45,7 @@ $badges = $profile['badges'] ?? [];
         <img src="<?php echo esc_specialchars($contributor['avatar_url']); ?>"
              class="rounded-circle mb-3" width="80" height="80" alt="Avatar">
         <?php else: ?>
-        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3 herita-width-80px-height-80px-732c" >
             <i class="fas fa-user display-4 text-primary"></i>
         </div>
         <?php endif; ?>

@@ -1,4 +1,15 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .privac-background-1a1a1a-754a { background: #1a1a1a; }
+  .privac-height-600px-overflow-auto-b-0b84 { height: 600px; overflow: auto; background: #2a2a2a; display: flex; justify-content: center; padding: 20px; }
+  .privac-max-height-500px-overflow-y--9117 { max-height: 500px; overflow-y: auto; }
+  .privac-position-absolute-top-0-left-bcd7 { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+  .privac-position-relative-d85c { position: relative; }
+  .privac-position-relative-box-shadow-d46f { position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+  .privac-width-100-height-600px-backg-858c { width: 100%; height: 600px; background: #1a1a1a; }
+</style>
 
 @section('content')
 @php
@@ -126,11 +137,11 @@ $viewerId = 'redaction-viewer-' . $objectId;
         <div class="row">
             <!-- Viewer Column -->
             <div class="col-lg-9">
-                <div class="card" style="background: #1a1a1a;">
+                <div class="card privac-background-1a1a1a-754a" >
                     <div class="card-body p-0">
                         @if($docInfo['is_pdf'])
                             <!-- PDF Viewer with text selection -->
-                            <div id="pdf-redaction-container" style="position: relative;">
+                            <div id="pdf-redaction-container" class="privac-position-relative-d85c">
                                 <div class="pdf-toolbar bg-dark text-white p-2 d-flex gap-2 align-items-center">
                                     <button class="btn btn-sm btn-outline-light" id="pdf-prev"><i class="fas fa-chevron-left"></i></button>
                                     <span id="pdf-page-info">Page 1 of {{ $docInfo['page_count'] }}</span>
@@ -140,10 +151,10 @@ $viewerId = 'redaction-viewer-' . $objectId;
                                         <button class="btn btn-sm btn-outline-light" id="pdf-zoom-in"><i class="fas fa-search-plus"></i></button>
                                     </div>
                                 </div>
-                                <div id="pdf-viewer-area" style="height: 600px; overflow: auto; background: #2a2a2a; display: flex; justify-content: center; padding: 20px;">
-                                    <div id="pdf-page-wrapper" style="position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+                                <div id="pdf-viewer-area" class="privac-height-600px-overflow-auto-b-0b84">
+                                    <div id="pdf-page-wrapper" class="privac-position-relative-box-shadow-d46f">
                                         <canvas id="pdf-canvas"></canvas>
-                                        <div id="fabric-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                                        <div id="fabric-container" class="privac-position-absolute-top-0-left-bcd7">
                                             <canvas id="redaction-overlay"></canvas>
                                         </div>
                                     </div>
@@ -151,7 +162,7 @@ $viewerId = 'redaction-viewer-' . $objectId;
                             </div>
                         @else
                             <!-- OpenSeadragon Image Viewer with Annotorious -->
-                            <div id="osd-redaction-viewer" style="width: 100%; height: 600px; background: #1a1a1a;"></div>
+                            <div id="osd-redaction-viewer" class="privac-width-100-height-600px-backg-858c"></div>
                         @endif
                     </div>
                 </div>
@@ -164,7 +175,7 @@ $viewerId = 'redaction-viewer-' . $objectId;
                         <span><i class="fas fa-list me-2"></i>Redaction Regions</span>
                         <span class="badge bg-danger" id="region-count">{{ count($regions) }}</span>
                     </div>
-                    <div class="card-body p-0" id="region-list" style="max-height: 500px; overflow-y: auto;">
+                    <div class="card-body p-0" id="region-list" class="privac-max-height-500px-overflow-y--9117">
                         @if(empty($regions))
                             <div class="text-center text-muted py-4" id="empty-regions">
                                 <i class="fas fa-draw-polygon fa-2x mb-2"></i>

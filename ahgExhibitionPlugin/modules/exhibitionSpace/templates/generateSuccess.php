@@ -1,4 +1,14 @@
 <?php /* heratio#1186 PSIS port — AI Exhibition Designer: theme -> AI-curated draft (rooms + object thumbnails + labels) -> Build real spaces. */ ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-display-none-cb45 { display:none; }
+  .exhibi-max-width-680px-d031 { max-width:680px; }
+  .exhibi-width-48px-height-48px-4544 { width:48px;height:48px; }
+  .exhibi-width-48px-height-48px-objec-604e { width:48px;height:48px;object-fit:cover; }
+</style>
 <?php $n = sfConfig::get('csp_nonce', ''); $nonce = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
 <div class="container-fluid px-4 py-3 exhibition-space ai-designer">
   <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
@@ -8,7 +18,7 @@
   </div>
   <p class="text-muted small"><?php echo __('Describe a theme. PSIS searches the catalogue and the AI curates a draft exhibition - rooms, a selection of objects, and a one-line label for each. Review it here, then build a real Exhibition Space from the draft.') ?></p>
 
-  <div class="input-group mb-2" style="max-width:680px">
+  <div class="input-group mb-2 exhibi-max-width-680px-d031" >
     <input type="text" id="geTheme" class="form-control" placeholder="<?php echo esc_entities(__('e.g. women in the liberation struggle, Victorian furniture, WWI letters')) ?>" maxlength="200">
     <button type="button" id="geGo" class="btn btn-primary"><i class="fas fa-wand-magic-sparkles me-1"></i><?php echo __('Design it') ?></button>
   </div>
@@ -18,8 +28,8 @@
     <label class="form-check-label small text-muted" for="gePublished"><?php echo __('Published records only') ?></label>
   </div>
 
-  <div id="geErr" class="alert alert-warning" style="display:none"></div>
-  <div id="geOk" class="alert alert-success" style="display:none"></div>
+  <div id="geErr" class="alert alert-warning exhibi-display-none-cb45" ></div>
+  <div id="geOk" class="alert alert-success exhibi-display-none-cb45" ></div>
   <div id="geResult"></div>
 </div>
 
@@ -118,8 +128,8 @@
       html += '<ul class="list-group list-group-flush">';
       objs.forEach(function (o) {
         var thumb = o.thumb_url
-          ? '<img src="' + esc(o.thumb_url) + '" alt="" class="rounded me-2 flex-shrink-0" style="width:48px;height:48px;object-fit:cover">'
-          : '<span class="d-inline-flex align-items-center justify-content-center rounded bg-light text-muted me-2 flex-shrink-0" style="width:48px;height:48px"><i class="fas fa-image"></i></span>';
+          ? '<img src="' + esc(o.thumb_url) + '" alt="" class="rounded me-2 flex-shrink-0 exhibi-width-48px-height-48px-objec-604e" >'
+          : '<span class="d-inline-flex align-items-center justify-content-center rounded bg-light text-muted me-2 flex-shrink-0 exhibi-width-48px-height-48px-4544" ><i class="fas fa-image"></i></span>';
         html += '<li class="list-group-item d-flex align-items-start">' + thumb
           + '<div class="flex-grow-1"><div class="small fw-bold">' + esc(o.title)
           + (o.year ? ' <span class="badge bg-light text-dark border ms-1">' + esc('' + o.year) + '</span>' : '') + '</div>'

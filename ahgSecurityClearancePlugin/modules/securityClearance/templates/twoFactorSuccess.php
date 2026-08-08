@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-font-size-2rem-letter-spacin-5cf0 { font-size: 2rem; letter-spacing: 0.5rem; }
+</style>
 <?php
 /**
  * Two-Factor Authentication Verification Template.
@@ -26,7 +33,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         <?php if (isset($clearance) && $clearance): ?>
         <p>
           <strong><?php echo __('Your Clearance:') ?></strong>
-          <span class="badge" style="background-color: <?php echo esc_entities($clearance->color ?? '#666') ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo esc_entities($clearance->color ?? '#666') ?>">
             <?php echo esc_entities($clearance->name ?? '') ?>
           </span>
         </p>
@@ -54,7 +61,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
             <input type="text" name="code" class="form-control form-control-lg text-center"
                    maxlength="6" pattern="\d{6}" placeholder="000000" required autofocus
                    autocomplete="one-time-code" inputmode="numeric"
-                   style="font-size: 2rem; letter-spacing: 0.5rem;">
+                   class="securi-font-size-2rem-letter-spacin-5cf0">
             <div class="form-text">
               <?php echo __('Enter the 6-digit code from your authenticator app.') ?>
             </div>

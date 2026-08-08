@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-max-height-80vh-f2f4 { max-height: 80vh; }
+  .market-object-fit-cover-3dc4 { object-fit: cover; }
+</style>
 <?php
 /**
  * _imageGallery.php - Image gallery with main display, thumbnails, and lightbox.
@@ -43,7 +51,7 @@ $galleryId = 'mkt-gallery-' . mt_rand(1000, 9999);
              role="button">
           <img src="<?php echo esc_entities($thumb->file_path); ?>"
                alt="<?php echo esc_entities($thumb->caption ?? __('Image %1%', ['%1%' => $idx + 1])); ?>"
-               class="w-100 h-100" style="object-fit: cover;">
+               class="w-100 h-100 market-object-fit-cover-3dc4" >
         </div>
       <?php endforeach; ?>
     </div>
@@ -59,7 +67,7 @@ $galleryId = 'mkt-gallery-' . mt_rand(1000, 9999);
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="<?php echo __('Close'); ?>"></button>
         </div>
         <div class="modal-body text-center p-2">
-          <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="" class="img-fluid" id="<?php echo $galleryId; ?>-lightbox-img" style="max-height: 80vh;">
+          <img src="<?php echo esc_entities($primaryImage->file_path); ?>" alt="" class="img-fluid" id="<?php echo $galleryId; ?>-lightbox-img" class="market-max-height-80vh-f2f4">
         </div>
       </div>
     </div>

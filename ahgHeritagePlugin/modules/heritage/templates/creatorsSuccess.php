@@ -1,4 +1,12 @@
 <?php use_helper('Url', 'Tag'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-display-none-z-index-1050-ma-48e6 { display: none; z-index: 1050; max-height: 400px; overflow-y: auto; }
+  .herita-font-size-2-5rem-3f60 { font-size: 2.5rem; }
+</style>
 
 <?php slot('title'); ?>
   Creators & People
@@ -42,8 +50,8 @@
             </div>
           </form>
           <!-- Autocomplete dropdown -->
-          <div id="creatorAutocomplete" class="position-absolute w-100 bg-white border rounded-bottom shadow-lg"
-               style="display: none; z-index: 1050; max-height: 400px; overflow-y: auto;"></div>
+          <div id="creatorAutocomplete" class="position-absolute w-100 bg-white border rounded-bottom shadow-lg herita-display-none-z-index-1050-ma-48e6"
+               ></div>
         </div>
       </div>
       <div class="col-12 col-md-4 col-lg-6 d-flex align-items-center mt-3 mt-md-0">
@@ -69,7 +77,7 @@
               <div class="card-body">
                 <div class="d-flex align-items-center">
                   <div class="creator-avatar me-3">
-                    <i class="fas fa-user-circle text-primary" style="font-size: 2.5rem;"></i>
+                    <i class="fas fa-user-circle text-primary herita-font-size-2-5rem-3f60" ></i>
                   </div>
                   <div>
                     <h5 class="card-title mb-1"><?php echo htmlspecialchars($creator['name']); ?></h5>

@@ -1,4 +1,11 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .spectr-background-color-17a2b8-impo-ddd4 { background-color: #17a2b8 !important; }
+  .spectr-height-10px-977d { height: 10px; }
+  .spectr-width-100px-height-100px-33d7 { width: 100px; height: 100px; }
+</style>
 
 @section('title')
 <h1><i class="fas fa-tasks me-2"></i>{{ __('Collections Procedures Workflow Dashboard') }}</h1>
@@ -69,7 +76,7 @@
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-info me-2">&nbsp;</span> {{ __('Received / Documented / Reported') }}</li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-primary me-2">&nbsp;</span> {{ __('In Progress / Examining / Investigating') }}</li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-warning text-dark me-2">&nbsp;</span> {{ __('Review / Under Review / Assessed') }}</li>
-                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-cyan me-2" style="background-color: #17a2b8 !important;">&nbsp;</span> {{ __('Approved / Scheduled / Quoted') }}</li>
+                <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-cyan me-2 spectr-background-color-17a2b8-impo-ddd4" >&nbsp;</span> {{ __('Approved / Scheduled / Quoted') }}</li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-success me-2">&nbsp;</span> {{ __('Completed / Resolved / Accessioned') }}</li>
                 <li class="list-group-item d-flex align-items-center py-1"><span class="badge bg-secondary me-2">&nbsp;</span> {{ __('Disposed / Closed') }}</li>
             </ul>
@@ -83,15 +90,15 @@
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center">
-                        <div class="rounded-circle bg-white text-info d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                        <div class="rounded-circle bg-white text-info d-inline-flex align-items-center justify-content-center spectr-width-100px-height-100px-33d7" >
                             <span class="h3 mb-0">{{ $overallCompletion['percentage'] }}%</span>
                         </div>
                     </div>
                     <div class="col-md-9">
                         <h3>{{ __('Overall Workflow Completion') }}</h3>
                         <p class="mb-0">{{ $overallCompletion['completed'] }} {{ __('of') }} {{ $overallCompletion['total'] }} {{ __('procedures completed') }}</p>
-                        <div class="progress mt-2" style="height: 10px;">
-                            <div class="progress-bar bg-white" style="width: {{ $overallCompletion['percentage'] }}%"></div>
+                        <div class="progress mt-2 spectr-height-10px-977d" >
+                            <div class="progress-bar bg-white" data-ahg-style="width: {{ $overallCompletion['percentage'] }}%"></div>
                         </div>
                     </div>
                 </div>

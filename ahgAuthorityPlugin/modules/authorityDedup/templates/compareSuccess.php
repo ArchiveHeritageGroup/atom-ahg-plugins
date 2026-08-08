@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .author-width-20-1008 { width:20%; }
+  .author-width-38-5b7e { width:38%; }
+  .author-width-4-059d { width:4%; }
+</style>
 
 <?php
   $rawComparison = $sf_data->getRaw('comparison');
@@ -41,10 +50,10 @@
         <table class="table table-sm mb-0">
           <thead>
             <tr>
-              <th style="width:20%"><?php echo __('Field'); ?></th>
-              <th style="width:38%"><?php echo __('Primary: %1%', ['%1%' => htmlspecialchars($primary->authorized_form_of_name ?? '')]); ?></th>
-              <th style="width:38%"><?php echo __('Secondary: %1%', ['%1%' => htmlspecialchars($secondary->authorized_form_of_name ?? '')]); ?></th>
-              <th style="width:4%"></th>
+              <th class="author-width-20-1008"><?php echo __('Field'); ?></th>
+              <th class="author-width-38-5b7e"><?php echo __('Primary: %1%', ['%1%' => htmlspecialchars($primary->authorized_form_of_name ?? '')]); ?></th>
+              <th class="author-width-38-5b7e"><?php echo __('Secondary: %1%', ['%1%' => htmlspecialchars($secondary->authorized_form_of_name ?? '')]); ?></th>
+              <th class="author-width-4-059d"></th>
             </tr>
           </thead>
           <tbody>

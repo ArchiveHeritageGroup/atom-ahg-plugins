@@ -27,7 +27,7 @@
         <?php if ($classification): ?>
         <p>
           <strong><?php echo __('Classification:') ?></strong>
-          <span class="badge" style="background-color: <?php echo $classification->color ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $classification->color ?>">
             <i class="fas <?php echo $classification->icon ?>"></i>
             <?php echo esc_entities($classification->name) ?>
           </span>
@@ -39,7 +39,7 @@
     <?php if ($userClearance): ?>
     <div class="alert alert-info">
       <strong><?php echo __('Your Current Clearance:') ?></strong>
-      <span class="badge" style="background-color: <?php echo $userClearance->color ?>">
+      <span class="badge" data-ahg-style="background-color: <?php echo $userClearance->color ?>">
         <?php echo esc_entities($userClearance->name) ?>
       </span>
       (Level <?php echo $userClearance->level ?>)

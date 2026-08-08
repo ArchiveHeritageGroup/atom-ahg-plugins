@@ -1,4 +1,11 @@
 <?php use_helper('Display'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .displa-width-auto-dc25 { width: auto; }
+</style>
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'display', 'action' => 'index']); ?>">Display</a></li>
@@ -59,7 +66,7 @@
                 <form method="post">
                     <div class="mb-3">
                         <label class="form-label">Batch Size</label>
-                        <select name="batch_size" class="form-select" style="width: auto;">
+                        <select name="batch_size" class="form-select displa-width-auto-dc25" >
                             <option value="50">50 (slower, less memory)</option>
                             <option value="100" selected>100 (recommended)</option>
                             <option value="200">200 (faster)</option>

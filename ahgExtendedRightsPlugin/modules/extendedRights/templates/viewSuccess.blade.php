@@ -1,3 +1,9 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .extend-width-48px-height-48px-7468 { width:48px;height:48px; }
+  .extend-width-88px-b399 { width:88px; }
+</style>
 @if ($rightsData['has_rights'])
 
 <section id="extended-rights-area" class="card mb-3">
@@ -34,7 +40,7 @@
         <div class="field mb-3">
           <h5>{{ __('Rights Statement') }}</h5>
           <div class="d-flex align-items-start">
-            <img src="{{ $primary->rightsStatement->icon_url }}" alt="" class="me-3" style="width:88px;">
+            <img src="{{ $primary->rightsStatement->icon_url }}" alt="" class="me-3 extend-width-88px-b399" >
             <div>
               <strong>{{ $primary->rightsStatement->name }}</strong>
               <p class="text-muted mb-1">{{ $primary->rightsStatement->definition }}</p>
@@ -66,7 +72,7 @@
           <div class="tk-labels-grid">
             @foreach ($primary->tkLabels as $label)
               <div class="tk-label-item d-flex align-items-start mb-2">
-                <img src="{{ $label->icon_url }}" alt="" class="me-2" style="width:48px;height:48px;">
+                <img src="{{ $label->icon_url }}" alt="" class="me-2 extend-width-48px-height-48px-7468" >
                 <div>
                   <strong>{{ $label->name }}</strong>
                   <p class="small text-muted mb-0">{{ $label->description }}</p>

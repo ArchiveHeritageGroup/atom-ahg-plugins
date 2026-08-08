@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+  .market-width-40px-height-40px-objec-21e6 { width: 40px; height: 40px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('My Bids'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -74,9 +82,9 @@
               <td>
                 <div class="d-flex align-items-center">
                   <?php if ($bid->featured_image_path): ?>
-                    <img src="<?php echo esc_entities($bid->featured_image_path); ?>" alt="" class="rounded me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                    <img src="<?php echo esc_entities($bid->featured_image_path); ?>" alt="" class="rounded me-2 market-width-40px-height-40px-objec-21e6" >
                   <?php else: ?>
-                    <div class="bg-light rounded d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center me-2 market-width-40px-height-40px-9a6a" >
                       <i class="fas fa-image text-muted small"></i>
                     </div>
                   <?php endif; ?>

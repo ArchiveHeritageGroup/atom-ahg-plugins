@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .galler-height-180px-648e { height: 180px; }
+  .galler-height-180px-object-fit-cove-b052 { height: 180px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Gallery Browse'); ?></h1>
@@ -39,13 +47,13 @@
               <img src="<?php echo esc_entities($thumbUrl); ?>" 
                    class="card-img-top" 
                    alt="<?php echo esc_entities($item->title ?? ''); ?>"
-                   style="height: 180px; object-fit: cover;">
+                   class="galler-height-180px-object-fit-cove-b052">
             <?php elseif ($is3D): ?>
-              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 180px;">
+              <div class="card-img-top d-flex align-items-center justify-content-center bg-light galler-height-180px-648e" >
                 <i class="fas fa-cube fa-4x text-primary"></i>
               </div>
             <?php else: ?>
-              <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 180px;">
+              <div class="card-img-top d-flex align-items-center justify-content-center bg-light galler-height-180px-648e" >
                 <i class="fas fa-image fa-4x text-muted"></i>
               </div>
             <?php endif; ?>

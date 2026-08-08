@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .3dmode-max-width-200px-792c { max-width:200px; }
+</style>
 <?php
 /**
  * 3D Model Edit Template
@@ -40,7 +47,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                         field-of-view="<?php echo $model->field_of_view ?>"
                         exposure="<?php echo $model->exposure ?>"
                         shadow-intensity="<?php echo $model->shadow_intensity ?>"
-                        style="width:100%; height:400px; background-color: <?php echo $model->background_color ?>;"
+                        data-ahg-style="width:100%; height:400px; background-color: <?php echo $model->background_color ?>;"
                     ></model-viewer>
                 </div>
             </div>
@@ -124,7 +131,7 @@ $hotspots = $sf_data->getRaw('hotspots');
 
                     <div class="mb-3">
                         <label for="background_color" class="form-label">Background Color</label>
-                        <div class="input-group" style="max-width:200px;">
+                        <div class="input-group 3dmode-max-width-200px-792c" >
                             <input type="color" class="form-control form-control-color" id="bg_color_picker" 
                                    value="<?php echo $model->background_color ?>"
                                    onchange="document.getElementById('background_color').value=this.value; updatePreview();">
@@ -250,7 +257,7 @@ $hotspots = $sf_data->getRaw('hotspots');
                         <?php foreach ($hotspots as $hotspot): ?>
                         <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
                             <div>
-                                <span class="badge" style="background-color:<?php echo $hotspot->color ?>;"><?php echo ucfirst($hotspot->hotspot_type) ?></span>
+                                <span class="badge" data-ahg-style="background-color:<?php echo $hotspot->color ?>;"><?php echo ucfirst($hotspot->hotspot_type) ?></span>
                                 <small class="ms-1"><?php echo esc_entities($hotspot->title ?: 'Untitled') ?></small>
                             </div>
                             <button type="button" class="btn btn-sm btn-outline-danger delete-hotspot" data-id="<?php echo $hotspot->id ?>">

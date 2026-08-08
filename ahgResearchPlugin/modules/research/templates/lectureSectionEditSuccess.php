@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-max-width-160px-8ddd { max-width:160px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -48,7 +55,7 @@ $curMedia = $section['media_type'] ?? '';
                 </select>
             </div>
         </div>
-        <div class="mb-3" style="max-width:160px;">
+        <div class="mb-3 resear-max-width-160px-8ddd" >
             <label class="form-label">Sort order</label>
             <input type="number" name="sort_order" class="form-control" value="<?php echo (int) ($section['sort_order'] ?? 0); ?>">
         </div>

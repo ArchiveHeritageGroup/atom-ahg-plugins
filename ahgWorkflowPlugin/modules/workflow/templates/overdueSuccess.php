@@ -1,4 +1,16 @@
 <?php use_helper('Date') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .workfl-background-color-rgba-220-53-1aa4 { background-color: rgba(220,53,69,0.1); }
+  .workfl-background-color-rgba-253-12-6468 { background-color: rgba(253,126,20,0.1); }
+  .workfl-background-color-rgba-255-19-e21b { background-color: rgba(255,193,7,0.1); }
+  .workfl-background-color-rgba-40-167-9a3e { background-color: rgba(40,167,69,0.1); }
+  .workfl-color-fd7e14-378a { color:#fd7e14; }
+  .workfl-height-6px-min-width-60px-13b4 { height: 6px; min-width: 60px; }
+</style>
 
 <?php include_partial('workflow/accessibilityHelpers') ?>
 
@@ -30,7 +42,7 @@
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(40,167,69,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-40-167-9a3e" >
                 <div class="card-body py-2">
                     <div class="h4 mb-0 text-success"><?php echo $overview['on_track'] ?? 0 ?></div>
                     <small class="text-muted">On Track</small>
@@ -38,7 +50,7 @@
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(255,193,7,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-255-19-e21b" >
                 <div class="card-body py-2">
                     <div class="h4 mb-0 text-warning"><?php echo $overview['at_risk'] ?? 0 ?></div>
                     <small class="text-muted">At Risk</small>
@@ -46,15 +58,15 @@
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(253,126,20,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-253-12-6468" >
                 <div class="card-body py-2">
-                    <div class="h4 mb-0" style="color:#fd7e14"><?php echo $overview['overdue'] ?? 0 ?></div>
+                    <div class="h4 mb-0 workfl-color-fd7e14-378a" ><?php echo $overview['overdue'] ?? 0 ?></div>
                     <small class="text-muted">Overdue</small>
                 </div>
             </div>
         </div>
         <div class="col-md-2">
-            <div class="card text-center border-0" style="background-color: rgba(220,53,69,0.1);">
+            <div class="card text-center border-0 workfl-background-color-rgba-220-53-1aa4" >
                 <div class="card-body py-2">
                     <div class="h4 mb-0 text-danger"><?php echo $overview['breached'] ?? 0 ?></div>
                     <small class="text-muted">Breached</small>
@@ -84,7 +96,7 @@
                             <th class="text-center">Open</th>
                             <th class="text-center text-success">On Track</th>
                             <th class="text-center text-warning">At Risk</th>
-                            <th class="text-center" style="color:#fd7e14">Overdue</th>
+                            <th class="text-center workfl-color-fd7e14-378a" >Overdue</th>
                             <th class="text-center text-danger">Breached</th>
                             <th class="text-center">Health</th>
                         </tr>
@@ -105,8 +117,8 @@
                                         $pct = $total > 0 ? round(($healthy / $total) * 100) : 100;
                                         $barColor = $pct >= 80 ? 'bg-success' : ($pct >= 50 ? 'bg-warning' : 'bg-danger');
                                     ?>
-                                    <div class="progress" style="height: 6px; min-width: 60px;">
-                                        <div class="progress-bar <?php echo $barColor ?>" style="width: <?php echo $pct ?>%"></div>
+                                    <div class="progress workfl-height-6px-min-width-60px-13b4" >
+                                        <div class="progress-bar <?php echo $barColor ?>" data-ahg-style="width: <?php echo $pct ?>%"></div>
                                     </div>
                                     <small class="text-muted"><?php echo $pct ?>%</small>
                                 </td>

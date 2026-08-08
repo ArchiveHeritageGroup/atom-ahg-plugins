@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .extend-background-color-1a4d2e-colo-902c { background-color: #1a4d2e; color: white; }
+</style>
 <?php
 $rsData = $sf_data->getRaw('rightsStatements');
 $ccData = $sf_data->getRaw('ccLicenses');
@@ -66,7 +73,7 @@ $statsData = $sf_data->getRaw('stats');
     <!-- TK Labels -->
     <div class="col-md-4 mb-4">
       <div class="card h-100">
-        <div class="card-header" style="background-color: #1a4d2e; color: white;">
+        <div class="card-header extend-background-color-1a4d2e-colo-902c" >
           <h5 class="mb-0"><?php echo __('Traditional Knowledge Labels'); ?></h5>
         </div>
         <div class="card-body">
@@ -80,7 +87,7 @@ $statsData = $sf_data->getRaw('stats');
                 ?>
                   <li class="mb-2">
                     <?php if (!empty($tk->color)): ?>
-                      <span style="display:inline-block;width:12px;height:12px;background:<?php echo htmlspecialchars($tk->color); ?>;border-radius:2px;margin-right:5px;"></span>
+                      <span data-ahg-style="display:inline-block;width:12px;height:12px;background:<?php echo htmlspecialchars($tk->color); ?>;border-radius:2px;margin-right:5px;"></span>
                     <?php endif; ?>
                     <a href="<?php echo htmlspecialchars($tk->uri ?? ''); ?>" target="_blank">
                       <?php echo htmlspecialchars($tk->name ?? $tk->code ?? 'Unknown'); ?>

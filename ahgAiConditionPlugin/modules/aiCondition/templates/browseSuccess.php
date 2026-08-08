@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .aicond-width-150px-9578 { width:150px; }
+  .aicond-width-200px-8f77 { width:200px; }
+</style>
 
 <?php
 require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Helpers/AiConditionHelper.php';
@@ -56,14 +64,14 @@ require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlu
 <!-- Filters -->
 <div class="d-flex gap-2 mb-3 flex-wrap">
     <form method="get" action="<?php echo url_for(['module' => 'aiCondition', 'action' => 'browse']) ?>" class="d-flex gap-2 flex-wrap">
-        <input type="text" name="q" class="form-control form-control-sm" style="width:200px" placeholder="<?php echo __('Search...') ?>" value="<?php echo esc_entities($filters['search'] ?? '') ?>">
-        <select name="grade" class="form-select form-select-sm" style="width:150px">
+        <input type="text" name="q" class="form-control form-control-sm aicond-width-200px-8f77"  placeholder="<?php echo __('Search...') ?>" value="<?php echo esc_entities($filters['search'] ?? '') ?>">
+        <select name="grade" class="form-select form-select-sm aicond-width-150px-9578" >
             <option value=""><?php echo __('All grades') ?></option>
             <?php foreach (['excellent','good','fair','poor','critical'] as $g): ?>
             <option value="<?php echo $g ?>" <?php echo ($filters['condition_grade'] ?? '') === $g ? 'selected' : '' ?>><?php echo ucfirst($g) ?></option>
             <?php endforeach ?>
         </select>
-        <select name="confirmed" class="form-select form-select-sm" style="width:150px">
+        <select name="confirmed" class="form-select form-select-sm aicond-width-150px-9578" >
             <option value=""><?php echo __('All status') ?></option>
             <option value="1" <?php echo ($filters['is_confirmed'] ?? '') === '1' ? 'selected' : '' ?>><?php echo __('Confirmed') ?></option>
             <option value="0" <?php echo ($filters['is_confirmed'] ?? '') === '0' ? 'selected' : '' ?>><?php echo __('Pending') ?></option>

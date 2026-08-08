@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .jobsma-height-18px-min-width-120px-6fd6 { height: 18px; min-width: 120px; }
+  .jobsma-width-100px-e3d2 { width: 100px; }
+  .jobsma-width-60px-902c { width: 60px; }
+</style>
 <?php use_helper('Date'); ?>
 
 <?php slot('title'); ?>
@@ -36,7 +45,7 @@
       <table class="table table-bordered table-hover mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 60px;"><?php echo __('ID'); ?></th>
+            <th class="jobsma-width-60px-902c"><?php echo __('ID'); ?></th>
             <th><?php echo __('Name'); ?></th>
             <th><?php echo __('Queue'); ?></th>
             <th><?php echo __('Status'); ?></th>
@@ -44,7 +53,7 @@
             <th><?php echo __('Jobs'); ?></th>
             <th><?php echo __('User'); ?></th>
             <th><?php echo __('Created'); ?></th>
-            <th style="width: 100px;"><?php echo __('Actions'); ?></th>
+            <th class="jobsma-width-100px-e3d2"><?php echo __('Actions'); ?></th>
           </tr>
         </thead>
         <tbody>
@@ -60,10 +69,10 @@
                 </span>
               </td>
               <td>
-                <div class="progress" style="height: 18px; min-width: 120px;">
+                <div class="progress jobsma-height-18px-min-width-120px-6fd6" >
                   <?php $pct = (float) $batch->progress_percent; ?>
                   <div class="progress-bar <?php echo ($batch->status === 'failed') ? 'bg-danger' : ''; ?>"
-                       role="progressbar" style="width: <?php echo $pct; ?>%">
+                       role="progressbar" data-ahg-style="width: <?php echo $pct; ?>%">
                     <?php echo round($pct); ?>%
                   </div>
                 </div>

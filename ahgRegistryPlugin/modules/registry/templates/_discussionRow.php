@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-min-width-30px-2429 { min-width: 30px; }
+</style>
 <?php
   $topicIcons = [
     'discussion' => 'fas fa-comments text-primary',
@@ -24,7 +31,7 @@
 ?>
 <a href="<?php echo $discUrl; ?>" class="list-group-item list-group-item-action<?php echo $isPinned ? ' list-group-item-warning' : ''; ?>">
   <div class="d-flex align-items-start">
-    <div class="me-3 text-center flex-shrink-0" style="min-width: 30px;">
+    <div class="me-3 text-center flex-shrink-0 regist-min-width-30px-2429" >
       <i class="<?php echo $tIcon; ?>" title="<?php echo htmlspecialchars(ucfirst($tt), ENT_QUOTES, 'UTF-8'); ?>"></i>
     </div>
     <div class="flex-grow-1 min-width-0">

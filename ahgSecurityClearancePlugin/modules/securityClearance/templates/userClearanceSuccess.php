@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .securi-max-height-400px-overflow-y--f4d9 { max-height: 400px; overflow-y: auto; }
+</style>
 <?php
 /**
  * User Clearance Detail Template.
@@ -25,7 +32,7 @@
           <div class="col-md-6">
             <p>
               <strong><?php echo __('Level:') ?></strong><br>
-              <span class="badge fs-5" style="background-color: <?php echo $clearance->color ?>">
+              <span class="badge fs-5" data-ahg-style="background-color: <?php echo $clearance->color ?>">
                 <?php echo esc_entities($clearance->name) ?>
               </span>
             </p>
@@ -244,7 +251,7 @@
       <div class="card-header">
         <h5 class="mb-0"><?php echo __('Clearance History') ?></h5>
       </div>
-      <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+      <div class="card-body securi-max-height-400px-overflow-y--f4d9" >
         <?php if (empty($history)): ?>
         <p class="text-muted"><?php echo __('No history.') ?></p>
         <?php else: ?>

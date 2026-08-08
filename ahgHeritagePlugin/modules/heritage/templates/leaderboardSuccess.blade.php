@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-width-32px-height-32px-0269 { width: 32px; height: 32px; }
+</style>
 
 @php
 // Helper to convert Symfony escaped arrays to plain arrays
@@ -132,7 +137,7 @@ $stats = $toArray($stats ?? []);
                                 <img src="{{ $entry['avatar_url'] }}"
                                      class="rounded-circle me-2" width="32" height="32" alt="">
                                 @else
-                                <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2 herita-width-32px-height-32px-0269" >
                                     <i class="fas fa-user text-primary"></i>
                                 </div>
                                 @endif

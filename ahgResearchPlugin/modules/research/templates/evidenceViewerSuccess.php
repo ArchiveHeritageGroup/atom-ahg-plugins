@@ -1,4 +1,13 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-height-200px-283b { height:200px; }
+  .resear-max-height-300px-ce34 { max-height:300px; }
+  .resear-width-60px-height-6px-6dda { width:60px;height:6px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -18,9 +27,9 @@
             <div class="card-header"><h5 class="mb-0">Object Preview</h5></div>
             <div class="card-body text-center">
                 <?php if (!empty($thumbnail)): ?>
-                    <img src="<?php echo htmlspecialchars($thumbnail); ?>" class="img-fluid rounded mb-2" alt="Preview" style="max-height:300px;">
+                    <img src="<?php echo htmlspecialchars($thumbnail); ?>" class="img-fluid rounded mb-2" alt="Preview" class="resear-max-height-300px-ce34">
                 <?php else: ?>
-                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height:200px;">
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center resear-height-200px-283b" >
                         <i class="fas fa-file-alt fa-3x text-muted"></i>
                     </div>
                 <?php endif; ?>
@@ -179,7 +188,7 @@
                                 <td>
                                     <?php $qpct = round((float)($m->score ?? 0) * 100); $qcolor = $qpct >= 80 ? 'success' : ($qpct >= 50 ? 'warning' : 'danger'); ?>
                                     <div class="d-flex align-items-center gap-1">
-                                        <div class="progress" style="width:60px;height:6px"><div class="progress-bar bg-<?php echo $qcolor; ?>" style="width:<?php echo $qpct; ?>%"></div></div>
+                                        <div class="progress resear-width-60px-height-6px-6dda" ><div class="progress-bar bg-<?php echo $qcolor; ?>" data-ahg-style="width:<?php echo $qpct; ?>%"></div></div>
                                         <small><?php echo $qpct; ?>%</small>
                                     </div>
                                 </td>

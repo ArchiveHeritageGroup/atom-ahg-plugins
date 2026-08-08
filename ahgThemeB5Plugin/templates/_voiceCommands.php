@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-display-none-cb45 { display:none; }
+</style>
 <?php
 /**
  * Voice Commands UI partial - included in layout_end.
@@ -14,12 +21,12 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
 ?>
 
 <!-- Voice: Listening indicator bar -->
-<div id="voice-indicator" class="voice-indicator voice-ui" style="display:none"></div>
+<div id="voice-indicator" class="voice-indicator voice-ui themeb-display-none-cb45" ></div>
 
 <!-- Voice: Floating mic button (bottom-right) -->
 <button id="voice-floating-btn"
-  class="voice-floating-btn voice-ui"
-  style="display:none"
+  class="voice-floating-btn voice-ui themeb-display-none-cb45"
+  
   type="button"
   aria-label="<?php echo __('Toggle voice commands'); ?>"
   title="<?php echo __('Click: voice | Right-click: type command'); ?>">
@@ -27,10 +34,10 @@ if (preg_match('/bot|crawl|spider|slurp|bingpreview|facebookexternalhit/i', $ua)
 </button>
 
 <!-- Voice: Toast container -->
-<div id="voice-toast-container" class="voice-toast-container voice-ui" style="display:none" aria-live="polite"></div>
+<div id="voice-toast-container" class="voice-toast-container voice-ui themeb-display-none-cb45"  aria-live="polite"></div>
 
 <!-- Voice: Help modal -->
-<div class="modal fade voice-ui" id="voice-help-modal" tabindex="-1" aria-labelledby="voice-help-label" aria-hidden="true" style="display:none">
+<div class="modal fade voice-ui" id="voice-help-modal" tabindex="-1" aria-labelledby="voice-help-label" aria-hidden="true" class="themeb-display-none-cb45">
   <div class="modal-dialog modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">

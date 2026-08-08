@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .museum-width-15-29bf { width: 15%; }
+  .museum-width-20-4341 { width: 20%; }
+  .museum-width-50-cd77 { width: 50%; }
+</style>
 <div class="section">
 <?php use Illuminate\Database\Capsule\Manager as DB; ?>
 
@@ -6,13 +15,13 @@
   <table class="table table-bordered multiRow" id="childsTable">
     <thead>
       <tr>
-        <th style="width: 15%">
+        <th class="museum-width-15-29bf">
           <?php echo __('Identifier'); ?>
-        </th><th style="width: 15%">
+        </th><th class="museum-width-15-29bf">
           <?php echo __('Level'); ?>
-        </th><th style="width: 50%">
+        </th><th class="museum-width-50-cd77">
           <?php echo __('Title'); ?>
-        </th><th style="width: 20%">
+        </th><th class="museum-width-20-4341">
           <?php echo __('Date'); ?>
         </th>
       </tr>

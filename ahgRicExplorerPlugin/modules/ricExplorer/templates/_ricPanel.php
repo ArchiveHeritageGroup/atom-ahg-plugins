@@ -1,3 +1,16 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricexp-display-flex-align-items-cen-693c { display:flex; align-items:center; justify-content:center; height:100%; color:#fff; }
+  .ricexp-display-none-align-items-cen-4e1a { display:none; align-items:center; justify-content:center; height:100%; }
+  .ricexp-display-none-position-fixed--024d { display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#1a1a2e; z-index:9999; }
+  .ricexp-height-350px-position-relati-7b12 { height: 350px; position: relative; overflow: hidden; background: #1a1a2e; }
+  .ricexp-position-absolute-top-0-left-8076 { position:absolute; top:0; left:0; width:100%; height:100%; display:none; }
+  .ricexp-position-absolute-top-15px-r-a9f9 { position:absolute; top:15px; right:15px; z-index:10001; }
+  .ricexp-width-100-height-100-b62e { width:100%; height:100%; }
+</style>
 <?php
 $resourceId = $sf_data->getRaw('resourceId');
 if (!$resourceId) return;
@@ -21,24 +34,24 @@ if (!$resourceId) return;
   </div>
 
   <div class="card-body p-0">
-    <div id="ric-mini-graph-container" style="height: 350px; position: relative; overflow: hidden; background: #1a1a2e;">
-      <div id="ric-placeholder" style="display:flex; align-items:center; justify-content:center; height:100%; color:#fff;">
+    <div id="ric-mini-graph-container" class="ricexp-height-350px-position-relati-7b12">
+      <div id="ric-placeholder" class="ricexp-display-flex-align-items-cen-693c">
         <div class="text-center">
           <i class="fas fa-project-diagram fa-3x mb-2"></i>
           <p>Click "Load" to view RiC relationships</p>
         </div>
       </div>
-      <div id="ric-loading" style="display:none; align-items:center; justify-content:center; height:100%;">
+      <div id="ric-loading" class="ricexp-display-none-align-items-cen-4e1a">
         <div class="spinner-border text-success"></div>
       </div>
-      <div id="ric-graph-2d" style="position:absolute; top:0; left:0; width:100%; height:100%; display:none;"></div>
-      <div id="ric-graph-3d" style="position:absolute; top:0; left:0; width:100%; height:100%; display:none;"></div>
+      <div id="ric-graph-2d" class="ricexp-position-absolute-top-0-left-8076"></div>
+      <div id="ric-graph-3d" class="ricexp-position-absolute-top-0-left-8076"></div>
     </div>
   </div>
 </section>
 
-<div id="ric-fullscreen-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#1a1a2e; z-index:9999;">
-  <div style="position:absolute; top:15px; right:15px; z-index:10001;">
+<div id="ric-fullscreen-modal" class="ricexp-display-none-position-fixed--024d">
+  <div class="ricexp-position-absolute-top-15px-r-a9f9">
     <div class="btn-group btn-group-sm">
       <button type="button" class="btn btn-light ric-fs-view-btn active" data-view="2d">2D</button>
       <button type="button" class="btn btn-light ric-fs-view-btn" data-view="3d">3D</button>
@@ -47,7 +60,7 @@ if (!$resourceId) return;
       <i class="fas fa-times"></i> Close
     </button>
   </div>
-  <div id="ric-fullscreen-graph" style="width:100%; height:100%;"></div>
+  <div id="ric-fullscreen-graph" class="ricexp-width-100-height-100-b62e"></div>
 </div>
 
 <!-- RiC Explorer dependencies - vendored locally (were CDN: cytoscape 3.28.1,

@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-max-width-820px-3c73 { max-width: 820px; }
+  .resear-width-220px-d415 { width: 220px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive ?? 'targetJournals', 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -34,7 +42,7 @@
   <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
 <?php endif; ?>
 
-<div style="max-width: 820px;">
+<div class="resear-max-width-820px-3c73">
   <?php if (!empty($journal['subject_scope'])): ?>
     <h2 class="h6 mt-3"><?php echo __('Scope — what it accepts'); ?></h2>
     <p><?php echo nl2br(htmlspecialchars($journal['subject_scope'])); ?></p>
@@ -60,7 +68,7 @@
       ?>
       <?php foreach ($rows as $label => $val): ?>
         <?php if ($val !== null && $val !== ''): ?>
-          <tr><th class="text-muted" style="width: 220px;"><?php echo $label; ?></th><td><?php echo nl2br(htmlspecialchars((string) $val)); ?></td></tr>
+          <tr><th class="text-muted resear-width-220px-d415" ><?php echo $label; ?></th><td><?php echo nl2br(htmlspecialchars((string) $val)); ?></td></tr>
         <?php endif; ?>
       <?php endforeach; ?>
     </tbody>

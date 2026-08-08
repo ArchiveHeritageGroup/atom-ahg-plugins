@@ -32,7 +32,7 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
       <div class="row">
         <div class="col-md-3">
           <strong><?php echo __('Rating'); ?>:</strong>
-          <span class="badge" style="background-color: <?php echo $ratings[$currentCondition->condition_rating]['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $ratings[$currentCondition->condition_rating]['color'] ?? '#999'; ?>">
             <?php echo $ratings[$currentCondition->condition_rating]['label'] ?? $currentCondition->condition_rating; ?>
           </span>
         </div>
@@ -66,7 +66,7 @@ require_once sfConfig::get('sf_plugins_dir') . '/ahgUiOverridesPlugin/lib/helper
       <tr>
         <td><?php echo $report->assessment_date; ?></td>
         <td>
-          <span class="badge" style="background-color: <?php echo $ratings[$report->condition_rating]['color'] ?? '#999'; ?>">
+          <span class="badge" data-ahg-style="background-color: <?php echo $ratings[$report->condition_rating]['color'] ?? '#999'; ?>">
             <?php echo $ratings[$report->condition_rating]['label'] ?? $report->condition_rating; ?>
           </span>
         </td>

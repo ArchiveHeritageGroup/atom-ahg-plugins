@@ -1,4 +1,11 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .exhibi-width-30px-ec5c { width: 30px; }
+</style>
 <?php
 // Extract raw arrays from Symfony decorator
 $objectsArray = $objects instanceof sfOutputEscaperArrayDecorator ? $objects->getRawValue() : (array) ($objects ?? []);
@@ -134,7 +141,7 @@ $sectionsArray = $sections instanceof sfOutputEscaperArrayDecorator ? $sections-
             <table class="table table-sm table-hover mb-0">
               <thead>
                 <tr>
-                  <th style="width: 30px;"></th>
+                  <th class="exhibi-width-30px-ec5c"></th>
                   <th>Object Number</th>
                   <th>Title/Description</th>
                   <th>Display Location</th>
@@ -192,7 +199,7 @@ $sectionsArray = $sections instanceof sfOutputEscaperArrayDecorator ? $sections-
             <table class="table table-sm table-hover mb-0">
               <thead>
                 <tr>
-                  <th style="width: 30px;"></th>
+                  <th class="exhibi-width-30px-ec5c"></th>
                   <th>Object Number</th>
                   <th>Title/Description</th>
                   <th>Display Location</th>

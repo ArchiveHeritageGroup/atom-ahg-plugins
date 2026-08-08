@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-display-inline-5f8f { display:inline; }
+  .settin-display-none-93b8 { display:none; }
+  .settin-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+</style>
 <?php
 /**
  * Preservation Settings Page
@@ -126,14 +135,14 @@ slot('title', $title);
                                             <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editTargetModal<?php echo $target->id; ?>" title="<?php echo __('Edit'); ?>">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <form method="post" style="display:inline;">
+                                            <form method="post" class="settin-display-inline-5f8f">
                                                 <input type="hidden" name="action_type" value="toggle_target">
                                                 <input type="hidden" name="target_id" value="<?php echo $target->id; ?>">
                                                 <button type="submit" class="btn btn-outline-<?php echo $target->is_active ? 'warning' : 'success'; ?>" title="<?php echo $target->is_active ? __('Disable') : __('Enable'); ?>">
                                                     <i class="fas fa-<?php echo $target->is_active ? 'pause' : 'play'; ?>"></i>
                                                 </button>
                                             </form>
-                                            <form method="post" style="display:inline;" onsubmit="return confirm('<?php echo __('Delete this target?'); ?>');">
+                                            <form method="post" class="settin-display-inline-5f8f" onsubmit="return confirm('<?php echo __('Delete this target?'); ?>');">
                                                 <input type="hidden" name="action_type" value="delete_target">
                                                 <input type="hidden" name="target_id" value="<?php echo $target->id; ?>">
                                                 <button type="submit" class="btn btn-outline-danger" title="<?php echo __('Delete'); ?>">
@@ -209,7 +218,7 @@ slot('title', $title);
                 <div class="card-header">
                     <i class="fas fa-history me-2"></i><?php echo __('Recent Sync Logs'); ?>
                 </div>
-                <div class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+                <div class="list-group list-group-flush settin-max-height-300px-overflow-y--3db9" >
                     <?php if (empty($recentLogs)): ?>
                     <div class="list-group-item text-center text-muted">
                         <?php echo __('No sync logs yet'); ?>
@@ -291,23 +300,23 @@ php symfony preservation:verify-backup --status</code></pre>
                         <label class="form-label"><?php echo __('Path'); ?> *</label>
                         <input type="text" name="path" class="form-control" placeholder="/var/backups/atom">
                     </div>
-                    <div class="mb-3 remote-field" style="display:none;">
+                    <div class="mb-3 remote-field settin-display-none-93b8" >
                         <label class="form-label"><?php echo __('Host'); ?></label>
                         <input type="text" name="host" class="form-control" placeholder="backup.server.com">
                     </div>
-                    <div class="mb-3 remote-field" style="display:none;">
+                    <div class="mb-3 remote-field settin-display-none-93b8" >
                         <label class="form-label"><?php echo __('Port'); ?></label>
                         <input type="number" name="port" class="form-control" value="22">
                     </div>
-                    <div class="mb-3 remote-field" style="display:none;">
+                    <div class="mb-3 remote-field settin-display-none-93b8" >
                         <label class="form-label"><?php echo __('User'); ?></label>
                         <input type="text" name="user" class="form-control" placeholder="backup">
                     </div>
-                    <div class="mb-3 s3-field" style="display:none;">
+                    <div class="mb-3 s3-field settin-display-none-93b8" >
                         <label class="form-label"><?php echo __('Bucket'); ?></label>
                         <input type="text" name="bucket" class="form-control" placeholder="my-archive-bucket">
                     </div>
-                    <div class="mb-3 s3-field" style="display:none;">
+                    <div class="mb-3 s3-field settin-display-none-93b8" >
                         <label class="form-label"><?php echo __('Region'); ?></label>
                         <input type="text" name="region" class="form-control" placeholder="af-south-1">
                     </div>

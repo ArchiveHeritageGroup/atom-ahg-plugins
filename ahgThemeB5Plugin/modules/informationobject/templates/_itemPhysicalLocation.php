@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .themeb-background-color-var-ahg-pri-5e4b { background-color: var(--ahg-primary, #005837) !important; color: #fff !important; }
+  .themeb-background-color-var-ahg-pri-20b5 { background-color: var(--ahg-primary, #005837); }
+</style>
 <?php
 /**
  * Item Physical Location partial (Edit Form)
@@ -42,7 +50,7 @@ foreach ($poResult as $po) {
     <button class="accordion-button collapsed" type="button"
             data-bs-toggle="collapse" data-bs-target="#collapse-physical-location"
             aria-expanded="false" aria-controls="collapse-physical-location"
-            style="background-color: var(--ahg-primary, #005837) !important; color: #fff !important;">
+            class="themeb-background-color-var-ahg-pri-5e4b">
       <?php echo __('Item Physical Location'); ?>
       <span class="cco-chapter"><?php echo __('Storage & Access'); ?></span>
     </button>
@@ -71,7 +79,7 @@ foreach ($poResult as $po) {
     </div>
 
     <!-- Location within container -->
-    <h6 class="text-white py-2 px-3 mb-3" style="background-color: var(--ahg-primary, #005837);"><i class="fas fa-box me-2"></i><?php echo __('Location within container'); ?></h6>
+    <h6 class="text-white py-2 px-3 mb-3 themeb-background-color-var-ahg-pri-20b5" ><i class="fas fa-box me-2"></i><?php echo __('Location within container'); ?></h6>
     <div class="row mb-3">
       <div class="col-md-2">
         <label class="form-label"><?php echo __('Box'); ?></label>
@@ -119,7 +127,7 @@ foreach ($poResult as $po) {
     </div>
 
     <!-- Condition & Status -->
-    <h6 class="text-white py-2 px-3 mb-3" style="background-color: var(--ahg-primary, #005837);"><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition & Status'); ?></h6>
+    <h6 class="text-white py-2 px-3 mb-3 themeb-background-color-var-ahg-pri-20b5" ><i class="fas fa-clipboard-check me-2"></i><?php echo __('Condition & Status'); ?></h6>
     <div class="row mb-3">
       <div class="col-md-3">
         <label class="form-label"><?php echo __('Condition'); ?></label>

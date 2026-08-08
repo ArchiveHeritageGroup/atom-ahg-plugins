@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .resear-width-40px-4792 { width: 40px; }
+</style>
 <?php slot('sidebar') ?>
 <?php include_partial('research/researchSidebar', ['active' => $sidebarActive, 'unreadNotifications' => $unreadNotifications ?? 0]) ?>
 <?php end_slot() ?>
@@ -49,7 +56,7 @@
                 <caption class="visually-hidden"><?php echo __('Select items to check out in batch') ?></caption>
                 <thead class="table-light">
                     <tr>
-                        <th scope="col" style="width: 40px;">
+                        <th scope="col" class="resear-width-40px-4792">
                             <input type="checkbox" class="form-check-input" id="selectAllBatch" checked
                                    aria-label="<?php echo __('Select all items') ?>">
                         </th>

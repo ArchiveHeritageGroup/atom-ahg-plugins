@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ai-display-none-224b { display: none; }
+</style>
 <?php
 /**
  * AI Summarize Button - Include on information object show page
@@ -8,7 +15,7 @@
     <button type="button" class="btn btn-outline-info w-100" id="aiSummarizeBtn" onclick="generateSummary(<?php echo $resource->id ?>)">
         <i class="bi bi-file-text me-1"></i>Generate Summary (AI)
     </button>
-    <div id="summaryResult" class="mt-2" style="display: none;"></div>
+    <div id="summaryResult" class="mt-2 ai-display-none-224b" ></div>
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

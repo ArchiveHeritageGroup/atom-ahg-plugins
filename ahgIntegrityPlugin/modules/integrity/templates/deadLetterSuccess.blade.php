@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .integr-max-width-200px-3831 { max-width:200px; }
+</style>
 @php
 $entries = $entries ?? [];
 $statusCounts = $statusCounts ?? [];
@@ -61,7 +66,7 @@ $filterStatus = $filterStatus ?? null;
                 <td>{{ $e->first_failure_at }}</td>
                 <td>{{ $e->last_failure_at }}</td>
                 <td>{{ $e->retry_count }}/{{ $e->max_retries }}</td>
-                <td class="text-truncate" style="max-width:200px" title="{{ $e->last_error_detail ?? '' }}">{{ $e->last_error_detail ?? '—' }}</td>
+                <td class="text-truncate integr-max-width-200px-3831"  title="{{ $e->last_error_detail ?? '' }}">{{ $e->last_error_detail ?? '—' }}</td>
                 <td>
                   <div class="btn-group btn-group-sm">
                     @if ($e->status === 'open')

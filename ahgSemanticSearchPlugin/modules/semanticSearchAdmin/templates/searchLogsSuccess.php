@@ -1,4 +1,11 @@
 <?php use_helper('Text'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .semant-max-width-200px-1a5c { max-width: 200px; }
+</style>
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -27,7 +34,7 @@
                         <?php if ($popularSearches && count($popularSearches) > 0): ?>
                             <?php foreach ($popularSearches as $search): ?>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span class="text-truncate" style="max-width: 200px;" title="<?php echo htmlspecialchars($search->original_query); ?>">
+                                <span class="text-truncate semant-max-width-200px-1a5c"  title="<?php echo htmlspecialchars($search->original_query); ?>">
                                     <?php echo htmlspecialchars($search->original_query); ?>
                                 </span>
                                 <span class="badge bg-primary rounded-pill"><?php echo number_format($search->count); ?></span>

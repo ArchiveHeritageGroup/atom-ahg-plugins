@@ -1,4 +1,11 @@
 <?php use_helper('Text') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .datami-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+</style>
 
 <div class="container-fluid py-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -74,7 +81,7 @@
       <i class="bi bi-exclamation-triangle me-2"></i>Import Errors
     </div>
     <div class="card-body">
-      <ul class="list-unstyled mb-0" style="max-height: 300px; overflow-y: auto;">
+      <ul class="list-unstyled mb-0 datami-max-height-300px-overflow-y--3db9" >
         <?php foreach ($stats['errors'] as $error): ?>
           <li class="text-danger small mb-1"><i class="bi bi-x-circle me-1"></i><?php echo esc_specialchars($error) ?></li>
         <?php endforeach ?>

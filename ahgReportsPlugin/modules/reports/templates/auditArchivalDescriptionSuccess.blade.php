@@ -1,10 +1,15 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .report-width-100-199b { width: 100%; }
+</style>
 
 @section('content')
 
 <h1>{{ __('Audit Trail') }}</h1>
 
-<table class="sticky-enabled" style="width: 100%;">
+<table class="sticky-enabled report-width-100-199b" >
   <thead>
     <tr>
       <th>
@@ -12,7 +17,7 @@
       </th>
     </tr>
   </thead>
-  <tbody style="width: 100%;">
+  <tbody class="report-width-100-199b">
 	<section class="actions mb-3">
 		<input class="c-btn c-btn-submit" type="button" onclick="history.back();" value="{{ __('Back') }}">
 	</section>
@@ -26,7 +31,7 @@
        <tr class="{{ 0 == @++$row % 2 ? 'even' : 'odd' }}">
         <td>
     		{!! '<hr>' !!}
-			<table border=1 style="width: 100%;">
+			<table border=1 class="report-width-100-199b">
 			<tr>
 			<td colspan=3>{{ __('Archival Description') }}
 			</td>

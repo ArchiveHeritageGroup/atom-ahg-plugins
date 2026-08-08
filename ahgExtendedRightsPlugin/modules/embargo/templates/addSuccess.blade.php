@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .extend-display-none-224b { display: none; }
+</style>
 
 @section('title')
   <h1>{{ __('Add Embargo') }}</h1>
@@ -89,7 +94,7 @@
             {{ __('This will create the same embargo on all child records below this item in the hierarchy.') }}
           </div>
         </div>
-        <div class="alert alert-warning mb-0" id="propagation-warning" style="display: none;">
+        <div class="alert alert-warning mb-0" id="propagation-warning" class="extend-display-none-224b">
           <i class="fas fa-exclamation-triangle me-2"></i>
           {{ __('Warning: This action cannot be easily undone. Each child record will have its own embargo that must be lifted individually.') }}
         </div>

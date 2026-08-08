@@ -1,4 +1,13 @@
 <?php use_helper('Url', 'Tag'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-font-size-3rem-5afc { font-size: 3rem; }
+  .herita-height-150px-5e77 { height: 150px; }
+  .herita-height-150px-object-fit-cove-7ace { height: 150px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?>
   <?php echo isset($currentPeriod) ? $currentPeriod['name'] . ' - Timeline' : 'Historical Timeline'; ?>
@@ -28,9 +37,9 @@
             <div class="timeline-dot"></div>
             <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'timeline', 'period_id' => $period['id']]); ?>"
                class="card timeline-card text-decoration-none"
-               <?php if ($period['background_color']): ?>style="border-left: 4px solid <?php echo $period['background_color']; ?>;"<?php endif; ?>>
+               <?php if ($period['background_color']): ?>data-ahg-style="border-left: 4px solid <?php echo $period['background_color']; ?>;"<?php endif; ?>>
               <?php if ($period['cover_image']): ?>
-                <div class="card-img-top" style="height: 120px; background: url('<?php echo $period['cover_image']; ?>') center/cover;"></div>
+                <div class="card-img-top" data-ahg-style="height: 120px; background: url('<?php echo $period['cover_image']; ?>') center/cover;"></div>
               <?php endif; ?>
               <div class="card-body">
                 <h3 class="card-title h5"><?php echo $period['name']; ?></h3>
@@ -91,10 +100,10 @@
               <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $item['slug']]); ?>"
                  class="card h-100 text-decoration-none heritage-result-card">
                 <?php if (!empty($item['thumbnail'])): ?>
-                  <img src="<?php echo $item['thumbnail']; ?>" class="card-img-top heritage-thumb" alt="<?php echo htmlspecialchars($item['title']); ?>" style="height: 150px; object-fit: cover;" onerror="this.src='/plugins/ahgThemeB5Plugin/images/placeholder.png'">
+                  <img src="<?php echo $item['thumbnail']; ?>" class="card-img-top heritage-thumb" alt="<?php echo htmlspecialchars($item['title']); ?>" class="herita-height-150px-object-fit-cove-7ace" onerror="this.src='/plugins/ahgThemeB5Plugin/images/placeholder.png'">
                 <?php else: ?>
-                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
-                    <i class="fas fa-file-earmark text-muted" style="font-size: 3rem;"></i>
+                  <div class="card-img-top bg-light d-flex align-items-center justify-content-center herita-height-150px-5e77" >
+                    <i class="fas fa-file-earmark text-muted herita-font-size-3rem-5afc" ></i>
                   </div>
                 <?php endif; ?>
                 <div class="card-body">

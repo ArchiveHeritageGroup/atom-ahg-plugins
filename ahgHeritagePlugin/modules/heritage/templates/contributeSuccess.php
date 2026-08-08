@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-font-size-0-6em-1b76 { font-size: 0.6em; }
+</style>
 <?php
 /**
  * Contribution Form.
@@ -414,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function renderTags() {
             tagContainer.innerHTML = tags.map((tag, i) =>
                 `<span class="badge bg-primary me-1 mb-1">${tag}
-                    <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6em" onclick="removeTag(${i})"></button>
+                    <button type="button" class="btn-close btn-close-white ms-1 herita-font-size-0-6em-1b76"  onclick="removeTag(${i})"></button>
                 </span>`
             ).join('');
             tagsData.value = JSON.stringify(tags);

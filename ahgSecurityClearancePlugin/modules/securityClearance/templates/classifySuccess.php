@@ -37,7 +37,7 @@
         <hr class="my-2">
         <small>
           <strong><?php echo __('Current Classification:'); ?></strong>
-          <span class="badge" style="background-color: <?php echo $currentClassification->classificationColor; ?>;">
+          <span class="badge" data-ahg-style="background-color: <?php echo $currentClassification->classificationColor; ?>;">
             <?php echo $currentClassification->classificationName; ?>
           </span>
         </small>
@@ -64,7 +64,7 @@
                          <?php echo ($currentClassification && $currentClassification->classificationId == $c->id) ? 'checked' : ''; ?>
                          required>
                   <label class="form-check-label w-100" for="classification_<?php echo $c->id; ?>">
-                    <span class="badge w-100 py-2 mb-2" style="background-color: <?php echo $c->color; ?>;">
+                    <span class="badge w-100 py-2 mb-2" data-ahg-style="background-color: <?php echo $c->color; ?>;">
                       <i class="<?php echo $c->icon; ?> me-1"></i>
                       <?php echo $c->name; ?>
                     </span>

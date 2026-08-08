@@ -1,4 +1,12 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-display-none-224b { display: none; }
+  .herita-width-100px-e3d2 { width: 100px; }
+  .herita-width-150px-c251 { width: 150px; }
+  .herita-width-60px-902c { width: 60px; }
+</style>
 
 @php
 $featured = (array) $featured;
@@ -36,7 +44,7 @@ $archivalCollections = (array) $archivalCollections;
                     </select>
                 </div>
 
-                <div class="col-md-4" id="archival_select_wrapper" style="display: none;">
+                <div class="col-md-4" id="archival_select_wrapper" class="herita-display-none-224b">
                     <label for="archival_source_id" class="form-label">Select Archival Collection</label>
                     <select class="form-select" id="archival_source_id" name="source_id_archival">
                         <option value="">Select collection...</option>
@@ -46,7 +54,7 @@ $archivalCollections = (array) $archivalCollections;
                     </select>
                 </div>
 
-                <div class="col-md-4" id="iiif_select_wrapper" style="display: none;">
+                <div class="col-md-4" id="iiif_select_wrapper" class="herita-display-none-224b">
                     <label for="iiif_source_id" class="form-label">Select IIIF Collection</label>
                     <select class="form-select" id="iiif_source_id" name="source_id_iiif">
                         <option value="">Select collection...</option>
@@ -100,12 +108,12 @@ $archivalCollections = (array) $archivalCollections;
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 60px;">Order</th>
+                        <th class="herita-width-60px-902c">Order</th>
                         <th>Collection</th>
                         <th>Type</th>
                         <th>Custom Title</th>
-                        <th style="width: 100px;">Status</th>
-                        <th style="width: 150px;">Actions</th>
+                        <th class="herita-width-100px-e3d2">Status</th>
+                        <th class="herita-width-150px-c251">Actions</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-cursor-pointer-color-ddd-fd12 { cursor: pointer; color: #ddd; }
+  .regist-width-50px-height-50px-4fd2 { width: 50px; height: 50px; }
+  .regist-width-50px-height-50px-objec-4908 { width: 50px; height: 50px; object-fit: contain; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Write a Review'); ?><?php end_slot(); ?>
 
@@ -32,9 +41,9 @@
       <div class="card-body">
         <div class="d-flex align-items-center">
           <?php if (!empty($entity->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($entity->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3" style="width: 50px; height: 50px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($entity->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-3 regist-width-50px-height-50px-objec-4908" >
           <?php else: ?>
-            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+            <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center regist-width-50px-height-50px-4fd2" >
               <i class="fas fa-<?php echo 'vendor' === $entityType ? 'handshake' : 'laptop-code'; ?> text-muted"></i>
             </div>
           <?php endif; ?>
@@ -56,7 +65,7 @@
             <label class="form-label fw-semibold"><?php echo __('Rating'); ?> <span class="text-danger">*</span></label>
             <div id="star-rating" class="d-flex gap-1" role="group" aria-label="<?php echo __('Star rating'); ?>">
               <?php for ($i = 1; $i <= 5; $i++): ?>
-                <span class="star-btn fs-3" data-value="<?php echo $i; ?>" style="cursor: pointer; color: #ddd;" title="<?php echo $i; ?> <?php echo __('star'); ?><?php echo $i > 1 ? 's' : ''; ?>">
+                <span class="star-btn fs-3" data-value="<?php echo $i; ?>" class="regist-cursor-pointer-color-ddd-fd12" title="<?php echo $i; ?> <?php echo __('star'); ?><?php echo $i > 1 ? 's' : ''; ?>">
                   <i class="fas fa-star"></i>
                 </span>
               <?php endfor; ?>

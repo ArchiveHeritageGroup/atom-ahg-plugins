@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-height-250px-d19b { height: 250px; }
+</style>
 <?php
 /**
  * Heritage Analytics Content Performance.
@@ -227,11 +234,11 @@ $summary = [
         <div class="row">
             <div class="col-md-6">
                 <h6>By Level of Description</h6>
-                <canvas id="levelChart" style="height: 250px;"></canvas>
+                <canvas id="levelChart" class="herita-height-250px-d19b"></canvas>
             </div>
             <div class="col-md-6">
                 <h6>By Repository</h6>
-                <canvas id="repoChart" style="height: 250px;"></canvas>
+                <canvas id="repoChart" class="herita-height-250px-d19b"></canvas>
             </div>
         </div>
     </div>

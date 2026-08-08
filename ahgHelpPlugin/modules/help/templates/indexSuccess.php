@@ -1,4 +1,11 @@
 <?php use_helper('I18N') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .help-color-var-ahg-primary-005837-48c3 { color: var(--ahg-primary, #005837); }
+</style>
 <?php
   $rawCategories = sfOutputEscaper::unescape($categories);
   $rawRecentArticles = sfOutputEscaper::unescape($recentArticles);
@@ -62,7 +69,7 @@
               <div class="card h-100 help-category-card">
                 <div class="card-body">
                   <div class="d-flex align-items-center mb-2">
-                    <i class="bi <?php echo isset($rawCategoryIcons[$catName]) ? $rawCategoryIcons[$catName] : 'bi-folder' ?> fs-3 me-2" style="color: var(--ahg-primary, #005837);"></i>
+                    <i class="bi <?php echo isset($rawCategoryIcons[$catName]) ? $rawCategoryIcons[$catName] : 'bi-folder' ?> fs-3 me-2 help-color-var-ahg-primary-005837-48c3" ></i>
                     <h5 class="card-title mb-0"><?php echo htmlspecialchars($catName) ?></h5>
                   </div>
                   <p class="card-text text-muted small">

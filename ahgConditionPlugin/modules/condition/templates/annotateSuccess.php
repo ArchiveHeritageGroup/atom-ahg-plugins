@@ -1,3 +1,14 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .condit-background-color-1dc4 { background: ' + color + '; }
+  .condit-background-transparent-paddi-e2c4 { background: transparent; padding: 0; }
+  .condit-color-fff-421b { color: #fff; }
+  .condit-color-rgba-255-255-255-0-8-5d0b { color: rgba(255,255,255,0.8); }
+  .condit-min-height-500px-3f9f { min-height: 500px; }
+</style>
 <?php
 /**
  * Condition Photo Annotation View
@@ -17,13 +28,13 @@ $photoTypes = [
 
 <div class="condition-check-header">
     <nav aria-label="breadcrumb" class="mb-2">
-        <ol class="breadcrumb mb-0" style="background: transparent; padding: 0;">
-            <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage') ?>" style="color: rgba(255,255,255,0.8);">Home</a></li>
+        <ol class="breadcrumb mb-0 condit-background-transparent-paddi-e2c4" >
+            <li class="breadcrumb-item"><a href="<?php echo url_for('@homepage') ?>" class="condit-color-rgba-255-255-255-0-8-5d0b">Home</a></li>
             <?php if ($conditionCheck->slug): ?>
-            <li class="breadcrumb-item"><a href="/<?php echo $conditionCheck->slug ?>" style="color: rgba(255,255,255,0.8);"><?php echo $conditionCheck->identifier ?></a></li>
+            <li class="breadcrumb-item"><a href="/<?php echo $conditionCheck->slug ?>" class="condit-color-rgba-255-255-255-0-8-5d0b"><?php echo $conditionCheck->identifier ?></a></li>
             <?php endif ?>
-            <li class="breadcrumb-item"><a href="<?php echo url_for('@condition_photos?id=' . $photo->condition_check_id) ?>" style="color: rgba(255,255,255,0.8);">Condition Photos</a></li>
-            <li class="breadcrumb-item active" style="color: #fff;">Annotate</li>
+            <li class="breadcrumb-item"><a href="<?php echo url_for('@condition_photos?id=' . $photo->condition_check_id) ?>" class="condit-color-rgba-255-255-255-0-8-5d0b">Condition Photos</a></li>
+            <li class="breadcrumb-item active condit-color-fff-421b" >Annotate</li>
         </ol>
     </nav>
     
@@ -65,7 +76,7 @@ $photoTypes = [
 <div class="row">
     <div class="col-lg-9">
         <!-- Annotation Canvas -->
-        <div id="annotator-container" style="min-height: 500px;"></div>
+        <div id="annotator-container" class="condit-min-height-500px-3f9f"></div>
     </div>
     
     <div class="col-lg-3">
@@ -82,7 +93,7 @@ $photoTypes = [
                 <?php else: ?>
                 <?php foreach ($annotations as $ann): ?>
                 <div class="annotation-list-item" data-id="<?php echo $ann['id'] ?? '' ?>">
-                    <span class="ann-color" style="background: <?php echo $ann['fabricData']['stroke'] ?? $ann['stroke'] ?? '#FF0000' ?>;"></span>
+                    <span class="ann-color" data-ahg-style="background: <?php echo $ann['fabricData']['stroke'] ?? $ann['stroke'] ?? '#FF0000' ?>;"></span>
                     <div class="ann-info">
                         <div class="ann-label">
                             <?php echo esc_entities($ann['label'] ?? 'Annotation') ?>
@@ -204,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var aiTag = ann.ai_generated ? '<span class="ann-ai">AI</span>' : '';
             
             html += '<div class="annotation-list-item" data-id="' + (ann.id || '') + '">' +
-                '<span class="ann-color" style="background: ' + color + ';"></span>' +
+                '<span class="ann-color condit-background-color-1dc4" ></span>' +
                 '<div class="ann-info">' +
                 '<div class="ann-label">' + (ann.label || 'Annotation') + ' ' + aiTag + '</div>' +
                 (ann.notes ? '<div class="ann-notes">' + ann.notes + '</div>' : '') +

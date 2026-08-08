@@ -24,7 +24,7 @@
   <?php foreach ($cards as $c): ?>
     <div class="col">
       <div class="card text-center"><div class="card-body py-2">
-        <div class="h4 mb-0" style="color:<?php echo $c[2]; ?>"><?php echo (int) ($summary[$c[0]] ?? 0); ?></div>
+        <div class="h4 mb-0" data-ahg-style="color:<?php echo $c[2]; ?>"><?php echo (int) ($summary[$c[0]] ?? 0); ?></div>
         <div class="small text-muted"><?php echo $c[1]; ?></div>
       </div></div>
     </div>

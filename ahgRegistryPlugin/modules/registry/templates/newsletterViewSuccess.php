@@ -1,4 +1,11 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-1-1rem-e7ec { font-size: 1.1rem; }
+</style>
 
 <?php slot('title'); ?><?php echo htmlspecialchars($newsletter->subject, ENT_QUOTES, 'UTF-8'); ?><?php end_slot(); ?>
 
@@ -28,7 +35,7 @@
       </header>
 
       <?php if (!empty($newsletter->excerpt)): ?>
-      <div class="lead text-muted mb-4" style="font-size: 1.1rem;">
+      <div class="lead text-muted mb-4 regist-font-size-1-1rem-e7ec" >
         <?php echo htmlspecialchars($newsletter->excerpt, ENT_QUOTES, 'UTF-8'); ?>
       </div>
       <?php endif; ?>

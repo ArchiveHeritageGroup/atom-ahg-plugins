@@ -1,3 +1,12 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .settin-width-20-f6f6 { width: 20%; }
+  .settin-width-26-4e12 { width: 26%; }
+  .settin-width-27-722d { width: 27%; }
+</style>
 <?php
 /**
  * Metadata Extraction Settings
@@ -228,10 +237,10 @@ $metadataSources = [
             <table class="table table-sm table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 20%;">Metadata Source</th>
-                        <th style="width: 26%;">Archives (ISAD)</th>
-                        <th style="width: 27%;">Museum (Collections Procedures)</th>
-                        <th style="width: 27%;">DAM</th>
+                        <th class="settin-width-20-f6f6">Metadata Source</th>
+                        <th class="settin-width-26-4e12">Archives (ISAD)</th>
+                        <th class="settin-width-27-722d">Museum (Collections Procedures)</th>
+                        <th class="settin-width-27-722d">DAM</th>
                     </tr>
                 </thead>
                 <tbody>

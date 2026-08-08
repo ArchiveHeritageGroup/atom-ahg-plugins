@@ -1,4 +1,28 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .report-background-color-059669-impo-5d31 { background-color: #059669 !important; }
+  .report-background-color-0d6efd-impo-be65 { background-color: #0d6efd !important; }
+  .report-background-color-0dcaf0-impo-463a { background-color: #0dcaf0 !important; }
+  .report-background-color-17a2b8-impo-ddd4 { background-color: #17a2b8 !important; }
+  .report-background-color-198754-impo-8a96 { background-color: #198754 !important; }
+  .report-background-color-20c997-impo-53c6 { background-color: #20c997 !important; }
+  .report-background-color-2563eb-impo-1e08 { background-color: #2563eb !important; }
+  .report-background-color-28a745-impo-fb40 { background-color: #28a745 !important; }
+  .report-background-color-6610f2-impo-bbfa { background-color: #6610f2 !important; }
+  .report-background-color-6c757d-impo-2b77 { background-color: #6c757d !important; }
+  .report-background-color-6f42c1-impo-83ec { background-color: #6f42c1 !important; }
+  .report-background-color-7c3aed-impo-12ba { background-color: #7c3aed !important; }
+  .report-background-color-dc3545-impo-91aa { background-color: #dc3545 !important; }
+  .report-background-color-e83e8c-impo-a7b0 { background-color: #e83e8c !important; }
+  .report-background-color-fd7e14-impo-4b52 { background-color: #fd7e14 !important; }
+  .report-background-color-ffc107-impo-bb34 { background-color: #ffc107 !important; color: #000 !important; }
+  .report-color-000-important-1e25 { color: #000 !important; }
+  .report-height-8px-c984 { height:8px; }
+  .report-min-width-30px-f25d { min-width:30px; }
+  .report-min-width-85px-b0fb { min-width:85px; }
+</style>
 
 <?php
 use Illuminate\Database\Capsule\Manager as DB;
@@ -341,7 +365,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                <div class="card-header text-white report-background-color-6610f2-impo-bbfa" >
                     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>{{ __('Approval Workflow') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -356,7 +380,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasSpectrum)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                <div class="card-header text-white report-background-color-0d6efd-impo-be65" >
                     <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>{{ __('Collections Procedures Workflow') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -511,11 +535,11 @@ $canManage = $isAdmin || $isEditor;
                     @foreach (['excellent', 'good', 'fair', 'poor', 'critical'] as $grade)
                     <?php $count = $byGrade[$grade] ?? 0; $pct = round(($count / $totalAssessments) * 100); $color = $gradeColors[$grade]; $icon = $gradeIcons[$grade]; ?>
                     <div class="d-flex align-items-center mb-2">
-                        <span class="badge bg-{{ $color }} me-2" style="min-width:85px"><i class="fas {{ $icon }} me-1"></i>{{ ucfirst($grade) }}</span>
-                        <div class="progress flex-grow-1" style="height:8px">
-                            <div class="progress-bar bg-{{ $color }}" style="width:{{ $pct }}%"></div>
+                        <span class="badge bg-{{ $color }} me-2 report-min-width-85px-b0fb" ><i class="fas {{ $icon }} me-1"></i>{{ ucfirst($grade) }}</span>
+                        <div class="progress flex-grow-1 report-height-8px-c984" >
+                            <div class="progress-bar bg-{{ $color }}" data-ahg-style="width:{{ $pct }}%"></div>
                         </div>
-                        <span class="ms-2 small text-muted" style="min-width:30px">{{ $count }}</span>
+                        <span class="ms-2 small text-muted report-min-width-30px-f25d" >{{ $count }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -530,7 +554,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header bg-purple text-white" style="background-color: #6f42c1 !important;">
+                <div class="card-header bg-purple text-white report-background-color-6f42c1-impo-83ec" >
                     <h5 class="mb-0"><i class="fas fa-gavel me-2"></i>{{ __('Rights & Licensing') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -552,7 +576,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #e83e8c !important;">
+                <div class="card-header text-white report-background-color-e83e8c-impo-a7b0" >
                     <h5 class="mb-0"><i class="fas fa-lock me-2"></i>{{ __('Embargo Management') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -571,7 +595,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #20c997 !important;">
+                <div class="card-header text-white report-background-color-20c997-impo-53c6" >
                     <h5 class="mb-0"><i class="fas fa-book-open me-2"></i>{{ __('Rights Vocabularies') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -597,7 +621,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #fd7e14 !important;">
+                <div class="card-header text-white report-background-color-fd7e14-impo-4b52" >
                     <h5 class="mb-0"><i class="fas fa-building me-2"></i>{{ __('Vendor Management') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -619,7 +643,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasMarketplace)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #7c3aed !important;">
+                <div class="card-header text-white report-background-color-7c3aed-impo-12ba" >
                     <h5 class="mb-0"><i class="fas fa-store-alt me-2"></i>{{ __('Marketplace') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -634,7 +658,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #2563eb !important;">
+                <div class="card-header text-white report-background-color-2563eb-impo-1e08" >
                     <h5 class="mb-0"><i class="fas fa-users me-2"></i>{{ __('Sellers & Stores') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -649,7 +673,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #059669 !important;">
+                <div class="card-header text-white report-background-color-059669-impo-5d31" >
                     <h5 class="mb-0"><i class="fas fa-cash-register me-2"></i>{{ __('Sales & Payouts') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -665,7 +689,7 @@ $canManage = $isAdmin || $isEditor;
         @elseif ($hasCart)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #059669 !important;">
+                <div class="card-header text-white report-background-color-059669-impo-5d31" >
                     <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>{{ __('E-Commerce') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -683,7 +707,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasAccessRequest)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                <div class="card-header text-white report-background-color-0d6efd-impo-be65" >
                     <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>{{ __('Access Requests') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -698,7 +722,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasRic)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6f42c1 !important;">
+                <div class="card-header text-white report-background-color-6f42c1-impo-83ec" >
                     <h5 class="mb-0"><i class="fas fa-project-diagram me-2"></i>{{ __('Records in Contexts (RiC)') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -732,7 +756,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasDedupe)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #dc3545 !important;">
+                <div class="card-header text-white report-background-color-dc3545-impo-91aa" >
                     <h5 class="mb-0"><i class="fas fa-clone me-2"></i>{{ __('Duplicate Detection') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -749,7 +773,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasForms)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #198754 !important;">
+                <div class="card-header text-white report-background-color-198754-impo-8a96" >
                     <h5 class="mb-0"><i class="fas fa-edit me-2"></i>{{ __('Form Templates') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -765,7 +789,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasDoi)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0dcaf0 !important;">
+                <div class="card-header text-white report-background-color-0dcaf0-impo-463a" >
                     <h5 class="mb-0"><i class="fas fa-link me-2"></i>{{ __('DOI Management') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -786,7 +810,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasDataMigration)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #fd7e14 !important;">
+                <div class="card-header text-white report-background-color-fd7e14-impo-4b52" >
                     <h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>{{ __('Data Migration') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -802,7 +826,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasPreservation)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #20c997 !important;">
+                <div class="card-header text-white report-background-color-20c997-impo-53c6" >
                     <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>{{ __('TIFF to PDF Merge') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -816,7 +840,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasHeritage2)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6c757d !important;">
+                <div class="card-header text-white report-background-color-6c757d-impo-2b77" >
                     <h5 class="mb-0"><i class="fas fa-landmark me-2"></i>{{ __('Heritage Management') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -834,7 +858,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #17a2b8 !important;">
+                <div class="card-header text-white report-background-color-17a2b8-impo-ddd4" >
                     <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>{{ __('Digital Preservation') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -848,7 +872,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6610f2 !important;">
+                <div class="card-header text-white report-background-color-6610f2-impo-bbfa" >
                     <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>{{ __('Format Registry') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -861,7 +885,7 @@ $canManage = $isAdmin || $isEditor;
 
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #28a745 !important;">
+                <div class="card-header text-white report-background-color-28a745-impo-fb40" >
                     <h5 class="mb-0"><i class="fas fa-fingerprint me-2"></i>{{ __('Checksums & Integrity') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -879,7 +903,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasCDPA)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #198754 !important;">
+                <div class="card-header text-white report-background-color-198754-impo-8a96" >
                     <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>{{ __('CDPA Data Protection') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -895,7 +919,7 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasNAZ)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #0d6efd !important;">
+                <div class="card-header text-white report-background-color-0d6efd-impo-be65" >
                     <h5 class="mb-0"><i class="fas fa-landmark me-2"></i>{{ __('NAZ Archives') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
@@ -911,8 +935,8 @@ $canManage = $isAdmin || $isEditor;
         @if ($hasIPSAS)
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #ffc107 !important; color: #000 !important;">
-                    <h5 class="mb-0" style="color: #000 !important;"><i class="fas fa-coins me-2"></i>{{ __('IPSAS Heritage Assets') }}</h5>
+                <div class="card-header text-white report-background-color-ffc107-impo-bb34" >
+                    <h5 class="mb-0 report-color-000-important-1e25" ><i class="fas fa-coins me-2"></i>{{ __('IPSAS Heritage Assets') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item"><a href="{{ url_for(['module' => 'ipsas', 'action' => 'index']) }}"><i class="fas fa-tachometer-alt me-2 text-muted"></i>{{ __('IPSAS Dashboard') }}</a></li>
@@ -929,7 +953,7 @@ $canManage = $isAdmin || $isEditor;
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card h-100">
-                <div class="card-header text-white" style="background-color: #6c757d !important;">
+                <div class="card-header text-white report-background-color-6c757d-impo-2b77" >
                     <h5 class="mb-0"><i class="fas fa-monument me-2"></i>{{ __('NMMZ Monuments') }}</h5>
                 </div>
                 <ul class="list-group list-group-flush">

@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .imagea-display-none-cb45 { display:none; }
+  .imagea-max-height-70vh-b4aa { max-height:70vh; }
+</style>
 <?php
 /* #147 — 2D image AR viewer. */
 $n = sfConfig::get('csp_nonce', '');
@@ -17,7 +25,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
   <div class="row g-4 align-items-start">
     <div class="col-md-7">
       <div class="border rounded bg-light p-2 text-center">
-        <img id="ar-image" src="<?php echo esc_entities($item['image_url']) ?>" alt="<?php echo esc_entities($item['title']) ?>" class="img-fluid" style="max-height:70vh">
+        <img id="ar-image" src="<?php echo esc_entities($item['image_url']) ?>" alt="<?php echo esc_entities($item['title']) ?>" class="img-fluid imagea-max-height-70vh-b4aa" >
       </div>
     </div>
     <div class="col-md-5">
@@ -33,7 +41,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
   </div>
 
   <!-- DOM overlay shown while in the immersive AR session -->
-  <div id="ar-overlay" style="display:none">
+  <div id="ar-overlay" class="imagea-display-none-cb45">
     <button id="ar-exit" type="button">✕</button>
     <div id="ar-hint"><?php echo __('Move your phone to find a surface, then tap to place.') ?></div>
   </div>

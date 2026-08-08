@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .librar-height-20px-edb7 { height:20px; }
+  .librar-width-30-59c8 { width:30%; }
+  .librar-width-auto-d3b6 { width:auto; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Acquisition Budgets'); ?></h1>
@@ -27,7 +36,7 @@
   <!-- Fiscal year filter -->
   <form method="get" action="<?php echo url_for(['module' => 'acquisition', 'action' => 'budgets']); ?>" class="d-flex gap-2 align-items-center">
     <label for="fy_filter" class="form-label mb-0"><?php echo __('Fiscal year'); ?>:</label>
-    <select class="form-select form-select-sm" id="fy_filter" name="fiscal_year" style="width:auto;" onchange="this.form.submit()">
+    <select class="form-select form-select-sm" id="fy_filter" name="fiscal_year" class="librar-width-auto-d3b6" onchange="this.form.submit()">
       <?php
         $currentYear = (int) date('Y');
         $selectedYear = $sf_data->getRaw('fiscalYear') ?? $currentYear;
@@ -67,7 +76,7 @@
               <th class="text-end"><?php echo __('Encumbered'); ?></th>
               <th class="text-end"><?php echo __('Available'); ?></th>
               <th><?php echo __('Category'); ?></th>
-              <th style="width:30%"><?php echo __('Spend ratio'); ?></th>
+              <th class="librar-width-30-59c8"><?php echo __('Spend ratio'); ?></th>
             </tr>
           </thead>
           <tbody>
@@ -99,15 +108,15 @@
                 </td>
                 <td><?php echo esc_entities(ucfirst($budget->category ?? 'general')); ?></td>
                 <td>
-                  <div class="progress" style="height:20px;">
+                  <div class="progress librar-height-20px-edb7" >
                     <div class="progress-bar <?php echo $barColor; ?>" role="progressbar"
-                         style="width:<?php echo $spendPct; ?>%"
+                         data-ahg-style="width:<?php echo $spendPct; ?>%"
                          aria-valuenow="<?php echo $spendPct; ?>" aria-valuemin="0" aria-valuemax="100">
                       <?php echo $spendPct; ?>%
                     </div>
                     <?php if ($encPct > 0): ?>
                       <div class="progress-bar bg-info" role="progressbar"
-                           style="width:<?php echo $encPct; ?>%"
+                           data-ahg-style="width:<?php echo $encPct; ?>%"
                            aria-valuenow="<?php echo $encPct; ?>" aria-valuemin="0" aria-valuemax="100">
                       </div>
                     <?php endif; ?>

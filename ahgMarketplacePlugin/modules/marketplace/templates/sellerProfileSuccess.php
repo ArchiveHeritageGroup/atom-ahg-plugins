@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-object-fit-cover-3dc4 { object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Edit Seller Profile'); ?> - <?php echo __('Marketplace'); ?><?php end_slot(); ?>
 
@@ -42,7 +49,7 @@
               <label for="avatar" class="form-label"><?php echo __('Avatar'); ?></label>
               <?php if ($seller->avatar_path): ?>
                 <div class="mb-2">
-                  <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle" width="80" height="80" style="object-fit: cover;">
+                  <img src="<?php echo esc_entities($seller->avatar_path); ?>" alt="" class="rounded-circle" width="80" height="80" class="market-object-fit-cover-3dc4">
                 </div>
               <?php endif; ?>
               <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
@@ -52,7 +59,7 @@
               <label for="banner" class="form-label"><?php echo __('Banner Image'); ?></label>
               <?php if ($seller->banner_path): ?>
                 <div class="mb-2">
-                  <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="rounded" width="200" height="60" style="object-fit: cover;">
+                  <img src="<?php echo esc_entities($seller->banner_path); ?>" alt="" class="rounded" width="200" height="60" class="market-object-fit-cover-3dc4">
                 </div>
               <?php endif; ?>
               <input type="file" class="form-control" id="banner" name="banner" accept="image/*">

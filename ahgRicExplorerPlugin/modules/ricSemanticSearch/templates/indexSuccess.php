@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricexp-display-none-224b { display: none; }
+  .ricexp-display-none-font-size-12px-03c1 { display: none; font-size: 12px; }
+</style>
 
 <?php slot('title'); ?>
   <?php echo __('Semantic Search'); ?>
@@ -46,7 +54,7 @@
 </div>
 
 <!-- Results -->
-<div id="ric-results-container" class="card" style="display: none;">
+<div id="ric-results-container" class="card ricexp-display-none-224b" >
   <div class="card-header d-flex justify-content-between align-items-center">
     <span id="ric-result-count">0 results</span>
     <button type="button" id="ric-clear-btn" class="btn btn-sm btn-outline-secondary">
@@ -59,7 +67,7 @@
 </div>
 
 <!-- Loading -->
-<div id="ric-loading" class="text-center py-5" style="display: none;">
+<div id="ric-loading" class="text-center py-5 ricexp-display-none-224b" >
   <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
   <p class="mt-2 text-muted"><?php echo __('Searching...'); ?></p>
 </div>
@@ -103,7 +111,7 @@
   <button type="button" id="ric-sparql-toggle" class="btn btn-sm btn-link text-muted">
     <i class="fas fa-code me-1"></i><?php echo __('View SPARQL Query'); ?>
   </button>
-  <pre id="ric-sparql-code" class="bg-dark text-light p-3 rounded mt-2" style="display: none; font-size: 12px;"></pre>
+  <pre id="ric-sparql-code" class="bg-dark text-light p-3 rounded mt-2 ricexp-display-none-font-size-12px-03c1" ></pre>
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>

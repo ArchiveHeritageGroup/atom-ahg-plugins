@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-height-180px-object-fit-cove-b052 { height: 180px; object-fit: cover; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Images'); ?> - <?php echo esc_entities($listing->title); ?><?php end_slot(); ?>
 
@@ -69,7 +76,7 @@
           <div class="col-6 col-md-4 col-lg-3">
             <div class="card h-100">
               <div class="position-relative">
-                <img src="<?php echo esc_entities($img->file_path); ?>" alt="<?php echo esc_entities($img->caption ?? ''); ?>" class="card-img-top" style="height: 180px; object-fit: cover;">
+                <img src="<?php echo esc_entities($img->file_path); ?>" alt="<?php echo esc_entities($img->caption ?? ''); ?>" class="card-img-top market-height-180px-object-fit-cove-b052" >
                 <?php if (!empty($img->is_primary)): ?>
                   <span class="badge bg-success position-absolute top-0 start-0 m-2"><?php echo __('Primary'); ?></span>
                 <?php endif; ?>

@@ -1,4 +1,12 @@
 <?php use_helper('Date'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .loan-display-inline-3df0 { display: inline; }
+  .loan-max-height-200px-overflow-y--d98f { max-height: 200px; overflow-y: auto; }
+</style>
 
 <nav aria-label="breadcrumb" class="mb-3">
   <ol class="breadcrumb">
@@ -169,7 +177,7 @@
                     <?php endif; ?>
                   </td>
                   <td class="text-end">
-                    <form action="<?php echo url_for(['module' => 'loan', 'action' => 'removeObject', 'id' => $loan['id']]); ?>" method="post" style="display: inline;" onsubmit="return confirm('Remove this object from the loan?');">
+                    <form action="<?php echo url_for(['module' => 'loan', 'action' => 'removeObject', 'id' => $loan['id']]); ?>" method="post" class="loan-display-inline-3df0" onsubmit="return confirm('Remove this object from the loan?');">
                       <input type="hidden" name="object_id" value="<?php echo $obj['information_object_id']; ?>">
                       <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
                         <i class="fa-solid fa-times"></i>
@@ -399,7 +407,7 @@
             <input type="hidden" name="information_object_id" id="selectedObjectId">
             <input type="hidden" name="object_title" id="selectedObjectTitle">
             <input type="hidden" name="object_identifier" id="selectedObjectIdentifier">
-            <div id="searchResults" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+            <div id="searchResults" class="list-group mt-2 loan-max-height-200px-overflow-y--d98f" ></div>
           </div>
           <div class="mb-3">
             <label class="form-label">Insurance Value (ZAR)</label>

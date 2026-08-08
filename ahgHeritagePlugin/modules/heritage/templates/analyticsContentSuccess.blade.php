@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .herita-height-250px-d19b { height: 250px; }
+</style>
 
 @php
 // Helper to convert Symfony escaped arrays to plain arrays
@@ -224,11 +229,11 @@ $summary = [
         <div class="row">
             <div class="col-md-6">
                 <h6>By Level of Description</h6>
-                <canvas id="levelChart" style="height: 250px;"></canvas>
+                <canvas id="levelChart" class="herita-height-250px-d19b"></canvas>
             </div>
             <div class="col-md-6">
                 <h6>By Repository</h6>
-                <canvas id="repoChart" style="height: 250px;"></canvas>
+                <canvas id="repoChart" class="herita-height-250px-d19b"></canvas>
             </div>
         </div>
     </div>

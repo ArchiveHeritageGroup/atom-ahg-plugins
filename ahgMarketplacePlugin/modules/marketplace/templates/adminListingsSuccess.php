@@ -1,4 +1,14 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .market-width-40px-4792 { width: 40px; }
+  .market-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+  .market-width-40px-height-40px-objec-21e6 { width: 40px; height: 40px; object-fit: cover; }
+  .market-width-50px-ae1f { width: 50px; }
+</style>
 
 <?php slot('title'); ?><?php echo __('Manage Listings'); ?> - <?php echo __('Marketplace Admin'); ?><?php end_slot(); ?>
 
@@ -77,8 +87,8 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
           <tr>
-            <th style="width: 40px;"><?php echo __('ID'); ?></th>
-            <th style="width: 50px;"></th>
+            <th class="market-width-40px-4792"><?php echo __('ID'); ?></th>
+            <th class="market-width-50px-ae1f"></th>
             <th><?php echo __('Title'); ?></th>
             <th><?php echo __('Seller'); ?></th>
             <th><?php echo __('Sector'); ?></th>
@@ -95,9 +105,9 @@
               <td class="small text-muted"><?php echo (int) $listing->id; ?></td>
               <td>
                 <?php if ($listing->featured_image_path): ?>
-                  <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                  <img src="<?php echo esc_entities($listing->featured_image_path); ?>" alt="" class="rounded market-width-40px-height-40px-objec-21e6" >
                 <?php else: ?>
-                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center market-width-40px-height-40px-9a6a" >
                     <i class="fas fa-image text-muted small"></i>
                   </div>
                 <?php endif; ?>

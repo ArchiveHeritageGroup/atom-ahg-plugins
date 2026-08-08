@@ -1,4 +1,13 @@
 <?php decorate_with(sfConfig::get('sf_plugins_dir').'/ahgRegistryPlugin/modules/registry/templates/layout_registry'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .regist-font-size-0-65em-3bf9 { font-size: 0.65em; }
+  .regist-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+  .regist-width-40px-height-40px-objec-79db { width: 40px; height: 40px; object-fit: contain; }
+</style>
 
 <?php slot('title'); ?><?php echo htmlspecialchars($guide->title ?? '', ENT_QUOTES, 'UTF-8'); ?> - <?php echo __('Setup Guide'); ?><?php end_slot(); ?>
 
@@ -70,9 +79,9 @@
       <div class="card-body">
         <a href="<?php echo url_for(['module' => 'registry', 'action' => 'softwareView', 'slug' => $software->slug ?? '']); ?>" class="d-flex align-items-center text-decoration-none">
           <?php if (!empty($software->logo_path)): ?>
-            <img src="<?php echo htmlspecialchars($software->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2 flex-shrink-0" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="<?php echo htmlspecialchars($software->logo_path, ENT_QUOTES, 'UTF-8'); ?>" alt="" class="rounded me-2 flex-shrink-0 regist-width-40px-height-40px-objec-79db" >
           <?php else: ?>
-            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+            <div class="bg-light rounded me-2 d-flex align-items-center justify-content-center flex-shrink-0 regist-width-40px-height-40px-9a6a" >
               <i class="fas fa-box-open text-muted"></i>
             </div>
           <?php endif; ?>
@@ -100,7 +109,7 @@
           <a href="<?php echo url_for(['module' => 'registry', 'action' => 'setupGuideView', 'slug' => $software->slug ?? '', 'guide_slug' => $other->slug ?? '']); ?>" class="text-decoration-none">
             <?php echo htmlspecialchars($other->title ?? '', ENT_QUOTES, 'UTF-8'); ?>
           </a>
-          <span class="badge <?php echo $oCatClass; ?> ms-1" style="font-size: 0.65em;"><?php echo htmlspecialchars(ucfirst($oCat), ENT_QUOTES, 'UTF-8'); ?></span>
+          <span class="badge <?php echo $oCatClass; ?> ms-1 regist-font-size-0-65em-3bf9" ><?php echo htmlspecialchars(ucfirst($oCat), ENT_QUOTES, 'UTF-8'); ?></span>
           <?php if (!empty($other->view_count)): ?>
             <small class="text-muted d-block"><i class="fas fa-eye me-1"></i><?php echo number_format((int) $other->view_count); ?></small>
           <?php endif; ?>

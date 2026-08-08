@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .access-width-60px-height-6px-c021 { width: 60px; height: 6px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><?php echo __('Portfolio Valuation Report'); ?></h1>
@@ -95,8 +102,8 @@
                   <?php if ($totalValue > 0): ?>
                   <?php $pct = ($amount / $totalValue) * 100; ?>
                   <div class="d-flex align-items-center justify-content-end">
-                    <div class="progress me-2" style="width: 60px; height: 6px;">
-                      <div class="progress-bar bg-primary" style="width: <?php echo $pct; ?>%"></div>
+                    <div class="progress me-2 access-width-60px-height-6px-c021" >
+                      <div class="progress-bar bg-primary" data-ahg-style="width: <?php echo $pct; ?>%"></div>
                     </div>
                     <span class="small"><?php echo number_format($pct, 1); ?>%</span>
                   </div>

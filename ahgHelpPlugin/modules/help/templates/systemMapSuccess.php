@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .help-width-280px-min-width-280px-1c8f { width:280px;min-width:280px; }
+</style>
 <?php slot('title'); ?>
   <h1 class="h3"><i class="fas fa-diagram-project me-2"></i><?php echo __('System map'); ?></h1>
 <?php end_slot(); ?>
@@ -8,7 +15,7 @@
 
 <div class="d-flex gap-3">
   <div id="cy" class="border rounded flex-grow-1"></div>
-  <div id="sm-detail" class="border rounded p-3" style="width:280px;min-width:280px;">
+  <div id="sm-detail" class="border rounded p-3 help-width-280px-min-width-280px-1c8f" >
     <p class="text-muted mb-0"><?php echo __('Select a node to see details.'); ?></p>
   </div>
 </div>

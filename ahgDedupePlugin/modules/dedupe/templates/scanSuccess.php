@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .dedupe-display-none-224b { display: none; }
+</style>
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col">
@@ -41,7 +48,7 @@
                             </div>
                         </div>
 
-                        <div class="mb-4" id="repositorySelect" style="display: none;">
+                        <div class="mb-4" id="repositorySelect" class="dedupe-display-none-224b">
                             <label for="repository_id" class="form-label">Select Repository</label>
                             <select name="repository_id" id="repository_id" class="form-select">
                                 <option value="">-- Select Repository --</option>

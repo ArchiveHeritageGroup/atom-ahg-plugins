@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .ricexp-display-none-224b { display: none; }
+</style>
 <?php
 /**
  * RiC Search Widget Integration
@@ -56,7 +63,7 @@ $searchApiUrl = sfConfig::get('app_ric_search_api', 'http://localhost:5001/api')
     </div>
     <?php endif; ?>
     
-    <div id="ric-sidebar-results" class="ric-results" style="display: none;"></div>
+    <div id="ric-sidebar-results" class="ric-results ricexp-display-none-224b" ></div>
   </div>
   
   <div class="ric-widget-footer">

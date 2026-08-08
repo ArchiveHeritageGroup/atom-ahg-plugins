@@ -68,7 +68,7 @@
           <small>
             <?php echo htmlspecialchars($item->author_name ?? '', ENT_QUOTES, 'UTF-8'); ?>
             <?php if ($at): ?>
-              <span class="badge <?php echo $atClass; ?>" style="<?php echo 'user_group' === $at ? 'background-color:#6f42c1!important;' : ''; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $at)), ENT_QUOTES, 'UTF-8'); ?></span>
+              <span class="badge <?php echo $atClass; ?>" data-ahg-style="<?php echo 'user_group' === $at ? 'background-color:#6f42c1!important;' : ''; ?>"><?php echo htmlspecialchars(ucfirst(str_replace('_', ' ', $at)), ENT_QUOTES, 'UTF-8'); ?></span>
             <?php endif; ?>
           </small>
         </td>

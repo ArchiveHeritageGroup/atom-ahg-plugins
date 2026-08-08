@@ -1,4 +1,13 @@
 <?php /* Collections Procedures Phase C1 — collection-wide compliance dashboard (PSIS port) */ ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .workfl-max-width-14rem-072e { max-width: 14rem; }
+  .workfl-min-width-150px-684a { min-width: 150px; }
+  .workfl-min-width-3rem-text-align-ri-0eb3 { min-width: 3rem; text-align: right; }
+</style>
 <?php $n = sfConfig::get('csp_nonce', ''); $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
 <style <?php echo $nonceAttr; ?>>
   .spectrum-heatmap-row:hover { background: #f8f9fa; }
@@ -27,7 +36,7 @@
   </div>
 
   <form method="get" action="<?php echo url_for(['module' => 'workflow', 'action' => 'spectrumDashboard']) ?>" class="d-flex gap-2 align-items-end mb-3">
-    <div style="max-width: 14rem;">
+    <div class="workfl-max-width-14rem-072e">
       <label for="overdue_days" class="form-label small mb-1"><?php echo __('Overdue threshold (days)') ?></label>
       <input type="number" name="overdue_days" id="overdue_days" class="form-control form-control-sm" min="1" max="3650" value="<?php echo (int) $overdueDays ?>">
     </div>
@@ -46,7 +55,7 @@
               <th class="status-cell"><?php echo __('Completed') ?></th>
               <th class="status-cell"><?php echo __('Overdue') ?></th>
               <th class="status-cell"><?php echo __('Rejected') ?></th>
-              <th style="min-width: 150px;"><?php echo __('Completion') ?></th>
+              <th class="workfl-min-width-150px-684a"><?php echo __('Completion') ?></th>
             </tr>
           </thead>
           <tbody>
@@ -61,9 +70,9 @@
                 <td>
                   <div class="d-flex align-items-center gap-2">
                     <div class="progress flex-grow-1">
-                      <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $row['percent_completed'] ?>%" aria-valuenow="<?php echo $row['percent_completed'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                      <div class="progress-bar bg-success" role="progressbar" data-ahg-style="width: <?php echo $row['percent_completed'] ?>%" aria-valuenow="<?php echo $row['percent_completed'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
-                    <small class="text-muted" style="min-width: 3rem; text-align: right;"><?php echo $row['percent_completed'] ?>%</small>
+                    <small class="text-muted workfl-min-width-3rem-text-align-ri-0eb3" ><?php echo $row['percent_completed'] ?>%</small>
                   </div>
                 </td>
               </tr>

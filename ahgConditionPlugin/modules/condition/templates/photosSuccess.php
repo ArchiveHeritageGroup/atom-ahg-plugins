@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .condit-display-none-cb45 { display:none; }
+</style>
 <?php
 use_helper('Text');
 
@@ -244,9 +251,9 @@ $nonceVal  = $n ? preg_replace('/^nonce=/', '', $n) : '';
                     <i class="fas fa-spinner fa-spin fa-2x text-success mb-3 d-block"></i>
                     <p class="text-muted"><?php echo __('Analyzing image for damage...'); ?></p>
                 </div>
-                <div id="aiScanResult" style="display:none"></div>
+                <div id="aiScanResult" class="condit-display-none-cb45"></div>
             </div>
-            <div class="modal-footer" id="aiScanFooter" style="display:none">
+            <div class="modal-footer" id="aiScanFooter" class="condit-display-none-cb45">
                 <a href="#" id="aiScanViewFull" class="btn btn-primary btn-sm" target="_blank">
                     <i class="fas fa-eye me-1"></i><?php echo __('View Full Report'); ?>
                 </a>

@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .herita-white-space-pre-wrap-4f5f { white-space: pre-wrap; }
+  .herita-width-40px-height-40px-9a6a { width: 40px; height: 40px; }
+</style>
 <?php
 /**
  * Single Contribution Review.
@@ -67,7 +75,7 @@ $versions = $contribution['versions'] ?? [];
             <img src="<?php echo esc_specialchars($contributor['avatar_url']); ?>"
                  class="rounded-circle me-2" width="40" height="40" alt="">
             <?php else: ?>
-            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+            <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-2 herita-width-40px-height-40px-9a6a" >
                 <i class="fas fa-user text-primary"></i>
             </div>
             <?php endif; ?>
@@ -155,7 +163,7 @@ $versions = $contribution['versions'] ?? [];
         <h6 class="text-muted mb-3">Contribution Content</h6>
 
         <?php if ($type['code'] === 'transcription'): ?>
-        <div class="bg-light border rounded p-3 font-monospace" style="white-space: pre-wrap;">
+        <div class="bg-light border rounded p-3 font-monospace herita-white-space-pre-wrap-4f5f" >
 <?php echo esc_specialchars($content['text'] ?? ''); ?>
         </div>
         <?php if (!empty($content['notes'])): ?>
