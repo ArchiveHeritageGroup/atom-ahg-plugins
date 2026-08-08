@@ -1057,6 +1057,9 @@ class preservationActions extends AhgController
                         'parent_package_id' => ((int) $request->getParameter('parent_package_id')) ?: null,
                         'information_object_id' => ((int) $request->getParameter('information_object_id')) ?: null,
                         'created_by' => $this->getUser()->getAttribute('user_name', 'admin'),
+                        // Someone creating a package against a description means
+                        // that description's objects. See createPackage().
+                        'populate_from_information_object' => true,
                     ];
 
                     $newId = $this->service->createPackage($data);

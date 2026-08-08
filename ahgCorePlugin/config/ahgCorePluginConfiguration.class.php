@@ -108,6 +108,195 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
 
         // Make the CSP helpers available to every template. See AhgCspHelper.php.
         $this->dispatcher->connect('context.load_factories', ['ahgCorePluginConfiguration', 'loadCoreHelpers']);
+
+        // Apply data-ahg-style declarations. See injectStyleApplier().
+        $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectStyleApplier']);
+
+        // Attribution in the footer of pages an AHG plugin serves. See injectPluginCredit().
+        $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectPluginCredit']);
+    }
+
+    /**
+     * Attribution line in the footer, on pages an AHG plugin serves.
+     *
+     * Deliberately not site-wide. Someone who installs one plugin has not handed
+     * over their whole site, and stamping a credit onto AtoM's own browse and
+     * search pages would claim work that is not ours. The test is therefore the
+     * module: if the request is being served out of an ahg*Plugin, the credit
+     * appears; otherwise the page is left exactly as AtoM rendered it.
+     *
+     * Injected here rather than written into templates because the alternative is
+     * the same block copied into every template of every plugin, which drifts the
+     * moment one of them is edited.
+     *
+     * Markup carries no style attribute. An enforcing Content Security Policy
+     * drops those silently, so the styling comes from Bootstrap classes the theme
+     * already ships - see AhgCspHelper.php for the longer version of that story.
+     */
+    public static function injectPluginCredit($event, $content)
+    {
+        if (!is_string($content) || false === stripos($content, '</footer>')) {
+            return $content;
+        }
+
+        // Idempotent: response.filter_content can fire more than once per request.
+        if (false !== stripos($content, 'ahg-plugin-credit')) {
+            return $content;
+        }
+
+        if (!self::isAhgModule()) {
+            return $content;
+        }
+
+        $credit =
+            '<div class="ahg-plugin-credit text-center small text-muted py-2">'
+            .'Powered by: '
+            .'<a href="https://theahg.co.za/" rel="noopener noreferrer" target="_blank">'
+            .'The Archive and Heritage Digital Commons Group</a>'
+            .' and '
+            .'<a href="https://plainsailingisystems.co.za/" rel="noopener noreferrer" target="_blank">'
+            .'Plain Sailing Informations Systems</a>'
+            .'</div>';
+
+        // Last thing inside the footer, so it sits under whatever the theme put there.
+        $position = strripos($content, '</footer>');
+
+        if (false === $position) {
+            return $content;
+        }
+
+        return substr($content, 0, $position).$credit.substr($content, $position);
+    }
+
+    /**
+     * Is this page an AHG plugin's own screen, rather than one of AtoM's?
+     *
+     * Two tests, and both have to pass.
+     *
+     * First: the action actually executing must live inside an ahg*Plugin. Taken
+     * by reflection on the running action rather than from the module name,
+     * because a name alone proves nothing about who is serving it.
+     *
+     * Second: base AtoM must not ship a module of that name. ahgCorePlugin
+     * overrides informationobject, user and settings - all three are AtoM's own
+     * module names, so a name-only test put the credit on browse, on the login
+     * page and on the home page. Overriding one of AtoM's screens does not make it
+     * ours, and claiming it in the footer would be exactly the over-reach this
+     * check exists to prevent.
+     */
+    protected static function isAhgModule()
+    {
+        try {
+            if (!sfContext::hasInstance()) {
+                return false;
+            }
+
+            $context = sfContext::getInstance();
+            $module = $context->getModuleName();
+
+            if (!$module) {
+                return false;
+            }
+
+            // A module base AtoM also ships is AtoM's screen, override or not.
+            $appModuleDir = sfConfig::get('sf_app_module_dir');
+
+            if ($appModuleDir && is_dir($appModuleDir.'/'.$module)) {
+                return false;
+            }
+
+            $entry = $context->getActionStack()->getLastEntry();
+
+            if (!$entry) {
+                return false;
+            }
+
+            $file = (new ReflectionClass($entry->getActionInstance()))->getFileName();
+
+            return $file && preg_match('#[/\\\\]plugins[/\\\\]ahg[A-Za-z0-9]*Plugin[/\\\\]#', $file);
+        } catch (Throwable $e) {
+            // Attribution is never worth a failed request.
+            return false;
+        }
+    }
+
+    /**
+     * Apply the declarations carried in data-ahg-style.
+     *
+     * A style attribute is dropped outright by an enforcing Content Security
+     * Policy, and no nonce can rescue it - nonces apply to <style> and <script>
+     * elements. A fixed declaration can become a class, but a computed one cannot:
+     * a per-record width or an institution's own colour is not knowable when the
+     * stylesheet is written.
+     *
+     * CSP does not cover the CSSOM, so the declaration travels in a data attribute
+     * and is set as a property here. That is the one route that keeps a computed
+     * value working under the enforcing header.
+     *
+     * Injected once from core rather than as a script in each of the 178 templates
+     * that need it, so a template author writes data-ahg-style and nothing else.
+     */
+    public static function injectStyleApplier($event, $content)
+    {
+        if (!is_string($content) || false === stripos($content, 'data-ahg-style')) {
+            return $content;
+        }
+
+        if (false === stripos($content, '</body>')) {
+            return $content;
+        }
+
+        $nonce = sfConfig::get('csp_nonce', '');
+        $nonceAttr = $nonce ? ' '.preg_replace('/^nonce=/', 'nonce="', $nonce).'"' : '';
+
+        // setProperty rather than assigning cssText or the style attribute:
+        // writing the attribute back would be blocked by exactly the policy this
+        // exists to work with. Custom properties (--foo) are handled too, which
+        // is why the name is passed through untouched.
+        $js = <<<'APPLIER'
+(function () {
+  function apply(root) {
+    root.querySelectorAll('[data-ahg-style]').forEach(function (el) {
+      var decls = el.getAttribute('data-ahg-style');
+      if (!decls) { return; }
+      decls.split(';').forEach(function (decl) {
+        var i = decl.indexOf(':');
+        if (i < 1) { return; }
+        var name = decl.slice(0, i).trim();
+        var value = decl.slice(i + 1).trim();
+        if (!name || !value) { return; }
+        try { el.style.setProperty(name, value); } catch (e) {}
+      });
+      el.removeAttribute('data-ahg-style');
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { apply(document); });
+  } else {
+    apply(document);
+  }
+
+  // Content added after load - autocompletes, modals, AJAX panels - carries the
+  // same attributes, so watch for it rather than leaving those elements bare.
+  if (window.MutationObserver) {
+    new MutationObserver(function (records) {
+      records.forEach(function (r) {
+        r.addedNodes.forEach(function (n) {
+          if (1 !== n.nodeType) { return; }
+          if (n.hasAttribute && n.hasAttribute('data-ahg-style')) { apply(n.parentNode || document); }
+          else if (n.querySelector && n.querySelector('[data-ahg-style]')) { apply(n); }
+        });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  }
+})();
+APPLIER;
+
+        $script = "\n<script".$nonceAttr.">".$js."</script>\n";
+        $pos = stripos($content, '</body>');
+
+        return substr($content, 0, $pos).$script.substr($content, $pos);
     }
 
     /**
