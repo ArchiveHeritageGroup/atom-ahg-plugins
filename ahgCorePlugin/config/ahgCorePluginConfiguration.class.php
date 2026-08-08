@@ -105,6 +105,28 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
 
         // Render whatever plugins have contributed to AhgNav. See injectNavEntries().
         $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectNavEntries']);
+
+        // Make the CSP helpers available to every template. See AhgCspHelper.php.
+        $this->dispatcher->connect('context.load_factories', ['ahgCorePluginConfiguration', 'loadCoreHelpers']);
+    }
+
+    /**
+     * Load ahgCorePlugin's template helpers.
+     *
+     * AhgCsp gives templates ahg_style_block() and ahg_script_block(), which emit
+     * inline CSS and JavaScript carrying the CSP nonce. Loaded centrally so that
+     * writing a correct inline style is the path of least resistance: every
+     * instance of this being got wrong so far has been an author not knowing the
+     * rule rather than disagreeing with it, and an unnonced <style> fails
+     * silently, which is the worst way for a convention to be enforced.
+     */
+    public static function loadCoreHelpers($event)
+    {
+        try {
+            $event->getSubject()->getConfiguration()->loadHelpers(['AhgCsp']);
+        } catch (Throwable $e) {
+            // A missing helper must not take down the request.
+        }
     }
 
     /**
