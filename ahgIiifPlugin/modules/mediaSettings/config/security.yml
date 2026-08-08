@@ -1,0 +1,7 @@
+# Media processing configuration and the derivative queue: an administrator
+# function throughout. With no file here it was anonymous, which meant an
+# unauthenticated caller could read the configuration and empty or run the
+# processing queue.
+all:
+  is_secure:   true
+  credentials: administrator

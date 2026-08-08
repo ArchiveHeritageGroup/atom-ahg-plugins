@@ -268,7 +268,7 @@ if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()
                     'description' => $row->description,
                 ];
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             // Table might not exist
         }
 

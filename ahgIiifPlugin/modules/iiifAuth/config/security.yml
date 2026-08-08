@@ -1,0 +1,26 @@
+# The IIIF Authentication API. These endpoints exist to be called by an external
+# viewer before it holds any session, so they must stay reachable - that is the
+# point of the specification, not an oversight.
+#
+# Stated explicitly because there was no file here, and an absent security.yml
+# and a deliberately public one look identical from the outside.
+accessService:  { is_secure: false }
+accessToken:    { is_secure: false }
+token:          { is_secure: false }
+probe:          { is_secure: false }
+probePreflight: { is_secure: false }
+check:          { is_secure: false }
+login:          { is_secure: false }
+logout:         { is_secure: false }
+confirm:        { is_secure: false }
+
+# Marking an object protected or unprotected changes who may see it.
+protect:   { is_secure: true, credentials: [[ editor, administrator ]] }
+unprotect: { is_secure: true, credentials: [[ editor, administrator ]] }
+
+# Cantaloupe reachability is an operator diagnostic.
+cantaloupeCheck: { is_secure: true, credentials: administrator }
+
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

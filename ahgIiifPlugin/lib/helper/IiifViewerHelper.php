@@ -1,5 +1,32 @@
 <?php
 
+if (!function_exists('iiif_table_exists')) {
+    /**
+     * Is a table owned by another plugin present?
+     *
+     * This helper reads tables belonging to optional plugins - redactions from
+     * ahgPrivacyPlugin among them - and a missing optional plugin is an ordinary
+     * state rather than an exceptional one. Checked rather than caught, and
+     * cached per request, because a viewer page can ask repeatedly.
+     */
+    function iiif_table_exists(string $table): bool
+    {
+        static $seen = [];
+
+        if (isset($seen[$table])) {
+            return $seen[$table];
+        }
+
+        try {
+            return $seen[$table] = \Illuminate\Database\Capsule\Manager::schema()->hasTable($table);
+        } catch (\Throwable $e) {
+            return $seen[$table] = false;
+        }
+    }
+}
+
+
+
 /**
  * IIIF Viewer Helper for AtoM Integration
  *
@@ -486,7 +513,10 @@ function get_digital_object_url($digitalObject)
     // Check if it's a PDF and has redactions
     if ($objectId && stripos($mimeType, 'pdf') !== false) {
         // Check if redactions exist for this object
-        $hasRedactions = \Illuminate\Database\Capsule\Manager::table('privacy_visual_redaction')
+        // ahgPrivacyPlugin owns this table and is optional, so its absence must
+        // mean "no redactions" rather than a fatal on the PDF viewer path.
+        $hasRedactions = iiif_table_exists('privacy_visual_redaction')
+            && \Illuminate\Database\Capsule\Manager::table('privacy_visual_redaction')
             ->where('object_id', $objectId)
             ->exists();
         

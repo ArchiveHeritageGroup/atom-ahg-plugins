@@ -93,7 +93,7 @@ class iiifContentActions extends sfActions
         try {
             $result = $this->getContentStateService()->encode($state, $options);
             return $this->renderJson($result);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return $this->renderJson([
                 'error' => 'Failed to encode content state: ' . $e->getMessage(),
             ], 500);

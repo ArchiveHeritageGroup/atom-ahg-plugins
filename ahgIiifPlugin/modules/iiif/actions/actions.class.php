@@ -437,7 +437,7 @@ class iiifActions extends AhgController
                 $isProtected = true;
                 $manifest['service'] = $accessCheck['service'];
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Auth check failure is non-fatal — treat as public
         }
 
@@ -454,7 +454,7 @@ class iiifActions extends AhgController
         $manifestJson = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         try {
             $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, $totalPageCount, $tier);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Cache write failure is non-fatal
         }
 
@@ -573,7 +573,7 @@ class iiifActions extends AhgController
         $manifestJson = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         try {
             $viewerService->setCachedManifest((int) $object['id'], $culture, $manifestJson, null, $tier);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Cache write failure is non-fatal
         }
 
@@ -768,7 +768,7 @@ class iiifActions extends AhgController
         try {
             $vs = new \AhgIiif\Services\IiifViewerService();
             $vs->invalidateManifestCache((int) $data['object_id']);
-        } catch (\Exception $e) { /* non-fatal */ }
+        } catch (\Throwable $e) { /* non-fatal */ }
 
         return $this->renderText(json_encode([
             'success' => true,
@@ -866,7 +866,7 @@ class iiifActions extends AhgController
         try {
             $vs = new \AhgIiif\Services\IiifViewerService();
             $vs->invalidateManifestCache((int) $existing->object_id);
-        } catch (\Exception $e) { /* non-fatal */ }
+        } catch (\Throwable $e) { /* non-fatal */ }
 
         return $this->renderText(json_encode(['success' => true]));
     }
@@ -911,7 +911,7 @@ class iiifActions extends AhgController
         try {
             $vs = new \AhgIiif\Services\IiifViewerService();
             $vs->invalidateManifestCache((int) $objectId);
-        } catch (\Exception $e) { /* non-fatal */ }
+        } catch (\Throwable $e) { /* non-fatal */ }
 
         return $this->renderText(json_encode(['success' => true]));
     }

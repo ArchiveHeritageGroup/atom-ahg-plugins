@@ -1,0 +1,34 @@
+# Secure by default, with the read-only IIIF surface opted out explicitly.
+#
+# There was no file here at all, so symfony's default applied and every action
+# was anonymous - including the AI extract review and approval actions and the
+# validation dashboard, which are staff functions. The absence of a file is not
+# visible in review, which is why this states the whole picture rather than only
+# the exceptions.
+#
+# The public entries are deliberate: a IIIF manifest that requires a session is
+# not a IIIF manifest, and interoperability with external viewers depends on
+# these being fetchable. Access control for them lives in the actions, which
+# serve a reference derivative to anonymous callers and never a master.
+manifest:          { is_secure: false }
+manifestById:      { is_secure: false }
+manifestV:         { is_secure: false }
+viewer:            { is_secure: false }
+compare:           { is_secure: false }
+search:            { is_secure: false }
+autocomplete:      { is_secure: false }
+annotationsList:   { is_secure: false }
+activity:          { is_secure: false }
+activityPage:      { is_secure: false }
+aiCanvases:        { is_secure: false }
+ocrExport:         { is_secure: false }
+
+# Writing annotations is not a public act.
+annotationsCreate: { is_secure: true, credentials: [[ editor, administrator ]] }
+annotationsUpdate: { is_secure: true, credentials: [[ editor, administrator ]] }
+annotationsModify: { is_secure: true, credentials: [[ editor, administrator ]] }
+annotationsDelete: { is_secure: true, credentials: [[ editor, administrator ]] }
+
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

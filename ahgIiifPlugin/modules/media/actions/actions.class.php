@@ -168,7 +168,7 @@ class mediaActions extends AhgController
             && \AtomFramework\Core\Security\EncryptionService::isEncryptedFile($fullPath)) {
             try {
                 return \AtomFramework\Core\Security\FileEncryptionService::decryptToTemp($fullPath);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 error_log("Media decrypt failed for {$fullPath}: " . $e->getMessage());
 
                 return null;
@@ -384,7 +384,7 @@ class mediaActions extends AhgController
                 ->toArray();
 
             echo json_encode(['snippets' => $snippets]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             echo json_encode(['error' => $e->getMessage()]);
         }
 
@@ -419,7 +419,7 @@ class mediaActions extends AhgController
                     })
                     ->toArray();
                 echo json_encode(['snippets' => $snippets]);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 echo json_encode(['error' => $e->getMessage()]);
             }
 
@@ -460,7 +460,7 @@ class mediaActions extends AhgController
             ]);
 
             echo json_encode(['success' => true, 'id' => $id]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             echo json_encode(['error' => $e->getMessage()]);
         }
 
@@ -493,7 +493,7 @@ class mediaActions extends AhgController
             }
 
             echo json_encode(['success' => true]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             echo json_encode(['error' => $e->getMessage()]);
         }
 
@@ -586,7 +586,7 @@ class mediaActions extends AhgController
             );
 
             echo json_encode(['success' => true, 'metadata' => $meta]);
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             echo json_encode(['error' => $e->getMessage()]);
         }
 
@@ -708,7 +708,7 @@ PHP;
                     $stmt->execute([$id]);
                 }
                 echo json_encode(['success' => true]);
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 echo json_encode(['error' => $e->getMessage()]);
             }
 
@@ -763,7 +763,7 @@ PHP;
                 header('Content-Disposition: attachment; filename="transcription-' . $id . '.txt"');
                 echo $transcription->full_text ?? '';
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setContentType('application/json');
             echo json_encode(['error' => $e->getMessage()]);
         }
@@ -795,7 +795,7 @@ PHP;
             } else {
                 echo json_encode(['error' => 'No metadata found']);
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             echo json_encode(['error' => $e->getMessage()]);
         }
 

@@ -298,7 +298,7 @@ class iiifCollectionActions extends AhgController
             $this->getResponse()->setHttpHeader('Access-Control-Allow-Origin', '*');
             
             return $this->renderText(json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->getResponse()->setStatusCode(500);
             return $this->renderText(json_encode(['error' => $e->getMessage()]));
         }

@@ -259,6 +259,12 @@ class IiifAnnotationService
      */
     public function syncResearchAnnotation(int $researchAnnotationId, ?int $iiifAnnotationId = null): int
     {
+        // ahgResearchPlugin owns this table and is not a declared dependency, so
+        // syncing has nothing to sync from when it is absent.
+        if (!self::tableExists('research_annotation')) {
+            return 0;
+        }
+
         $ra = DB::table('research_annotation')
             ->where('id', $researchAnnotationId)
             ->first();
@@ -370,4 +376,23 @@ class IiifAnnotationService
 
         return $data;
     }
+
+    /**
+     * Is a table owned by another plugin present? Cached per request.
+     */
+    private static function tableExists(string $table): bool
+    {
+        static $seen = [];
+
+        if (isset($seen[$table])) {
+            return $seen[$table];
+        }
+
+        try {
+            return $seen[$table] = DB::schema()->hasTable($table);
+        } catch (\Throwable $e) {
+            return $seen[$table] = false;
+        }
+    }
+
 }

@@ -1,0 +1,9 @@
+# Content state encoding and decoding for the IIIF Content State API. A viewer
+# hands these a state token when opening a link, so they precede any session.
+encode: { is_secure: false }
+decode: { is_secure: false }
+state:  { is_secure: false }
+
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
