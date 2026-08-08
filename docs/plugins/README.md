@@ -91,6 +91,23 @@ keeps their own list; no particular permission is needed beyond being signed in.
 
 [Download 2.0.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgFavoritesPlugin-v2.0.0) - 3 tables
 
+### IIIF, with a viewer of your choice
+
+IIIF manifests, collections, annotations, OCR export and media streaming.
+Manifests are publicly fetchable so external viewers can use them, while the media
+processing queue and validation tools require an editor or administrator.
+
+The viewer is a separate, optional install. Take one, both or neither:
+
+- **[Seadragon 1.0.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgSeadragonPlugin-v1.0.0)** - OpenSeadragon, deep zoom for single images
+- **[Mirador 1.0.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.0.0)** - side-by-side comparison across collections
+
+Each registers itself with the IIIF renderer registry rather than being named by
+the theme, so installing one does not require the other and removing one leaves
+the rest working.
+
+[Download IIIF 1.0.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgIiifPlugin-v1.0.2)
+
 ### Feedback
 
 Collect and manage feedback from users against archival descriptions. Readers can
