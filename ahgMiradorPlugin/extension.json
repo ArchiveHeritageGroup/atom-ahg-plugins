@@ -1,16 +1,33 @@
 {
   "name": "AHG Mirador Viewer",
   "machine_name": "ahgMiradorPlugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Contributes the Mirador IIIF image viewer as an independently installable plugin. Registers a renderer with ahgIiifPlugin's RendererRegistry; install or disable it to choose the viewer.",
   "author": "The Archive and Heritage Group (Pty) Ltd",
   "license": "AGPL-3.0-or-later",
-  "requires": { "atom": ">=2.10", "php": ">=8.1" },
-  "dependencies": ["ahgIiifPlugin"],
+  "requires": {
+    "atom": ">=2.10",
+    "php": ">=8.1"
+  },
+  "dependencies": [
+    "ahgIiifPlugin"
+  ],
   "optional_dependencies": [],
-  "theme_support": { "required": false },
-  "distribution": { "tier": "community" },
-  "provides_renderers": [{ "name": "mirador-plugin", "priority": 18, "mime": "image/*" }],
-  "install": { "database": false },
+  "theme_support": {
+    "required": false
+  },
+  "distribution": {
+    "tier": "community"
+  },
+  "provides_renderers": [
+    {
+      "name": "mirador-plugin",
+      "priority": 18,
+      "mime": "image/*"
+    }
+  ],
+  "install": {
+    "database": false
+  },
   "tables": []
 }
