@@ -106,20 +106,29 @@ Each registers itself with the IIIF renderer registry rather than being named by
 the theme, so installing one does not require the other and removing one leaves
 the rest working.
 
-**If you want tiled deep zoom, you need an image server.** Cantaloupe is the usual
-choice, and it is a separate install. Manifests, the viewer and OCR export work
-without one; tiled images do not.
+**Tiled deep zoom needs an image server, and that stays yours.** The plugins do not
+install one, do not configure one, and do not assume you are without one. Manifests,
+the viewer and OCR export work as they are; tiling is what an image server adds. If
+you already run Cantaloupe, IIPImage or anything else that speaks IIIF, point it at
+your uploads and carry on.
 
-More importantly, an image server reads files straight off disk and knows nothing
-about AtoM's access control. Left unconfigured, every master under `uploads/r/`
-becomes retrievable through the IIIF endpoint by anyone who can form the path, and
-those paths appear in every manifest. The nginx rules protecting `/uploads/r/` do
-not help: it is a different route to the same bytes.
+Whichever server you use, one thing has to be right. It reads files straight off
+disk and knows nothing about AtoM's access control, so left open, every master under
+`uploads/r/` is retrievable through the IIIF endpoint by anyone who can form the
+path, and those paths appear in every manifest. The nginx rules protecting
+`/uploads/r/` do not help: it is a different route to the same bytes.
 
-The bundle ships `config/cantaloupe/delegates.rb`, the authorisation hook that
-closes this, together with a README covering the three ways it can appear
-configured while doing nothing. Read that before putting an image server in front
-of a live collection.
+For Cantaloupe, the authorisation hook that closes this ships in the bundle at
+`config/cantaloupe/delegates.rb`, with a README covering three ways it can appear
+configured while doing nothing at all. For anything else, the endpoint your check
+should call is documented in the guides below.
+
+Two standalone guides, both optional, neither required to install a plugin:
+
+- **[Setting up an IIIF image server](../infrastructure/iiif-image-server.md)** -
+  requirements, Cantaloupe configuration, authorisation, and how to prove it refuses
+- **[nginx](../infrastructure/nginx.md)** - proxying the image server, serving
+  derivatives directly, the `ProtectSystem=full` trap, and CSP
 
 [Download IIIF 1.0.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgIiifPlugin-v1.0.2)
 

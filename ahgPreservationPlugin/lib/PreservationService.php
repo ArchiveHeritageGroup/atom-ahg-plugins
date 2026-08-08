@@ -2590,6 +2590,50 @@ class PreservationService
         // Log creation event
         $this->logPackageEvent($packageId, 'creation', 'Package created', 'success');
 
+        // Populate from the linked description, when the caller asked for it.
+        //
+        // A package created against an archival description recorded the link and
+        // did nothing with it, so it arrived empty and the operator was sent to
+        // search by title or file name for objects the row already pointed at. The
+        // Build controls are hidden while object_count is 0, so the package simply
+        // sat in Draft with no visible way forward.
+        //
+        // Opt-in rather than automatic on any information_object_id, because
+        // convertSipToAip() also passes one and then copies the SIP's own objects
+        // across. An AIP must mirror its SIP; pulling in the whole subtree there
+        // would quietly change what was preserved.
+        if (!empty($data['populate_from_information_object']) && !empty($data['information_object_id'])) {
+            try {
+                $result = $this->addObjectsFromCollection($packageId, (int) $data['information_object_id']);
+
+                if (!empty($result['added'])) {
+                    $this->logPackageEvent(
+                        $packageId,
+                        'modification',
+                        sprintf('Added %d master object(s) from the linked description', (int) $result['added']),
+                        'success'
+                    );
+                } else {
+                    // Worth a record either way: "nothing was added" and "nothing
+                    // was there" look identical on the packages list otherwise.
+                    $this->logPackageEvent(
+                        $packageId,
+                        'modification',
+                        $result['error'] ?? 'No master digital objects found under the linked description',
+                        'success'
+                    );
+                }
+            } catch (Exception $e) {
+                // A package that exists and is empty beats no package at all.
+                $this->logPackageEvent(
+                    $packageId,
+                    'modification',
+                    'Could not add objects from the linked description: '.$e->getMessage(),
+                    'fail'
+                );
+            }
+        }
+
         return $packageId;
     }
 
