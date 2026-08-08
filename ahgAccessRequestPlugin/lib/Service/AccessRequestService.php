@@ -320,13 +320,17 @@ class AccessRequestService
             } elseif ($request->request_type === 'researcher' && $request->scope_type === 'renewal') {
                 // Handle researcher renewal
                 $newExpiry = $expiresAt ?: date('Y-m-d', strtotime('+1 year'));
-                DB::table('research_researcher')
-                    ->where('user_id', $request->user_id)
-                    ->update([
-                        'status' => 'approved',
-                        'expires_at' => $newExpiry,
-                        'updated_at' => date('Y-m-d H:i:s'),
-                    ]);
+                // Only when ahgResearchPlugin is installed; a renewal has nowhere
+                // to be recorded otherwise, and this is not a declared dependency.
+                if (self::hasTable('research_researcher')) {
+                    DB::table('research_researcher')
+                        ->where('user_id', $request->user_id)
+                        ->update([
+                            'status' => 'approved',
+                            'expires_at' => $newExpiry,
+                            'updated_at' => date('Y-m-d H:i:s'),
+                        ]);
+                }
             } else {
                 // Grant object access
                 $scopes = DB::table('access_request_scope')
@@ -742,6 +746,13 @@ class AccessRequestService
             return self::isApprover($userId);
         }
 
+        // ahgSecurityClearancePlugin is a declared dependency, so this should be
+        // present - but denying is the safe answer if it is not, and throwing
+        // from an approval check is not.
+        if (!self::hasTable('security_classification')) {
+            return false;
+        }
+
         $classification = DB::table('security_classification')
             ->where('id', $classificationId)
             ->first();
@@ -1103,6 +1114,13 @@ class AccessRequestService
             }
             if ($action === 'delete') $changedFields = array_keys($oldValues);
             $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x', mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0x0fff)|0x4000, mt_rand(0,0x3fff)|0x8000, mt_rand(0,0xffff), mt_rand(0,0xffff), mt_rand(0,0xffff));
+            // ahgAuditTrailPlugin is optional; without it there is nowhere to
+            // write an audit entry, and failing to log must not fail the action
+            // that was being logged.
+            if (!self::hasTable('ahg_audit_log')) {
+                return;
+            }
+
             DB::table('ahg_audit_log')->insert([
                 'uuid' => $uuid, 'user_id' => $userId, 'username' => $username,
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
@@ -1119,4 +1137,37 @@ class AccessRequestService
             self::getLogger()->error("AUDIT ERROR: " . $e->getMessage());
         }
     }
+
+    /**
+     * Is a table belonging to another plugin present?
+     *
+     * This service reads four tables it does not own. Two belong to
+     * ahgSecurityClearancePlugin, which is a declared dependency and so is fair
+     * game. The other two are not: research_researcher belongs to
+     * ahgResearchPlugin, which access request neither declares nor needs, and
+     * ahg_audit_log belongs to ahgAuditTrailPlugin, which is optional everywhere.
+     *
+     * Without this an install lacking either plugin threw from inside a service,
+     * which returns an empty body rather than an error anyone can act on. The
+     * enclosing try/catch looked like protection and was not: it swallowed the
+     * failure and returned null, so approving a request appeared to do nothing.
+     *
+     * Checked rather than caught, and cached per request, because a missing
+     * optional plugin is an ordinary state rather than an exceptional one.
+     */
+    private static function hasTable(string $table): bool
+    {
+        static $seen = [];
+
+        if (isset($seen[$table])) {
+            return $seen[$table];
+        }
+
+        try {
+            return $seen[$table] = DB::schema()->hasTable($table);
+        } catch (\Throwable $e) {
+            return $seen[$table] = false;
+        }
+    }
+
 }

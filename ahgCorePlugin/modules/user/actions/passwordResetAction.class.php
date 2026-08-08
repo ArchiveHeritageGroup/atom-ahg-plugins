@@ -3,16 +3,30 @@ use AtomFramework\Http\Controllers\AhgController;
 use AtomFramework\Services\Write\WriteServiceFactory;
 use Illuminate\Database\Capsule\Manager as DB;
 
-// Load PHPMailer via framework autoloader or vendor path
-$frameworkAutoload = sfConfig::get('sf_root_dir') . '/atom-framework/vendor/autoload.php';
-if (file_exists($frameworkAutoload)) {
-    require_once $frameworkAutoload;
-} else {
-    // Fallback to vendor directory
-    $vendorPath = sfConfig::get('sf_root_dir') . '/vendor/phpmailer/phpmailer/src';
-    require_once $vendorPath . '/PHPMailer.php';
-    require_once $vendorPath . '/SMTP.php';
-    require_once $vendorPath . '/Exception.php';
+// PHPMailer is normally already available: the framework bootstrap loads its own
+// composer autoloader, and PHPMailer is one of its dependencies. So ask before
+// requiring anything.
+//
+// This used to require atom-framework/vendor/autoload.php outright and, failing
+// that, three files from <root>/vendor/phpmailer/phpmailer/src. On an install
+// from a plugin bundle the framework lives at plugins/ahgRuntimePlugin, so the
+// first path does not exist and the fallback requires files that are not there
+// either - a fatal on a page any signed-out user can reach, which is how password
+// reset was failing.
+if (!class_exists(\PHPMailer\PHPMailer\PHPMailer::class, true)) {
+    $root = sfConfig::get('sf_root_dir');
+
+    foreach ([
+        $root.'/plugins/ahgRuntimePlugin/vendor/autoload.php',
+        $root.'/atom-framework/vendor/autoload.php',
+        $root.'/vendor/autoload.php',
+    ] as $autoload) {
+        if (is_file($autoload)) {
+            require_once $autoload;
+
+            break;
+        }
+    }
 }
 
 use PHPMailer\PHPMailer\Exception;

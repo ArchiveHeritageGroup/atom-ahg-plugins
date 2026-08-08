@@ -45,10 +45,23 @@ class AhgDb
             return false;
         }
 
-        // Load framework autoloader if available
-        $frameworkAutoload = $rootPath . '/atom-framework/vendor/autoload.php';
-        if (file_exists($frameworkAutoload) && !class_exists(Capsule::class)) {
-            require_once $frameworkAutoload;
+        // Load the framework autoloader if the Capsule is not already available.
+        //
+        // Both layouts are tried: atom-framework/ from a checkout, and
+        // plugins/ahgRuntimePlugin/ from a plugin bundle. Only the first was
+        // looked for, so on a packaged install this silently did nothing and the
+        // caller went on to use a Capsule that had never been configured.
+        if (!class_exists(Capsule::class)) {
+            foreach ([
+                $rootPath.'/plugins/ahgRuntimePlugin/vendor/autoload.php',
+                $rootPath.'/atom-framework/vendor/autoload.php',
+            ] as $autoload) {
+                if (file_exists($autoload)) {
+                    require_once $autoload;
+
+                    break;
+                }
+            }
         }
 
         // Load database config
