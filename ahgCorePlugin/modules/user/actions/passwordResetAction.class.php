@@ -86,10 +86,21 @@ class UserPasswordResetAction extends AhgController
                         $expiry
                     );
 
-                    // Send email
-                    $this->sendResetEmail($user, $token);
-
-                    $this->getUser()->setFlash('notice', $this->context->i18n->__('Password reset instructions have been sent to your email.'));
+                    // Tell the user what actually happened.
+                    //
+                    // The send used to be fire-and-forget, with the success
+                    // message printed unconditionally on the next line. With SMTP
+                    // disabled - which is the shipped default, smtp_enabled 0 and
+                    // no host - the token was stored, nothing was sent, and the
+                    // user was told to go and check their inbox. Nothing appeared
+                    // in the log either.
+                    if ('1' !== (string) $this->getEmailSetting('smtp_enabled', '0')) {
+                        $this->getUser()->setFlash('error', $this->context->i18n->__('Email is not configured on this site, so the reset message could not be sent. Please contact an administrator.'));
+                    } elseif ($this->sendResetEmail($user, $token)) {
+                        $this->getUser()->setFlash('notice', $this->context->i18n->__('Password reset instructions have been sent to your email.'));
+                    } else {
+                        $this->getUser()->setFlash('error', $this->context->i18n->__('The reset message could not be sent. Please contact an administrator.'));
+                    }
                 } else {
                     // Don't reveal if email exists (security best practice)
                     $this->getUser()->setFlash('notice', $this->context->i18n->__('If that email exists, reset instructions have been sent.'));
@@ -129,7 +140,10 @@ class UserPasswordResetAction extends AhgController
         return $setting ? $setting->setting_value : $default;
     }
 
-    protected function sendResetEmail($user, $token)
+    /**
+     * @return bool whether the message was actually handed to the mail server
+     */
+    protected function sendResetEmail($user, $token): bool
     {
         $mail = new PHPMailer(true);
 
@@ -177,8 +191,17 @@ class UserPasswordResetAction extends AhgController
 
             $mail->send();
 
-        } catch (Exception $e) {
-            error_log("Password reset email could not be sent. Error: " . $mail->ErrorInfo);
+            return true;
+        } catch (\Throwable $e) {
+            // Reported, not swallowed. This used to catch and log, and the caller
+            // ignored the return value and told the user the mail was on its way
+            // regardless - so a misconfigured or unreachable SMTP server was
+            // indistinguishable from success, for the user and for us. Throwable
+            // rather than Exception because a PHP 8 Error escaped the old catch
+            // entirely.
+            error_log('Password reset email could not be sent: '.($mail->ErrorInfo ?: $e->getMessage()));
+
+            return false;
         }
     }
 }

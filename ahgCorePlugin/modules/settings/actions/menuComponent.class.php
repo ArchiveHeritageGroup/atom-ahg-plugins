@@ -18,6 +18,7 @@ class SettingsMenuComponent extends sfComponent
             ['label' => $i18n->__('Default page elements'), 'action' => 'pageElements'],
             ['label' => $i18n->__('Default template'), 'action' => 'template'],
             ['label' => $i18n->__('Diacritics'), 'action' => 'diacritics'],
+            ['label' => $i18n->__('Email'), 'action' => 'email'],
             ['label' => $i18n->__('Digital object derivatives'), 'action' => 'digitalObjectDerivatives'],
             ['label' => $i18n->__('DIP upload'), 'action' => 'dipUpload'],
             ['label' => $i18n->__('Finding Aid'), 'action' => 'findingAid'],
