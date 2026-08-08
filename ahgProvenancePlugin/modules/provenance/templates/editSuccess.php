@@ -1,4 +1,11 @@
 <?php use_helper('Date') ?>
+<?php // Panels shown or hidden from a stored flag. A plain display:none rather
+      // than Bootstrap's d-none, because the script on this page reveals them by
+      // setting style.display and d-none carries !important.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .prov-collapsed { display: none; }
+</style>
 
 <div class="container-fluid py-3">
   <!-- Breadcrumb -->
@@ -187,7 +194,7 @@
               <input type="checkbox" name="has_gaps" class="form-check-input" id="hasGaps" value="1" <?php echo ($record->has_gaps ?? 0) ? 'checked' : '' ?>>
               <label class="form-check-label" for="hasGaps">There are gaps in the provenance chain</label>
             </div>
-            <div class="mb-0" id="gapDescriptionGroup" style="<?php echo ($record->has_gaps ?? 0) ? '' : 'display:none' ?>">
+            <div class="mb-0" id="gapDescriptionGroup" class="<?php echo ($record->has_gaps ?? 0) ? '' : 'prov-collapsed' ?>">
               <label class="form-label">Gap Description</label>
               <textarea name="gap_description" class="form-control" rows="2" placeholder="Describe the gaps in provenance..."><?php echo htmlspecialchars($record->gap_description ?? '') ?></textarea>
             </div>
@@ -312,7 +319,7 @@
               <input type="checkbox" name="nazi_era_provenance_checked" class="form-check-input" id="naziEraChecked" value="1" <?php echo ($record->nazi_era_provenance_checked ?? 0) ? 'checked' : '' ?>>
               <label class="form-check-label" for="naziEraChecked">Nazi-era provenance has been checked</label>
             </div>
-            <div id="naziEraClearGroup" style="<?php echo ($record->nazi_era_provenance_checked ?? 0) ? '' : 'display:none' ?>">
+            <div id="naziEraClearGroup" class="<?php echo ($record->nazi_era_provenance_checked ?? 0) ? '' : 'prov-collapsed' ?>">
               <div class="mb-3">
                 <label class="form-label">Result</label>
                 <select name="nazi_era_provenance_clear" class="form-select">

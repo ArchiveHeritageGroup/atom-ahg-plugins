@@ -1,3 +1,9 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .pres-height-20px-84ce { height: 20px; }
+  .pres-width-200px-5c2d { width: 200px; }
+</style>
 @section('title', __('Format Identification (PRONOM)'))
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -206,9 +212,9 @@
                         </td>
                         <td>{{ $format->format_name ?? 'Unknown' }}</td>
                         <td class="text-end">{{ number_format($format->count) }}</td>
-                        <td style="width: 200px;">
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar bg-info" role="progressbar" style="width: {{ $percentage }}%">
+                        <td class="pres-width-200px-5c2d">
+                            <div class="progress pres-height-20px-84ce" >
+                                <div class="progress-bar bg-info" role="progressbar" class="pres-pct" data-pct="{{ $percentage }}">
                                     {{ number_format($percentage, 1) }}%
                                 </div>
                             </div>
@@ -317,3 +323,11 @@ php symfony preservation:identify --object-id=123 --reidentify</code></pre>
         </div>
     </div>
 </div>
+
+{{-- Width applied through the CSSOM, which CSP does not cover, rather than a
+     style attribute, which it blocks outright. --}}
+<script @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  document.querySelectorAll('.pres-pct').forEach(function (el) {
+    el.style.width = (parseFloat(el.dataset.pct) || 0) + '%';
+  });
+</script>

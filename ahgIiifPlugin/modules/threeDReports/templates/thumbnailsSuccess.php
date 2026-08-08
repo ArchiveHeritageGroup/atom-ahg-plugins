@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-max-height-40px-4d22 { max-height:40px; }
+</style>
 
 <?php slot('sidebar'); ?>
 <div class="sidebar-content">
@@ -53,7 +60,7 @@
             </span>
             <div>
                 <?php if ($m->thumbnail): ?>
-                <img src="<?php echo $m->thumbnail; ?>" alt="Thumbnail" style="max-height:40px;" class="me-2">
+                <img src="<?php echo $m->thumbnail; ?>" alt="Thumbnail" class="me-2 iiif-max-height-40px-4d22" >
                 <?php endif; ?>
             </div>
         </li>

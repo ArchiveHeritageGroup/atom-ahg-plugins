@@ -1,4 +1,13 @@
 <?php decorate_with('layout_1col'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .fav-width-110px-3e28 { width: 110px; }
+  .fav-width-140px-1417 { width: 140px; }
+  .fav-width-80px-588c { width: 80px; }
+</style>
 
 <?php slot('title'); ?>
   <h1><i class="fas fa-share-alt me-2"></i><?php echo __('Shared Favorites'); ?></h1>
@@ -55,9 +64,9 @@
             <thead class="table-light">
               <tr>
                 <th><?php echo __('Title'); ?></th>
-                <th style="width: 140px;"><?php echo __('Reference Code'); ?></th>
-                <th class="text-center" style="width: 110px;"><?php echo __('Date Added'); ?></th>
-                <th class="text-center" style="width: 80px;"><?php echo __('View'); ?></th>
+                <th class="fav-width-140px-1417"><?php echo __('Reference Code'); ?></th>
+                <th class="text-center fav-width-110px-3e28" ><?php echo __('Date Added'); ?></th>
+                <th class="text-center fav-width-80px-588c" ><?php echo __('View'); ?></th>
               </tr>
             </thead>
             <tbody>

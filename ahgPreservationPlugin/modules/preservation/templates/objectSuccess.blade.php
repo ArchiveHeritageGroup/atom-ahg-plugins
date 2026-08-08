@@ -1,4 +1,9 @@
 @extends('layouts.page')
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .pres-font-size-0-8em-c402 { font-size: 0.8em; }
+</style>
 
 @section('title')
 <h1><i class="fas fa-file-lines text-primary me-2"></i>{{ __('Preservation Details') }}</h1>
@@ -105,7 +110,7 @@
                     @foreach ($checksums as $cs)
                     <tr>
                         <td><strong>{{ strtoupper($cs->algorithm) }}</strong></td>
-                        <td><code style="font-size: 0.8em;">{{ $cs->checksum_value }}</code></td>
+                        <td><code class="pres-font-size-0-8em-c402">{{ $cs->checksum_value }}</code></td>
                         <td>
                             @if ($cs->verification_status === 'valid')
                                 <span class="badge bg-success">Valid</span>

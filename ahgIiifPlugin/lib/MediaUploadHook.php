@@ -164,7 +164,14 @@ class MediaUploadHook
         $settings = self::loadSettings();
         
         // Framework path
-        $frameworkPath = sfConfig::get('sf_root_dir') . '/atom-framework/src/Extensions/IiifViewer';
+        // Inlined for the same reason as iiifCollection: this is not template
+        // scope, so a helper function is not available here.
+        $root = sfConfig::get('sf_root_dir');
+        $frameworkPath = $root.'/atom-framework/src/Extensions/IiifViewer';
+
+        if (is_dir($root.'/plugins/ahgRuntimePlugin/src/Extensions/IiifViewer')) {
+            $frameworkPath = $root.'/plugins/ahgRuntimePlugin/src/Extensions/IiifViewer';
+        }
         
         // Include service class
         require_once $frameworkPath . '/Services/MediaUploadProcessor.php';

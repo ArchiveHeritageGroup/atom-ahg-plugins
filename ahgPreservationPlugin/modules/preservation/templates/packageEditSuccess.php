@@ -1,4 +1,12 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .pres-z-index-1000-57dd { z-index:1000; }
+  .pres-z-index-1050-top-100-max-hei-5388 { z-index:1050; top:100%; max-height:320px; overflow-y:auto; }
+</style>
 <?php slot('title') ?>
 <h1>
     <i class="fas fa-box-archive text-primary me-2"></i>
@@ -140,7 +148,7 @@
                                 <i class="fas fa-xmark"></i>
                             </button>
                         </div>
-                        <div id="collectionResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1000;"></div>
+                        <div id="collectionResults" class="list-group position-absolute w-100 shadow-sm pres-z-index-1000-57dd" ></div>
                         <div class="form-text"><?php echo __('The archival collection this package represents (its child descriptions).'); ?></div>
                     </div>
 
@@ -182,7 +190,7 @@
                         <button type="button" class="btn btn-outline-primary" data-ahg-action="addObject">
                             <i class="fas fa-plus me-1"></i><?php echo __('Add'); ?>
                         </button>
-                        <div id="objectSearchResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
+                        <div id="objectSearchResults" class="list-group position-absolute w-100 shadow-sm pres-z-index-1050-top-100-max-hei-5388" ></div>
                     </div>
                     <div class="form-text"><?php echo __('Search a description by title or file name and pick it - or type a numeric digital object ID directly.'); ?></div>
                 </div>
@@ -195,7 +203,7 @@
                         <button type="button" class="btn btn-outline-primary" data-ahg-action="addCollectionObjects">
                             <i class="fas fa-layer-group me-1"></i><?php echo __('Add all'); ?>
                         </button>
-                        <div id="collImportResults" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050; top:100%; max-height:320px; overflow-y:auto;"></div>
+                        <div id="collImportResults" class="list-group position-absolute w-100 shadow-sm pres-z-index-1050-top-100-max-hei-5388" ></div>
                     </div>
                     <div class="form-text"><?php echo __('Pulls every master digital object under the chosen description and its child records into this package.'); ?></div>
                 </div>

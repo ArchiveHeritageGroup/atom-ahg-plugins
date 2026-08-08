@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .pres-max-height-200px-overflow-y--d98f { max-height: 200px; overflow-y: auto; }
+</style>
 <?php
 $title = 'Job Details: ' . htmlspecialchars($job->job_name);
 slot('title', $title);
@@ -87,7 +94,7 @@ slot('title', $title);
                     <hr>
                     <div>
                         <strong>Processing Log:</strong>
-                        <pre class="bg-light p-2 mt-2 small" style="max-height: 200px; overflow-y: auto;"><?php echo htmlspecialchars($job->notes); ?></pre>
+                        <pre class="bg-light p-2 mt-2 small pres-max-height-200px-overflow-y--d98f" ><?php echo htmlspecialchars($job->notes); ?></pre>
                     </div>
                     <?php endif; ?>
                 </div>

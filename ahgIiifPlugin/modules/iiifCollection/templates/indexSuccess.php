@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-height-150px-5e77 { height: 150px; }
+  .iiif-height-150px-object-fit-cove-7ace { height: 150px; object-fit: cover; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -54,9 +62,9 @@
         <div class="col">
             <div class="card h-100 collection-card">
                 <?php if ($collection->thumbnail_url): ?>
-                <img src="<?php echo esc_entities($collection->thumbnail_url) ?>" class="card-img-top" alt="<?php echo esc_entities($collection->display_name) ?>" style="height: 150px; object-fit: cover;">
+                <img src="<?php echo esc_entities($collection->thumbnail_url) ?>" class="card-img-top" alt="<?php echo esc_entities($collection->display_name) ?>" class="iiif-height-150px-object-fit-cove-7ace">
                 <?php else: ?>
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center iiif-height-150px-5e77" >
                     <i class="fas fa-layer-group fa-4x text-muted"></i>
                 </div>
                 <?php endif ?>

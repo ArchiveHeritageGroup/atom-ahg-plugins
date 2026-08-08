@@ -10,7 +10,26 @@ class iiifCollectionActions extends AhgController
 
     protected function initService()
     {
-        require_once $this->config('sf_root_dir') . '/atom-framework/src/Services/IiifCollectionService.php';
+        // Both layouts: atom-framework/ from a checkout, plugins/ahgRuntimePlugin
+        // from a bundle. Naming only the first made this page a fatal on any
+        // packaged install - 200 with an empty body, nothing logged.
+        //
+        // Resolved inline rather than through a shared helper: helper files are
+        // loaded into template scope, not action scope, so calling one here
+        // swapped a missing file for a missing function and the page stayed
+        // broken in exactly the same way.
+        $root = $this->config('sf_root_dir');
+
+        foreach ([
+            $root.'/plugins/ahgRuntimePlugin/src/Services/IiifCollectionService.php',
+            $root.'/atom-framework/src/Services/IiifCollectionService.php',
+        ] as $candidate) {
+            if (is_file($candidate)) {
+                require_once $candidate;
+
+                break;
+            }
+        }
         $this->collectionService = new \AtoM\Framework\Services\IiifCollectionService();
     }
 

@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .core-display-none-93b8 { display:none; }
+</style>
 
 <?php slot('title'); ?>
   <?php if (isset($resource)) { ?>
@@ -89,7 +96,7 @@
               <?php } ?>
 
 	      <div class="form-item">
-                <div class="panel panel-default" id="matchingOptions" style="display:none;">
+                <div class="panel panel-default" id="matchingOptions" class="core-display-none-93b8">
                   <div class="panel-body">
                     <div class="mb-3 form-check">
                       <input class="form-check-input" name="skipUnmatched" id="skip-unmatched-input" type="checkbox"/>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-max-height-400px-overflow-au-4dd5 { max-height:400px;overflow:auto; }
+</style>
 <h1><?php echo __('Media Processing Test Result') ?></h1>
 
 <div class="mb-4">
@@ -70,6 +77,6 @@
     <?php endif; ?>
     
     <h6 class="mt-4"><?php echo __('Full Result') ?></h6>
-    <pre class="bg-light p-3 rounded" style="max-height:400px;overflow:auto;"><?php echo htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)) ?></pre>
+    <pre class="bg-light p-3 rounded iiif-max-height-400px-overflow-au-4dd5" ><?php echo htmlspecialchars(json_encode($result, JSON_PRETTY_PRINT)) ?></pre>
   </div>
 </div>

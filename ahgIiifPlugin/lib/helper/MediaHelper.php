@@ -19,7 +19,40 @@
  * @author Johan Pieterse - The Archive and Heritage Group
  */
 
-require_once sfConfig::get('sf_root_dir') . '/atom-framework/src/Helpers/MediaHelper.php';
+
+/**
+ * Resolve a path inside the framework, whichever layout it is installed in.
+ *
+ * The framework ships two ways: atom-framework/ beside the AtoM root from a git
+ * checkout, and plugins/ahgRuntimePlugin/ from a plugin bundle. Only the first
+ * was named here, so on a packaged install these requires failed - and a failed
+ * require is fatal, so the page returned HTTP 200 with an empty body and nothing
+ * in the AtoM log.
+ */
+if (!function_exists('iiif_framework_path')) {
+    function iiif_framework_path(string $relative): ?string
+    {
+        $root = sfConfig::get('sf_root_dir');
+
+        foreach ([
+            $root.'/plugins/ahgRuntimePlugin/'.$relative,
+            $root.'/atom-framework/'.$relative,
+        ] as $candidate) {
+            if (is_file($candidate) || is_dir($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+}
+
+$mediaHelper = iiif_framework_path('src/Helpers/MediaHelper.php');
+
+if ($mediaHelper) {
+    require_once $mediaHelper;
+}
+
 
 use AtomFramework\Helpers\MediaHelper as FrameworkMediaHelper;
 

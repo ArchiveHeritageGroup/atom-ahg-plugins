@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-height-18px-949a { height:18px; }
+</style>
 <?php
 $r = $sf_data->getRaw('report') ?: [];
 $missThumb = $sf_data->getRaw('missingThumbnail') ?: [];
@@ -6,7 +13,7 @@ $byType = $r['by_media_type'] ?? [];
 function cov_bar($pct)
 {
     $tone = $pct < 50 ? 'bg-danger' : ($pct < 85 ? 'bg-warning' : 'bg-success');
-    echo '<div class="progress" style="height:18px"><div class="progress-bar ' . $tone . '" style="width:' . (int) $pct . '%">' . (int) $pct . '%</div></div>';
+    echo '<div class="progress iiif-height-18px-949a" ><div class="progress-bar ' . $tone . ' ms-pct" data-pct="' . (int) $pct . '">' . (int) $pct . '%</div></div>';
 }
 ?>
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -71,3 +78,10 @@ function cov_bar($pct)
   </div>
   <?php endforeach; ?>
 </div>
+
+<?php $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<script <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  document.querySelectorAll('.ms-pct').forEach(function (el) {
+    el.style.width = (parseFloat(el.dataset.pct) || 0) + '%';
+  });
+</script>

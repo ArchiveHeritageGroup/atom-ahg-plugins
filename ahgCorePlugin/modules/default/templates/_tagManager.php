@@ -1,4 +1,11 @@
 <?php if ('script' === $code) { ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .core-display-none-visibility-hidd-b3bf { display:none;visibility:hidden; }
+</style>
 
 <?php if ('' === sfConfig::get('csp_nonce', '')) { ?>
 <!-- Google Tag Manager -->
@@ -22,6 +29,6 @@ n&&j.setAttribute('nonce',n.nonce||n.getAttribute('nonce'));f.parentNode.insertB
 <?php } elseif ('noscript' === $code) { ?>
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=<?php echo $containerId; ?>"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+height="0" width="0" class="core-display-none-visibility-hidd-b3bf"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 <?php } ?>

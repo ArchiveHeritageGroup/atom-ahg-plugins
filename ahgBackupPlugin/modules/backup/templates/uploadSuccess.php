@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .bk-height-25px-bd56 { height: 25px; }
+  .bk-width-0-7590 { width: 0%; }
+</style>
 <?php
 $maxUploadSize = $sf_data->getRaw('maxUploadSize') ?? 0;
 $pendingUploads = $sf_data->getRaw('pendingUploads') ?? [];
@@ -93,8 +101,8 @@ function formatBytes($bytes) {
                     <!-- Progress -->
                     <div id="upload-progress" class="d-none mb-4">
                         <label class="form-label"><?php echo __('Upload Progress') ?></label>
-                        <div class="progress" style="height: 25px;">
-                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%">0%</div>
+                        <div class="progress bk-height-25px-bd56" >
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bk-width-0-7590" >0%</div>
                         </div>
                         <small class="text-muted" id="upload-status"></small>
                     </div>

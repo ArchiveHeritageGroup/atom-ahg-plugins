@@ -1,4 +1,12 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+  .iiif-min-height-50px-fec4 { min-height: 50px; }
+</style>
 
 <?php slot('sidebar') ?>
 <div class="sidebar-content">
@@ -54,12 +62,12 @@
                     <input type="text" class="form-control" id="objectSearchInput" 
                            placeholder="<?php echo __('Type to search by title or identifier...') ?>"
                            autocomplete="off">
-                    <div id="searchResults" class="list-group mt-2" style="max-height: 300px; overflow-y: auto;"></div>
+                    <div id="searchResults" class="list-group mt-2 iiif-max-height-300px-overflow-y--3db9" ></div>
                 </div>
                 
                 <div class="mb-3">
                     <label class="form-label"><?php echo __('Selected Items') ?></label>
-                    <div id="selectedItems" class="border rounded p-2" style="min-height: 50px;">
+                    <div id="selectedItems" class="border rounded p-2 iiif-min-height-50px-fec4" >
                         <span class="text-muted" id="noSelection"><?php echo __('No items selected') ?></span>
                     </div>
                 </div>

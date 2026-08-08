@@ -1,3 +1,11 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .pres-display-none-224b { display: none; }
+  .pres-height-8px-d826 { height: 8px; }
+  .pres-min-height-100px-max-height--803c { min-height: 100px; max-height: 400px; overflow-y: auto; }
+  .pres-width-0-7590 { width: 0%; }
+</style>
 @php
 $title = 'Merge Images to PDF';
 if ($informationObject) {
@@ -33,7 +41,7 @@ if ($informationObject) {
                 </div>
 
                 <div class="card-body">
-                    <div id="tpmAlert" class="alert" style="display: none;"></div>
+                    <div id="tpmAlert" class="alert pres-display-none-224b" ></div>
 
                     <input type="hidden" id="tpmInformationObjectId" value="{{ $informationObjectId ?? '' }}">
                     <input type="hidden" id="tpmJobId" value="">
@@ -84,13 +92,13 @@ if ($informationObject) {
                             <p class="text-muted small mb-0"><i class="fas fa-info-circle me-1"></i>Supported: TIFF, JPEG, PNG, BMP, GIF</p>
                             <input type="file" id="tpmFileInput" class="d-none" multiple accept=".tif,.tiff,.jpg,.jpeg,.png,.bmp,.gif">
                         </div>
-                        <div id="tpmProgressContainer" class="mt-3" style="display: none;">
+                        <div id="tpmProgressContainer" class="mt-3 pres-display-none-224b" >
                             <div class="d-flex justify-content-between mb-1">
                                 <small class="text-muted">Uploading...</small>
                                 <small id="tpmProgressText" class="text-muted"></small>
                             </div>
-                            <div class="progress" style="height: 8px;">
-                                <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                            <div class="progress pres-height-8px-d826" >
+                                <div id="tpmProgressBar" class="progress-bar progress-bar-striped progress-bar-animated pres-width-0-7590" ></div>
                             </div>
                         </div>
                     </div>
@@ -103,7 +111,7 @@ if ($informationObject) {
                             </h6>
                             <small class="text-muted"><i class="fas fa-arrows-alt me-1"></i>Drag to reorder</small>
                         </div>
-                        <div id="tpmFileList" class="border rounded bg-white" style="min-height: 100px; max-height: 400px; overflow-y: auto;">
+                        <div id="tpmFileList" class="border rounded bg-white pres-min-height-100px-max-height--803c" >
                             <div class="text-muted text-center py-5"><i class="fas fa-images fa-2x mb-2 d-block"></i>No files uploaded yet</div>
                         </div>
                     </div>
@@ -134,7 +142,7 @@ if ($informationObject) {
                             @endif
                         </div>
                         <div>
-                            <button type="button" class="btn btn-outline-danger me-2" id="tpmClearBtn" style="display: none;">
+                            <button type="button" class="btn btn-outline-danger me-2" id="tpmClearBtn" class="pres-display-none-224b">
                                 <i class="fas fa-trash me-1"></i>Clear All
                             </button>
                             <button type="button" class="btn btn-primary btn-lg" id="tpmCreateBtn" disabled>

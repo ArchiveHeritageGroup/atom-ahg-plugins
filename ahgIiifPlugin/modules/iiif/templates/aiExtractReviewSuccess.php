@@ -1,4 +1,11 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-white-space-pre-wrap-max-hei-568f { white-space:pre-wrap;max-height:16rem;overflow:auto; }
+</style>
 <?php $n = sfConfig::get('csp_nonce', ''); $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : ''; ?>
 
 <?php slot('sidebar') ?>
@@ -51,7 +58,7 @@
                 </div>
                 <?php endif; ?>
                 <div class="col">
-                    <pre class="ahg-extract-text mb-2" style="white-space:pre-wrap;max-height:16rem;overflow:auto;"><?php echo esc_specialchars((string) $ex['output_text']) ?></pre>
+                    <pre class="ahg-extract-text mb-2 iiif-white-space-pre-wrap-max-hei-568f" ><?php echo esc_specialchars((string) $ex['output_text']) ?></pre>
                     <?php if ($ex['status'] === 'draft'): ?>
                     <div class="d-flex flex-wrap gap-2 align-items-center">
                         <label class="small text-muted mb-0"><?php echo __('Apply to') ?>:</label>

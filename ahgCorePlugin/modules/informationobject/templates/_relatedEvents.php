@@ -1,17 +1,27 @@
 <?php $sf_response->addJavaScript('multiDelete', 'last'); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .core-text-align-right-28bb { text-align: right; }
+  .core-width-10-828e { width: 10%; }
+  .core-width-20-4341 { width: 20%; }
+  .core-width-25-3ea1 { width: 25%; }
+</style>
 
 <table id="relatedEvents" class="table table-bordered">
   <thead>
     <tr>
-      <th style="width: 25%">
+      <th class="core-width-25-3ea1">
         <?php echo __('Name'); ?>
-      </th><th style="width: 20%">
+      </th><th class="core-width-20-4341">
         <?php echo __('Role/event'); ?>
-      </th><th style="width: 20%">
+      </th><th class="core-width-20-4341">
         <?php echo __('Place'); ?>
-      </th><th style="width: 25%">
+      </th><th class="core-width-25-3ea1">
         <?php echo __('Date(s)'); ?>
-      </th><th style="width: 10%">
+      </th><th class="core-width-10-828e">
         &nbsp;
       </th>
     </tr>
@@ -38,7 +48,7 @@
           <div>
             <?php echo render_value_inline(Qubit::renderDateStartEnd($item->getDate(['cultureFallback' => true]), $item->startDate, $item->endDate)); ?>
           </div>
-        </td><td style="text-align: right">
+        </td><td class="core-text-align-right-28bb">
           <input class="multiDelete" name="deleteEvents[]" type="checkbox" value="<?php echo url_for([$item, 'module' => 'event']); ?>"/>
         </td>
       </tr>

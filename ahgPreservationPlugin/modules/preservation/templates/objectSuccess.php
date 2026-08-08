@@ -1,4 +1,11 @@
 <?php decorate_with('layout_1col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .pres-font-size-0-8em-c402 { font-size: 0.8em; }
+</style>
 <?php slot('title') ?>
 <h1><i class="fas fa-file-lines text-primary me-2"></i><?php echo __('Preservation Details'); ?></h1>
 <?php end_slot() ?>
@@ -104,7 +111,7 @@
                     <?php foreach ($checksums as $cs): ?>
                     <tr>
                         <td><strong><?php echo strtoupper($cs->algorithm); ?></strong></td>
-                        <td><code style="font-size: 0.8em;"><?php echo $cs->checksum_value; ?></code></td>
+                        <td><code class="pres-font-size-0-8em-c402"><?php echo $cs->checksum_value; ?></code></td>
                         <td>
                             <?php if ($cs->verification_status === 'valid'): ?>
                                 <span class="badge bg-success">Valid</span>

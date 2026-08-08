@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-color-white-margin-top-15px--826c { color:white;margin-top:15px;font-family:Arial,sans-serif; }
+</style>
 <?php
 /**
  * IIIF Comparison Viewer
@@ -26,7 +33,7 @@ $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
 
 <div class="compare-loading" id="compare-loading">
   <div class="compare-spinner"></div>
-  <div style="color:white;margin-top:15px;font-family:Arial,sans-serif;">Loading comparison view...</div>
+  <div class="iiif-color-white-margin-top-15px--826c">Loading comparison view...</div>
 </div>
 
 <div id="mirador-compare"></div>

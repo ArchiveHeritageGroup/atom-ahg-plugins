@@ -38,7 +38,7 @@
                 <td><small><?php echo esc_specialchars($s->camera_orbit ?? '-'); ?></small></td>
                 <td><?php echo esc_specialchars($s->field_of_view ?? '-'); ?></td>
                 <td><?php echo $s->ar_enabled ? '<i class="fas fa-mobile-alt text-success"></i> ' . $s->ar_placement : '-'; ?></td>
-                <td><span style="display:inline-block;width:20px;height:20px;background:<?php echo $s->background_color ?? '#f5f5f5'; ?>;border:1px solid #ccc;"></span></td>
+                <td><span class="td-swatch" data-colour="<?php echo htmlspecialchars($s->background_color ?? '#f5f5f5', ENT_QUOTES, 'UTF-8'); ?>"></span></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
@@ -46,3 +46,14 @@
 </div>
 <?php endif; ?>
 <?php end_slot(); ?>
+
+<?php $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .td-swatch { display: inline-block; width: 20px; height: 20px; border: 1px solid #ccc; }
+</style>
+<?php $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<script <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  document.querySelectorAll('.td-swatch').forEach(function (el) {
+    if (el.dataset.colour) { el.style.background = el.dataset.colour; }
+  });
+</script>

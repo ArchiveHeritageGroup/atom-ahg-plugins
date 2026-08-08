@@ -1,4 +1,12 @@
 <?php slot('title', __('Format Identification (PRONOM)')); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .pres-height-20px-84ce { height: 20px; }
+  .pres-width-200px-5c2d { width: 200px; }
+</style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-fingerprint"></i> Format Identification</h1>
@@ -204,9 +212,9 @@
                         </td>
                         <td><?php echo htmlspecialchars($format->format_name ?? 'Unknown') ?></td>
                         <td class="text-end"><?php echo number_format($format->count) ?></td>
-                        <td style="width: 200px;">
-                            <div class="progress" style="height: 20px;">
-                                <div class="progress-bar bg-info" role="progressbar" style="width: <?php echo $percentage ?>%">
+                        <td class="pres-width-200px-5c2d">
+                            <div class="progress pres-height-20px-84ce" >
+                                <div class="progress-bar bg-info" role="progressbar" class="pres-pct" data-pct="<?php echo (float) $percentage; ?>">
                                     <?php echo number_format($percentage, 1) ?>%
                                 </div>
                             </div>
@@ -315,3 +323,10 @@ php symfony preservation:identify --object-id=123 --reidentify</code></pre>
         </div>
     </div>
 </div>
+
+<?php $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<script <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  document.querySelectorAll('.pres-pct').forEach(function (el) {
+    el.style.width = (parseFloat(el.dataset.pct) || 0) + '%';
+  });
+</script>

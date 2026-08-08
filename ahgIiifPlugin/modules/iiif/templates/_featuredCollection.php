@@ -1,3 +1,13 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-font-size-0-6rem-b742 { font-size: 0.6rem; }
+  .iiif-height-100-587c { height: 100%; }
+  .iiif-max-width-100-max-height-100-a809 { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .iiif-width-70px-height-50px-objec-42a2 { width: 70px; height: 50px; object-fit: cover; cursor: pointer; transition: all 0.2s; }
+</style>
 <?php
 /**
  * Featured Collection Carousel for Homepage
@@ -252,14 +262,14 @@ $carouselId = 'featured-collection-' . $collection->id;
         </div>
         <?php endif ?>
 
-        <div class="carousel-inner rounded shadow" style="height: <?php echo $height ?>; background: #1a1a1a;">
+        <div class="carousel-inner rounded shadow" class="iiif-featured" data-height="<?php echo htmlspecialchars($height, ENT_QUOTES, 'UTF-8'); ?>">
             <?php foreach ($slides as $idx => $slide): ?>
-            <div class="carousel-item <?php echo $idx === 0 ? 'active' : '' ?>" style="height: 100%;">
+            <div class="carousel-item <?php echo $idx === 0 ? 'active' : '' ?> iiif-height-100-587c" >
                 <a href="<?php echo $slide['link'] ?>" class="d-block h-100">
                     <div class="d-flex align-items-center justify-content-center h-100">
                         <img src="<?php echo $slide['image_large'] ?>"
-                             class="d-block"
-                             style="max-width: 100%; max-height: 100%; object-fit: contain;"
+                             class="d-block iiif-max-width-100-max-height-100-a809"
+                             
                              alt="<?php echo esc_entities($slide['title']) ?>"
                              loading="<?php echo $idx < 3 ? 'eager' : 'lazy' ?>"
                              onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\'text-white-50 text-center\'><i class=\'fas fa-image fa-3x mb-2\'></i><br>Image unavailable</div>';">
@@ -301,17 +311,17 @@ $carouselId = 'featured-collection-' . $collection->id;
         <?php foreach ($slides as $idx => $slide): ?>
         <div class="position-relative">
             <img src="<?php echo $slide['image_thumb'] ?>"
-                 class="featured-thumb rounded border <?php echo $idx === 0 ? 'border-primary border-2' : '' ?>"
-                 style="width: 70px; height: 50px; object-fit: cover; cursor: pointer; transition: all 0.2s;"
+                 class="featured-thumb rounded border <?php echo $idx === 0 ? 'border-primary border-2' : '' ?> iiif-width-70px-height-50px-objec-42a2"
+                 
                  data-bs-target="#<?php echo $carouselId ?>"
                  data-bs-slide-to="<?php echo $idx ?>"
                  alt="<?php echo esc_entities($slide['title']) ?>"
                  title="<?php echo esc_entities($slide['title']) ?>"
                  onerror="this.style.display='none';">
             <?php if ($slide['media_type'] === 'video'): ?>
-            <span class="position-absolute bottom-0 end-0 badge bg-dark bg-opacity-75" style="font-size: 0.6rem;"><i class="fas fa-film"></i></span>
+            <span class="position-absolute bottom-0 end-0 badge bg-dark bg-opacity-75 iiif-font-size-0-6rem-b742" ><i class="fas fa-film"></i></span>
             <?php elseif ($slide['media_type'] === 'audio'): ?>
-            <span class="position-absolute bottom-0 end-0 badge bg-dark bg-opacity-75" style="font-size: 0.6rem;"><i class="fas fa-music"></i></span>
+            <span class="position-absolute bottom-0 end-0 badge bg-dark bg-opacity-75 iiif-font-size-0-6rem-b742" ><i class="fas fa-music"></i></span>
             <?php endif ?>
         </div>
         <?php endforeach ?>
@@ -355,4 +365,15 @@ document.addEventListener('DOMContentLoaded', function() {
     right: 0;
     border-radius: 0 0 0.375rem 0.375rem !important;
 }
+</style>
+
+<?php $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<script <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  document.querySelectorAll('.iiif-featured').forEach(function (el) {
+    if (el.dataset.height) { el.style.height = el.dataset.height; }
+  });
+</script>
+<?php $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-featured { background: #1a1a1a; }
 </style>

@@ -1,3 +1,14 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .pres-cursor-pointer-min-height-15-52e1 { cursor: pointer; min-height: 150px; }
+  .pres-display-none-224b { display: none; }
+  .pres-height-6px-3586 { height: 6px; }
+  .pres-max-height-300px-overflow-y--3db9 { max-height: 300px; overflow-y: auto; }
+  .pres-width-0-7590 { width: 0%; }
+</style>
 <?php
 /**
  * TIFF to PDF Merge Modal Component
@@ -20,7 +31,7 @@ $informationObjectId = $informationObjectId ?? null;
 
             <div class="modal-body">
                 <!-- Alert area -->
-                <div id="tpm-alert" class="alert" style="display: none;"></div>
+                <div id="tpm-alert" class="alert pres-display-none-224b" ></div>
 
                 <!-- Hidden fields -->
                 <input type="hidden" id="tpm-information-object-id" value="<?php echo $informationObjectId; ?>">
@@ -58,8 +69,8 @@ $informationObjectId = $informationObjectId ?? null;
                 </div>
 
                 <!-- Drop Zone -->
-                <div id="tpm-drop-zone" class="border border-2 border-dashed rounded p-4 text-center mb-3 bg-light" 
-                     style="cursor: pointer; min-height: 150px;">
+                <div id="tpm-drop-zone" class="border border-2 border-dashed rounded p-4 text-center mb-3 bg-light pres-cursor-pointer-min-height-15-52e1" 
+                     >
                     <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-2"></i>
                     <p class="mb-1">
                         <strong>Drag and drop images here</strong>
@@ -73,14 +84,14 @@ $informationObjectId = $informationObjectId ?? null;
                 </div>
 
                 <!-- Progress Bar -->
-                <div id="tpm-progress-container" class="mb-3" style="display: none;">
+                <div id="tpm-progress-container" class="mb-3 pres-display-none-224b" >
                     <div class="d-flex justify-content-between mb-1">
                         <small class="text-muted">Uploading...</small>
                         <small id="tpm-progress-text" class="text-muted"></small>
                     </div>
-                    <div class="progress" style="height: 6px;">
+                    <div class="progress pres-height-6px-3586" >
                         <div id="tpm-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" 
-                             role="progressbar" style="width: 0%"></div>
+                             role="progressbar" class="pres-width-0-7590"></div>
                     </div>
                 </div>
 
@@ -97,7 +108,7 @@ $informationObjectId = $informationObjectId ?? null;
                             Drag to reorder pages
                         </small>
                     </div>
-                    <div id="tpm-file-list" class="border rounded" style="max-height: 300px; overflow-y: auto;">
+                    <div id="tpm-file-list" class="border rounded pres-max-height-300px-overflow-y--3db9" >
                         <div class="text-muted text-center py-4">No files uploaded yet</div>
                     </div>
                 </div>

@@ -1,3 +1,10 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-max-height-400px-overflow-au-a829 { max-height:400px;overflow:auto;font-size:0.85rem; }
+</style>
 <?php
 /**
  * stateSuccess
@@ -25,7 +32,7 @@ $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
         <div class="card-body">
             <div class="mb-3">
                 <h5 class="card-title">Content State</h5>
-                <pre class="bg-dark text-light p-3 rounded" style="max-height:400px;overflow:auto;font-size:0.85rem;"><?php
+                <pre class="bg-dark text-light p-3 rounded iiif-max-height-400px-overflow-au-a829" ><?php
                     echo htmlspecialchars(json_encode($contentState ?? [], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                 ?></pre>
             </div>

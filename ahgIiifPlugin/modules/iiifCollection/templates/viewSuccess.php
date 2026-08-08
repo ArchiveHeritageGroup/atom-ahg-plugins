@@ -1,4 +1,14 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .iiif-width-120px-b15a { width: 120px; }
+  .iiif-width-150px-c251 { width: 150px; }
+  .iiif-width-50px-ae1f { width: 50px; }
+  .iiif-width-80px-588c { width: 80px; }
+</style>
 
 <?php
 // Initialize database for image checking
@@ -294,13 +304,13 @@ foreach ($collection->items as $item) {
                 <table class="table table-hover align-middle" id="itemsTable">
                     <thead>
                         <tr>
-                            <th style="width: 50px;"></th>
+                            <th class="iiif-width-50px-ae1f"></th>
                             <th><?php echo __('Title') ?></th>
                             <th><?php echo __('Identifier') ?></th>
                             <th><?php echo __('Type') ?></th>
-                            <th style="width: 80px;"><?php echo __('Media') ?></th>
-                            <th style="width: 120px;"><?php echo __('Status') ?></th>
-                            <th style="width: 150px;"><?php echo __('Actions') ?></th>
+                            <th class="iiif-width-80px-588c"><?php echo __('Media') ?></th>
+                            <th class="iiif-width-120px-b15a"><?php echo __('Status') ?></th>
+                            <th class="iiif-width-150px-c251"><?php echo __('Actions') ?></th>
                         </tr>
                     </thead>
                     <tbody class="sortable-items">

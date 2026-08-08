@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .pres-cursor-pointer-24b5 { cursor: pointer; }
+</style>
 @section('title', __('Workflow Scheduler'))
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -201,7 +206,7 @@
                             </thead>
                             <tbody>
                                 @foreach($recentRuns as $run)
-                                <tr class="run-row" data-id="{{ $run->id }}" style="cursor: pointer;">
+                                <tr class="run-row" data-id="{{ $run->id }}" class="pres-cursor-pointer-24b5">
                                     <td>{{ $run->schedule_name }}</td>
                                     <td><small>{{ date('Y-m-d H:i:s', strtotime($run->started_at)) }}</small></td>
                                     <td>

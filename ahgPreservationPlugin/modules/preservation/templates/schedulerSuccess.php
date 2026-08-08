@@ -1,4 +1,11 @@
 <?php slot('title', __('Workflow Scheduler')); ?>
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .pres-cursor-pointer-24b5 { cursor: pointer; }
+</style>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1><i class="fas fa-clock"></i> Workflow Scheduler</h1>
@@ -201,7 +208,7 @@
                             </thead>
                             <tbody>
                                 <?php foreach ($recentRuns as $run): ?>
-                                <tr class="run-row" data-id="<?php echo $run->id ?>" style="cursor: pointer;">
+                                <tr class="run-row" data-id="<?php echo $run->id ?>" class="pres-cursor-pointer-24b5">
                                     <td><?php echo htmlspecialchars($run->schedule_name) ?></td>
                                     <td><small><?php echo date('Y-m-d H:i:s', strtotime($run->started_at)) ?></small></td>
                                     <td>

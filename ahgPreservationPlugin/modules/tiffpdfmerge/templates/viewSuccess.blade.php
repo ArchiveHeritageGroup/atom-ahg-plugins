@@ -1,3 +1,8 @@
+{{-- Rules moved out of style attributes: a CSP nonce covers <style>
+     elements and never an attribute. --}}
+<style @if(!empty($cspNonce)) nonce="{{ $cspNonce }}" @endif>
+  .pres-max-height-200px-overflow-y--d98f { max-height: 200px; overflow-y: auto; }
+</style>
 @php
 $title = 'Job Details: ' . htmlspecialchars($job->job_name);
 @endphp
@@ -88,7 +93,7 @@ $title = 'Job Details: ' . htmlspecialchars($job->job_name);
                     <hr>
                     <div>
                         <strong>Processing Log:</strong>
-                        <pre class="bg-light p-2 mt-2 small" style="max-height: 200px; overflow-y: auto;">{{ $job->notes }}</pre>
+                        <pre class="bg-light p-2 mt-2 small pres-max-height-200px-overflow-y--d98f" >{{ $job->notes }}</pre>
                     </div>
                     @endif
                 </div>

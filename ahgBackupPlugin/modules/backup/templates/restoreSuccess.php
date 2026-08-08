@@ -1,3 +1,11 @@
+<?php // Rules moved out of style attributes: a CSP nonce covers <style>
+      // elements and never an attribute, so under an enforcing policy every one
+      // of these was dropped silently.
+      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
+  .bk-height-25px-bd56 { height: 25px; }
+  .bk-width-100-be70 { width: 100%; }
+</style>
 <?php
 $backup = $sf_data->getRaw('backup') ?? [];
 $backupId = $sf_data->getRaw('backupId');
@@ -80,8 +88,8 @@ $components = $backup['components'] ?? [];
                     <?php endif; ?>
 
                     <div id="restore-progress" class="d-none mb-4">
-                        <div class="progress" style="height: 25px;">
-                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning" style="width: 100%"><?php echo __('Restoring...') ?></div>
+                        <div class="progress bk-height-25px-bd56" >
+                            <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated bg-warning bk-width-100-be70" ><?php echo __('Restoring...') ?></div>
                         </div>
                         <small class="text-muted" id="restore-status"><?php echo __('Please wait...') ?></small>
                     </div>
