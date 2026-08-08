@@ -6,17 +6,21 @@ require 'uri'
 class CustomDelegate
   attr_accessor :context
 
-  INSTANCE_PATHS = {
-    'nahlisa.theahg.co.za' => '/usr/share/nginx/archive/',
-    'archives.theahg.co.za' => '/usr/share/nginx/archive/',
-    'psis.theahg.co.za' => '/usr/share/nginx/archive/',
-    'heratio.theahg.co.za' => '/mnt/nas/heratio/',
-    'atom.theahg.co.za' => '/usr/share/nginx/atom/',
-    'dam.theahg.co.za' => '/usr/share/nginx/dam/',
-    'archaeology.theahg.co.za' => '/usr/share/nginx/archeology/',
-  }.freeze
+    # Where each site keeps its uploads, keyed by the hostname the request
+    # arrives with. One image server usually fronts several AtoM instances, and
+    # the same identifier means a different file on each, so this cannot be a
+    # single path.
+    #
+    # Replace these with your own. The key is the site's hostname; the value is
+    # the directory that uploads/ sits inside, with a trailing slash.
+    INSTANCE_PATHS = {
+      # 'archives.example.org' => '/usr/share/nginx/archives/',
+      # 'museum.example.org'   => '/srv/atom-museum/',
+    }.freeze
 
-  DEFAULT_PATH = '/usr/share/nginx/archive/'.freeze
+    # Used when the hostname is not listed above. Set this to your AtoM root, or
+    # leave it and list every site explicitly.
+    DEFAULT_PATH = '/usr/share/nginx/atom/'.freeze
 
   AUTH_CACHE_TTL = 60  # seconds
 
