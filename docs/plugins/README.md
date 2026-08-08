@@ -106,6 +106,21 @@ Each registers itself with the IIIF renderer registry rather than being named by
 the theme, so installing one does not require the other and removing one leaves
 the rest working.
 
+**If you want tiled deep zoom, you need an image server.** Cantaloupe is the usual
+choice, and it is a separate install. Manifests, the viewer and OCR export work
+without one; tiled images do not.
+
+More importantly, an image server reads files straight off disk and knows nothing
+about AtoM's access control. Left unconfigured, every master under `uploads/r/`
+becomes retrievable through the IIIF endpoint by anyone who can form the path, and
+those paths appear in every manifest. The nginx rules protecting `/uploads/r/` do
+not help: it is a different route to the same bytes.
+
+The bundle ships `config/cantaloupe/delegates.rb`, the authorisation hook that
+closes this, together with a README covering the three ways it can appear
+configured while doing nothing. Read that before putting an image server in front
+of a live collection.
+
 [Download IIIF 1.0.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgIiifPlugin-v1.0.2)
 
 ### Feedback
