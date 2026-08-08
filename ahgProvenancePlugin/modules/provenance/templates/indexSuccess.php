@@ -1,4 +1,10 @@
 <?php use_helper('Date') ?>
+<?php $n = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  .prov-bar { height: 20px; }
+  .prov-pct { width: 0; transition: width .2s; }
+</style>
+
 
 <div class="container-fluid py-3">
   <!-- Header -->
@@ -85,9 +91,9 @@
                   <td class="text-end">
                     <strong><?php echo number_format($count) ?></strong>
                   </td>
-                  <td style="width: 50%">
-                    <div class="progress" style="height: 20px;">
-                      <div class="progress-bar" style="width: <?php echo $stats['total'] > 0 ? round($count / $stats['total'] * 100) : 0 ?>%"></div>
+                  <td class="w-50">
+                    <div class="progress" class="prov-bar">
+                      <div class="progress-bar" class="prov-pct" data-pct="<?php echo $stats['total'] > 0 ? round($count / $stats['total'] * 100) : 0 ?>"></div>
                     </div>
                   </td>
                 </tr>
@@ -131,9 +137,9 @@
                   <td class="text-end">
                     <strong><?php echo number_format($count) ?></strong>
                   </td>
-                  <td style="width: 50%">
-                    <div class="progress" style="height: 20px;">
-                      <div class="progress-bar bg-<?php echo $color ?>" style="width: <?php echo $stats['total'] > 0 ? round($count / $stats['total'] * 100) : 0 ?>%"></div>
+                  <td class="w-50">
+                    <div class="progress" class="prov-bar">
+                      <div class="progress-bar bg-<?php echo $color ?>" class="prov-pct" data-pct="<?php echo $stats['total'] > 0 ? round($count / $stats['total'] * 100) : 0 ?>"></div>
                     </div>
                   </td>
                 </tr>
@@ -211,3 +217,13 @@
     </div>
   </div>
 </div>
+
+<?php // Widths come from data attributes rather than style attributes: a CSP
+      // nonce covers <style> and <script> elements, never a style attribute, so
+      // under an enforcing policy these bars rendered at zero width. Setting the
+      // width through the CSSOM is not covered by CSP, so this is safe. ?>
+<script <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  document.querySelectorAll('.prov-pct').forEach(function (el) {
+    el.style.width = (parseFloat(el.dataset.pct) || 0) + '%';
+  });
+</script>

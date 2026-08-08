@@ -1,4 +1,18 @@
 <?php decorate_with('layout_2col.php') ?>
+<?php // Column widths held here rather than in style attributes. A CSP nonce
+      // covers <style> elements and never a style attribute, so under an
+      // enforcing policy every one of these was dropped and the table collapsed.
+      $n = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  .fb-w5   { width: 5%; }
+  .fb-w8   { width: 8%; }
+  .fb-w10  { width: 10%; }
+  .fb-w12  { width: 12%; }
+  .fb-w20  { width: 20%; }
+  .fb-w25  { width: 25%; }
+  .fb-mw200 { max-width: 200px; }
+</style>
+
 
 <?php slot('title') ?>
 <div class="d-flex align-items-center">
@@ -54,23 +68,23 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th style="width:5%">#</th>
-                        <th style="width:20%">
+                        <th class="fb-w5">#</th>
+                        <th class="fb-w20">
                             <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'browse', 'filter' => $filter, 'sort' => ($sort === 'nameUp') ? 'nameDown' : 'nameUp']) ?>" class="text-decoration-none text-dark">
                                 <?php echo __('Subject/Record') ?>
                                 <?php if ('nameUp' === $sort): ?><i class="fas fa-sort-up ms-1"></i><?php elseif ('nameDown' === $sort): ?><i class="fas fa-sort-down ms-1"></i><?php endif; ?>
                             </a>
                         </th>
-                        <th style="width:10%"><?php echo __('Type') ?></th>
-                        <th style="width:25%"><?php echo __('Remarks') ?></th>
-                        <th style="width:20%"><?php echo __('Contact') ?></th>
-                        <th style="width:12%">
+                        <th class="fb-w10"><?php echo __('Type') ?></th>
+                        <th class="fb-w25"><?php echo __('Remarks') ?></th>
+                        <th class="fb-w20"><?php echo __('Contact') ?></th>
+                        <th class="fb-w12">
                             <a href="<?php echo url_for(['module' => 'feedback', 'action' => 'browse', 'filter' => $filter, 'sort' => ($sort === 'dateUp') ? 'dateDown' : 'dateUp']) ?>" class="text-decoration-none text-dark">
                                 <?php echo __('Date') ?>
                                 <?php if ('dateUp' === $sort): ?><i class="fas fa-sort-up ms-1"></i><?php elseif ('dateDown' === $sort): ?><i class="fas fa-sort-down ms-1"></i><?php endif; ?>
                             </a>
                         </th>
-                        <th style="width:8%" class="text-center"><?php echo __('Actions') ?></th>
+                        <th class="fb-w8" class="text-center"><?php echo __('Actions') ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -110,7 +124,7 @@
                     </td>
                     <td><span class="badge <?php echo $type['class'] ?>"><?php echo __($type['label']) ?></span></td>
                     <td>
-                        <div class="text-truncate" style="max-width:200px" title="<?php echo esc_entities($item->remarks) ?>">
+                        <div class="text-truncate" class="fb-mw200" title="<?php echo esc_entities($item->remarks) ?>">
                             <?php echo esc_entities(mb_strimwidth($item->remarks, 0, 60, '...')) ?>
                         </div>
                     </td>

@@ -1,4 +1,10 @@
 <?php use_helper('Text') ?>
+<?php $n = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  .ms-pointer { cursor: pointer; }
+  .ms-suggest { display: none; z-index: 1000; max-height: 300px; overflow-y: auto; }
+</style>
+
 <?php use_stylesheet("/plugins/ahgCorePlugin/web/css/vendor/tom-select.bootstrap5.min.css") ?>
 <?php use_javascript("/plugins/ahgCorePlugin/web/js/vendor/tom-select.complete.min.js") ?>
 
@@ -118,7 +124,7 @@ $groupLabels = [
         <div class="position-relative">
           <input type="text" id="media-search-input" class="form-control" placeholder="<?php echo __('Type to search (min 2 characters)...') ?>" autocomplete="off">
           <input type="hidden" name="slug" id="media-search-slug">
-          <div id="media-search-results" class="position-absolute w-100 bg-white border rounded shadow-sm" style="display:none; z-index:1000; max-height:300px; overflow-y:auto;"></div>
+          <div id="media-search-results" class="position-absolute w-100 bg-white border rounded shadow-sm" class="ms-suggest"></div>
         </div>
       </div>
       <div class="col-auto">
@@ -159,7 +165,7 @@ $groupLabels = [
                     } else {
                         var html = '';
                         data.forEach(function(item) {
-                            html += '<div class="p-2 border-bottom media-result-item" style="cursor:pointer" data-slug="' + item.slug + '">';
+                            html += '<div class="p-2 border-bottom media-result-item" class="ms-pointer" data-slug="' + item.slug + '">';
                             html += '<strong>' + (item.title || '(Untitled)') + '</strong>';
                             if (item.identifier) html += ' <span class="text-muted">(' + item.identifier + ')</span>';
                             html += '</div>';

@@ -1,4 +1,12 @@
 <?php $n = sfConfig::get('csp_nonce', ''); $nonceAttr = $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>
+<?php $n = sfConfig::get('csp_nonce', ''); ?>
+<style <?php echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
+  .iiif-stage { width: 100%; height: 75vh; border-radius: 8px; background: #1a1a1a; }
+  /* Plain display:none, not Bootstrap's d-none: the viewer script reveals these
+     by setting style.display, and d-none carries !important. */
+  .iiif-hidden { display: none; background: none; }
+</style>
+
 
 <?php echo get_partial('layout_start', ['title' => 'IIIF Viewer - ' . htmlspecialchars($objectTitle)]) ?>
 
@@ -40,10 +48,10 @@
     </div>
 
     <!-- OpenSeadragon container -->
-    <div id="iiif-osd-viewer" style="width:100%;height:75vh;background:#1a1a1a;border-radius:8px;"></div>
+    <div id="iiif-osd-viewer" class="iiif-stage"></div>
 
     <!-- Mirador container (hidden by default) -->
-    <div id="iiif-mirador-viewer" style="width:100%;height:75vh;border-radius:8px;display:none;"></div>
+    <div id="iiif-mirador-viewer" class="iiif-stage iiif-hidden"></div>
 </div>
 
 <script <?php echo $nonceAttr; ?>>
