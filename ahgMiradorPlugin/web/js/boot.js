@@ -8,8 +8,21 @@
 (function () {
   'use strict';
 
+  // Height, applied through the CSSOM.
+  //
+  // A style attribute is dropped by AtoM's CSP without reporting anything, and
+  // the CSSOM is not covered by CSP - so this is the one route that lets a
+  // caller set a height per record. Runs before the iframe check below, because
+  // the iframe path is the normal one and needs the height just as much.
+  function applyHeight(el) {
+    var h = el.dataset.height;
+    if (h && /^\d+(px|%|vh)$/.test(h)) { el.style.height = h; }
+  }
+
   function boot(el) {
     if (el.dataset.booted) { return; }
+
+    applyHeight(el);
 
     // The renderer mounts Mirador in an iframe (see viewer.html). If one is already
     // present the viewer is running in its own document and mounting again here
