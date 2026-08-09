@@ -25,6 +25,18 @@ class SeadragonRenderer implements RendererInterface
         $id       = $this->attr((string) ($config['viewerId'] ?? 'v1'));
         $manifest = htmlspecialchars((string) ($config['manifestUrl'] ?? ''), ENT_QUOTES);
         $options  = is_array($config['options'] ?? null) ? $config['options'] : [];
+
+        // Site defaults from the IIIF settings screen, under anything the
+        // caller passed. ahgIiifPlugin owns the table and the screen, so a
+        // site with one viewer installed behaves the same as one with both.
+        // Guarded: this viewer must still work if that service is older or
+        // absent.
+        if (class_exists('\\AhgIiif\\Services\\IiifViewerDefaults')) {
+            $options = array_replace_recursive(
+                \AhgIiif\Services\IiifViewerDefaults::forViewer('seadragon'),
+                $options
+            );
+        }
         $height   = $this->height((string) ($options['height'] ?? '600px'));
 
         // Optional: a direct image URL, used when no IIIF image service is available
