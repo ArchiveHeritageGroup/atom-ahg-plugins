@@ -1,0 +1,10 @@
+{
+  "name": "ahgRuntimePlugin",
+  "version": "2.14.1",
+  "description": "AHG runtime - shared services and base classes required by AHG plugins",
+  "tier": "community",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": [],
+  "generated_from": "atom-framework",
+  "display_panels": []
+}

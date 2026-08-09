@@ -1,0 +1,179 @@
+<?php
+
+namespace AtomFramework\Services;
+
+use AtomExtensions\Helpers\CultureHelper;
+use AtomFramework\Core\Security\LoginSecurityService;
+use AtomFramework\Core\Security\PasswordService;
+use Illuminate\Database\Capsule\Manager as DB;
+
+/**
+ * Standalone authentication service for Heratio.
+ *
+ * Replicates QubitUser::checkCredentials() with dual-layer password
+ * verification: SHA1(salt + password) -> password_verify(sha1Hash, argon2iHash).
+ *
+ * AtoM stores passwords as:
+ *   salt: random hex string
+ *   password_hash: password_hash(sha1(salt . plaintext), PASSWORD_DEFAULT)
+ *
+ * The inner SHA1 layer is legacy; the outer Argon2i/Bcrypt layer was added
+ * in AtoM 2.x. Both layers must be checked for backward compatibility.
+ *
+ * Includes brute force protection via LoginSecurityService — accounts are
+ * locked after 5 failed attempts within 15 minutes.
+ */
+class AuthService
+{
+    /**
+     * Authenticate a user by email or username.
+     *
+     * Tries email first, then username (matching QubitUser::checkCredentials order).
+     * Enforces account lockout after excessive failed attempts.
+     *
+     * @return object|null User object on success, null on failure
+     */
+    public static function authenticate(string $emailOrUsername, string $password, ?string $ipAddress = null): ?object
+    {
+        $ip = $ipAddress ?? ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+
+        // Check account lockout before attempting authentication
+        if (LoginSecurityService::isLockedOut($emailOrUsername, $ip)) {
+            $remaining = LoginSecurityService::lockoutRemaining($emailOrUsername);
+            error_log(sprintf(
+                'Login blocked (account locked): %s from %s — unlocks in %d seconds',
+                $emailOrUsername,
+                $ip,
+                $remaining
+            ));
+
+            return null;
+        }
+
+        // Try email first
+        $user = self::findUser($emailOrUsername);
+
+        if (!$user) {
+            LoginSecurityService::recordAttempt($emailOrUsername, $ip, false);
+
+            return null;
+        }
+
+        if (!$user->active) {
+            LoginSecurityService::recordAttempt($emailOrUsername, $ip, false);
+
+            return null;
+        }
+
+        // Verify supporting BOTH schemes (new Argon2id-over-plaintext when salt
+        // is empty; legacy Argon2i-over-sha1(salt.plaintext) otherwise).
+        // See PasswordService — password-hashing migration 2026-06-15.
+        if (!PasswordService::verify($password, (string) $user->password_hash, $user->salt ?? '')) {
+            LoginSecurityService::recordAttempt($emailOrUsername, $ip, false);
+
+            return null;
+        }
+
+        // Success — clear any previous failures
+        LoginSecurityService::recordAttempt($emailOrUsername, $ip, true);
+
+        // Transparent verify-on-login upgrade: rehash a legacy/old-cost credential
+        // to the current scheme. Best-effort — the user is already authenticated.
+        if (PasswordService::needsUpgrade((string) $user->password_hash, $user->salt ?? '')) {
+            try {
+                $new = PasswordService::hash($password);
+                DB::table('user')->where('id', $user->id)->update($new);
+                $user->password_hash = $new['password_hash'];
+                $user->salt = $new['salt'];
+            } catch (\Throwable $e) {
+                // non-fatal: retried on next login
+            }
+        }
+
+        return $user;
+    }
+
+    /**
+     * Find user by email or username.
+     */
+    private static function findUser(string $emailOrUsername): ?object
+    {
+        $culture = class_exists(CultureHelper::class) ? CultureHelper::getCulture() : 'en';
+
+        // Try email first
+        $user = DB::table('user as u')
+            ->join('actor as a', 'u.id', '=', 'a.id')
+            ->leftJoin('actor_i18n as ai', function ($join) use ($culture) {
+                $join->on('a.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 'u.id', '=', 's.object_id')
+            ->where('u.email', $emailOrUsername)
+            ->select(
+                'u.id',
+                'u.username',
+                'u.email',
+                'u.active',
+                'u.salt',
+                'u.password_hash',
+                'ai.authorized_form_of_name as name',
+                's.slug'
+            )
+            ->first();
+
+        if ($user) {
+            return $user;
+        }
+
+        // Fall back to username
+        return DB::table('user as u')
+            ->join('actor as a', 'u.id', '=', 'a.id')
+            ->leftJoin('actor_i18n as ai', function ($join) use ($culture) {
+                $join->on('a.id', '=', 'ai.id')
+                    ->where('ai.culture', '=', $culture);
+            })
+            ->leftJoin('slug as s', 'u.id', '=', 's.object_id')
+            ->where('u.username', $emailOrUsername)
+            ->select(
+                'u.id',
+                'u.username',
+                'u.email',
+                'u.active',
+                'u.salt',
+                'u.password_hash',
+                'ai.authorized_form_of_name as name',
+                's.slug'
+            )
+            ->first();
+    }
+
+    /**
+     * Get group names for a user (EN culture).
+     *
+     * @return string[] Array of group names
+     */
+    public static function getGroupNames(int $userId): array
+    {
+        return DB::table('acl_user_group as ug')
+            ->join('acl_group_i18n as gi', function ($join) {
+                $join->on('ug.group_id', '=', 'gi.id')
+                    ->where('gi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());
+            })
+            ->where('ug.user_id', $userId)
+            ->pluck('gi.name')
+            ->toArray();
+    }
+
+    /**
+     * Get group IDs for a user.
+     *
+     * @return int[] Array of group IDs
+     */
+    public static function getGroupIds(int $userId): array
+    {
+        return DB::table('acl_user_group')
+            ->where('user_id', $userId)
+            ->pluck('group_id')
+            ->toArray();
+    }
+}
