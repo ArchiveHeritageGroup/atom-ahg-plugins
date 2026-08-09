@@ -50,3 +50,11 @@ __pycache__/
 # source and its vendor tree. A build artifact, not source: 6,505 files and
 # ~1M lines that change wholesale on every framework release.
 ahgRuntimePlugin/
+
+# Working files. Git already holds every previous version; a .bak of a
+# routing.yml or a plugin configuration class is a second copy the loader might
+# plausibly read, and it costs somebody an afternoon during a debugging session.
+*.bak
+*.orig
+*.old
+*.rej
