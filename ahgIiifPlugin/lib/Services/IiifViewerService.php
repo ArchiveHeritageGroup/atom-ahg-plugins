@@ -233,6 +233,36 @@ class IiifViewerService
             ->map(fn ($r) => $r->id . ':' . (string) $r->checksum)
             ->implode(',');
 
-        return hash('sha256', "{$objectId}:{$culture}:{$parts}");
+        return hash('sha256', "{$objectId}:{$culture}:{$this->cacheHost()}:{$parts}");
+    }
+
+    /**
+     * The host a manifest was built for, folded into the cache signature.
+     *
+     * A manifest embeds absolute URLs - the image service id, the canvas ids,
+     * the search service - so one built for a given hostname is wrong for every
+     * other one. The signature covered the digital objects and the culture but
+     * not the host, which meant whichever request populated the cache first fixed
+     * those URLs for everybody until the 24 hour expiry.
+     *
+     * That is not a theoretical multi-tenant concern. A localhost health check, a
+     * cron warm-up or an internal monitor reaching a manifest first leaves every
+     * public reader with image URLs pointing at 127.0.0.1, and the images simply
+     * do not load - no error anywhere, because from the server's point of view
+     * the manifest is perfectly valid. Found exactly that way on the test VM,
+     * where my own curl had poisoned it.
+     *
+     * Folded into the signature rather than added to the cache key because the
+     * `culture` column is varchar(10) and a host does not fit. The cost is that
+     * two hostnames serving the same site take turns regenerating rather than
+     * both being cached; the alternative was a schema change to a table clients
+     * already have.
+     */
+    private function cacheHost(): string
+    {
+        $host = $_SERVER['HTTP_HOST'] ?? 'cli';
+        $scheme = (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https' : 'http';
+
+        return $scheme.'://'.$host;
     }
 }
