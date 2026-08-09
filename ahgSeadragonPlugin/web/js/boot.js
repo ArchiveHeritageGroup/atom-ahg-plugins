@@ -14,25 +14,156 @@
     return (el && el.dataset.assets) || '/plugins/ahgSeadragonPlugin/web/openseadragon';
   }
 
-  function mount(el) {
-    if (el.dataset.booted) { return; }
-    el.dataset.booted = '1';
+  // Height, applied through the CSSOM. A style attribute is dropped by AtoM's
+  // CSP without reporting anything; the CSSOM is not covered by CSP.
+  function applyHeight(el) {
+    var h = el.dataset.height;
+    if (h && /^\d+(px|%|vh)$/.test(h)) { el.style.height = h; }
+  }
 
-    // A IIIF image service is preferred; without one (no image server installed)
-    // OpenSeadragon can still show a single image via its simple-image mode.
-    var tiles = el.dataset.manifest;
-    if (el.dataset.tileSource) {
-      tiles = { type: 'image', url: el.dataset.tileSource };
-    }
-    if (!tiles) { return; }
+  /**
+   * Turn a IIIF Presentation manifest into tile sources OpenSeadragon can open.
+   *
+   * This is the part that was missing entirely. The viewer was handed the
+   * manifest URL directly as tileSources, and a Presentation manifest is not a
+   * tile source - OpenSeadragon answers "Unable to load TileSource" and shows
+   * nothing. The implementation this plugin replaced did it properly
+   * (ahgIiifPlugin/modules/iiif/templates/viewerSuccess.php:100): walk the
+   * canvases, take each image service id, append /info.json.
+   *
+   * Both Presentation 2 and 3 are handled, because our own manifests carry both
+   * shapes for client compatibility.
+   */
+  function tileSourcesFromManifest(manifest) {
+    var out = [];
 
-    OpenSeadragon({
+    // v3: items[] -> items[] (AnnotationPage) -> items[] (Annotation) -> body
+    (manifest.items || []).forEach(function (canvas) {
+      (canvas.items || []).forEach(function (page) {
+        (page.items || []).forEach(function (anno) {
+          var body = anno.body || {};
+          var svc = [].concat(body.service || []);
+          var id = svc.length ? (svc[0].id || svc[0]['@id']) : null;
+          if (id) {
+            out.push(id.replace(/\/$/, '') + '/info.json');
+          } else if (body.id) {
+            // No image service - a flat image beats an empty viewer.
+            out.push({ type: 'image', url: body.id });
+          }
+        });
+      });
+    });
+
+    if (out.length) { return out; }
+
+    // v2: sequences[] -> canvases[] -> images[] -> resource.service
+    (manifest.sequences || []).forEach(function (seq) {
+      (seq.canvases || []).forEach(function (canvas) {
+        (canvas.images || []).forEach(function (img) {
+          var res = img.resource || {};
+          var id = (res.service || {})['@id'] || (res.service || {}).id;
+          if (id) {
+            out.push(id.replace(/\/$/, '') + '/info.json');
+          } else if (res['@id']) {
+            out.push({ type: 'image', url: res['@id'] });
+          }
+        });
+      });
+    });
+
+    return out;
+  }
+
+  /**
+   * Defaults, restored from the two implementations this plugin replaced.
+   *
+   * crossOriginPolicy is the one that is easy to omit and expensive to: without
+   * it, canvas operations fail as soon as tiles come from a different origin to
+   * the page, which is exactly the arrangement our own image-server guide
+   * recommends.
+   */
+  function defaults(el, tiles) {
+    return {
       id: el.id,
       prefixUrl: assetsFor(el) + '/images/',
       tileSources: tiles,
       showNavigator: true,
-      sequenceMode: false
-    });
+      navigatorPosition: 'BOTTOM_RIGHT',
+      // From the page count, not hardcoded false. A multi-page document opened
+      // on page one with no way to reach page two.
+      sequenceMode: tiles.length > 1,
+      showReferenceStrip: tiles.length > 1,
+      referenceStripScroll: 'horizontal',
+      showRotationControl: true,
+      showFlipControl: true,
+      gestureSettingsMouse: { clickToZoom: true, scrollToZoom: true },
+      crossOriginPolicy: 'Anonymous',
+      animationTime: 0.5,
+      zoomPerClick: 1.5,
+      maxZoomPixelRatio: 4,
+      visibilityRatio: 0.5,
+      constrainDuringPan: true,
+      tileRetryMax: 3,
+      tileRetryDelay: 2000
+    };
+  }
+
+  // Caller overrides, restricted to an allowlist. data-* is page content and is
+  // only as trustworthy as the page that carries it.
+  var ALLOWED = [
+    'showNavigator', 'navigatorPosition', 'sequenceMode', 'showReferenceStrip',
+    'referenceStripScroll', 'showRotationControl', 'showFlipControl',
+    'showZoomControl', 'showHomeControl', 'showFullPageControl',
+    'gestureSettingsMouse', 'gestureSettingsTouch', 'crossOriginPolicy',
+    'animationTime', 'zoomPerClick', 'zoomPerScroll', 'maxZoomPixelRatio',
+    'minZoomLevel', 'maxZoomLevel', 'defaultZoomLevel', 'visibilityRatio',
+    'constrainDuringPan', 'wrapHorizontal', 'wrapVertical', 'immediateRender',
+    'imageSmoothingEnabled', 'tileRetryMax', 'tileRetryDelay', 'preload',
+    'collectionMode', 'collectionRows', 'collectionTileSize'
+  ];
+
+  function withOverrides(config, el) {
+    if (!el.dataset.options) { return config; }
+
+    try {
+      var passed = JSON.parse(el.dataset.options);
+      Object.keys(passed).forEach(function (k) {
+        if (ALLOWED.indexOf(k) !== -1) { config[k] = passed[k]; }
+      });
+    } catch (e) {
+      // A malformed override must not cost the reader the viewer.
+    }
+
+    return config;
+  }
+
+  function open(el, tiles) {
+    if (!tiles || !tiles.length) { return; }
+    OpenSeadragon(withOverrides(defaults(el, tiles), el));
+  }
+
+  function mount(el) {
+    if (el.dataset.booted) { return; }
+    el.dataset.booted = '1';
+
+    applyHeight(el);
+
+    // A direct image URL, for installs with no IIIF image service at all.
+    if (el.dataset.tileSource) {
+      open(el, [{ type: 'image', url: el.dataset.tileSource }]);
+
+      return;
+    }
+
+    if (!el.dataset.manifest) { return; }
+
+    fetch(el.dataset.manifest, { credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (m) { open(el, tileSourcesFromManifest(m)); })
+      .catch(function () {
+        // Leave the container empty rather than throwing. The switcher offers
+        // other viewers, and one failing must not take the page with it.
+      });
   }
 
   /**

@@ -24,7 +24,8 @@ class SeadragonRenderer implements RendererInterface
     {
         $id       = $this->attr((string) ($config['viewerId'] ?? 'v1'));
         $manifest = htmlspecialchars((string) ($config['manifestUrl'] ?? ''), ENT_QUOTES);
-        $height   = $this->height((string) ($config['options']['height'] ?? '600px'));
+        $options  = is_array($config['options'] ?? null) ? $config['options'] : [];
+        $height   = $this->height((string) ($options['height'] ?? '600px'));
 
         // Optional: a direct image URL, used when no IIIF image service is available
         // so the viewer still works on installs without Cantaloupe.
@@ -32,10 +33,24 @@ class SeadragonRenderer implements RendererInterface
             ? ' data-tile-source="' . htmlspecialchars((string) $config['tileSource'], ENT_QUOTES) . '"'
             : '';
 
+        // Caller options. This renderer has accepted $config['options'] since it
+        // was written and read only 'height' from it, so every OpenSeadragon
+        // setting was unreachable no matter what a caller passed. boot.js
+        // applies an allowlist to whatever arrives here.
+        $opts = '';
+
+        if ($passed = array_diff_key($options, ['height' => true])) {
+            $opts = ' data-options="' . htmlspecialchars((string) json_encode($passed), ENT_QUOTES) . '"';
+        }
+
         return '<div id="osd-' . $id . '" class="osd-viewer" data-viewer="openseadragon"'
              . ' data-rendered-by="ahgSeadragonPlugin"'
              . ' data-manifest="' . $manifest . '"'
              . $tile
+             . $opts
+             // Applied through the CSSOM by boot.js: a style attribute is dropped
+             // by the host CSP without reporting anything.
+             . ' data-height="' . htmlspecialchars($height, ENT_QUOTES) . '"'
              . ' data-assets="/plugins/ahgSeadragonPlugin/web/openseadragon"'
              . '></div>';
     }

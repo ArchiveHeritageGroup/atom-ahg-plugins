@@ -1,7 +1,7 @@
 {
   "name": "AHG Seadragon Viewer",
   "machine_name": "ahgSeadragonPlugin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Contributes the Seadragon IIIF image viewer as an independently installable plugin. Registers a renderer with ahgIiifPlugin's RendererRegistry; install or disable it to choose the viewer.",
   "author": "The Archive and Heritage Group (Pty) Ltd",
   "license": "AGPL-3.0-or-later",
