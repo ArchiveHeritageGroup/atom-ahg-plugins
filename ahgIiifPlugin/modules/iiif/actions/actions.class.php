@@ -674,29 +674,6 @@ class iiifActions extends AhgController
                 'background_color' => $request->getParameter('background_color', '#000000'),
                 'show_on_browse' => $request->getParameter('show_on_browse', '0'),
                 'show_on_view' => $request->getParameter('show_on_view', '0'),
-
-                // Per-viewer defaults, read by IiifViewerDefaults and handed to
-                // whichever viewer plugin is installed. Every one of these was
-                // fixed in JavaScript until now, so a site that wanted the
-                // navigator off had to patch a plugin and carry the patch.
-                'seadragon_show_navigator' => $request->getParameter('seadragon_show_navigator', '0'),
-                'seadragon_navigator_position' => $request->getParameter('seadragon_navigator_position', 'BOTTOM_RIGHT'),
-                'seadragon_show_rotation' => $request->getParameter('seadragon_show_rotation', '0'),
-                'seadragon_show_flip' => $request->getParameter('seadragon_show_flip', '0'),
-                'seadragon_cross_origin' => $request->getParameter('seadragon_cross_origin', 'Anonymous'),
-                'seadragon_zoom_per_click' => $request->getParameter('seadragon_zoom_per_click', '1.5'),
-                'seadragon_max_zoom_pixel_ratio' => $request->getParameter('seadragon_max_zoom_pixel_ratio', '4'),
-                'seadragon_animation_time' => $request->getParameter('seadragon_animation_time', '0.5'),
-                'seadragon_tile_retry_max' => $request->getParameter('seadragon_tile_retry_max', '3'),
-                'seadragon_tile_retry_delay' => $request->getParameter('seadragon_tile_retry_delay', '2000'),
-
-                'mirador_allow_close' => $request->getParameter('mirador_allow_close', '0'),
-                'mirador_allow_maximize' => $request->getParameter('mirador_allow_maximize', '0'),
-                'mirador_allow_fullscreen' => $request->getParameter('mirador_allow_fullscreen', '0'),
-                'mirador_sidebar_open' => $request->getParameter('mirador_sidebar_open', '0'),
-                'mirador_thumbnail_position' => $request->getParameter('mirador_thumbnail_position', 'far-bottom'),
-                'mirador_workspace_panel' => $request->getParameter('mirador_workspace_panel', '0'),
-                'mirador_zoom_controls' => $request->getParameter('mirador_zoom_controls', '0'),
             ];
 
             foreach ($settings as $key => $value) {

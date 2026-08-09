@@ -19,6 +19,10 @@ class SettingsMenuComponent extends sfComponent
             ['label' => $i18n->__('Default template'), 'action' => 'template'],
             ['label' => $i18n->__('Diacritics'), 'action' => 'diacritics'],
             ['label' => $i18n->__('Email'), 'action' => 'email'],
+            // Hidden unless a viewer plugin is present: the settings are stored
+            // by ahgIiifPlugin, and an entry leading to a page that cannot save
+            // is worse than no entry.
+            ['label' => $i18n->__('Image viewers'), 'action' => 'viewers', 'hide' => !in_array('ahgIiifPlugin', sfProjectConfiguration::getActive()->getPlugins(), true)],
             ['label' => $i18n->__('Digital object derivatives'), 'action' => 'digitalObjectDerivatives'],
             ['label' => $i18n->__('DIP upload'), 'action' => 'dipUpload'],
             ['label' => $i18n->__('Finding Aid'), 'action' => 'findingAid'],

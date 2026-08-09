@@ -36,6 +36,31 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         // Set IIIF config defaults (plugin manages its own config)
         $this->setConfigDefaults();
 
+        // Navigation.
+        //
+        // This plugin registered nothing, so /admin/iiif-settings and the
+        // collection manager were reachable only by typing the URL - the
+        // settings screen has existed for as long as the plugin has and could
+        // not be found from anywhere in the interface. AhgNav entries are
+        // rendered into the stock menus by ahgCorePlugin on a themeless install
+        // and by ahgThemeB5Plugin where that is present, so this works either
+        // way and disappears cleanly when the plugin is disabled.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'iiifSettings', [
+                'url' => '/index.php/admin/iiif-settings',
+                'label' => 'IIIF and viewer settings',
+                'credentials' => ['administrator'],
+                'weight' => 60,
+            ]);
+
+            AhgNav::register('manage', 'iiifCollections', [
+                'url' => '/index.php/manifest-collections',
+                'label' => 'IIIF collections',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 61,
+            ]);
+        }
+
         // Enable modules
         $enabledModules = sfConfig::get('sf_enabled_modules', []);
         $enabledModules[] = 'iiif';
