@@ -1,0 +1,27 @@
+# Absence of this file means is_secure: false for every action, so it is written
+# out in full rather than relying on a default.
+
+index:
+  is_secure: true
+
+request:
+  is_secure: true
+
+availability:
+  is_secure: true
+
+# Reviewing and the placement register are staff screens. Credentials are
+# double-bracketed, which is OR - a single [editor] list refuses administrators.
+review:
+  is_secure: true
+  credentials: [[editor, administrator]]
+
+placements:
+  is_secure: true
+  credentials: [[editor, administrator]]
+
+view:
+  is_secure: true
+
+all:
+  is_secure: true

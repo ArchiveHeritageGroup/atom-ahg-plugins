@@ -1,0 +1,27 @@
+# ahgArtworkRequestPlugin routes
+
+ahg_artwork_request_index:
+  url: /artworkRequest
+  param: { module: artworkRequest, action: index }
+
+ahg_artwork_request_new:
+  url: /artworkRequest/new
+  param: { module: artworkRequest, action: request }
+
+ahg_artwork_request_review:
+  url: /artworkRequest/review
+  param: { module: artworkRequest, action: review }
+
+ahg_artwork_request_placements:
+  url: /artworkRequest/placements
+  param: { module: artworkRequest, action: placements }
+
+ahg_artwork_request_availability:
+  url: /artworkRequest/availability
+  param: { module: artworkRequest, action: availability }
+
+ahg_artwork_request_view:
+  url: /artworkRequest/:id
+  param: { module: artworkRequest, action: view }
+  requirements:
+    id: \d+
