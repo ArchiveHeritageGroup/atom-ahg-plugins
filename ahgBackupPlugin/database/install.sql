@@ -25,7 +25,6 @@
 -- Table structure for table `backup_history`
 --
 
-DROP TABLE IF EXISTS `backup_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `backup_history` (
@@ -50,7 +49,6 @@ CREATE TABLE IF NOT EXISTS `backup_history` (
 -- Table structure for table `backup_schedule`
 --
 
-DROP TABLE IF EXISTS `backup_schedule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `backup_schedule` (
@@ -78,7 +76,6 @@ CREATE TABLE IF NOT EXISTS `backup_schedule` (
 -- Table structure for table `backup_setting`
 --
 
-DROP TABLE IF EXISTS `backup_setting`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `backup_setting` (

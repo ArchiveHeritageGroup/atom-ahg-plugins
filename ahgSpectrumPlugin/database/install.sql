@@ -25,7 +25,6 @@
 -- Table structure for table `spectrum_acquisition`
 --
 
-DROP TABLE IF EXISTS `spectrum_acquisition`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_acquisition` (
@@ -70,7 +69,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_acquisition` (
 -- Table structure for table `spectrum_approval`
 --
 
-DROP TABLE IF EXISTS `spectrum_approval`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_approval` (
@@ -92,7 +90,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_approval` (
 -- Table structure for table `spectrum_audit_log`
 --
 
-DROP TABLE IF EXISTS `spectrum_audit_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_audit_log` (
@@ -120,7 +117,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_audit_log` (
 -- Table structure for table `spectrum_barcode`
 --
 
-DROP TABLE IF EXISTS `spectrum_barcode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_barcode` (
@@ -144,7 +140,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_barcode` (
 -- Table structure for table `spectrum_condition_check`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_check`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_check` (
@@ -198,7 +193,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_check` (
 -- Table structure for table `spectrum_condition_check_data`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_check_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_check_data` (
@@ -224,7 +218,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_check_data` (
 -- Table structure for table `spectrum_condition_photo`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_photo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_photo` (
@@ -271,7 +264,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_photo` (
 -- Table structure for table `spectrum_condition_photo_comparison`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_photo_comparison`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_photo_comparison` (
@@ -293,7 +285,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_photo_comparison` (
 -- Table structure for table `spectrum_condition_photos`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_photos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_photos` (
@@ -323,7 +314,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_photos` (
 -- Table structure for table `spectrum_condition_template`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_template`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_template` (
@@ -349,7 +339,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_template` (
 -- Table structure for table `spectrum_condition_template_field`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_template_field`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_template_field` (
@@ -375,7 +364,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_template_field` (
 -- Table structure for table `spectrum_condition_template_section`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_template_section`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_template_section` (
@@ -395,7 +383,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_template_section` (
 -- Table structure for table `spectrum_conservation`
 --
 
-DROP TABLE IF EXISTS `spectrum_conservation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_conservation` (
@@ -439,7 +426,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_conservation` (
 -- Table structure for table `spectrum_conservation_treatment`
 --
 
-DROP TABLE IF EXISTS `spectrum_conservation_treatment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_conservation_treatment` (
@@ -465,7 +451,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_conservation_treatment` (
 -- Table structure for table `spectrum_deaccession`
 --
 
-DROP TABLE IF EXISTS `spectrum_deaccession`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_deaccession` (
@@ -505,7 +490,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_deaccession` (
 -- Table structure for table `spectrum_event`
 --
 
-DROP TABLE IF EXISTS `spectrum_event`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_event` (
@@ -540,7 +524,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_event` (
 -- Table structure for table `spectrum_loan_agreements`
 --
 
-DROP TABLE IF EXISTS `spectrum_loan_agreements`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_loan_agreements` (
@@ -561,7 +544,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_loan_agreements` (
 -- Table structure for table `spectrum_loan_document`
 --
 
-DROP TABLE IF EXISTS `spectrum_loan_document`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_loan_document` (
@@ -587,7 +569,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_loan_document` (
 -- Table structure for table `spectrum_loan_in`
 --
 
-DROP TABLE IF EXISTS `spectrum_loan_in`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_loan_in` (
@@ -648,7 +629,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_loan_in` (
 -- Table structure for table `spectrum_loan_out`
 --
 
-DROP TABLE IF EXISTS `spectrum_loan_out`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_loan_out` (
@@ -716,7 +696,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_loan_out` (
 -- Table structure for table `spectrum_location`
 --
 
-DROP TABLE IF EXISTS `spectrum_location`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_location` (
@@ -753,7 +732,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_location` (
 -- Table structure for table `spectrum_movement`
 --
 
-DROP TABLE IF EXISTS `spectrum_movement`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_movement` (
@@ -800,7 +778,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_movement` (
 -- Table structure for table `spectrum_notification`
 --
 
-DROP TABLE IF EXISTS `spectrum_notification`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_notification` (
@@ -824,7 +801,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_notification` (
 -- Table structure for table `spectrum_object_entry`
 --
 
-DROP TABLE IF EXISTS `spectrum_object_entry`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_object_entry` (
@@ -862,7 +838,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_object_entry` (
 -- Table structure for table `spectrum_object_exit`
 --
 
-DROP TABLE IF EXISTS `spectrum_object_exit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_object_exit` (
@@ -898,7 +873,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_object_exit` (
 -- Table structure for table `spectrum_procedure_history`
 --
 
-DROP TABLE IF EXISTS `spectrum_procedure_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_procedure_history` (
@@ -921,7 +895,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_procedure_history` (
 -- Table structure for table `spectrum_valuation`
 --
 
-DROP TABLE IF EXISTS `spectrum_valuation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_valuation` (
@@ -957,7 +930,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_valuation` (
 -- Table structure for table `spectrum_valuation_alert`
 --
 
-DROP TABLE IF EXISTS `spectrum_valuation_alert`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_valuation_alert` (
@@ -983,7 +955,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_valuation_alert` (
 -- Table structure for table `spectrum_workflow_config`
 --
 
-DROP TABLE IF EXISTS `spectrum_workflow_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_workflow_config` (
@@ -1006,7 +977,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_workflow_config` (
 -- Table structure for table `spectrum_workflow_history`
 --
 
-DROP TABLE IF EXISTS `spectrum_workflow_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_workflow_history` (
@@ -1032,7 +1002,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_workflow_history` (
 -- Table structure for table `spectrum_workflow_notification`
 --
 
-DROP TABLE IF EXISTS `spectrum_workflow_notification`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_workflow_notification` (
@@ -1058,7 +1027,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_workflow_notification` (
 -- Table structure for table `spectrum_workflow_state`
 --
 
-DROP TABLE IF EXISTS `spectrum_workflow_state`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_workflow_state` (

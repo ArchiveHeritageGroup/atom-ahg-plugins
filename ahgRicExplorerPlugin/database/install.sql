@@ -25,7 +25,6 @@
 -- Table structure for table `ric_orphan_tracking`
 --
 
-DROP TABLE IF EXISTS `ric_orphan_tracking`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ric_orphan_tracking` (
@@ -51,7 +50,6 @@ CREATE TABLE IF NOT EXISTS `ric_orphan_tracking` (
 -- Temporary view structure for view `ric_queue_status`
 --
 
-DROP TABLE IF EXISTS `ric_queue_status`;
 /*!50001 DROP VIEW IF EXISTS `ric_queue_status`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -66,7 +64,6 @@ SET character_set_client = @saved_cs_client;
 -- Temporary view structure for view `ric_recent_operations`
 --
 
-DROP TABLE IF EXISTS `ric_recent_operations`;
 /*!50001 DROP VIEW IF EXISTS `ric_recent_operations`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -91,7 +88,6 @@ SET character_set_client = @saved_cs_client;
 -- Table structure for table `ric_sync_config`
 --
 
-DROP TABLE IF EXISTS `ric_sync_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ric_sync_config` (
@@ -109,7 +105,6 @@ CREATE TABLE IF NOT EXISTS `ric_sync_config` (
 -- Table structure for table `ric_sync_log`
 --
 
-DROP TABLE IF EXISTS `ric_sync_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ric_sync_log` (
@@ -137,7 +132,6 @@ CREATE TABLE IF NOT EXISTS `ric_sync_log` (
 -- Table structure for table `ric_sync_queue`
 --
 
-DROP TABLE IF EXISTS `ric_sync_queue`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ric_sync_queue` (
@@ -166,7 +160,6 @@ CREATE TABLE IF NOT EXISTS `ric_sync_queue` (
 -- Table structure for table `ric_sync_status`
 --
 
-DROP TABLE IF EXISTS `ric_sync_status`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ric_sync_status` (
@@ -197,7 +190,6 @@ CREATE TABLE IF NOT EXISTS `ric_sync_status` (
 -- Temporary view structure for view `ric_sync_summary`
 --
 
-DROP TABLE IF EXISTS `ric_sync_summary`;
 /*!50001 DROP VIEW IF EXISTS `ric_sync_summary`*/;
 SET @saved_cs_client     = @@character_set_client;
 /*!50503 SET character_set_client = utf8mb4 */;

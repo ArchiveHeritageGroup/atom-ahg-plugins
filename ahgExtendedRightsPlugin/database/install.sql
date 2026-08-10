@@ -213,7 +213,6 @@ INSERT IGNORE INTO `tk_label_i18n` (`tk_label_id`, `culture`, `name`, `descripti
 -- Table structure for table `extended_rights`
 --
 
-DROP TABLE IF EXISTS `extended_rights`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `extended_rights` (
@@ -241,7 +240,6 @@ CREATE TABLE IF NOT EXISTS `extended_rights` (
 -- Table structure for table `extended_rights_batch_log`
 --
 
-DROP TABLE IF EXISTS `extended_rights_batch_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `extended_rights_batch_log` (
@@ -264,7 +262,6 @@ CREATE TABLE IF NOT EXISTS `extended_rights_batch_log` (
 -- Table structure for table `extended_rights_i18n`
 --
 
-DROP TABLE IF EXISTS `extended_rights_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `extended_rights_i18n` (
@@ -284,7 +281,6 @@ CREATE TABLE IF NOT EXISTS `extended_rights_i18n` (
 -- Table structure for table `extended_rights_tk_label`
 --
 
-DROP TABLE IF EXISTS `extended_rights_tk_label`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `extended_rights_tk_label` (
@@ -306,7 +302,6 @@ CREATE TABLE IF NOT EXISTS `extended_rights_tk_label` (
 -- Table structure for table `embargo`
 --
 
-DROP TABLE IF EXISTS `embargo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `embargo` (
@@ -339,7 +334,6 @@ CREATE TABLE IF NOT EXISTS `embargo` (
 -- Table structure for table `embargo_audit`
 --
 
-DROP TABLE IF EXISTS `embargo_audit`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `embargo_audit` (
@@ -360,7 +354,6 @@ CREATE TABLE IF NOT EXISTS `embargo_audit` (
 -- Table structure for table `embargo_exception`
 --
 
-DROP TABLE IF EXISTS `embargo_exception`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `embargo_exception` (
@@ -385,7 +378,6 @@ CREATE TABLE IF NOT EXISTS `embargo_exception` (
 -- Table structure for table `embargo_i18n`
 --
 
-DROP TABLE IF EXISTS `embargo_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `embargo_i18n` (

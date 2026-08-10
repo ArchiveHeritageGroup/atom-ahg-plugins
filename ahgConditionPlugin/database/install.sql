@@ -25,7 +25,6 @@
 -- Table structure for table `condition_assessment_schedule`
 --
 
-DROP TABLE IF EXISTS `condition_assessment_schedule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_assessment_schedule` (
@@ -47,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `condition_assessment_schedule` (
 -- Table structure for table `condition_conservation_link`
 --
 
-DROP TABLE IF EXISTS `condition_conservation_link`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_conservation_link` (
@@ -66,7 +64,6 @@ CREATE TABLE IF NOT EXISTS `condition_conservation_link` (
 -- Table structure for table `condition_damage`
 --
 
-DROP TABLE IF EXISTS `condition_damage`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_damage` (
@@ -93,7 +90,6 @@ CREATE TABLE IF NOT EXISTS `condition_damage` (
 -- Table structure for table `condition_event`
 --
 
-DROP TABLE IF EXISTS `condition_event`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_event` (
@@ -121,7 +117,6 @@ CREATE TABLE IF NOT EXISTS `condition_event` (
 -- Table structure for table `condition_image`
 --
 
-DROP TABLE IF EXISTS `condition_image`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_image` (
@@ -143,7 +138,6 @@ CREATE TABLE IF NOT EXISTS `condition_image` (
 -- Table structure for table `condition_report`
 --
 
-DROP TABLE IF EXISTS `condition_report`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_report` (
@@ -175,7 +169,6 @@ CREATE TABLE IF NOT EXISTS `condition_report` (
 -- Table structure for table `condition_vocabulary`
 --
 
-DROP TABLE IF EXISTS `condition_vocabulary`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_vocabulary` (
@@ -200,7 +193,6 @@ CREATE TABLE IF NOT EXISTS `condition_vocabulary` (
 -- Table structure for table `condition_vocabulary_term`
 --
 
-DROP TABLE IF EXISTS `condition_vocabulary_term`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `condition_vocabulary_term` (
@@ -221,7 +213,6 @@ CREATE TABLE IF NOT EXISTS `condition_vocabulary_term` (
 -- Table structure for table `spectrum_condition_check`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_check`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_check` (
@@ -275,7 +266,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_check` (
 -- Table structure for table `spectrum_condition_check_data`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_check_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_check_data` (
@@ -301,7 +291,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_check_data` (
 -- Table structure for table `spectrum_condition_photo`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_photo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_photo` (
@@ -348,7 +337,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_photo` (
 -- Table structure for table `spectrum_condition_photo_comparison`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_photo_comparison`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_photo_comparison` (
@@ -370,7 +358,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_photo_comparison` (
 -- Table structure for table `spectrum_condition_photos`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_photos`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_photos` (
@@ -400,7 +387,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_photos` (
 -- Table structure for table `spectrum_condition_template`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_template`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_template` (
@@ -426,7 +412,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_template` (
 -- Table structure for table `spectrum_condition_template_field`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_template_field`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_template_field` (
@@ -452,7 +437,6 @@ CREATE TABLE IF NOT EXISTS `spectrum_condition_template_field` (
 -- Table structure for table `spectrum_condition_template_section`
 --
 
-DROP TABLE IF EXISTS `spectrum_condition_template_section`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `spectrum_condition_template_section` (

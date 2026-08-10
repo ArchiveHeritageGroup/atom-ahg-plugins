@@ -92,7 +92,6 @@ CREATE TABLE IF NOT EXISTS `gallery_venue` (
 -- =====================================================
 -- ARTISTS
 -- =====================================================
-DROP TABLE IF EXISTS `gallery_artist`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_artist` (
@@ -136,7 +135,6 @@ CREATE TABLE IF NOT EXISTS `gallery_artist` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `gallery_artist_bibliography`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_artist_bibliography` (
@@ -161,7 +159,6 @@ CREATE TABLE IF NOT EXISTS `gallery_artist_bibliography` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `gallery_artist_exhibition_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_artist_exhibition_history` (
@@ -187,7 +184,6 @@ CREATE TABLE IF NOT EXISTS `gallery_artist_exhibition_history` (
 -- =====================================================
 -- LOANS
 -- =====================================================
-DROP TABLE IF EXISTS `gallery_loan`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_loan` (
@@ -227,7 +223,6 @@ CREATE TABLE IF NOT EXISTS `gallery_loan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `gallery_loan_object`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_loan_object` (
@@ -251,7 +246,6 @@ CREATE TABLE IF NOT EXISTS `gallery_loan_object` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `gallery_facility_report`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_facility_report` (
@@ -292,7 +286,6 @@ CREATE TABLE IF NOT EXISTS `gallery_facility_report` (
 -- =====================================================
 -- VALUATIONS & INSURANCE
 -- =====================================================
-DROP TABLE IF EXISTS `gallery_valuation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_valuation` (
@@ -320,7 +313,6 @@ CREATE TABLE IF NOT EXISTS `gallery_valuation` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS `gallery_insurance_policy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_insurance_policy` (
@@ -347,7 +339,6 @@ CREATE TABLE IF NOT EXISTS `gallery_insurance_policy` (
 -- =====================================================
 -- SPACES (references exhibition_venue from ahgExhibitionPlugin)
 -- =====================================================
-DROP TABLE IF EXISTS `gallery_space`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `gallery_space` (

@@ -25,7 +25,6 @@
 -- Table structure for table `object_security_classification`
 --
 
-DROP TABLE IF EXISTS `object_security_classification`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_security_classification` (
@@ -61,7 +60,6 @@ CREATE TABLE IF NOT EXISTS `object_security_classification` (
 -- Table structure for table `security_2fa_session`
 --
 
-DROP TABLE IF EXISTS `security_2fa_session`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_2fa_session` (
@@ -84,7 +82,6 @@ CREATE TABLE IF NOT EXISTS `security_2fa_session` (
 -- Table structure for table `security_access_condition_link`
 --
 
-DROP TABLE IF EXISTS `security_access_condition_link`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_access_condition_link` (
@@ -107,7 +104,6 @@ CREATE TABLE IF NOT EXISTS `security_access_condition_link` (
 -- Table structure for table `security_access_log`
 --
 
-DROP TABLE IF EXISTS `security_access_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_access_log` (
@@ -138,7 +134,6 @@ CREATE TABLE IF NOT EXISTS `security_access_log` (
 -- Table structure for table `security_audit_log`
 --
 
-DROP TABLE IF EXISTS `security_audit_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_audit_log` (
@@ -166,7 +161,6 @@ CREATE TABLE IF NOT EXISTS `security_audit_log` (
 -- Table structure for table `security_classification`
 --
 
-DROP TABLE IF EXISTS `security_classification`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_classification` (
@@ -199,7 +193,6 @@ CREATE TABLE IF NOT EXISTS `security_classification` (
 -- Table structure for table `security_clearance_history`
 --
 
-DROP TABLE IF EXISTS `security_clearance_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_clearance_history` (
@@ -224,7 +217,6 @@ CREATE TABLE IF NOT EXISTS `security_clearance_history` (
 -- Table structure for table `security_compartment`
 --
 
-DROP TABLE IF EXISTS `security_compartment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_compartment` (
@@ -250,7 +242,6 @@ CREATE TABLE IF NOT EXISTS `security_compartment` (
 -- Table structure for table `security_compliance_log`
 --
 
-DROP TABLE IF EXISTS `security_compliance_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_compliance_log` (
@@ -274,7 +265,6 @@ CREATE TABLE IF NOT EXISTS `security_compliance_log` (
 -- Table structure for table `security_declassification_schedule`
 --
 
-DROP TABLE IF EXISTS `security_declassification_schedule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_declassification_schedule` (
@@ -304,7 +294,6 @@ CREATE TABLE IF NOT EXISTS `security_declassification_schedule` (
 -- Table structure for table `security_retention_schedule`
 --
 
-DROP TABLE IF EXISTS `security_retention_schedule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_retention_schedule` (
@@ -325,7 +314,6 @@ CREATE TABLE IF NOT EXISTS `security_retention_schedule` (
 -- Table structure for table `security_watermark_log`
 --
 
-DROP TABLE IF EXISTS `security_watermark_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_watermark_log` (
@@ -352,7 +340,6 @@ CREATE TABLE IF NOT EXISTS `security_watermark_log` (
 -- Table structure for table `user_security_clearance`
 --
 
-DROP TABLE IF EXISTS `user_security_clearance`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `user_security_clearance` (
@@ -376,7 +363,6 @@ CREATE TABLE IF NOT EXISTS `user_security_clearance` (
 -- Table structure for table `user_security_clearance_log`
 --
 
-DROP TABLE IF EXISTS `user_security_clearance_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `user_security_clearance_log` (

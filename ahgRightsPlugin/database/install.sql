@@ -47,7 +47,6 @@ CREATE TABLE IF NOT EXISTS `object_creative_commons` (
 -- Table structure for table `rights`
 --
 
-DROP TABLE IF EXISTS `rights`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights` (
@@ -79,7 +78,6 @@ CREATE TABLE IF NOT EXISTS `rights` (
 -- Table structure for table `rights_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_i18n` (
@@ -103,7 +101,6 @@ CREATE TABLE IF NOT EXISTS `rights_i18n` (
 -- Table structure for table `rights_cc_license`
 --
 
-DROP TABLE IF EXISTS `rights_cc_license`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_cc_license` (
@@ -130,7 +127,6 @@ CREATE TABLE IF NOT EXISTS `rights_cc_license` (
 -- Table structure for table `rights_cc_license_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_cc_license_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_cc_license_i18n` (
@@ -172,7 +168,6 @@ INSERT IGNORE INTO `rights_cc_license_i18n` (`id`, `culture`, `name`, `descripti
 -- Table structure for table `rights_derivative_log`
 --
 
-DROP TABLE IF EXISTS `rights_derivative_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_derivative_log` (
@@ -196,7 +191,6 @@ CREATE TABLE IF NOT EXISTS `rights_derivative_log` (
 -- Table structure for table `rights_derivative_rule`
 --
 
-DROP TABLE IF EXISTS `rights_derivative_rule`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_derivative_rule` (
@@ -232,7 +226,6 @@ CREATE TABLE IF NOT EXISTS `rights_derivative_rule` (
 -- Table structure for table `rights_embargo`
 --
 
-DROP TABLE IF EXISTS `rights_embargo`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_embargo` (
@@ -269,7 +262,6 @@ CREATE TABLE IF NOT EXISTS `rights_embargo` (
 -- Table structure for table `rights_embargo_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_embargo_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_embargo_i18n` (
@@ -286,7 +278,6 @@ CREATE TABLE IF NOT EXISTS `rights_embargo_i18n` (
 -- Table structure for table `rights_embargo_log`
 --
 
-DROP TABLE IF EXISTS `rights_embargo_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_embargo_log` (
@@ -310,7 +301,6 @@ CREATE TABLE IF NOT EXISTS `rights_embargo_log` (
 -- Table structure for table `rights_grant`
 --
 
-DROP TABLE IF EXISTS `rights_grant`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_grant` (
@@ -335,7 +325,6 @@ CREATE TABLE IF NOT EXISTS `rights_grant` (
 -- Table structure for table `rights_grant_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_grant_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_grant_i18n` (
@@ -351,7 +340,6 @@ CREATE TABLE IF NOT EXISTS `rights_grant_i18n` (
 -- Table structure for table `rights_holder`
 --
 
-DROP TABLE IF EXISTS `rights_holder`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_holder` (
@@ -365,7 +353,6 @@ CREATE TABLE IF NOT EXISTS `rights_holder` (
 -- Table structure for table `rights_object_tk_label`
 --
 
-DROP TABLE IF EXISTS `rights_object_tk_label`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_object_tk_label` (
@@ -392,7 +379,6 @@ CREATE TABLE IF NOT EXISTS `rights_object_tk_label` (
 -- Table structure for table `rights_orphan_search_step`
 --
 
-DROP TABLE IF EXISTS `rights_orphan_search_step`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_orphan_search_step` (
@@ -419,7 +405,6 @@ CREATE TABLE IF NOT EXISTS `rights_orphan_search_step` (
 -- Table structure for table `rights_orphan_work`
 --
 
-DROP TABLE IF EXISTS `rights_orphan_work`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_orphan_work` (
@@ -452,7 +437,6 @@ CREATE TABLE IF NOT EXISTS `rights_orphan_work` (
 -- Table structure for table `rights_orphan_work_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_orphan_work_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_orphan_work_i18n` (
@@ -469,7 +453,6 @@ CREATE TABLE IF NOT EXISTS `rights_orphan_work_i18n` (
 -- Table structure for table `rights_record`
 --
 
-DROP TABLE IF EXISTS `rights_record`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_record` (
@@ -519,7 +502,6 @@ CREATE TABLE IF NOT EXISTS `rights_record` (
 -- Table structure for table `rights_record_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_record_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_record_i18n` (
@@ -536,7 +518,6 @@ CREATE TABLE IF NOT EXISTS `rights_record_i18n` (
 -- Table structure for table `rights_statement`
 --
 
-DROP TABLE IF EXISTS `rights_statement`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_statement` (
@@ -560,7 +541,6 @@ CREATE TABLE IF NOT EXISTS `rights_statement` (
 -- Table structure for table `rights_statement_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_statement_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_statement_i18n` (
@@ -580,7 +560,6 @@ CREATE TABLE IF NOT EXISTS `rights_statement_i18n` (
 -- Table structure for table `rights_territory`
 --
 
-DROP TABLE IF EXISTS `rights_territory`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_territory` (
@@ -602,7 +581,6 @@ CREATE TABLE IF NOT EXISTS `rights_territory` (
 -- Table structure for table `rights_tk_label`
 --
 
-DROP TABLE IF EXISTS `rights_tk_label`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_tk_label` (
@@ -626,7 +604,6 @@ CREATE TABLE IF NOT EXISTS `rights_tk_label` (
 -- Table structure for table `rights_tk_label_i18n`
 --
 
-DROP TABLE IF EXISTS `rights_tk_label_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `rights_tk_label_i18n` (
@@ -644,7 +621,6 @@ CREATE TABLE IF NOT EXISTS `rights_tk_label_i18n` (
 -- Table structure for table `creative_commons_license`
 --
 
-DROP TABLE IF EXISTS `creative_commons_license`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `creative_commons_license` (
@@ -672,7 +648,6 @@ CREATE TABLE IF NOT EXISTS `creative_commons_license` (
 -- Table structure for table `creative_commons_license_i18n`
 --
 
-DROP TABLE IF EXISTS `creative_commons_license_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `creative_commons_license_i18n` (

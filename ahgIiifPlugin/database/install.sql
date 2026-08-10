@@ -179,7 +179,6 @@ CREATE TABLE IF NOT EXISTS `media_speakers` (
 -- Table structure for table `iiif_annotation`
 --
 
-DROP TABLE IF EXISTS `iiif_annotation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_annotation` (
@@ -204,7 +203,6 @@ CREATE TABLE IF NOT EXISTS `iiif_annotation` (
 -- Table structure for table `iiif_annotation_body`
 --
 
-DROP TABLE IF EXISTS `iiif_annotation_body`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_annotation_body` (
@@ -225,7 +223,6 @@ CREATE TABLE IF NOT EXISTS `iiif_annotation_body` (
 -- Table structure for table `iiif_collection`
 --
 
-DROP TABLE IF EXISTS `iiif_collection`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_collection` (
@@ -257,7 +254,6 @@ CREATE TABLE IF NOT EXISTS `iiif_collection` (
 -- Table structure for table `iiif_collection_i18n`
 --
 
-DROP TABLE IF EXISTS `iiif_collection_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_collection_i18n` (
@@ -276,7 +272,6 @@ CREATE TABLE IF NOT EXISTS `iiif_collection_i18n` (
 -- Table structure for table `iiif_collection_item`
 --
 
-DROP TABLE IF EXISTS `iiif_collection_item`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_collection_item` (
@@ -302,7 +297,6 @@ CREATE TABLE IF NOT EXISTS `iiif_collection_item` (
 -- Table structure for table `iiif_ocr_block`
 --
 
-DROP TABLE IF EXISTS `iiif_ocr_block`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_ocr_block` (
@@ -330,7 +324,6 @@ CREATE TABLE IF NOT EXISTS `iiif_ocr_block` (
 -- Table structure for table `iiif_ocr_text`
 --
 
-DROP TABLE IF EXISTS `iiif_ocr_text`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_ocr_text` (
@@ -354,7 +347,6 @@ CREATE TABLE IF NOT EXISTS `iiif_ocr_text` (
 -- Table structure for table `iiif_viewer_settings`
 --
 
-DROP TABLE IF EXISTS `iiif_viewer_settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_viewer_settings` (

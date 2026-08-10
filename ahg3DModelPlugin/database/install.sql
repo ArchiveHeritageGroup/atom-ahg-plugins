@@ -25,7 +25,6 @@
 -- Table structure for table `iiif_3d_manifest`
 --
 
-DROP TABLE IF EXISTS `iiif_3d_manifest`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `iiif_3d_manifest` (
@@ -45,7 +44,6 @@ CREATE TABLE IF NOT EXISTS `iiif_3d_manifest` (
 -- Table structure for table `object_3d_audit_log`
 --
 
-DROP TABLE IF EXISTS `object_3d_audit_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_3d_audit_log` (
@@ -71,7 +69,6 @@ CREATE TABLE IF NOT EXISTS `object_3d_audit_log` (
 -- Table structure for table `object_3d_hotspot`
 --
 
-DROP TABLE IF EXISTS `object_3d_hotspot`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_3d_hotspot` (
@@ -101,7 +98,6 @@ CREATE TABLE IF NOT EXISTS `object_3d_hotspot` (
 -- Table structure for table `object_3d_hotspot_i18n`
 --
 
-DROP TABLE IF EXISTS `object_3d_hotspot_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_3d_hotspot_i18n` (
@@ -120,7 +116,6 @@ CREATE TABLE IF NOT EXISTS `object_3d_hotspot_i18n` (
 -- Table structure for table `object_3d_model`
 --
 
-DROP TABLE IF EXISTS `object_3d_model`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_3d_model` (
@@ -206,7 +201,6 @@ CREATE TABLE IF NOT EXISTS `object_3d_model` (
 -- Table structure for table `object_3d_model_i18n`
 --
 
-DROP TABLE IF EXISTS `object_3d_model_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_3d_model_i18n` (
@@ -226,7 +220,6 @@ CREATE TABLE IF NOT EXISTS `object_3d_model_i18n` (
 -- Table structure for table `object_3d_settings`
 --
 
-DROP TABLE IF EXISTS `object_3d_settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_3d_settings` (
@@ -255,7 +248,6 @@ CREATE TABLE IF NOT EXISTS `object_3d_settings` (
 -- Table structure for table `object_3d_texture`
 --
 
-DROP TABLE IF EXISTS `object_3d_texture`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `object_3d_texture` (
@@ -277,7 +269,6 @@ CREATE TABLE IF NOT EXISTS `object_3d_texture` (
 -- Table structure for table `viewer_3d_settings`
 --
 
-DROP TABLE IF EXISTS `viewer_3d_settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `viewer_3d_settings` (

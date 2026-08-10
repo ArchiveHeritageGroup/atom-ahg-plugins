@@ -25,7 +25,6 @@
 -- Table structure for table `display_collection_type`
 --
 
-DROP TABLE IF EXISTS `display_collection_type`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_collection_type` (
@@ -47,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `display_collection_type` (
 -- Table structure for table `display_collection_type_i18n`
 --
 
-DROP TABLE IF EXISTS `display_collection_type_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_collection_type_i18n` (
@@ -64,7 +62,6 @@ CREATE TABLE IF NOT EXISTS `display_collection_type_i18n` (
 -- Table structure for table `display_field`
 --
 
-DROP TABLE IF EXISTS `display_field`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_field` (
@@ -94,7 +91,6 @@ CREATE TABLE IF NOT EXISTS `display_field` (
 -- Table structure for table `display_field_i18n`
 --
 
-DROP TABLE IF EXISTS `display_field_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_field_i18n` (
@@ -111,7 +107,6 @@ CREATE TABLE IF NOT EXISTS `display_field_i18n` (
 -- Table structure for table `display_level`
 --
 
-DROP TABLE IF EXISTS `display_level`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_level` (
@@ -136,7 +131,6 @@ CREATE TABLE IF NOT EXISTS `display_level` (
 -- Table structure for table `display_level_i18n`
 --
 
-DROP TABLE IF EXISTS `display_level_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_level_i18n` (
@@ -153,7 +147,6 @@ CREATE TABLE IF NOT EXISTS `display_level_i18n` (
 -- Table structure for table `display_mode_global`
 --
 
-DROP TABLE IF EXISTS `display_mode_global`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_mode_global` (
@@ -181,7 +174,6 @@ CREATE TABLE IF NOT EXISTS `display_mode_global` (
 -- Table structure for table `display_object_config`
 --
 
-DROP TABLE IF EXISTS `display_object_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_object_config` (
@@ -203,7 +195,6 @@ CREATE TABLE IF NOT EXISTS `display_object_config` (
 -- Table structure for table `display_object_profile`
 --
 
-DROP TABLE IF EXISTS `display_object_profile`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_object_profile` (
@@ -225,7 +216,6 @@ CREATE TABLE IF NOT EXISTS `display_object_profile` (
 -- Table structure for table `display_profile`
 --
 
-DROP TABLE IF EXISTS `display_profile`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_profile` (
@@ -257,7 +247,6 @@ CREATE TABLE IF NOT EXISTS `display_profile` (
 -- Table structure for table `display_profile_i18n`
 --
 
-DROP TABLE IF EXISTS `display_profile_i18n`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `display_profile_i18n` (
@@ -274,7 +263,6 @@ CREATE TABLE IF NOT EXISTS `display_profile_i18n` (
 -- Table structure for table `user_display_preference`
 --
 
-DROP TABLE IF EXISTS `user_display_preference`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `user_display_preference` (
@@ -494,7 +482,6 @@ UNLOCK TABLES;
 -- Per-user settings for browse interface preferences
 -- ============================================================
 
-DROP TABLE IF EXISTS `user_browse_settings`;
 CREATE TABLE IF NOT EXISTS `user_browse_settings` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -519,7 +506,6 @@ CREATE TABLE IF NOT EXISTS `user_browse_settings` (
 -- Refreshed by: php symfony ahg:refresh-facet-cache
 -- ============================================================
 
-DROP TABLE IF EXISTS `display_facet_cache`;
 CREATE TABLE IF NOT EXISTS `display_facet_cache` (
   `id` int NOT NULL AUTO_INCREMENT,
   `facet_type` varchar(50) NOT NULL COMMENT 'Type: subject, place, genre, level, repository, creator, glam_type, media_type',

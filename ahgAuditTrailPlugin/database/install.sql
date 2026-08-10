@@ -25,7 +25,6 @@
 -- Table structure for table `ahg_audit_access`
 --
 
-DROP TABLE IF EXISTS `ahg_audit_access`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ahg_audit_access` (
@@ -65,7 +64,6 @@ CREATE TABLE IF NOT EXISTS `ahg_audit_access` (
 -- Table structure for table `ahg_audit_authentication`
 --
 
-DROP TABLE IF EXISTS `ahg_audit_authentication`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ahg_audit_authentication` (
@@ -96,7 +94,6 @@ CREATE TABLE IF NOT EXISTS `ahg_audit_authentication` (
 -- Table structure for table `ahg_audit_log`
 --
 
-DROP TABLE IF EXISTS `ahg_audit_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ahg_audit_log` (
@@ -152,7 +149,6 @@ CREATE TABLE IF NOT EXISTS `ahg_audit_log` (
 -- Table structure for table `ahg_audit_retention_policy`
 --
 
-DROP TABLE IF EXISTS `ahg_audit_retention_policy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ahg_audit_retention_policy` (
@@ -173,7 +169,6 @@ CREATE TABLE IF NOT EXISTS `ahg_audit_retention_policy` (
 -- Table structure for table `ahg_audit_settings`
 --
 
-DROP TABLE IF EXISTS `ahg_audit_settings`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `ahg_audit_settings` (

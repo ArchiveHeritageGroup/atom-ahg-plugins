@@ -25,7 +25,6 @@
 -- Table structure for table `access_request`
 --
 
-DROP TABLE IF EXISTS `access_request`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `access_request` (
@@ -60,7 +59,6 @@ CREATE TABLE IF NOT EXISTS `access_request` (
 -- Table structure for table `access_request_approver`
 --
 
-DROP TABLE IF EXISTS `access_request_approver`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `access_request_approver` (
@@ -81,7 +79,6 @@ CREATE TABLE IF NOT EXISTS `access_request_approver` (
 -- Table structure for table `access_request_justification`
 --
 
-DROP TABLE IF EXISTS `access_request_justification`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `access_request_justification` (
@@ -100,7 +97,6 @@ CREATE TABLE IF NOT EXISTS `access_request_justification` (
 -- Table structure for table `access_request_log`
 --
 
-DROP TABLE IF EXISTS `access_request_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `access_request_log` (
@@ -122,7 +118,6 @@ CREATE TABLE IF NOT EXISTS `access_request_log` (
 -- Table structure for table `access_request_scope`
 --
 
-DROP TABLE IF EXISTS `access_request_scope`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `access_request_scope` (
@@ -144,7 +139,6 @@ CREATE TABLE IF NOT EXISTS `access_request_scope` (
 -- Table structure for table `security_access_request`
 --
 
-DROP TABLE IF EXISTS `security_access_request`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE IF NOT EXISTS `security_access_request` (
