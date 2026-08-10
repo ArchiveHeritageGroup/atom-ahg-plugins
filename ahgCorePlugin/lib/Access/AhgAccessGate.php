@@ -73,9 +73,31 @@ class AhgAccessGate
             }
 
             return false;
+        } catch (\sfStopException $e) {
+            // The forward above ends in `throw new sfStopException()` - that is how
+            // sfAction::forward halts the action it interrupts. Catching it here
+            // swallowed the stop, canView() returned true, and the calling action
+            // carried on rendering the record it had just blocked. The embargo was
+            // defeated by its own error handler.
+            //
+            // sfStopException extends sfException extends Exception, so the broad
+            // catch below took it silently. It has to travel.
+            throw $e;
         } catch (\Exception $e) {
-            error_log('AhgAccessGate: ' . $e->getMessage());
-            return true; // Fail open on errors
+            // Fail CLOSED.
+            //
+            // This returned true, so any fault inside canAccessRecord() or
+            // getEmbargoDisplayInfo() - a missing table, a bad row - made an
+            // embargoed record readable. An embargo we cannot evaluate is not an
+            // embargo that has lapsed, and the four callers are the museum,
+            // library, DAM and gallery record views, where the cost of being wrong
+            // is disclosure rather than inconvenience.
+            //
+            // A record wrongly withheld is visible and complained about. A record
+            // wrongly disclosed is neither.
+            error_log('AhgAccessGate: embargo check failed, denying access: ' . $e->getMessage());
+
+            return false;
         }
     }
 
