@@ -55,7 +55,14 @@ class ahgStorageManagePluginConfiguration extends sfPluginConfiguration
 
         $router->any('physicalobject_browse_override', '/physicalobject/browse', 'browse');
         $router->any('physicalobject_autocomplete_override', '/physicalobject/autocomplete', 'autocomplete');
-        $router->any('physicalobject_boxlist_override', '/physicalobject/boxList', 'boxList');
+        // boxList is deliberately NOT overridden.
+        //
+        // Base AtoM links to it from the physical object view as a RESOURCE
+        // route carrying the slug, and its action needs that resource. Routing
+        // /physicalobject/boxList without a slug gave an action that could never
+        // succeed - it demanded a resource the route was incapable of supplying,
+        // so every visit was a 404. This plugin's copy of executeBoxList was
+        // identical to base's apart from a guard cushioning that very failure.
         $router->any('physicalobject_holdings_export_override', '/physicalobject/holdingsReportExport', 'holdingsReportExport');
 
         $router->register($event->getSubject());
