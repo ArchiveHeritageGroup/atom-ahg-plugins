@@ -139,6 +139,36 @@ class IiifManifestV3Service
             $manifest['partOf'] = [$partOf];
         }
 
+        // rendering - the file itself, as an alternative to viewing it.
+        //
+        // A manifest describes how to LOOK at something; rendering is how to take
+        // it away. A reader who wants the PDF rather than a canvas has no route
+        // through the Presentation API without it.
+        //
+        // Safe by construction: the caller has already run applyMasterAccess(), so
+        // $digitalObjects holds whatever representation this requester is entitled
+        // to - the master, or the reference derivative in its place. The download
+        // route enforces that again on its own account, so an expired session gets
+        // 403 rather than a file.
+        $rendering = [];
+
+        foreach ($digitalObjects as $do) {
+            if (empty($do['id'])) {
+                continue;
+            }
+
+            $rendering[] = [
+                'id' => "{$this->baseUrl}/index.php/media/download/{$do['id']}",
+                'type' => $this->renderingType((string) ($do['mime_type'] ?? '')),
+                'label' => [$culture => [(string) ($do['name'] ?: 'Download')]],
+                'format' => (string) ($do['mime_type'] ?: 'application/octet-stream'),
+            ];
+        }
+
+        if ($rendering) {
+            $manifest['rendering'] = $rendering;
+        }
+
         if ($object['identifier']) {
             $manifest['metadata'][] = [
                 'label' => [$culture => ['Identifier']],
@@ -606,6 +636,33 @@ class IiifManifestV3Service
     /**
      * Build a v3 canvas with annotation page and painting annotation.
      */
+    /**
+     * The Presentation 3 class for a rendering, from its media type.
+     *
+     * Not cosmetic: a client decides what to do with a rendering from its type,
+     * and calling a PDF an Image is how one gets opened in the wrong viewer.
+     */
+    private function renderingType(string $mimeType): string
+    {
+        if (0 === strpos($mimeType, 'image/')) {
+            return 'Image';
+        }
+
+        if (0 === strpos($mimeType, 'video/')) {
+            return 'Video';
+        }
+
+        if (0 === strpos($mimeType, 'audio/')) {
+            return 'Sound';
+        }
+
+        if (0 === strpos($mimeType, 'text/') || 'application/pdf' === $mimeType) {
+            return 'Text';
+        }
+
+        return 'Dataset';
+    }
+
     /**
      * Reading direction, from the description's own language.
      *
