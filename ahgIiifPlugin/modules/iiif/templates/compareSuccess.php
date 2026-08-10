@@ -1,18 +1,48 @@
 <?php
 /*
- * Standalone document, not an AtoM page.
+ * IIIF comparison - Mirador in mosaic mode, mounted in its own document.
  *
- * Mirador is a full React/Material-UI application that expects to own its
- * viewport and positions its panels absolutely. Rendered inside the AtoM layout
- * it collides with the Bootstrap bundle and its workspace becomes black blocks
- * scattered over the site chrome - which is exactly what this page did, and what
- * ahgMiradorPlugin avoids by mounting in an iframe.
+ * WHY AN IFRAME RATHER THAN THIS PAGE
  *
- * The CSS below already assumed a page of its own: html/body at 100% height and
- * #mirador-compare absolutely positioned to the viewport. It was simply never
- * given one.
+ * Mirador 3 is React with emotion: it injects its Material-UI styles into the
+ * document at runtime. AtoM's Content Security Policy is `style-src 'self'
+ * 'nonce-...'` with no 'unsafe-inline', and a nonce cannot cover a stylesheet
+ * the page writes after load - so every one of those injected rules is dropped.
+ *
+ * The result is not an error. Mirador mounts, fetches the manifest, fetches
+ * tiles, and draws an unstyled workspace: black rectangles where the windows,
+ * toolbars and thumbnails should be. Nothing fails, so nothing is reported.
+ * That is what this page did, and the manifest and tile requests all returned
+ * 200 the whole time.
+ *
+ * web/public/mirador/compare.html is a static file served by the web server
+ * rather than rendered by AtoM, so it carries no CSP header and Mirador may
+ * style itself. It already accepts repeated ?manifest= parameters. That is the
+ * same reason ahgMiradorPlugin mounts its viewer in an iframe.
+ *
+ * @var array  $manifests   manifest URLs
+ * @var string $baseUrl
+ * @var string $pluginPath
  */
 decorate_with(false);
+
+// Unwrap the output escaper before touching it: Symfony hands templates their
+// variables wrapped, so this is an object rather than an array, and array-
+// functions on it are a fatal on PHP 8 - which previously truncated this
+// response mid-script.
+$manifestUrls = $manifests instanceof sfOutputEscaperArrayDecorator
+    ? $manifests->getRawValue()
+    : (array) $manifests;
+
+$query = implode('&', array_map(
+    static fn ($url) => 'manifest='.rawurlencode((string) $url),
+    array_values($manifestUrls)
+));
+
+$src = $pluginPath.'/public/mirador/compare.html?'.$query;
+
+$n = sfConfig::get('csp_nonce', '');
+$nonceAttr = $n ? ' '.preg_replace('/^nonce=/', 'nonce="', $n).'"' : '';
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo sfContext::getInstance()->getUser()->getCulture(); ?>">
@@ -20,100 +50,12 @@ decorate_with(false);
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><?php echo __('IIIF comparison'); ?></title>
-<?php // Rules moved out of style attributes: a CSP nonce covers <style>
-      // elements and never an attribute, so under an enforcing policy every one
-      // of these was dropped silently.
-      $cspNonce = sfConfig::get('csp_nonce', ''); ?>
-<style <?php echo $cspNonce ? preg_replace('/^nonce=/', 'nonce="', $cspNonce).'"' : ''; ?>>
-  .iiif-color-white-margin-top-15px--826c { color:white;margin-top:15px;font-family:Arial,sans-serif; }
-</style>
-<?php
-/**
- * IIIF Comparison Viewer
- * Uses Mirador in mosaic workspace mode to compare multiple manifests side-by-side.
- *
- * @var array $manifests  Array of manifest URLs
- * @var string $baseUrl
- * @var string $pluginPath
- */
-$n = sfConfig::get('csp_nonce', '');
-$nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
-?>
 <style<?php echo $nonceAttr; ?>>
   html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #1e1e1e; }
-  #mirador-compare { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
-  .compare-loading {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
-    justify-content: center; align-items: center; z-index: 9999;
-    transition: opacity 0.3s;
-  }
-  .compare-loading.hidden { opacity: 0; pointer-events: none; }
-  .compare-spinner { width: 50px; height: 50px; border: 5px solid #333; border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; display: block; }
 </style>
-
 </head>
 <body>
-
-<div class="compare-loading" id="compare-loading">
-  <div class="compare-spinner"></div>
-  <div class="iiif-color-white-margin-top-15px--826c">Loading comparison view...</div>
-</div>
-
-<div id="mirador-compare"></div>
-
-<link rel="stylesheet" href="<?php echo $pluginPath; ?>/public/mirador/mirador.min.css">
-<script src="<?php echo $pluginPath; ?>/public/mirador/mirador.min.js"<?php echo $nonceAttr; ?>></script>
-<script<?php echo $nonceAttr; ?>>
-(function() {
-  <?php
-  /*
-   * Unwrap before touching it.
-   *
-   * Symfony hands a template action variables wrapped in an output escaper, so
-   * $manifests here is an sfOutputEscaperArrayDecorator and not an array.
-   * array_values() on an object is a TypeError on PHP 8, which killed the
-   * response mid-statement: the browser received
-   *
-   *     (function() { var manifests =
-   *
-   * and nothing else. No JavaScript error, because there was no JavaScript -
-   * just an unterminated function expression the browser discarded, leaving the
-   * loading spinner up for ever. Comparison has never worked.
-   */
-  $manifestUrls = $manifests instanceof sfOutputEscaperArrayDecorator
-      ? $manifests->getRawValue()
-      : (array) $manifests;
-  ?>
-  var manifests = <?php echo json_encode(array_values($manifestUrls), JSON_UNESCAPED_SLASHES); ?>;
-
-  var windows = manifests.map(function(url) {
-    return { manifestId: url, canvasIndex: 0 };
-  });
-
-  Mirador.viewer({
-    id: 'mirador-compare',
-    windows: windows,
-    window: {
-      allowClose: true,
-      allowMaximize: true,
-      allowFullscreen: true,
-      sideBarOpenByDefault: false
-    },
-    workspace: {
-      showZoomControls: true,
-      type: 'mosaic',
-      allowNewWindows: true
-    },
-    workspaceControlPanel: { enabled: true },
-    catalog: manifests.map(function(url) { return { manifestId: url }; })
-  });
-
-  setTimeout(function() {
-    document.getElementById('compare-loading').classList.add('hidden');
-  }, 2500);
-})();
-</script>
+<iframe src="<?php echo esc_specialchars($src); ?>" title="<?php echo __('IIIF comparison'); ?>"></iframe>
 </body>
 </html>

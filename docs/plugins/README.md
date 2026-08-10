@@ -42,7 +42,9 @@ Mirador 3 as the record viewer. Renders manifest ranges as a navigable table of 
 
 ![Mirador on a record page, with the viewer switcher](screenshots/ahgMiradorPlugin/mirador-record.png)
 
-Side-by-side comparison across manifests is available at `/iiif/compare` and is **not yet presentable** - the workspace renders empty panels. Tracked in [#286](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog/issues/286).
+Side-by-side comparison across manifests at `/iiif/compare?slugs=a,b`.
+
+![Comparing manifests in the Mirador workspace](screenshots/ahgMiradorPlugin/compare.png)
 
 [Download Mirador 1.1.1](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.1.1) · [Full documentation](../../ahgMiradorPlugin/README.md)
 
