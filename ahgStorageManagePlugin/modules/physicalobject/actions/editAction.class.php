@@ -138,12 +138,35 @@ class PhysicalObjectEditAction extends AhgEditController
         $this->response->setTitle("{$title} - {$this->response->getTitle()}");
     }
 
+    /**
+     * Read a field from $this->resource, whichever shape it is.
+     *
+     * Two different things land in $this->resource. An existing record comes
+     * from the route as a Qubit object, which supports array access. A new one
+     * comes from WriteServiceFactory::physicalObject()->newPhysicalObject(),
+     * which returns a stdClass - and `$this->resource[$name]` on that is
+     * "Cannot use object of type stdClass as array", a fatal.
+     *
+     * The fatal killed the response mid-render, so /physicalobject/add and
+     * /physicalobject/edit both returned HTTP 200 with a 39-byte body: no error
+     * page, no 500, just nothing. Adding or editing a physical object was
+     * impossible and looked like a blank screen.
+     */
+    protected function resourceValue(string $name)
+    {
+        if (is_array($this->resource) || $this->resource instanceof ArrayAccess) {
+            return $this->resource[$name] ?? null;
+        }
+
+        return $this->resource->{$name} ?? null;
+    }
+
     protected function addField($name)
     {
         switch ($name) {
             case 'location':
             case 'name':
-                $this->form->setDefault($name, $this->resource[$name]);
+                $this->form->setDefault($name, $this->resourceValue($name));
                 $this->form->setValidator($name, new sfValidatorString());
                 $this->form->setWidget($name, new sfWidgetFormInput());
 
