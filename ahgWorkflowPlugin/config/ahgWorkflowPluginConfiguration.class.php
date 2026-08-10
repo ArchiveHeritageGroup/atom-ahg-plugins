@@ -13,6 +13,42 @@ class ahgWorkflowPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Navigation entry, contributed by the plugin rather than named by the
+        // theme.
+        //
+        // These modules were reachable only because ahgThemeB5Plugin hardcodes
+        // them in its own admin menu, so on a stock AtoM install - which is what
+        // the published bundles target - the plugin installed, worked, and had
+        // nowhere to click from. ahgCorePlugin renders these into AtoM's own
+        // quick-links menu when the theme is absent, so the entry now follows
+        // the plugin and disappears with it. Issue #292.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'workflow_dashboard', [
+                'route' => ['module' => 'workflow', 'action' => 'dashboard'],
+                'label' => 'Workflow dashboard',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 400,
+            ]);
+            AhgNav::register('manage', 'workflow_admin', [
+                'route' => ['module' => 'workflow', 'action' => 'admin'],
+                'label' => 'Workflows and diagrams',
+                'credentials' => ['administrator'],
+                'weight' => 401,
+            ]);
+            AhgNav::register('manage', 'workflow_spectrumDashboard', [
+                'route' => ['module' => 'workflow', 'action' => 'spectrumDashboard'],
+                'label' => 'Collections Procedures compliance',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 402,
+            ]);
+            AhgNav::register('manage', 'workflow_spectrumChain', [
+                'route' => ['module' => 'workflow', 'action' => 'spectrumChain'],
+                'label' => 'Collections Procedures chain rules',
+                'credentials' => ['administrator'],
+                'weight' => 403,
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 

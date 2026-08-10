@@ -22,6 +22,36 @@ class ahgResearcherPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Navigation entry, contributed by the plugin rather than named by the
+        // theme.
+        //
+        // These modules were reachable only because ahgThemeB5Plugin hardcodes
+        // them in its own admin menu, so on a stock AtoM install - which is what
+        // the published bundles target - the plugin installed, worked, and had
+        // nowhere to click from. ahgCorePlugin renders these into AtoM's own
+        // quick-links menu when the theme is absent, so the entry now follows
+        // the plugin and disappears with it. Issue #292.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'researcher_dashboard', [
+                'route' => ['module' => 'researcher', 'action' => 'dashboard'],
+                'label' => 'Researcher dashboard',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 360,
+            ]);
+            AhgNav::register('manage', 'researcher_submissions', [
+                'route' => ['module' => 'researcher', 'action' => 'submissions'],
+                'label' => 'Researcher submissions',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 361,
+            ]);
+            AhgNav::register('manage', 'researcher_importExchange', [
+                'route' => ['module' => 'researcher', 'action' => 'importExchange'],
+                'label' => 'Researcher import exchange',
+                'credentials' => ['administrator'],
+                'weight' => 362,
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 

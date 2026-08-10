@@ -18,6 +18,24 @@ class ahgRicExplorerPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Navigation entry, contributed by the plugin rather than named by the
+        // theme.
+        //
+        // These modules were reachable only because ahgThemeB5Plugin hardcodes
+        // them in its own admin menu, so on a stock AtoM install - which is what
+        // the published bundles target - the plugin installed, worked, and had
+        // nowhere to click from. ahgCorePlugin renders these into AtoM's own
+        // quick-links menu when the theme is absent, so the entry now follows
+        // the plugin and disappears with it. Issue #292.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'ricDashboard_index', [
+                'route' => ['module' => 'ricDashboard', 'action' => 'index'],
+                'label' => 'RiC dashboard',
+                'credentials' => ['administrator'],
+                'weight' => 370,
+            ]);
+        }
         // Add CSS and JS to all pages
         $this->dispatcher->connect('response.filter_content', [$this, 'filterContent']);
 

@@ -13,6 +13,36 @@ class ahgAuditTrailPluginConfiguration extends sfPluginConfiguration
 
     public function initialize(): void
     {
+
+        // Navigation entry, contributed by the plugin rather than named by the
+        // theme.
+        //
+        // These modules were reachable only because ahgThemeB5Plugin hardcodes
+        // them in its own admin menu, so on a stock AtoM install - which is what
+        // the published bundles target - the plugin installed, worked, and had
+        // nowhere to click from. ahgCorePlugin renders these into AtoM's own
+        // quick-links menu when the theme is absent, so the entry now follows
+        // the plugin and disappears with it. Issue #292.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'auditTrail_statistics', [
+                'route' => ['module' => 'auditTrail', 'action' => 'statistics'],
+                'label' => 'Audit statistics',
+                'credentials' => ['administrator'],
+                'weight' => 300,
+            ]);
+            AhgNav::register('manage', 'auditTrail_browse', [
+                'route' => ['module' => 'auditTrail', 'action' => 'browse'],
+                'label' => 'Audit logs',
+                'credentials' => ['administrator'],
+                'weight' => 301,
+            ]);
+            AhgNav::register('manage', 'auditTrail_settings', [
+                'route' => ['module' => 'auditTrail', 'action' => 'settings'],
+                'label' => 'Audit settings',
+                'credentials' => ['administrator'],
+                'weight' => 302,
+            ]);
+        }
         // Register autoloader for plugin namespaces
         $this->registerAutoloader();
 

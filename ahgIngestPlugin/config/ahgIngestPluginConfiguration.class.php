@@ -21,6 +21,30 @@ class ahgIngestPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+
+        // Navigation entry, contributed by the plugin rather than named by the
+        // theme.
+        //
+        // These modules were reachable only because ahgThemeB5Plugin hardcodes
+        // them in its own admin menu, so on a stock AtoM install - which is what
+        // the published bundles target - the plugin installed, worked, and had
+        // nowhere to click from. ahgCorePlugin renders these into AtoM's own
+        // quick-links menu when the theme is absent, so the entry now follows
+        // the plugin and disappears with it. Issue #292.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'ingest_index', [
+                'route' => ['module' => 'ingest', 'action' => 'index'],
+                'label' => 'Ingest dashboard',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 350,
+            ]);
+            AhgNav::register('manage', 'ingest_configure', [
+                'route' => ['module' => 'ingest', 'action' => 'configure'],
+                'label' => 'New ingest',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 351,
+            ]);
+        }
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
