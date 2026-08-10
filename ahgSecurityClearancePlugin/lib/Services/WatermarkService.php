@@ -81,7 +81,16 @@ class WatermarkService
     private function generateWatermarkData(int $userId, int $objectId, ?int $digitalObjectId): array
     {
         $user = DB::table('user')->where('id', $userId)->first();
-        $code = strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 12));
+        // CSPRNG, not md5(uniqid(mt_rand)) - the twin of this line in
+        // SecurityClearanceService was fixed by the 2026-06-15 audit and this one
+        // was missed, which is the usual shape: the refactor fixes the call site
+        // that was searched for and leaves the copy.
+        //
+        // It matters here because the code is what identifies who a leaked copy
+        // was issued to. mt_rand is seeded from a small state and uniqid is the
+        // clock, so a code that can be predicted or replayed makes the watermark
+        // decorative rather than evidential.
+        $code = strtoupper(substr(bin2hex(random_bytes(8)), 0, 12));
 
         $text = str_replace(
             ['{username}', '{date}', '{code}', '{email}'],
