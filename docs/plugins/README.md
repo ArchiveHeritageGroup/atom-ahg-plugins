@@ -8,7 +8,7 @@ This page lists the **current version of each**. For older versions see the [ful
 
 | | Version | |
 |---|---|---|
-| **AHG Runtime** - the shared foundation every plugin depends on | 2.14.1 | [Download](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgRuntimePlugin-v2.14.1) |
+| **AHG Runtime** - the shared foundation every plugin depends on | 2.15.0 | [Download](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgRuntimePlugin-v2.15.0) |
 
 It ships once, separately, because it is the large part and identical for all of them. It also provides `bin/ahg`, the command-line entry point that makes plugin tasks available to cron.
 
@@ -95,7 +95,7 @@ Reader feedback and corrections against archival records, with a queue for staff
 Each bundle carries its own dependencies and an `INSTALL.md` with the enable order. In short, from the AtoM root:
 
 ```bash
-unzip ahgRuntimePlugin-2.14.1.zip -d plugins/     # first, shared by all
+unzip ahgRuntimePlugin-2.15.0.zip -d plugins/     # first, shared by all
 unzip <plugin>.zip                -d plugins/
 chown -R www-data:www-data plugins/
 mysql -u <user> -p <database> < plugins/<plugin>/database/install.sql
