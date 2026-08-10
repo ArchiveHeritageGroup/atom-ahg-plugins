@@ -109,6 +109,36 @@ class IiifManifestV3Service
             $manifest['structures'] = $structures;
         }
 
+        if (count($items) > 1) {
+            // Where to open. Without it a client picks, and clients disagree.
+            $manifest['start'] = [
+                'id' => "{$manifestId}/canvas/1",
+                'type' => 'Canvas',
+            ];
+
+            // How to display it. A multi-page file is a book and should be paged;
+            // a set of separate photographs is not, and paging it puts unrelated
+            // images side by side as though they were a spread.
+            $manifest['behavior'] = $structures ? ['paged'] : ['individuals'];
+        }
+
+        // Right-to-left material. Arabic and Hebrew documents are read the other
+        // way, and a viewer has no way to know that from the images.
+        if ($direction = $this->resolveViewingDirection((int) ($object['id'] ?? 0))) {
+            $manifest['viewingDirection'] = $direction;
+        }
+
+        // The date timeline browsers sort on - the creation date, not the date the
+        // record was catalogued.
+        if ($navDate = $this->resolveNavDate((int) ($object['id'] ?? 0))) {
+            $manifest['navDate'] = $navDate;
+        }
+
+        // The parent description, so a client can walk up out of a single item.
+        if ($partOf = $this->resolvePartOf((int) ($object['id'] ?? 0), $culture)) {
+            $manifest['partOf'] = [$partOf];
+        }
+
         if ($object['identifier']) {
             $manifest['metadata'][] = [
                 'label' => [$culture => ['Identifier']],
@@ -576,6 +606,128 @@ class IiifManifestV3Service
     /**
      * Build a v3 canvas with annotation page and painting annotation.
      */
+    /**
+     * Reading direction, from the description's own language.
+     *
+     * IIIF names four; only right-to-left is worth deriving, because a viewer
+     * defaults to left-to-right and gets Arabic, Hebrew, Persian and Urdu
+     * backwards with no indication anything is wrong.
+     */
+    private function resolveViewingDirection(int $objectId): ?string
+    {
+        if (!$objectId) {
+            return null;
+        }
+
+        try {
+            // AtoM keeps the language of the material in the property table as a
+            // serialised array, NOT on information_object_i18n - which has no
+            // language column at all. Worth stating, because the obvious guess is
+            // wrong and the catch below would have hidden it permanently: the
+            // query fails, null comes back, and a manifest that never carries a
+            // direction looks exactly like material that is all left-to-right.
+            $raw = (string) DB::table('property as p')
+                ->join('property_i18n as pi', 'pi.id', '=', 'p.id')
+                ->where('p.object_id', $objectId)
+                ->where('p.name', 'language')
+                ->value('pi.value');
+
+            if ('' === $raw) {
+                return null;
+            }
+
+            $languages = @unserialize($raw);
+            $languages = is_array($languages) ? $languages : [$raw];
+
+            foreach ($languages as $lang) {
+                if (in_array(strtolower(substr((string) $lang, 0, 2)), ['ar', 'he', 'fa', 'ur'], true)) {
+                    return 'right-to-left';
+                }
+            }
+        } catch (\Throwable $e) {
+            // A manifest without a direction is fine; one that throws is not.
+        }
+
+        return null;
+    }
+
+    /**
+     * navDate, the date a timeline browser sorts on.
+     *
+     * Deliberately the creation date rather than any date on the record: a
+     * timeline of when things were catalogued is of no interest to anyone.
+     * Ranges collapse to their start date, which is what a point on a timeline
+     * has to be.
+     */
+    private function resolveNavDate(int $objectId): ?string
+    {
+        if (!$objectId) {
+            return null;
+        }
+
+        try {
+            $date = DB::table('event')
+                ->where('object_id', $objectId)
+                ->whereNotNull('start_date')
+                ->orderBy('start_date')
+                ->value('start_date');
+
+            if (!$date) {
+                return null;
+            }
+
+            $ts = strtotime((string) $date);
+
+            return $ts ? gmdate('Y-m-d\TH:i:s\Z', $ts) : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * The parent description, as a Collection reference.
+     *
+     * Lets a client walk up from an item to the series it belongs to. Skipped at
+     * the top of the tree, and skipped for AtoM's synthetic root - which is a row
+     * rather than a description and has no manifest of its own.
+     */
+    private function resolvePartOf(int $objectId, string $culture): ?array
+    {
+        if (!$objectId) {
+            return null;
+        }
+
+        try {
+            $parentId = (int) DB::table('information_object')
+                ->where('id', $objectId)
+                ->value('parent_id');
+
+            // 1 is QubitInformationObject::ROOT_ID.
+            if (!$parentId || 1 === $parentId) {
+                return null;
+            }
+
+            $slug = DB::table('slug')->where('object_id', $parentId)->value('slug');
+
+            if (!$slug) {
+                return null;
+            }
+
+            $title = DB::table('information_object_i18n')
+                ->where('id', $parentId)
+                ->orderByRaw("culture = ? DESC", [$culture])
+                ->value('title');
+
+            return [
+                'id' => "{$this->baseUrl}/iiif/v3/manifest/{$slug}",
+                'type' => 'Collection',
+                'label' => [$culture => [(string) ($title ?: $slug)]],
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     /**
      * Ranges for the manifest, one per file.
      *
