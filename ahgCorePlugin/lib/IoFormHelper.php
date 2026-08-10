@@ -805,6 +805,7 @@ class IoFormHelper
             if ($action->isNew) {
                 $newId = $svc::create($data, $culture);
                 self::saveSecurityClassification($request, $action, (int) $newId);
+                self::saveWatermarkSettings($request, $action, (int) $newId);
                 $newSlug = \AhgCore\Services\ObjectService::getSlug($newId);
                 $action->redirect($returnToEdit ? '/informationobject/' . $newSlug . '/edit' : '/' . $newSlug);
 
@@ -815,6 +816,7 @@ class IoFormHelper
             // After the IO save has committed (update() runs its own transaction),
             // persist the security classification if the fieldset was on the form.
             self::saveSecurityClassification($request, $action, (int) $action->io['id']);
+            self::saveWatermarkSettings($request, $action, (int) $action->io['id']);
             $action->redirect($returnToEdit ? '/informationobject/' . $action->io['slug'] . '/edit' : '/' . $action->io['slug']);
 
             return true;
@@ -843,7 +845,12 @@ class IoFormHelper
             return;
         }
 
-        $svc = '\\AtomExtensions\\Services\\SecurityClearanceService';
+        // Global namespace: the class declares no namespace. This read
+        // '\\AtomExtensions\\Services\\SecurityClearanceService', which does not exist, so
+        // class_exists() was false and this handler returned without doing
+        // anything - every classification set on an AHG edit form since #236
+        // was silently discarded, with the description itself saving fine.
+        $svc = '\\SecurityClearanceService';
         if (!\class_exists($svc)) {
             return;
         }
@@ -862,6 +869,80 @@ class IoFormHelper
         } elseif (null !== $svc::getObjectClassification($objectId)) {
             // "- none -" chosen on a currently-classified record: declassify.
             $svc::declassifyObject($objectId, null, $userId, 'Cleared via edit form');
+        }
+    }
+
+    /**
+     * Persist the watermark settings posted by the securityClearance fieldset.
+     *
+     * The fieldset has rendered watermark_enabled, watermark_type_id and
+     * custom_watermark_id since #236 and nothing ever read them back - not here
+     * and not on the base ISAD form either. So an editor could set a watermark
+     * on a record, save, and find the record saved perfectly with the watermark
+     * unchanged. A form that shows a control and discards it is worse than one
+     * that does not show it, because the first teaches people the setting does
+     * not work and the second only teaches them where it lives.
+     *
+     * Runs after the information-object save has committed, like the
+     * classification handler beside it, so a watermark problem can never void
+     * the description write.
+     *
+     * The new_watermark_* upload fields are NOT handled here. A file upload
+     * inside the edit-save path means holding the request open through image
+     * work, and the dedicated screen at securityClearance/watermarkSettings
+     * already does it properly. See #256.
+     */
+    private static function saveWatermarkSettings(sfWebRequest $request, sfActions $action, int $objectId): void
+    {
+        if ($objectId <= 0
+            || !\in_array('ahgSecurityClearancePlugin', \sfProjectConfiguration::getActive()->getPlugins())
+            || !$request->hasParameter('watermark_type_id')) {
+            return;
+        }
+
+        $svc = '\\AhgCore\\Services\\WatermarkSettingsService';
+
+        if (!\class_exists($svc)) {
+            return;
+        }
+
+        $typeId = (int) $request->getParameter('watermark_type_id');
+        $customId = (int) $request->getParameter('custom_watermark_id');
+
+        try {
+            $svc::saveObjectWatermark(
+                $objectId,
+                $typeId > 0 ? $typeId : null,
+                (bool) $request->getParameter('watermark_enabled'),
+                $customId,
+                $request->getParameter('new_watermark_position') ?: null,
+                null !== $request->getParameter('new_watermark_opacity')
+                    ? (float) $request->getParameter('new_watermark_opacity')
+                    : null
+            );
+        } catch (\Throwable $e) {
+            // Never cost the editor their description over a watermark row.
+            \error_log('saveWatermarkSettings: '.$e->getMessage());
+
+            return;
+        }
+
+        // Derivatives carry the watermark, so changing the setting without
+        // regenerating them leaves the old mark on disk. Opt-in, because
+        // regenerating a large record is not something to do behind someone's
+        // back on a save.
+        if (!$request->getParameter('regenerate_derivatives')) {
+            return;
+        }
+
+        $regen = '\\AhgCore\\Services\\DerivativeWatermarkService';
+
+        if (\class_exists($regen) && \method_exists($regen, 'regenerateDerivatives')) {
+            try {
+                $regen::regenerateDerivatives($objectId);
+            } catch (\Throwable $e) {
+                \error_log('saveWatermarkSettings regenerate: '.$e->getMessage());
+            }
         }
     }
 

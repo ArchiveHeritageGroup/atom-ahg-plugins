@@ -211,8 +211,23 @@ class WatermarkSettingsService
     /**
      * Save watermark settings for an object.
      */
-    public static function saveObjectWatermark(int $objectId, ?int $watermarkTypeId, bool $enabled = true): bool
-    {
+    /**
+     * Save watermark settings for an object.
+     *
+     * $customWatermarkId, $position and $opacity are optional so existing
+     * two-argument callers keep their behaviour: passing null leaves the stored
+     * value alone rather than clearing it. The edit form passes all of them,
+     * because a form that shows a field and silently discards it is worse than
+     * one that does not show it - which is what #256 was about.
+     */
+    public static function saveObjectWatermark(
+        int $objectId,
+        ?int $watermarkTypeId,
+        bool $enabled = true,
+        ?int $customWatermarkId = null,
+        ?string $position = null,
+        ?float $opacity = null
+    ): bool {
         $existing = DB::table('object_watermark_setting')
             ->where('object_id', $objectId)
             ->first();
@@ -222,6 +237,19 @@ class WatermarkSettingsService
             'watermark_enabled' => $enabled ? 1 : 0,
             'updated_at' => date('Y-m-d H:i:s'),
         ];
+
+        // Only overwrite what the caller actually supplied.
+        if (null !== $customWatermarkId) {
+            $data['custom_watermark_id'] = $customWatermarkId ?: null;
+        }
+
+        if (null !== $position) {
+            $data['position'] = $position;
+        }
+
+        if (null !== $opacity) {
+            $data['opacity'] = $opacity;
+        }
 
         if ($existing) {
             return DB::table('object_watermark_setting')
