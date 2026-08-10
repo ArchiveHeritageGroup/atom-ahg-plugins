@@ -7,6 +7,20 @@ class ahgMarketplacePluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Contribute this plugin's navigation entry.
+        //
+        // Registered here rather than named by a theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'Marketplace', [
+                'url' => '/index.php/marketplace',
+                'label' => 'Marketplace',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         // Enable the marketplace module so Symfony can resolve actions
         sfConfig::set('sf_enabled_modules', array_merge(
             sfConfig::get('sf_enabled_modules', []),

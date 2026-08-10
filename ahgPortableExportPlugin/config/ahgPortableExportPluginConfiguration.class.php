@@ -21,6 +21,20 @@ class ahgPortableExportPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Contribute this plugin's navigation entry.
+        //
+        // Registered here rather than named by a theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'PortableExport', [
+                'url' => '/index.php/portable-export',
+                'label' => 'Portable Export',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 

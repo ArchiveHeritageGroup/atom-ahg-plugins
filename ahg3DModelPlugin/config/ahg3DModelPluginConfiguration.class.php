@@ -22,6 +22,20 @@ class ahg3DModelPluginConfiguration extends sfPluginConfiguration
 
     public function initialize()
     {
+        // Contribute this plugin's navigation entry.
+        //
+        // Registered here rather than named by a theme, so the entry exists
+        // exactly while this plugin is enabled and appears on any theme.
+        // Without it the plugin was reachable only by typing its URL.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', '3DModel', [
+                'url' => '/index.php/ahg3DModel/index',
+                'label' => '3 D Model',
+                'credentials' => ['editor', 'administrator'],
+                'weight' => 70,
+            ]);
+        }
+
         // Enable modules
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'model3d';
