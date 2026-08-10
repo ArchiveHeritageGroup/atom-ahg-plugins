@@ -9,6 +9,15 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
     public function initialize()
     {
 
+        // Show where a record physically is, on the record itself.
+        //
+        // spectrum_location and spectrum_movement have always held building,
+        // room, shelf, every move with its reason and handler, and a planned
+        // return date - and none of it appeared on a description. You had to
+        // know these screens existed and go to them. See LocationInjector.
+        require_once __DIR__.'/../lib/Listeners/LocationInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgSpectrum\Listeners\LocationInjector', 'filter']);
+
         // Navigation contributed to the theme. The theme renders whatever is
         // registered and knows nothing about this plugin: previously it named
         // '@spectrum_my_tasks' directly and called ahgSpectrumWorkflowService
