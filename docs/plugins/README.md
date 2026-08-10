@@ -16,7 +16,7 @@ Requirements are the same throughout: **AtoM 2.9 or 2.10, PHP 8.1+, MySQL 8.0**.
 
 ## The plugins
 
-### IIIF - 1.2.2
+### IIIF - 1.2.3
 
 Manifests, collections, annotations, search, authorisation, OCR export and media handling. Presentation API 3.0 with a 2.1 path, Image API 2 and 3 both advertised, Content Search 2.0, Auth 1.0 and 2.0, Change Discovery 1.0.
 
@@ -24,9 +24,9 @@ Manifests carry `structures` so multi-page material gets a table of contents, pl
 
 ![A record page with the viewer switcher, image and plugin panels](screenshots/ahgIiifPlugin/record-viewer.png)
 
-[Download IIIF 1.2.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgIiifPlugin-v1.2.2) · [Full documentation](../../ahgIiifPlugin/README.md)
+[Download IIIF 1.2.3](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgIiifPlugin-v1.2.3) · [Full documentation](../../ahgIiifPlugin/README.md)
 
-### Seadragon viewer - 1.1.2
+### Seadragon viewer - 1.1.3
 
 OpenSeadragon 4.1.0 deep zoom. Registers itself with the IIIF renderer registry, so a site can install this viewer, Mirador, both or neither.
 
@@ -34,11 +34,11 @@ Opens a IIIF manifest, navigates multi-page sequences, and offers rotation and f
 
 ![Viewer defaults under Admin > Settings](screenshots/ahgSeadragonPlugin/viewer-settings.png)
 
-[Download Seadragon 1.1.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgSeadragonPlugin-v1.1.2) · [Full documentation](../../ahgSeadragonPlugin/README.md)
+[Download Seadragon 1.1.3](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgSeadragonPlugin-v1.1.3) · [Full documentation](../../ahgSeadragonPlugin/README.md)
 
-### Mirador viewer - 1.1.2
+### Mirador viewer - 1.2.0
 
-Mirador 3 as the record viewer. Renders manifest ranges as a navigable table of contents, follows the interface language rather than defaulting to English, and mounts in its own frame so its workspace does not collide with the site theme.
+Mirador 3.4.3 as the record viewer. Renders manifest ranges as a navigable table of contents, follows the interface language rather than defaulting to English, and mounts in its own frame so its workspace does not collide with the site theme.
 
 ![Mirador on a record page, with the viewer switcher](screenshots/ahgMiradorPlugin/mirador-record.png)
 
@@ -46,7 +46,7 @@ Side-by-side comparison across manifests at `/iiif/compare?slugs=a,b`.
 
 ![Comparing manifests in the Mirador workspace](screenshots/ahgMiradorPlugin/compare.png)
 
-[Download Mirador 1.1.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.1.2) · [Full documentation](../../ahgMiradorPlugin/README.md)
+[Download Mirador 1.2.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.2.0) · [Full documentation](../../ahgMiradorPlugin/README.md)
 
 ### Digital Preservation - 1.0.6
 

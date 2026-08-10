@@ -1,6 +1,6 @@
 # AHG Mirador Viewer
 
-Mirador as an independently installable AtoM plugin. A full IIIF workspace - deep zoom, thumbnails, metadata panel and the comparison model Mirador is chosen for.
+Mirador as an independently installable AtoM plugin. A full IIIF workspace - deep zoom, thumbnails, metadata panel, and the side-by-side comparison Mirador is chosen for.
 
 **Current version: 1.2.0. Bundled library: Mirador 3.4.3.**
 
@@ -54,12 +54,8 @@ An IIIF image server is optional and stays yours - see the [image server guide](
 
 ## Not implemented
 
-- **Side-by-side comparison.** `compare.html` exists in `ahgIiifPlugin` and was never ported to this plugin, so comparison across manifests is not reachable from here. This is the capability Mirador is best known for and the gap worth closing first.
-- **Annotations.** Mirador's annotation support is exposed nowhere, while `ahgIiifPlugin` runs its own annotation feature that knows nothing about Mirador's. Two systems, no connection.
-- **`osdConfig`** - Mirador embeds OpenSeadragon and passes options through to it, so everything in the Seadragon plugin's option list is reachable this way and is not.
-- **`theme`** - the viewer does not match the AtoM site around it on any instance.
-- **`galleryView`, `export`, `requests`** - grid browsing, sharing a view, and headers for manifest fetches.
-- **Annotations are not wired to a store.** Mirador can display annotations from a manifest, but nothing here writes them back. `ahgIiifPlugin` has an annotation store and the two are not connected, so annotations made in the viewer are not kept.
+- **Annotations are not wired to a store.** Mirador can display annotations carried in a manifest, but nothing here writes them back, and `ahgIiifPlugin` runs its own annotation store that knows nothing about Mirador's. Connecting them means deciding which is authoritative and what becomes of annotations already held in either, so it is a design decision rather than a missing call. Tracked in issue #286.
+- **The viewer does not match the site around it.** `theme` is passed through and accepted, but nothing derives a Mirador theme from the active AtoM theme, so a site with its own colours gets Mirador's defaults.
 
 Verified on AtoM 2.10 against Cantaloupe 5.0.6: mounts on a record page, refuses a cross-origin manifest, reports a missing one, and drops a non-allowlisted override.
 
