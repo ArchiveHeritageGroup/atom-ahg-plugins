@@ -38,9 +38,11 @@ Opens a IIIF manifest, navigates multi-page sequences, and offers rotation and f
 
 ### Mirador viewer - 1.1.1
 
-Mirador 3, for side-by-side comparison across collections. Renders manifest ranges as a navigable table of contents, and follows the interface language rather than defaulting to English.
+Mirador 3 as the record viewer. Renders manifest ranges as a navigable table of contents, follows the interface language rather than defaulting to English, and mounts in its own frame so its workspace does not collide with the site theme.
 
-![Comparing manifests side by side](screenshots/ahgMiradorPlugin/compare.png)
+![Mirador on a record page, with the viewer switcher](screenshots/ahgMiradorPlugin/mirador-record.png)
+
+Side-by-side comparison across manifests is available at `/iiif/compare` and is **not yet presentable** - the workspace renders empty panels. Tracked in [#286](https://github.com/ArchiveHeritageGroup/atom-extensions-catalog/issues/286).
 
 [Download Mirador 1.1.1](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.1.1) · [Full documentation](../../ahgMiradorPlugin/README.md)
 

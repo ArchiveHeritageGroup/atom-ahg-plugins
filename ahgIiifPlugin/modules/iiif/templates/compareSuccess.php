@@ -1,3 +1,25 @@
+<?php
+/*
+ * Standalone document, not an AtoM page.
+ *
+ * Mirador is a full React/Material-UI application that expects to own its
+ * viewport and positions its panels absolutely. Rendered inside the AtoM layout
+ * it collides with the Bootstrap bundle and its workspace becomes black blocks
+ * scattered over the site chrome - which is exactly what this page did, and what
+ * ahgMiradorPlugin avoids by mounting in an iframe.
+ *
+ * The CSS below already assumed a page of its own: html/body at 100% height and
+ * #mirador-compare absolutely positioned to the viewport. It was simply never
+ * given one.
+ */
+decorate_with(false);
+?>
+<!DOCTYPE html>
+<html lang="<?php echo sfContext::getInstance()->getUser()->getCulture(); ?>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><?php echo __('IIIF comparison'); ?></title>
 <?php // Rules moved out of style attributes: a CSP nonce covers <style>
       // elements and never an attribute, so under an enforcing policy every one
       // of these was dropped silently.
@@ -30,6 +52,9 @@ $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
   .compare-spinner { width: 50px; height: 50px; border: 5px solid #333; border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
+
+</head>
+<body>
 
 <div class="compare-loading" id="compare-loading">
   <div class="compare-spinner"></div>
@@ -90,3 +115,5 @@ $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
   }, 2500);
 })();
 </script>
+</body>
+</html>
