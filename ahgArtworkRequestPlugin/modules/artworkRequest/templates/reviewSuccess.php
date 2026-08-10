@@ -3,6 +3,12 @@
   <h1><?php echo __('Artwork requests') ?> <span class="badge bg-secondary"><?php echo count($pending) ?></span></h1>
 <?php end_slot() ?>
 
+<p class="mb-3">
+  <a class="btn btn-sm btn-outline-secondary"
+     href="<?php echo url_for(['module' => 'artworkRequest', 'action' => 'approvers']) ?>"><?php echo __('Approvers') ?></a>
+</p>
+
+
 <p>
   <a class="btn btn-outline-secondary btn-sm" href="<?php echo url_for(['module' => 'artworkRequest', 'action' => 'placements']) ?>">
     <?php echo __('What is out on campus') ?>

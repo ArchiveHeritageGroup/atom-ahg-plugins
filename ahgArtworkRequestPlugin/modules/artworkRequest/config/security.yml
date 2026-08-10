@@ -10,6 +10,9 @@ request:
 availability:
   is_secure: true
 
+view:
+  is_secure: true
+
 # Reviewing and the placement register are staff screens. Credentials are
 # double-bracketed, which is OR - a single [editor] list refuses administrators.
 review:
@@ -24,8 +27,11 @@ createLoan:
   is_secure: true
   credentials: [[editor, administrator]]
 
-view:
+# Deciding who approves is an administrative function rather than a curatorial
+# one, so it is held tighter than the review queue itself.
+approvers:
   is_secure: true
+  credentials: [[administrator]]
 
 all:
   is_secure: true

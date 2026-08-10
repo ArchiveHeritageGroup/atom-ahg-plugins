@@ -195,6 +195,83 @@ class artworkRequestActions extends sfActions
             || $this->getUser()->hasCredential('administrator');
     }
 
+    /**
+     * Who reviews requests, and for which department.
+     *
+     * These rows went in by hand until now, which meant a gallery could not
+     * change who is notified without someone at a database prompt - and an
+     * approver who leaves keeps getting the mail until somebody notices.
+     */
+    public function executeApprovers($request)
+    {
+        $this->errors = [];
+
+        if ($request->isMethod('post')) {
+            $action = $request->getParameter('form_action');
+            $id = (int) $request->getParameter('approver_id');
+
+            switch ($action) {
+                case 'add':
+                    $added = Requests::addApprover(
+                        (string) $request->getParameter('user_ref'),
+                        $request->getParameter('department'),
+                        (bool) $request->getParameter('email_notifications')
+                    );
+
+                    if (null === $added) {
+                        $this->errors[] = 'No user matches that username or email address.';
+                    } else {
+                        $this->getUser()->setFlash('notice', 'Approver added.');
+                    }
+
+                    break;
+
+                case 'activate':
+                    Requests::setApproverActive($id, true);
+                    $this->getUser()->setFlash('notice', 'Approver enabled.');
+
+                    break;
+
+                case 'deactivate':
+                    // Deactivate rather than delete by default: an approver who
+                    // steps away usually comes back, and the row carries which
+                    // department they covered.
+                    Requests::setApproverActive($id, false);
+                    $this->getUser()->setFlash('notice', 'Approver disabled.');
+
+                    break;
+
+                case 'notifications':
+                    Requests::setApproverNotifications($id, (bool) $request->getParameter('on'));
+                    $this->getUser()->setFlash('notice', 'Notification setting saved.');
+
+                    break;
+
+                case 'remove':
+                    Requests::removeApprover($id);
+                    $this->getUser()->setFlash('notice', 'Approver removed.');
+
+                    break;
+            }
+
+            if (!$this->errors) {
+                $this->redirect(['module' => 'artworkRequest', 'action' => 'approvers']);
+
+                return;
+            }
+        }
+
+        $this->approvers = Requests::approvers();
+        $this->candidates = Requests::candidateUsers();
+        $this->departments = DB::table('artwork_request')
+            ->whereNotNull('department')
+            ->where('department', '!=', '')
+            ->distinct()
+            ->orderBy('department')
+            ->pluck('department')
+            ->all();
+    }
+
     protected function currentUserEmail(): ?string
     {
         $userId = $this->getUser()->getAttribute('user_id');

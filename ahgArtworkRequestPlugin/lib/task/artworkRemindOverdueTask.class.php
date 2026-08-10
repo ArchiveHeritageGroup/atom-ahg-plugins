@@ -26,6 +26,8 @@ class artworkRemindOverdueTask extends sfBaseTask
             new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'propel'),
             new sfCommandOption('every-days', null, sfCommandOption::PARAMETER_REQUIRED,
                 'Do not chase the same request more often than this', 7),
+            new sfCommandOption('before-days', null, sfCommandOption::PARAMETER_REQUIRED,
+                'Also send a courtesy reminder this many days before the due date; 0 disables', 7),
             new sfCommandOption('dry-run', null, sfCommandOption::PARAMETER_NONE,
                 'List what would be chased and send nothing'),
         ]);
@@ -35,11 +37,14 @@ class artworkRemindOverdueTask extends sfBaseTask
         $this->briefDescription = 'Email reminders for artworks past their return date';
         $this->detailedDescription = <<<'EOF'
 The [artwork:remind-overdue|INFO] task emails the borrower and the gallery about
-placements that are past their return date.
+placements that are past their return date, and - unless --before-days=0 - about
+placements coming up for return.
 
-Each send is written to artwork_request_log as a `reminded` event, so the record
-shows what was chased and when, and the same request is not chased again inside
---every-days.
+Each send is written to artwork_request_log: `reminded` for something already
+late, `reminded_due_soon` for the courtesy nudge before the date. They are
+separate events on purpose, so a nudge on the Monday cannot suppress the chase
+on the Friday. The same request is not sent the same kind of reminder twice
+inside --every-days.
 
   [php plugins/ahgRuntimePlugin/bin/ahg artwork:remind-overdue|INFO]
   [php plugins/ahgRuntimePlugin/bin/ahg artwork:remind-overdue --dry-run|INFO]
@@ -56,8 +61,27 @@ EOF;
         require_once __DIR__.'/../Service/ArtworkRequestService.php';
 
         $every = (int) ($options['every-days'] ?? 7);
+        $before = (int) ($options['before-days'] ?? 7);
 
         if (!empty($options['dry-run'])) {
+            if ($before > 0) {
+                $soon = \AhgArtworkRequest\Service\ArtworkRequestService::dueSoonNeedingReminder($before, $every);
+
+                foreach ($soon as $r) {
+                    $in = (int) ceil((strtotime((string) $r->requested_to) - time()) / 86400);
+                    $this->logSection('artwork', sprintf(
+                        '%s - %s, due %s (in %d day(s)), with %s',
+                        $r->request_number,
+                        $r->requester_name ?: 'unknown',
+                        $r->requested_to,
+                        max(0, $in),
+                        $r->placement_occupant ?: $r->requester_name
+                    ));
+                }
+
+                $this->logSection('artwork', sprintf('%d placement(s) due soon would be reminded.', count($soon)));
+            }
+
             $due = \AhgArtworkRequest\Service\ArtworkRequestService::overdueNeedingReminder($every);
 
             foreach ($due as $r) {
@@ -77,9 +101,17 @@ EOF;
             return 0;
         }
 
+        $soonSent = $before > 0
+            ? \AhgArtworkRequest\Service\ArtworkRequestService::sendDueSoonReminders($before, $every)
+            : 0;
+
         $sent = \AhgArtworkRequest\Service\ArtworkRequestService::sendOverdueReminders($every);
 
-        $this->logSection('artwork', sprintf('%d reminder(s) sent.', $sent));
+        if ($before > 0) {
+            $this->logSection('artwork', sprintf('%d due-soon reminder(s) sent.', $soonSent));
+        }
+
+        $this->logSection('artwork', sprintf('%d overdue reminder(s) sent.', $sent));
 
         return 0;
     }

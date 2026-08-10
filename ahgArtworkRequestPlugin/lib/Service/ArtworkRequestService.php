@@ -599,4 +599,183 @@ class ArtworkRequestService
             return false;
         }
     }
+
+    // ------------------------------------------------------ approver settings
+
+    /**
+     * Everyone who reviews requests, with the user behind each row.
+     *
+     * Inactive rows are returned too. Turning an approver off is not the same as
+     * never having had one, and a settings screen that hides what it disabled
+     * invites the same person being added twice.
+     */
+    public static function approvers(): array
+    {
+        return DB::table('artwork_request_approver as ara')
+            ->join('user as u', 'ara.user_id', '=', 'u.id')
+            ->select('ara.id', 'ara.user_id', 'ara.department', 'ara.email_notifications',
+                     'ara.active', 'ara.created_at', 'u.username', 'u.email')
+            ->orderByDesc('ara.active')
+            ->orderBy('u.username')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Add an approver, identified by username or email.
+     *
+     * Returns null when no such user exists, so the screen can say which of the
+     * two things went wrong rather than reporting a generic failure.
+     */
+    public static function addApprover(string $userRef, ?string $department, bool $emailNotifications = true): ?int
+    {
+        $userRef = trim($userRef);
+
+        if ('' === $userRef) {
+            return null;
+        }
+
+        $user = DB::table('user')
+            ->where('username', $userRef)
+            ->orWhere('email', $userRef)
+            ->select('id')
+            ->first();
+
+        if (!$user) {
+            return null;
+        }
+
+        $department = ('' === trim((string) $department)) ? null : trim((string) $department);
+
+        // The unique key is (user_id, department), and NULL never equals NULL in
+        // MySQL - so the general queue would happily take the same person twice
+        // if this relied on the constraint alone.
+        $existing = DB::table('artwork_request_approver')
+            ->where('user_id', $user->id)
+            ->when(null === $department,
+                static fn ($q) => $q->whereNull('department'),
+                static fn ($q) => $q->where('department', $department))
+            ->first();
+
+        if ($existing) {
+            DB::table('artwork_request_approver')
+                ->where('id', $existing->id)
+                ->update(['active' => 1, 'email_notifications' => $emailNotifications ? 1 : 0]);
+
+            return (int) $existing->id;
+        }
+
+        return (int) DB::table('artwork_request_approver')->insertGetId([
+            'user_id' => (int) $user->id,
+            'department' => $department,
+            'email_notifications' => $emailNotifications ? 1 : 0,
+            'active' => 1,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+    }
+
+    public static function setApproverActive(int $approverId, bool $active): void
+    {
+        DB::table('artwork_request_approver')
+            ->where('id', $approverId)
+            ->update(['active' => $active ? 1 : 0]);
+    }
+
+    public static function setApproverNotifications(int $approverId, bool $on): void
+    {
+        DB::table('artwork_request_approver')
+            ->where('id', $approverId)
+            ->update(['email_notifications' => $on ? 1 : 0]);
+    }
+
+    public static function removeApprover(int $approverId): void
+    {
+        DB::table('artwork_request_approver')->where('id', $approverId)->delete();
+    }
+
+    /**
+     * Users who could be made approvers, for the picker.
+     */
+    public static function candidateUsers(int $limit = 500): array
+    {
+        return DB::table('user')
+            ->whereNotNull('username')
+            ->select('id', 'username', 'email')
+            ->orderBy('username')
+            ->limit($limit)
+            ->get()
+            ->all();
+    }
+
+    // --------------------------------------------------- due-soon reminders
+
+    /**
+     * Placements coming up for return within $withinDays.
+     *
+     * Deliberately a different log event from `reminded`. If both used the same
+     * one, a courtesy nudge sent on the Monday would suppress the overdue chase
+     * on the Friday, and the reminder that actually matters would be the one
+     * silently skipped.
+     */
+    public static function dueSoonNeedingReminder(int $withinDays = 7, int $everyDays = 7): array
+    {
+        $cutoff = date('Y-m-d H:i:s', strtotime("-{$everyDays} days"));
+        $horizon = date('Y-m-d', strtotime("+{$withinDays} days"));
+
+        return DB::table('artwork_request as ar')
+            ->join('artwork_request_object as aro', 'aro.request_id', '=', 'ar.id')
+            ->whereIn('ar.status', ['approved', 'fulfilled'])
+            ->whereIn('aro.status', ['approved', 'issued'])
+            ->whereDate('ar.requested_to', '>=', date('Y-m-d'))
+            ->whereDate('ar.requested_to', '<=', $horizon)
+            ->whereNotExists(function ($q) use ($cutoff) {
+                $q->select(DB::raw(1))
+                    ->from('artwork_request_log')
+                    ->whereColumn('artwork_request_log.request_id', 'ar.id')
+                    ->where('artwork_request_log.event', 'reminded_due_soon')
+                    ->where('artwork_request_log.created_at', '>=', $cutoff);
+            })
+            ->select('ar.id', 'ar.request_number', 'ar.requester_name', 'ar.requester_email',
+                     'ar.department', 'ar.requested_to', 'ar.placement_building',
+                     'ar.placement_room', 'ar.placement_occupant')
+            ->distinct()
+            ->orderBy('ar.requested_to')
+            ->get()
+            ->all();
+    }
+
+    public static function sendDueSoonReminders(int $withinDays = 7, int $everyDays = 7): int
+    {
+        $sent = 0;
+
+        foreach (self::dueSoonNeedingReminder($withinDays, $everyDays) as $r) {
+            $days = (int) ceil((strtotime((string) $r->requested_to) - time()) / 86400);
+            $where = trim(($r->placement_building ?? '').' '.($r->placement_room ?? ''));
+
+            $body = sprintf(
+                "%s is due back on %s, in %d day(s).\n\nRequest: %s\nPlacement: %s\nWith: %s\n\n".
+                "No action is needed if it is coming back as arranged. If you would like to keep it ".
+                "longer, ask the gallery to extend the placement before the date above.\n",
+                $r->request_number,
+                $r->requested_to,
+                max(0, $days),
+                $r->request_number,
+                $where ?: 'not recorded',
+                $r->placement_occupant ?: $r->requester_name
+            );
+
+            if ($r->requester_email) {
+                self::sendEmail($r->requester_email, 'Artwork due back soon: '.$r->request_number, $body);
+            }
+
+            foreach (self::approversFor($r->department) as $approver) {
+                self::sendEmail($approver->email, 'Artwork due back soon: '.$r->request_number, $body);
+            }
+
+            self::log((int) $r->id, 'reminded_due_soon', null, "Due in {$days} day(s); courtesy reminder sent");
+            ++$sent;
+        }
+
+        return $sent;
+    }
 }
