@@ -2,7 +2,7 @@
 
 Mirador as an independently installable AtoM plugin. A full IIIF workspace - deep zoom, thumbnails, metadata panel and the comparison model Mirador is chosen for.
 
-**Current version: 1.0.4. Bundled library: Mirador 3.x.**
+**Current version: 1.2.0. Bundled library: Mirador 3.4.3.**
 
 ## How it plugs in
 
@@ -42,6 +42,12 @@ A caller may pass options per record through `$config['options']` on the rendere
     ahgCorePlugin     carried in this bundle
     ahgRuntimePlugin  2.14.1 or later, installed separately
 
+The bundled build is pinned to the published **Mirador 3.4.3** release
+(`https://unpkg.com/mirador@3.4.3/dist/mirador.min.js`, sha256 recorded in
+`extension.json`), so it can be checked against upstream advisories. Until v1.2.0
+the bundle matched no release between 3.0.0 and 3.4.3 and its provenance could not
+be established, which left any security question about it unanswerable.
+
 Mirador is vendored, so there is no CDN to whitelist and no build step. Mirador 3 injects its own styles from JavaScript; the `mirador.min.css` beside it is a placeholder and carries no rules.
 
 An IIIF image server is optional and stays yours - see the [image server guide](../docs/infrastructure/iiif-image-server.md).
@@ -53,7 +59,7 @@ An IIIF image server is optional and stays yours - see the [image server guide](
 - **`osdConfig`** - Mirador embeds OpenSeadragon and passes options through to it, so everything in the Seadragon plugin's option list is reachable this way and is not.
 - **`theme`** - the viewer does not match the AtoM site around it on any instance.
 - **`galleryView`, `export`, `requests`** - grid browsing, sharing a view, and headers for manifest fetches.
-- **No version string.** The bundled `mirador.min.js` embeds none, so `extension.json` records it by sha256 instead. That makes a security or compatibility question unanswerable until the source of the build is established.
+- **Annotations are not wired to a store.** Mirador can display annotations from a manifest, but nothing here writes them back. `ahgIiifPlugin` has an annotation store and the two are not connected, so annotations made in the viewer are not kept.
 
 Verified on AtoM 2.10 against Cantaloupe 5.0.6: mounts on a record page, refuses a cross-origin manifest, reports a missing one, and drops a non-allowlisted override.
 

@@ -30,7 +30,7 @@ class MiradorRendererPlugin implements RendererInterface
      */
     private const PASSTHROUGH = [
         'window', 'workspace', 'workspaceControlPanel', 'thumbnailNavigation',
-        'osdConfig', 'theme', 'galleryView', 'export',
+        'osdConfig', 'theme', 'galleryView', 'export', 'requests',
     ];
 
     public function render(array $config): string
