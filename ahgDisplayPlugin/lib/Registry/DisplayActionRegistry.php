@@ -302,7 +302,33 @@ class DisplayActionRegistry
             try {
                 return AclService::check($resource, $permission);
             } catch (\Exception $e) {
-                return true; // Default to allowing if ACL check fails
+                // Fail closed, and say so.
+                //
+                // This returned true - an ACL check that threw granted the
+                // permission it was asked about, and logged nothing, so a
+                // failing check and a passing one were indistinguishable
+                // afterwards.
+                //
+                // Failing closed is safe here in a way it would not be
+                // everywhere: this method has one caller, which filters the list
+                // of action buttons offered for a resource. It gates what is
+                // OFFERED, not what is reachable - a URL is still guarded by the
+                // module's own security.yml and by AtoM's ACL on the action
+                // itself. So the worst outcome of this change is a button that
+                // does not appear while the ACL layer is broken, which is both
+                // the conservative answer and now a visible, logged one.
+                //
+                // AclService::check() already returns false rather than throwing
+                // for an anonymous user, so reaching this catch means a genuine
+                // fault - a missing table, a bad resource - not an ordinary
+                // permission denial.
+                error_log(sprintf(
+                    'DisplayActionRegistry: ACL check for "%s" failed, hiding the action: %s',
+                    $permission,
+                    $e->getMessage()
+                ));
+
+                return false;
             }
         }
 
