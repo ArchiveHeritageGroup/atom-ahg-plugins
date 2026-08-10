@@ -35,18 +35,55 @@ class artworkRequestActions extends sfActions
     /**
      * Ask for one or more works.
      */
+    /**
+     * Ask for one or more works.
+     *
+     * Everything submitted is handed back to the template on a validation error.
+     * It used to re-render blank: the message was accurate and the form beneath
+     * it was empty, so somebody who missed one field lost their dates, their
+     * placement and their justification. People do not retype a justification
+     * carefully - they retype it badly, or they email the gallery instead, which
+     * is the behaviour this plugin exists to replace.
+     */
     public function executeRequest($request)
     {
         $this->conflicts = [];
         $this->errors = [];
 
+        // Field values for the form. Populated from the submission on a failed
+        // post, empty on a first visit, so the template binds the same way in
+        // both cases and cannot render a stale value by accident.
+        $this->values = array_fill_keys([
+            'requested_from', 'requested_to', 'department', 'purpose', 'justification',
+            'placement_building', 'placement_floor', 'placement_room',
+            'placement_occupant', 'placement_notes',
+        ], '');
+
+        $this->works = [];
+
         if ($request->isMethod('post')) {
-            $objectIds = array_filter(array_map('intval', (array) $request->getParameter('object_ids', [])));
-            $from = $request->getParameter('requested_from');
-            $to = $request->getParameter('requested_to');
+            foreach (array_keys($this->values) as $field) {
+                $this->values[$field] = (string) $request->getParameter($field, '');
+            }
+
+            $objectIds = Requests::objectIdsFromRequest(
+                (array) $request->getParameter('object_ids', []),
+                $request->getParameter('object_ids_manual')
+            );
+
+            $this->works = Requests::worksByIds($objectIds);
+
+            $from = $this->values['requested_from'];
+            $to = $this->values['requested_to'];
 
             if (!$objectIds) {
                 $this->errors[] = 'Choose at least one work.';
+            }
+
+            foreach ($this->works as $w) {
+                if (!$w->exists) {
+                    $this->errors[] = sprintf('There is no record with id %d.', $w->id);
+                }
             }
 
             if (!$from || !$to) {
@@ -62,16 +99,16 @@ class artworkRequestActions extends sfActions
                     'requester_user_id' => $user->getAttribute('user_id'),
                     'requester_name' => $user->getAttribute('user_name'),
                     'requester_email' => $this->currentUserEmail(),
-                    'department' => $request->getParameter('department'),
-                    'purpose' => $request->getParameter('purpose'),
-                    'justification' => $request->getParameter('justification'),
+                    'department' => $this->values['department'],
+                    'purpose' => $this->values['purpose'],
+                    'justification' => $this->values['justification'],
                     'requested_from' => $from,
                     'requested_to' => $to,
-                    'placement_building' => $request->getParameter('placement_building'),
-                    'placement_floor' => $request->getParameter('placement_floor'),
-                    'placement_room' => $request->getParameter('placement_room'),
-                    'placement_occupant' => $request->getParameter('placement_occupant'),
-                    'placement_notes' => $request->getParameter('placement_notes'),
+                    'placement_building' => $this->values['placement_building'],
+                    'placement_floor' => $this->values['placement_floor'],
+                    'placement_room' => $this->values['placement_room'],
+                    'placement_occupant' => $this->values['placement_occupant'],
+                    'placement_notes' => $this->values['placement_notes'],
                 ], $objectIds, true);
 
                 $this->getUser()->setFlash('notice', 'Request submitted. The gallery has been notified.');

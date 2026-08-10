@@ -778,4 +778,67 @@ class ArtworkRequestService
 
         return $sent;
     }
+
+    /**
+     * Resolve works for the request form, before any request exists.
+     *
+     * The form needs titles for works the user has chosen but not yet submitted -
+     * on a first pick, and again when a validation error sends the form back.
+     * Unknown ids are returned too, flagged, rather than silently dropped: a work
+     * that vanishes from the list without explanation reads as the form eating
+     * input.
+     *
+     * @param int[] $ids
+     *
+     * @return array<int, object> {id, title, identifier, exists}
+     */
+    public static function worksByIds(array $ids): array
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+
+        if (!$ids) {
+            return [];
+        }
+
+        $rows = DB::table('information_object')
+            ->whereIn('id', $ids)
+            ->pluck('identifier', 'id')
+            ->all();
+
+        $out = [];
+
+        foreach ($ids as $id) {
+            $known = array_key_exists($id, $rows);
+
+            $out[] = (object) [
+                'id' => $id,
+                'title' => $known ? self::objectTitle($id) : null,
+                'identifier' => $known ? ($rows[$id] ?: null) : null,
+                'exists' => $known,
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Object ids from a submitted form, however they were entered.
+     *
+     * The picker builds `object_ids[]` with script. The plain-text field beside
+     * it is what makes the form completable when that script has not run - so
+     * both are read here rather than the form having a hidden dependency on
+     * JavaScript to be submittable at all.
+     */
+    public static function objectIdsFromRequest(array $listed, ?string $typed): array
+    {
+        $ids = array_map('intval', $listed);
+
+        foreach (preg_split('/[^0-9]+/', (string) $typed) ?: [] as $part) {
+            if ('' !== $part) {
+                $ids[] = (int) $part;
+            }
+        }
+
+        return array_values(array_unique(array_filter($ids)));
+    }
 }

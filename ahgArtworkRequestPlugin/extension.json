@@ -1,7 +1,7 @@
 {
   "name": "Artwork Request",
   "machine_name": "ahgArtworkRequestPlugin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Staff requests to place artworks in offices and shared spaces. Captures the request, checks availability, notifies the responsible staff and records the decision - the conversation itself stays with people.",
   "author": "The Archive and Heritage Group",
   "license": "AGPL-3.0-or-later",
