@@ -42,7 +42,26 @@ $nonceAttr = $n ? ' ' . preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
 <script src="<?php echo $pluginPath; ?>/public/mirador/mirador.min.js"<?php echo $nonceAttr; ?>></script>
 <script<?php echo $nonceAttr; ?>>
 (function() {
-  var manifests = <?php echo json_encode(array_values($manifests), JSON_UNESCAPED_SLASHES); ?>;
+  <?php
+  /*
+   * Unwrap before touching it.
+   *
+   * Symfony hands a template action variables wrapped in an output escaper, so
+   * $manifests here is an sfOutputEscaperArrayDecorator and not an array.
+   * array_values() on an object is a TypeError on PHP 8, which killed the
+   * response mid-statement: the browser received
+   *
+   *     (function() { var manifests =
+   *
+   * and nothing else. No JavaScript error, because there was no JavaScript -
+   * just an unterminated function expression the browser discarded, leaving the
+   * loading spinner up for ever. Comparison has never worked.
+   */
+  $manifestUrls = $manifests instanceof sfOutputEscaperArrayDecorator
+      ? $manifests->getRawValue()
+      : (array) $manifests;
+  ?>
+  var manifests = <?php echo json_encode(array_values($manifestUrls), JSON_UNESCAPED_SLASHES); ?>;
 
   var windows = manifests.map(function(url) {
     return { manifestId: url, canvasIndex: 0 };
