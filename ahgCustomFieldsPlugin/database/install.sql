@@ -3,28 +3,21 @@
 -- Admin-configurable custom metadata fields (EAV pattern)
 -- ============================================================
 
--- Register plugin in atom_plugin table
-INSERT IGNORE INTO atom_plugin (name, class_name, version, description, category, is_enabled, is_core, is_locked, load_order, created_at)
-VALUES (
-    'ahgCustomFieldsPlugin',
-    'ahgCustomFieldsPluginConfiguration',
-    '1.0.0',
-    'Admin-configurable custom metadata fields for any entity type',
-    'metadata',
-    0,
-    0,
-    0,
-    45,
-    NOW()
-);
+-- Enablement is deliberately NOT done here.
+--
+-- A plugin that registers itself in atom_plugin becomes *statically enabled*,
+-- and sfPluginAdminPlugin drops statically-enabled plugins from its list
+-- (pluginsAction.class.php:44-46). So writing this row makes the plugin
+-- invisible in the very screen an operator would use to manage it, and it
+-- cannot be disabled through the interface.
+--
+-- Installing schema and deciding to run a plugin are separate acts. The second
+-- is the operator's.
 
-UPDATE atom_plugin SET
-    version = '1.0.0',
-    description = 'Admin-configurable custom metadata fields for any entity type',
-    category = 'metadata',
-    load_order = 45,
-    updated_at = NOW()
-WHERE name = 'ahgCustomFieldsPlugin';
+-- Version, description, category and load order live in extension.json, which
+-- is what the extension manager reads. Writing them into atom_plugin from here
+-- gave a second copy that drifts, and only worked at all if the operator had
+-- already created the row.
 
 -- ============================================================
 -- Field definitions — admin-configurable schema

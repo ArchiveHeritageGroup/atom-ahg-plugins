@@ -3,11 +3,16 @@
 -- No tables needed - config stored in ahg_settings
 -- =====================================================
 
--- Register plugin in atom_plugin (idempotent)
-INSERT IGNORE INTO atom_plugin (name, class_name, version, description, category, is_enabled, is_core, is_locked, load_order, created_at, updated_at)
-VALUES ('ahgFtpPlugin', 'ahgFtpPluginConfiguration', '1.0.0', 'Browser-based FTP/SFTP upload for CSV import digital objects', 'import', 1, 0, 0, 100, NOW(), NOW());
-
-UPDATE atom_plugin SET version = '1.0.0', description = 'Browser-based FTP/SFTP upload for CSV import digital objects', category = 'import', updated_at = NOW() WHERE name = 'ahgFtpPlugin';
+-- Enablement is deliberately NOT done here.
+--
+-- This previously inserted its own atom_plugin row with is_enabled = 1, so
+-- installing the schema also switched the plugin on - and then UPDATEd that row
+-- on every re-run. Two problems: an operator never chose to enable it, and a
+-- plugin enabled this way is *statically enabled*, which sfPluginAdminPlugin
+-- drops from its list (pluginsAction.class.php:44-46). It could not be turned
+-- off through the admin UI because it was not shown there.
+--
+-- Installing schema and deciding to run a plugin are separate acts.
 
 -- =====================================================
 -- Menu entry: Import > FTP Upload
