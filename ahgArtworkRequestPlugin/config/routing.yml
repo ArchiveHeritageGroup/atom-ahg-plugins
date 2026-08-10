@@ -25,3 +25,9 @@ ahg_artwork_request_view:
   param: { module: artworkRequest, action: view }
   requirements:
     id: \d+
+
+ahg_artwork_request_create_loan:
+  url: /artworkRequest/:id/create-loan
+  param: { module: artworkRequest, action: createLoan }
+  requirements:
+    id: \d+

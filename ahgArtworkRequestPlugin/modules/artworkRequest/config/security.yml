@@ -20,6 +20,10 @@ placements:
   is_secure: true
   credentials: [[editor, administrator]]
 
+createLoan:
+  is_secure: true
+  credentials: [[editor, administrator]]
+
 view:
   is_secure: true
 

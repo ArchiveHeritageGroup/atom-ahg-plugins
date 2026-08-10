@@ -242,6 +242,188 @@ class ArtworkRequestService
         )->orderBy('ar.requested_to')->get()->all();
     }
 
+    /**
+     * Create a loan record from an approved request. #277
+     *
+     * A button, never automatic. Approving is a decision about whether a work may
+     * hang somewhere; creating the loan is the moment it physically moves, and
+     * those are not the same event. Deciding which work hangs in whose office is
+     * a conversation between people, and software that insists on owning that
+     * gets worked around within a term.
+     *
+     * Hands off to ahgLoanPlugin so the physical side is tracked where it belongs:
+     * ahg_loan_object already carries pending -> approved -> prepared ->
+     * dispatched -> received -> on_display -> packed -> returned, and
+     * ahg_loan_condition_report gives the condition record at issue and at return.
+     * For a work going into an uncontrolled office environment, that return
+     * comparison is the point.
+     *
+     * partner_institution is NOT NULL on ahg_loan and an internal placement has no
+     * partner, so the requester's department goes there rather than something
+     * untrue. That is a compromise, and it is why artwork_request is a separate
+     * table rather than a loan_type.
+     *
+     * @return int|null the loan id, or null when the plugin is absent or nothing was approved
+     */
+    public static function createLoan(int $requestId, ?int $actorId = null): ?int
+    {
+        if (!self::hasTable('ahg_loan') || !self::hasTable('ahg_loan_object')) {
+            return null;
+        }
+
+        $request = self::get($requestId);
+
+        if (!$request || $request->loan_id) {
+            return null;
+        }
+
+        $approved = array_filter(
+            self::objects($requestId),
+            static fn ($w) => in_array($w->status, ['approved', 'issued'], true)
+        );
+
+        if (!$approved) {
+            return null;
+        }
+
+        try {
+            // The request number is already AR-YYYY-NNNN; prefixing it again
+            // produced AR-AR-2026-0001. Reuse it so the loan and the request
+            // are obviously the same thing.
+            $number = (string) $request->request_number;
+
+            $loanId = DB::table('ahg_loan')->insertGetId([
+                'loan_number' => $number,
+                'loan_type' => 'out',
+                'sector' => 'gallery',
+                'title' => 'Placement: '.trim(($request->placement_building ?? '').' '.($request->placement_room ?? '')),
+                'description' => $request->justification,
+                'purpose' => $request->purpose ?: 'office',
+                // No partner on an internal placement; the department is the
+                // nearest true thing.
+                'partner_institution' => $request->department ?: 'Internal placement',
+                'partner_contact_name' => $request->placement_occupant ?: $request->requester_name,
+                'partner_contact_email' => $request->requester_email,
+                'request_date' => $request->created_at,
+                'start_date' => $request->requested_from,
+                'end_date' => $request->requested_to,
+                'status' => 'approved',
+                'internal_approver_id' => $request->reviewed_by,
+                'approved_date' => $request->reviewed_at,
+                'notes' => 'Created from artwork placement request '.$request->request_number,
+                'created_by' => $actorId,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            foreach ($approved as $work) {
+                DB::table('ahg_loan_object')->insert([
+                    'loan_id' => $loanId,
+                    'information_object_id' => $work->information_object_id,
+                    'object_title' => $work->object_title,
+                    'object_identifier' => $work->object_identifier,
+                    'status' => 'approved',
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            DB::table('artwork_request')->where('id', $requestId)->update([
+                'loan_id' => $loanId,
+                'status' => 'fulfilled',
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            self::log($requestId, 'issued', null, "Loan {$number} created with ".count($approved).' work(s)', $actorId);
+
+            return $loanId;
+        } catch (\Throwable $e) {
+            // Say why. A handoff that fails silently leaves a request marked
+            // approved with no loan and nobody aware of the gap.
+            self::log($requestId, 'note', null, 'Could not create the loan record: '.$e->getMessage(), $actorId);
+
+            return null;
+        }
+    }
+
+    /**
+     * Placements past their return date that have not been chased recently. #278
+     *
+     * This is the part that decides whether the programme works. Works go out
+     * easily and come back when someone chases them, and nobody chases what they
+     * cannot see. A register that is only correct when somebody remembers to open
+     * it is a register of what left the building.
+     *
+     * @param int $everyDays do not chase the same request more often than this
+     */
+    public static function overdueNeedingReminder(int $everyDays = 7): array
+    {
+        $cutoff = date('Y-m-d H:i:s', strtotime("-{$everyDays} days"));
+
+        return DB::table('artwork_request as ar')
+            ->join('artwork_request_object as aro', 'aro.request_id', '=', 'ar.id')
+            ->whereIn('ar.status', ['approved', 'fulfilled'])
+            ->whereIn('aro.status', ['approved', 'issued'])
+            ->whereDate('ar.requested_to', '<', date('Y-m-d'))
+            // Not chased since the cutoff. A reminder every run would train
+            // people to ignore them, which is worse than not sending any.
+            ->whereNotExists(function ($q) use ($cutoff) {
+                $q->select(DB::raw(1))
+                    ->from('artwork_request_log')
+                    ->whereColumn('artwork_request_log.request_id', 'ar.id')
+                    ->where('artwork_request_log.event', 'reminded')
+                    ->where('artwork_request_log.created_at', '>=', $cutoff);
+            })
+            ->select('ar.id', 'ar.request_number', 'ar.requester_name', 'ar.requester_email',
+                     'ar.department', 'ar.requested_to', 'ar.placement_building',
+                     'ar.placement_room', 'ar.placement_occupant')
+            ->distinct()
+            ->orderBy('ar.requested_to')
+            ->get()
+            ->all();
+    }
+
+    /**
+     * Send the overdue reminders and record that they went. #278
+     *
+     * Every send is logged as a `reminded` event, so the record shows what was
+     * chased and when - which is the difference between a reminder system and a
+     * mail loop nobody can audit.
+     *
+     * @return int how many were sent
+     */
+    public static function sendOverdueReminders(int $everyDays = 7): int
+    {
+        $sent = 0;
+
+        foreach (self::overdueNeedingReminder($everyDays) as $r) {
+            $days = (int) floor((time() - strtotime((string) $r->requested_to)) / 86400);
+
+            $where = trim(($r->placement_building ?? '').' '.($r->placement_room ?? ''));
+            $body = sprintf(
+                "%s was due back on %s - %d day(s) ago.\n\nRequest: %s\nPlacement: %s\nWith: %s\n\n".
+                "Please arrange its return, or ask the gallery to extend the placement.\n",
+                $r->request_number,
+                $r->requested_to,
+                $days,
+                $r->request_number,
+                $where ?: 'not recorded',
+                $r->placement_occupant ?: $r->requester_name
+            );
+
+            if ($r->requester_email) {
+                self::sendEmail($r->requester_email, 'Artwork overdue: '.$r->request_number, $body);
+            }
+
+            foreach (self::approversFor($r->department) as $approver) {
+                self::sendEmail($approver->email, 'Artwork overdue: '.$r->request_number, $body);
+            }
+
+            self::log((int) $r->id, 'reminded', null, "Overdue by {$days} day(s); reminder sent");
+            ++$sent;
+        }
+
+        return $sent;
+    }
+
     public static function get(int $id)
     {
         return DB::table('artwork_request')->where('id', $id)->first();

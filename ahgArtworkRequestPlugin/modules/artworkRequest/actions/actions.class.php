@@ -145,6 +145,29 @@ class artworkRequestActions extends sfActions
     }
 
     /**
+     * Create the loan record for an approved request. #277
+     *
+     * A separate action behind a button rather than something approval does by
+     * itself: approving decides whether a work may hang somewhere, creating the
+     * loan is the moment it physically moves, and those are different events.
+     */
+    public function executeCreateLoan($request)
+    {
+        $id = (int) $request->getParameter('id');
+        $loanId = Requests::createLoan($id, $this->getUser()->getAttribute('user_id'));
+
+        if ($loanId) {
+            $this->getUser()->setFlash('notice', 'Loan record created. Condition reports and movement are tracked there.');
+        } else {
+            // Distinguish "cannot" from "did not": a silent no-op here leaves a
+            // request marked approved with no loan and nobody aware of the gap.
+            $this->getUser()->setFlash('error', 'No loan record was created - ahgLoanPlugin may not be installed, nothing on this request is approved, or a loan already exists.');
+        }
+
+        $this->redirect(['module' => 'artworkRequest', 'action' => 'view', 'id' => $id]);
+    }
+
+    /**
      * What is out on campus, and what is late.
      */
     public function executePlacements($request)

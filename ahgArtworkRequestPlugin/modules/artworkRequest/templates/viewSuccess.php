@@ -54,6 +54,21 @@
   </table>
 </div>
 
+<?php if ($canReview && 'approved' === $request_row->status && !$request_row->loan_id): ?>
+  <div class="card mb-3">
+    <div class="card-body">
+      <a class="btn btn-primary" href="<?php echo url_for(['module' => 'artworkRequest', 'action' => 'createLoan', 'id' => $request_row->id]) ?>">
+        <?php echo __('Create loan record') ?>
+      </a>
+      <div class="form-text">
+        <?php echo __('Hands the approved works to the loan register, where condition at issue and at return are recorded. Approving decides whether a work may hang somewhere; this is the moment it moves.') ?>
+      </div>
+    </div>
+  </div>
+<?php elseif ($request_row->loan_id): ?>
+  <div class="alert alert-success"><?php echo __('Loan record created.') ?></div>
+<?php endif ?>
+
 <div class="card">
   <div class="card-header"><?php echo __('History') ?></div>
   <table class="table table-sm mb-0">
