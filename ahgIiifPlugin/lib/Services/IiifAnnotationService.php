@@ -42,64 +42,12 @@ class IiifAnnotationService
      *     $host = $_SERVER['HTTP_HOST'] ?? 'psis.theahg.co.za';
      *     $this->baseUrl = "https://{$host}";
      *
-     * which was wrong twice. The scheme was hardcoded, so an instance served
-     * over http minted https identifiers - and a viewer on an http page then
-     * refuses to fetch them as mixed content. And the fallback was one
-     * particular customer's domain, so any request without HTTP_HOST - CLI
-     * tasks, queued jobs, the annotation sync - minted identifiers pointing at
-     * somebody else's site.
-     *
-     * Precedence matches get_iiif_base_url() in IiifViewerHelper, which is the
-     * plugin's existing answer to this question: configuration first, because a
-     * site that cares about durable identifiers should pin them rather than let
-     * them follow whichever hostname a request arrived on.
+     * See IiifBaseUrl for why both halves of that were wrong, and for the
+     * precedence used instead.
      */
     private static function detectBaseUrl(): string
     {
-        if (class_exists('sfConfig')) {
-            $configured = (string) \sfConfig::get('app_iiif_base_url', '');
-
-            if ('' === $configured) {
-                $configured = (string) \sfConfig::get('app_siteBaseUrl', '');
-            }
-
-            if ('' !== $configured) {
-                return rtrim($configured, '/');
-            }
-        }
-
-        if (empty($_SERVER['HTTP_HOST'])) {
-            // No request to derive from. localhost is obviously local and
-            // obviously wrong, which is the point: it cannot be mistaken for a
-            // real published identifier the way another site's domain can.
-            return 'http://localhost';
-        }
-
-        return self::requestScheme().'://'.$_SERVER['HTTP_HOST'];
-    }
-
-    /**
-     * The scheme the client actually used.
-     *
-     * HTTPS is unset in php-fpm when nginx terminates TLS and does not pass it,
-     * so the proxy header has to be honoured or every identifier minted behind
-     * a TLS-terminating proxy comes out as http.
-     */
-    private static function requestScheme(): string
-    {
-        if (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) {
-            return 'https';
-        }
-
-        if ('https' === ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) {
-            return 'https';
-        }
-
-        if (443 === (int) ($_SERVER['SERVER_PORT'] ?? 0)) {
-            return 'https';
-        }
-
-        return 'http';
+        return IiifBaseUrl::detect();
     }
 
     // ========================================================================

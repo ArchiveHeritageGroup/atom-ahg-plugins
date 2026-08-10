@@ -553,3 +553,28 @@ INSERT INTO `iiif_auth_service` (`name`, `profile`, `auth_version`, `access_prof
 ('login-v2', 'login', '2.0', 'active', 'Login Required', 'This resource requires authentication', 'Login', 'Authentication Required', 'Please log in to access this resource.', 'Authentication Required', 'You need to log in to view this content.'),
 ('restricted-v2', 'login', '2.0', 'active', 'Restricted Access', 'This resource has restricted access', 'Request Access', 'Restricted Content', 'This content is restricted. Please contact the repository for access.', 'Restricted Content', 'This content is restricted. Contact the archive for access.')
 ON DUPLICATE KEY UPDATE `label` = VALUES(`label`);
+
+--
+-- Table structure for table `iiif_saved_view`
+--
+-- Backing store for IIIF Content State short tokens. ContentStateService reads
+-- and writes this table in three places and it was never declared here, so the
+-- Content State API answered every call with "Table 'iiif_saved_view' doesn't
+-- exist" on any install that had not created it by hand.
+--
+
+CREATE TABLE IF NOT EXISTS `iiif_saved_view` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `token` VARCHAR(191) NOT NULL COMMENT 'short token handed out in share links',
+  `state_json` LONGTEXT NOT NULL COMMENT 'the Content State JSON-LD this token resolves to',
+  `user_id` BIGINT UNSIGNED DEFAULT NULL,
+  `object_id` BIGINT UNSIGNED DEFAULT NULL,
+  `click_count` INT UNSIGNED NOT NULL DEFAULT 0,
+  `expires_at` DATETIME DEFAULT NULL,
+  `created_ip` VARCHAR(45) DEFAULT NULL COMMENT 'INET6_NTOA length, so IPv6 fits',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_token` (`token`),
+  KEY `idx_expires` (`expires_at`),
+  KEY `idx_object` (`object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

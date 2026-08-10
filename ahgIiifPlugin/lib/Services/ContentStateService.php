@@ -209,11 +209,15 @@ class ContentStateService
     // Internal helpers
     // -------------------------------------------------------------------------
 
+    /**
+     * A content state is a shareable link to a particular view, so its target
+     * URIs travel further than most. The fallback here was a specific customer's
+     * domain, which meant a state encoded without HTTP_HOST pointed at PSIS from
+     * whichever install produced it.
+     */
     protected function detectBaseUrl(): string
     {
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'psis.theahg.co.za';
-        return "{$scheme}://{$host}";
+        return IiifBaseUrl::detect();
     }
 
     protected function base64urlEncode(string $data): string
@@ -365,18 +369,59 @@ class ContentStateService
         ], true);
     }
 
-    protected function getPdo(): PDO
+    /**
+     * The instance's own database connection.
+     *
+     * This opened its own PDO from environment variables that php-fpm does not
+     * set, so in practice it always fell through to the defaults:
+     *
+     *     dbname=archive, user=root, password=''
+     *
+     * which is one developer's local setup. Any instance whose database is not
+     * called `archive`, or whose root is not passwordless, got
+     * "Access denied for user 'root'@'localhost'" and the entire Content State
+     * API returned 500. Same defect as the psis.theahg.co.za base URL: somebody's
+     * environment baked in as the fallback for everybody else's.
+     *
+     * Taking the framework's existing connection instead also brings this in
+     * line with the project rule that everything except the Plugin Manager goes
+     * through the query builder, and means credentials live in one place.
+     */
+    public function getPdo(): PDO
     {
-        if ($this->pdo === null) {
-            $dsn = 'mysql:host=' . (getenv('DATABASE_HOST') ?: 'localhost')
-                . ';dbname=' . (getenv('DATABASE_NAME') ?: 'archive')
-                . ';charset=utf8mb4';
-            $this->pdo = new PDO($dsn,
-                getenv('DATABASE_USER') ?: 'root',
-                getenv('DATABASE_PASSWORD') ?: '',
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
-            );
+        if (null !== $this->pdo) {
+            return $this->pdo;
         }
+
+        \AhgCore\Core\AhgDb::init();
+
+        $config = \Illuminate\Database\Capsule\Manager::connection()->getConfig();
+
+        // A separate handle rather than the framework's own, deliberately.
+        //
+        // This service reads rows as arrays ($row['id']), while the shared
+        // connection is set to FETCH_OBJ for everything else in the codebase.
+        // Flipping the default fetch mode on the shared PDO would fix this
+        // service and quietly break every caller that expects objects, so it
+        // takes the credentials and opens its own.
+        $dsn = sprintf(
+            'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+            $config['host'] ?? 'localhost',
+            $config['port'] ?? 3306,
+            $config['database'] ?? '',
+            $config['charset'] ?? 'utf8mb4'
+        );
+
+        $this->pdo = new PDO(
+            $dsn,
+            $config['username'] ?? '',
+            $config['password'] ?? '',
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]
+        );
+
         return $this->pdo;
     }
 }

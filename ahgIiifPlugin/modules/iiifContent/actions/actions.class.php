@@ -16,8 +16,15 @@ class iiifContentActions extends sfActions
     protected function getContentStateService(): ContentStateService
     {
         if ($this->contentStateService === null) {
-            $baseUrl = sfConfig::get('app_iiif_base_url', 'https://psis.theahg.co.za');
-            $this->contentStateService = new ContentStateService($baseUrl);
+            // Let the service work out its own base URL.
+            //
+            // This used to read the setting here and default to a specific
+            // customer's domain, which also meant the explicit argument was
+            // always set - so the service's own detection could never run and
+            // every unconfigured instance minted content states pointing at
+            // PSIS. The service already prefers app_iiif_base_url when it is
+            // set, so nothing is lost by not passing it.
+            $this->contentStateService = new ContentStateService();
         }
         return $this->contentStateService;
     }
@@ -47,14 +54,7 @@ class iiifContentActions extends sfActions
     {
         $this->forward404Unless($request->getMethod() === sfRequest::POST);
 
-        $contentType = $request->getContentType();
-        $body = $request->getRawPostParameters();
-
-        if ($contentType === 'application/json' || $contentType === 'text/plain') {
-            $data = json_decode($body, true);
-        } else {
-            $data = $request->getPostParameters();
-        }
+        $data = $this->decodeRequestBody($request);
 
         if (!is_array($data)) {
             return $this->renderJson(['error' => 'Invalid JSON body'], 400);
@@ -243,12 +243,58 @@ class iiifContentActions extends sfActions
         return $row ? '/iiif/viewer/' . $row['id'] : null;
     }
 
-    protected function renderJson(array $data, int $status = 200): sfView
+    /**
+     * The request body, decoded, whether it arrived as JSON or as a form post.
+     *
+     * This read `$request->getRawPostParameters()`, which does not exist on
+     * sfWebRequest. Symfony does not fail on an unknown request method: with no
+     * listener for `request.method_not_found`, sfRequest::__call() treats the
+     * call as a fluent setter and returns a *clone of the request*. So the body
+     * was an sfWebRequest object, json_decode() threw a TypeError on it, and
+     * every call to /iiif/content-state/encode ended as HTTP 200 with a
+     * zero-byte body.
+     *
+     * Worth remembering beyond this endpoint: a mistyped request method is not
+     * an error in Symfony 1.4, it is an object that looks plausible until
+     * something type-checks it.
+     *
+     * @return array|null null when the body is not usable
+     */
+    protected function decodeRequestBody($request): ?array
+    {
+        $contentType = (string) $request->getContentType();
+
+        if (false !== stripos($contentType, 'json') || false !== stripos($contentType, 'text/plain')) {
+            $decoded = json_decode((string) file_get_contents('php://input'), true);
+
+            return is_array($decoded) ? $decoded : null;
+        }
+
+        $post = $request->getPostParameters();
+
+        return is_array($post) ? $post : null;
+    }
+
+    /**
+     * Return a JSON body.
+     *
+     * The return type was declared `sfView`, but `sfView::NONE` is the string
+     * 'None' rather than an object, so every call to this threw a TypeError on
+     * PHP 8. The headers had already been sent by then, so the request finished
+     * as HTTP 200 with a zero-byte body and nothing in the log that named the
+     * endpoint - the whole Content State API answered every call with silence.
+     *
+     * The body was never written either: assigning to `$this->data` sets an
+     * action property, and returning sfView::NONE tells Symfony to render
+     * nothing at all. renderText() writes to the response and returns the same
+     * NONE, which is what the annotation endpoints in this plugin already do.
+     */
+    protected function renderJson(array $data, int $status = 200): string
     {
         $this->getResponse()->setHttpHeader('Content-Type', 'application/json; charset=utf-8');
         $this->getResponse()->setStatusCode($status);
-        $this->data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        return sfView::NONE;
+
+        return $this->renderText(json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     /**
