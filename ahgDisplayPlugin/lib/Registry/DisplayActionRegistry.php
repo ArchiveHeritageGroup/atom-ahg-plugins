@@ -354,6 +354,28 @@ class DisplayActionRegistry
             $resourceId = is_object($resource) && isset($resource->id) ? $resource->id : null;
             return (bool) call_user_func([$class, $methodName], $resourceId);
         } catch (\Exception $e) {
+            // Fails OPEN, deliberately, and this one must not be "fixed" to match
+            // checkPermission() above.
+            //
+            // The only declared user of this is ahgExtendedRightsPlugin's
+            // embargo_badge, checking EmbargoService::isObjectEmbargoed. The badge
+            // is shown when a record IS embargoed, so returning true on error
+            // over-warns: a record is marked restricted when we could not tell.
+            // Returning false would hide the embargo badge and leave a restricted
+            // record looking unrestricted, which is the failure that matters.
+            //
+            // The same call also serves 'condition' checks, where the stakes are
+            // only whether an action that may not apply is offered.
+            //
+            // So the direction is right and the silence was not: a check that
+            // throws on every record produced a badge on every record, and
+            // nothing said so.
+            error_log(sprintf(
+                'DisplayActionRegistry: check %s threw, showing the item anyway: %s',
+                $method,
+                $e->getMessage()
+            ));
+
             return true;
         }
     }
