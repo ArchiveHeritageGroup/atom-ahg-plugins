@@ -32,7 +32,7 @@ The renderer emits markup and `data-*` attributes only - no inline `<script>`, n
 
 **Admin > Settings > Image viewers** sets the defaults: navigator and its position, rotation control, flip control, cross-origin policy, zoom per click, tile retries and height.
 
-A caller may also pass options per record through `$config['options']` on the renderer. Those override the site settings, and are filtered through a 32-key allowlist covering navigation controls, the reference strip, zoom and pan limits, gestures, networking, rendering and collection display.
+A caller may also pass options per record through `$config['options']` on the renderer. Those override the site settings, and are filtered through a 54-key allowlist covering navigation controls, the reference strip, zoom and pan limits, mouse, touch and pen gestures, networking including `ajaxHeaders`, rendering, sequence navigation and collection display.
 
 ## Requirements
 
@@ -48,12 +48,14 @@ An IIIF image server is optional and stays yours - see the [image server guide](
 
 ## Not implemented
 
-OpenSeadragon exposes 174 options. This plugin sets 19 and accepts 32. Untouched:
+OpenSeadragon exposes 174 options. This plugin sets 19 as defaults and accepts 54. Untouched:
 
-- **Collection display** - `collectionMode`, `collectionRows`, `collectionLayout` and friends. OpenSeadragon can present a whole collection as a grid natively, which is close to what a finding aid wants.
-- **Touch and pen gestures** - `gestureSettingsTouch`, `gestureSettingsPen`, `pinchRotate`, `flickEnabled`. Tablet readers get library defaults nobody here has tested.
-- **`ajaxHeaders`** - how an authenticated image server would be reached.
-- Fine navigator styling, blend and compositing, and the image-cache tuning options.
+- Fine navigator styling - size ratio, auto-fade, colours, explicit positioning
+- Blend and compositing - `blendTime`, `alwaysBlend`, `compositeOperation`, `opacity`
+- Image cache tuning - `imageLoaderLimit`, `maxImageCacheCount`, `minScrollDeltaTime`
+- Debug options
+
+Collection display, touch and pen gestures, `ajaxHeaders` and the sequence controls are now configurable per record through `$config['options']`, but have no field on the settings screen - they are set in code by whoever renders the viewer.
 
 Verified against Cantaloupe 5.0.6: the viewer opens a manifest, extracts the tile source and renders. Verified with one record and one image - a real multi-page TIFF has not been through it.
 

@@ -119,7 +119,28 @@
     'minZoomLevel', 'maxZoomLevel', 'defaultZoomLevel', 'visibilityRatio',
     'constrainDuringPan', 'wrapHorizontal', 'wrapVertical', 'immediateRender',
     'imageSmoothingEnabled', 'tileRetryMax', 'tileRetryDelay', 'preload',
-    'collectionMode', 'collectionRows', 'collectionTileSize'
+
+    // Collection display. OpenSeadragon can lay a whole collection out as a
+    // grid natively, which is close to what a finding aid wants and is
+    // otherwise built separately.
+    'collectionMode', 'collectionRows', 'collectionColumns', 'collectionLayout',
+    'collectionTileSize', 'collectionTileMargin',
+
+    // Touch and pen. Absent from the allowlist, a tablet reader got library
+    // defaults that nobody here had tested and no site could change.
+    'gestureSettingsPen', 'gestureSettingsUnknown', 'pinchRotate', 'pinchToZoom',
+    'flickEnabled', 'flickMinSpeed', 'flickMomentum', 'dblClickToZoom',
+    'dblClickDragToZoom', 'zoomPerDblClickDrag',
+
+    // Networking. ajaxHeaders is how an authenticated image server is reached;
+    // without it there was no way to send a token with a tile request. These
+    // arrive from the renderer, which builds them server side from settings -
+    // they are not read from anything a reader controls.
+    'ajaxHeaders', 'ajaxWithCredentials', 'loadTilesWithAjax', 'timeout',
+
+    // Sequence, beyond the two the defaults set.
+    'initialPage', 'preserveViewport', 'navPrevNextWrap', 'showSequenceControl',
+    'sequenceControlAnchor'
   ];
 
   function withOverrides(config, el) {
