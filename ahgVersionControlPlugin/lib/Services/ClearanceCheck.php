@@ -40,6 +40,11 @@ class ClearanceCheck
             return true; // CLI/system context.
         }
 
+        // No clearance plugin installed means nothing is classified.
+        if (!$this->clearanceSchemaPresent()) {
+            return true;
+        }
+
         try {
             $isAdmin = $this->userIsAdministrator($userId);
             if ($isAdmin) {
@@ -54,9 +59,16 @@ class ClearanceCheck
             $userLevel = $this->resolveUserClearanceLevel($userId);
             return $userLevel >= $entityLevel;
         } catch (\Throwable $e) {
-            // ahgSecurityClearancePlugin not installed — fail OPEN. The plugin
-            // documents this in extension.json (suggests, not requires).
-            return true;
+            // Fail CLOSED.
+            //
+            // The absent-plugin case is handled above by
+            // clearanceSchemaPresent(), so reaching here means the schema
+            // exists and the lookup failed anyway - a bad row, a dropped
+            // column, a connection lost mid-query. That is a fault, and a
+            // clearance check that cannot complete has not granted anything.
+            error_log('ClearanceCheck: clearance lookup failed, denying: '.$e->getMessage());
+
+            return false;
         }
     }
 
@@ -124,5 +136,39 @@ class ClearanceCheck
             })
             ->max('sc.level');
         return (int) ($level ?? 0);
+    }
+
+    /**
+     * Is the clearance schema present at all?
+     *
+     * ahgSecurityClearancePlugin is a suggested dependency, not a required one.
+     * Where it is absent nothing is classified, so allowing is correct. Where it
+     * is present, a failure is a fault and must not be read as permission.
+     *
+     * Checked explicitly rather than inferred from an exception, because the
+     * broad catch this replaces could not tell the two apart: a missing table
+     * and a genuine bug both returned "allowed".
+     */
+    private function clearanceSchemaPresent(): bool
+    {
+        static $present = null;
+
+        if (null !== $present) {
+            return $present;
+        }
+
+        try {
+            $schema = DB::schema();
+            $present = $schema->hasTable('security_classification')
+                && $schema->hasTable(self::ENTITY_OBJECT_TABLE)
+                && $schema->hasTable('user_security_clearance');
+        } catch (\Throwable $e) {
+            // Cannot even ask. Treat as absent: this is the same position as a
+            // site without the plugin, and refusing everything because the
+            // schema inspector failed would be its own outage.
+            $present = false;
+        }
+
+        return $present;
     }
 }
