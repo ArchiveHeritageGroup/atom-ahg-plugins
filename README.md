@@ -2,6 +2,13 @@
 
 **Transform Access to Memory into a Complete GLAM Solution**
 
+> ### ➜ [Download the plugins](docs/plugins/README.md)
+>
+> Nine plugins for AtoM 2.9 and 2.10, each installable on its own, with what
+> they do and what they look like. That page carries the current version of
+> each; the [releases page](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases)
+> holds the full history.
+
 ## What is AtoM?
 
 [Access to Memory (AtoM)](https://www.accesstomemory.org) is a powerful, open-source archival management system trusted by institutions worldwide. AtoM provides:

@@ -1,210 +1,115 @@
 # AHG plugins for AtoM
 
-Extensions for [Access to Memory](https://accesstomemory.org), installable one at
-a time on a standard AtoM installation. Each is a separate download. Take the ones
-you want and leave the rest.
+Nine plugins for [Access to Memory](https://accesstomemory.org) 2.9 and 2.10. Each installs on its own, and nothing in base AtoM is modified - no file under `apps/`, `lib/`, `vendor/` or `config/` is touched, and `ProjectConfiguration.class.php` stays as upstream ships it.
 
-Nothing in base AtoM is modified. No file under `apps/`, `lib/`, `vendor/` or
-`config/` is touched, and `ProjectConfiguration.class.php` stays exactly as
-upstream ships it. Removing a plugin is deleting its directory and disabling it.
+This page lists the **current version of each**. For older versions see the [full release history](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases).
 
-All plugins are AGPL-3.0-or-later.
+## Install the runtime first
 
-## Before you start
+| | Version | |
+|---|---|---|
+| **AHG Runtime** - the shared foundation every plugin depends on | 2.14.1 | [Download](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgRuntimePlugin-v2.14.1) |
 
-    AtoM     2.9 or 2.10
-    PHP      8.1 or later
-    MySQL    8.0
+It ships once, separately, because it is the large part and identical for all of them. It also provides `bin/ahg`, the command-line entry point that makes plugin tasks available to cron.
 
-AtoM 2.9 and 2.10 both require PHP 8 already, so on a supported AtoM there is
-nothing to prepare.
-
-**AtoM 2.8 is not supported.** It is the last release that runs on PHP 7.4, and
-these plugins are built on Laravel 10, which is PHP 8.1+ by construction. That is
-a property of the dependency tree rather than a coding style, so it is not
-something a compatibility pass could fix. AtoM 2.8 itself runs perfectly well on
-PHP 8.3, so a 2.8 site that wants these can move its FPM pool rather than upgrade
-AtoM.
-
-### Install the runtime first, once
-
-Every plugin needs the shared runtime. It is a separate download because it is
-identical for all of them, and shipping it inside each bundle would mean carrying
-the same 56 MB a dozen times and re-releasing everything whenever it changed.
-
-[**Download ahgRuntimePlugin 2.14.0**](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgRuntimePlugin-v2.14.0)
-
-From your AtoM root:
-
-    unzip ahgRuntimePlugin-2.14.0.zip -d plugins/
-    chown -R www-data:www-data plugins/ahgRuntimePlugin
-    mysql -u <user> -p <database> < plugins/ahgRuntimePlugin/database/install.sql
-
-Enable **ahgRuntimePlugin** in Admin > Plugins, then:
-
-    rm -rf cache/*
-    php symfony cc
-    systemctl reload php8.3-fpm
+Requirements are the same throughout: **AtoM 2.9 or 2.10, PHP 8.1+, MySQL 8.0**. AtoM 2.8 is not supported - it is the last release on PHP 7.4, and the runtime is built on Laravel 10, which is PHP 8.1+ by construction.
 
 ## The plugins
 
-### Provenance Tracking
+### IIIF - 1.1.1
 
-Chain of custody and ownership history for archival records, museum objects and
-library materials. Records acquisition type, certainty level and gaps in custody,
-flags material needing Nazi-era provenance checking, tracks cultural property
-status, and signs manifests with Ed25519. Also records the provenance of AI
-inference where that is used to generate description.
+Manifests, collections, annotations, search, authorisation, OCR export and media handling. Presentation API 3.0 with a 2.1 path, Image API 2 and 3 both advertised, Content Search 2.0, Auth 1.0 and 2.0, Change Discovery 1.0.
 
-![Provenance management](screenshots/ahgProvenancePlugin/provenance.png)
+Manifests carry `structures` so multi-page material gets a table of contents, plus `rights`, `requiredStatement`, `provider`, `thumbnail`, `seeAlso`, `start`, `behavior`, `viewingDirection`, `navDate`, `partOf` and `rendering`.
 
-[Download 1.2.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgProvenancePlugin-v1.2.2) - 10 tables
+![A record page with the viewer switcher, image and plugin panels](screenshots/ahgIiifPlugin/record-viewer.png)
 
-### Backup and Restore
+[Download IIIF 1.1.1](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgIiifPlugin-v1.1.1) · [Full documentation](../../ahgIiifPlugin/README.md)
 
-Database and file backup with scheduling, restore, upload and retention
-management. Backs up the database, uploads, plugins and framework independently,
-keeps a configurable number of copies, and can be driven from cron for unattended
-operation.
+### Seadragon viewer - 1.0.5
 
-![Backups and schedules](screenshots/ahgBackupPlugin/backup.png)
+OpenSeadragon 4.1.0 deep zoom. Registers itself with the IIIF renderer registry, so a site can install this viewer, Mirador, both or neither.
 
-[Download 1.1.1](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgBackupPlugin-v1.1.1) - 3 tables
+Opens a IIIF manifest, navigates multi-page sequences, and offers rotation and flip - which scanned material needs more often than you would like. Falls back to a flat image where no image server is installed.
 
-### Digital Preservation
+![Viewer defaults under Admin > Settings](screenshots/ahgSeadragonPlugin/viewer-settings.png)
 
-Checksums, fixity checking, PREMIS event recording, format identification against
-PRONOM, and OAIS packaging with SIP, AIP and DIP. Includes TIFF and PDF merge for
-assembling multi-page objects from scanned pages.
+[Download Seadragon 1.0.5](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgSeadragonPlugin-v1.0.5) · [Full documentation](../../ahgSeadragonPlugin/README.md)
 
-![Preservation packages](screenshots/ahgPreservationPlugin/packages.png)
+### Mirador viewer - 1.0.4
 
-[Download 1.0.5](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgPreservationPlugin-v1.0.5) - 30 tables
+Mirador 3, for side-by-side comparison across collections. Renders manifest ranges as a navigable table of contents, and follows the interface language rather than defaulting to English.
 
-### Favourites
+![Comparing manifests side by side](screenshots/ahgMiradorPlugin/compare.png)
 
-Per-user favourites and folders, with sharing, export, and optional integration
-with research projects and bibliographies where those are installed. Each user
-keeps their own list; no particular permission is needed beyond being signed in.
+[Download Mirador 1.0.4](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.0.4) · [Full documentation](../../ahgMiradorPlugin/README.md)
 
-![Favourites and folders](screenshots/ahgFavoritesPlugin/favorites.png)
+### Digital Preservation - 1.0.6
 
-[Download 2.0.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgFavoritesPlugin-v2.0.0) - 3 tables
+Checksums, fixity verification, PREMIS events, format identification and BagIt packaging. A package built from a record arrives holding that record's masters, and builds and exports to a downloadable bag in one action.
 
-### IIIF, with a viewer of your choice
+Ten `preservation:*` command-line tasks for scheduling - fixity, virus scan, format identification, migration planning, replication.
 
-IIIF manifests, collections, annotations, OCR export and media streaming.
-Manifests are publicly fetchable so external viewers can use them, while the media
-processing queue and validation tools require an editor or administrator.
+![OAIS packages](screenshots/ahgPreservationPlugin/packages.png)
 
-The viewer is a separate, optional install. Take one, both or neither:
+[Download Preservation 1.0.6](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgPreservationPlugin-v1.0.6)
 
-- **[Seadragon 1.0.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgSeadragonPlugin-v1.0.0)** - OpenSeadragon, deep zoom for single images
-- **[Mirador 1.0.0](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgMiradorPlugin-v1.0.0)** - side-by-side comparison across collections
+### Provenance Tracking - 1.2.3
 
-Each registers itself with the IIIF renderer registry rather than being named by
-the theme, so installing one does not require the other and removing one leaves
-the rest working.
+Chain of custody for archival records, museum objects and library material, with a coverage view showing what is documented and what is not.
 
-**Tiled deep zoom needs an image server, and that stays yours.** The plugins do not
-install one, do not configure one, and do not assume you are without one. Manifests,
-the viewer and OCR export work as they are; tiling is what an image server adds. If
-you already run Cantaloupe, IIPImage or anything else that speaks IIIF, point it at
-your uploads and carry on.
+![Provenance records](screenshots/ahgProvenancePlugin/provenance.png)
 
-Whichever server you use, one thing has to be right. It reads files straight off
-disk and knows nothing about AtoM's access control, so left open, every master under
-`uploads/r/` is retrievable through the IIIF endpoint by anyone who can form the
-path, and those paths appear in every manifest. The nginx rules protecting
-`/uploads/r/` do not help: it is a different route to the same bytes.
+[Download Provenance 1.2.3](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgProvenancePlugin-v1.2.3)
 
-For Cantaloupe, the authorisation hook that closes this ships in the bundle at
-`config/cantaloupe/delegates.rb`, with a README covering three ways it can appear
-configured while doing nothing at all. For anything else, the endpoint your check
-should call is documented in the guides below.
+### Backup and Restore - 1.1.2
 
-Two standalone guides, both optional, neither required to install a plugin:
+Database and file backup with scheduling, restore, upload and retention management.
 
-- **[Setting up an IIIF image server](../infrastructure/iiif-image-server.md)** -
-  requirements, Cantaloupe configuration, authorisation, and how to prove it refuses
-- **[nginx](../infrastructure/nginx.md)** - proxying the image server, serving
-  derivatives directly, the `ProtectSystem=full` trap, and CSP
+![Backup](screenshots/ahgBackupPlugin/backup.png)
 
-[Download IIIF 1.0.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgIiifPlugin-v1.0.2)
+[Download Backup 1.1.2](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgBackupPlugin-v1.1.2)
 
-### Feedback
+### Favourites - 2.0.1
 
-Collect and manage feedback from users against archival descriptions. Readers can
-report a correction or add context from the record page; staff triage the queue
-by status.
+Per-user bookmarks with folders, notes, bulk operations and export.
 
-![Feedback management](screenshots/ahgFeedbackPlugin/feedback.png)
+![Favourites](screenshots/ahgFavoritesPlugin/favorites.png)
 
-[Download 1.0.5](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgFeedbackPlugin-v1.0.5) - 2 tables
+[Download Favourites 2.0.1](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgFavoritesPlugin-v2.0.1)
 
-## Installing a plugin
+### Feedback - 1.0.6
 
-The same four steps for every one. From your AtoM root, with the runtime already
-installed:
+Reader feedback and corrections against archival records, with a queue for staff.
 
-    unzip <plugin>-<version>.zip -d plugins/
-    chown -R www-data:www-data plugins/
-    mysql -u <user> -p <database> < plugins/<plugin>/database/install.sql
-    mysql -u <user> -p <database> < plugins/ahgCorePlugin/database/install.sql
+![Feedback](screenshots/ahgFeedbackPlugin/feedback.png)
 
-Enable in Admin > Plugins, in this order:
+[Download Feedback 1.0.6](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases/tag/ahgFeedbackPlugin-v1.0.6)
 
-    1. ahgRuntimePlugin
-    2. ahgCorePlugin
-    3. the plugin itself
+## Installing
 
-Then clear the cache and reload PHP as above. Each zip contains an `INSTALL.md`
-with the exact commands for that plugin, including the tables it creates.
+Each bundle carries its own dependencies and an `INSTALL.md` with the enable order. In short, from the AtoM root:
 
-Once enabled, the plugin adds itself to the navigation. On a stock AtoM that is
-the **Quick links** menu; AtoM has no Manage menu of its own.
+```bash
+unzip ahgRuntimePlugin-2.14.1.zip -d plugins/     # first, shared by all
+unzip <plugin>.zip                -d plugins/
+chown -R www-data:www-data plugins/
+mysql -u <user> -p <database> < plugins/<plugin>/database/install.sql
+```
 
-## If something does not work
+Then enable in **Admin > Plugins**, clear the cache and reload PHP.
 
-Read the AtoM log rather than the rendered page:
+## Infrastructure, if you want it
 
-    tail -50 log/qubit_prod.log
+Optional, and deliberately separate - your web server and image server are yours:
 
-AtoM returns HTTP 200 for pages that are not successes, its login page and its
-error page among them, so a status code on its own proves very little. An empty
-body with a 200 usually means a fatal error.
+- [Setting up an IIIF image server](../infrastructure/iiif-image-server.md) - requirements, Cantaloupe, authorisation, and how to prove it refuses
+- [nginx](../infrastructure/nginx.md) - proxying an image server, serving derivatives, the `ProtectSystem=full` trap, CSP
 
-### If your AtoM lives under /usr/share/nginx
+**One thing to carry across whichever image server you use.** It reads files straight off disk and knows nothing about AtoM's access control, so left open, every master under `uploads/r/` is retrievable through the IIIF endpoint by anyone who can form the path - and those paths appear in every manifest. The Cantaloupe delegate that closes this ships with the IIIF plugin.
 
-php-fpm ships with `ProtectSystem=full`, which mounts `/usr` read-only for the
-worker. The site then cannot write its own cache or logs and every page returns
-500 with an empty body, which looks nothing like a permissions problem. Grant the
-paths in `/etc/systemd/system/php8.3-fpm.service.d/<site>-storage.conf`:
+## Older versions
 
-    [Service]
-    ReadWritePaths=/usr/share/nginx/<site>/log
-    ReadWritePaths=/usr/share/nginx/<site>/cache
-    ReadWritePaths=/usr/share/nginx/<site>/uploads
-    ReadWritePaths=/usr/share/nginx/<site>/downloads
-    ReadWritePaths=/usr/share/nginx/<site>/backups
+Everything above is the current release. Previous versions, and the repository-wide `v1.6.x` and `v1.7.x` tags that predate per-plugin packaging, are on the [releases page](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/releases).
 
-Then `systemctl daemon-reload && systemctl restart php8.3-fpm`.
-
-## Removing a plugin
-
-Disable it in Admin > Plugins, delete its directory from `plugins/`, and clear the
-cache. The tables are left in place; drop them by hand if the data is genuinely no
-longer wanted, because nothing else will.
-
-## How these were tested
-
-Each was installed on a wiped AtoM 2.9 from the steps above and then used, rather
-than inspected. Every page is exercised in a real browser and checked on four
-things: the status code, the content, JavaScript console errors, and any failed
-request the page itself issued. The last two matter more than they sound - a page
-can be flawless at the HTTP level and broken the moment someone presses a button.
-
-Reports and issues:
-[github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues](https://github.com/ArchiveHeritageGroup/atom-ahg-plugins/issues)
-
-The Archive and Heritage Group (Pty) Ltd.
+Licence: AGPL-3.0-or-later.
