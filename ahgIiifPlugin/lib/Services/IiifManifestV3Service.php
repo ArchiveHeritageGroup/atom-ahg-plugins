@@ -45,6 +45,10 @@ class IiifManifestV3Service
         $items = [];
         $canvasIndex = 1;
 
+        // Which canvases came from which file, so the manifest can carry a table
+        // of contents. See buildStructures().
+        $canvasGroups = [];
+
         foreach ($digitalObjects as $do) {
             $imagePath = ltrim($do['path'], '/');
             $cantaloupeId = str_replace('/', '_SL_', $imagePath) . $do['name'];
@@ -68,6 +72,7 @@ class IiifManifestV3Service
                             $dims['width'],
                             $dims['height']
                         );
+                        $canvasGroups[$do['name'] ?: 'Item'][] = "{$manifestId}/canvas/{$canvasIndex}";
                         $canvasIndex++;
                     }
                     continue;
@@ -84,6 +89,7 @@ class IiifManifestV3Service
                 $dims['width'],
                 $dims['height']
             );
+            $canvasGroups[$do['name'] ?: "Image {$canvasIndex}"][] = "{$manifestId}/canvas/{$canvasIndex}";
             $canvasIndex++;
         }
 
@@ -95,6 +101,13 @@ class IiifManifestV3Service
             'metadata' => [],
             'items' => $items,
         ];
+
+        // Ranges, so a reader gets a table of contents rather than a flat strip of
+        // images. See buildStructures().
+        $structures = $this->buildStructures($manifestId, $canvasGroups, $culture);
+        if ($structures) {
+            $manifest['structures'] = $structures;
+        }
 
         if ($object['identifier']) {
             $manifest['metadata'][] = [
@@ -563,6 +576,66 @@ class IiifManifestV3Service
     /**
      * Build a v3 canvas with annotation page and painting annotation.
      */
+    /**
+     * Ranges for the manifest, one per file.
+     *
+     * Without structures a IIIF client shows a flat strip of images: a
+     * twelve-page letter and the envelope beside it are indistinguishable, and
+     * there is no way to jump to a section. Ranges are what viewers turn into a
+     * table of contents, and their absence is the most visible difference
+     * between our manifests and a well-formed one from a national library.
+     *
+     * The grouping is by digital object rather than by descriptive hierarchy,
+     * because a manifest covers one description: its canvases are that record's
+     * files, and a multi-page TIFF expands into a canvas per page. So the useful
+     * structure is "this file, these pages".
+     *
+     * Emitted only when it says something. One file with one page needs no table
+     * of contents, and a range per canvas where every range holds exactly one
+     * canvas is noise that some viewers render as an empty sidebar.
+     *
+     * @param array $groups label => [canvas id, ...] in canvas order
+     */
+    private function buildStructures(string $manifestId, array $groups, string $culture): array
+    {
+        $groups = array_filter($groups);
+
+        if (!$groups) {
+            return [];
+        }
+
+        $canvasCount = array_sum(array_map('count', $groups));
+
+        // Nothing to navigate.
+        if ($canvasCount < 2) {
+            return [];
+        }
+
+        // Several files, each a single image: the canvas labels already say
+        // everything a range would, so ranges add a level and no information.
+        if (count($groups) === $canvasCount) {
+            return [];
+        }
+
+        $structures = [];
+        $index = 1;
+
+        foreach ($groups as $label => $canvasIds) {
+            $structures[] = [
+                'id' => "{$manifestId}/range/{$index}",
+                'type' => 'Range',
+                'label' => [$culture => [(string) $label]],
+                'items' => array_map(
+                    static fn ($id) => ['id' => $id, 'type' => 'Canvas'],
+                    $canvasIds
+                ),
+            ];
+            ++$index;
+        }
+
+        return $structures;
+    }
+
     private function buildCanvas(string $manifestId, int $index, string $label, string $cantaloupeId, int $width, int $height): array
     {
         $canvasId = "{$manifestId}/canvas/{$index}";
