@@ -230,6 +230,67 @@ class ahgSpectrumWorkflowService
                 'triggers' => [],
                 'spectrumRef' => 'Spectrum 5.1 - Object Exit',
             ],
+
+            // Institution-level and governance procedures. These have had working
+            // workflow configs - states, transitions, and now step keys - since
+            // the schema was seeded, and SpectrumComplianceService counts them.
+            // They were simply absent from this array, so no tile was rendered
+            // and nothing linked to them: reachable only by typing a
+            // procedure_type into the URL.
+            self::PROC_RISK => [
+                'label' => 'Risk Management',
+                'description' => 'Identifying and mitigating risks to the collection.',
+                'category' => 'governance',
+                'icon' => 'fa-triangle-exclamation',
+                'requiredFields' => [],
+                'triggers' => [],
+                'spectrumRef' => 'Spectrum 5.1 - Risk Management',
+            ],
+            self::PROC_AUDIT => [
+                'label' => 'Audit',
+                'description' => 'Checking the collection against the record.',
+                'category' => 'governance',
+                'icon' => 'fa-clipboard-check',
+                'requiredFields' => [],
+                'triggers' => [],
+                'spectrumRef' => 'Spectrum 5.1 - Audit',
+            ],
+            self::PROC_RIGHTS => [
+                'label' => 'Rights Management',
+                'description' => 'Managing rights held in and over the collection.',
+                'category' => 'governance',
+                'icon' => 'fa-copyright',
+                'requiredFields' => [],
+                'triggers' => [],
+                'spectrumRef' => 'Spectrum 5.1 - Rights Management',
+            ],
+            self::PROC_REPRODUCTION => [
+                'label' => 'Reproduction',
+                'description' => 'Requests to reproduce material from the collection.',
+                'category' => 'access',
+                'icon' => 'fa-copy',
+                'requiredFields' => [],
+                'triggers' => [self::PROC_RIGHTS],
+                'spectrumRef' => 'Spectrum 5.1 - Reproduction',
+            ],
+            self::PROC_DOCUMENTATION => [
+                'label' => 'Documentation Planning',
+                'description' => 'Planning what is documented, to what standard, and by when.',
+                'category' => 'governance',
+                'icon' => 'fa-diagram-project',
+                'requiredFields' => [],
+                'triggers' => [],
+                'spectrumRef' => 'Spectrum 5.1 - Documentation Planning',
+            ],
+            self::PROC_RETROSPECTIVE => [
+                'label' => 'Retrospective Documentation',
+                'description' => 'Filling gaps in the record for material already held.',
+                'category' => 'governance',
+                'icon' => 'fa-clock-rotate-left',
+                'requiredFields' => [],
+                'triggers' => [self::PROC_CATALOGUING],
+                'spectrumRef' => 'Spectrum 5.1 - Retrospective Documentation',
+            ],
         ];
     }
 

@@ -72,3 +72,20 @@ SET config_json = JSON_SET(
         CAST('[{"on_state": "approved", "handler": "heritage_revaluation", "requires_evidence": true}]' AS JSON)
     )
 WHERE procedure_type = 'valuation' AND is_active = 1;
+
+-- ------------------------------------------------------------
+-- Conservation: completing a treatment proposes the condition it
+-- left the object in. Not an accounting outcome - proof that the
+-- mechanism is not accounting-specific.
+--
+-- heritage_asset.last_condition_assessment has never been written
+-- by any code, while spectrum_condition_check holds real rows: the
+-- two plugins hold halves of the same fact.
+-- ------------------------------------------------------------
+UPDATE spectrum_workflow_config
+SET config_json = JSON_SET(
+        config_json,
+        '$.outcomes',
+        CAST('[{"on_state": "completed", "handler": "conservation_record", "requires_evidence": false}]' AS JSON)
+    )
+WHERE procedure_type = 'conservation' AND is_active = 1;

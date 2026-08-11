@@ -721,9 +721,14 @@ class spectrumActions extends AhgController
 
         try {
             if (class_exists('SpectrumOutcomeService')) {
+                // $resource, not $this->resource - this action resolves the
+                // record into a local, and the property is never set here. Using
+                // the property cast a null to 0, so every proposal was raised
+                // against record 0 (the institution-level sentinel) and the
+                // evidence check looked in the wrong place.
                 $proposalsRaised = SpectrumOutcomeService::onStateEntered(
                     $procedureType,
-                    (int) $this->resource->id,
+                    (int) $resource->id,
                     (string) $toState,
                     $userId
                 );

@@ -41,6 +41,10 @@ class SpectrumOutcomeService
             'class' => 'HeritageRevaluationOutcome',
             'requires_plugin' => 'ahgHeritageAccountingPlugin',
         ],
+        'conservation_record' => [
+            'class' => 'ConservationRecordOutcome',
+            'requires_plugin' => 'ahgHeritageAccountingPlugin',
+        ],
     ];
 
     /**

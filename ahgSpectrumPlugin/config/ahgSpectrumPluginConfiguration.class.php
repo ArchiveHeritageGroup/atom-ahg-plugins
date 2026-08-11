@@ -27,6 +27,7 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         // silently skipped outcome rather than an error.
         require_once __DIR__.'/../lib/Outcomes/SpectrumOutcomeHandler.class.php';
         require_once __DIR__.'/../lib/Outcomes/HeritageRevaluationOutcome.class.php';
+        require_once __DIR__.'/../lib/Outcomes/ConservationRecordOutcome.class.php';
 
         // Navigation contributed to the theme. The theme renders whatever is
         // registered and knows nothing about this plugin: previously it named

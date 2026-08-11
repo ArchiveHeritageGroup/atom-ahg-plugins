@@ -129,6 +129,18 @@ CREATE TABLE IF NOT EXISTS `heritage_valuation_history` (
     `valuer_name` VARCHAR(255) NULL,
     `valuer_credentials` VARCHAR(255) NULL,
     `valuer_organization` VARCHAR(255) NULL,
+    `valuer_id` INT UNSIGNED NULL,
+    -- Written by HeritageAssetService::addValuation() (new_value minus the
+    -- previous carrying amount). It was added to live databases by a migration
+    -- and never to this file, so a fresh install had a service that always
+    -- failed with "Unknown column 'valuation_change'" while an upgraded one
+    -- worked. Classic CREATE TABLE IF NOT EXISTS drift: the table exists, so the
+    -- statement is skipped, and the two schemas never converge.
+    `valuation_change` DECIMAL(15,2) NULL,
+    `valuation_report_reference` VARCHAR(100) NULL,
+    -- The surplus/deficit split GRAP 103.74(e) and IPSAS 45.88(e) require.
+    -- The column exists on upgraded installs; nothing writes it yet.
+    `revaluation_surplus_change` DECIMAL(15,2) NULL,
     `notes` TEXT NULL,
     `created_by` INT UNSIGNED NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
