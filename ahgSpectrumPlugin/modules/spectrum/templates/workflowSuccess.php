@@ -217,11 +217,94 @@ if ($users->isEmpty()) {
                                 <?php if ($done && $st->completed_at): ?>
                                 <small class="text-muted">&mdash; <?php echo esc_entities(substr((string) $st->completed_at, 0, 10)); ?></small>
                                 <?php endif; ?>
+                                <?php
+                                // Evidence already attached to this step. Shown
+                                // beside the tick rather than in a separate list,
+                                // because "what is this based on" belongs next to
+                                // "is it done".
+                                $stepEvidence = $evidenceByStep[$step['key']] ?? [];
+                                ?>
+                                <?php if ($stepEvidence): ?>
+                                <span class="badge bg-light text-dark ms-1" style="font-weight:normal;">
+                                    <i class="fas fa-paperclip"></i> <?php echo count($stepEvidence); ?>
+                                </span>
+                                <?php endif; ?>
                             </label>
+                            <?php if ($stepEvidence): ?>
+                            <ul class="list-unstyled small ms-4 mb-1">
+                                <?php foreach ($stepEvidence as $ev): ?>
+                                <li>
+                                    <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'evidenceDownload', 'id' => $ev->id]); ?>">
+                                        <i class="fas fa-file me-1"></i><?php echo esc_entities($ev->caption ?: $ev->original_name); ?>
+                                    </a>
+                                    <span class="text-muted">
+                                        <?php echo esc_entities(ucfirst((string) $ev->evidence_type)); ?>
+                                        <?php if ($ev->size_bytes): ?>&middot; <?php echo esc_entities(round($ev->size_bytes / 1024).' KB'); ?><?php endif; ?>
+                                    </span>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                            <?php endif; ?>
                         </div>
                         <?php endforeach; ?>
                         <button type="submit" class="btn btn-sm btn-outline-primary mt-2"><i class="fas fa-save me-1"></i><?php echo __('Save steps'); ?></button>
                     </form>
+                    <?php if ('valuation' === $procedureType): ?>
+                    <p class="mt-2 mb-0">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           href="<?php echo url_for(['module' => 'spectrum', 'action' => 'valuation', 'slug' => $resource->slug]); ?>">
+                            <i class="fas fa-coins me-1"></i><?php echo __('Record or review valuations'); ?>
+                        </a>
+                    </p>
+                    <?php endif; ?>
+
+                    <?php
+                    // Attach supporting evidence to a step.
+                    //
+                    // Deliberately a plain multipart form rather than an async
+                    // uploader: the file has to survive validation server-side
+                    // and be reported honestly if it is refused, and there is no
+                    // useful partial success to show.
+                    ?>
+                    <div class="mt-3 p-2 border rounded bg-light">
+                        <form method="post" enctype="multipart/form-data"
+                              action="<?php echo url_for(['module' => 'spectrum', 'action' => 'evidenceUpload', 'slug' => $resource->slug]); ?>">
+                            <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">
+                            <input type="hidden" name="procedure_type" value="<?php echo esc_entities($procedureType); ?>">
+                            <div class="small fw-bold mb-2"><i class="fas fa-paperclip me-1"></i><?php echo __('Attach evidence'); ?></div>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label small mb-1"><?php echo __('Step'); ?></label>
+                                    <select class="form-select form-select-sm" name="step_key">
+                                        <option value=""><?php echo __('The procedure as a whole'); ?></option>
+                                        <?php foreach ($steps as $step): ?>
+                                        <option value="<?php echo esc_entities($step['key']); ?>"><?php echo esc_entities($step['name']); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small mb-1"><?php echo __('Kind'); ?></label>
+                                    <select class="form-select form-select-sm" name="evidence_type">
+                                        <?php foreach (SpectrumEvidenceService::TYPES as $k => $label): ?>
+                                        <option value="<?php echo esc_entities($k); ?>"><?php echo esc_entities($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small mb-1"><?php echo __('Description'); ?></label>
+                                    <input type="text" class="form-control form-control-sm" name="caption" maxlength="255">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small mb-1"><?php echo __('File'); ?></label>
+                                    <input type="file" class="form-control form-control-sm" name="evidence[]" multiple required>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="submit" class="btn btn-sm btn-outline-primary w-100"><?php echo __('Add'); ?></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="mt-2">
                         <form method="post" action="<?php echo url_for(['module' => 'spectrum', 'action' => 'workflowStepsMode', 'slug' => $resource->slug]); ?>" class="d-inline">
 <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES); ?>">

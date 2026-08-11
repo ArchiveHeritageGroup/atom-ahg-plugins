@@ -333,6 +333,23 @@ class spectrumActions extends AhgController
         // Per-record step checklist state (step_key => row). Guarded so the page
         // still renders if the migration hasn't run yet.
         $this->stepStates = [];
+
+        // Evidence for this procedure, grouped by step, so the template can show
+        // it beside the checklist without a query per step. Guarded the same way
+        // as stepStates above: the page must still render on an install where
+        // the migration has not run.
+        $this->evidenceByStep = [];
+
+        try {
+            if (class_exists('SpectrumEvidenceService')) {
+                $this->evidenceByStep = SpectrumEvidenceService::groupedByStep(
+                    (string) $this->procedureType,
+                    (int) $this->resource->id
+                );
+            }
+        } catch (Throwable $e) {
+            error_log('Spectrum evidence lookup failed: '.$e->getMessage());
+        }
         try {
             $rows = DB::table('spectrum_workflow_step_state')
                 ->where('record_id', $this->resource->id)
@@ -690,6 +707,31 @@ class spectrumActions extends AhgController
             ahgSpectrumNotificationService::markTaskNotificationsAsReadBySlug($slug, $procedureType);
         }
 
+        // Outcomes: what this procedure produces on reaching this state.
+        //
+        // Fired after every write above has committed, and wrapped, because an
+        // outcome is a CONSEQUENCE of the transition. A broken consequence must
+        // not undo the fact that the transition happened - the curator moved the
+        // record and that is true whether or not the accounting side is
+        // reachable.
+        //
+        // Nothing is posted here. A proposal is raised for whoever is
+        // accountable for the destination to accept. See SpectrumOutcomeService.
+        $proposalsRaised = 0;
+
+        try {
+            if (class_exists('SpectrumOutcomeService')) {
+                $proposalsRaised = SpectrumOutcomeService::onStateEntered(
+                    $procedureType,
+                    (int) $this->resource->id,
+                    (string) $toState,
+                    $userId
+                );
+            }
+        } catch (Throwable $e) {
+            error_log('Spectrum outcome dispatch failed: '.$e->getMessage());
+        }
+
         // Confirm the save in the alerts block. The transition was recorded in the
         // activity history but the page came back looking unchanged, so there was
         // nothing to tell the user it had worked.
@@ -700,6 +742,15 @@ class spectrumActions extends AhgController
                 '%2%' => ucwords(str_replace('_', ' ', (string) $toState)),
             ]
         ));
+
+        // Say so when an outcome was raised, otherwise it happens invisibly and
+        // nobody goes to accept it.
+        if ($proposalsRaised > 0) {
+            $this->getUser()->setFlash('notice', $this->context->i18n->__(
+                '%1% outcome awaiting review. Nothing has been posted yet.',
+                ['%1%' => $proposalsRaised]
+            ));
+        }
 
         // Redirect back
         $this->redirect(['module' => 'spectrum', 'action' => 'workflow', 'slug' => $slug, 'procedure_type' => $procedureType]);
@@ -1459,8 +1510,389 @@ class spectrumActions extends AhgController
         }
     }
 
+    // ================================================================
+    // Evidence attached to a procedure step
+    // ================================================================
+
+    /**
+     * Attach one or more files to a step.
+     */
+    public function executeEvidenceUpload($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $slug = $request->getParameter('slug');
+        $this->resource = $this->getResourceBySlug($slug);
+
+        if (!$this->resource) {
+            $this->forward404();
+        }
+
+        $this->requireProcedureEditor();
+
+        $procedureType = (string) $request->getParameter('procedure_type');
+        $stepKey = (string) $request->getParameter('step_key');
+        $i18n = $this->context->i18n;
+
+        $files = $this->normaliseUploadedFiles($_FILES['evidence'] ?? null);
+
+        if (!$files) {
+            $this->getUser()->setFlash('error', $i18n->__('No file was chosen.'));
+            $this->redirectToWorkflow($slug, $procedureType);
+
+            return;
+        }
+
+        $stored = 0;
+        $errors = [];
+
+        foreach ($files as $file) {
+            if (!isset($file['error']) || UPLOAD_ERR_NO_FILE === $file['error']) {
+                continue;
+            }
+
+            try {
+                SpectrumEvidenceService::store(
+                    $procedureType,
+                    (int) $this->resource->id,
+                    $stepKey,
+                    $file,
+                    [
+                        'evidence_type' => $request->getParameter('evidence_type'),
+                        'caption' => $request->getParameter('caption'),
+                        'note' => $request->getParameter('note'),
+                    ],
+                    $this->getUser()->getAttribute('user_id')
+                );
+                ++$stored;
+            } catch (Throwable $e) {
+                // Name the file: with several selected, "rejected" alone does not
+                // say which one to fix.
+                $errors[] = ($file['name'] ?? 'file').' - '.$e->getMessage();
+            }
+        }
+
+        if ($stored > 0) {
+            $this->getUser()->setFlash('success', $i18n->__('%1% file(s) attached.', ['%1%' => $stored]));
+        }
+
+        if ($errors) {
+            $this->getUser()->setFlash('error', implode(' | ', $errors));
+        }
+
+        $this->redirectToWorkflow($slug, $procedureType);
+    }
+
+    /**
+     * Stream one evidence file.
+     *
+     * Files are stored outside any served directory, so this is the only route
+     * to one. The id is re-resolved and authorisation re-checked here rather
+     * than trusted from the link that produced it.
+     */
+    public function executeEvidenceDownload($request)
+    {
+        $evidence = SpectrumEvidenceService::get((int) $request->getParameter('id'));
+
+        if (!$evidence) {
+            $this->forward404('No such evidence.');
+        }
+
+        // Re-authorise against the record the evidence belongs to, not the
+        // evidence row - otherwise knowing an id is enough.
+        $this->resource = $this->getResourceById((int) $evidence->record_id);
+        $this->requireProcedureReader();
+
+        $path = SpectrumEvidenceService::pathFor($evidence);
+
+        // Belt and braces: the path is derived, not stored, but check it still
+        // resolves inside the evidence root before streaming anything.
+        //
+        // The root is passed explicitly rather than using defaultRoots(), which
+        // covers sf_upload_dir - the evidence store deliberately sits outside it,
+        // so defaultRoots() would reject every legitimate file here.
+        if (class_exists('\AtomExtensions\Services\PathGuard')) {
+            $safe = \AtomExtensions\Services\PathGuard::within(
+                $path,
+                [SpectrumEvidenceService::storageRoot()]
+            );
+
+            if (null === $safe) {
+                $this->forward404('Evidence is not readable.');
+            }
+
+            $path = $safe;
+        }
+
+        if (!is_file($path)) {
+            $this->forward404('The file is missing from storage.');
+        }
+
+        $response = $this->getResponse();
+        $response->clearHttpHeaders();
+        $response->setContentType($evidence->mime_type ?: 'application/octet-stream');
+        // RFC 5987, so a name with spaces or non-ASCII survives the round trip.
+        $response->setHttpHeader('Content-Disposition', sprintf(
+            'attachment; filename="%s"; filename*=UTF-8\'\'%s',
+            str_replace('"', '', (string) $evidence->original_name),
+            rawurlencode((string) $evidence->original_name)
+        ));
+        $response->setHttpHeader('Content-Length', (string) filesize($path));
+        $response->setHttpHeader('X-Content-Type-Options', 'nosniff');
+        $response->sendHttpHeaders();
+        readfile($path);
+
+        return sfView::NONE;
+    }
+
+    public function executeEvidenceDelete($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $evidence = SpectrumEvidenceService::get((int) $request->getParameter('id'));
+
+        if (!$evidence) {
+            $this->forward404('No such evidence.');
+        }
+
+        $this->resource = $this->getResourceById((int) $evidence->record_id);
+        $this->requireProcedureEditor();
+
+        $ok = SpectrumEvidenceService::delete((int) $evidence->id);
+
+        $this->getUser()->setFlash($ok ? 'success' : 'error', $this->context->i18n->__(
+            $ok ? 'Evidence removed.' : 'The evidence could not be removed.'
+        ));
+
+        $this->redirectToWorkflow(
+            $this->resource ? $this->resource->slug : null,
+            (string) $evidence->procedure_type
+        );
+    }
+
+    // ================================================================
+    // Outcome proposals
+    // ================================================================
+
+    /**
+     * Everything a procedure has proposed and nobody has decided yet.
+     */
+    public function executeOutcomes($request)
+    {
+        $this->requireProcedureEditor();
+
+        $this->proposals = SpectrumOutcomeService::pending(
+            $request->getParameter('procedure_type') ?: null
+        );
+
+        $this->decided = \Illuminate\Database\Capsule\Manager::table('spectrum_outcome_proposal')
+            ->whereIn('status', ['accepted', 'rejected', 'failed'])
+            ->orderByDesc('decided_at')
+            ->limit(25)
+            ->get()
+            ->all();
+
+        $this->titles = $this->titlesFor(array_merge($this->proposals, $this->decided));
+    }
+
+    /**
+     * Accept or reject. Accepting is the only thing that writes a destination.
+     */
+    public function executeOutcomeDecide($request)
+    {
+        if (!$request->isMethod('post')) {
+            $this->forward404();
+        }
+
+        $this->requireProcedureEditor();
+
+        $id = (int) $request->getParameter('id');
+        $note = $request->getParameter('note');
+        $i18n = $this->context->i18n;
+
+        if ('accept' === $request->getParameter('decision')) {
+            $ok = SpectrumOutcomeService::accept($id, $this->getUser()->getAttribute('user_id'), $note);
+            $proposal = SpectrumOutcomeService::get($id);
+
+            if ($ok) {
+                $this->getUser()->setFlash('success', $i18n->__('Applied. %1%', [
+                    '%1%' => $proposal ? (string) $proposal->result_note : '',
+                ]));
+            } else {
+                $this->getUser()->setFlash('error', $i18n->__('Could not be applied. %1%', [
+                    '%1%' => $proposal ? (string) $proposal->result_note : '',
+                ]));
+            }
+        } else {
+            SpectrumOutcomeService::reject($id, $this->getUser()->getAttribute('user_id'), $note);
+            $this->getUser()->setFlash('notice', $i18n->__('Rejected. Nothing was written.'));
+        }
+
+        $this->redirect(['module' => 'spectrum', 'action' => 'outcomes']);
+    }
+
+    // ================================================================
+    // Shared helpers for the above
+    // ================================================================
+
+    protected function requireProcedureEditor(): void
+    {
+        $user = $this->getUser();
+
+        if (!$user->isAuthenticated()
+            || !($user->hasCredential('administrator') || $user->hasCredential('editor'))) {
+            $this->forward('admin', 'secure');
+        }
+    }
+
+    protected function requireProcedureReader(): void
+    {
+        // Evidence can carry valuations, insurance figures and donor
+        // correspondence, so reading it is a staff action, not a public one.
+        $this->requireProcedureEditor();
+    }
+
+    protected function getResourceById(int $id)
+    {
+        return \Illuminate\Database\Capsule\Manager::table('information_object as io')
+            ->leftJoin('slug as s', 's.object_id', '=', 'io.id')
+            ->where('io.id', $id)
+            ->select('io.id', 's.slug')
+            ->first();
+    }
+
+    protected function redirectToWorkflow(?string $slug, string $procedureType): void
+    {
+        if (!$slug) {
+            $this->redirect(['module' => 'spectrum', 'action' => 'dashboard']);
+
+            return;
+        }
+
+        $this->redirect([
+            'module' => 'spectrum', 'action' => 'workflow',
+            'slug' => $slug, 'procedure_type' => $procedureType,
+        ]);
+    }
+
+    /**
+     * Record titles for a set of proposals, in one query rather than N.
+     */
+    protected function titlesFor(array $rows): array
+    {
+        $ids = array_values(array_unique(array_map(static fn ($r) => (int) $r->record_id, $rows)));
+
+        if (!$ids) {
+            return [];
+        }
+
+        return \Illuminate\Database\Capsule\Manager::table('information_object_i18n')
+            ->whereIn('id', $ids)
+            ->where('culture', 'en')
+            ->pluck('title', 'id')
+            ->all();
+    }
+
+    /**
+     * Record a valuation against a record.
+     *
+     * spectrum_valuation has had eighteen columns and no writer since it was
+     * created - every reference in the codebase was a SELECT, and the table was
+     * empty on every instance. So the Valuation procedure could be driven to
+     * "approved" with no valuation recorded anywhere, and its outcome had
+     * nothing to propose.
+     *
+     * Follows executeObjectEntry, the existing precedent for a procedure with
+     * its own data screen.
+     */
+    public function executeValuation($request)
+    {
+        $slug = $request->getParameter('slug');
+        $this->resource = $this->getResourceBySlug($slug);
+
+        if (!$this->resource) {
+            $this->forward404();
+        }
+
+        $this->requireProcedureEditor();
+        $i18n = $this->context->i18n;
+
+        if ($request->isMethod('post')) {
+            $amount = (float) str_replace([' ', ','], ['', '.'], (string) $request->getParameter('valuation_amount'));
+            $date = trim((string) $request->getParameter('valuation_date'));
+
+            if ($amount <= 0 || '' === $date) {
+                $this->getUser()->setFlash('error', $i18n->__('A valuation needs an amount and a date.'));
+            } else {
+                $isCurrent = (bool) $request->getParameter('is_current');
+
+                if ($isCurrent) {
+                    // Only one current valuation per record, or "the current
+                    // figure" stops meaning anything.
+                    DB::table('spectrum_valuation')
+                        ->where('object_id', $this->resource->id)
+                        ->update(['is_current' => 0]);
+                }
+
+                DB::table('spectrum_valuation')->insert([
+                    'object_id' => (int) $this->resource->id,
+                    'valuation_reference' => $request->getParameter('valuation_reference') ?: null,
+                    'valuation_date' => $date,
+                    'valuation_type' => $request->getParameter('valuation_type') ?: null,
+                    'valuation_amount' => $amount,
+                    'valuation_currency' => $request->getParameter('valuation_currency') ?: 'ZAR',
+                    'valuer_name' => $request->getParameter('valuer_name') ?: null,
+                    'valuer_organization' => $request->getParameter('valuer_organization') ?: null,
+                    'valuation_note' => $request->getParameter('valuation_note') ?: null,
+                    'renewal_date' => $request->getParameter('renewal_date') ?: null,
+                    'is_current' => $isCurrent ? 1 : 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'created_by' => $this->getUser()->getAttribute('user_id'),
+                ]);
+
+                $this->getUser()->setFlash('success', $i18n->__('Valuation recorded.'));
+                $this->redirect(['module' => 'spectrum', 'action' => 'valuation', 'slug' => $slug]);
+
+                return;
+            }
+        }
+
+        $this->valuations = DB::table('spectrum_valuation')
+            ->where('object_id', $this->resource->id)
+            ->orderByDesc('valuation_date')
+            ->orderByDesc('id')
+            ->get()
+            ->all();
+
+        $this->types = [
+            'insurance' => $i18n->__('Insurance'),
+            'fair_value' => $i18n->__('Fair value'),
+            'market' => $i18n->__('Market'),
+            'replacement' => $i18n->__('Replacement'),
+            'deemed_cost' => $i18n->__('Deemed cost'),
+            'nominal' => $i18n->__('Nominal'),
+        ];
+    }
+
     public function executeGrapDashboard($request)
     {
+        // Heritage accounting is a separate, optional plugin, and this screen
+        // reads its tables directly. Without it the route still resolves and the
+        // query below fails on a missing table - a 500 for a feature that is
+        // simply not installed.
+        //
+        // Spectrum ships and runs standalone (it does so on the 2.10 test VM
+        // today, with no heritage_asset table present), so absence is a normal
+        // configuration rather than a fault.
+        if (class_exists('SpectrumOutcomeService')
+            && !SpectrumOutcomeService::pluginEnabled('ahgHeritageAccountingPlugin')) {
+            $this->forward404('Heritage accounting is not installed on this site.');
+        }
+
         $slug = $request->getParameter('slug');
         $this->resource = $this->getResourceBySlug($slug);
 

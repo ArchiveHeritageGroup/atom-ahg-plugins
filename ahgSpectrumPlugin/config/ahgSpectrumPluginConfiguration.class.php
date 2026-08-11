@@ -18,6 +18,16 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         require_once __DIR__.'/../lib/Listeners/LocationInjector.php';
         $this->dispatcher->connect('response.filter_content', ['\AhgSpectrum\Listeners\LocationInjector', 'filter']);
 
+        // Outcome handlers: what a procedure produces when it reaches a state.
+        //
+        // Required explicitly, and the interface before the class that implements
+        // it, because nested lib/ directories are not reliably picked up by the
+        // autoload cache here - the Listeners above are required for the same
+        // reason. A handler that fails to load would otherwise turn into a
+        // silently skipped outcome rather than an error.
+        require_once __DIR__.'/../lib/Outcomes/SpectrumOutcomeHandler.class.php';
+        require_once __DIR__.'/../lib/Outcomes/HeritageRevaluationOutcome.class.php';
+
         // Navigation contributed to the theme. The theme renders whatever is
         // registered and knows nothing about this plugin: previously it named
         // '@spectrum_my_tasks' directly and called ahgSpectrumWorkflowService
@@ -73,12 +83,26 @@ class ahgSpectrumPluginConfiguration extends sfPluginConfiguration
         $spectrum->any('spectrum_index', '/:slug/spectrum', 'index');
         $spectrum->any('spectrum_label', '/:slug/spectrum/label', 'label');
         $spectrum->any('spectrum_object_entry', '/:slug/spectrum/object-entry', 'objectEntry');
+        $spectrum->any('spectrum_valuation', '/:slug/spectrum/valuation', 'valuation');
         $spectrum->any('spectrum_label_png', '/:slug/spectrum/label.png', 'labelPng');
         $spectrum->any('spectrum_workflow', '/spectrum/:slug/workflow', 'workflow');
         $spectrum->any('spectrum_workflow_update', '/spectrum/:slug/workflow/update', 'workflowUpdate');
         $spectrum->any('spectrum_workflow_transition', '/spectrum/:slug/workflow/transition', 'workflowTransition');
         $spectrum->any('spectrum_workflow_steps', '/spectrum/:slug/workflow/steps', 'workflowSteps');
         $spectrum->any('spectrum_workflow_steps_mode', '/spectrum/:slug/workflow/steps-mode', 'workflowStepsMode');
+
+        // Evidence attached to a procedure step.
+        //
+        // Download is by evidence id and re-checks authorisation against the
+        // record, rather than trusting the id. Files live outside the web root,
+        // so this action is the only way to reach one.
+        $spectrum->post('spectrum_evidence_upload', '/spectrum/:slug/workflow/evidence', 'evidenceUpload');
+        $spectrum->any('spectrum_evidence_download', '/spectrum/evidence/:id/download', 'evidenceDownload', ['id' => '\d+']);
+        $spectrum->post('spectrum_evidence_delete', '/spectrum/evidence/:id/delete', 'evidenceDelete', ['id' => '\d+']);
+
+        // Outcome proposals raised by a procedure, and the decision on them.
+        $spectrum->any('spectrum_outcomes', '/spectrum/outcomes', 'outcomes');
+        $spectrum->post('spectrum_outcome_decide', '/spectrum/outcomes/:id/decide', 'outcomeDecide', ['id' => '\d+']);
 
         // Dashboard routes
         $spectrum->any('spectrum_dashboard', '/spectrum/dashboard', 'dashboard');
