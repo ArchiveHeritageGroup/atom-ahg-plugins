@@ -70,7 +70,13 @@
           allowClose: false,
           allowMaximize: true,
           allowFullscreen: true,
-          sideBarOpenByDefault: false
+          sideBarOpenByDefault: false,
+          // Annotations panel. This is the harness that actually serves record
+          // pages, and it was the one without the setting - ahgIiifPlugin's two
+          // harnesses had it, this did not, so a canvas could advertise an
+          // AnnotationPage, Mirador could fetch it, and the reader still had no
+          // way to see it.
+          annotations: true
         },
         workspace: {
           type: 'single',
