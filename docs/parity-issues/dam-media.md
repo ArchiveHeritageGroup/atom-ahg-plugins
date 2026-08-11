@@ -17,7 +17,7 @@ Heratio has significantly richer dam-media functionality (45% parity from AtoM p
 - AI video animation from static images — `ahg-image-ar` → `none`.
 - RDA export/import with carrier mapping — `ahg-metadata-export` → `ahgMetadataExportPlugin`.
 - DACS export/import — `ahg-metadata-export` → `ahgMetadataExportPlugin`.
-- EAD4, EAD2002, MODS, METS, EAC-F exporters — `ahg-metadata-export` → `ahgMetadataExportPlugin`.
+- EAD2002, MODS, METS, EAC-F exporters — `ahg-metadata-export` → `ahgMetadataExportPlugin`.
 
 ### Remediation (per AHG twin convention)
 - **A — port via patches/plugin extension** (preferred): mirror the Heratio package logic into the AtoM plugin.

@@ -149,7 +149,7 @@
    "claimed_atom": "ahgMetadataExportPlugin"
   },
   {
-   "feature": "EAD4, EAD2002, MODS, METS, EAC-F exporters",
+   "feature": "EAD2002, MODS, METS, EAC-F exporters",
    "severity": "medium",
    "heratio_pkg": "ahg-metadata-export",
    "claimed_atom": "ahgMetadataExportPlugin"

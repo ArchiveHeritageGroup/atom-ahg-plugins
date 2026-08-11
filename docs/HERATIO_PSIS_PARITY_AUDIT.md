@@ -106,7 +106,7 @@ Heratio has significantly richer dam-media functionality (45% parity from AtoM p
 - **[medium]** AI video animation from static images — _ahg-image-ar → none_: Heratio AnimationService calls SVD/CogVideoX server; no AtoM equivalent
 - **[medium]** RDA export/import with carrier mapping — _ahg-metadata-export → ahgMetadataExportPlugin_: Heratio supports RAD XML; AtoM has no RAD support
 - **[medium]** DACS export/import — _ahg-metadata-export → ahgMetadataExportPlugin_: Heratio DacsSerializer/DacsXmlImporter; AtoM has no DACS
-- **[medium]** EAD4, EAD2002, MODS, METS, EAC-F exporters — _ahg-metadata-export → ahgMetadataExportPlugin_: Heratio 16 exporters vs AtoM 12 (missing 8 formats)
+- **[medium]** EAD2002, MODS, METS, EAC-F exporters — _ahg-metadata-export → ahgMetadataExportPlugin_: Heratio 16 exporters vs AtoM 12 (missing 8 formats)
 - **[low]** Photo processing (brightness, contrast, rotation, crop) — _ahg-media-processing → none_: Heratio PhotoProcessor; no AtoM equivalent
 - **[low]** SPARQL query engine for RDF metadata — _ahg-metadata-export → none_: Heratio SimpleSparqlEngine; no AtoM equivalent
 
