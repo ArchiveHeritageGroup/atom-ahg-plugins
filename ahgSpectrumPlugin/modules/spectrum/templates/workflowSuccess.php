@@ -225,7 +225,7 @@ if ($users->isEmpty()) {
                                 $stepEvidence = $evidenceByStep[$step['key']] ?? [];
                                 ?>
                                 <?php if ($stepEvidence): ?>
-                                <span class="badge bg-light text-dark ms-1" style="font-weight:normal;">
+                                <span class="badge bg-light text-dark ms-1 fw-normal">
                                     <i class="fas fa-paperclip"></i> <?php echo count($stepEvidence); ?>
                                 </span>
                                 <?php endif; ?>

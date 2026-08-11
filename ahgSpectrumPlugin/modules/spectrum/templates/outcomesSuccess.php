@@ -3,6 +3,14 @@
   <h1><?php echo __('Procedure outcomes awaiting review') ?></h1>
 <?php end_slot() ?>
 
+<?php
+// A <style> element carrying the CSP nonce, rather than an inline style
+// attribute. A nonce covers elements and never attributes, so an attribute is
+// dropped on any site running the enforcing header - the control would simply
+// render full width with nothing to say why.
+echo ahg_style_block('.ahg-outcome-note { width: 14rem; }');
+?>
+
 <p class="text-muted">
   <?php echo __('When a procedure reaches a state that produces something - a valuation approved, a work disposed of - it records what it would write and stops there. Nothing below has been posted. Accepting is what writes it.') ?>
 </p>
@@ -33,7 +41,7 @@
           <form method="post" class="d-inline"
                 action="<?php echo url_for(['module' => 'spectrum', 'action' => 'outcomeDecide', 'id' => $p->id]) ?>">
             <input type="hidden" name="_ahg_csrf_token" value="<?php echo htmlspecialchars(class_exists('\AtomFramework\Services\CsrfService') ? \AtomFramework\Services\CsrfService::generateToken() : '', ENT_QUOTES) ?>">
-            <input type="text" class="form-control form-control-sm d-inline-block" style="width:14rem;"
+            <input type="text" class="form-control form-control-sm d-inline-block ahg-outcome-note"
                    name="note" placeholder="<?php echo __('Note (optional)') ?>">
             <button class="btn btn-sm btn-success" name="decision" value="accept"
                     onclick="return confirm('<?php echo __('Write this to the record it belongs to?') ?>')">
