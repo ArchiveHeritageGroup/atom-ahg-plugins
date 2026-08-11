@@ -91,7 +91,13 @@
                     allowClose: true,
                     allowMaximize: true,
                     allowFullscreen: true,
-                    sideBarOpenByDefault: false
+                    sideBarOpenByDefault: false,
+                    // Annotations, as viewer.html has always had. Comparison is
+                    // where they matter most - the reason to put two images side
+                    // by side is usually to point at something in both - and the
+                    // two harnesses disagreeing meant annotations would light up
+                    // in the single viewer and silently do nothing here.
+                    annotations: true
                 },
                 workspace: {
                     showZoomControls: true,

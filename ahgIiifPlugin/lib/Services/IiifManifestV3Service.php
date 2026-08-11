@@ -16,6 +16,9 @@ class IiifManifestV3Service
     private string $baseUrl;
     private string $cantaloupeBaseUrl;
 
+    /** Record the current manifest describes - see annotationsFor(). */
+    private ?int $annotationObjectId = null;
+
     public function __construct(?string $baseUrl = null, ?string $cantaloupeBaseUrl = null)
     {
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
@@ -35,6 +38,11 @@ class IiifManifestV3Service
      */
     public function generateV3Manifest(array $object, array $digitalObjects, string $culture = 'en', ?int $cachedPageCount = null): array
     {
+        // Carried on the service because buildCanvas() is given a canvas index and
+        // image identifiers, not the record. Every canvas of one manifest belongs
+        // to the same record, so this is set once per manifest.
+        $this->annotationObjectId = ((int) ($object['id'] ?? 0)) ?: null;
+
         // Build multi-language labels from all available i18n rows
         $multiLangLabels = $this->getMultiLanguageLabels((int) ($object['id'] ?? 0));
         $label = !empty($multiLangLabels)
@@ -607,12 +615,16 @@ class IiifManifestV3Service
             $height = (int) $size[1];
         }
 
-        return [
+        return $this->withoutEmptyAnnotations([
             'id' => $canvasId,
             'type' => 'Canvas',
             'label' => ['none' => [$label]],
             'width' => $width,
             'height' => $height,
+            // Same on the no-image-service path. An instance without an image
+            // server still has annotations, and omitting this here would make the
+            // feature appear to work only where Cantaloupe happens to be running.
+            'annotations' => $this->annotationsFor($canvasId),
             'items' => [[
                 'id' => "{$canvasId}/page",
                 'type' => 'AnnotationPage',
@@ -630,7 +642,7 @@ class IiifManifestV3Service
                     'target' => $canvasId,
                 ]],
             ]],
-        ];
+        ]);
     }
 
     /**
@@ -845,6 +857,54 @@ class IiifManifestV3Service
         return $structures;
     }
 
+    /**
+     * The non-painting annotations attached to a canvas.
+     *
+     * A canvas advertises annotations that are ABOUT the image through an
+     * `annotations` property; `items` is the painting annotation, which is the
+     * image itself. Without this property a viewer is never told the
+     * AnnotationPage exists, never fetches it, and shows nothing - which is why
+     * /iiif/annotations/object/:id has served a valid W3C AnnotationPage for as
+     * long as it has existed while no viewer anywhere displayed one. See #294.
+     *
+     * WHAT THIS DOES NOT DECIDE
+     *
+     * There are several annotation stores in the suite and which one is
+     * authoritative is still open. This points at the serving ENDPOINT, not at a
+     * table, so that question stays open: whatever the endpoint is later made to
+     * read, every manifest already published keeps working and needs no reissue.
+     *
+     * Returned as a referenced AnnotationPage - id and type only, no items - so a
+     * viewer fetches it on demand rather than every manifest carrying every
+     * annotation inline.
+     */
+    private function annotationsFor(string $canvasId): array
+    {
+        if (null === $this->annotationObjectId) {
+            return [];
+        }
+
+        return [[
+            'id' => "{$this->baseUrl}/iiif/annotations/object/{$this->annotationObjectId}",
+            'type' => 'AnnotationPage',
+        ]];
+    }
+
+    /**
+     * Drop an empty annotations key rather than publishing "annotations": [].
+     *
+     * An empty array is legal and says nothing; a canvas with no annotations
+     * should simply not carry the property.
+     */
+    private function withoutEmptyAnnotations(array $canvas): array
+    {
+        if (empty($canvas['annotations'])) {
+            unset($canvas['annotations']);
+        }
+
+        return $canvas;
+    }
+
     private function buildCanvas(string $manifestId, int $index, string $label, string $cantaloupeId, int $width, int $height): array
     {
         $canvasId = "{$manifestId}/canvas/{$index}";
@@ -860,12 +920,13 @@ class IiifManifestV3Service
             return $this->buildCanvasWithoutImageService($canvasId, $label, $cantaloupeId, $width, $height);
         }
 
-        return [
+        return $this->withoutEmptyAnnotations([
             'id' => $canvasId,
             'type' => 'Canvas',
             'label' => ['none' => [$label]],
             'width' => $width,
             'height' => $height,
+            'annotations' => $this->annotationsFor($canvasId),
             'items' => [
                 [
                     'id' => "{$canvasId}/page",
@@ -899,7 +960,7 @@ class IiifManifestV3Service
                     ],
                 ],
             ],
-        ];
+        ]);
     }
 
     /**
