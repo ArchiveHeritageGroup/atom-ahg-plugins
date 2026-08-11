@@ -1,6 +1,17 @@
-<?php 
+<?php
 decorate_with('layout_1col');
 use Illuminate\Database\Capsule\Manager as DB;
+
+// Evidence thumbnails. A nonced <style> element, not a style attribute: the
+// nonce covers elements and never attributes, so an attribute is dropped
+// wherever the enforcing CSP header is on and the image would render at its
+// natural size, full width of the column.
+echo ahg_style_block(
+    '.ahg-evidence-thumb {'
+    .' max-height: 140px; max-width: 220px; height: auto; width: auto;'
+    .' border: 1px solid rgba(0,0,0,.15); border-radius: .25rem;'
+    .' object-fit: contain; background: #fff; }'
+);
 
 // Get workflow config for current procedure
 $workflowConfig = DB::table('spectrum_workflow_config')
@@ -233,14 +244,41 @@ if ($users->isEmpty()) {
                             <?php if ($stepEvidence): ?>
                             <ul class="list-unstyled small ms-4 mb-1">
                                 <?php foreach ($stepEvidence as $ev): ?>
-                                <li>
-                                    <a href="<?php echo url_for(['module' => 'spectrum', 'action' => 'evidenceDownload', 'id' => $ev->id]); ?>">
+                                <?php
+                                // Show a picture as a picture. Evidence for a step is
+                                // usually the thing you want to look at - a signed
+                                // receipt, a condition photograph - and a filename
+                                // tells you nothing about whether the right file was
+                                // attached.
+                                //
+                                // Raster formats only, matching the allowlist in
+                                // executeEvidenceDownload; SVG stays a download,
+                                // because an inline SVG is a document that can carry
+                                // script and this file came from a user.
+                                $previewable = in_array(
+                                    strtolower((string) $ev->mime_type),
+                                    ['image/png', 'image/jpeg', 'image/gif', 'image/webp'],
+                                    true
+                                );
+                                $href = url_for(['module' => 'spectrum', 'action' => 'evidenceDownload', 'id' => $ev->id]);
+                                ?>
+                                <li class="mb-2">
+                                    <a href="<?php echo $href; ?>">
                                         <i class="fas fa-file me-1"></i><?php echo esc_entities($ev->caption ?: $ev->original_name); ?>
                                     </a>
                                     <span class="text-muted">
                                         <?php echo esc_entities(ucfirst((string) $ev->evidence_type)); ?>
                                         <?php if ($ev->size_bytes): ?>&middot; <?php echo esc_entities(round($ev->size_bytes / 1024).' KB'); ?><?php endif; ?>
                                     </span>
+                                    <?php if ($previewable): ?>
+                                    <div class="mt-1">
+                                        <a href="<?php echo $href.'?inline=1'; ?>" target="_blank" rel="noopener">
+                                            <img class="ahg-evidence-thumb"
+                                                 src="<?php echo $href.'?inline=1'; ?>"
+                                                 alt="<?php echo esc_entities($ev->caption ?: $ev->original_name); ?>">
+                                        </a>
+                                    </div>
+                                    <?php endif; ?>
                                 </li>
                                 <?php endforeach; ?>
                             </ul>

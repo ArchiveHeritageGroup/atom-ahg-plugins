@@ -1635,12 +1635,24 @@ class spectrumActions extends AhgController
             $this->forward404('The file is missing from storage.');
         }
 
+        // Serve a picture as a picture when the page asks for it, so evidence can
+        // be seen on the step it belongs to instead of only downloaded.
+        //
+        // The allowlist is raster formats only, and SVG is left out deliberately:
+        // an SVG rendered inline is a document that can carry script, and this
+        // file was uploaded by a user. Anything not on the list keeps the
+        // attachment disposition it has always had.
+        $inlineTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+        $wantsInline = $request->getParameter('inline')
+            && in_array(strtolower((string) $evidence->mime_type), $inlineTypes, true);
+
         $response = $this->getResponse();
         $response->clearHttpHeaders();
         $response->setContentType($evidence->mime_type ?: 'application/octet-stream');
         // RFC 5987, so a name with spaces or non-ASCII survives the round trip.
         $response->setHttpHeader('Content-Disposition', sprintf(
-            'attachment; filename="%s"; filename*=UTF-8\'\'%s',
+            '%s; filename="%s"; filename*=UTF-8\'\'%s',
+            $wantsInline ? 'inline' : 'attachment',
             str_replace('"', '', (string) $evidence->original_name),
             rawurlencode((string) $evidence->original_name)
         ));
