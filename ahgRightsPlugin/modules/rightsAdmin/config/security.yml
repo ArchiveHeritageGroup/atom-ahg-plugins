@@ -1,0 +1,8 @@
+# SECURITY: administrators only - this module configures rights statements,
+# licences and territories that every other rights record depends on.
+#
+# Without this file the module inherits apps/qubit/config/security.yml, whose
+# `default: is_secure: false` makes every action public.
+all:
+  is_secure:   true
+  credentials: [[ administrator ]]

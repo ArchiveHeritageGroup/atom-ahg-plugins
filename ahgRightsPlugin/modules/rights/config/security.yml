@@ -1,0 +1,11 @@
+# SECURITY: rights records carry licence terms, rights holders and embargo
+# reasons - staff data, not public.
+#
+# Without this file the module inherits apps/qubit/config/security.yml, whose
+# `default: is_secure: false` makes every action public.
+#
+# Double-bracket (OR) form: `credentials: [editor]` would require literally that
+# group and 403 administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

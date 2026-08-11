@@ -12,8 +12,8 @@ class extendedRightsExportAction extends AhgController
         $culture = $this->context->user->getCulture();
         
         // Load services with require_once
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsExportService.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/ExtendedRightsExportService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/ExtendedRightsService.php';
         
         $exportService = new \ahgExtendedRightsPlugin\Services\ExtendedRightsExportService($culture);
         $rightsService = new \ahgExtendedRightsPlugin\Services\ExtendedRightsService($culture);

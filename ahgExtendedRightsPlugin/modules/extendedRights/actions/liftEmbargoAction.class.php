@@ -10,7 +10,7 @@ class extendedRightsLiftEmbargoAction extends AhgController
         }
 
         // Load service
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/ExtendedRightsService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/ExtendedRightsService.php';
 
         $service = new \ahgExtendedRightsPlugin\Services\ExtendedRightsService('en');
 

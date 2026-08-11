@@ -8,14 +8,14 @@ class embargoActions extends AhgController
     protected function getService(): \ahgExtendedRightsPlugin\Services\EmbargoService
     {
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/EmbargoService.php';
         return new \ahgExtendedRightsPlugin\Services\EmbargoService();
     }
 
     protected function getResource(int $objectId)
     {
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/EmbargoService.php';
         return DB::table('information_object as io')
             ->leftJoin('information_object_i18n as ioi', function ($join) {
                 $join->on('io.id', '=', 'ioi.id')
@@ -203,7 +203,7 @@ class embargoActions extends AhgController
     protected function processAddExceptionForm(sfWebRequest $request, int $embargoId)
     {
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgExtendedRightsPlugin/lib/Services/EmbargoService.php';
+        require_once dirname(__FILE__) . '/../../../lib/Services/EmbargoService.php';
         $now = date('Y-m-d H:i:s');
 
         DB::table('embargo_exception')->insert([

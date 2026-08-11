@@ -37,7 +37,7 @@ class ProcessCommand extends BaseCommand
 
     protected function handle(): int
     {
-        $pluginDir = $this->getAtomRoot() . '/atom-ahg-plugins/ahgExtendedRightsPlugin';
+        $pluginDir = dirname(__DIR__, 2);
         require_once $pluginDir . '/lib/Services/EmbargoService.php';
         require_once $pluginDir . '/lib/Services/EmbargoNotificationService.php';
 

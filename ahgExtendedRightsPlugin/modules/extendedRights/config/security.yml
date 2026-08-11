@@ -1,0 +1,18 @@
+# SECURITY: rights management is a staff function, not public data.
+#
+# Without this file the module inherits apps/qubit/config/security.yml, whose
+# `default: is_secure: false` makes every action public. Verified anonymously on
+# a clean AtoM 2.10 and on PSIS: /admin/rights returned 200 and rendered
+# "Extended Rights Management" with its batch and edit controls to a visitor
+# with no session at all.
+#
+# Credentials use the double-bracket (OR) form. A single-item list such as
+# `credentials: [editor]` requires literally that group and 403s administrators.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+# Batch operations rewrite rights across many records at once.
+batch:
+  is_secure:   true
+  credentials: [[ administrator ]]

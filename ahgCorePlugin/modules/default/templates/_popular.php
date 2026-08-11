@@ -29,10 +29,41 @@
       if ('' === trim($label)) {
           $label = (string) ($object->slug ?? '');
       }
+
+      // The module has to be named. url_for([$object]) supplies no module and no
+      // action, and sfRoute::matchesParameters() fills both in from whichever
+      // route it is testing - so the first route in the collection with no
+      // variables of its own matches, and the object is serialised into its query
+      // string. On a clean AtoM every link in this list rendered as
+      // /ahg/rights/embargo/edit/?0%5BdisableNestedSetUpdating%5D=0 the moment a
+      // plugin owning a static route was enabled, and moved to a different wrong
+      // route as the enabled set changed.
+      //
+      // Repository extends Actor, so it must be tested first. Anything unrecognised
+      // is skipped rather than linked somewhere arbitrary.
+      $module = null;
+
+      if ($object instanceof QubitInformationObject) {
+          $module = 'informationobject';
+      } elseif ($object instanceof QubitRepository) {
+          $module = 'repository';
+      } elseif ($object instanceof QubitActor) {
+          $module = 'actor';
+      } elseif ($object instanceof QubitFunctionObject) {
+          $module = 'function';
+      } elseif ($object instanceof QubitTerm) {
+          $module = 'term';
+      } elseif ($object instanceof QubitAccession) {
+          $module = 'accession';
+      }
+
+      if (null === $module) {
+          continue;
+      }
       ?>
       <a
         class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-break"
-        href="<?php echo url_for([$object]); ?>">
+        href="<?php echo url_for([$object, 'module' => $module]); ?>">
         <?php echo $label; ?>
         <span class="ms-3 text-nowrap">
           <?php echo __('%1% visits', ['%1%' => $item[1]]); ?>
