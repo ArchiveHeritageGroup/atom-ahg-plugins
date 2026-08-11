@@ -197,6 +197,16 @@ CREATE TABLE IF NOT EXISTS `heritage_movement_register` (
     `to_location` VARCHAR(255) NULL,
     `reason` TEXT NULL,
     `authorized_by` VARCHAR(255) NULL,
+    -- Loan/movement lifecycle. Present on upgraded installs via migration and
+    -- never in this file, so a fresh install has a narrower table than the
+    -- reports expect.
+    `authorization_date` DATE NULL,
+    `expected_return_date` DATE NULL,
+    `actual_return_date` DATE NULL,
+    `condition_on_departure` TEXT NULL,
+    `condition_on_return` TEXT NULL,
+    `condition_notes` TEXT NULL,
+    `insurance_confirmed` TINYINT(1) NOT NULL DEFAULT 0,
     `insurance_value` DECIMAL(15,2) NULL,
     `notes` TEXT NULL,
     `created_by` INT UNSIGNED NULL,
@@ -209,21 +219,50 @@ CREATE TABLE IF NOT EXISTS `heritage_movement_register` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Journal Entries
+-- Double-entry journal.
+--
+-- This definition was a whole design behind the code: it declared
+-- entry_date/entry_type/amount while every query uses journal_date, journal_type
+-- and the debit/credit pair. migrations/005_fix_journal_and_movement_columns.php
+-- has renamed and extended it for a long time, and that migration never reached
+-- this file. So an upgraded install worked and a fresh one died with
+-- "Unknown column 'journal_date' in 'order clause'" the moment a heritage asset
+-- was opened. CREATE TABLE IF NOT EXISTS skips the statement when the table is
+-- already present, so the two shapes never converge on their own.
+--
+-- Kept deliberately identical to what 005 produces - column for column, type for
+-- type - so a fresh install and a migrated one end up the same. 005 CHANGEs the
+-- old names rather than keeping them, so there are no aliases to retain here.
 CREATE TABLE IF NOT EXISTS `heritage_journal_entry` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `heritage_asset_id` INT UNSIGNED NOT NULL,
-    `entry_date` DATE NOT NULL,
-    `entry_type` VARCHAR(50) NOT NULL,
-    `debit_account` VARCHAR(100) NULL,
-    `credit_account` VARCHAR(100) NULL,
-    `amount` DECIMAL(15,2) NOT NULL,
+    `journal_date` DATE NOT NULL,
+    `journal_number` VARCHAR(50) NULL,
+    `journal_type` VARCHAR(120) NOT NULL
+        COMMENT 'recognition, revaluation, depreciation, impairment, impairment_reversal, derecognition, adjustment, transfer',
+    `debit_account` VARCHAR(50) NOT NULL,
+    `debit_amount` DECIMAL(18,2) NOT NULL DEFAULT 0,
+    `credit_account` VARCHAR(50) NOT NULL,
+    `credit_amount` DECIMAL(18,2) NOT NULL DEFAULT 0,
     `description` TEXT NULL,
-    `reference` VARCHAR(100) NULL,
-    `created_by` INT UNSIGNED NULL,
+    `reference_document` VARCHAR(255) NULL,
+    `fiscal_year` INT NULL,
+    `fiscal_period` INT NULL,
+    `posted` TINYINT(1) DEFAULT 0,
+    `posted_by` INT NULL,
+    `posted_at` DATETIME NULL,
+    `reversed` TINYINT(1) DEFAULT 0,
+    `reversal_journal_id` INT UNSIGNED NULL,
+    `reversal_date` DATE NULL,
+    `reversal_reason` TEXT NULL,
+    `created_by` INT NULL,
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_asset` (`heritage_asset_id`),
-    KEY `idx_date` (`entry_date`),
+    KEY `idx_date` (`journal_date`),
+    KEY `idx_type` (`journal_type`),
+    KEY `idx_fiscal_year` (`fiscal_year`),
+    KEY `idx_posted` (`posted`),
     FOREIGN KEY (`heritage_asset_id`) REFERENCES `heritage_asset`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
