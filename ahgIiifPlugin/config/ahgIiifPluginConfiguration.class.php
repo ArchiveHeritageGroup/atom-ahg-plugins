@@ -81,6 +81,12 @@ class ahgIiifPluginConfiguration extends sfPluginConfiguration
         require_once __DIR__ . '/../lib/Listeners/ViewerInjector.php';
         $this->dispatcher->connect('response.filter_content', ['\AhgIiif\Listeners\ViewerInjector', 'filter']);
 
+        // A Compare button on each description, and the launcher that opens
+        // /iiif/compare with the chosen slugs. The comparison workspace has
+        // always worked and nothing linked to it - see CompareInjector.
+        require_once __DIR__ . '/../lib/Listeners/CompareInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgIiif\Listeners\CompareInjector', 'filter']);
+
         // Include helper
         $this->loadHelpers();
     }
