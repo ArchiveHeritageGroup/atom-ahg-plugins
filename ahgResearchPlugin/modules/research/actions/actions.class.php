@@ -1004,7 +1004,7 @@ class researchActions extends AhgController
                 if ($wasRejected) {
                     // Reactivate existing user with new password
                     // Argon2id over plaintext, empty salt (migration P4, 2026-06-15).
-                    $ph = \AtomFramework\Core\Security\PasswordService::hash($password);
+                    $ph = $this->atomCompatiblePassword($password);
                     $passwordHash = $ph['password_hash'];
                     $salt = $ph['salt'];
                     
@@ -1079,7 +1079,7 @@ class researchActions extends AhgController
     protected function createAtomUser(string $username, string $email, string $password): int
     {
         // Argon2id over plaintext, empty salt (migration P4, 2026-06-15).
-        $ph = \AtomFramework\Core\Security\PasswordService::hash($password);
+        $ph = $this->atomCompatiblePassword($password);
         $passwordHash = $ph['password_hash'];
         $salt = $ph['salt'];
         $now = date('Y-m-d H:i:s');
@@ -1144,6 +1144,46 @@ class researchActions extends AhgController
      * obviously local and obviously wrong, so it cannot be mistaken for a real
      * published address the way another site's domain can.
      */
+    /**
+     * A password hash stock AtoM can actually verify.
+     *
+     * WHY NOT PasswordService::hash()
+     *
+     * PasswordService writes Argon2id over the plaintext and leaves user.salt
+     * empty, which is the better scheme and is what an AHG instance verifies.
+     * Stock AtoM does not: QubitUser::checkCredentials() computes exactly
+     *
+     *     password_verify(sha1($user->getSalt() . $password), $user->getPasswordHash())
+     *
+     * and nothing else. Feed it an Argon2id-over-plaintext hash with an empty
+     * salt and it can never match - so a self-registered researcher was created,
+     * approved, activated, and then locked out of the account permanently. The
+     * hash was right and the verifier was looking for a different one.
+     *
+     * The alternative was patching base AtoM, which is not on the table: a base
+     * patch reverts silently on the next upgrade and takes every researcher's
+     * login with it, with no error to show for it.
+     *
+     * So this writes the shape stock AtoM verifies - but with a real salt.
+     * AtoM's own generator is md5(rand(100000, 999999) . email): six digits of
+     * entropy keyed on a value the attacker already knows. This uses
+     * random_bytes(16), so the outer password_hash() is still doing real work
+     * over an unpredictable input.
+     *
+     * Verifies on both kinds of instance. A non-empty salt is exactly what
+     * PasswordService::verify() uses to route to its legacy branch, so an AHG
+     * instance reads these correctly too.
+     */
+    private function atomCompatiblePassword(string $plaintext): array
+    {
+        $salt = bin2hex(random_bytes(16));
+
+        return [
+            'password_hash' => password_hash(sha1($salt.$plaintext), PASSWORD_DEFAULT),
+            'salt' => $salt,
+        ];
+    }
+
     private function resetBaseUrl(): string
     {
         $configured = (string) $this->config('app_siteBaseUrl', '');
@@ -1239,7 +1279,7 @@ class researchActions extends AhgController
             // Argon2id over plaintext, empty salt (migration P4, 2026-06-15) — was
             // argon(plaintext) with a random salt, which the scheme-aware verify
             // would have mis-treated as legacy and rejected.
-            $ph = \AtomFramework\Core\Security\PasswordService::hash($password);
+            $ph = $this->atomCompatiblePassword($password);
             $passwordHash = $ph['password_hash'];
             $salt = $ph['salt'];
             DB::table('user')->where('id', $reset->user_id)->update([
@@ -1419,7 +1459,7 @@ class researchActions extends AhgController
         $newPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 12);
         // Argon2id over plaintext, empty salt (migration P4, 2026-06-15) — was a
         // raw sha1() that AuthService could not verify.
-        $ph = \AtomFramework\Core\Security\PasswordService::hash($newPassword);
+        $ph = $this->atomCompatiblePassword($newPassword);
         DB::table('user')->where('id', $researcher->user_id)->update([
             'password_hash' => $ph['password_hash'],
             'salt' => $ph['salt'],
