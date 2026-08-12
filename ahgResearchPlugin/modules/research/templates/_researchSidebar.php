@@ -108,7 +108,20 @@ $nonce = $n ? preg_replace('/^nonce=/', 'nonce="', $n) . '"' : '';
         <i class="fas fa-file-alt me-2"></i><?php echo __('My Reports'); ?>
     </a>
 <?php endif; ?>
-<?php if (Illuminate\Database\Capsule\Manager::table('atom_plugin')->where('name', 'ahgFavoritesPlugin')->where('is_enabled', 1)->exists()): ?>
+<?php
+// Ask the running configuration what is loaded, not the atom_plugin table.
+//
+// atom_plugin belongs to the framework's extension manager and does not exist on
+// a community install, where enablement is the stock `plugins` setting - so this
+// query threw "Base table or view not found" and took the whole sidebar, and
+// therefore every researcher screen, down with a 500.
+//
+// getPlugins() is the same test this plugin already uses for ahgSAHRAPlugin in
+// dashboardSuccess.php, and it reports what is actually loaded rather than what
+// some table says should be.
+$__favOn = in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins(), true);
+?>
+<?php if ($__favOn): ?>
     <a href="<?php echo url_for(['module' => 'favorites', 'action' => 'browse']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'favorites' ? 'active' : ''; ?>">
         <i class="fas fa-heart me-2"></i><?php echo __('My Favorites'); ?>

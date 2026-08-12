@@ -379,20 +379,23 @@ class ReproducibilityService
     /**
      * Delegate DOI minting to ahgDoiPlugin if available.
      *
-     * Checks if ahgDoiPlugin is installed and enabled via the atom_plugin table.
-     * If available, builds metadata and delegates the minting request.
-     * Logs a doi_minted event on success.
+     * Checks whether ahgDoiPlugin is loaded, and delegates the minting request
+     * if so. Logs a doi_minted event on success.
      *
      * @param int $projectId The research project ID
      * @return array ['success' => bool, 'doi' => string|null, 'url' => string|null, 'error' => string|null]
      */
     public function mintDoi(int $projectId): array
     {
-        // Check if ahgDoiPlugin is installed and enabled
-        $doiPlugin = DB::table('atom_plugin')
-            ->where('name', 'ahgDoiPlugin')
-            ->where('is_enabled', 1)
-            ->first();
+        // Ask the running configuration, not the atom_plugin table: that table
+        // belongs to the framework's extension manager and does not exist on a
+        // community install, so querying it threw "Base table or view not found"
+        // rather than reporting the plugin as absent.
+        $doiPlugin = in_array(
+            'ahgDoiPlugin',
+            \sfProjectConfiguration::getActive()->getPlugins(),
+            true
+        );
 
         if (!$doiPlugin) {
             return [

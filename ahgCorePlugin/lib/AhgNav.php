@@ -188,6 +188,19 @@ class AhgNav
             return true;
         }
 
+        // A missing or non-string route is a bad registration, and a bad
+        // registration must cost its own menu entry and nothing else.
+        //
+        // knownRoute() is typed string. ahgSecurityClearancePlugin registered
+        // ['module' => ..., 'action' => ...], and the resulting TypeError was
+        // raised from inside the layout - so every page on that instance
+        // returned an empty 200 because of one wrong menu entry. That is exactly
+        // the failure this class documents itself as preventing: "a typo costs a
+        // missing link, not a dead site".
+        if (!isset($config['route']) || !is_string($config['route'])) {
+            return false;
+        }
+
         return self::knownRoute($config['route']);
     }
 

@@ -21,7 +21,11 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
         // the plugin and disappears with it. Issue #292.
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'securityClearance_index', [
-                'route' => ['module' => 'securityClearance', 'action' => 'index'],
+                // A route NAME, not a module/action array. AhgNav::knownRoute()
+                // is typed string, so the array raised a TypeError from inside
+                // the layout - which meant every page on a themeless instance
+                // returned an empty 200, not just this menu entry.
+                'route' => '@security_clearances',
                 'label' => 'Security clearances',
                 'credentials' => ['administrator'],
                 'weight' => 380,

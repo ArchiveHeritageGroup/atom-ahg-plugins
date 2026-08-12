@@ -10,13 +10,14 @@
  * ])
  */
 
-// Check if favorites plugin is enabled
-try {
-    $favEnabled = Illuminate\Database\Capsule\Manager::table('atom_plugin')
-        ->where('name', 'ahgFavoritesPlugin')->where('is_enabled', 1)->exists();
-} catch (Exception $e) {
-    $favEnabled = false;
-}
+// Is the favorites plugin loaded? Ask the configuration, not atom_plugin - that
+// table is the framework extension manager's and is absent on a community
+// install, where enablement lives in the stock `plugins` setting.
+//
+// The catch here did hide the error, but hiding it meant the button silently
+// never rendered wherever atom_plugin was missing - the failure mode was "the
+// feature quietly does not exist", which is worse than the exception.
+$favEnabled = in_array('ahgFavoritesPlugin', sfProjectConfiguration::getActive()->getPlugins(), true);
 if (!$favEnabled) return;
 
 $userId = sfContext::getInstance()->getUser()->getAttribute('user_id');
