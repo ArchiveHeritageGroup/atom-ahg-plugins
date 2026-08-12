@@ -59,6 +59,16 @@ class ahgUserRegistrationPluginConfiguration extends sfPluginConfiguration
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
+
+        // Tell an administrator a request is waiting, on whatever page they are
+        // on. The AhgNav entry above carries the same count but sits inside a
+        // closed dropdown, so it only reaches somebody already looking for it.
+        // See PendingRegistrationBanner.
+        require_once __DIR__.'/../lib/Listeners/PendingRegistrationBanner.php';
+        $this->dispatcher->connect(
+            'response.filter_content',
+            ['\AhgUserRegistration\Listeners\PendingRegistrationBanner', 'filter']
+        );
     }
 
     protected function registerAutoloader()

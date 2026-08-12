@@ -238,7 +238,20 @@
   });
 
   // Confirm approve
+  //
+  // The button is disabled for the duration of the request. Approving is not a
+  // fast operation - it creates the account and sends mail - so there is a
+  // visible pause during which nothing indicated the click had registered, and a
+  // second click sent a second approval. The first succeeded and the second was
+  // answered with an error about the state the first had just created, which is
+  // how an approval that worked reported itself as having failed.
   document.getElementById('confirm-approve').addEventListener('click', function() {
+    var button = this;
+
+    if (button.disabled) {
+      return;
+    }
+
     var requestId = document.getElementById('approve-id').value;
     var groupId = document.getElementById('approve-group').value;
     var notes = document.getElementById('approve-notes').value;
@@ -247,6 +260,15 @@
     formData.append('request_id', requestId);
     formData.append('group_id', groupId);
     formData.append('admin_notes', notes);
+
+    var label = button.textContent;
+    button.disabled = true;
+    button.textContent = <?php echo json_encode(__('Approving...')); ?>;
+
+    var restore = function() {
+      button.disabled = false;
+      button.textContent = label;
+    };
 
     fetch(approveUrl, { method: 'POST', body: formData })
       .then(function(r) { return r.json(); })
@@ -258,15 +280,25 @@
             row.querySelector('td:last-child').innerHTML = '<small class="text-muted">Approved</small>';
           }
           bootstrap.Modal.getInstance(document.getElementById('approveModal')).hide();
+          restore();
         } else {
+          // Re-enable only on failure: the administrator may want to retry, and
+          // on success the request is no longer approvable.
+          restore();
           alert('Error: ' + result.error);
         }
       })
-      .catch(function(err) { alert('Network error: ' + err.message); });
+      .catch(function(err) { restore(); alert('Network error: ' + err.message); });
   });
 
-  // Confirm reject
+  // Confirm reject - same double-submit guard as approve above.
   document.getElementById('confirm-reject').addEventListener('click', function() {
+    var button = this;
+
+    if (button.disabled) {
+      return;
+    }
+
     var requestId = document.getElementById('reject-id').value;
     var notes = document.getElementById('reject-notes').value;
 
@@ -279,9 +311,19 @@
     formData.append('request_id', requestId);
     formData.append('admin_notes', notes);
 
+    var label = button.textContent;
+    button.disabled = true;
+    button.textContent = <?php echo json_encode(__('Rejecting...')); ?>;
+
+    var restore = function() {
+      button.disabled = false;
+      button.textContent = label;
+    };
+
     fetch(rejectUrl, { method: 'POST', body: formData })
       .then(function(r) { return r.json(); })
       .then(function(result) {
+        restore();
         if (result.success) {
           var row = document.getElementById('reg-row-' + requestId);
           if (row) {
@@ -293,7 +335,7 @@
           alert('Error: ' + result.error);
         }
       })
-      .catch(function(err) { alert('Network error: ' + err.message); });
+      .catch(function(err) { restore(); alert('Network error: ' + err.message); });
   });
 })();
 </script>

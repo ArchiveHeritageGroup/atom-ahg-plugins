@@ -146,7 +146,13 @@ class RegistrationService
             return ['success' => false, 'error' => 'Registration request not found.'];
         }
 
-        if ($request->status !== 'pending') {
+        // Already verified is the outcome the caller asked for. Same reasoning as
+        // approve() above: a repeated click should not be reported as a failure.
+        if ('verified' === $request->status) {
+            return ['success' => true, 'already' => true];
+        }
+
+        if ('pending' !== $request->status) {
             return ['success' => false, 'error' => 'Only pending requests can be marked verified.'];
         }
 
@@ -199,7 +205,37 @@ class RegistrationService
             return ['success' => false, 'error' => 'Registration request not found.'];
         }
 
-        if ($request->status !== 'verified') {
+        // Answer for the state the request is actually in.
+        //
+        // This was one test - status !== 'verified' - reporting every other state
+        // as an email-verification failure. The state that mattered was
+        // 'approved': a second submission of an approval that had already
+        // succeeded was told the applicant had not confirmed their email, which
+        // is both untrue and alarming. It reads as "the approval failed" when the
+        // account exists and is active, and it is what an administrator sees
+        // whenever they click Approve twice - reported as "error but it approves".
+        //
+        // Already approved is reported as success. A second click means the
+        // administrator could not tell the first worked; the outcome they wanted
+        // holds, so saying so is both accurate and the useful answer. Nothing is
+        // written twice - this returns before the transaction.
+        if ('approved' === $request->status) {
+            return [
+                'success' => true,
+                'already' => true,
+                'user_id' => (int) DB::table('user')->where('username', $request->username)->value('id'),
+            ];
+        }
+
+        if ('rejected' === $request->status) {
+            return ['success' => false, 'error' => 'This registration was rejected and cannot be approved.'];
+        }
+
+        if ('expired' === $request->status) {
+            return ['success' => false, 'error' => 'This registration expired before it was confirmed.'];
+        }
+
+        if ('verified' !== $request->status) {
             return ['success' => false, 'error' => 'Only email-verified registrations can be approved.'];
         }
 
