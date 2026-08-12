@@ -32,7 +32,7 @@ $formUrl = $journal
     : url_for(['module' => 'research', 'action' => 'targetJournalBuilder']);
 ?>
 
-<div style="max-width: 860px;">
+<div data-ahg-style="max-width: 860px;">
   <form method="post" action="<?php echo $formUrl; ?>">
     <div class="mb-3"><label class="form-label"><?php echo __('Title'); ?> <span class="text-danger">*</span></label>
       <input name="title" class="form-control" required value="<?php echo $v('title'); ?>"></div>

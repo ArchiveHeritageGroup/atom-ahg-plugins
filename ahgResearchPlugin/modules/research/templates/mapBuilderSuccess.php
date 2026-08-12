@@ -22,7 +22,7 @@
 
 <div class="card mb-4">
     <div class="card-body p-0">
-        <div id="map" style="width:100%; height:500px;"></div>
+        <div id="map" data-ahg-style="width:100%; height:500px;"></div>
     </div>
 </div>
 

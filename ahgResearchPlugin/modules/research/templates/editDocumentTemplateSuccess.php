@@ -62,7 +62,7 @@
                 <div id="fieldsContainer">
                     <!-- Dynamic field rows inserted here -->
                 </div>
-                <div id="noFieldsMsg" class="text-center text-muted py-3" style="display:none;">
+                <div id="noFieldsMsg" class="text-center text-muted py-3 d-none" >
                     <i class="fas fa-info-circle me-1"></i><?php echo __('No fields defined. Click "Add Field" to begin.'); ?>
                 </div>
             </div>
@@ -88,7 +88,7 @@
 </form>
 
 <?php if ($template): ?>
-<form method="post" id="deleteForm" style="display:none;">
+<form method="post" id="deleteForm" class="d-none">
     <input type="hidden" name="form_action" value="delete">
 </form>
 <?php endif; ?>

@@ -47,9 +47,9 @@
                 <td><span class="badge bg-light text-dark"><?php echo htmlspecialchars($j->extraction_type); ?></span></td>
                 <td><span class="badge bg-<?php echo match($j->status) { 'queued' => 'secondary', 'running' => 'primary', 'completed' => 'success', 'failed' => 'danger', default => 'dark' }; ?> job-status"><?php echo ucfirst($j->status); ?></span></td>
                 <td>
-                    <div class="progress" style="height: 20px;">
+                    <div class="progress" data-ahg-style="height: 20px;">
                         <?php $pct = $j->total_items > 0 ? round(($j->processed_items / $j->total_items) * 100) : 0; ?>
-                        <div class="progress-bar job-progress" style="width: <?php echo $pct; ?>%"><?php echo (int) $j->processed_items; ?>/<?php echo (int) $j->total_items; ?></div>
+                        <div class="progress-bar job-progress" data-ahg-style="width: <?php echo $pct; ?>%"><?php echo (int) $j->processed_items; ?>/<?php echo (int) $j->total_items; ?></div>
                     </div>
                 </td>
                 <td><?php echo $j->created_at; ?></td>

@@ -13,7 +13,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h2">Network Graph</h1>
     <div class="d-flex gap-2">
-        <select id="filterType" class="form-select form-select-sm" style="width:auto;">
+        <select id="filterType" class="form-select form-select-sm" data-ahg-style="width:auto;">
             <option value="">All Types</option>
             <option value="biographical">Biographical</option>
             <option value="chronological">Chronological</option>
@@ -21,13 +21,13 @@
             <option value="relational">Relational</option>
             <option value="attributive">Attributive</option>
         </select>
-        <select id="filterStatus" class="form-select form-select-sm" style="width:auto;">
+        <select id="filterStatus" class="form-select form-select-sm" data-ahg-style="width:auto;">
             <option value="">All Statuses</option>
             <option value="proposed">Proposed</option>
             <option value="verified">Verified</option>
             <option value="disputed">Disputed</option>
         </select>
-        <input type="text" id="nodeSearch" class="form-control form-control-sm" style="width:180px;" placeholder="Search nodes...">
+        <input type="text" id="nodeSearch" class="form-control form-control-sm" data-ahg-style="width:180px;" placeholder="Search nodes...">
         <div class="btn-group btn-group-sm">
             <a href="<?php echo url_for(['module' => 'research', 'action' => 'exportGraphGEXF', 'project_id' => $projectId]); ?>" class="btn btn-outline-secondary" title="Export GEXF (Gephi)"><i class="fas fa-download me-1"></i>GEXF</a>
             <button id="exportGraphML" class="btn btn-outline-secondary" title="Export GraphML"><i class="fas fa-download me-1"></i>GraphML</button>
@@ -53,7 +53,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-body p-0 position-relative">
-                <div id="graphContainer" style="width:100%; height:600px; background:#fafafa;"></div>
+                <div id="graphContainer" data-ahg-style="width:100%; height:600px; background:#fafafa;"></div>
                 <div class="position-absolute bottom-0 end-0 p-2 d-flex gap-1">
                     <button id="zoomIn" class="btn btn-sm btn-light border" title="Zoom in"><i class="fas fa-plus"></i></button>
                     <button id="zoomOut" class="btn btn-sm btn-light border" title="Zoom out"><i class="fas fa-minus"></i></button>
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return sid === node.id || tid === node.id;
         });
         var html = '<h6>' + escHtml(node.label) + '</h6>';
-        html += '<p class="mb-1"><span class="badge" style="background:' + (typeColors[node.type] || '#76b7b2') + '">' + escHtml(node.type || 'unknown') + '</span></p>';
+        html += '<p class="mb-1"><span class="badge" data-ahg-style="background:' + (typeColors[node.type] || '#76b7b2') + '">' + escHtml(node.type || 'unknown') + '</span></p>';
         html += '<p class="mb-2 text-muted small">ID: ' + node.id + ' | Connections: ' + connections.length + '</p>';
         if (connections.length > 0) {
             html += '<hr><h6 class="small">Connections</h6><ul class="list-unstyled small">';

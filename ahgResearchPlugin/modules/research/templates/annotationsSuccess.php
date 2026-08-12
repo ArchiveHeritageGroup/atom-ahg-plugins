@@ -108,7 +108,7 @@ $activeTag = $sf_request->getParameter('tag', '');
         elseif ($thumbEt === 'repository') $thumbModule = 'repository';
         ?>
         <a href="<?php echo url_for(['module' => $thumbModule, 'slug' => $thumbSlug]); ?>" title="<?php echo htmlspecialchars($annotation->object_title ?? ''); ?>">
-          <img src="<?php echo htmlspecialchars($annotation->thumbnail_path); ?>" alt="<?php echo htmlspecialchars($annotation->object_title ?? ''); ?>" class="img-fluid rounded" style="max-height:120px;">
+          <img src="<?php echo htmlspecialchars($annotation->thumbnail_path); ?>" alt="<?php echo htmlspecialchars($annotation->object_title ?? ''); ?>" class="img-fluid rounded" data-ahg-style="max-height:120px;">
         </a>
       </div>
       <?php endif; ?>
@@ -258,7 +258,7 @@ $activeTag = $sf_request->getParameter('tag', '');
             <label class="form-check-label fw-bold" for="exportSelectAll"><?php echo __('Select All'); ?></label>
           </div>
           <?php if (!empty($annotations)): ?>
-          <div style="max-height: 300px; overflow-y: auto;">
+          <div data-ahg-style="max-height: 300px; overflow-y: auto;">
             <?php foreach ($annotations as $ann): ?>
             <div class="form-check mb-1">
               <input class="form-check-input export-note-check" type="checkbox" value="<?php echo $ann->id; ?>" id="exportNote<?php echo $ann->id; ?>" checked>

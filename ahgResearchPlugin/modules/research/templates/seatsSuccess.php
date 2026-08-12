@@ -279,7 +279,7 @@ $seatTypes = Illuminate\Database\Capsule\Manager::table('ahg_dropdown')
                             </div>
                         </div>
                     </div>
-                    <div class="mb-3" id="activeField" style="display: none;">
+                    <div class="mb-3" id="activeField" class="d-none">
                         <div class="form-check">
                             <input type="checkbox" name="is_active" id="isActive" class="form-check-input" value="1" checked>
                             <label class="form-check-label" for="isActive">Active</label>

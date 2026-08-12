@@ -24,14 +24,14 @@ $cs = $currentStatus ?? '';
     <div class="row align-items-center">
       <div class="col-md-6">
         <form method="get" class="d-flex gap-2">
-          <select name="status" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+          <select name="status" class="form-select form-select-sm" data-ahg-style="width: auto;" onchange="this.form.submit()">
             <option value=""><?php echo __('All Status'); ?></option>
             <option value="pending" <?php echo $currentStatus === 'pending' ? 'selected' : ''; ?>><?php echo __('Pending'); ?></option>
             <option value="approved" <?php echo $currentStatus === 'approved' ? 'selected' : ''; ?>><?php echo __('Approved'); ?></option>
             <option value="suspended" <?php echo $currentStatus === 'suspended' ? 'selected' : ''; ?>><?php echo __('Suspended'); ?></option>
             <option value="rejected" <?php echo $currentStatus === 'rejected' ? 'selected' : ''; ?>><?php echo __('Rejected'); ?></option>
           </select>
-          <input type="text" name="q" class="form-control form-control-sm" placeholder="<?php echo __('Search...'); ?>" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" style="width: 200px;">
+          <input type="text" name="q" class="form-control form-control-sm" placeholder="<?php echo __('Search...'); ?>" value="<?php echo htmlspecialchars($_GET['q'] ?? ''); ?>" data-ahg-style="width: 200px;">
           <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
         </form>
       </div>

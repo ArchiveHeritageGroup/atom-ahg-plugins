@@ -48,7 +48,7 @@ $uid = 'rfav-' . uniqid();
             title="<?php echo __('Choose folder'); ?>">
         <span class="visually-hidden"><?php echo __('Choose folder'); ?></span>
     </button>
-    <ul class="dropdown-menu dropdown-menu-end" id="<?php echo $uid; ?>-menu" style="min-width:200px;">
+    <ul class="dropdown-menu dropdown-menu-end" id="<?php echo $uid; ?>-menu" data-ahg-style="min-width:200px;">
         <li><h6 class="dropdown-header"><i class="fas fa-folder me-1"></i><?php echo __('Add to folder'); ?></h6></li>
         <li><hr class="dropdown-divider"></li>
         <li class="px-3 py-1 text-muted small"><?php echo __('Loading folders...'); ?></li>
@@ -145,7 +145,7 @@ $uid = 'rfav-' . uniqid();
                         a.href = '#';
                         var icon = f.icon || 'fa-folder';
                         var color = f.color || '#6c757d';
-                        a.innerHTML = '<i class="fas ' + icon + ' me-2" style="color:' + color + ';"></i>' +
+                        a.innerHTML = '<i class="fas ' + icon + ' me-2" data-ahg-style="color:' + color + ';"></i>' +
                                       escH(f.name) +
                                       (f.item_count ? ' <span class="badge bg-secondary ms-1">' + f.item_count + '</span>' : '');
                         (function(fId) {

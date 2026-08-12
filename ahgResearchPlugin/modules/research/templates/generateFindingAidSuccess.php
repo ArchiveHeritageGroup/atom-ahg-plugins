@@ -39,7 +39,7 @@
 </head>
 <body>
 
-<a href="javascript:history.back()" class="print-btn" style="right: 230px; background: #6c757d;"><i class="fas fa-arrow-left"></i> Back</a>
+<a href="javascript:history.back()" class="print-btn" data-ahg-style="right: 230px; background: #6c757d;"><i class="fas fa-arrow-left"></i> Back</a>
 <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Print / Save PDF</button>
 
 <div class="header">

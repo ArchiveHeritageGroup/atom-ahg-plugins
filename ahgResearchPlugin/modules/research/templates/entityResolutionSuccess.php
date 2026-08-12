@@ -87,9 +87,9 @@
                 <td>
                     <?php if ($p->confidence !== null): ?>
                     <div class="d-flex align-items-center gap-1">
-                        <div class="progress" style="width:60px;height:6px">
+                        <div class="progress" data-ahg-style="width:60px;height:6px">
                             <?php $pct = round((float)$p->confidence * 100); $color = $pct >= 80 ? 'success' : ($pct >= 50 ? 'warning' : 'danger'); ?>
-                            <div class="progress-bar bg-<?php echo $color; ?>" style="width:<?php echo $pct; ?>%"></div>
+                            <div class="progress-bar bg-<?php echo $color; ?>" data-ahg-style="width:<?php echo $pct; ?>%"></div>
                         </div>
                         <small><?php echo $pct; ?>%</small>
                     </div>

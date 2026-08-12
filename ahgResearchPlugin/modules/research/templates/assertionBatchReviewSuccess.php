@@ -26,7 +26,7 @@
                 <label for="selectAll" class="form-check-label">Select All</label>
             </div>
             <div class="d-flex gap-2">
-                <select name="new_status" class="form-select form-select-sm" style="width:auto;">
+                <select name="new_status" class="form-select form-select-sm" data-ahg-style="width:auto;">
                     <option value="verified">Verify</option>
                     <option value="disputed">Dispute</option>
                     <option value="retracted">Retract</option>
@@ -40,7 +40,7 @@
         <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th style="width:40px;"></th>
+                    <th data-ahg-style="width:40px;"></th>
                     <th>Subject</th>
                     <th>Predicate</th>
                     <th>Object</th>

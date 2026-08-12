@@ -69,7 +69,7 @@
                         </div>
 
                 <!-- Student ID (conditional) -->
-                <div class="col-md-6" id="student_id_wrapper" style="display:none;">
+                <div class="col-md-6" id="student_id_wrapper" class="d-none">
                     <label class="form-label"><?php echo __('Student ID'); ?></label>
                     <input type="text" name="student_id" class="form-control" placeholder="<?php echo __('University student number'); ?>">
                     <small class="text-muted"><?php echo __('Required for student researchers'); ?></small>

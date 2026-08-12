@@ -52,7 +52,7 @@
                             <?php foreach ($conditionOptions as $opt): ?>
                                 <option value="<?php echo htmlspecialchars($opt->code) ?>"
                                         <?php echo $opt->is_default ? 'selected' : '' ?>
-                                        style="color: <?php echo $opt->color ?? '' ?>">
+                                        data-ahg-style="color: <?php echo $opt->color ?? '' ?>">
                                     <?php echo htmlspecialchars($opt->label) ?>
                                 </option>
                             <?php endforeach ?>

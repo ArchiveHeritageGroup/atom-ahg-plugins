@@ -18,9 +18,9 @@
             <div class="card-header"><h5 class="mb-0">Object Preview</h5></div>
             <div class="card-body text-center">
                 <?php if (!empty($thumbnail)): ?>
-                    <img src="<?php echo htmlspecialchars($thumbnail); ?>" class="img-fluid rounded mb-2" alt="Preview" style="max-height:300px;">
+                    <img src="<?php echo htmlspecialchars($thumbnail); ?>" class="img-fluid rounded mb-2" alt="Preview" data-ahg-style="max-height:300px;">
                 <?php else: ?>
-                    <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height:200px;">
+                    <div class="bg-light rounded d-flex align-items-center justify-content-center" data-ahg-style="height:200px;">
                         <i class="fas fa-file-alt fa-3x text-muted"></i>
                     </div>
                 <?php endif; ?>
@@ -179,7 +179,7 @@
                                 <td>
                                     <?php $qpct = round((float)($m->score ?? 0) * 100); $qcolor = $qpct >= 80 ? 'success' : ($qpct >= 50 ? 'warning' : 'danger'); ?>
                                     <div class="d-flex align-items-center gap-1">
-                                        <div class="progress" style="width:60px;height:6px"><div class="progress-bar bg-<?php echo $qcolor; ?>" style="width:<?php echo $qpct; ?>%"></div></div>
+                                        <div class="progress" data-ahg-style="width:60px;height:6px"><div class="progress-bar bg-<?php echo $qcolor; ?>" data-ahg-style="width:<?php echo $qpct; ?>%"></div></div>
                                         <small><?php echo $qpct; ?>%</small>
                                     </div>
                                 </td>

@@ -48,7 +48,7 @@ $curMedia = $section['media_type'] ?? '';
                 </select>
             </div>
         </div>
-        <div class="mb-3" style="max-width:160px;">
+        <div class="mb-3" data-ahg-style="max-width:160px;">
             <label class="form-label">Sort order</label>
             <input type="number" name="sort_order" class="form-control" value="<?php echo (int) ($section['sort_order'] ?? 0); ?>">
         </div>

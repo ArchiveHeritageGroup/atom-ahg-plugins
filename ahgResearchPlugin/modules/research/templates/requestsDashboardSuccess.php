@@ -112,7 +112,7 @@
                             <?php if (!empty($req->sla) && isset($req->sla['status'])): ?>
                                 <?php $slaStatus = $req->sla['status'] ?>
                                 <span class="badge" role="status"
-                                      style="background-color: <?php echo $slaColors[$slaStatus] ?? '#6c757d' ?>"
+                                      data-ahg-style="background-color: <?php echo $slaColors[$slaStatus] ?? '#6c757d' ?>"
                                       aria-label="<?php echo __('SLA: %1%', ['%1%' => ucfirst(str_replace('_', ' ', $slaStatus))]) ?>">
                                     <i class="fas <?php echo $slaIcons[$slaStatus] ?? 'fa-minus-circle' ?> me-1" aria-hidden="true"></i>
                                     <?php echo ucfirst(str_replace('_', ' ', $slaStatus)) ?>
@@ -190,7 +190,7 @@
                             <?php if (!empty($req->sla) && isset($req->sla['status'])): ?>
                                 <?php $slaStatus = $req->sla['status'] ?>
                                 <span class="badge" role="status"
-                                      style="background-color: <?php echo $slaColors[$slaStatus] ?? '#6c757d' ?>"
+                                      data-ahg-style="background-color: <?php echo $slaColors[$slaStatus] ?? '#6c757d' ?>"
                                       aria-label="<?php echo __('SLA: %1%', ['%1%' => ucfirst(str_replace('_', ' ', $slaStatus))]) ?>">
                                     <i class="fas <?php echo $slaIcons[$slaStatus] ?? 'fa-minus-circle' ?> me-1" aria-hidden="true"></i>
                                     <?php echo ucfirst(str_replace('_', ' ', $slaStatus)) ?>

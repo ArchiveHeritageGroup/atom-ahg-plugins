@@ -146,7 +146,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header"><h5 class="mb-0">Assertions (<?php echo count($assertions ?? []); ?>)</h5></div>
-            <div class="card-body" style="max-height:300px; overflow:auto;">
+            <div class="card-body" data-ahg-style="max-height:300px; overflow:auto;">
                 <?php if (!empty($assertions)): ?>
                 <ul class="list-group list-group-flush">
                     <?php foreach ($assertions as $a): ?>
@@ -170,7 +170,7 @@
     <div class="col-md-6">
         <div class="card mb-4">
             <div class="card-header"><h5 class="mb-0">Extraction Jobs (<?php echo count($extractionJobs ?? []); ?>)</h5></div>
-            <div class="card-body" style="max-height:300px; overflow:auto;">
+            <div class="card-body" data-ahg-style="max-height:300px; overflow:auto;">
                 <?php if (!empty($extractionJobs)): ?>
                 <ul class="list-group list-group-flush">
                     <?php foreach ($extractionJobs as $ej): ?>

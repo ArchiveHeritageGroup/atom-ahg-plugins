@@ -62,7 +62,7 @@
                     </div>
                     <div class="d-flex align-items-center gap-1 ms-2">
                         <label class="form-label mb-0 small">Color:</label>
-                        <input type="color" id="annColor" value="#FF0000" class="border rounded" style="width:32px;height:26px;padding:1px;cursor:pointer;">
+                        <input type="color" id="annColor" value="#FF0000" class="border rounded" data-ahg-style="width:32px;height:26px;padding:1px;cursor:pointer;">
                     </div>
                     <div class="btn-group ms-2" role="group">
                         <button type="button" class="btn btn-sm btn-outline-info" id="toggleAnnotations" title="Show/Hide Annotations"><i class="fas fa-eye"></i></button>
@@ -86,7 +86,7 @@
                 </div>
             </div>
             <!-- Canvas Area -->
-            <div class="card-body p-0" id="canvasWrapper" style="background:#1a1a2e;overflow:auto;min-height:500px;display:flex;justify-content:center;align-items:center;padding:20px !important;">
+            <div class="card-body p-0" id="canvasWrapper" data-ahg-style="background:#1a1a2e;overflow:auto;min-height:500px;display:flex;justify-content:center;align-items:center;padding:20px !important;">
                 <canvas id="annotationCanvas"></canvas>
             </div>
             <div class="card-footer py-1 d-flex justify-content-between small text-muted">
@@ -134,7 +134,7 @@
             <div class="card-header py-2 d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><i class="fas fa-list me-1"></i>Annotations (<?php echo count($annotations); ?>)</h6>
             </div>
-            <div class="card-body py-0 px-0" style="max-height:400px;overflow-y:auto;">
+            <div class="card-body py-0 px-0" data-ahg-style="max-height:400px;overflow-y:auto;">
                 <?php if (empty($annotations)): ?>
                     <p class="text-muted small text-center py-3 mb-0">No annotations yet. Draw on the image and save.</p>
                 <?php else: ?>
@@ -170,12 +170,12 @@
                     <div class="border-bottom p-2 annotation-list-item <?php echo $hasFragment ? 'has-region' : ''; ?>"
                          data-annotation-id="<?php echo (int) $ann->id; ?>"
                          data-selector="<?php echo htmlspecialchars(json_encode($selectorData)); ?>"
-                         style="cursor:pointer;font-size:0.85em;">
+                         data-ahg-style="cursor:pointer;font-size:0.85em;">
                         <div class="d-flex justify-content-between align-items-start">
-                            <span class="badge bg-info" style="font-size:0.7em;"><?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?></span>
+                            <span class="badge bg-info" data-ahg-style="font-size:0.7em;"><?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?></span>
                             <div class="d-flex gap-1">
-                                <button class="btn btn-link btn-sm p-0 text-warning edit-ann-btn" data-id="<?php echo (int) $ann->id; ?>" data-body="<?php echo htmlspecialchars($bodyText); ?>" data-motivation="<?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?>" title="Edit"><i class="fas fa-edit" style="font-size:0.75em;"></i></button>
-                                <button class="btn btn-link btn-sm p-0 text-danger delete-ann-btn" data-id="<?php echo (int) $ann->id; ?>" title="Delete"><i class="fas fa-trash" style="font-size:0.75em;"></i></button>
+                                <button class="btn btn-link btn-sm p-0 text-warning edit-ann-btn" data-id="<?php echo (int) $ann->id; ?>" data-body="<?php echo htmlspecialchars($bodyText); ?>" data-motivation="<?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?>" title="Edit"><i class="fas fa-edit" data-ahg-style="font-size:0.75em;"></i></button>
+                                <button class="btn btn-link btn-sm p-0 text-danger delete-ann-btn" data-id="<?php echo (int) $ann->id; ?>" title="Delete"><i class="fas fa-trash" data-ahg-style="font-size:0.75em;"></i></button>
                             </div>
                         </div>
                         <div class="mt-1 text-truncate"><?php echo htmlspecialchars($bodyText ?: '(no text)'); ?></div>
@@ -188,7 +188,7 @@
             </div>
         <?php if (sfProjectConfiguration::getActive()->isPluginEnabled('ahgAiConditionPlugin')): ?>
         <!-- AI Condition Results -->
-        <div class="card mt-3" id="aiResultsCard" style="display:none;">
+        <div class="card mt-3" id="aiResultsCard" class="d-none">
             <div class="card-header py-2 bg-success text-white"><h6 class="mb-0"><i class="fas fa-robot me-1"></i>AI Condition Results</h6></div>
             <div class="card-body py-2" id="aiResultsBody">
                 <!-- Populated by JS after AI scan -->
@@ -202,7 +202,7 @@
 
 <?php if ($has3D): ?>
 <!-- 3D Model Annotation Panel -->
-<div id="annotation-3d-panel" class="row" style="<?php echo $hasImage ? 'display:none;' : ''; ?>">
+<div id="annotation-3d-panel" class="row" data-ahg-style="<?php echo $hasImage ? 'display:none;' : ''; ?>">
     <div class="col-lg-9">
         <div class="card">
             <div class="card-header p-2">
@@ -217,20 +217,20 @@
                     </div>
                     <div class="d-flex align-items-center gap-1 ms-2">
                         <label class="form-label mb-0 small">Color:</label>
-                        <input type="color" id="ann3dColor" value="#1a73e8" class="border rounded" style="width:32px;height:26px;padding:1px;cursor:pointer;">
+                        <input type="color" id="ann3dColor" value="#1a73e8" class="border rounded" data-ahg-style="width:32px;height:26px;padding:1px;cursor:pointer;">
                     </div>
                     <small class="text-muted ms-2" id="status3dText">Click <i class="fas fa-map-marker-alt"></i> then click on the model surface to place an annotation</small>
                     <span class="ms-auto small text-muted" id="annotation3dCount">0 3D annotations</span>
                 </div>
             </div>
-            <div class="card-body p-0" style="position:relative;">
+            <div class="card-body p-0" data-ahg-style="position:relative;">
                 <model-viewer
                     id="annotation-model-viewer"
                     src="<?php echo htmlspecialchars('/' . ltrim($model3D->file_path, '/') . $model3D->filename); ?>"
                     camera-controls touch-action="pan-y"
                     <?php echo $model3D->auto_rotate ? 'auto-rotate' : ''; ?>
                     shadow-intensity="<?php echo htmlspecialchars($model3D->shadow_intensity ?? '1'); ?>"
-                    style="width:100%;height:600px;background:<?php echo htmlspecialchars($model3D->background_color ?? '#1a1a2e'); ?>;border-radius:0 0 8px 8px;">
+                    data-ahg-style="width:100%;height:600px;background:<?php echo htmlspecialchars($model3D->background_color ?? '#1a1a2e'); ?>;border-radius:0 0 8px 8px;">
                 </model-viewer>
             </div>
             <div class="card-footer py-1 d-flex justify-content-between small text-muted">
@@ -275,7 +275,7 @@
             <div class="card-header py-2">
                 <h6 class="mb-0"><i class="fas fa-list me-1"></i>3D Annotations</h6>
             </div>
-            <div class="card-body py-0 px-0" style="max-height:400px;overflow-y:auto;" id="annotations3dList">
+            <div class="card-body py-0 px-0" data-ahg-style="max-height:400px;overflow-y:auto;" id="annotations3dList">
                 <?php
                     $has3dAnnotations = false;
                     if (!empty($annotations)):
@@ -309,15 +309,15 @@
                 <div class="border-bottom p-2 annotation-3d-list-item"
                      data-annotation-id="<?php echo (int) $ann->id; ?>"
                      data-selector="<?php echo htmlspecialchars(json_encode(array_merge(['type' => 'PointSelector3D'], $sel3dData))); ?>"
-                     style="cursor:pointer;font-size:0.85em;">
+                     data-ahg-style="cursor:pointer;font-size:0.85em;">
                     <div class="d-flex justify-content-between align-items-start">
                         <span>
-                            <span class="badge bg-info" style="font-size:0.7em;"><?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?></span>
-                            <i class="fas fa-cube text-primary ms-1" style="font-size:0.7em;" title="3D annotation"></i>
+                            <span class="badge bg-info" data-ahg-style="font-size:0.7em;"><?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?></span>
+                            <i class="fas fa-cube text-primary ms-1" data-ahg-style="font-size:0.7em;" title="3D annotation"></i>
                         </span>
                         <div class="d-flex gap-1">
-                            <button class="btn btn-link btn-sm p-0 text-warning edit-ann-btn" data-id="<?php echo (int) $ann->id; ?>" data-body="<?php echo htmlspecialchars($bodyText3d); ?>" data-motivation="<?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?>" title="Edit"><i class="fas fa-edit" style="font-size:0.75em;"></i></button>
-                            <button class="btn btn-link btn-sm p-0 text-danger delete-ann-btn" data-id="<?php echo (int) $ann->id; ?>" title="Delete"><i class="fas fa-trash" style="font-size:0.75em;"></i></button>
+                            <button class="btn btn-link btn-sm p-0 text-warning edit-ann-btn" data-id="<?php echo (int) $ann->id; ?>" data-body="<?php echo htmlspecialchars($bodyText3d); ?>" data-motivation="<?php echo htmlspecialchars($ann->motivation ?? 'commenting'); ?>" title="Edit"><i class="fas fa-edit" data-ahg-style="font-size:0.75em;"></i></button>
+                            <button class="btn btn-link btn-sm p-0 text-danger delete-ann-btn" data-id="<?php echo (int) $ann->id; ?>" title="Delete"><i class="fas fa-trash" data-ahg-style="font-size:0.75em;"></i></button>
                         </div>
                     </div>
                     <div class="mt-1 text-truncate ann-title"><?php echo htmlspecialchars($bodyText3d ?: '(no text)'); ?></div>
@@ -1095,7 +1095,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         var conf = d.confidence != null ? (d.confidence * 100).toFixed(0) : '?';
                         var color = dmgColors[d.damage_type] || '#6c757d';
                         html += '<div class="d-flex justify-content-between py-1 border-bottom">'
-                            + '<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + color + ';margin-right:4px;"></span>' + (d.damage_type||'').replace(/_/g,' ') + '</span>'
+                            + '<span><span data-ahg-style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + color + ';margin-right:4px;"></span>' + (d.damage_type||'').replace(/_/g,' ') + '</span>'
                             + '<span class="text-muted">' + conf + '%</span></div>';
 
                         // Draw bounding box on canvas

@@ -117,7 +117,7 @@ $currentType = $sf_request->getParameter('type', '');
                   </div>
                 </td>
                 <td>
-                  <select name="prefs[<?php echo $typeKey; ?>][digest_frequency]" class="form-select form-select-sm" style="width: 150px;">
+                  <select name="prefs[<?php echo $typeKey; ?>][digest_frequency]" class="form-select form-select-sm" data-ahg-style="width: 150px;">
                     <?php foreach (['immediate' => 'Immediate', 'hourly' => 'Hourly', 'daily' => 'Daily', 'weekly' => 'Weekly', 'never' => 'Never'] as $fKey => $fLabel): ?>
                       <option value="<?php echo $fKey; ?>" <?php echo (($pref->digest_frequency ?? 'immediate') === $fKey) ? 'selected' : ''; ?>><?php echo __($fLabel); ?></option>
                     <?php endforeach; ?>

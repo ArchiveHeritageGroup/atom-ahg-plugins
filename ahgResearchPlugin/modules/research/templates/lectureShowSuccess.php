@@ -91,7 +91,7 @@ $statuses = ['draft', 'scheduled', 'delivered', 'published', 'archived'];
 <!-- Status quick-set -->
 <form method="post" action="<?php echo url_for(['module' => 'research', 'action' => 'lectureStatus', 'id' => $id]); ?>" class="d-flex align-items-center gap-2 mb-4">
     <label class="form-label mb-0">Status</label>
-    <select name="status" class="form-select form-select-sm" style="width:auto;">
+    <select name="status" class="form-select form-select-sm" data-ahg-style="width:auto;">
         <?php foreach ($statuses as $s): ?>
             <option value="<?php echo $s; ?>" <?php echo $status === $s ? 'selected' : ''; ?>><?php echo ucfirst($s); ?></option>
         <?php endforeach; ?>

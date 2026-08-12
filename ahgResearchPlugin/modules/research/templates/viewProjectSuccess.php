@@ -225,7 +225,7 @@
                         <div class="timeline-date text-muted fw-bold small mb-2 mt-3"><?php echo $itemDate; ?></div>
                     <?php endif; ?>
                     <div class="d-flex align-items-start mb-2 ms-3">
-                        <span class="badge bg-<?php echo $item->color; ?> rounded-circle p-1 me-2 mt-1" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+                        <span class="badge bg-<?php echo $item->color; ?> rounded-circle p-1 me-2 mt-1" data-ahg-style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-<?php echo $item->icon; ?> fa-xs"></i>
                         </span>
                         <div>

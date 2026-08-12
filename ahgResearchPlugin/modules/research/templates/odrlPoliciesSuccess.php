@@ -176,7 +176,7 @@
               <option value="assertion">Assertion</option>
             </select>
           </div>
-          <div class="col-md-6 mb-3" id="targetSearchGroup" style="display:none;">
+          <div class="col-md-6 mb-3" id="targetSearchGroup" class="d-none">
             <label class="form-label fw-semibold" id="targetSearchLabel">Target <span class="text-danger">*</span></label>
             <select id="policyTargetSearch"></select>
             <input type="hidden" id="policyTargetId" value="">

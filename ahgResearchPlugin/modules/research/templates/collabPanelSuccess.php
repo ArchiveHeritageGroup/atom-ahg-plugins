@@ -34,7 +34,7 @@ $resolveUrlTpl = '/index.php/research/projects/' . (int) $project->id . '/realti
     <div class="col-lg-8 mb-4">
         <div class="card">
             <div class="card-header"><h5 class="mb-0"><i class="fas fa-comments me-2"></i>Project comments</h5></div>
-            <div class="card-body" id="comment-list" style="max-height:520px; overflow-y:auto;">
+            <div class="card-body" id="comment-list" data-ahg-style="max-height:520px; overflow-y:auto;">
                 <p class="text-muted small">Loading…</p>
             </div>
             <div class="card-footer">
@@ -77,7 +77,7 @@ $resolveUrlTpl = '/index.php/research/projects/' . (int) $project->id . '/realti
         if (!list.length) { el.innerHTML = '<li class="list-group-item text-muted small">No collaborators online.</li>'; return; }
         el.innerHTML = list.map(function(p) {
             return '<li class="list-group-item d-flex align-items-center">'
-                 + '<span class="presence-dot" style="background:' + p.color + '"></span>'
+                 + '<span class="presence-dot" data-ahg-style="background:' + p.color + '"></span>'
                  + '<span>' + escapeHtml(p.name) + '</span></li>';
         }).join('');
     }

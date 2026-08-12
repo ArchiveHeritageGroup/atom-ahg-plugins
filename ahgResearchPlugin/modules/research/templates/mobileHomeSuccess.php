@@ -113,7 +113,7 @@ $hasAny = count($collections) + count($projects) + count($folders) > 0;
                                     return '<label class="list-group-item d-flex align-items-center">'
                                         + '<input type="hidden" name="record_ids[]" value="' + id + '">'
                                         + '<span class="flex-grow-1">' + esc(picked[id]) + '</span>'
-                                        + '<span class="rec-del text-danger" data-id="' + id + '" style="cursor:pointer;font-weight:700">&times;</span></label>';
+                                        + '<span class="rec-del text-danger" data-id="' + id + '" data-ahg-style="cursor:pointer;font-weight:700">&times;</span></label>';
                                 }).join('');
                         }
                         box.addEventListener('input', function () {

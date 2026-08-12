@@ -49,7 +49,7 @@
                 <caption class="visually-hidden"><?php echo __('Select items to check out in batch') ?></caption>
                 <thead class="table-light">
                     <tr>
-                        <th scope="col" style="width: 40px;">
+                        <th scope="col" data-ahg-style="width: 40px;">
                             <input type="checkbox" class="form-check-input" id="selectAllBatch" checked
                                    aria-label="<?php echo __('Select all items') ?>">
                         </th>

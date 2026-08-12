@@ -72,7 +72,7 @@ $bookedEquipment = isset($bookedEquipment) && is_array($bookedEquipment) ? $book
                 <input type="hidden" name="form_action" value="book">
                 <input type="hidden" name="equipment_id" value="<?php echo $eq->id; ?>">
                 <div class="mb-2">
-                  <input type="text" name="purpose" class="form-control form-control-sm" placeholder="<?php echo __('Purpose (optional)'); ?>" style="min-width: 150px;">
+                  <input type="text" name="purpose" class="form-control form-control-sm" placeholder="<?php echo __('Purpose (optional)'); ?>" data-ahg-style="min-width: 150px;">
                 </div>
                 <button type="submit" class="btn btn-sm btn-primary w-100"><i class="fas fa-plus me-1"></i><?php echo __('Book'); ?></button>
               </form>

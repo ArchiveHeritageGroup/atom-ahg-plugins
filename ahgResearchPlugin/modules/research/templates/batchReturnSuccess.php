@@ -27,7 +27,7 @@
                 <caption class="visually-hidden"><?php echo __('Set condition for each returning item') ?></caption>
                 <thead class="table-light">
                     <tr>
-                        <th scope="col" style="width: 40px;">
+                        <th scope="col" data-ahg-style="width: 40px;">
                             <input type="checkbox" class="form-check-input" id="selectAllReturn" checked
                                    aria-label="<?php echo __('Select all items') ?>">
                         </th>

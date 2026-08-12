@@ -62,11 +62,11 @@ $maxDaily = max(array_map(fn ($x) => $x['count'], $d['daily_series'] ?: [['count
                 <?php if (empty($d['daily_series'])): ?>
                     <p class="text-muted mb-0">No activity in this period.</p>
                 <?php else: ?>
-                    <div class="d-flex align-items-end" style="height:140px; gap:4px;">
+                    <div class="d-flex align-items-end" data-ahg-style="height:140px; gap:4px;">
                         <?php foreach ($d['daily_series'] as $row): ?>
                             <div class="flex-grow-1 d-flex flex-column align-items-center">
                                 <div title="<?php echo htmlspecialchars($row['date']); ?>: <?php echo (int) $row['count']; ?>"
-                                     style="background:#0d6efd; width:100%; height:<?php echo max(2, round(120 * $row['count'] / max(1, $maxDaily))); ?>px;"></div>
+                                     data-ahg-style="background:#0d6efd; width:100%; height:<?php echo max(2, round(120 * $row['count'] / max(1, $maxDaily))); ?>px;"></div>
                             </div>
                         <?php endforeach; ?>
                     </div>

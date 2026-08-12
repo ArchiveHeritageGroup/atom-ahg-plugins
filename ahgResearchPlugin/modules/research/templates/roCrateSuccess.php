@@ -65,7 +65,7 @@
 <!-- Data Items -->
 <div class="card mb-4">
     <div class="card-header"><h5 class="mb-0">Items (<?php echo count($roCrate['items'] ?? []); ?>)</h5></div>
-    <div class="card-body" style="max-height:400px; overflow:auto;">
+    <div class="card-body" data-ahg-style="max-height:400px; overflow:auto;">
         <?php if (!empty($roCrate['items'])): ?>
         <div class="table-responsive">
             <table class="table table-sm mb-0">
@@ -91,7 +91,7 @@
 <?php if (!empty($roCrate['assertions'])): ?>
 <div class="card mb-4">
     <div class="card-header"><h5 class="mb-0">Assertions (<?php echo count($roCrate['assertions']); ?>)</h5></div>
-    <div class="card-body" style="max-height:300px; overflow:auto;">
+    <div class="card-body" data-ahg-style="max-height:300px; overflow:auto;">
         <div class="table-responsive">
             <table class="table table-sm mb-0">
                 <thead><tr><th>Type</th><th>Predicate</th><th>Status</th></tr></thead>

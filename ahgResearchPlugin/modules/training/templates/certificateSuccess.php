@@ -16,9 +16,9 @@ $issued = !empty($cert['issued_at']) ? date('j F Y', strtotime((string) $cert['i
 <?php end_slot() ?>
 
 <?php slot('content') ?>
-<div class="card border-success shadow-sm mx-auto" style="max-width: 720px;">
+<div class="card border-success shadow-sm mx-auto" data-ahg-style="max-width: 720px;">
   <div class="card-body text-center p-5">
-    <p class="text-uppercase text-muted mb-1" style="letter-spacing:.2em;"><?php echo __('Certificate of completion'); ?></p>
+    <p class="text-uppercase text-muted mb-1" data-ahg-style="letter-spacing:.2em;"><?php echo __('Certificate of completion'); ?></p>
     <h2 class="my-4"><?php echo htmlspecialchars((string) ($course['title'] ?? '')); ?></h2>
     <p class="mb-1"><?php echo __('This certifies that'); ?></p>
     <h3 class="mb-4"><?php echo htmlspecialchars((string) ($enrol['learner_name'] ?? '')); ?></h3>

@@ -69,7 +69,7 @@ $templates = isset($templates) && is_array($templates) ? $templates : (isset($te
     ?>
     <?php foreach ($defaultTemplates as $code => $tpl): ?>
     <div class="col-md-4 mb-3">
-      <div class="card h-100 template-card" data-template="<?php echo $code; ?>" role="button" style="cursor: pointer;">
+      <div class="card h-100 template-card" data-template="<?php echo $code; ?>" role="button" data-ahg-style="cursor: pointer;">
         <div class="card-body text-center">
           <div class="mb-3">
             <i class="<?php echo $tpl['icon']; ?> fa-2x text-<?php echo $tpl['color']; ?>"></i>

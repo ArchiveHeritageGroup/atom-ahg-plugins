@@ -150,7 +150,7 @@
                         <td>
                             <?php $tpct = round((float)($ts->score ?? 0) * 100); $tc = $tpct >= 80 ? 'success' : ($tpct >= 50 ? 'warning' : 'danger'); ?>
                             <div class="d-flex align-items-center gap-1">
-                                <div class="progress" style="width:80px;height:6px"><div class="progress-bar bg-<?php echo $tc; ?>" style="width:<?php echo $tpct; ?>%"></div></div>
+                                <div class="progress" data-ahg-style="width:80px;height:6px"><div class="progress-bar bg-<?php echo $tc; ?>" data-ahg-style="width:<?php echo $tpct; ?>%"></div></div>
                                 <small><?php echo $tpct; ?>%</small>
                             </div>
                         </td>

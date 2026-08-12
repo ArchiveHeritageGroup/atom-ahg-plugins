@@ -34,7 +34,7 @@
   <div class="alert alert-success"><?php echo $sf_user->getFlash('success'); ?></div>
 <?php endif; ?>
 
-<div style="max-width: 820px;">
+<div data-ahg-style="max-width: 820px;">
   <?php if (!empty($journal['subject_scope'])): ?>
     <h2 class="h6 mt-3"><?php echo __('Scope — what it accepts'); ?></h2>
     <p><?php echo nl2br(htmlspecialchars($journal['subject_scope'])); ?></p>
@@ -60,7 +60,7 @@
       ?>
       <?php foreach ($rows as $label => $val): ?>
         <?php if ($val !== null && $val !== ''): ?>
-          <tr><th class="text-muted" style="width: 220px;"><?php echo $label; ?></th><td><?php echo nl2br(htmlspecialchars((string) $val)); ?></td></tr>
+          <tr><th class="text-muted" data-ahg-style="width: 220px;"><?php echo $label; ?></th><td><?php echo nl2br(htmlspecialchars((string) $val)); ?></td></tr>
         <?php endif; ?>
       <?php endforeach; ?>
     </tbody>

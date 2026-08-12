@@ -20,7 +20,7 @@
 
 <div class="card mb-4">
     <div class="card-body p-0">
-        <div id="timeline" style="width:100%; height:400px;"></div>
+        <div id="timeline" data-ahg-style="width:100%; height:400px;"></div>
     </div>
 </div>
 

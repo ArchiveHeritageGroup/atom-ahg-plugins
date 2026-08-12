@@ -61,7 +61,7 @@
                     <dd class="col-sm-8">
                         <?php echo $requestData->sla_due_date ?? ($requestData->sla['due_at'] ?? '—') ?>
                         <?php if (isset($requestData->sla['status'])): ?>
-                            <span class="badge ms-1" style="background-color: <?php echo \WorkflowSlaService::STATUS_COLORS[$requestData->sla['status']] ?? '#6c757d' ?>" role="status">
+                            <span class="badge ms-1" data-ahg-style="background-color: <?php echo \WorkflowSlaService::STATUS_COLORS[$requestData->sla['status']] ?? '#6c757d' ?>" role="status">
                                 <?php echo ucfirst(str_replace('_', ' ', $requestData->sla['status'])) ?>
                             </span>
                         <?php endif ?>

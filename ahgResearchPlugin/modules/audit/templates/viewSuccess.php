@@ -10,7 +10,7 @@
       <div class="card-header"><i class="fas fa-info-circle me-2"></i>Entry Details</div>
       <div class="card-body">
         <table class="table table-bordered mb-0">
-          <tr><th style="width:30%;">Date/Time</th><td><?php echo $entry->created_at; ?></td></tr>
+          <tr><th data-ahg-style="width:30%;">Date/Time</th><td><?php echo $entry->created_at; ?></td></tr>
           <tr><th>User</th><td><?php echo htmlspecialchars($entry->user_name ?? 'System'); ?></td></tr>
           <tr><th>Action</th><td><span class="badge bg-<?php echo match($entry->action) { 'create'=>'success', 'update'=>'warning', 'delete'=>'danger', default=>'secondary' }; ?>"><?php echo ucfirst($entry->action); ?></span></td></tr>
           <tr><th>Table</th><td><code><?php echo $entry->table_name; ?></code></td></tr>

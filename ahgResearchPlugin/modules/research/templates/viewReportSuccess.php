@@ -145,7 +145,7 @@ $collaborators = isset($collaborators) && is_array($collaborators) ? $collaborat
           <?php if (!empty($thisSectionComments) || true): ?>
           <div class="card-footer bg-transparent">
             <details>
-              <summary class="text-muted small" style="cursor: pointer;">
+              <summary class="text-muted small" data-ahg-style="cursor: pointer;">
                 <i class="fas fa-comments me-1"></i><?php echo __('Comments'); ?> (<?php echo count($thisSectionComments); ?>)
               </summary>
               <div class="mt-2">

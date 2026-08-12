@@ -24,7 +24,7 @@
                         <small class="text-muted">Search registered researchers by name or email</small>
                     </div>
 
-                    <div class="mb-3" id="external-invite-section" style="display:none;">
+                    <div class="mb-3" id="external-invite-section" class="d-none">
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <strong>Not a registered researcher?</strong><br>

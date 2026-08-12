@@ -34,8 +34,8 @@ $statusTone = ['draft' => 'secondary', 'active' => 'primary', 'final' => 'succes
           <td><?php echo htmlspecialchars((string) ($d->funder ?? '')); ?></td>
           <td><?php echo htmlspecialchars((string) ($d->project_title ?? '—')); ?></td>
           <td><span class="badge bg-<?php echo $statusTone[$d->status] ?? 'secondary'; ?>"><?php echo __(ucfirst((string) $d->status)); ?></span></td>
-          <td style="min-width:120px">
-            <div class="progress" style="height:14px"><div class="progress-bar<?php echo $pct < 100 ? ' bg-warning' : ' bg-success'; ?>" style="width:<?php echo (int) $pct; ?>%"><?php echo (int) $pct; ?>%</div></div>
+          <td data-ahg-style="min-width:120px">
+            <div class="progress" data-ahg-style="height:14px"><div class="progress-bar<?php echo $pct < 100 ? ' bg-warning' : ' bg-success'; ?>" data-ahg-style="width:<?php echo (int) $pct; ?>%"><?php echo (int) $pct; ?>%</div></div>
           </td>
           <td class="small text-muted"><?php echo htmlspecialchars((string) $d->updated_at); ?></td>
           <td class="text-end">
