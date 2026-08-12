@@ -1,0 +1,9 @@
+# SECURITY: training courses, assessments and certificates belong to enrolled
+# users - a certificate is a record about a person.
+#
+# The module shipped modules/training/config/module.yml but no security.yml, so
+# it inherited apps/qubit/config/security.yml and its `default: is_secure: false`.
+# requireAuth() at modules/training/actions/actions.class.php:31-35 is the only
+# thing that was standing in the way.
+all:
+  is_secure: true

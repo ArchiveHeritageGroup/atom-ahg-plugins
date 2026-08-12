@@ -1,0 +1,9 @@
+# SECURITY: the institutional journal builder is a member area.
+#
+# The module had no config/ directory, so it inherited
+# apps/qubit/config/security.yml and its `default: is_secure: false`. The actions
+# call requireResearcher() (modules/researchjournal/actions/actions.class.php:39-50),
+# which redirects a visitor who is not an approved researcher - but that is a
+# redirect inside the action, not an access control in front of it.
+all:
+  is_secure: true

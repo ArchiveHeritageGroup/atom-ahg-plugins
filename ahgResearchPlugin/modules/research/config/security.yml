@@ -1,4 +1,18 @@
-# Public actions - no authentication required
+# SECURITY: the researcher portal is a staff and member area with five public
+# doors, not a public module.
+#
+# This file previously ended in `all: is_secure: false` directly under a comment
+# reading "All other actions require authentication by default" - the comment
+# stated the intent and the setting did the opposite, leaving roughly 200 actions
+# reachable by anyone. On PSIS that was masked: the theme does not link them and
+# 59 other plugins cover for each other. On a stock install it is an open door.
+#
+# Authorisation inside the actions (isAdministrator(), isAuthenticated(),
+# hasCredential()) is unchanged and still applies. This adds the declarative
+# layer beneath it, so a new action is private unless someone says otherwise -
+# rather than public unless someone remembers.
+
+# The five genuinely public doors.
 publicRegister:
   is_secure: false
 
@@ -11,12 +25,16 @@ passwordResetRequest:
 passwordReset:
   is_secure: false
 
+# Citation export for a described record - a reader-facing courtesy.
 cite:
   is_secure: false
 
-dashboard:
-  is_secure: false
-
-# All other actions require authentication by default
+# Everything else, including dashboard.
+#
+# dashboard was public, and it is not a landing page: executeDashboard loads
+# pending researcher applications and today's reading-room bookings - researcher
+# names, rooms and times - and dashboardSuccess.php renders the "Today's
+# Schedule" card without an authentication gate. The public entry point to the
+# portal is publicRegister; the dashboard is what a member sees after signing in.
 all:
-  is_secure: false
+  is_secure: true
