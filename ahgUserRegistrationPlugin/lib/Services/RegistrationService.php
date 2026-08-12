@@ -281,8 +281,9 @@ class RegistrationService
                 return $id;
             });
 
-            // Send approval email
-            $this->sendApprovalEmail($request->email, $request->full_name);
+            // Send approval email, naming the access level that was assigned.
+            $assigned = DB::table($this->table)->where('id', $requestId)->value('assigned_group_id');
+            $this->sendApprovalEmail($request->email, $request->full_name, $assigned ? (int) $assigned : null);
 
             return ['success' => true, 'user_id' => $userId];
         } catch (\Exception $e) {
@@ -381,12 +382,26 @@ class RegistrationService
             $verifyUrl = $siteUrl . '/register/verify/' . $token;
             $siteName = \sfConfig::get('app_siteTitle', 'AtoM');
 
+            // Says what happens next, and that verifying is not the last step.
+            //
+            // It used to stop at "verify your email", so an applicant verified,
+            // went straight to the login form, and was told their email or
+            // password was unrecognised - because no account exists until an
+            // administrator approves. The message was accurate and still left
+            // people stuck.
             $subject = "Verify your email - {$siteName}";
             $body = "Dear {$name},\n\n";
             $body .= "Thank you for registering at {$siteName}.\n\n";
             $body .= "Please click the link below to verify your email address:\n\n";
             $body .= "{$verifyUrl}\n\n";
             $body .= "This link expires in 48 hours.\n\n";
+            $body .= "What happens after that:\n\n";
+            $body .= "1. We receive your verified request.\n";
+            $body .= "2. An administrator reviews it and decides your level of access.\n";
+            $body .= "3. You receive a second email once your account is ready.\n\n";
+            $body .= "You will not be able to sign in until that second email arrives. ";
+            $body .= "If you try before then, the login page will not recognise your details, ";
+            $body .= "because the account is only created at approval.\n\n";
             $body .= "If you did not register, you can safely ignore this email.\n\n";
             $body .= "Regards,\n{$siteName}";
 
@@ -441,16 +456,55 @@ class RegistrationService
     /**
      * Send approval email to user.
      */
-    private function sendApprovalEmail(string $email, string $name): void
+    /**
+     * Human-readable name for an ACL group, or null if it cannot be resolved.
+     *
+     * Read from acl_group_i18n rather than hardcoded, because the group names
+     * are editable and an institution may well have renamed them.
+     */
+    private function groupName(int $groupId): ?string
+    {
+        try {
+            $name = DB::table('acl_group_i18n')
+                ->where('id', $groupId)
+                ->where('culture', 'en')
+                ->value('name');
+
+            return $name ? (string) $name : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function sendApprovalEmail(string $email, string $name, ?int $groupId = null): void
     {
         try {
             $siteName = \sfConfig::get('app_siteTitle', 'AtoM');
             $siteUrl = \sfConfig::get('app_siteBaseUrl', '');
 
+            // Name the access level that was granted.
+            //
+            // Approval assigns a group - administrator, editor, contributor or
+            // translator - and that choice decides what the person can actually
+            // do. The email said only "approved", so the one fact decided on
+            // their behalf was the one fact not communicated.
+            $roleLine = '';
+
+            if (null !== $groupId) {
+                $role = $this->groupName($groupId);
+
+                if (null !== $role) {
+                    $roleLine = "Your access level is: {$role}.\n\n";
+                }
+            }
+
             $subject = "Registration approved - {$siteName}";
             $body = "Dear {$name},\n\n";
-            $body .= "Your registration at {$siteName} has been approved.\n\n";
-            $body .= "You can now log in at:\n{$siteUrl}/user/login\n\n";
+            $body .= "Your registration at {$siteName} has been approved and your account is ready.\n\n";
+            $body .= $roleLine;
+            $body .= "You can now sign in at:\n{$siteUrl}/user/login\n\n";
+            $body .= "Sign in with the email address and password you chose when you registered.\n\n";
+            $body .= "If you need a different level of access, reply to this message and ask.\n\n";
             $body .= "Regards,\n{$siteName}";
 
             // Send via the settings-driven AHG mailer (email_setting -> SMTP/sendmail),
