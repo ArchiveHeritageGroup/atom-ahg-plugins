@@ -1,0 +1,32 @@
+-- ============================================================
+-- Remove redundant acl_user_group rows for group 99 ('authenticated')
+--
+-- QubitUser::getAclGroups() prepends AUTHENTICATED_ID to every user
+-- (lib/model/QubitUser.php:108-119). An explicit acl_user_group row for 99
+-- therefore makes the group appear twice, and Zend's ACL registry throws
+--
+--     Role id '99' already exists in the registry
+--
+-- which surfaces as a 500 on every page that account opens.
+--
+-- It only bites a user whose groups are 99 AND NOTHING ELSE - an administrator
+-- holds 100 explicitly and 99 implicitly, so nothing repeats. That is exactly a
+-- self-registered researcher: approved, active, and unable to open a single page
+-- of the portal they had just been admitted to.
+--
+-- Three code paths were writing the row - ahgResearchPlugin's publicRegister,
+-- ahgUserRegistrationPlugin's approve(), and ahgUserManagePlugin's create() -
+-- all fixed. This clears the rows they already wrote.
+--
+-- SAFE BECAUSE THE ROW GRANTS NOTHING
+--
+-- Deleting it removes no entitlement: every authenticated user is in group 99
+-- whether or not the row exists. myUser::signIn() builds credentials from
+-- getAclGroups(), which prepends it regardless.
+--
+-- Scoped deliberately: only rows for group 99, and only where the user has at
+-- least one other group OR none - i.e. all of them - but never any other group
+-- id. No user loses a real group.
+-- ============================================================
+
+DELETE FROM `acl_user_group` WHERE `group_id` = 99;

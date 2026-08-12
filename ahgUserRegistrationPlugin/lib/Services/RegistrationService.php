@@ -226,11 +226,18 @@ class RegistrationService
                 // Step 5: Generate slug
                 ObjectService::generateSlug($id, $request->username);
 
-                // Step 6: Assign 'authenticated' group (99) — always required
-                DB::table('acl_user_group')->insert([
-                    'user_id' => $id,
-                    'group_id' => 99,
-                ]);
+                // Step 6: no 'authenticated' row - group 99 is implicit.
+                //
+                // QubitUser::getAclGroups() prepends AUTHENTICATED_ID to every
+                // user (lib/model/QubitUser.php:108-119). Writing it as well makes
+                // the group appear twice, and Zend's ACL registry throws
+                // "Role id '99' already exists in the registry" - a 500 on every
+                // page for that account.
+                //
+                // Harmless here only because step 7 also assigns a real group, so
+                // the duplicate sat alongside a distinct one. It is removed
+                // because the row is redundant either way, and because a caller
+                // that skips step 7 would inherit the fault.
 
                 // Step 7: Assign additional group if specified (default: contributor = 102)
                 $assignGroupId = $groupId ?: $this->getDefaultGroupId();

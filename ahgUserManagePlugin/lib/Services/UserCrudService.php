@@ -170,12 +170,15 @@ class UserCrudService
                 'active' => isset($data['active']) ? (int) $data['active'] : 1,
             ]);
 
-            // Assign groups
-            // Always add 'authenticated' group (99)
-            DB::table('acl_user_group')->insert([
-                'user_id' => $id,
-                'group_id' => 99,
-            ]);
+            // Assign groups.
+            //
+            // Group 99 ('authenticated') is deliberately NOT written:
+            // QubitUser::getAclGroups() prepends it to every user already
+            // (lib/model/QubitUser.php:108-119), so an explicit row makes the
+            // group appear twice and Zend's ACL registry throws "Role id '99'
+            // already exists in the registry" - a 500 on every page for that
+            // account. A user created here with no other group would have been
+            // locked out of the site by the row meant to let them in.
 
             if (!empty($data['groups'])) {
                 foreach ($data['groups'] as $groupId) {

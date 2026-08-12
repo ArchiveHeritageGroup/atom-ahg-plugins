@@ -1020,10 +1020,22 @@ class researchActions extends AhgController
                     $userId = $this->createAtomUser($username, $email, $password);
                 }
                 
-                // Ensure user is in researcher group
-                if (!DB::table('acl_user_group')->where('user_id', $userId)->where('group_id', 99)->exists()) {
-                    DB::table('acl_user_group')->insert(['user_id' => $userId, 'group_id' => 99]);
-                }
+                // No acl_user_group row for group 99.
+                //
+                // QubitUser::getAclGroups() already prepends AUTHENTICATED_ID to
+                // every user (lib/model/QubitUser.php:108-119), so an explicit row
+                // makes the group appear twice - and Zend's ACL registry throws
+                // "Role id '99' already exists in the registry" on the second
+                // registration, which is a 500 on every page the user opens.
+                //
+                // It only bit self-registered researchers: an administrator holds
+                // group 100 explicitly and 99 implicitly, so nothing repeats. A
+                // researcher whose only group IS 99 could not use the account they
+                // had just been approved for.
+                //
+                // A researcher needs no explicit group. Being authenticated is the
+                // entitlement; what they may do is decided by research_researcher
+                // status, not by an ACL group.
                 $this->service->registerResearcher([
                     'user_id' => $userId,
                     'title' => $request->getParameter('title'),
