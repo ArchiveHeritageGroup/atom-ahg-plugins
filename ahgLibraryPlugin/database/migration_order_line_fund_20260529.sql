@@ -1,5 +1,5 @@
 -- ============================================================================
--- Acquisitions fund-split (#104) — 2026-05-29
+-- Acquisitions fund-split (#104) - 2026-05-29
 -- ============================================================================
 -- Allocate a single order line across multiple funds. library_order_line keeps
 -- its primary fund_code; this table records the split when one is supplied.

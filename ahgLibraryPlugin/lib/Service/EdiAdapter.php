@@ -10,7 +10,7 @@ declare(strict_types=1);
  * transmits them via SFTP / AS2 / HTTP(S) / EMAIL / MANUAL endpoints.
  *
  * Framework-agnostic Symfony port of the Heratio (Laravel)
- * AhgLibrary\Services\EdiAdapter — operates on plain stdClass rows from
+ * AhgLibrary\Services\EdiAdapter - operates on plain stdClass rows from
  * library_trading_partner / library_ill_request (no Eloquent), uses Guzzle
  * (when present) for AS2/HTTP and phpseclib3 (when present) for SFTP, with
  * graceful degradation when an optional transport library is missing.

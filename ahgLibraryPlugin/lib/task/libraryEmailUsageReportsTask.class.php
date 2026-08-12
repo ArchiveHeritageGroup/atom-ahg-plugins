@@ -7,7 +7,7 @@
  *
  * Emails the prior period's COUNTER R5 reports to the configured recipients,
  * attaching each as JSON + TSV. Reuses the existing LibraryCounterService
- * (PR / TR_J1 / TR_J3 / DR / IR + toJson/toTsv) — no new tables or report
+ * (PR / TR_J1 / TR_J3 / DR / IR + toJson/toTsv) - no new tables or report
  * engine. Settings live in the ahg_settings table:
  *
  *   counter_email_enabled      bool    master kill-switch (default false)
@@ -63,12 +63,12 @@ EOF;
         }));
 
         if (!$enabled && empty($options['force'])) {
-            $this->logSection('library', 'counter_email_enabled is off — skipping. Use --force for a one-off send.');
+            $this->logSection('library', 'counter_email_enabled is off - skipping. Use --force for a one-off send.');
 
             return 0;
         }
         if (empty($recipients)) {
-            $this->logSection('library', 'No valid recipients in ahg_settings.counter_email_recipients — nothing to send.', null, 'ERROR');
+            $this->logSection('library', 'No valid recipients in ahg_settings.counter_email_recipients - nothing to send.', null, 'ERROR');
 
             return 0;
         }
@@ -109,7 +109,7 @@ EOF;
         }
 
         if (empty($attachments)) {
-            $this->logSection('library', 'No reports built — nothing to send.', null, 'ERROR');
+            $this->logSection('library', 'No reports built - nothing to send.', null, 'ERROR');
 
             return 1;
         }

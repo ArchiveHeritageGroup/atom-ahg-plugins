@@ -52,7 +52,7 @@ EOF;
         foreach ($patrons as $patron) {
             if ($dryRun) {
                 $this->logSection('dry-run', sprintf(
-                    'Would expire: %s %s [%s] — expired %s',
+                    'Would expire: %s %s [%s] - expired %s',
                     $patron->first_name, $patron->last_name, $patron->card_number, $patron->membership_expiry
                 ));
                 $flagged++;
@@ -69,7 +69,7 @@ EOF;
             $flagged++;
 
             $this->logSection('expired', sprintf(
-                '%s %s [%s] — membership expired %s',
+                '%s %s [%s] - membership expired %s',
                 $patron->first_name, $patron->last_name, $patron->card_number, $patron->membership_expiry
             ));
         }

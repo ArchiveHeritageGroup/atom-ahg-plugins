@@ -20,7 +20,7 @@ class circulationLoanRulesAction extends AhgController
         $this->notice = $this->getUser()->getFlash('notice');
         $this->error = $this->getUser()->getFlash('error');
 
-        // Handle POST — save loan rules
+        // Handle POST - save loan rules
         if ('POST' === $request->getMethod()) {
             $this->saveLoanRules($request);
 
@@ -74,7 +74,7 @@ class circulationLoanRulesAction extends AhgController
         $maxRenewals = (int) $request->getParameter('max_renewals', 2);
         $maxCheckouts = (int) $request->getParameter('max_checkouts', 5);
         $finePerDay = (float) $request->getParameter('fine_per_day', 0);
-        // library_loan_rule has no is_renewable column — renewability is encoded
+        // library_loan_rule has no is_renewable column - renewability is encoded
         // as max_renewals > 0, so an unchecked "renewable" box means 0 renewals.
         if (!$request->getParameter('is_renewable')) {
             $maxRenewals = 0;
@@ -86,7 +86,7 @@ class circulationLoanRulesAction extends AhgController
         }
 
         try {
-            // Only real library_loan_rule columns — max_checkouts (patron-level),
+            // Only real library_loan_rule columns - max_checkouts (patron-level),
             // is_renewable and updated_at do NOT exist on this table.
             $data = [
                 'material_type'    => $materialType,

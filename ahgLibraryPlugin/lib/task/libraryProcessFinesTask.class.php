@@ -123,7 +123,7 @@ EOF;
 
             if ($dryRun) {
                 $this->logSection('dry-run', sprintf(
-                    'Would fine R%.2f — %s — %d days overdue — Patron #%d',
+                    'Would fine R%.2f - %s - %d days overdue - Patron #%d',
                     $fineAmount, $row->title, $row->days_overdue, $row->patron_id
                 ));
                 $created++;
@@ -152,7 +152,7 @@ EOF;
             $created++;
 
             $this->logSection('fine', sprintf(
-                'R%.2f — %s — %d days overdue — Patron #%d',
+                'R%.2f - %s - %d days overdue - Patron #%d',
                 $fineAmount, $row->title, $row->days_overdue, $row->patron_id
             ));
         }

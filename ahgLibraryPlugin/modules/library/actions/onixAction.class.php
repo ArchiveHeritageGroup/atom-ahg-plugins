@@ -3,12 +3,12 @@
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * ONIX ingestion — upload a publisher ONIX feed, parse + validate into a review
+ * ONIX ingestion - upload a publisher ONIX feed, parse + validate into a review
  * queue. (Commit-to-catalogue is a follow-up phase.)
  *
- * GET  /library/onix            — upload form + recent ingests
- * GET  /library/onix?id=N       — review the parsed lines of ingest N
- * POST /library/onix            — ingest an uploaded file or pasted XML
+ * GET  /library/onix            - upload form + recent ingests
+ * GET  /library/onix?id=N       - review the parsed lines of ingest N
+ * POST /library/onix            - ingest an uploaded file or pasted XML
  */
 class libraryOnixAction extends AhgController
 {

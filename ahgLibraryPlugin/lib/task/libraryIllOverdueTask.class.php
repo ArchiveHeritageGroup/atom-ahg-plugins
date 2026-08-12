@@ -65,10 +65,10 @@ EOF;
         }
 
         if ($borrowed->isNotEmpty()) {
-            $this->logSection('ill', sprintf('=== BORROWED — %d overdue (we need to return) ===', $borrowed->count()));
+            $this->logSection('ill', sprintf('=== BORROWED - %d overdue (we need to return) ===', $borrowed->count()));
             foreach ($borrowed as $row) {
                 $this->logSection('overdue', sprintf(
-                    '[%s] %s — from %s — %d days overdue (due %s)',
+                    '[%s] %s - from %s - %d days overdue (due %s)',
                     $row->request_number, $row->title, $row->partner_library,
                     $row->days_overdue, $row->due_date
                 ));
@@ -77,10 +77,10 @@ EOF;
 
         if ($lent->isNotEmpty()) {
             $this->logSection('', '');
-            $this->logSection('ill', sprintf('=== LENT — %d overdue (they need to return) ===', $lent->count()));
+            $this->logSection('ill', sprintf('=== LENT - %d overdue (they need to return) ===', $lent->count()));
             foreach ($lent as $row) {
                 $this->logSection('overdue', sprintf(
-                    '[%s] %s — to %s — %d days overdue (due %s)',
+                    '[%s] %s - to %s - %d days overdue (due %s)',
                     $row->request_number, $row->title, $row->partner_library,
                     $row->days_overdue, $row->due_date
                 ));

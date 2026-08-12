@@ -53,7 +53,7 @@
         <div class="mb-3">
           <label class="form-label"><?php echo __('Vendor'); ?></label>
           <select name="vendor_id" class="form-select">
-            <option value=""><?php echo __('— none —'); ?></option>
+            <option value=""><?php echo __('- none -'); ?></option>
             <?php foreach ($vendors as $v): ?>
               <option value="<?php echo (int) $v->id; ?>" <?php echo (int) ($p->vendor_id ?? 0) === (int) $v->id ? 'selected' : ''; ?>><?php echo esc_entities($v->name); ?></option>
             <?php endforeach; ?>

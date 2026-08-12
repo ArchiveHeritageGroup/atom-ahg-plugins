@@ -22,7 +22,7 @@ class kbartVendorActions extends AhgController
     }
 
     /**
-     * Export the library's holdings as a NISO KBART title list (TSV download) — #110.
+     * Export the library's holdings as a NISO KBART title list (TSV download) - #110.
      */
     public function executeExport($request)
     {

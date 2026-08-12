@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * PatronService
  *
- * Manages library patrons — registration, status, borrowing privileges.
+ * Manages library patrons - registration, status, borrowing privileges.
  * All patron types driven by ahg_dropdown (patron_type taxonomy).
  *
  * @package    ahgLibraryPlugin

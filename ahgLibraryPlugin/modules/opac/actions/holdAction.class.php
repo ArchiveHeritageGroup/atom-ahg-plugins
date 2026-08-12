@@ -5,7 +5,7 @@ declare(strict_types=1);
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * OPAC hold — place a hold on a library item (POST only).
+ * OPAC hold - place a hold on a library item (POST only).
  *
  * @package    ahgLibraryPlugin
  * @subpackage opac

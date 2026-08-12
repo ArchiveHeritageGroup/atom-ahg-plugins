@@ -1,5 +1,5 @@
 -- Migration: Z39.50 SERVER mode (raw binary ISO 23950 daemon)
--- ahgLibraryPlugin — PSIS parity with Heratio ahg-z3950 server half.
+-- ahgLibraryPlugin - PSIS parity with Heratio ahg-z3950 server half.
 --
 -- PSIS already has: library_z3950_target (client), library_sru_log (SRU/HTTP
 -- server), library_z3950_import_log. This adds the raw Z39.50 *server* tables:

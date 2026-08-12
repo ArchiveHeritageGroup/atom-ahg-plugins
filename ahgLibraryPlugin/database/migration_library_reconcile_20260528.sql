@@ -7,7 +7,7 @@
 --
 -- This file covers the additions that are NOT already in a clean standalone
 -- migration. To fully reconcile an instance, ALSO run (all idempotent):
---   * migration_frbr_clustering.sql      (FRBR columns + override table — superseded by this file)
+--   * migration_frbr_clustering.sql      (FRBR columns + override table - superseded by this file)
 --   * migration_counter_sushi.sql        (library_usage_event, library_counter_settings)
 --   * migration_sushi_access_log.sql     (library_sushi_access_log)
 --   * migration_z3950_sru.sql            (library_z3950_target, library_sru_log, library_z3950_import_log)

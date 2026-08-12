@@ -41,7 +41,7 @@ class Z3950Actions extends AhgController
     }
 
     // ========================================================================
-    // index — list targets
+    // index - list targets
     // ========================================================================
 
     public function executeIndex($request)
@@ -69,7 +69,7 @@ class Z3950Actions extends AhgController
     }
 
     // ========================================================================
-    // test — AJAX ping + sample query test (called from edit form)
+    // test - AJAX ping + sample query test (called from edit form)
     // ========================================================================
 
     public function executeTest($request)
@@ -137,7 +137,7 @@ class Z3950Actions extends AhgController
     }
 
     // ========================================================================
-    // edit — create or update target (GET=form, POST=save)
+    // edit - create or update target (GET=form, POST=save)
     // ========================================================================
 
     public function executeEdit($request)
@@ -199,7 +199,7 @@ class Z3950Actions extends AhgController
     }
 
     // ========================================================================
-    // delete — remove a target
+    // delete - remove a target
     // ========================================================================
 
     public function executeDelete($request)
@@ -213,7 +213,7 @@ class Z3950Actions extends AhgController
     }
 
     // ========================================================================
-    // sru — SRU HTTP endpoint handler
+    // sru - SRU HTTP endpoint handler
     //                            Route: ?module=z3950&action=sru&...
     //                            Also reachable at /api/sru via web server rewrite.
     // ========================================================================

@@ -48,7 +48,7 @@
         <target></target>
       </trans-unit>
       <trans-unit id="12">
-        <source>Acquisitions — Purchase Orders</source>
+        <source>Acquisitions - Purchase Orders</source>
         <target></target>
       </trans-unit>
       <trans-unit id="13">
@@ -380,7 +380,7 @@
         <target></target>
       </trans-unit>
       <trans-unit id="95">
-        <source>Batch Capture — ISBN Lookup</source>
+        <source>Batch Capture - ISBN Lookup</source>
         <target></target>
       </trans-unit>
       <trans-unit id="96">
@@ -624,7 +624,7 @@
         <target></target>
       </trans-unit>
       <trans-unit id="156">
-        <source>Circulation — Checkout Station</source>
+        <source>Circulation - Checkout Station</source>
         <target></target>
       </trans-unit>
       <trans-unit id="157">
@@ -976,11 +976,11 @@
         <target></target>
       </trans-unit>
       <trans-unit id="244">
-        <source>Dry run — no changes saved</source>
+        <source>Dry run - no changes saved</source>
         <target></target>
       </trans-unit>
       <trans-unit id="245">
-        <source>Dry run — preview changes without saving</source>
+        <source>Dry run - preview changes without saving</source>
         <target></target>
       </trans-unit>
       <trans-unit id="246">
@@ -2380,7 +2380,7 @@
         <target></target>
       </trans-unit>
       <trans-unit id="595">
-        <source>Optional — link to a patron record</source>
+        <source>Optional - link to a patron record</source>
         <target></target>
       </trans-unit>
       <trans-unit id="596">
@@ -3944,23 +3944,23 @@
         <target></target>
       </trans-unit>
       <trans-unit id="986">
-        <source>— None —</source>
+        <source>- None -</source>
         <target></target>
       </trans-unit>
       <trans-unit id="987">
-        <source>— none —</source>
+        <source>- none -</source>
         <target></target>
       </trans-unit>
       <trans-unit id="988">
-        <source>— No PO (standalone capture) —</source>
+        <source>- No PO (standalone capture) -</source>
         <target></target>
       </trans-unit>
       <trans-unit id="989">
-        <source>— select target —</source>
+        <source>- select target -</source>
         <target></target>
       </trans-unit>
       <trans-unit id="990">
-        <source>— Select —</source>
+        <source>- Select -</source>
         <target></target>
       </trans-unit>
       <trans-unit id="991">

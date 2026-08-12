@@ -12,9 +12,9 @@
   $count   = (int) $sf_data->getRaw('itemCount');
   $preview = $sf_data->getRaw('preview');
   $mimeDescs = [
-    'csv'    => 'text/csv — opens in Excel, Google Sheets, LibreOffice Calc',
-    'bibtex' => 'application/x-bibtex — import into LaTeX, Zotero, JabRef',
-    'ris'    => 'application/x-research-info-systems — import into EndNote, Mendeley, RefWorks',
+    'csv'    => 'text/csv - opens in Excel, Google Sheets, LibreOffice Calc',
+    'bibtex' => 'application/x-bibtex - import into LaTeX, Zotero, JabRef',
+    'ris'    => 'application/x-research-info-systems - import into EndNote, Mendeley, RefWorks',
   ];
   $mimeDesc = $mimeDescs[$format] ?? '';
 ?>
@@ -76,7 +76,7 @@
           <div class="mb-3">
             <label for="f-mat-type" class="form-label small fw-bold"><?php echo __('Material type'); ?></label>
             <select name="material_type" id="f-mat-type" class="form-select">
-              <option value="">— <?php echo __('Any'); ?> —</option>
+              <option value="">- <?php echo __('Any'); ?> -</option>
               <?php foreach (['book','ebook','serial','journal','magazine','thesis','conference paper','video','audio','map'] as $mt): ?>
                 <option value="<?php echo $mt; ?>" <?php echo ($filters['material_type'] ?? '') === $mt ? 'selected' : ''; ?>>
                   <?php echo ucfirst($mt); ?>
@@ -89,7 +89,7 @@
           <div class="mb-3">
             <label for="f-lang" class="form-label small fw-bold"><?php echo __('Language'); ?></label>
             <select name="language" id="f-lang" class="form-select">
-              <option value="">— <?php echo __('Any'); ?> —</option>
+              <option value="">- <?php echo __('Any'); ?> -</option>
               <?php foreach (['English','Afrikaans','isiZulu','isiXhosa','Sepedi','Sesotho','Setswana'] as $lang): ?>
                 <option value="<?php echo $lang; ?>" <?php echo ($filters['language'] ?? '') === $lang ? 'selected' : ''; ?>>
                   <?php echo $lang; ?>
@@ -141,11 +141,11 @@
       <div class="card-body small">
         <p class="text-muted mb-1"><strong><?php echo __('About %format% export', ['%format%' => strtoupper($format)]); ?></strong></p>
         <?php if ($format === 'csv'): ?>
-          <p class="text-muted mb-0">Comma-separated values — open in any spreadsheet application. UTF-8 encoded.</p>
+          <p class="text-muted mb-0">Comma-separated values - open in any spreadsheet application. UTF-8 encoded.</p>
         <?php elseif ($format === 'bibtex'): ?>
-          <p class="text-muted mb-0">BibTeX bibliography entries — compatible with LaTeX, Zotero, JabRef, and most reference managers.</p>
+          <p class="text-muted mb-0">BibTeX bibliography entries - compatible with LaTeX, Zotero, JabRef, and most reference managers.</p>
         <?php else: ?>
-          <p class="text-muted mb-0">RIS format — supported by EndNote, Mendeley, RefWorks, Zotero, and most academic reference managers.</p>
+          <p class="text-muted mb-0">RIS format - supported by EndNote, Mendeley, RefWorks, Zotero, and most academic reference managers.</p>
         <?php endif; ?>
       </div>
     </div>

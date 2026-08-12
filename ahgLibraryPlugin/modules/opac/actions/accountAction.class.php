@@ -5,7 +5,7 @@ declare(strict_types=1);
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * OPAC account — "My Account" for logged-in patrons.
+ * OPAC account - "My Account" for logged-in patrons.
  *
  * Shows current loans, holds, fines.
  *

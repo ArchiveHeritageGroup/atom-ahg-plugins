@@ -118,7 +118,7 @@
         <label class="form-label fw-bold" for="f-password">
           <?php echo __('Password'); ?>
           <?php if (!empty($target)): ?>
-            <span class="text-muted fw-normal"> — <?php echo __('leave blank to keep current'); ?></span>
+            <span class="text-muted fw-normal"> - <?php echo __('leave blank to keep current'); ?></span>
           <?php endif; ?>
         </label>
         <input type="password" class="form-control" id="f-password" name="password"

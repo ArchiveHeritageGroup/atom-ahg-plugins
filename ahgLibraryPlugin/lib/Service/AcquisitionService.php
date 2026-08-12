@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * AcquisitionService
  *
- * Manages library acquisitions — purchase orders, order lines, budgets.
+ * Manages library acquisitions - purchase orders, order lines, budgets.
  * All statuses driven by ahg_dropdown taxonomies.
  *
  * @package    ahgLibraryPlugin
@@ -369,7 +369,7 @@ class AcquisitionService
      * Get acquisition statistics.
      */
     /**
-     * Active vendor options for the acquisition vendor picker (#104) —
+     * Active vendor options for the acquisition vendor picker (#104) -
      * reuses ahgVendorPlugin's ahg_vendors rather than a separate store.
      *
      * @return array list of {id, name, vendor_code}
@@ -435,7 +435,7 @@ class AcquisitionService
         $year = date('Y');
 
         return [
-            // library_order has no fiscal_year column — derive from order_date.
+            // library_order has no fiscal_year column - derive from order_date.
             'orders_this_year'   => DB::table('library_order')->whereRaw('YEAR(order_date) = ?', [$year])->count(),
             'pending_orders'     => DB::table('library_order')->whereIn('status', ['draft', 'submitted', 'approved', 'ordered', 'partial'])->count(),
             'total_spent'        => (float) DB::table('library_budget')->where('fiscal_year', $year)->sum('spent_amount'),

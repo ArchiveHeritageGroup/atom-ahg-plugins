@@ -37,7 +37,7 @@ class serialEditAction extends AhgController
                     $this->subscription = $data['subscription'];
                 }
             } catch (\Exception $e) {
-                // ignore — form will be blank
+                // ignore - form will be blank
             }
         }
 
@@ -48,7 +48,7 @@ class serialEditAction extends AhgController
                 $this->vendorOptions = SerialService::getInstance()->getVendorOptions();
             }
         } catch (\Throwable $e) {
-            // leave empty — form still renders
+            // leave empty - form still renders
         }
 
         // POST: save

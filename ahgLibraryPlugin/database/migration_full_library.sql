@@ -1,5 +1,5 @@
 -- ============================================================================
--- ahgLibraryPlugin — Full Library System Migration
+-- ahgLibraryPlugin - Full Library System Migration
 -- Issue #214: Extend Heratio to be a full library system
 -- Date: 2026-03-08
 -- ============================================================================

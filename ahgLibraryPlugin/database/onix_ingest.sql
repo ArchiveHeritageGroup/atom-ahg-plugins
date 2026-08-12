@@ -1,4 +1,4 @@
--- ahgLibraryPlugin — ONIX ingestion (clone of Heratio library_onix_ingest).
+-- ahgLibraryPlugin - ONIX ingestion (clone of Heratio library_onix_ingest).
 -- Parse + validate publisher ONIX feeds into a review queue before commit.
 
 CREATE TABLE IF NOT EXISTS `library_onix_ingest` (

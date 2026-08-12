@@ -3,7 +3,7 @@
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * libraryIsbnLookupAction — Unified DOI / ISBN / ISSN / ISBNx resolver.
+ * libraryIsbnLookupAction - Unified DOI / ISBN / ISSN / ISBNx resolver.
  *
  * Auto-detects identifier type via DoiService::detectType() then resolves:
  *   - DOI     → CrossRef API (https://api.crossref.org)
@@ -201,7 +201,7 @@ class libraryIsbnLookupAction extends AhgController
                 ]);
             }
         } catch (\Exception $e) {
-            // WorldCat failed — fall through to CrossRef fallback
+            // WorldCat failed - fall through to CrossRef fallback
             $this->getContext()->getLogger()->warn(
                 'WorldCat lookup failed for ISBN ' . $cleanIsbn . ', trying CrossRef: ' . $e->getMessage()
             );

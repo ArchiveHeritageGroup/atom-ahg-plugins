@@ -13,7 +13,7 @@
 <h1>
     <i class="fas fa-history"></i>
     <?php echo __('KBART Import Log'); ?>
-    <small class="text-muted">— <?php echo htmlspecialchars($vendor->name); ?></small>
+    <small class="text-muted">- <?php echo htmlspecialchars($vendor->name); ?></small>
 </h1>
 <?php end_slot(); ?>
 
@@ -52,7 +52,7 @@
             </div>
             <div class="col-4">
                 <span class="text-muted small"><?php echo __('Last Fetch'); ?></span><br>
-                <strong><?php echo $vendor->last_fetch_at ? date('Y-m-d H:i:s', strtotime($vendor->last_fetch_at)) : '—'; ?></strong>
+                <strong><?php echo $vendor->last_fetch_at ? date('Y-m-d H:i:s', strtotime($vendor->last_fetch_at)) : '-'; ?></strong>
             </div>
         </div>
     </div>
@@ -95,14 +95,14 @@
                         <?php if ($log->new_count > 0): ?>
                             <span class="badge bg-success"><?php echo number_format($log->new_count); ?></span>
                         <?php else: ?>
-                            <span class="text-muted">—</span>
+                            <span class="text-muted">-</span>
                         <?php endif; ?>
                     </td>
                     <td class="text-center">
                         <?php if ($log->removed_count > 0): ?>
                             <span class="badge bg-warning text-dark"><?php echo number_format($log->removed_count); ?></span>
                         <?php else: ?>
-                            <span class="text-muted">—</span>
+                            <span class="text-muted">-</span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -118,7 +118,7 @@
                                 <?php echo htmlspecialchars(\Qubit:: truncate($log->error, 60)); ?>
                             </small>
                         <?php else: ?>
-                            <span class="text-success">—</span>
+                            <span class="text-success">-</span>
                         <?php endif; ?>
                     </td>
                 </tr>

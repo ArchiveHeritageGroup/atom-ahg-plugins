@@ -7,7 +7,7 @@ namespace ahgLibraryPlugin\Service;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * SearchService — advanced library catalogue search.
+ * SearchService - advanced library catalogue search.
  *
  * Supports:
  *   - Free-text query with Lucene-style syntax (AND, OR, NOT, phrase, field:, range:)

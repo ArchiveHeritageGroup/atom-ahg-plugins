@@ -5,7 +5,7 @@ declare(strict_types=1);
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * bulkImportAction — bulk import library items from CSV or MARCXML.
+ * bulkImportAction - bulk import library items from CSV or MARCXML.
  *
  * GET  /acquisition/bulk-import   → show upload form
  * POST /acquisition/bulk-import   → process upload
@@ -15,10 +15,10 @@ use AtomFramework\Http\Controllers\AhgController;
  *   - MARCXML  (.xml)
  *
  * POST params:
- *   file           — uploaded file (required)
- *   format         — csv | marcxml  (auto-detected from extension if omitted)
- *   repository_id   — AtoM repository ID for imported items
- *   dry_run        — 1 = preview only, no changes written
+ *   file           - uploaded file (required)
+ *   format         - csv | marcxml  (auto-detected from extension if omitted)
+ *   repository_id   - AtoM repository ID for imported items
+ *   dry_run        - 1 = preview only, no changes written
  *
  * @package ahgLibraryPlugin
  */
@@ -42,7 +42,7 @@ class acquisitionBulkImportAction extends AhgController
             return $this->handlePost($request);
         }
 
-        // GET — show form
+        // GET - show form
         return sfView::SUCCESS;
     }
 

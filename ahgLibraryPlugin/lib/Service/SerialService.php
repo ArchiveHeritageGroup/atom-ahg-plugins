@@ -306,7 +306,7 @@ class SerialService
     }
 
     /**
-     * Get gap analysis — expected but not received.
+     * Get gap analysis - expected but not received.
      */
     public function getGaps(int $subscriptionId): array
     {

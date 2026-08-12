@@ -61,7 +61,7 @@ class LibraryCounterService
     // ── Public API ─────────────────────────────────────────────────────────────
 
     /**
-     * TR_J1 — Journal Title Report (Requests)
+     * TR_J1 - Journal Title Report (Requests)
      * One row per unique journal / title / metric.
      */
     public function TR_J1(): array
@@ -86,7 +86,7 @@ class LibraryCounterService
     }
 
     /**
-     * TR_J3 — Journal Title Report (Access Denied)
+     * TR_J3 - Journal Title Report (Access Denied)
      */
     public function TR_J3(): array
     {
@@ -112,7 +112,7 @@ class LibraryCounterService
     }
 
     /**
-     * PR — Platform Report (aggregated platform totals)
+     * PR - Platform Report (aggregated platform totals)
      */
     public function PR(): array
     {
@@ -168,7 +168,7 @@ class LibraryCounterService
     }
 
     /**
-     * DR — Database Report (aggregated per material_type / platform)
+     * DR - Database Report (aggregated per material_type / platform)
      */
     public function DR(): array
     {
@@ -213,7 +213,7 @@ class LibraryCounterService
     }
 
     /**
-     * IR — Item Report (per-item totals)
+     * IR - Item Report (per-item totals)
      */
     public function IR(): array
     {

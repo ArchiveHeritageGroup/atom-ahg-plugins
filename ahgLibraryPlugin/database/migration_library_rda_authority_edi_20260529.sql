@@ -138,7 +138,7 @@ SET @sql = IF(@col = 0, 'ALTER TABLE library_ill_request ADD COLUMN responder_li
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_ill_request' AND COLUMN_NAME = 'trading_partner_id');
-SET @sql = IF(@col = 0, 'ALTER TABLE library_ill_request ADD COLUMN trading_partner_id BIGINT UNSIGNED NULL COMMENT ''library_trading_partner.id — EDI partner used''', 'SELECT 1');
+SET @sql = IF(@col = 0, 'ALTER TABLE library_ill_request ADD COLUMN trading_partner_id BIGINT UNSIGNED NULL COMMENT ''library_trading_partner.id - EDI partner used''', 'SELECT 1');
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_ill_request' AND COLUMN_NAME = 'responder_note');

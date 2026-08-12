@@ -16,7 +16,7 @@
 
 <div class="row">
   <?php /* ============================================================
-       LEFT — Search form + facet filters
+       LEFT - Search form + facet filters
        ============================================================ */ ?>
   <div class="col-md-4 col-lg-3">
 
@@ -53,7 +53,7 @@
               <?php echo __('Material type'); ?>
             </label>
             <select name="material_type" id="mat-type" class="form-select">
-              <option value="">— <?php echo __('Any'); ?> —</option>
+              <option value="">- <?php echo __('Any'); ?> -</option>
               <?php
                 $matTypes = ['book','ebook','serial','journal','magazine','thesis','conference paper','video','audio','map','photograph','cd','dvd'];
                 $selMat = $filters['material_type'] ?? '';
@@ -72,7 +72,7 @@
               <?php echo __('Language'); ?>
             </label>
             <select name="language" id="lang-filter" class="form-select">
-              <option value="">— <?php echo __('Any'); ?> —</option>
+              <option value="">- <?php echo __('Any'); ?> -</option>
               <?php
                 $langs = ['English','Afrikaans','isiZulu','isiXhosa','Sepedi','Sesotho','Setswana','Xitsonga','Tshivenda','isiNdebele'];
                 $selLang = $filters['language'] ?? '';
@@ -187,7 +187,7 @@
   </div>
 
   <?php /* ============================================================
-       RIGHT — Results
+       RIGHT - Results
        ============================================================ */ ?>
   <div class="col-md-8 col-lg-9">
 

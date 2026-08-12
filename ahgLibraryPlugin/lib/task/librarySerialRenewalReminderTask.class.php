@@ -1,7 +1,7 @@
 <?php
 
 /**
- * library:serial-renewal-reminders (#105) — email staff a digest of
+ * library:serial-renewal-reminders (#105) - email staff a digest of
  * subscriptions due for renewal within a window. Reuses
  * SerialService::getDueForRenewal(). Recipients come from
  * ahg_settings.serial_renewal_recipients (comma-separated). Intended for cron.
@@ -56,12 +56,12 @@ EOF;
         $lines = ["Subscriptions due for renewal within {$days} days:", ''];
         foreach ($due as $s) {
             $s = (array) $s;
-            $lines[] = sprintf('- %s (sub# %s) — renewal due %s', $s['title'] ?? $s['subscription_number'] ?? ('#' . ($s['id'] ?? '?')), $s['subscription_number'] ?? '', $s['renewal_date'] ?? '?');
+            $lines[] = sprintf('- %s (sub# %s) - renewal due %s', $s['title'] ?? $s['subscription_number'] ?? ('#' . ($s['id'] ?? '?')), $s['subscription_number'] ?? '', $s['renewal_date'] ?? '?');
         }
         $body = implode("\n", $lines) . "\n";
 
         if (empty($recipients)) {
-            $this->logSection('serials', count($due) . ' subscription(s) due — no recipients configured (ahg_settings.serial_renewal_recipients).', null, 'ERROR');
+            $this->logSection('serials', count($due) . ' subscription(s) due - no recipients configured (ahg_settings.serial_renewal_recipients).', null, 'ERROR');
             $this->log($body);
 
             return 0;

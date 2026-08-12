@@ -193,7 +193,7 @@
                 <div class="manifestation-row px-3 py-2 <?php echo $hiddenClass; ?> <?php echo $idx > 0 ? 'border-top' : ''; ?>"
                      data-manifestation-index="<?php echo $idx; ?>">
                   <?php if ($idx === 0): ?>
-                    <?php /* Primary row — already has title in header */ ?>
+                    <?php /* Primary row - already has title in header */ ?>
                     <div class="row align-items-center">
                       <div class="col">
                         <p class="mb-0 small text-muted">
@@ -218,7 +218,7 @@
                       </div>
                     </div>
                   <?php else: ?>
-                    <?php /* Secondary manifestation row — title shown inline */ ?>
+                    <?php /* Secondary manifestation row - title shown inline */ ?>
                     <div class="row align-items-center">
                       <div class="col">
                         <a href="<?php echo url_for(['module' => 'opac', 'action' => 'view', 'id' => $item->id]); ?>"

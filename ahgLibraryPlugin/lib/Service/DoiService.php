@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace ahgLibraryPlugin\Service;
 
 /**
- * DoiService — resolves DOIs via CrossRef and ISSNs via CrossRef / WorldCat SRU.
+ * DoiService - resolves DOIs via CrossRef and ISSNs via CrossRef / WorldCat SRU.
  *
  * Auto-detects identifier type:
  *   - DOI:    starts with "10."  (dx.doi.org / crossref.org)
@@ -45,7 +45,7 @@ class DoiService
     }
 
     // ========================================================================
-    // Public entry point — auto-detect and resolve
+    // Public entry point - auto-detect and resolve
     // ========================================================================
 
     /**

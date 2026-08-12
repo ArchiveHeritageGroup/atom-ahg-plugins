@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Z3950Service
  *
- * Z39.50 client — connects to remote Z39.50 targets, executes CCL/CCL-ish queries,
+ * Z39.50 client - connects to remote Z39.50 targets, executes CCL/CCL-ish queries,
  * and parses MARC-21 result records into library_item rows via MarcService.
  *
  * Falls back to a pure-PHP CCL→CQL→Prefix converter when the YAZ extension is
@@ -193,7 +193,7 @@ class Z3950Service
     }
 
     /**
-     * Ping a target — attempt connection and return status info.
+     * Ping a target - attempt connection and return status info.
      *
      * @return array ['ok' => bool, 'message' => string, 'elapsed_ms' => float]
      */
@@ -236,7 +236,7 @@ class Z3950Service
      *
      * @param int    $targetId  library_z3950_target.id
      * @param string $query     CCL query (e.g. "ti=warcraft and au=blizzard")
-     * @param int    $limit     Maximum records to return (1 – 1000)
+     * @param int    $limit     Maximum records to return (1 - 1000)
      * @param int    $offset    Starting position (0-based)
      * @return Z3950SearchResult
      */
@@ -266,7 +266,7 @@ class Z3950Service
             // Set range for result set
             yaz_range($sessionId, $offset, min($limit, 1000));
 
-            // Send query (CCL — YAZ handles conversion to RPN internally)
+            // Send query (CCL - YAZ handles conversion to RPN internally)
             yaz_query($sessionId, yaz_ccl_dfname($query), $query);
 
             yaz_search($sessionId);
@@ -310,7 +310,7 @@ class Z3950Service
 
     /**
      * Fallback search when YAZ extension is not available.
-     * Makes an HTTP SRU call instead (WC 3 — Z39.50-over-HTTP).
+     * Makes an HTTP SRU call instead (WC 3 - Z39.50-over-HTTP).
      * Only used in development / when YAZ cannot be installed.
      */
     protected function searchFallback(
@@ -471,7 +471,7 @@ class Z3950Service
                 ->where('isbn', $isbn)
                 ->value('id');
             if ($existing) {
-                throw new \Exception("Duplicate ISBN/ISSN: {$isbn} — skipping");
+                throw new \Exception("Duplicate ISBN/ISSN: {$isbn} - skipping");
             }
         }
 

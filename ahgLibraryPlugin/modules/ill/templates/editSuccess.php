@@ -30,7 +30,7 @@
         <div class="col-md-6">
           <label for="ill_patron_id" class="form-label"><?php echo __('Patron ID'); ?></label>
           <input type="number" class="form-control" id="ill_patron_id" name="patron_id"
-                 placeholder="<?php echo __('Optional — link to a patron record'); ?>">
+                 placeholder="<?php echo __('Optional - link to a patron record'); ?>">
         </div>
 
         <div class="col-md-6">

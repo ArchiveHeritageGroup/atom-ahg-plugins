@@ -26,7 +26,7 @@
           <div class="col-md-4">
             <label class="form-label"><?php echo __('Z39.50 Target'); ?></label>
             <select name="target_id" class="form-select" required>
-              <option value=""><?php echo __('— select target —'); ?></option>
+              <option value=""><?php echo __('- select target -'); ?></option>
               <?php foreach ($sf_data->getRaw('targets') as $t): ?>
                 <?php $tid = is_array($t) ? ($t['id'] ?? 0) : $t->id; $tname = is_array($t) ? ($t['name'] ?? '') : $t->name; ?>
                 <option value="<?php echo (int) $tid; ?>" <?php echo $targetId === (int) $tid ? 'selected' : ''; ?>><?php echo esc_entities($tname); ?></option>

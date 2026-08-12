@@ -25,7 +25,7 @@ class libraryFrbrReindexTask extends sfBaseTask
         $this->detailedDescription = <<<'EOT'
 Re-generate frbr_work_key for every library_item row.
 Unlike frbr-backfill (which only fills empty keys), this task
-overwrites ALL keys — useful after an algorithm change or a bulk import.
+overwrites ALL keys - useful after an algorithm change or a bulk import.
 
   php symfony library:frbr-reindex
   php symfony library:frbr-reindex --batch=1000
@@ -83,7 +83,7 @@ EOT;
                     $key = $svc->computeAndStoreWorkKey((int) $item->id);
                     if ($key === null) {
                         $this->logBlock(
-                            "Item {$item->id}: no stable key (title + identifiers all absent) — skipped",
+                            "Item {$item->id}: no stable key (title + identifiers all absent) - skipped",
                             'WARNING'
                         );
                     }
@@ -99,7 +99,7 @@ EOT;
 
             $pct = round(($done / $total) * 100, 1);
             $this->logSection('frbr-reindex',
-                sprintf('Batch %d/%d — %d/%d items done (%s%%)',
+                sprintf('Batch %d/%d - %d/%d items done (%s%%)',
                     $batch + 1, $batches, $done, $total, $pct));
         }
 

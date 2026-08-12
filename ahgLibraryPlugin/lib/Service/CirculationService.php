@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * CirculationService
  *
- * Core circulation operations — checkout, return, renew.
+ * Core circulation operations - checkout, return, renew.
  * Loan rules driven by library_loan_rule table (material_type × patron_type).
  * All status values from ahg_dropdown.
  *
@@ -207,7 +207,7 @@ class CirculationService
                         'fine_type'   => 'overdue',
                         'amount'      => $fineAmount,
                         'status' => 'outstanding',
-                        'description' => 'Overdue fine — due ' . $checkout->due_date . ', returned ' . $today,
+                        'description' => 'Overdue fine - due ' . $checkout->due_date . ', returned ' . $today,
                         'created_at'  => $now,
                         'updated_at'  => $now,
                     ]);
@@ -236,7 +236,7 @@ class CirculationService
             $copy = DB::table('library_copy')->where('id', $checkout->copy_id)->first();
             $this->updateAvailableCopies($copy->library_item_id);
 
-            // Check for pending holds on this item — notify next in queue
+            // Check for pending holds on this item - notify next in queue
             $this->processHoldQueue($copy->library_item_id);
 
             DB::connection()->commit();
@@ -296,7 +296,7 @@ class CirculationService
             return ['success' => false, 'error' => 'Item is not currently checked out'];
         }
 
-        // Resolve copy/item/patron and the loan rule up front — the renewal limit
+        // Resolve copy/item/patron and the loan rule up front - the renewal limit
         // lives on the loan rule / patron (library_checkout has no max_renewals
         // column), so we must know it before enforcing the cap.
         $copy = DB::table('library_copy')->where('id', $checkout->copy_id)->first();
@@ -322,7 +322,7 @@ class CirculationService
             ->count();
 
         if ($pendingHolds > 0) {
-            return ['success' => false, 'error' => 'Cannot renew — item has pending holds'];
+            return ['success' => false, 'error' => 'Cannot renew - item has pending holds'];
         }
 
         $renewalDays = (int) ($loanRule?->renewal_period_days
@@ -551,7 +551,7 @@ class CirculationService
     // ========================================================================
 
     /**
-     * Process hold queue after a return — mark next hold as ready.
+     * Process hold queue after a return - mark next hold as ready.
      */
     protected function processHoldQueue(int $libraryItemId): void
     {

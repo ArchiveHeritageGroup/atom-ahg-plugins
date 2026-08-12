@@ -139,7 +139,7 @@
           <select id="approve-group" class="form-select">
             <?php foreach ($groups as $group): ?>
               <option value="<?php echo $group->id; ?>"
-                <?php echo ($group->id == 102) ? 'selected' : ''; ?>>
+                <?php echo (99 == $group->id) ? 'selected' : ''; ?>>
                 <?php echo esc_entities($group->name ?? "Group {$group->id}"); ?>
               </option>
             <?php endforeach; ?>

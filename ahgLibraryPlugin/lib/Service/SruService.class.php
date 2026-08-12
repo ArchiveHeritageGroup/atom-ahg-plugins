@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * SruService
  *
- * SRU (Search/Retrieve via URL) — HTTP endpoint at /api/sru.
+ * SRU (Search/Retrieve via URL) - HTTP endpoint at /api/sru.
  *
  * Operations supported:
  *   - searchRetrieve  (CQL query → XML result set)
@@ -353,7 +353,7 @@ XML;
     }
 
     /**
-     * Return an SRU explainresponse — server capability document.
+     * Return an SRU explainresponse - server capability document.
      */
     public function explain(): string
     {
@@ -438,7 +438,7 @@ SRU_XML;
             $cql = substr($cql, 1, -1);
         }
 
-        // Split on top-level AND / OR (simplified — no nested parens)
+        // Split on top-level AND / OR (simplified - no nested parens)
         $parts = $this->splitCqlTokens($cql);
         foreach ($parts as $part) {
             $part = trim($part);
@@ -468,7 +468,7 @@ SRU_XML;
                 $field = $m[1];
                 $val   = trim($m[2]);
             } else {
-                // No qualifier — free-text search across title + creator
+                // No qualifier - free-text search across title + creator
                 $q->where(function ($inner) use ($val) {
                     $v = '%' . $val . '%';
                     $inner->where('ioi.title', 'LIKE', $v)

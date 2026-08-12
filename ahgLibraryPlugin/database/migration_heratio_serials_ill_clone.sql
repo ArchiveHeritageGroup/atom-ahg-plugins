@@ -1,4 +1,4 @@
--- ahgLibraryPlugin — clone of Heratio's serials / ILL schema (parity).
+-- ahgLibraryPlugin - clone of Heratio's serials / ILL schema (parity).
 --
 -- Mirrors Heratio packages/ahg-library migrations:
 --   2026_06_01_000100 serial_subscription, _000101 prediction,
@@ -6,7 +6,7 @@
 --   2026_06_02_000104 library_ill_request (rich), 2026_05_30_000004 EDI fields.
 --
 -- New tables use CREATE TABLE IF NOT EXISTS (idempotent). The ALTER blocks at
--- the bottom are RUN-ONCE (MySQL has no ADD COLUMN IF NOT EXISTS) — skip a
+-- the bottom are RUN-ONCE (MySQL has no ADD COLUMN IF NOT EXISTS) - skip a
 -- statement if the column already exists. Indexes (not hard FKs) match Heratio.
 
 -- ── Serials ────────────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `library_binding` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── ILL ──────────────────────────────────────────────────────────────────────
--- NOTE: NOT cloned. On verification the PSIS ILLService is already functional —
+-- NOTE: NOT cloned. On verification the PSIS ILLService is already functional -
 -- it has its own complete ISO 10160/10161 state machine (start state
 -- 'submitted'), status is plain VARCHAR(30) (no enum/FK), and every column it
 -- writes (incl. needed_by_date) already exists. Cloning Heratio's ILL would
@@ -137,4 +137,4 @@ CREATE TABLE IF NOT EXISTS `library_ill_request` (
 ALTER TABLE `library_serial_issue` ADD COLUMN `binding_id` BIGINT UNSIGNED NULL;
 ALTER TABLE `library_serial_issue` ADD INDEX `idx_library_serial_issue_binding` (`binding_id`);
 
--- ILL ALTERs intentionally removed — PSIS ILL is not cloned (already functional).
+-- ILL ALTERs intentionally removed - PSIS ILL is not cloned (already functional).

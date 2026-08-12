@@ -419,7 +419,7 @@ class MarcService
      * Splits the stream into records, decodes each with Marc21DecoderService,
      * maps it through the SAME column/creator/subject logic used for MARCXML
      * (parseDecodedRecord mirrors parseMarcXmlRecord), then persists via
-     * importParsedRecord — so binary and MARCXML import share one create path.
+     * importParsedRecord - so binary and MARCXML import share one create path.
      *
      * @param string   $filePath      Path to a binary MARC21 (.mrc) file.
      * @param int|null $repositoryId  Optional repository to attach records to.
@@ -602,7 +602,7 @@ class MarcService
 
     /**
      * Detect existing library items that conflict with a parsed record by any
-     * standard identifier — ISBN (020), ISSN (022), OCLC (035), LCCN (010) —
+     * standard identifier - ISBN (020), ISSN (022), OCLC (035), LCCN (010) -
      * so the importer can warn / offer a merge instead of silently duplicating
      * (#111). Returns [existing library_item.id => [matched identifier columns]].
      *
@@ -916,7 +916,7 @@ class MarcService
     }
 
     /**
-     * Export library items as binary MARC21 (ISO 2709) — a concatenation of
+     * Export library items as binary MARC21 (ISO 2709) - a concatenation of
      * records suitable for a .mrc file. Reuses the same field map as the XML
      * export via buildRecordFields().
      */
@@ -1056,11 +1056,11 @@ class MarcService
     {
         $xml->startElement('record');
 
-        // Leader — preserved from import when available, else regenerated (#111).
+        // Leader - preserved from import when available, else regenerated (#111).
         $leader = !empty($item->marc_leader) ? $item->marc_leader : $this->buildLeader($item->material_type);
         $xml->writeElement('leader', $leader);
 
-        // Control fields — round-trip preserved 005/008 when present (#111).
+        // Control fields - round-trip preserved 005/008 when present (#111).
         if (!empty($item->marc_005)) {
             $xml->startElement('controlfield');
             $xml->writeAttribute('tag', '005');
@@ -1331,7 +1331,7 @@ class MarcService
         $pubYear = substr($item->publication_date ?? '    ', 0, 4);
         $pubYear = str_pad($pubYear, 4);
 
-        // Basic 008 — date entered, pub status, dates, country, language
+        // Basic 008 - date entered, pub status, dates, country, language
         return $date . 's' . $pubYear . '    xx            000 0 eng d';
     }
 

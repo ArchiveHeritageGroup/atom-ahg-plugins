@@ -40,7 +40,7 @@
           <h5 class="mb-0">
             <?php echo __('Import complete'); ?>
             <?php if ($isDryRun): ?>
-              <span class="badge bg-warning text-dark ms-2"><?php echo __('Dry run — no changes saved'); ?></span>
+              <span class="badge bg-warning text-dark ms-2"><?php echo __('Dry run - no changes saved'); ?></span>
             <?php endif; ?>
           </h5>
         </div>
@@ -167,7 +167,7 @@
               <div class="col-md-6">
                 <label for="delimiter" class="form-label"><?php echo __('CSV delimiter'); ?></label>
                 <select name="delimiter" id="delimiter" class="form-select">
-                  <option value=";">Semicolon (;) — default</option>
+                  <option value=";">Semicolon (;) - default</option>
                   <option value=",">Comma (,)</option>
                   <option value="\t">Tab</option>
                 </select>
@@ -190,7 +190,7 @@
                      value="1"
                      class="form-check-input">
               <label for="dry-run" class="form-check-label">
-                <?php echo __('Dry run — preview changes without saving'); ?>
+                <?php echo __('Dry run - preview changes without saving'); ?>
               </label>
             </div>
 
@@ -226,7 +226,7 @@
   </div>
 
   <?php /* ============================================================
-       SIDEBAR — help
+       SIDEBAR - help
        ============================================================ */ ?>
   <div class="col-md-4">
     <div class="card">

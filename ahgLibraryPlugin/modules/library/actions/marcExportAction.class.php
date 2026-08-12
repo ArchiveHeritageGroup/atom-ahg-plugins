@@ -3,7 +3,7 @@
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * Export library items as MARC — binary MARC21/ISO-2709 (.mrc) or MARCXML.
+ * Export library items as MARC - binary MARC21/ISO-2709 (.mrc) or MARCXML.
  *
  * GET /library/marc-export?format=marc21|marcxml[&ids=1,2,3]
  * Authenticated (catalogue export is a staff function).

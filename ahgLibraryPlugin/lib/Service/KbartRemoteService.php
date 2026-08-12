@@ -267,7 +267,7 @@ class KbartRemoteService
         }
 
         // Count new (rows in new set that weren't in the last fetch)
-        // We track via import log — last successful fetch row_count is in vendor.last_row_count
+        // We track via import log - last successful fetch row_count is in vendor.last_row_count
         // For precise new/removed detection we need a snapshot table; for now estimate:
         // "new" = rows added since last fetch (would need prior snapshot)
         // For v1 we return totals; real delta would require library_kbart_snapshot table
@@ -304,7 +304,7 @@ class KbartRemoteService
      * Get vendor by ID.
      */
     /**
-     * Export the library's holdings as a NISO KBART title list (TSV) — the
+     * Export the library's holdings as a NISO KBART title list (TSV) - the
      * inverse of the import path, using the same REQUIRED_COLUMNS (#110).
      *
      * @param array $filters serials_only(bool)

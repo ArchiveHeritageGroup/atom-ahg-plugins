@@ -9,13 +9,13 @@ use Monolog\Logger;
 use Monolog\Handler\RotatingFileHandler;
 
 /**
- * OverdueNoticeService — generates and sends overdue item notices.
+ * OverdueNoticeService - generates and sends overdue item notices.
  *
  * Workflow:
- *   1. getOverdueItems()      — fetch overdue loans grouped by patron
- *   2. generateNoticeHtml()    — render an HTML notice for one patron
- *   3. sendBatchNotices()      — send all outstanding overdue notices
- *   4. sendSingleNotice()      — send a notice for one patron
+ *   1. getOverdueItems()      - fetch overdue loans grouped by patron
+ *   2. generateNoticeHtml()    - render an HTML notice for one patron
+ *   3. sendBatchNotices()      - send all outstanding overdue notices
+ *   4. sendSingleNotice()      - send a notice for one patron
  *
  * Email is sent via Symfony 1.4 sfMailer.
  * Notice templates use PHP string-replacement merge fields.
@@ -177,7 +177,7 @@ class OverdueNoticeService
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Overdue Notice — {$libraryName}</title>
+  <title>Overdue Notice - {$libraryName}</title>
   <style>
     body { font-family: Arial, sans-serif; font-size: 14px; color: #222; margin: 0; padding: 20px; background: #f9f9f9; }
     .wrapper { max-width: 700px; margin: 0 auto; background: #fff; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
@@ -205,7 +205,7 @@ class OverdueNoticeService
 <div class="wrapper">
   <div class="header">
     <h1>Overdue Notice</h1>
-    <p>{$libraryName} — Library Circulation System</p>
+    <p>{$libraryName} - Library Circulation System</p>
   </div>
 
   <div class="body">
@@ -235,7 +235,7 @@ class OverdueNoticeService
 
   <div class="notice-footer">
     <p><strong>Contact us:</strong> {{library_email}} | {{library_phone}}</p>
-    <p>This is an automated notice. Please do not reply directly to this email —
+    <p>This is an automated notice. Please do not reply directly to this email -
        contact the library using the details above.</p>
     <p style="margin-top:8px; color:#aaa; font-size:11px;">
        Circulation record ID: {{circulation_ids}} &bull; Notice generated: {{generated_at}}
@@ -262,7 +262,7 @@ HTML;
 
         $today = date('d F Y');
         $patronName = esc_entities($patron['patron_name'] ?: 'Valued Patron');
-        $patronBarcode = esc_entities($patron['patron_barcode'] ?: '—');
+        $patronBarcode = esc_entities($patron['patron_barcode'] ?: '-');
 
         $libraryName = \sfConfig::get('app_library_name', 'Library');
         $libraryEmail = \sfConfig::get('app_library_email', 'library@theahg.co.za');
@@ -281,9 +281,9 @@ HTML;
             $badgeLabel = $days . ' day' . ($days !== 1 ? 's' : '') . ' overdue';
 
             $itemsRows .= '<tr>'
-                . '<td>' . esc_entities($item['item_title'] ?: '—') . '</td>'
-                . '<td><code>' . esc_entities($item['item_barcode'] ?: '—') . '</code></td>'
-                . '<td>' . esc_entities($item['call_number'] ?: '—') . '</td>'
+                . '<td>' . esc_entities($item['item_title'] ?: '-') . '</td>'
+                . '<td><code>' . esc_entities($item['item_barcode'] ?: '-') . '</code></td>'
+                . '<td>' . esc_entities($item['call_number'] ?: '-') . '</td>'
                 . '<td>' . esc_entities(substr($item['checkout_date'], 0, 10)) . '</td>'
                 . '<td>' . esc_entities(substr($item['due_date'], 0, 10)) . '</td>'
                 . '<td><span class="overdue-badge ' . $badgeClass . '">' . $badgeLabel . '</span></td>'
@@ -358,7 +358,7 @@ HTML;
 <div class="fine-box">
   <strong>Estimated Fines</strong> (after {$graceDays}-day grace period,
   {$libraryCurrency} {$dailyRate}/day, max {$libraryCurrency} {$maxFine}/item)<br>
-  {$finedItems} item(s) may incur fines &mdash; estimated total:
+  {$finedItems} item(s) may incur fines - estimated total:
   <strong>{$libraryCurrency} {$totalStr}</strong>
 </div>
 HTML;
@@ -377,11 +377,11 @@ HTML;
         $today = date('d F Y');
 
         $lines = [
-            "OVERDUE NOTICE — {$libraryName}",
+            "OVERDUE NOTICE - {$libraryName}",
             str_repeat('=', 50),
             "Date: {$today}",
             "Patron: " . ($patron['patron_name'] ?: 'Valued Patron'),
-            "Library Card: " . ($patron['patron_barcode'] ?: '—'),
+            "Library Card: " . ($patron['patron_barcode'] ?: '-'),
             "",
             "Dear " . ($patron['patron_name'] ?: 'Valued Patron') . ",",
             "",
@@ -398,9 +398,9 @@ HTML;
         foreach ($patron['items'] ?? [] as $item) {
             $lines[] = sprintf(
                 "%-45s %-12s %-10s %-12s %-12s",
-                substr($item['item_title'] ?: '—', 0, 43),
-                substr($item['item_barcode'] ?: '—', 0, 10),
-                substr($item['call_number'] ?: '—', 0, 8),
+                substr($item['item_title'] ?: '-', 0, 43),
+                substr($item['item_barcode'] ?: '-', 0, 10),
+                substr($item['call_number'] ?: '-', 0, 8),
                 substr($item['checkout_date'], 0, 10),
                 substr($item['due_date'], 0, 10)
             );
@@ -440,7 +440,7 @@ HTML;
             ?? \sfConfig::get('app_library_email', 'library@theahg.co.za');
         $fromName = $options['from_name']
             ?? \sfConfig::get('app_library_name', 'Library');
-        $subjectTemplate = $options['subject'] ?? 'Overdue Notice — {{library_name}} ({{today}})';
+        $subjectTemplate = $options['subject'] ?? 'Overdue Notice - {{library_name}} ({{today}})';
 
         $result = $this->getOverdueItems(null, null, $minDays);
         $patrons = $result['patrons'];
@@ -594,12 +594,12 @@ HTML;
 
         $libraryName = \sfConfig::get('app_library_name', 'Library');
         $fromEmail = \sfConfig::get('app_library_email', 'library@theahg.co.za');
-        $subject = "Overdue Notice — {$libraryName} (" . date('d M Y') . ")";
+        $subject = "Overdue Notice - {$libraryName} (" . date('d M Y') . ")";
 
         if ($dryRun) {
             return [
                 'success' => true,
-                'message' => 'Dry run — would send to ' . $email,
+                'message' => 'Dry run - would send to ' . $email,
                 'email'   => $email,
                 'item_count' => count($patron['items'] ?? []),
                 'subject' => $subject,

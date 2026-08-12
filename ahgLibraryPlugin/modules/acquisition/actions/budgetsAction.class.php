@@ -3,7 +3,7 @@
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * Budget management — list and create budgets.
+ * Budget management - list and create budgets.
  */
 class acquisitionBudgetsAction extends AhgController
 {
@@ -18,7 +18,7 @@ class acquisitionBudgetsAction extends AhgController
 
         $service = AcquisitionService::getInstance();
 
-        // Handle POST — create budget
+        // Handle POST - create budget
         if ('POST' === $request->getMethod()) {
             $this->createBudget($request, $service);
 

@@ -191,7 +191,7 @@ class spectrumActions extends AhgController
         $objectTitle = $resource->title ?: $resource->slug;
         $transitionLabel = ucwords(str_replace('_', ' ', $transitionKey));
 
-        $subject = "Spectrum: {$transitionLabel} — {$procedureLabel}";
+        $subject = "Spectrum: {$transitionLabel} - {$procedureLabel}";
         $message = "{$actingName} performed '{$transitionLabel}' on a task.\n\n"
             . "Object: {$objectTitle}\n"
             . "Procedure: {$procedureLabel}\n"

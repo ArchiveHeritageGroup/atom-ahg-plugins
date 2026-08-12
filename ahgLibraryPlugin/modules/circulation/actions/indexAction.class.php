@@ -4,7 +4,7 @@ use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * Circulation dashboard — checkout station.
+ * Circulation dashboard - checkout station.
  *
  * Displays barcode scanning inputs, current patron info,
  * and recent circulation transactions.

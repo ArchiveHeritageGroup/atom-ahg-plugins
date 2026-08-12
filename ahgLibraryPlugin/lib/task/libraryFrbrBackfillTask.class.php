@@ -29,7 +29,7 @@ Run this after migration_frbr_clustering.sql has been applied.
   php symfony library:frbr-backfill --batch=1000
 
 The task logs progress every 10 batches and reports final counts.
-Items with no title (and no isbn/issn/lccn) are skipped — they cannot
+Items with no title (and no isbn/issn/lccn) are skipped - they cannot
 receive a stable work key and are logged as warnings.
 EOT;
         $this->addArgument('name', sfCommandArgument::OPTIONAL, '');
@@ -59,7 +59,7 @@ EOT;
             if ($batch % 10 === 0 || $progress['done'] === $progress['total']) {
                 $pct = $total > 0 ? round(($done / $total) * 100, 1) : 0;
                 $this->logSection('frbr-backfill',
-                    sprintf('Batch %d — %d/%d items done (%s%%)',
+                    sprintf('Batch %d - %d/%d items done (%s%%)',
                         $batch, $done, $total, $pct));
             }
         }

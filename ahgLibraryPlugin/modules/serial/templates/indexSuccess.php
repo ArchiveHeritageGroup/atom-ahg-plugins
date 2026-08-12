@@ -34,7 +34,7 @@
           <?php if (!empty($renewal->issn)): ?>
             <small class="text-muted">(ISSN: <?php echo esc_entities($renewal->issn); ?>)</small>
           <?php endif; ?>
-          &mdash; <?php echo __('Renewal: %1%', ['%1%' => esc_entities($renewal->renewal_date)]); ?>
+          - <?php echo __('Renewal: %1%', ['%1%' => esc_entities($renewal->renewal_date)]); ?>
         </li>
       <?php endforeach; ?>
     </ul>

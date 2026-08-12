@@ -86,7 +86,7 @@ EOF;
                 if (!$exists) {
                     if ($dryRun) {
                         $this->logSection('dry-run', sprintf(
-                            'Would create: %s — expected %s',
+                            'Would create: %s - expected %s',
                             $sub->title, $nextDate
                         ));
                     } else {
@@ -112,7 +112,7 @@ EOF;
                 ->count();
 
             if ($lateIssues > 0) {
-                $this->logSection('late', sprintf('%s — %d issue(s) overdue', $sub->title, $lateIssues));
+                $this->logSection('late', sprintf('%s - %d issue(s) overdue', $sub->title, $lateIssues));
                 $late += $lateIssues;
             }
         }

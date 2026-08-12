@@ -1,5 +1,5 @@
 -- Migration: Z39.50 Client + SRU HTTP Server
--- Issue #92 — ahgLibraryPlugin
+-- Issue #92 - ahgLibraryPlugin
 
 -- 1. Target config table
 CREATE TABLE IF NOT EXISTS library_z3950_target (

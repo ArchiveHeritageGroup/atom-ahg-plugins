@@ -3,7 +3,7 @@
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * Serial subscriptions — browse and search.
+ * Serial subscriptions - browse and search.
  *
  * Displays subscription list with search/filter, plus renewal alerts.
  */

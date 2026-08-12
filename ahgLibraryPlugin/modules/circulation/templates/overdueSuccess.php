@@ -135,10 +135,10 @@
               ?>
               <tr class="<?php echo $severityClass; ?>">
                 <td>
-                  <strong><?php echo esc_entities($patron['patron_name'] ?: '—'); ?></strong>
+                  <strong><?php echo esc_entities($patron['patron_name'] ?: '-'); ?></strong>
                 </td>
                 <td>
-                  <code><?php echo esc_entities($patron['patron_barcode'] ?: '—'); ?></code>
+                  <code><?php echo esc_entities($patron['patron_barcode'] ?: '-'); ?></code>
                 </td>
                 <td>
                   <?php if ($hasEmail): ?>
@@ -193,10 +193,10 @@
                 <tr class="table-row-nested text-muted small">
                   <td colspan="2" class="ps-4 text-secondary">
                     <i class="fas fa-caret-right me-1"></i>
-                    <?php echo esc_entities($item['item_title'] ?: '—'); ?>
+                    <?php echo esc_entities($item['item_title'] ?: '-'); ?>
                   </td>
-                  <td><code><?php echo esc_entities($item['item_barcode'] ?: '—'); ?></code></td>
-                  <td><?php echo esc_entities($item['call_number'] ?: '—'); ?></td>
+                  <td><code><?php echo esc_entities($item['item_barcode'] ?: '-'); ?></code></td>
+                  <td><?php echo esc_entities($item['call_number'] ?: '-'); ?></td>
                   <td><?php echo substr($item['due_date'] ?? '', 0, 10); ?></td>
                   <td><span class="badge <?php echo $badgeClass; ?>"><?php echo $days; ?>d</span></td>
                   <td>

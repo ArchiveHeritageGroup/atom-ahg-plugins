@@ -22,7 +22,7 @@ class acquisitionOrderEditAction extends AhgController
         $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
 
         // Load order types from taxonomy. getTerms() does not exist on the
-        // service — getTermsWithAttributes() returns [code => term-object]
+        // service - getTermsWithAttributes() returns [code => term-object]
         // (with ->code and ->name); catch Throwable so a bad call degrades to
         // the template's built-in default order types instead of a white screen.
         try {
@@ -49,7 +49,7 @@ class acquisitionOrderEditAction extends AhgController
             }
         }
 
-        // Handle POST — save
+        // Handle POST - save
         if ('POST' === $request->getMethod()) {
             $this->saveOrder($request, $service, $orderId);
 

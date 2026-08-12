@@ -90,7 +90,7 @@ class FrbrService
             $parts[] = 'issn:' . preg_replace('/[^0-9X]/', '', strtoupper($issn));
         }
 
-        // Priority 3: LCCN (normalised — strip spaces and hyphens)
+        // Priority 3: LCCN (normalised - strip spaces and hyphens)
         if (!empty($lccn)) {
             $parts[] = 'lccn:' . preg_replace('/[^A-Z0-9]/', '', strtoupper($lccn));
         }

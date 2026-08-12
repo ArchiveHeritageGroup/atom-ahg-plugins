@@ -1,6 +1,6 @@
 <?php
 /**
- * ISBN / DOI / ISSN Resolver — lookup page.
+ * ISBN / DOI / ISSN Resolver - lookup page.
  *
  * Accepts ISBN (10 or 13), DOI (10.xxxx/...), or ISSN (xxxx-xxxx).
  * Resolution via /isbn/resolve?id=<identifier>
@@ -126,7 +126,7 @@
         btn.innerHTML = '<i class="fas fa-search me-1"></i><?php echo __('Resolve'); ?>';
 
         if (data.success) {
-          resultSource.textContent = data.type.toUpperCase() + ' — ' + (data.source || data.type);
+          resultSource.textContent = data.type.toUpperCase() + ' - ' + (data.source || data.type);
           resultBody.innerHTML = renderPreview(data);
           resultDiv.classList.remove('d-none');
         } else {

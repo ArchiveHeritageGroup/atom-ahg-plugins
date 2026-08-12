@@ -6,7 +6,7 @@ use AtomFramework\Console\BaseCommand;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * z3950:server — Start the Z39.50 bibliographic server daemon (ISO 23950).
+ * z3950:server - Start the Z39.50 bibliographic server daemon (ISO 23950).
  *
  * PSIS already exposes the catalogue via SRU-over-HTTP (/api/sru). This command
  * adds the raw binary Z39.50 *server* half: it answers INIT / SEARCH / PRESENT /

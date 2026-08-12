@@ -39,7 +39,7 @@
                         <select name="report_type" class="form-select">
                             <?php foreach ($reportTypes as $code => $label): ?>
                             <option value="<?php echo $code; ?>" <?php echo $selectedReport === $code ? 'selected' : ''; ?>>
-                                <?php echo $code; ?> — <?php echo $label; ?>
+                                <?php echo $code; ?> - <?php echo $label; ?>
                             </option>
                             <?php endforeach; ?>
                         </select>
@@ -200,7 +200,7 @@
                     <div class="col-md-6">
                         <small class="text-muted">
                             <i class="fas fa-calendar me-1"></i>
-                            <?php echo date('j M Y', strtotime($beginDate)); ?> — <?php echo date('j M Y', strtotime($endDate)); ?>
+                            <?php echo date('j M Y', strtotime($beginDate)); ?> - <?php echo date('j M Y', strtotime($endDate)); ?>
                         </small>
                     </div>
                     <div class="col-md-6 text-end">

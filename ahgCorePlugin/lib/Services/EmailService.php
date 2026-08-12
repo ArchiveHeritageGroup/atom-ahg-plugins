@@ -18,6 +18,34 @@ class EmailService
     /**
      * Load settings from database.
      */
+    /**
+     * A setting that may be stored encrypted.
+     *
+     * Falls back to the raw value when the framework's field encryption is not
+     * available, so a plugin-only install without the runtime still sends mail
+     * rather than authenticating with a ciphertext.
+     */
+    private static function decryptSetting(string $key): string
+    {
+        $value = (string) self::getSetting($key);
+
+        if ('' === $value) {
+            return $value;
+        }
+
+        if (!class_exists('\\AtomFramework\\Core\\Security\\EncryptableFieldService')) {
+            return $value;
+        }
+
+        try {
+            return \AtomFramework\Core\Security\EncryptableFieldService::decryptValue($value);
+        } catch (\Throwable $e) {
+            error_log('EmailService: could not decrypt '.$key.': '.$e->getMessage());
+
+            return $value;
+        }
+    }
+
     private static function loadSettings(): void
     {
         if (self::$loaded) {
@@ -68,7 +96,16 @@ class EmailService
         $port = (int) self::getSetting('smtp_port', 587);
         $encryption = self::getSetting('smtp_encryption', 'tls');
         $username = self::getSetting('smtp_username');
-        $password = self::getSetting('smtp_password');
+        // Decrypt if it is stored encrypted.
+        //
+        // The SMTP password sits in email_setting, and it sat there in plaintext:
+        // readable by anyone with database access, and copied verbatim into every
+        // backup and every dump. It is a live credential for a real mailbox.
+        //
+        // decryptValue() returns the value untouched when it has no encryption
+        // prefix, so this is safe on an instance that has not encrypted the field
+        // yet and needs no migration to switch over.
+        $password = self::decryptSetting('smtp_password');
         $fromEmail = self::getSetting('smtp_from_email');
         $fromName = self::getSetting('smtp_from_name');
 
@@ -317,7 +354,7 @@ class EmailService
                 $mail->Port = (int) self::getSetting('smtp_port', 587);
                 $mail->SMTPAuth = true;
                 $mail->Username = self::getSetting('smtp_username');
-                $mail->Password = self::getSetting('smtp_password');
+                $mail->Password = self::decryptSetting('smtp_password');
 
                 $encryption = self::getSetting('smtp_encryption', 'tls');
                 if ($encryption === 'tls') {

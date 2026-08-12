@@ -5,7 +5,7 @@ declare(strict_types=1);
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * OPAC view — single catalog item detail.
+ * OPAC view - single catalog item detail.
  *
  * @package    ahgLibraryPlugin
  * @subpackage opac

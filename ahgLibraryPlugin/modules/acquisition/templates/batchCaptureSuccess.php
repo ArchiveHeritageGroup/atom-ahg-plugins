@@ -1,7 +1,7 @@
 <?php decorate_with('layout_1col'); ?>
 
 <?php slot('title'); ?>
-  <h1><i class="fas fa-barcode me-2"></i><?php echo __('Batch Capture — ISBN Lookup'); ?></h1>
+  <h1><i class="fas fa-barcode me-2"></i><?php echo __('Batch Capture - ISBN Lookup'); ?></h1>
 <?php end_slot(); ?>
 
 <?php if (!empty($notice)): ?>
@@ -39,13 +39,13 @@
         <div class="col-md-6">
           <label for="order_id" class="form-label"><?php echo __('Link items to a Purchase Order'); ?></label>
           <select class="form-select" id="order_id" name="order_id">
-            <option value=""><?php echo __('— No PO (standalone capture) —'); ?></option>
+            <option value=""><?php echo __('- No PO (standalone capture) -'); ?></option>
             <?php if (!empty($rawOrders)): ?>
               <?php foreach ($rawOrders as $order): ?>
                 <option value="<?php echo (int) $order->id; ?>"
                   <?php echo $selectedOrderId == $order->id ? 'selected' : ''; ?>>
                   <?php echo esc_entities($order->order_number); ?>
-                  — <?php echo esc_entities($order->vendor_name ?? ''); ?>
+                  - <?php echo esc_entities($order->vendor_name ?? ''); ?>
                   (<?php echo esc_entities($order->status); ?>)
                 </option>
               <?php endforeach; ?>

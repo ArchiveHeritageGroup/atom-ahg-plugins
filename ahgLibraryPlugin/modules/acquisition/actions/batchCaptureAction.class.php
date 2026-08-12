@@ -300,7 +300,7 @@ class acquisitionBatchCaptureAction extends AhgController
             try {
                 exec('php ' . escapeshellarg(sfConfig::get('sf_root_dir') . '/symfony') . ' propel:build-nested-set 2>&1', $output, $rc);
             } catch (\Exception $e) {
-                // Non-fatal — nested set will be rebuilt on next cache clear
+                // Non-fatal - nested set will be rebuilt on next cache clear
             }
         }
 

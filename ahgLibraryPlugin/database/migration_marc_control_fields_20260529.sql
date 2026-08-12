@@ -1,5 +1,5 @@
 -- ============================================================================
--- MARC control-field preservation (#111) — 2026-05-29
+-- MARC control-field preservation (#111) - 2026-05-29
 -- ============================================================================
 -- Preserve the original leader / 005 (last transaction) / 008 (fixed-length
 -- data) from imported MARC so export round-trips them instead of regenerating

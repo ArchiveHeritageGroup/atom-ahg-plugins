@@ -80,7 +80,7 @@
         <div class="col-md-4">
           <label for="budget_id" class="form-label"><?php echo __('Budget'); ?></label>
           <select class="form-select" id="budget_id" name="budget_id">
-            <option value=""><?php echo __('— None —'); ?></option>
+            <option value=""><?php echo __('- None -'); ?></option>
             <?php if (!empty($rawBudgets)): ?>
               <?php foreach ($rawBudgets as $budget): ?>
                 <option value="<?php echo (int) $budget->id; ?>"

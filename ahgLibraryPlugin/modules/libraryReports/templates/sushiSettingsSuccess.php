@@ -157,7 +157,7 @@
                                 <td class="small text-muted"><?php echo substr($log->created_at, 0, 16); ?></td>
                                 <td class="small"><?php echo esc_specialchars($log->institution_id ?? '-'); ?></td>
                                 <td><code class="small"><?php echo esc_specialchars($log->report_type ?? '-'); ?></code></td>
-                                <td class="small"><?php echo esc_specialchars($log->period_begin ?? '-'); ?> — <?php echo esc_specialchars($log->period_end ?? '-'); ?></td>
+                                <td class="small"><?php echo esc_specialchars($log->period_begin ?? '-'); ?> - <?php echo esc_specialchars($log->period_end ?? '-'); ?></td>
                                 <td>
                                     <?php
                                     $ok = ($log->status_code ?? 0) >= 200 && ($log->status_code ?? 0) < 300;

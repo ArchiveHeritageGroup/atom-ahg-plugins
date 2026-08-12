@@ -1,5 +1,5 @@
 -- Migration: FRBR Work-Set Clustering + Override System
--- Issue #95 — ahgLibraryPlugin
+-- Issue #95 - ahgLibraryPlugin
 
 -- 1. Add FRBR columns to library_item
 ALTER TABLE library_item

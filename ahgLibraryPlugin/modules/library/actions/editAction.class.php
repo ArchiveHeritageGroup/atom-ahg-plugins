@@ -26,7 +26,7 @@ class libraryEditAction extends AhgController
             
             $this->loadLibraryData($this->resource->id);
         } else {
-            // Creating new resource — must use Propel object for Symfony template compatibility
+            // Creating new resource - must use Propel object for Symfony template compatibility
             $this->resource = new QubitInformationObject();
             $this->itemLocation = [];
             
@@ -88,7 +88,7 @@ class libraryEditAction extends AhgController
             $oldValues = $this->captureCurrentValues($this->resource->id);
         }
 
-        // SECURITY: store the title as submitted — do NOT html_entity_decode it,
+        // SECURITY: store the title as submitted - do NOT html_entity_decode it,
         // which would turn escaped markup (e.g. &lt;script&gt;) back into live HTML
         // and reintroduce a stored-XSS vector at render time.
         $this->resource->title = $request->getParameter('title');

@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * FineService
  *
- * Manages library fines — overdue, lost item, damage, and payments.
+ * Manages library fines - overdue, lost item, damage, and payments.
  * Fine types and statuses driven by ahg_dropdown.
  *
  * @package    ahgLibraryPlugin
@@ -77,7 +77,7 @@ class FineService
     }
 
     /**
-     * Create a lost item fine — charges replacement value.
+     * Create a lost item fine - charges replacement value.
      */
     public function createLostItemFine(int $checkoutId): array
     {

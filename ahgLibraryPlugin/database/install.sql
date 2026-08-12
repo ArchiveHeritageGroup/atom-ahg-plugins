@@ -523,7 +523,7 @@ CREATE TABLE IF NOT EXISTS library_kbart_import_log (
 -- Z39.50 server (parity) (registered for fresh installs)
 -- ============================================================
 -- Migration: Z39.50 SERVER mode (raw binary ISO 23950 daemon)
--- ahgLibraryPlugin — PSIS parity with Heratio ahg-z3950 server half.
+-- ahgLibraryPlugin - PSIS parity with Heratio ahg-z3950 server half.
 --
 -- PSIS already has: library_z3950_target (client), library_sru_log (SRU/HTTP
 -- server), library_z3950_import_log. This adds the raw Z39.50 *server* tables:
@@ -626,7 +626,7 @@ SET @s := IF(@t=1 AND @i=0, 'CREATE INDEX idx_library_usage_event_work_key ON li
 PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
 
 -- =========================================================================
--- FULL LIBRARY SCHEMA — folded from the plugin's migration_*.sql files so a
+-- FULL LIBRARY SCHEMA - folded from the plugin's migration_*.sql files so a
 -- fresh install builds the complete library schema. bin/install runs only
 -- this install.sql (never the migration_*.sql), so on a clean DB /library
 -- 500'd for missing columns/tables. All statements idempotent
@@ -635,7 +635,7 @@ PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
 
 -- --- #214 full library circulation system (migration_full_library.sql) ------
 -- ============================================================================
--- ahgLibraryPlugin — Full Library System Migration
+-- ahgLibraryPlugin - Full Library System Migration
 -- Issue #214: Extend Heratio to be a full library system
 -- Date: 2026-03-08
 -- ============================================================================
@@ -1300,7 +1300,7 @@ INSERT IGNORE INTO ahg_dropdown (taxonomy, taxonomy_label, taxonomy_section, cod
 --
 -- This file covers the additions that are NOT already in a clean standalone
 -- migration. To fully reconcile an instance, ALSO run (all idempotent):
---   * migration_frbr_clustering.sql      (FRBR columns + override table — superseded by this file)
+--   * migration_frbr_clustering.sql      (FRBR columns + override table - superseded by this file)
 --   * migration_counter_sushi.sql        (library_usage_event, library_counter_settings)
 --   * migration_sushi_access_log.sql     (library_sushi_access_log)
 --   * migration_z3950_sru.sql            (library_z3950_target, library_sru_log, library_z3950_import_log)
@@ -1488,7 +1488,7 @@ SET @sql = IF(@col = 0, 'ALTER TABLE library_ill_request ADD COLUMN responder_li
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_ill_request' AND COLUMN_NAME = 'trading_partner_id');
-SET @sql = IF(@col = 0, 'ALTER TABLE library_ill_request ADD COLUMN trading_partner_id BIGINT UNSIGNED NULL COMMENT ''library_trading_partner.id — EDI partner used''', 'SELECT 1');
+SET @sql = IF(@col = 0, 'ALTER TABLE library_ill_request ADD COLUMN trading_partner_id BIGINT UNSIGNED NULL COMMENT ''library_trading_partner.id - EDI partner used''', 'SELECT 1');
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 
 SET @col = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'library_ill_request' AND COLUMN_NAME = 'responder_note');
@@ -1532,7 +1532,7 @@ SET @sql = IF(@idx = 0, 'CREATE INDEX idx_ill_trading_partner ON library_ill_req
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 -- --- MARC control fields (migration_marc_control_fields_20260529.sql) ------
 -- ============================================================================
--- MARC control-field preservation (#111) — 2026-05-29
+-- MARC control-field preservation (#111) - 2026-05-29
 -- ============================================================================
 -- Preserve the original leader / 005 (last transaction) / 008 (fixed-length
 -- data) from imported MARC so export round-trips them instead of regenerating
@@ -1552,7 +1552,7 @@ SET @sql = IF(@col = 0, 'ALTER TABLE library_item ADD COLUMN marc_008 VARCHAR(40
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 -- --- serial bindery (migration_serial_bindery_20260529.sql) ---------------
 -- ============================================================================
--- Serials bindery workflow (#105) — 2026-05-29
+-- Serials bindery workflow (#105) - 2026-05-29
 -- ============================================================================
 -- A bindery batch groups received serial issues sent out for binding, tracked
 -- from send to return. library_serial_issue gains bindery_batch_id (the
@@ -1586,7 +1586,7 @@ SET @sql = IF(@idx = 0, 'CREATE INDEX idx_serial_bindery_batch ON library_serial
 PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
 -- --- order line/fund (migration_order_line_fund_20260529.sql) -------------
 -- ============================================================================
--- Acquisitions fund-split (#104) — 2026-05-29
+-- Acquisitions fund-split (#104) - 2026-05-29
 -- ============================================================================
 -- Allocate a single order line across multiple funds. library_order_line keeps
 -- its primary fund_code; this table records the split when one is supplied.
@@ -1605,7 +1605,7 @@ CREATE TABLE IF NOT EXISTS `library_order_line_fund` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- --- ILL status history (migration_ill_status_history_20260529.sql) -------
 -- ============================================================================
--- ILL status history (#106) — 2026-05-29
+-- ILL status history (#106) - 2026-05-29
 -- ============================================================================
 -- Audit trail of ISO 10160/10161 ILL transaction state transitions.
 -- Idempotent.
@@ -1623,7 +1623,7 @@ CREATE TABLE IF NOT EXISTS `library_ill_status_history` (
   KEY `idx_illh_to` (`to_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- --- serials/ILL clone (migration_heratio_serials_ill_clone.sql) ----------
--- ahgLibraryPlugin — clone of Heratio's serials / ILL schema (parity).
+-- ahgLibraryPlugin - clone of Heratio's serials / ILL schema (parity).
 --
 -- Mirrors Heratio packages/ahg-library migrations:
 --   2026_06_01_000100 serial_subscription, _000101 prediction,
@@ -1631,7 +1631,7 @@ CREATE TABLE IF NOT EXISTS `library_ill_status_history` (
 --   2026_06_02_000104 library_ill_request (rich), 2026_05_30_000004 EDI fields.
 --
 -- New tables use CREATE TABLE IF NOT EXISTS (idempotent). The ALTER blocks at
--- the bottom are RUN-ONCE (MySQL has no ADD COLUMN IF NOT EXISTS) — skip a
+-- the bottom are RUN-ONCE (MySQL has no ADD COLUMN IF NOT EXISTS) - skip a
 -- statement if the column already exists. Indexes (not hard FKs) match Heratio.
 
 -- ── Serials ────────────────────────────────────────────────────────────────
@@ -1695,7 +1695,7 @@ CREATE TABLE IF NOT EXISTS `library_binding` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ── ILL ──────────────────────────────────────────────────────────────────────
--- NOTE: NOT cloned. On verification the PSIS ILLService is already functional —
+-- NOTE: NOT cloned. On verification the PSIS ILLService is already functional -
 -- it has its own complete ISO 10160/10161 state machine (start state
 -- 'submitted'), status is plain VARCHAR(30) (no enum/FK), and every column it
 -- writes (incl. needed_by_date) already exists. Cloning Heratio's ILL would
@@ -1834,7 +1834,7 @@ CREATE TABLE IF NOT EXISTS library_sushi_access_log (
     INDEX idx_sushi_log_created  (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;-- --- Z39.50 server (migration_z3950_server_20260601.sql) ------------------
 -- Migration: Z39.50 SERVER mode (raw binary ISO 23950 daemon)
--- ahgLibraryPlugin — PSIS parity with Heratio ahg-z3950 server half.
+-- ahgLibraryPlugin - PSIS parity with Heratio ahg-z3950 server half.
 --
 -- PSIS already has: library_z3950_target (client), library_sru_log (SRU/HTTP
 -- server), library_z3950_import_log. This adds the raw Z39.50 *server* tables:
@@ -1892,7 +1892,7 @@ SELECT 'max_result_set', '1000', 'limits' FROM DUAL
 WHERE NOT EXISTS (SELECT 1 FROM library_z3950_server_config WHERE option_key = 'max_result_set');
 -- --- Z39.50/SRU (migration_z3950_sru.sql) ---------------------------------
 -- Migration: Z39.50 Client + SRU HTTP Server
--- Issue #92 — ahgLibraryPlugin
+-- Issue #92 - ahgLibraryPlugin
 
 -- 1. Target config table
 CREATE TABLE IF NOT EXISTS `library_z3950_target` (
@@ -1947,7 +1947,7 @@ CREATE TABLE IF NOT EXISTS library_z3950_import_log (
   INDEX idx_target_id (target_id),
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;-- --- ONIX ingest (onix_ingest.sql) ----------------------------------------
--- ahgLibraryPlugin — ONIX ingestion (clone of Heratio library_onix_ingest).
+-- ahgLibraryPlugin - ONIX ingestion (clone of Heratio library_onix_ingest).
 -- Parse + validate publisher ONIX feeds into a review queue before commit.
 
 CREATE TABLE IF NOT EXISTS `library_onix_ingest` (

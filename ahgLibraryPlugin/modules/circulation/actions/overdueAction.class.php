@@ -6,7 +6,7 @@ use AtomFramework\Http\Controllers\AhgController;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * circulationOverdueAction — overdue items list and notice dispatch.
+ * circulationOverdueAction - overdue items list and notice dispatch.
  *
  * GET  /circulation/overdue   → show overdue list
  * POST /circulation/overdue   → send batch overdue notices (param: send_notices=1)
@@ -47,7 +47,7 @@ class circulationOverdueAction extends AhgController
         // Load framework
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
 
-        // Handle POST — send batch notices
+        // Handle POST - send batch notices
         if ($request->isMethod('post') && $request->getParameter('send_notices')) {
             return $this->handleSendNotices($request);
         }
@@ -79,7 +79,7 @@ class circulationOverdueAction extends AhgController
     }
 
     /**
-     * Handle POST — dispatch batch overdue notices.
+     * Handle POST - dispatch batch overdue notices.
      */
     protected function handleSendNotices($request): string
     {

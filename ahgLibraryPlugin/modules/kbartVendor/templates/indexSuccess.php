@@ -109,14 +109,14 @@
                         <?php if ($vendor->last_fetch_at): ?>
                             <small><?php echo date('Y-m-d H:i', strtotime($vendor->last_fetch_at)); ?></small>
                         <?php else: ?>
-                            <span class="text-muted">—</span>
+                            <span class="text-muted">-</span>
                         <?php endif; ?>
                     </td>
                     <td class="text-center">
                         <?php if ($vendor->last_row_count !== null): ?>
                             <span class="badge bg-primary"><?php echo number_format($vendor->last_row_count); ?></span>
                         <?php else: ?>
-                            <span class="text-muted">—</span>
+                            <span class="text-muted">-</span>
                         <?php endif; ?>
                     </td>
                     <td>
@@ -199,7 +199,7 @@
 </div>
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
-// Edit button click — populate modal
+// Edit button click - populate modal
 document.querySelectorAll('.edit-vendor-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
         document.getElementById('edit_vendor_id').value = this.dataset.id;

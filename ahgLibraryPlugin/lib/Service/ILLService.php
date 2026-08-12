@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * ILLService
  *
- * Manages Interlibrary Loan (ILL) requests — borrowing from and lending to other libraries.
+ * Manages Interlibrary Loan (ILL) requests - borrowing from and lending to other libraries.
  * All statuses driven by ahg_dropdown (ill_status, ill_direction taxonomies).
  *
  * @package    ahgLibraryPlugin

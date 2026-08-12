@@ -5,7 +5,7 @@ declare(strict_types=1);
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * OPAC index — public catalog search page.
+ * OPAC index - public catalog search page.
  *
  * Supports FRBR work-set clustering. When clustering is enabled,
  * results are grouped by work key so one card shows all manifestations.
@@ -29,7 +29,7 @@ class opacIndexAction extends AhgController
                 $this->forward404();
             }
         } catch (\Exception $e) {
-            // Table may not exist — allow by default
+            // Table may not exist - allow by default
         }
 
         // Load OpacService

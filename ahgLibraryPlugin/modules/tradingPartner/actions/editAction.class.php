@@ -34,7 +34,7 @@ class tradingPartnerEditAction extends AhgController
                 : [];
         }
 
-        // No vendor table on this instance — keep the field optional.
+        // No vendor table on this instance - keep the field optional.
         $this->vendors = $db->getSchemaBuilder()->hasTable('library_vendors')
             ? $db->table('library_vendors')->where('is_active', 1)->orderBy('name')->get(['id', 'name', 'code'])->all()
             : [];

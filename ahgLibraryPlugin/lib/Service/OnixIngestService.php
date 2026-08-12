@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * OnixIngestService — parse + validate + stage ONIX product feeds.
+ * OnixIngestService - parse + validate + stage ONIX product feeds.
  *
  * Cloned from Heratio packages/ahg-library OnixIngestService (parse/validate/
  * ingest phase). Records land in a review queue (library_onix_ingest[_line]);
@@ -214,7 +214,7 @@ class OnixIngestService
                 return ['status' => 'duplicate', 'error' => 'Matching ISBN/ISSN already in catalogue.'];
             }
         } catch (\Throwable $e) {
-            // library_item may be unavailable — treat as non-duplicate.
+            // library_item may be unavailable - treat as non-duplicate.
         }
 
         return ['status' => 'valid', 'error' => null];
@@ -340,7 +340,7 @@ class OnixIngestService
      * Commit a parsed ingest: every 'valid' line becomes an acquisitions order
      * line (one order per commit). Cataloguing the bibliographic record happens
      * later on receipt (PSIS has no array catalogue-create path), so unlike
-     * Heratio this commit targets acquisitions only — the order_line carries the
+     * Heratio this commit targets acquisitions only - the order_line carries the
      * full ONIX bib data and a null library_item_id until received.
      *
      * @return array{imported:int,skipped:int,failed:int,order_id:?int}

@@ -86,7 +86,7 @@
               <?php if ($pingMs > 0): ?>
                 <span class="text-muted small"><?php echo round((float) $pingMs, 1); ?> ms</span>
               <?php else: ?>
-                <span class="text-muted">—</span>
+                <span class="text-muted">-</span>
               <?php endif; ?>
             </td>
             <td class="text-end">

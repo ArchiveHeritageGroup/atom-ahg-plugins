@@ -67,7 +67,7 @@ EOF;
 
         foreach ($overdue as $row) {
             $this->logSection('overdue', sprintf(
-                '%s — %s (%s) — %d days overdue — Patron: %s %s [%s]',
+                '%s - %s (%s) - %d days overdue - Patron: %s %s [%s]',
                 $row->barcode ?? 'N/A',
                 $row->title,
                 $row->due_date,

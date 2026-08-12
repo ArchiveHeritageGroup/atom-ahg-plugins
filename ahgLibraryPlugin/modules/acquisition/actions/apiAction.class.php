@@ -10,14 +10,14 @@ use Illuminate\Database\Capsule\Manager as DB;
  * All endpoints require X-API-Key header authentication.
  *
  * Routes:
- *   /api/library/orders           — List / Create orders
- *   /api/library/orders/:id       — Get / Update / Delete (cancel) order
- *   /api/library/orders/:id/lines — Add line item
- *   /api/library/orders/:id/lines/:line_id          — Update / Delete line item
- *   /api/library/orders/:id/lines/:line_id/receive   — Receive line item
- *   /api/library/budgets          — List / Create budgets
- *   /api/library/batch/isbn-lookup — Batch ISBN lookup
- *   /api/library/batch/capture     — Batch create library items
+ *   /api/library/orders           - List / Create orders
+ *   /api/library/orders/:id       - Get / Update / Delete (cancel) order
+ *   /api/library/orders/:id/lines - Add line item
+ *   /api/library/orders/:id/lines/:line_id          - Update / Delete line item
+ *   /api/library/orders/:id/lines/:line_id/receive   - Receive line item
+ *   /api/library/budgets          - List / Create budgets
+ *   /api/library/batch/isbn-lookup - Batch ISBN lookup
+ *   /api/library/batch/capture     - Batch create library items
  *
  * @package    ahgLibraryPlugin
  * @subpackage acquisition
@@ -172,7 +172,7 @@ class acquisitionApiAction extends AhgController
     // ========================================================================
 
     /**
-     * GET /api/library/orders — List orders with pagination and filters.
+     * GET /api/library/orders - List orders with pagination and filters.
      */
     protected function listOrders($request)
     {
@@ -198,7 +198,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * GET /api/library/orders/:id — Get single order with line items.
+     * GET /api/library/orders/:id - Get single order with line items.
      */
     protected function getOrder(int $orderId)
     {
@@ -221,7 +221,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * POST /api/library/orders — Create a new order.
+     * POST /api/library/orders - Create a new order.
      */
     protected function createOrder($request)
     {
@@ -256,7 +256,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * PUT /api/library/orders/:id — Update an existing order.
+     * PUT /api/library/orders/:id - Update an existing order.
      */
     protected function updateOrder(int $orderId, $request)
     {
@@ -298,7 +298,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * DELETE /api/library/orders/:id — Cancel an order (set status=cancelled).
+     * DELETE /api/library/orders/:id - Cancel an order (set status=cancelled).
      */
     protected function cancelOrder(int $orderId)
     {
@@ -335,7 +335,7 @@ class acquisitionApiAction extends AhgController
     // ========================================================================
 
     /**
-     * POST /api/library/orders/:id/lines — Add a line item to an order.
+     * POST /api/library/orders/:id/lines - Add a line item to an order.
      */
     protected function addLine(int $orderId, $request)
     {
@@ -388,7 +388,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * PUT /api/library/orders/:id/lines/:line_id — Update a line item.
+     * PUT /api/library/orders/:id/lines/:line_id - Update a line item.
      */
     protected function updateLine(int $orderId, int $lineId, $request)
     {
@@ -438,7 +438,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * DELETE /api/library/orders/:id/lines/:line_id — Remove a line item.
+     * DELETE /api/library/orders/:id/lines/:line_id - Remove a line item.
      */
     protected function deleteLine(int $orderId, int $lineId)
     {
@@ -467,7 +467,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * POST /api/library/orders/:id/lines/:line_id/receive — Mark line as received.
+     * POST /api/library/orders/:id/lines/:line_id/receive - Mark line as received.
      */
     protected function receiveLine(int $orderId, int $lineId, $request)
     {
@@ -514,7 +514,7 @@ class acquisitionApiAction extends AhgController
     // ========================================================================
 
     /**
-     * GET /api/library/budgets — List budgets with optional fiscal_year filter.
+     * GET /api/library/budgets - List budgets with optional fiscal_year filter.
      */
     protected function listBudgets($request)
     {
@@ -531,7 +531,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * POST /api/library/budgets — Create a new budget.
+     * POST /api/library/budgets - Create a new budget.
      */
     protected function createBudget($request)
     {
@@ -586,7 +586,7 @@ class acquisitionApiAction extends AhgController
     // ========================================================================
 
     /**
-     * POST /api/library/batch/isbn-lookup — Batch ISBN lookup.
+     * POST /api/library/batch/isbn-lookup - Batch ISBN lookup.
      */
     protected function batchIsbnLookup($request)
     {
@@ -641,7 +641,7 @@ class acquisitionApiAction extends AhgController
     }
 
     /**
-     * POST /api/library/batch/capture — Batch create library items.
+     * POST /api/library/batch/capture - Batch create library items.
      */
     protected function batchCapture($request)
     {

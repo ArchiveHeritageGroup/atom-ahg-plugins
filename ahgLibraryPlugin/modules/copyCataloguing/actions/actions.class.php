@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 /**
- * copyCataloguing actions — Z39.50 copy cataloguing workflow.
+ * copyCataloguing actions - Z39.50 copy cataloguing workflow.
  *
  * Search a configured Z39.50 target, preview the returned MARC21 records,
  * and import a chosen record into the catalogue. Reuses the existing
  * AtomExtensions\Services\Z3950Service (search + importResults) and
- * MarcService::parseMarc21() for record preview — no duplicated engine.
+ * MarcService::parseMarc21() for record preview - no duplicated engine.
  *
  * @package    ahgLibraryPlugin
  * @subpackage copyCataloguing

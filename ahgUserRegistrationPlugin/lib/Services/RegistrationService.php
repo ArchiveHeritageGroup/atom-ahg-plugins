@@ -259,7 +259,17 @@ class RegistrationService
                 // because the row is redundant either way, and because a caller
                 // that skips step 7 would inherit the fault.
 
-                // Step 7: Assign additional group if specified (default: contributor = 102)
+                // Step 7: assign a group beyond plain authenticated, if one was chosen.
+                //
+                // The default is authenticated (99), not contributor (102).
+                // Contributor carries edit rights, so approving a self-service
+                // registration on the defaults handed every applicant the ability to
+                // modify descriptions - an access grant nobody asked for and which
+                // the approving administrator was never shown.
+                //
+                // Nothing is inserted for 99: QubitUser::getAclGroups() prepends it
+                // to every authenticated user already, and an explicit row is the
+                // duplicate-role fault removed above.
                 $assignGroupId = $groupId ?: $this->getDefaultGroupId();
                 if ($assignGroupId && $assignGroupId > 99) {
                     DB::table('acl_user_group')->insert([
@@ -368,7 +378,7 @@ class RegistrationService
     private function getDefaultGroupId(): int
     {
         return (int) \AtomExtensions\Services\AhgSettingsService::get(
-            'registration_default_group', '102'
+            'registration_default_group', '99'
         );
     }
 

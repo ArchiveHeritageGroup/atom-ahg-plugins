@@ -5,11 +5,11 @@ declare(strict_types=1);
 /**
  * Marc21DecoderService
  *
- * ISO 2709 / MARC21 binary decoder. Pure parser — no database, no framework
+ * ISO 2709 / MARC21 binary decoder. Pure parser - no database, no framework
  * dependencies. Produces the same logical structure as a MARCXML <record>
  * (leader / control fields / data fields) so MarcService can map a decoded
  * record through exactly the same column/creator/subject logic it already
- * uses for MARCXML import (single source of truth — see
+ * uses for MARCXML import (single source of truth - see
  * MarcService::parseDecodedRecord()).
  *
  * Ported from the Heratio (Laravel) AhgLibrary\Services\Marc21DecoderService.
@@ -81,7 +81,7 @@ class Marc21DecoderService
      *     ],
      *   ]
      *
-     * Repeatable subfields are suffixed (a, a2, a3, ...) — strip the numeric
+     * Repeatable subfields are suffixed (a, a2, a3, ...) - strip the numeric
      * suffix to recover the code.
      *
      * ISO 2709 layout: leader(24) + directory(12/entry, 0x1E-terminated) +
@@ -119,7 +119,7 @@ class Marc21DecoderService
             $dataEnd   = $dataStart + $flen; // flen includes the trailing 0x1E
 
             if ($dataEnd > strlen($raw)) {
-                continue; // truncated record — skip this field
+                continue; // truncated record - skip this field
             }
 
             // Field data excluding the trailing field terminator.
@@ -181,7 +181,7 @@ class Marc21DecoderService
     /**
      * Validate a decoded record (#111). Checks leader length, indicator values,
      * the mandatory 245, and required subfields for common tags. Returns a list
-     * of human-readable issues (empty = valid). Pure — no DB.
+     * of human-readable issues (empty = valid). Pure - no DB.
      *
      * @return string[]
      */

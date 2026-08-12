@@ -67,7 +67,7 @@
 
 <?php elseif ($frbrOn && !empty($clusters)): ?>
   <?php /* ============================================================
-       FRBR CLUSTERED VIEW — one card per work, manifestation expander
+       FRBR CLUSTERED VIEW - one card per work, manifestation expander
        ============================================================ */ ?>
 
   <div class="row">
@@ -148,7 +148,7 @@
             </div>
 
             <?php /* ============================================================
-                 Manifestation Expander (hidden — shown on demand)
+                 Manifestation Expander (hidden - shown on demand)
                  ============================================================ */ ?>
             <?php if ($count > 1): ?>
               <div class="manifestations-panel mt-2 border-top pt-2">
@@ -224,7 +224,7 @@
 
 <?php elseif (!empty($items)): ?>
   <?php /* ============================================================
-       FLAT VIEW — paginated literal cards (original browse behaviour)
+       FLAT VIEW - paginated literal cards (original browse behaviour)
        ============================================================ */ ?>
 
   <div class="row">

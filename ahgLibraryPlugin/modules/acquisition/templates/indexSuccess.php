@@ -1,7 +1,7 @@
 <?php decorate_with('layout_1col'); ?>
 
 <?php slot('title'); ?>
-  <h1><?php echo __('Acquisitions — Purchase Orders'); ?></h1>
+  <h1><?php echo __('Acquisitions - Purchase Orders'); ?></h1>
 <?php end_slot(); ?>
 
 <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>#library" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-2"></i><?php echo __('Back to Library'); ?></a>

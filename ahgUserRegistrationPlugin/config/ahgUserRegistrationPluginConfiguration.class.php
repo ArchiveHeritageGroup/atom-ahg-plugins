@@ -16,6 +16,41 @@ class ahgUserRegistrationPluginConfiguration extends sfPluginConfiguration
                 'icon' => 'fas fa-user-plus',
                 'weight' => 10,
             ]);
+
+            // Tell administrators a request is waiting.
+            //
+            // Nothing did. ahgThemeB5Plugin renders a banner and a menu entry by
+            // querying ahg_registration_request itself
+            // (templates/_adminNotifications.php), so the only instances where an
+            // administrator learns of a pending registration are the ones running
+            // that theme. On stock AtoM a request could sit indefinitely with the
+            // applicant waiting and nobody aware.
+            //
+            // Declared here as a badge instead, which is what AhgNav's badge
+            // callback is for: the theme renders whatever is registered and never
+            // needs to know this plugin's schema. It then appears wherever AhgNav
+            // is rendered - the AHG theme, or AtoM's own quick-links menu via
+            // ahgCorePlugin on an instance with no theme at all.
+            AhgNav::register('manage', 'user_registrations', [
+                'route' => '@admin_registrations',
+                'label' => 'Registrations',
+                'icon' => 'fas fa-user-check',
+                'section' => 'Users',
+                'weight' => 30,
+                'credentials' => ['administrator'],
+                'badge' => static function () {
+                    try {
+                        return \Illuminate\Database\Capsule\Manager::table('ahg_registration_request')
+                            ->whereIn('status', ['pending', 'verified'])
+                            ->count();
+                    } catch (\Throwable $e) {
+                        // A badge is decoration. If the table is missing because
+                        // the schema has not been installed yet, the menu entry
+                        // should still render rather than take the page down.
+                        return null;
+                    }
+                },
+            ]);
         }
         $this->registerAutoloader();
 

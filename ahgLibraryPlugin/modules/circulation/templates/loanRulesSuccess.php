@@ -105,7 +105,7 @@
           <div class="mb-3">
             <label for="material_type" class="form-label"><?php echo __('Material type'); ?> <span class="text-danger">*</span></label>
             <select class="form-select" name="material_type" id="material_type" required>
-              <option value=""><?php echo __('— Select —'); ?></option>
+              <option value=""><?php echo __('- Select -'); ?></option>
               <?php $rawTypes = $sf_data->getRaw('materialTypes'); ?>
               <?php foreach ($rawTypes as $type): ?>
                 <option value="<?php echo esc_entities($type); ?>"><?php echo esc_entities(ucfirst($type)); ?></option>
@@ -136,7 +136,7 @@
 
           <?php /* "Max checkouts per patron" lives on the patron record, not the
                    loan rule (library_loan_rule has no max_checkouts column), so it
-                   is set on the patron edit form — not here. */ ?>
+                   is set on the patron edit form - not here. */ ?>
 
           <div class="mb-3">
             <label for="fine_per_day" class="form-label"><?php echo __('Fine per day overdue'); ?></label>
@@ -167,7 +167,7 @@
 
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
   document.addEventListener('DOMContentLoaded', function() {
-    // Edit rule buttons — populate form with existing data
+    // Edit rule buttons - populate form with existing data
     document.querySelectorAll('.edit-rule-btn').forEach(function(btn) {
       btn.addEventListener('click', function() {
         document.getElementById('rule_id').value = this.dataset.id || '';

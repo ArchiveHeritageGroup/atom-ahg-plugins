@@ -6,7 +6,7 @@ declare(strict_types=1);
  * HoldService
  *
  * Manages patron hold requests on library items.
- * Holds are placed on items (not copies) — system assigns copy at fulfillment.
+ * Holds are placed on items (not copies) - system assigns copy at fulfillment.
  *
  * @package    ahgLibraryPlugin
  * @subpackage Service

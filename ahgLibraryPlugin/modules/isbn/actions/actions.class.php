@@ -5,16 +5,16 @@ use AtomFramework\Http\Controllers\AhgController;
  * ISBN / DOI / ISSN Resolver Module.
  *
  * Actions:
- *   lookup      — ISBN-only (legacy, kept for backward compatibility)
- *   resolve     — Auto-detects DOI / ISSN / ISBN and resolves via CrossRef / WorldCat
- *   doi-lookup  — Dedicated DOI lookup page
+ *   lookup      - ISBN-only (legacy, kept for backward compatibility)
+ *   resolve     - Auto-detects DOI / ISSN / ISBN and resolves via CrossRef / WorldCat
+ *   doi-lookup  - Dedicated DOI lookup page
  *
  * All actions return JSON for AJAX requests; fall back to HTML page when no identifier is provided.
  */
 class isbnActions extends AhgController
 {
     /**
-     * Statistics page — requires authentication.
+     * Statistics page - requires authentication.
      */
     public function executeStats($request)
     {
@@ -29,7 +29,7 @@ class isbnActions extends AhgController
     }
 
     // ========================================================================
-    // resolve — primary action: auto-detects DOI / ISSN / ISBN
+    // resolve - primary action: auto-detects DOI / ISSN / ISBN
     // ========================================================================
 
     /**
@@ -91,7 +91,7 @@ class isbnActions extends AhgController
     }
 
     // ========================================================================
-    // lookup — ISBN-only (legacy, kept for backward compatibility)
+    // lookup - ISBN-only (legacy, kept for backward compatibility)
     // ========================================================================
 
     /**
@@ -143,7 +143,7 @@ class isbnActions extends AhgController
     }
 
     // ========================================================================
-    // doi-lookup — dedicated DOI resolution page
+    // doi-lookup - dedicated DOI resolution page
     // ========================================================================
 
     /**
@@ -195,7 +195,7 @@ class isbnActions extends AhgController
     }
 
     // ========================================================================
-    // api-test — CLI / browser test endpoint
+    // api-test - CLI / browser test endpoint
     // ========================================================================
 
     public function executeApiTest($request)
@@ -236,7 +236,7 @@ class isbnActions extends AhgController
     }
 
     /**
-     * Test page — requires authentication.
+     * Test page - requires authentication.
      */
     public function executeTest($request)
     {

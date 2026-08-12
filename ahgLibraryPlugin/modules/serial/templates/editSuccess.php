@@ -34,7 +34,7 @@
           <label for="sub_vendor_id" class="form-label"><?php echo __('Vendor'); ?></label>
           <?php $vendorOptions = $sf_data->getRaw('vendorOptions') ?: []; $curVendor = (int) ($rawSub->vendor_id ?? 0); ?>
           <select class="form-select" id="sub_vendor_id" name="vendor_id">
-            <option value=""><?php echo __('— none —'); ?></option>
+            <option value=""><?php echo __('- none -'); ?></option>
             <?php foreach ($vendorOptions as $vo): ?>
               <option value="<?php echo (int) $vo->id; ?>" <?php echo $curVendor === (int) $vo->id ? 'selected' : ''; ?>><?php echo esc_entities($vo->name); ?></option>
             <?php endforeach; ?>

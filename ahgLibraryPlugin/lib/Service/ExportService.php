@@ -7,7 +7,7 @@ namespace ahgLibraryPlugin\Service;
 use Illuminate\Database\Capsule\Manager as DB;
 
 /**
- * ExportService — exports library items to CSV, BibTeX, and RIS formats.
+ * ExportService - exports library items to CSV, BibTeX, and RIS formats.
  *
  * @package ahgLibraryPlugin\Service
  */
@@ -77,7 +77,7 @@ class ExportService
             })
             ->leftJoin('object_term_relation as otl_subject', 'io.id', '=', 'otl_subject.object_id')
             ->leftJoin('term as sub_term', function ($j) {
-                // object_term_relation has no type_id — a relation is a "subject"
+                // object_term_relation has no type_id - a relation is a "subject"
                 // when its term belongs to the Subjects taxonomy (id 35).
                 $j->on('otl_subject.term_id', '=', 'sub_term.id')
                   ->where('sub_term.taxonomy_id', '=', 35);

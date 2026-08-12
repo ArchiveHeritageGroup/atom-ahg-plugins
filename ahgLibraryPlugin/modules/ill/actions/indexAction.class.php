@@ -3,7 +3,7 @@
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * Interlibrary Loan — browse and search requests.
+ * Interlibrary Loan - browse and search requests.
  *
  * Displays ILL request list with direction tabs, search, and status filter.
  */

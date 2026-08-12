@@ -59,7 +59,7 @@ EOF;
         foreach ($holds as $hold) {
             if ($dryRun) {
                 $this->logSection('dry-run', sprintf(
-                    'Would expire hold #%d — %s — %s %s [%s]',
+                    'Would expire hold #%d - %s - %s %s [%s]',
                     $hold->id, $hold->title, $hold->first_name, $hold->last_name, $hold->card_number
                 ));
                 $expired++;
@@ -71,7 +71,7 @@ EOF;
                 ->update([
                     'status' => 'expired',
                     'cancelled_date' => now(),
-                    'cancel_reason' => 'Expired — not collected by expiry date',
+                    'cancel_reason' => 'Expired - not collected by expiry date',
                 ]);
 
             // Promote next in queue for this item
@@ -84,7 +84,7 @@ EOF;
             $expired++;
 
             $this->logSection('expired', sprintf(
-                'Hold #%d — %s — %s %s',
+                'Hold #%d - %s - %s %s',
                 $hold->id, $hold->title, $hold->first_name, $hold->last_name
             ));
         }

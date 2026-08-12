@@ -253,7 +253,7 @@ class libraryReportsActions extends AhgController
             'TR_J3' => 'Articles denied access due to no active subscription or usage limit exceeded. Use this report to monitor unmet demand and guide renewal decisions.',
             'DR'    => 'Usage aggregated by database / publisher platform. Shows total requests and investigations per material type across the reporting period.',
             'PR'    => 'Platform-wide totals for all metrics across all titles and databases. The broadest view of library usage.',
-            'IR'    => 'Per-item usage for individual books, articles, and other items. Metrics broken down by item — use for collection analysis.',
+            'IR'    => 'Per-item usage for individual books, articles, and other items. Metrics broken down by item - use for collection analysis.',
         ];
 
         // If downloading, stream the report directly
@@ -268,7 +268,7 @@ class libraryReportsActions extends AhgController
             };
 
             if ($format === 'xlsx') {
-                // Binary output — write to a temp file and stream it (#109).
+                // Binary output - write to a temp file and stream it (#109).
                 $filename = "counter_{$reportType}_" . date('Ymd') . '.xlsx';
                 $tmp = tempnam(sys_get_temp_dir(), 'counter_') . '.xlsx';
                 $svc->toXlsxFile($reportType, $records, $tmp);
@@ -403,7 +403,7 @@ class libraryReportsActions extends AhgController
         $this->settings = $svc->getSettings();
         $this->testUrl  = '/sushi/counter5';
 
-        // Access log — try library_sushi_access_log first, fall back to manual
+        // Access log - try library_sushi_access_log first, fall back to manual
         try {
             $this->accessLog = DB::table('library_sushi_access_log')
                 ->orderBy('created_at', 'desc')
@@ -440,7 +440,7 @@ class libraryReportsActions extends AhgController
      */
     public function executeTrackEvent($request)
     {
-        // Allow unauthenticated POST — OPAC visitors log anonymously
+        // Allow unauthenticated POST - OPAC visitors log anonymously
         $eventType = $request->getParameter('event_type', 'opac_view');
         $itemId    = $request->getParameter('item_id');
         $patronId  = $request->getParameter('patron_id');
@@ -483,8 +483,8 @@ class libraryReportsActions extends AhgController
 
     /**
      * FRBR work-key override management.
-     * GET  /libraryReports/frbrOverride — list all overrides + work-key stats
-     * POST /libraryReports/frbrOverride — set / clear an override
+     * GET  /libraryReports/frbrOverride - list all overrides + work-key stats
+     * POST /libraryReports/frbrOverride - set / clear an override
      */
     public function executeFrbrOverride($request)
     {

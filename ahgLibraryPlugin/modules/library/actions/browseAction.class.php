@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * browseAction — internal library catalog with FRBR work-set clustering.
+ * browseAction - internal library catalog with FRBR work-set clustering.
  *
  * Default view: FRBR ON. Items are grouped by work key so one card shows all
  * manifestations (editions) under the same work. Inline toggle to switch to flat.
@@ -47,7 +47,7 @@ class libraryBrowseAction extends AhgController
         $this->frbrUrl = rawurlencode($frbrOn ? '0' : '1');
 
         // ======================================================================
-        // Base query (returns all library items — no LIMIT for clustering decision)
+        // Base query (returns all library items - no LIMIT for clustering decision)
         // ======================================================================
         $base = $db->table('information_object as io')
             ->join('information_object_i18n as ioi', function ($j) use ($culture) {
@@ -141,7 +141,7 @@ class libraryBrowseAction extends AhgController
 
         } else {
             // ==================================================================
-            // Flat view (original behaviour — paginated)
+            // Flat view (original behaviour - paginated)
             // ==================================================================
             $this->limit  = 20;
             $this->page   = max(1, (int) $request->getParameter('page', 1));

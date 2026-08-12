@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * OpacService
  *
- * Online Public Access Catalog — search, availability, patron self-service.
+ * Online Public Access Catalog - search, availability, patron self-service.
  * Powers the public-facing OPAC interface for library patrons.
  *
  * @package    ahgLibraryPlugin
@@ -96,7 +96,7 @@ class OpacService
         $esOrderIds = [];
         if (!empty($q) && in_array($searchType, ['keyword', 'title', 'author', 'subject'], true)) {
             $esIds = $this->esRelevanceIds((string) $q);
-            // Only take the ES path when it actually matched something — an
+            // Only take the ES path when it actually matched something - an
             // empty/null result means ES is unavailable OR added no recall, so
             // we fall through to the MySQL LIKE search (better recall on small
             // catalogues). The library_item join below keeps results to books.
@@ -307,7 +307,7 @@ class OpacService
      * relevance order. Restricted to library items via the library_material_type
      * field (upserted by LibraryService::updateSearchIndex()).
      *
-     * Reuses AtoM's own ES client + index — no dedicated library index. Returns
+     * Reuses AtoM's own ES client + index - no dedicated library index. Returns
      * null when ES is unavailable or errors, signalling the MySQL fallback.
      *
      * @return int[]|null
@@ -331,7 +331,7 @@ class OpacService
                     // Relevance over the IO index. The library_* fields (upserted
                     // by LibraryService::updateSearchIndex) boost catalogue
                     // matches where present; i18n title carries the rest. We do
-                    // NOT filter to library docs here — the caller's SQL join to
+                    // NOT filter to library docs here - the caller's SQL join to
                     // library_item restricts results to books, so this stays
                     // correct even on instances where library_* aren't indexed.
                     'query'   => [

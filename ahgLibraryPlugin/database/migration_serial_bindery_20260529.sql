@@ -1,5 +1,5 @@
 -- ============================================================================
--- Serials bindery workflow (#105) — 2026-05-29
+-- Serials bindery workflow (#105) - 2026-05-29
 -- ============================================================================
 -- A bindery batch groups received serial issues sent out for binding, tracked
 -- from send to return. library_serial_issue gains bindery_batch_id (the

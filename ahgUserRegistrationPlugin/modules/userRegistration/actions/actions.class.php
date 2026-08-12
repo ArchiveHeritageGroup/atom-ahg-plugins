@@ -126,7 +126,11 @@ class userRegistrationActions extends AhgController
                 $join->on('acl_group.id', '=', 'acl_group_i18n.id')
                      ->where('acl_group_i18n.culture', '=', $culture);
             })
-            ->where('acl_group.id', '>', 99)
+            // >= 99, not > 99. Excluding 99 meant an administrator could not
+            // approve someone as a plain authenticated user: the lowest access the
+            // picker offered was contributor, which grants edit rights. Anonymous
+            // (98) and the root group (1) stay out - neither is assignable.
+            ->where('acl_group.id', '>=', 99)
             ->select(['acl_group.id', 'acl_group_i18n.name'])
             ->orderBy('acl_group_i18n.name')
             ->get()

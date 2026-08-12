@@ -154,7 +154,7 @@ class ahgLibraryPluginConfiguration extends sfPluginConfiguration
         $openurl->any('openurl_resolve', '/openurl', 'index');
         $openurl->register($routing);
 
-        // Library Reports — COUNTER / SUSHI / FRBR (admin-only)
+        // Library Reports - COUNTER / SUSHI / FRBR (admin-only)
         $reports = new \AtomFramework\Routing\RouteLoader('libraryReports');
         $reports->any('library_reports_counter', '/admin/library/counter', 'counter');
         $reports->any('library_reports_odi', '/admin/library/odi', 'odi');

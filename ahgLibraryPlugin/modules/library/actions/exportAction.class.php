@@ -5,16 +5,16 @@ declare(strict_types=1);
 use AtomFramework\Http\Controllers\AhgController;
 
 /**
- * libraryExportAction — export library items to CSV, BibTeX, or RIS.
+ * libraryExportAction - export library items to CSV, BibTeX, or RIS.
  *
  * GET  /library/export            → show export form with filters
  * GET  /library/export?format=...&download=1 → immediate download (backwards compatible)
  * POST /library/export            → download with applied filters
  *
  * Supported formats:
- *   csv    — CSV (spreadsheet)
- *   bibtex — BibTeX bibliography
- *   ris    — RIS (EndNote / Reference Manager)
+ *   csv    - CSV (spreadsheet)
+ *   bibtex - BibTeX bibliography
+ *   ris    - RIS (EndNote / Reference Manager)
  *
  * Filter params (all optional):
  *   search, material_type, language, publisher, date_from, date_to, format, download
@@ -62,8 +62,8 @@ class libraryExportAction extends AhgController
             return $this->streamDownload();
         }
 
-        // GET (no download param) — show the filter UI + preview
-        // POST — stream download with filters applied
+        // GET (no download param) - show the filter UI + preview
+        // POST - stream download with filters applied
         if ($request->isMethod('post')) {
             return $this->streamDownload();
         }
