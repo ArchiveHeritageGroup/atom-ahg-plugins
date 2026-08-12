@@ -53,8 +53,8 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="/plugins/ahgThemeB5Plugin/web/css/vis-timeline-graph2d.min.css">
-<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgThemeB5Plugin/web/js/vis-timeline-graph2d.min.js"></script>
+<link rel="stylesheet" href="/plugins/ahgResearchPlugin/web/vendor/css/vis-timeline-graph2d.min.css">
+<script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?> src="/plugins/ahgResearchPlugin/web/vendor/js/vis-timeline-graph2d.min.js"></script>
 <script <?php $n = sfConfig::get('csp_nonce', ''); echo $n ? preg_replace('/^nonce=/', 'nonce="', $n).'"' : ''; ?>>
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof vis === 'undefined') { document.getElementById('timeline').innerHTML = '<p class="text-muted p-3">Timeline library failed to load.</p>'; return; }
