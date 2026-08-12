@@ -18,7 +18,7 @@
 <div class="alert alert-info">
     <i class="fas fa-info-circle me-2"></i>
     API keys allow you to access your research data programmatically. Keep your keys secure and never share them publicly.
-    <br><strong>API Base URL:</strong> <code><?php echo sfConfig::get('app_siteBaseUrl', 'https://psis.theahg.co.za'); ?>/api/research</code>
+    <br><strong>API Base URL:</strong> <code><?php echo (rtrim((string) sfConfig::get('app_siteBaseUrl', ''), '/') ?: ((!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https://' : 'http://').($_SERVER['HTTP_HOST'] ?? 'localhost')); ?>/api/research</code>
 </div>
 
 <div class="card">

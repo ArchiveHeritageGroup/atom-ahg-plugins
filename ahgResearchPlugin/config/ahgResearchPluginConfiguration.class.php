@@ -48,6 +48,14 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
         $this->dispatcher->connect('context.load_factories', [$this, 'contextLoadFactories']);
         $this->dispatcher->connect('routing.load_configuration', [$this, 'addRoutes']);
 
+        // A route into researcher registration from the login screen, which is
+        // where somebody without an account actually arrives. Required
+        // explicitly - nested lib/ directories are not reliably picked up by the
+        // autoload cache, and a listener that fails to load would become a
+        // silently missing link rather than an error. See LoginRegisterLinkInjector.
+        require_once __DIR__.'/../lib/Listeners/LoginRegisterLinkInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgResearch\Listeners\LoginRegisterLinkInjector', 'filter']);
+
         $enabledModules = sfConfig::get('sf_enabled_modules');
         $enabledModules[] = 'research';
         $enabledModules[] = 'audit';

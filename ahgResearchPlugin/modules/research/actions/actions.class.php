@@ -1127,6 +1127,44 @@ class researchActions extends AhgController
     // PASSWORD RESET
     // =========================================================================
 
+    /**
+     * Base URL for a link we are about to email.
+     *
+     * The fallback used to be the literal string 'https://psis.theahg.co.za'.
+     * On any instance that has not set app_siteBaseUrl, that put one customer's
+     * domain into another customer's password-reset email - so the researcher
+     * either followed a link to a site they have no account on, or handed their
+     * reset token to a third party. A reset link is a bearer credential; it must
+     * never point somewhere the site does not control.
+     *
+     * Same defect as the annotation identifiers in #294, and the same order of
+     * precedence as the fix there: configuration first, because an emailed link
+     * should be stable rather than following whichever hostname a request
+     * happened to arrive on; then the request; and localhost last, which is
+     * obviously local and obviously wrong, so it cannot be mistaken for a real
+     * published address the way another site's domain can.
+     */
+    private function resetBaseUrl(): string
+    {
+        $configured = (string) $this->config('app_siteBaseUrl', '');
+
+        if ('' !== trim($configured)) {
+            return rtrim(trim($configured), '/');
+        }
+
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+
+        if ('' !== $host) {
+            $https = (!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS'])
+                || 'https' === ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')
+                || '443' === (string) ($_SERVER['SERVER_PORT'] ?? '');
+
+            return ($https ? 'https://' : 'http://').$host;
+        }
+
+        return 'http://localhost';
+    }
+
     public function executePasswordResetRequest($request)
     {
         if ($request->isMethod('post')) {
@@ -1139,8 +1177,30 @@ class researchActions extends AhgController
                     ['user_id' => $user->id],
                     ['token' => $token, 'expires_at' => $expires, 'created_at' => date('Y-m-d H:i:s')]
                 );
-                $resetUrl = $this->config('app_siteBaseUrl', 'https://psis.theahg.co.za') . '/index.php/research/passwordReset?token=' . $token;
-                error_log("Password reset for {$email}: {$resetUrl}");
+                $resetUrl = $this->resetBaseUrl() . '/index.php/research/passwordReset?token=' . $token;
+
+                // Actually send it.
+                //
+                // This was error_log($resetUrl) and nothing else, so the only way
+                // to reset a password was for someone with shell access to read
+                // the log and pass the link on by hand. A researcher who forgot
+                // their password had no route back into the account.
+                //
+                // \AhgCore\Services\EmailService is the canonical path - settings
+                // driven, via email_setting - and it already has a password-reset
+                // template. Failure is non-fatal and deliberately not reported to
+                // the visitor: the flash below is identical whether or not the
+                // address exists, so the form cannot be used to discover which
+                // email addresses hold accounts.
+                try {
+                    if (class_exists('\AhgCore\Services\EmailService')) {
+                        \AhgCore\Services\EmailService::sendPasswordReset($user, $resetUrl);
+                    } else {
+                        error_log('ahgResearchPlugin: ahgCorePlugin not loaded, password reset for '.$email.' not sent');
+                    }
+                } catch (\Throwable $e) {
+                    error_log('ahgResearchPlugin: password reset email failed for '.$email.': '.$e->getMessage());
+                }
             }
             $this->getUser()->setFlash('success', 'If an account exists, you will receive reset instructions.');
             $this->redirect('research/passwordResetRequest');

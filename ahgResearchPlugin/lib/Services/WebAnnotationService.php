@@ -368,7 +368,17 @@ class WebAnnotationService
             ->where('object_id', $objectId)
             ->value('slug');
 
-        $baseUri = \sfConfig::get('app_siteBaseUrl', 'https://psis.theahg.co.za');
+        // No customer's domain as a fallback. An annotation URI is a durable
+        // identifier; minting one that points at somebody else's site is worse
+        // than minting an obviously-local one, because it looks valid.
+        $baseUri = rtrim((string) \sfConfig::get('app_siteBaseUrl', ''), '/');
+
+        if ('' === $baseUri) {
+            $host = $_SERVER['HTTP_HOST'] ?? '';
+            $baseUri = '' !== $host
+                ? ((!empty($_SERVER['HTTPS']) && 'off' !== $_SERVER['HTTPS']) ? 'https://' : 'http://').$host
+                : 'http://localhost';
+        }
 
         // Get all active, non-private annotations targeting this object
         $annotations = DB::table('research_annotation_v2 as a')
