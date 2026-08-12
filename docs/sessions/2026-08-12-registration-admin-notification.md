@@ -113,3 +113,79 @@ migrating. Worth repeating the check on any instance where the notice was custom
 - Suppressing stderr on a `mysql` call hid an "Unknown column" error and produced an
   empty token that read as a legitimately empty value. Do not `2>/dev/null` a query
   whose result you are about to act on.
+
+---
+
+# Addendum (v3.99.21): the banner, and "error but it approves"
+
+## A menu entry is not a notification
+
+The AhgNav entry shipped in v3.99.20 rendered correctly and carried the right
+count - and was still not seen. It sits inside the "Quick links" dropdown, closed
+until somebody opens it, and it was the only item there. It reaches an
+administrator who was already going to look, which is the one who did not need
+telling.
+
+The verification at the time reported the entry as present with badge "1" and also
+reported `visible: false` with the dropdown toggle click timing out. Both were
+explained away as "just a collapsed dropdown" rather than checked. **A DOM presence
+assertion is not a reachability assertion.** If a check reports an element as not
+visible, that is the result, not an inconvenience to reason past.
+
+Added `lib/Listeners/PendingRegistrationBanner.php`, a `response.filter_content`
+listener anchored on `</header>`, rendering a Bootstrap alert with a Review button.
+Bootstrap classes only - a CSP nonce covers `<style>` and `<script>` elements but
+never a `style=""` attribute, so an inline style is dropped on exactly the
+instances configured correctly.
+
+Gated: administrators only, GET only, HTML only, suppressed on the queue page
+itself, and wrapped so a fault cannot take down a page it renders on every page of.
+It counts `pending` alongside `verified` - a request stuck because the confirmation
+mail never arrived is precisely the one somebody needs to see, and the queue offers
+a manual verify for it.
+
+## "Error: Only email-verified registrations can be approved" - on an approval that worked
+
+Reported as "error but it approves". Both halves were true.
+
+**Fault 1 - one test answering for every state.** `approve()` guarded with
+`status !== 'verified'` and returned "Only email-verified registrations can be
+approved" for everything else, including `approved`. A repeat submission of an
+approval that had already succeeded was told the applicant had not confirmed their
+email: untrue, and it reads as "the approval failed" when the account exists and is
+active. `markVerified()` had the same lumping.
+
+**Fault 2 - nothing stopped the second submission.** `#confirm-approve` was never
+disabled. Approving creates the account and sends mail, so there is a visible pause
+with no sign the click registered. Click again: the first POST succeeds and updates
+the row, the second is answered with an error about the state the first just
+created. Reproduced - three clicks sent three POSTs.
+
+Fixed on both sides, because either alone leaves a hole: the button guard does not
+help two browser tabs, and the server fix alone still fires redundant work.
+
+- `approved` now returns `{"success":true,"already":true,"user_id":N}`. A second
+  click means the administrator could not tell the first worked; the outcome they
+  wanted holds, so saying so is the accurate answer. `rejected` and `expired` get
+  their own messages. The early return happens **before** the transaction.
+- `#confirm-approve` / `#confirm-reject` disable while in flight ("Approving...",
+  "Rejecting...") and re-enable on failure so a genuine retry still works.
+  `.btn-verify` already did this.
+
+Verified on 131: three clicks -> 1 POST, no alert; re-approving an already-approved
+request returns success with `reviewed_at` untouched, no duplicate user, no extra
+ACL row; a genuinely `pending` request is still refused with the real message, so
+the guard is not weakened.
+
+### Notes for anyone testing this
+
+- Registration is rate-limited to **5 per IP per hour**
+  (`RegistrationService::isRateLimited()`). A signup that silently fails during a
+  test run is probably this, not a bug.
+- Synthetic POSTs to the admin endpoints are rejected by CSRF
+  (`{"error":"CSRF token validation failed"}`). Drive them in-page via
+  `page.evaluate` so they carry the real token - which also proves CSRF is live.
+- The approve/reject success handlers index `td:nth-child(6)` for Status and
+  `td:last-child` for Actions. The table has 8 columns; adding one before Status
+  breaks the row update silently, and a row that does not update is what invites
+  the second click.

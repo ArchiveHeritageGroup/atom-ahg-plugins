@@ -47,6 +47,21 @@ class PendingRegistrationBanner
                 return $content;
             }
 
+            // Stand down where the theme already does this.
+            //
+            // ahgThemeB5Plugin/templates/_adminNotifications.php renders its own
+            // notice from the identical query - whereIn(status, [pending,
+            // verified]) - as one entry in a shared notifications strip alongside
+            // access requests and error-log entries. On a themed instance both
+            // would fire and an administrator would be told twice.
+            //
+            // The theme wins: its version is part of a coherent strip, is
+            // dismissible, and sits where users of that theme expect it. This one
+            // exists for instances that have no such strip at all.
+            if (false !== strpos($html, 'ahg-admin-notifications')) {
+                return $content;
+            }
+
             $response = $event->getSubject();
 
             if (!$response instanceof \sfWebResponse) {
