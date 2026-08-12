@@ -1,18 +1,23 @@
 <?php
 
-namespace AhgResearch\Listeners;
+namespace AhgCore\Listeners;
 
 /**
- * A way to reach researcher registration from the login screen.
+ * A way to reach registration from the login screen.
  *
- * /research/register-researcher has existed and worked for as long as the plugin
- * has, and nothing linked to it from the one page where somebody without an
- * account inevitably lands. A researcher who has never registered arrives at the
- * login form, finds no way forward, and stops - the feature was reachable only
- * by someone who already knew the URL.
+ * Registration has existed and worked for as long as the plugins have, and
+ * nothing linked to it from the one page where somebody without an account
+ * inevitably lands. They arrive at the login form, find no way forward, and
+ * stop - the feature was reachable only by someone who already knew the URL.
  *
- * Same shape as the IIIF comparison workspace: a complete capability with no
- * door into it.
+ * WHY IN ahgCorePlugin
+ *
+ * It first lived in ahgResearchPlugin, which was wrong: it is not about
+ * researchers. It offers whichever registrations an instance has, and an
+ * instance may well have the ordinary-account one and not the researcher one -
+ * in which case the link would have vanished with the plugin that had no part in
+ * it. ahgCorePlugin is present wherever any AHG plugin is, which is exactly the
+ * condition under which this should work.
  *
  * WHY INJECTED
  *
@@ -37,7 +42,7 @@ namespace AhgResearch\Listeners;
  */
 class LoginRegisterLinkInjector
 {
-    private const MARKER = 'ahg-research-register-link';
+    private const MARKER = 'ahg-register-link';
 
     public static function filter(\sfEvent $event, $content)
     {

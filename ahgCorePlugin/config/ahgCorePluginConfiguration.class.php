@@ -112,6 +112,13 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // Apply data-ahg-style declarations. See injectStyleApplier().
         $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectStyleApplier']);
 
+        // A route into registration from the login screen. Offers whichever
+        // registrations the instance actually has, read from the routing table -
+        // so it works with the ordinary-account plugin, the researcher one, both,
+        // or neither. See LoginRegisterLinkInjector.
+        require_once __DIR__.'/../lib/Listeners/LoginRegisterLinkInjector.php';
+        $this->dispatcher->connect('response.filter_content', ['\AhgCore\Listeners\LoginRegisterLinkInjector', 'filter']);
+
         // Attribution in the footer of pages an AHG plugin serves. See injectPluginCredit().
         $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectPluginCredit']);
     }

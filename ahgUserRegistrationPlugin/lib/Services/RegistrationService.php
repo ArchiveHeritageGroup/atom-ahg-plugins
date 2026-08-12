@@ -44,11 +44,31 @@ class RegistrationService
             return ['success' => false, 'error' => 'This username is already taken.'];
         }
 
-        // Argon2id over plaintext, empty salt (migration 2026-06-15). Stored on the
-        // request row and copied verbatim to the user on approval.
-        $ph = \AtomFramework\Core\Security\PasswordService::hash((string) $data['password']);
-        $passwordHash = $ph['password_hash'];
-        $salt = $ph['salt'];
+        // A hash stock AtoM can verify, stored on the request row and copied
+        // verbatim to the user on approval.
+        //
+        // PasswordService::hash() writes Argon2id over the plaintext with an
+        // empty salt. That is the better scheme and an AHG instance reads it -
+        // but QubitUser::checkCredentials() in unmodified AtoM computes only
+        //
+        //     password_verify(sha1($user->getSalt() . $password), $hash)
+        //
+        // so the account created at approval could never log in. The applicant
+        // registered, verified their address, waited for an administrator, and
+        // was handed an account that rejects its own password. Nothing in the
+        // flow reports it: the login screen just says the email or password is
+        // unrecognised.
+        //
+        // Patching base AtoM is not the answer - a base patch reverts silently on
+        // the next upgrade and takes every account created this way with it. So
+        // write the shape AtoM verifies, but with random_bytes(16) rather than
+        // AtoM's own md5(rand(100000, 999999) . email), which is six digits of
+        // entropy keyed on a value the attacker already has.
+        //
+        // A non-empty salt is exactly what PasswordService::verify() routes to
+        // its legacy branch, so an AHG instance reads these correctly too.
+        $salt = bin2hex(random_bytes(16));
+        $passwordHash = password_hash(sha1($salt.(string) $data['password']), PASSWORD_DEFAULT);
 
         // Generate email verification token
         $token = bin2hex(random_bytes(32));
@@ -114,7 +134,7 @@ class RegistrationService
     }
 
     /**
-     * Admin — manually mark a pending request's email as verified.
+     * Admin - manually mark a pending request's email as verified.
      * Used when the verification email could not be delivered (e.g. mail down)
      * and the applicant confirms their identity out-of-band (phone/in person).
      */
@@ -167,7 +187,7 @@ class RegistrationService
     }
 
     /**
-     * Approve a registration request — creates user (inactive=0 → active=1 on approval).
+     * Approve a registration request - creates user (inactive=0 -> active=1 on approval).
      *
      * @return array{success: bool, error?: string, user_id?: int}
      */
@@ -213,7 +233,7 @@ class RegistrationService
                     'authorized_form_of_name' => $request->full_name,
                 ]);
 
-                // Step 4: Insert user record — ACTIVE (user is approved)
+                // Step 4: Insert user record - ACTIVE (user is approved)
                 DB::table('user')->insert([
                     'id' => $id,
                     'username' => $request->username,
@@ -361,7 +381,7 @@ class RegistrationService
             $verifyUrl = $siteUrl . '/register/verify/' . $token;
             $siteName = \sfConfig::get('app_siteTitle', 'AtoM');
 
-            $subject = "Verify your email — {$siteName}";
+            $subject = "Verify your email - {$siteName}";
             $body = "Dear {$name},\n\n";
             $body .= "Thank you for registering at {$siteName}.\n\n";
             $body .= "Please click the link below to verify your email address:\n\n";
@@ -370,11 +390,11 @@ class RegistrationService
             $body .= "If you did not register, you can safely ignore this email.\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            // Send via the settings-driven AHG mailer (email_setting → SMTP/sendmail),
+            // Send via the settings-driven AHG mailer (email_setting -> SMTP/sendmail),
             // not AtoM's Swift mailer (which targets a dead localhost SMTP).
             \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
-            // Email failure is non-fatal — admin can still see request
+            // Email failure is non-fatal - admin can still see request
         }
     }
 
@@ -399,7 +419,7 @@ class RegistrationService
                 return;
             }
 
-            $subject = "New registration request — {$siteName}";
+            $subject = "New registration request - {$siteName}";
             $body = "A new registration request has been submitted and email verified.\n\n";
             $body .= "Name: {$request->full_name}\n";
             $body .= "Email: {$request->email}\n";
@@ -427,13 +447,13 @@ class RegistrationService
             $siteName = \sfConfig::get('app_siteTitle', 'AtoM');
             $siteUrl = \sfConfig::get('app_siteBaseUrl', '');
 
-            $subject = "Registration approved — {$siteName}";
+            $subject = "Registration approved - {$siteName}";
             $body = "Dear {$name},\n\n";
             $body .= "Your registration at {$siteName} has been approved.\n\n";
             $body .= "You can now log in at:\n{$siteUrl}/user/login\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            // Send via the settings-driven AHG mailer (email_setting → SMTP/sendmail),
+            // Send via the settings-driven AHG mailer (email_setting -> SMTP/sendmail),
             // not AtoM's Swift mailer (which targets a dead localhost SMTP).
             \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {
@@ -449,7 +469,7 @@ class RegistrationService
         try {
             $siteName = \sfConfig::get('app_siteTitle', 'AtoM');
 
-            $subject = "Registration update — {$siteName}";
+            $subject = "Registration update - {$siteName}";
             $body = "Dear {$name},\n\n";
             $body .= "We regret to inform you that your registration at {$siteName} has not been approved.\n\n";
             if ($reason) {
@@ -458,7 +478,7 @@ class RegistrationService
             $body .= "If you believe this is an error, please contact the administrator.\n\n";
             $body .= "Regards,\n{$siteName}";
 
-            // Send via the settings-driven AHG mailer (email_setting → SMTP/sendmail),
+            // Send via the settings-driven AHG mailer (email_setting -> SMTP/sendmail),
             // not AtoM's Swift mailer (which targets a dead localhost SMTP).
             \AhgCore\Services\EmailService::send($email, $subject, $body);
         } catch (\Exception $e) {

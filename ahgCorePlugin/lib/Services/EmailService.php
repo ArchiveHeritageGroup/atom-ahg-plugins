@@ -134,10 +134,32 @@ class EmailService
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         }
 
+        // UTF-8, explicitly.
+        //
+        // PHPMailer defaults to iso-8859-1. Every message this class sends is
+        // built as UTF-8, so without this any non-ASCII byte is reinterpreted:
+        // an em dash in "Verify your email - AtoM 2.10" arrived as "â€\"", and
+        // the same would happen to any accented name or to Afrikaans, isiZulu or
+        // Sesotho text in a template.
+        //
+        // The mail() path below already declared charset=UTF-8 in its headers,
+        // which is why this only showed up once SMTP was switched on - the two
+        // paths disagreed and only one of them was ever exercised.
+        //
+        // CharSet also governs the subject: PHPMailer MIME-encodes it as an
+        // encoded-word using this value, so setting it fixes header and body
+        // together.
+        $mail->CharSet = \PHPMailer\PHPMailer\PHPMailer::CHARSET_UTF8;
+
         $mail->setFrom($config['from_email'], $config['from_name']);
         $mail->addAddress($to);
         $mail->Subject = $subject;
         $mail->Body = $body;
+
+        // Plain text, matching the Content-Type the mail() path sets. Every
+        // caller in the suite builds bodies with \n, not markup; sending them
+        // as HTML would collapse those line breaks.
+        $mail->isHTML(false);
 
         return $mail->send();
     }
