@@ -22,13 +22,22 @@ class RegistrationService
             return ['success' => false, 'error' => 'Too many registration attempts. Please try again later.'];
         }
 
-        // Check for existing email
+        // Look for ANY existing request for this address, whatever its status.
+        //
+        // This used to filter on status IN (pending, verified) while the table
+        // carries a UNIQUE index (uk_email) covering every status. A request that
+        // had been approved, rejected or expired therefore passed the check and
+        // then broke the INSERT, and the raw integrity-constraint exception
+        // surfaced as "Oops! An Error Occurred" with nothing to act on.
+        //
+        // The effect was that a rejected or expired applicant could never apply
+        // again - not "declined", but a crash - and likewise anyone whose account
+        // was later removed, since the request row outlives the user it created.
         $existing = DB::table($this->table)
             ->where('email', $data['email'])
-            ->whereIn('status', ['pending', 'verified'])
             ->first();
 
-        if ($existing) {
+        if ($existing && in_array($existing->status, ['pending', 'verified'], true)) {
             return ['success' => false, 'error' => 'A registration request with this email is already pending.'];
         }
 
@@ -73,7 +82,9 @@ class RegistrationService
         // Generate email verification token
         $token = bin2hex(random_bytes(32));
 
-        $requestId = DB::table($this->table)->insertGetId([
+        $now = date('Y-m-d H:i:s');
+
+        $row = [
             'email' => $data['email'],
             'username' => $data['username'],
             'password_hash' => $passwordHash,
@@ -85,9 +96,42 @@ class RegistrationService
             'status' => 'pending',
             'email_token' => $token,
             'ip_address' => $ipAddress,
-            'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s'),
-        ]);
+            'updated_at' => $now,
+        ];
+
+        try {
+            if ($existing) {
+                // A finished request for this address - approved, rejected or
+                // expired - and the checks above established it no longer
+                // corresponds to a live account. Reuse the row rather than insert
+                // beside it, which uk_email forbids.
+                //
+                // The prior decision is cleared, not preserved: this is a new
+                // application and an administrator must see it as pending, not
+                // inherit an approval or rejection made about an earlier one.
+                DB::table($this->table)->where('id', $existing->id)->update($row + [
+                    'created_at' => $now,
+                    'email_verified_at' => null,
+                    'admin_notes' => null,
+                    'reviewed_by' => null,
+                    'reviewed_at' => null,
+                    'assigned_group_id' => null,
+                    'user_id' => null,
+                ]);
+
+                $requestId = (int) $existing->id;
+            } else {
+                $requestId = DB::table($this->table)->insertGetId($row + ['created_at' => $now]);
+            }
+        } catch (\Throwable $e) {
+            // Two submissions racing, or a state not enumerated above. Either way
+            // the applicant gets a sentence they can act on instead of an error
+            // page - a registration form is the first thing a stranger to the
+            // archive sees, and a stack trace there costs a real user.
+            error_log('Registration write failed for '.$data['email'].': '.$e->getMessage());
+
+            return ['success' => false, 'error' => 'This registration could not be saved. Please try again, or contact the archive if it persists.'];
+        }
 
         // Send verification email
         $this->sendVerificationEmail($data['email'], $data['full_name'], $token);
@@ -321,6 +365,11 @@ class RegistrationService
                     'reviewed_by' => $adminId,
                     'reviewed_at' => date('Y-m-d H:i:s'),
                     'assigned_group_id' => $assignGroupId,
+                    // Bind the request to the account it just created. The FK on
+                    // this column cascades, so deleting the user removes this row
+                    // rather than leaving an orphan that blocks the address from
+                    // ever registering again.
+                    'user_id' => $id,
                     'updated_at' => date('Y-m-d H:i:s'),
                 ]);
 
