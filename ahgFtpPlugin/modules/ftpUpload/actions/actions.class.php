@@ -9,14 +9,42 @@ class ftpUploadActions extends AhgController
     const CHUNK_SIZE = 10 * 1024 * 1024;
 
     /**
-     * SECURITY: the FTP/SFTP store (upload / delete / clearAll) is an
-     * administrator facility — gate the whole module. It previously only
-     * required login, so any authenticated user could drive it (clearAll
-     * mass-deletes the upload folder).
+     * SECURITY: gate on what each action can actually do.
+     *
+     * This module previously required only a login, so any authenticated user -
+     * a registered researcher included - could drive it, and clearAll
+     * mass-deletes the upload folder. That was closed by requiring administrator
+     * for the whole module, which shut the hole but also locked out the staff who
+     * do the bulk uploads: cataloguers who are editors or contributors, not
+     * administrators. Uploading a file is their job; wiping the store is not.
+     *
+     * So the gate follows the consequence rather than the module:
+     *
+     *   deleteFile, clearAll   destructive - administrator only
+     *   everything else        needs edit rights, not merely a login
+     *
+     * The original hole stays closed either way: a plain authenticated account
+     * with no edit rights gets nothing here.
      */
     public function boot(): void
     {
-        $this->requireAdmin();
+        $destructive = ['deletefile', 'clearall'];
+
+        if (in_array(strtolower((string) $this->getActionName()), $destructive, true)) {
+            $this->requireAdmin();
+
+            return;
+        }
+
+        $this->requireAuth();
+
+        $user = $this->getUser();
+
+        if (!$user->isAdministrator()
+            && !$user->hasCredential('editor')
+            && !$user->hasCredential('contributor')) {
+            $this->forward('admin', 'secure');
+        }
     }
 
     /** Temp directory for chunk assembly */
