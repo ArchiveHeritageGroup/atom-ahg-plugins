@@ -61,6 +61,15 @@
                     <div class="form-text"><?php echo __('Uploads every file in the folder, keeping its subfolder structure.') ?></div>
                 </div>
                 <div id="upload-progress" class="d-none">
+                    <!-- Batch summary and controls. With hundreds of files the
+                         per-file rows are unreadable on their own, and there was
+                         previously no way to stop the run as a whole. -->
+                    <div class="d-flex justify-content-between align-items-center bg-light border rounded p-2 mb-3 sticky-top">
+                        <div id="upload-summary" class="small text-muted"></div>
+                        <button type="button" id="pause-all-btn" class="btn btn-sm btn-outline-warning">
+                            <i class="fa fa-pause me-1"></i><?php echo __('Pause all') ?>
+                        </button>
+                    </div>
                     <!-- Per-file progress bars inserted by JS -->
                 </div>
             </div>
@@ -172,6 +181,21 @@
     var RETRY_DELAY_MS = 2000;
     var UPLOAD_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'uploadChunk']) ?>';
     var LIST_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'listFiles']) ?>';
+    var EXISTS_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'exists']) ?>';
+
+    // How many files are uploaded at once.
+    //
+    // Every selected file used to be started immediately. With 532 files that is
+    // 532 XMLHttpRequests opened at once; a browser will only run about six per
+    // host, so the other 526 sat in the browser's own queue with their 2-minute
+    // xhr.timeout already ticking. They timed out before they were ever sent,
+    // and each timeout then went through the retry-with-backoff path, which
+    // started the whole pile-up again. The uploads were not slow - most of them
+    // had not begun.
+    //
+    // Three at a time keeps the link busy without queueing anything behind a
+    // timeout it cannot outrun.
+    var MAX_CONCURRENT = 3;
     var DELETE_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'deleteFile']) ?>';
     var CLEAR_URL = '<?php echo url_for(['module' => 'ftpUpload', 'action' => 'clearAll']) ?>';
     var clearAllBtn = document.getElementById('clear-all-btn');
@@ -330,11 +354,172 @@
         if (e.dataTransfer.files.length > 0) startUploads(e.dataTransfer.files);
     });
 
+    // The pending queue, and how many files are in flight.
+    var queue = [];
+    var activeCount = 0;
+    var allPaused = false;
+    var totals = { queued: 0, done: 0, failed: 0, skipped: 0 };
+
     function startUploads(files) {
         progressContainer.classList.remove('d-none');
-        for (var i = 0; i < files.length; i++) {
-            chunkedUpload(files[i]);
+
+        var list = Array.prototype.slice.call(files);
+
+        if (!list.length) {
+            return;
         }
+
+        // Ask the server, once, which of these it already has, so re-running an
+        // interrupted upload only sends what is missing. One request for the
+        // whole batch - asking per file would be 532 round trips before the
+        // first byte, which is the delay this is meant to remove.
+        var manifest = list.map(function(f) {
+            return { name: f.name, dir: relativeDirOf(f), size: f.size };
+        });
+
+        setSummary('<?php echo __('Checking which files are already on the server...') ?>');
+
+        var fd = new FormData();
+        fd.append('items', JSON.stringify(manifest));
+
+        fetch(EXISTS_URL, { method: 'POST', body: fd, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(d) { enqueue(list, (d && d.existing) || []); })
+            .catch(function() {
+                // Never let the check stop the upload. Sending a file that turns
+                // out to be there is recoverable; skipping one that is not is
+                // a gap nobody notices until the record is opened.
+                enqueue(list, []);
+            });
+    }
+
+    function relativeDirOf(file) {
+        if (!file.webkitRelativePath) {
+            return '';
+        }
+
+        var slash = file.webkitRelativePath.lastIndexOf('/');
+
+        return slash > 0 ? file.webkitRelativePath.substring(0, slash) : '';
+    }
+
+    function enqueue(list, existingIndexes) {
+        var skip = {};
+
+        existingIndexes.forEach(function(i) { skip[i] = true; });
+
+        list.forEach(function(file, i) {
+            if (skip[i]) {
+                totals.skipped++;
+                renderSkipped(file);
+            } else {
+                queue.push(file);
+                totals.queued++;
+            }
+        });
+
+        updateSummary();
+        pump();
+    }
+
+    /**
+     * Start uploads until MAX_CONCURRENT are running.
+     *
+     * Called again whenever one finishes, fails or is cancelled, so the queue
+     * keeps moving without anything scheduling itself ahead of time.
+     */
+    function pump() {
+        while (!allPaused && activeCount < MAX_CONCURRENT && queue.length) {
+            activeCount++;
+            chunkedUpload(queue.shift());
+        }
+
+        updateSummary();
+    }
+
+    /**
+     * Give back the concurrency slot this file was holding.
+     *
+     * Guarded per file, because a file can reach an end state more than once -
+     * fail, be retried by hand, then fail again - and each of those paths calls
+     * this. Decrementing twice for one slot would let activeCount drift below
+     * zero and quietly raise the real concurrency above the limit, which is the
+     * behaviour this whole change exists to prevent.
+     */
+    function fileFinished(state) {
+        if (state) {
+            if (state.slotReleased) {
+                return;
+            }
+
+            state.slotReleased = true;
+        }
+
+        activeCount--;
+        pump();
+    }
+
+    function renderSkipped(file) {
+        progressContainer.insertAdjacentHTML('beforeend',
+            '<div class="mb-2 border rounded p-2 d-flex justify-content-between align-items-center">' +
+                '<span class="text-truncate"><i class="fa fa-check text-muted me-1"></i>' + escapeHtml(file.name) + '</span>' +
+                '<span class="badge bg-secondary"><?php echo __('Already on server') ?></span>' +
+            '</div>');
+    }
+
+    function setSummary(text) {
+        var el = document.getElementById('upload-summary');
+
+        if (el) {
+            el.innerHTML = text;
+        }
+    }
+
+    function updateSummary() {
+        setSummary(
+            '<strong>' + totals.done + '</strong> <?php echo __('uploaded') ?>' +
+            ' &middot; <strong>' + activeCount + '</strong> <?php echo __('in progress') ?>' +
+            ' &middot; <strong>' + queue.length + '</strong> <?php echo __('queued') ?>' +
+            (totals.skipped ? ' &middot; <strong>' + totals.skipped + '</strong> <?php echo __('already on server') ?>' : '') +
+            (totals.failed ? ' &middot; <strong class="text-danger">' + totals.failed + '</strong> <?php echo __('failed') ?>' : '')
+        );
+    }
+
+    // Pause everything, including whatever is mid-transfer.
+    //
+    // The per-file Pause button only ever set a flag that the NEXT chunk checked,
+    // so on a single-chunk file it appeared to do nothing at all, and with
+    // hundreds of files there was no way to stop the run as a whole - only 532
+    // individual buttons. This halts the queue and the transfers together.
+    var pauseAllBtn = document.getElementById('pause-all-btn');
+
+    if (pauseAllBtn) {
+        pauseAllBtn.addEventListener('click', function() {
+            allPaused = !allPaused;
+            pauseAllBtn.innerHTML = allPaused
+                ? '<i class="fa fa-play me-1"></i><?php echo __('Resume all') ?>'
+                : '<i class="fa fa-pause me-1"></i><?php echo __('Pause all') ?>';
+
+            Object.keys(uploads).forEach(function(id) {
+                var st = uploads[id];
+
+                if (!st) {
+                    return;
+                }
+
+                if (allPaused) {
+                    st.pause();
+                } else {
+                    st.resume();
+                }
+            });
+
+            if (!allPaused) {
+                pump();
+            }
+
+            updateSummary();
+        });
     }
 
     function generateId() {
@@ -389,27 +574,53 @@
         };
         uploads[uploadId] = state;
 
-        // Pause button
-        pauseBtn.classList.remove('d-none');
-        pauseBtn.addEventListener('click', function() {
+        // Pause and resume, as methods on the state so the "Pause all" button can
+        // drive every upload through the same path as the per-file buttons.
+        //
+        // Pausing ABORTS the request in flight rather than only setting a flag
+        // for the next chunk to notice. Setting the flag alone did nothing
+        // visible on a single-chunk file - the transfer ran to completion and
+        // the pause took effect on a chunk that never came - which is why Pause
+        // looked broken. Aborting is safe: currentChunk is only advanced once the
+        // server has confirmed a chunk, so resuming re-sends the same one.
+        state.pause = function() {
+            if (state.paused || state.cancelled) {
+                return;
+            }
+
             state.paused = true;
+
+            if (state.xhr) {
+                state.aborting = true;
+                try { state.xhr.abort(); } catch (e) {}
+                state.xhr = null;
+            }
+
             pauseBtn.classList.add('d-none');
             resumeBtn.classList.remove('d-none');
             status.textContent = '<?php echo __('Paused') ?>';
             status.className = 'upload-status badge bg-warning text-dark';
             bar.classList.remove('progress-bar-animated');
-            detail.textContent = '<?php echo __('Chunk') ?> ' + state.currentChunk + '/' + totalChunks + ' — <?php echo __('paused') ?>';
-        });
+            detail.textContent = '<?php echo __('Chunk') ?> ' + state.currentChunk + '/' + totalChunks + ' - <?php echo __('paused') ?>';
+        };
 
-        // Resume button
-        resumeBtn.addEventListener('click', function() {
+        state.resume = function() {
+            if (!state.paused || state.cancelled) {
+                return;
+            }
+
             state.paused = false;
+            state.retries = 0;
             resumeBtn.classList.add('d-none');
             pauseBtn.classList.remove('d-none');
             status.className = 'upload-status badge bg-primary';
             bar.classList.add('progress-bar-animated');
             sendChunk();
-        });
+        };
+
+        pauseBtn.classList.remove('d-none');
+        pauseBtn.addEventListener('click', function() { state.pause(); });
+        resumeBtn.addEventListener('click', function() { state.resume(); });
 
         // Cancel button
         cancelBtn.addEventListener('click', function() {
@@ -420,7 +631,15 @@
             status.className = 'upload-status badge bg-secondary';
             detail.textContent = '';
             el.querySelector('.upload-actions').innerHTML = '';
+
+            if (state.xhr) {
+                state.aborting = true;
+                try { state.xhr.abort(); } catch (e) {}
+                state.xhr = null;
+            }
+
             delete uploads[uploadId];
+            fileFinished(state);
         });
 
         function sendChunk() {
@@ -448,7 +667,13 @@
             formData.append('relativeDir', relDir);
 
             var xhr = new XMLHttpRequest();
+            state.xhr = xhr;
+            state.aborting = false;
             xhr.open('POST', UPLOAD_URL, true);
+
+            // An abort is a pause or a cancel, not a failure. Without this the
+            // abort surfaces through the error path and burns a retry.
+            xhr.addEventListener('abort', function() { state.xhr = null; });
 
             // Per-chunk progress
             xhr.upload.addEventListener('progress', function(e) {
@@ -493,6 +718,9 @@
                                 detail.textContent = formatBytes(file.size) + ' <?php echo __('in') ?> ' + formatTime(elapsed);
                                 el.querySelector('.upload-actions').innerHTML = '<i class="fa fa-check-circle text-success"></i>';
                                 delete uploads[uploadId];
+                                state.xhr = null;
+                                totals.done++;
+                                fileFinished(state);
                                 refreshFileList();
                             }
                         } else {
@@ -519,7 +747,7 @@
         }
 
         function handleChunkError(msg) {
-            if (state.cancelled) return;
+            if (state.cancelled || state.aborting || state.paused) return;
 
             state.retries++;
             if (state.retries <= MAX_RETRIES) {
@@ -537,7 +765,15 @@
                     }
                 }, delay);
             } else {
-                // Max retries exceeded — allow manual resume
+                // Max retries exceeded - allow manual resume.
+                //
+                // Release the concurrency slot as well, or a batch would grind to
+                // a halt three failures in with hundreds of files still queued
+                // and nothing running.
+                state.xhr = null;
+                totals.failed++;
+                fileFinished(state);
+
                 bar.classList.remove('progress-bar-animated', 'progress-bar-striped');
                 bar.classList.add('bg-danger');
                 status.textContent = '<?php echo __('Failed') ?>';
@@ -551,6 +787,13 @@
                 var origResume = resumeBtn.onclick;
                 resumeBtn.onclick = null;
                 resumeBtn.addEventListener('click', function handler() {
+                    // Taking a slot back, so the manual retry counts against the
+                    // same limit as everything else.
+                    if (state.slotReleased) {
+                        state.slotReleased = false;
+                        activeCount++;
+                    }
+
                     state.retries = 0;
                     state.paused = false;
                     resumeBtn.classList.add('d-none');

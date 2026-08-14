@@ -124,9 +124,17 @@ class auditTrailActions extends AhgController
             'requestToPublish' => 'Request to Publish',
         ]);
 
+        // Keyed on the codes in the security_classification table - PUBLIC,
+        // CONFIDENTIAL - which is what AuditService now records. The lowercase
+        // keys that were here matched nothing, and nothing was ever written to
+        // this column anyway.
         $this->securityLevels = $this->distinctWithLabels('security_classification', [
-            'public' => 'Public', 'restricted' => 'Restricted',
-            'confidential' => 'Confidential', 'secret' => 'Secret', 'top_secret' => 'Top Secret',
+            'PUBLIC' => 'Public',
+            'INTERNAL' => 'Internal',
+            'RESTRICTED' => 'Restricted',
+            'CONFIDENTIAL' => 'Confidential',
+            'SECRET' => 'Secret',
+            'TOP_SECRET' => 'Top Secret',
         ]);
 
         // Get distinct usernames from audit log for dropdown
@@ -136,6 +144,59 @@ class auditTrailActions extends AhgController
             ->orderBy('username')
             ->pluck('username')
             ->toArray();
+    }
+
+    /**
+     * Words that should not be title-cased like ordinary words.
+     *
+     * Without these, aiAssess reads "Ai Assess", adminErdEdit reads "Admin Erd
+     * Edit" and webauthnRegisterBegin reads "Webauthn Register Begin" - each one
+     * technically a word and none of them how anyone writes it.
+     */
+    protected const ACRONYMS = [
+        'ai' => 'AI', 'api' => 'API', 'acl' => 'ACL', 'csv' => 'CSV', 'doi' => 'DOI',
+        'ead' => 'EAD', 'erd' => 'ERD', 'html' => 'HTML', 'id' => 'ID', 'iiif' => 'IIIF',
+        'ip' => 'IP', 'isbn' => 'ISBN', 'json' => 'JSON', 'marc' => 'MARC', 'mfa' => 'MFA',
+        'oai' => 'OAI', 'ocr' => 'OCR', 'pdf' => 'PDF', 'pii' => 'PII', 'qr' => 'QR',
+        'ric' => 'RiC', 'sip' => 'SIP', 'aip' => 'AIP', 'dip' => 'DIP', 'sql' => 'SQL',
+        'url' => 'URL', 'xml' => 'XML', 'ner' => 'NER', 'llm' => 'LLM', 'pwa' => 'PWA',
+        'webauthn' => 'WebAuthn', 'graphql' => 'GraphQL', 'sharepoint' => 'SharePoint',
+    ];
+
+    /**
+     * Turn a stored code into something a person would write.
+     *
+     * Heratio renders the same list with ucfirst(), which leaves the underscore
+     * and the camel hump in place - "Version_created", "UploadChunk". This does
+     * the three things that actually make the difference: split on underscores
+     * and camelCase, separate a trailing number so error404 is not one word, and
+     * keep acronyms in the case people write them in.
+     */
+    protected static function humanise(string $value): string
+    {
+        $words = str_replace(['_', '-'], ' ', $value);
+
+        // Split camelCase, but only where there is a case boundary to split on.
+        // Applied to an all-caps code such as TOP_SECRET this would put a space
+        // before every letter and render "T O P  S E C R E T".
+        if ($words !== strtoupper($words)) {
+            $words = preg_replace('/(?<!^)[A-Z]/', ' $0', $words);
+        }
+
+        // error404 -> "error 404", not "Error404".
+        $words = preg_replace('/([a-zA-Z])(\d)/', '$1 $2', $words);
+
+        $parts = preg_split('/\s+/', strtolower(trim($words)), -1, PREG_SPLIT_NO_EMPTY);
+
+        if (!$parts) {
+            return $value;
+        }
+
+        foreach ($parts as $i => $word) {
+            $parts[$i] = self::ACRONYMS[$word] ?? ucfirst($word);
+        }
+
+        return implode(' ', $parts);
     }
 
     /**
@@ -159,8 +220,13 @@ class auditTrailActions extends AhgController
         $out = [];
 
         foreach ($values as $value) {
-            $out[$value] = $labels[$value]
-                ?? ucfirst(trim(preg_replace('/(?<!^)[A-Z]/', ' $0', str_replace('_', ' ', (string) $value))));
+            if (isset($labels[$value])) {
+                $out[$value] = $labels[$value];
+
+                continue;
+            }
+
+            $out[$value] = self::humanise((string) $value);
         }
 
         return $out;

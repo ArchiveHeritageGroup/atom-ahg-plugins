@@ -15,6 +15,18 @@ use AtoM\Framework\Plugins\AuditTrail\Repositories\AuditSettingsRepository;
 
 class AuditService
 {
+    /**
+     * object_id => classification code, for the life of one request.
+     *
+     * A single request can audit the same object more than once (view, then a
+     * download of its digital object), and this saves repeating the lookup.
+     * Capped because a long-running CLI task audits thousands of objects and an
+     * unbounded cache would be a slow memory leak.
+     */
+    protected static array $classificationCache = [];
+
+    protected const CLASSIFICATION_CACHE_LIMIT = 500;
+
     protected AuditLogRepository $auditRepo;
     protected AuditAuthenticationRepository $authRepo;
     protected AuditAccessRepository $accessRepo;
@@ -95,7 +107,8 @@ class AuditService
             'new_values' => $this->maskSensitiveData($options['new_values'] ?? null),
             'changed_fields' => $options['changed_fields'] ?? null,
             'metadata' => $options['metadata'] ?? null,
-            'security_classification' => $options['security_classification'] ?? null,
+            'security_classification' => $options['security_classification']
+                ?? $this->resolveClassification($entityId ?? null),
             'status' => $options['status'] ?? AuditLog::STATUS_SUCCESS,
             'error_message' => $options['error_message'] ?? null,
         ];
@@ -197,7 +210,8 @@ class AuditService
             'entity_id' => $entity->id ?? null,
             'entity_slug' => $entity->slug ?? null,
             'entity_title' => $this->getEntityTitle($entity),
-            'security_classification' => $options['security_classification'] ?? null,
+            'security_classification' => $options['security_classification']
+                ?? $this->resolveClassification($entity->id ?? null),
             'security_clearance_level' => $options['clearance_level'] ?? null,
             'clearance_verified' => $options['clearance_verified'] ?? false,
             'file_path' => $options['file_path'] ?? null,
@@ -245,6 +259,57 @@ class AuditService
     {
         if (method_exists($entity, 'toArray')) return $this->maskSensitiveData($entity->toArray());
         return [];
+    }
+
+    /**
+     * The security classification of the object being audited.
+     *
+     * The column existed and was never once populated - 3.19M rows, every one
+     * NULL - because AuditService only ever stored what a caller passed in
+     * $options['security_classification'], and no caller anywhere passes it.
+     * An audit trail that cannot say whether the record someone opened was
+     * Confidential is missing the one fact a security audit is for, and the gap
+     * was invisible: the filter simply offered levels that matched nothing.
+     *
+     * Resolved here instead of at every call site, so it holds for anything that
+     * audits - existing callers included - without each one having to remember.
+     *
+     * Reads ahg_io_security, where object_id is the primary key, so this is a
+     * single indexed lookup. It returns the classification's code (CONFIDENTIAL,
+     * SECRET) rather than its id, so the log stays readable on its own and
+     * survives the classification table being re-keyed.
+     */
+    protected function resolveClassification($entityId): ?string
+    {
+        if (empty($entityId) || !is_numeric($entityId)) {
+            return null;
+        }
+
+        $key = (int) $entityId;
+
+        if (array_key_exists($key, self::$classificationCache)) {
+            return self::$classificationCache[$key];
+        }
+
+        $code = null;
+
+        try {
+            $code = \Illuminate\Database\Capsule\Manager::table('ahg_io_security as s')
+                ->join('security_classification as c', 'c.id', '=', 's.security_classification_id')
+                ->where('s.object_id', $key)
+                ->value('c.code');
+        } catch (\Throwable $e) {
+            // Auditing must not fail because a lookup did. An unclassified row
+            // is a smaller loss than a lost audit record - or than breaking the
+            // page that triggered it.
+            return null;
+        }
+
+        if (count(self::$classificationCache) >= self::CLASSIFICATION_CACHE_LIMIT) {
+            self::$classificationCache = [];
+        }
+
+        return self::$classificationCache[$key] = ($code ?: null);
     }
 
     protected function maskSensitiveData(?array $data): ?array

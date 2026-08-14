@@ -358,14 +358,15 @@ class FtpService
         return ['success' => true, 'message' => 'File uploaded successfully'];
     }
 
-    protected function ftpListFiles(): array
+    protected function ftpListFiles(string $relativeDir = ''): array
     {
         $result = $this->connectFtp();
         if (!$result['success']) {
             return ['success' => false, 'message' => $result['message'], 'files' => []];
         }
 
-        $rawList = @ftp_rawlist($this->ftpConn, $this->remotePath);
+        $path = $this->remotePath.('' !== $relativeDir ? '/'.$relativeDir : '');
+        $rawList = @ftp_rawlist($this->ftpConn, $path);
         $this->disconnect();
 
         if ($rawList === false) {
@@ -488,15 +489,21 @@ SFTPEOF";
         return ['success' => true, 'message' => 'File uploaded successfully'];
     }
 
-    protected function sftpListFiles(): array
+    protected function sftpListFiles(string $relativeDir = ''): array
     {
         $prefix = $this->sshpassPrefix();
         $opts = $this->sshOpts();
         $port = (int) $this->port;
         $userHost = escapeshellarg($this->username . '@' . $this->host);
-        $remotePath = escapeshellarg($this->remotePath);
 
-        $cmd = "{$prefix} sftp -P {$port} {$opts} {$userHost} 2>/dev/null <<SFTPEOF\nls -l {$this->remotePath}\nbye\nSFTPEOF";
+        // sanitizeRelativePath has already rejected traversal, but this value is
+        // interpolated into a shell heredoc, so anything outside a plain path
+        // segment is dropped rather than trusted.
+        $rel = preg_replace('#[^A-Za-z0-9._/\\-]#', '', $relativeDir);
+        $listPath = $this->remotePath.('' !== $rel ? '/'.$rel : '');
+        $remotePath = escapeshellarg($listPath);
+
+        $cmd = "{$prefix} sftp -P {$port} {$opts} {$userHost} 2>/dev/null <<SFTPEOF\nls -l {$listPath}\nbye\nSFTPEOF";
 
         $output = [];
         $exitCode = 0;
@@ -584,6 +591,110 @@ SFTPEOF";
      * hidden/empty segments and unsafe characters; returns a safe relative path
      * like "MyFolder/sub" or '' if nothing valid remains.
      */
+    /**
+     * Which of these files the destination already has.
+     *
+     * Answers for a whole batch in one request. The alternative - the client
+     * asking once per file - is 532 round trips before a single byte is sent,
+     * which is the problem this is meant to relieve rather than add to.
+     *
+     * $items is a list of ['name' => string, 'dir' => string, 'size' => int].
+     * Returns the indexes that already exist, so the caller can skip exactly
+     * those and upload the rest.
+     *
+     * A file counts as present only when the SIZE MATCHES TOO. Name alone would
+     * skip a half-written file from an interrupted run and call the collection
+     * complete, which is the worst outcome available here: silent, and only
+     * discovered when someone opens the record. A size mismatch is treated as
+     * absent so the file is re-sent and overwritten.
+     */
+    public function existing(array $items): array
+    {
+        $present = [];
+
+        // Group by directory so each one is listed once, however many files it
+        // holds. Directory listing is the expensive call on FTP and SFTP.
+        $byDir = [];
+
+        foreach ($items as $i => $item) {
+            $dir = $this->sanitizeRelativePath((string) ($item['dir'] ?? ''));
+            $byDir[$dir][] = $i;
+        }
+
+        foreach ($byDir as $dir => $indexes) {
+            $sizes = $this->sizesIn($dir);
+
+            if (null === $sizes) {
+                // The directory could not be read - it may simply not exist yet.
+                // Skip nothing: uploading a file that turns out to be there is
+                // recoverable, not uploading one that is not is data loss.
+                continue;
+            }
+
+            foreach ($indexes as $i) {
+                $name = (string) ($items[$i]['name'] ?? '');
+                $size = (int) ($items[$i]['size'] ?? -1);
+
+                if ('' !== $name && isset($sizes[$name]) && $sizes[$name] === $size) {
+                    $present[] = $i;
+                }
+            }
+        }
+
+        return $present;
+    }
+
+    /**
+     * filename => size for one directory, or null if it cannot be read.
+     */
+    protected function sizesIn(string $relativeDir): ?array
+    {
+        if ('local' === $this->protocol) {
+            $dir = $this->localDir.('' !== $relativeDir ? '/'.$relativeDir : '');
+
+            if (!is_dir($dir)) {
+                return null;
+            }
+
+            $sizes = [];
+
+            foreach (scandir($dir) ?: [] as $f) {
+                if ('.' === $f || '..' === $f) {
+                    continue;
+                }
+
+                $path = $dir.'/'.$f;
+
+                if (is_file($path)) {
+                    $sizes[$f] = (int) @filesize($path);
+                }
+            }
+
+            return $sizes;
+        }
+
+        // FTP and SFTP: reuse the existing listing, which reports name and size.
+        try {
+            $listed = 'sftp' === $this->protocol ? $this->sftpListFiles($relativeDir) : $this->ftpListFiles($relativeDir);
+        } catch (\Throwable $e) {
+            return null;
+        }
+
+        if (empty($listed['success'])) {
+            return null;
+        }
+
+        $sizes = [];
+
+        foreach ($listed['files'] ?? [] as $f) {
+            if (isset($f['name'])) {
+                $sizes[$f['name']] = (int) ($f['size'] ?? -1);
+            }
+        }
+
+        return $sizes;
+    }
+
     protected function sanitizeRelativePath(string $path): string
     {
         $parts = [];

@@ -299,6 +299,41 @@ class ftpUploadActions extends AhgController
     /**
      * AJAX: list remote files.
      */
+    /**
+     * Which of a batch of files the destination already holds (AJAX).
+     *
+     * Asked once, before anything is sent, so a re-run of an interrupted upload
+     * only transfers what is actually missing.
+     */
+    public function executeExists(sfWebRequest $request)
+    {
+        if (!$this->getUser()->isAuthenticated()) {
+            return $this->json(['success' => false, 'message' => 'Unauthorized']);
+        }
+
+        $items = json_decode((string) $request->getParameter('items', '[]'), true);
+
+        if (!is_array($items)) {
+            return $this->json(['success' => false, 'message' => 'Malformed request', 'existing' => []]);
+        }
+
+        // A guard, not a limit on what anyone may upload: the client sends the
+        // whole manifest in one request and this is decoded into memory.
+        if (count($items) > 5000) {
+            $items = array_slice($items, 0, 5000, true);
+        }
+
+        try {
+            $existing = $this->getFtpService()->existing($items);
+        } catch (\Throwable $e) {
+            // Skipping nothing is the safe failure. The upload proceeds in full
+            // rather than silently omitting files because a listing failed.
+            return $this->json(['success' => true, 'existing' => [], 'degraded' => true]);
+        }
+
+        return $this->json(['success' => true, 'existing' => $existing]);
+    }
+
     public function executeListFiles(sfWebRequest $request)
     {
         if (!$this->getUser()->isAuthenticated()) {

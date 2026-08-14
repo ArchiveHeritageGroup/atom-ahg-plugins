@@ -218,6 +218,7 @@ FTPJS;
         $r->any('ftp_upload_do', '/ftp-upload/upload', 'upload');
         $r->any('ftp_upload_chunk', '/ftp-upload/chunk', 'uploadChunk');
         $r->any('ftp_upload_list', '/ftp-upload/list', 'listFiles');
+        $r->any('ftp_upload_exists', '/ftp-upload/exists', 'exists');
         $r->any('ftp_upload_delete', '/ftp-upload/delete', 'deleteFile');
         $r->any('ftp_upload_import', '/ftp-upload/import-as-upload', 'importAsUpload');
 
