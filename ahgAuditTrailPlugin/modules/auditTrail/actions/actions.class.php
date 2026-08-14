@@ -137,6 +137,8 @@ class auditTrailActions extends AhgController
             'TOP_SECRET' => 'Top Secret',
         ]);
 
+        $this->timezoneNote = $this->timezoneNote();
+
         // Get distinct usernames from audit log for dropdown
         $this->usernames = DB::table('ahg_audit_log')
             ->whereNotNull('username')
@@ -144,6 +146,46 @@ class auditTrailActions extends AhgController
             ->orderBy('username')
             ->pluck('username')
             ->toArray();
+    }
+
+    /**
+     * The timezone-changeover note, or null if there is nothing to say.
+     *
+     * AtoM ships America/Vancouver in locked base config, so an instance that
+     * corrects its timezone ends up with a log whose timestamps step by several
+     * hours at one point. Unexplained, that reads as corrupted data. Explained, it
+     * is a setting that was fixed on a known date.
+     *
+     * Driven entirely by settings, and self-suppressing: no note on an instance
+     * that never changed over, and none once the log no longer reaches back past
+     * the change. Nothing is hardcoded here - the date differs per instance, and
+     * some (WDB) have not changed over at all.
+     */
+    protected function timezoneNote(): ?array
+    {
+        try {
+            $changedAt = trim((string) \AtomExtensions\Services\AhgSettingsService::get('audit_timezone_changed_at', ''));
+
+            if ('' === $changedAt) {
+                return null;
+            }
+
+            // Only worth saying while entries from before the change still exist.
+            $older = DB::table('ahg_audit_log')->where('created_at', '<', $changedAt)->limit(1)->count();
+
+            if (!$older) {
+                return null;
+            }
+
+            return [
+                'changed_at' => $changedAt,
+                'previous' => trim((string) \AtomExtensions\Services\AhgSettingsService::get('audit_timezone_previous', 'America/Vancouver')),
+                'current' => date_default_timezone_get(),
+            ];
+        } catch (\Throwable $e) {
+            // A footnote must never take the audit screen down.
+            return null;
+        }
     }
 
     /**

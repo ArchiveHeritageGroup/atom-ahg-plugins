@@ -193,3 +193,62 @@ Verified by reading the body, not the status: `body class="... user login"`, and
 response. Test access control on page content, never on status code.
 
 Confirmed working on WDB by the user.
+
+---
+
+# Addendum: timezone (v3.99.27)
+
+## AtoM ships America/Vancouver, and every deployment inherits it
+
+`apps/qubit/config/settings.yml` line 60: `default_timezone: America/Vancouver` -
+Artefactual's own timezone, correct for them. Symfony applies it with
+`date_default_timezone_set()`, so **everything PHP timestamps** lands in Vancouver
+time. On PSIS that put every `ahg_audit_log` row 9 hours behind local time (the log
+said 23:28 while the clock said 08:28 the next morning), and the audit screen's
+from/to date filters inherited the same skew - a search for "today" quietly missed
+most of today.
+
+## Fixed without touching locked base config
+
+`apps/` is locked. There is no project-level `settings.yml` to override from, and an
+app-level value would win over one anyway. **A plugin's `initialize()` runs BEFORE
+symfony's `initConfiguration()`**, so setting the timezone there is overwritten
+moments later - the trap to avoid.
+
+`context.load_factories` is the first hook where it sticks: after configuration,
+before any action, once per request. Forty other AHG listeners already use it.
+`ahgCorePlugin/lib/Listeners/TimezoneOverride.php`.
+
+**Opt-in by design.** No `ahg_settings.default_timezone` row, no change. This code
+ships to every AHG instance internationally; there is no correct value to hardcode,
+only a correct value per deployment. An unrecognised value is ignored (validated
+against `DateTimeZone::listIdentifiers()`) - `date_default_timezone_set()` on a bad
+name emits a warning per request and keeps the old value, which is a warning storm
+and no fix.
+
+Verified on 131 with a throwaway probe module: unset gave
+`America/Vancouver 05:28 PDT` against a system clock of `14:28 SAST`; set gave
+`Africa/Johannesburg 14:29:05 SAST`, matching exactly. Invalid value fell back with
+zero warnings. On PSIS after deployment, newest audit row vs `NOW()` went from
+**540 minutes behind to 0**.
+
+## The 3.19M historical rows were NOT corrected, deliberately
+
+`ChainedAuditWriter` includes `created_at` in the hashed payload -
+`entry_hash = SHA-256(prev_hash || canonical(content))` - across **2,734,614**
+chained rows. Rewriting those timestamps would invalidate every subsequent hash and
+make the entire log read as tampered with. **That is precisely what the mechanism
+exists to detect; tamper-evidence you can quietly rewrite is not tamper-evidence.**
+
+So the change is forward-only: from 2026-08-14 timestamps are SAST, everything
+before is Vancouver time.
+
+Two further reasons a "simple" correction would have been wrong anyway:
+
+- **The offset is not constant.** The log starts 2026-03-03; Vancouver was on PST
+  (UTC-8, ten hours) until 8 March and PDT (UTC-7, nine hours) after. A blanket +9h
+  would have corrupted the first five days.
+- **MySQL's timezone tables are not loaded** on this host, so `CONVERT_TZ` with named
+  zones returns NULL - checked, not assumed.
+
+Suggested follow-up: a note on the audit screen recording the changeover date.

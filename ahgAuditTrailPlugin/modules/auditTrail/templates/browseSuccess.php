@@ -71,6 +71,33 @@
 <?php slot('content') ?>
 <?php $pagerRaw = $sf_data->getRaw('pager'); ?>
 
+<?php if (!empty($timezoneNote)): ?>
+  <?php /*
+    Shown only where this instance has actually changed timezone and the log still
+    holds rows from before it. AtoM records timestamps in whatever
+    date_default_timezone_set() was given, and ships America/Vancouver; when an
+    instance corrects that, older entries keep the timezone they were written in.
+    The times therefore step by several hours at a single point in the log, and
+    without saying so that reads as corrupted data rather than a fixed setting.
+
+    The rows are not rewritten: created_at is inside the audit hash chain, so
+    editing it would make every later entry read as tampered with.
+  */ ?>
+  <div class="alert alert-info d-flex align-items-start" role="note">
+    <i class="fas fa-clock me-2 mt-1" aria-hidden="true"></i>
+    <div>
+      <?php echo __(
+          'Entries recorded before %1% are timestamped in %2%; later entries use %3%. Times therefore shift at that point in the log. Earlier entries are left exactly as written - their timestamps form part of the tamper-evident record and are not rewritten.',
+          [
+              '%1%' => '<strong>'.esc_entities($timezoneNote['changed_at']).'</strong>',
+              '%2%' => esc_entities($timezoneNote['previous']),
+              '%3%' => esc_entities($timezoneNote['current']),
+          ]
+      ) ?>
+    </div>
+  </div>
+<?php endif; ?>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <span class="text-muted"><?php echo __('Showing %1% to %2% of %3% results', ['%1%' => $pagerRaw['from'], '%2%' => $pagerRaw['to'], '%3%' => $pagerRaw['total']]) ?></span>
   <div class="btn-group btn-group-sm">
