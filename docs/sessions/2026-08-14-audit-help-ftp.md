@@ -252,3 +252,59 @@ Two further reasons a "simple" correction would have been wrong anyway:
   zones returns NULL - checked, not assumed.
 
 Suggested follow-up: a note on the audit screen recording the changeover date.
+
+---
+
+# Addendum: cart + request-to-publish standalone on 131 (v3.99.29)
+
+Both installed on the clean AtoM 2.10 box (131) as real directories under `plugins/`,
+the autonomous-delivery layout. 12 tables, enabled after `ahgCorePlugin`. Core
+`informationobject` and `actor` browse unaffected - cart's `module.yml` injection into
+that core module is inert.
+
+## THE BUG: includes built from sf_root_dir . '/atom-ahg-plugins/...'
+
+22 requires (21 in cart, 1 in RTP) of the form
+
+    require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/...'
+
+That path only resolves where `plugins/<name>` is a **symlink into
+`atom-ahg-plugins/`**, which is how PSIS is laid out. Installed as a real directory
+every one of them failed, and the failure was near-invisible: the admin order and
+settings pages returned an **empty HTTP 200** - no content, no error page, nothing in
+`ahg_error_log`, because the include fatal happened after headers. A status-code
+sweep reads that as "ok".
+
+Rewritten to `dirname(__FILE__, N)` so they resolve from the file's own location.
+**Works in both layouts**: PHP resolves `__FILE__` through symlinks to the real path,
+verified on PSIS.
+
+**LESSON: grepping for the literal path is not enough.** The earlier audit searched
+for `/usr/share/nginx` and found zero, because the path was *constructed* from
+`sf_root_dir`. Search for `atom-ahg-plugins` as a string in any plugin being assessed
+for standalone use. Same class as the `ahgExtendedRightsPlugin` fix.
+
+## My install was incomplete (not a plugin bug)
+
+`schema:install` globs `<plugin>/database/*.sql` - install.sql first, then the rest
+alphabetically. RTP keeps `rtp_workflow` and `rtp_review` in a separate
+`workflow.sql`, so piping only `install.sql` left the inbox 500ing on a missing table.
+**Install a plugin with `schema:install`, or apply every `database/*.sql`, not just
+install.sql.** PSIS has all four tables because `workflow.sql` was run by hand there,
+which is why this never surfaced before a genuinely fresh install.
+
+The admin error page (v3.99.24) earned its keep here: it named
+`Table 'atom.rtp_workflow' doesn't exist` on screen rather than requiring a log dig.
+
+## Open, not fixed
+
+- `/admin/pricing` is routed to an `adminPricing` action with **no action file and no
+  template** anywhere in the plugin - 404 for everyone including admins. Seed data
+  installed fine (9 product types, 9 pricing rows), so the data model exists and the
+  admin screen does not. Left in place: looks like an unfinished feature, not a typo.
+- RTP still ships two modules differing only in case: `requestToPublish` (routed, 7
+  actions, no security.yml) and `requesttopublish` (dead, 3 actions, has one). Not
+  exploitable - 6 of 7 live actions guard imperatively and the 7th is a token URL -
+  but the guarded-looking config guards nothing.
+- Cart's `modules/cart/config/security.yml` is the fail-open catch-all
+  (`all: is_secure: false`) over 18 actions, mitigated imperatively.

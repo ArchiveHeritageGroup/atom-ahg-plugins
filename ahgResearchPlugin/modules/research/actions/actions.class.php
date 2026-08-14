@@ -1369,6 +1369,29 @@ class researchActions extends AhgController
         $adminId = $this->getUser()->getAttribute('user_id');
         $this->service->approveResearcher($id, $adminId);
         DB::table('user')->where('id', $researcher->user_id)->update(['active' => 1]);
+
+        // Close the access request this registration opened.
+        //
+        // Registration creates an access_request alongside the researcher record
+        // (ResearchService::registerResearcher). Rejection resolved it, setting
+        // it to 'denied' with the reviewer and timestamp - but approval did not
+        // touch it at all, so every approved researcher left a request sitting in
+        // the queue as pending, permanently. Each one reads as outstanding work
+        // that nobody can clear, and a review queue that cannot be emptied stops
+        // being trusted.
+        //
+        // Mirrors the reject path exactly, including the guard on 'pending' so a
+        // request already resolved by another route is not overwritten.
+        DB::table('access_request')
+            ->where('user_id', $researcher->user_id)
+            ->where('request_type', 'researcher')
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'approved',
+                'reviewed_by' => $adminId,
+                'reviewed_at' => date('Y-m-d H:i:s'),
+            ]);
+
         // Send approval email
         $this->sendResearcherEmail('approved', $researcher);
         $this->getUser()->setFlash('success', 'Researcher approved and account activated');
