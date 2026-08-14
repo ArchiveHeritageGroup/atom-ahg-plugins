@@ -1,7 +1,7 @@
 <?php
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/CartService.php';
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCartPlugin/lib/Services/EcommerceService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/CartService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/EcommerceService.php';
 
 use AtomFramework\Http\Controllers\AhgController;
 use AtomAhgPlugins\ahgCartPlugin\Services\CartService;

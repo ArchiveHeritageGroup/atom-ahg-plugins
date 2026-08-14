@@ -123,7 +123,7 @@ class RequestToPublishEditRequestToPublishAction extends AhgEditController {
 			
 			case 'outcome':
 				// Load RTP status choices from taxonomy (issue #130)
-				require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+				require_once dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
 				$taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
 				$choices = $taxonomyService->getRtpStatuses(false);
 
