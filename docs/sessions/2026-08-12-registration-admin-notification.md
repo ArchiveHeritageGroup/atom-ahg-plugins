@@ -189,3 +189,87 @@ the guard is not weakened.
   `td:last-child` for Actions. The table has 8 columns; adding one before Status
   breaks the row update silently, and a row that does not update is what invites
   the second click.
+
+---
+
+# Addendum 2 (v3.99.23): "/register - Oops! An Error Occurred"
+
+## An orphaned request made an address permanently unregisterable
+
+Reported as a 500 on `/register/`. The page was fine; **submitting** it died:
+
+    SQLSTATE[23000]: Integrity constraint violation: 1062
+    Duplicate entry 'pieterse.johan3@gmail.com' for key 'uk_email'
+
+`createRequest()` had two guards and neither covered the case:
+
+1. an existing request, but filtered to `status IN (pending, verified)`
+2. an existing `user` account with that email
+
+`uk_email` is UNIQUE across **every** status. So an `approved` row whose account had
+since been deleted passed both checks, and the INSERT then broke on the index. The
+raw PDO exception surfaced as AtoM's error page with nothing to act on.
+
+Not specific to a deleted account: **any `rejected` or `expired` address could never
+register again**, and crashed rather than saying so. A rejected applicant had no way
+to reapply.
+
+### Fixes
+
+- The lookup considers all statuses. A finished request with no live account is
+  **reused** - the row is rewritten and the prior decision cleared
+  (`email_verified_at`, `admin_notes`, `reviewed_by`, `reviewed_at`,
+  `assigned_group_id`, `user_id` all nulled) so an administrator sees a fresh
+  pending request rather than inheriting a decision about an earlier application.
+- The write is wrapped. A race or an unenumerated state returns a sentence the
+  applicant can act on. A registration form is the first thing a stranger to the
+  archive sees; a stack trace there costs a real user.
+
+## The root cause: nothing linked a request to the account it created
+
+Deleting a user left its `ahg_registration_request` row behind, because no column
+connected them. Added `user_id INT NULL` with
+`FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE`, set in `approve()`.
+
+**A database constraint, not application code, and deliberately so.** AtoM deletes
+users from base code this plugin cannot hook, and users also disappear via CLI tasks
+and via the `object` -> `actor` -> `user` cascade. A cleanup in one code path would
+be missed by the others. Verified the cascade fires through two levels: deleting the
+`object` row removes the user and the registration request with it.
+
+## GOTCHA: user.email and the plugin table have different collations
+
+The first draft of the migration backfilled with `JOIN user u ON u.email = r.email`.
+That works on a fresh install and **aborts on PSIS**:
+
+    ERROR 1267: Illegal mix of collations
+    (utf8mb4_0900_ai_ci,IMPLICIT) and (utf8mb4_unicode_ci,IMPLICIT)
+
+AtoM's `user` table is `utf8mb4_0900_ai_ci` (the MySQL 8 default); this plugin
+declares `utf8mb4_unicode_ci`. **Any join between an AHG plugin table and a core AtoM
+table on a string column has this problem.** Fix: `COLLATE utf8mb4_general_ci` on
+BOTH sides - named explicitly because it exists on MySQL 5.7, MySQL 8 and MariaDB,
+whereas `utf8mb4_0900_ai_ci` does not.
+
+131 did not catch this. Preview a migration against production data before shipping
+it, not only against the test instance.
+
+## Verified
+
+131, full chain through the app with no direct DB writes: register -> reject ->
+re-register (reuse path) -> verify -> approve -> **signed in with the new password,
+old password correctly refused**, which proves reuse rewrites the credentials rather
+than carrying stale ones. Deleting the account removed the request via cascade. The
+three refusal cases each return a message with nothing written: pending duplicate,
+existing account, taken username.
+
+PSIS: migration applied, 2 approved requests linked to their live accounts, nothing
+deleted (no orphans present), re-run confirmed a no-op, site healthy, zero new
+`ahg_error_log` entries.
+
+### Note for the next person
+
+The migration was applied by piping the .sql directly on both hosts, so
+`atom_framework_migrations` does not record it. A fresh install gets the column from
+`install.sql` (updated in the same commit), but an instance migrated this way will
+not show the migration as run.

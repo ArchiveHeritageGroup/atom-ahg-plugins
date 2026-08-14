@@ -100,6 +100,14 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
         // symfony still renders the page it would have.
         $this->dispatcher->connect('application.throw_exception', ['ahgCorePluginConfiguration', 'logThrownException']);
 
+        // Then, for administrators only, show what broke instead of the generic
+        // page. Registered AFTER the logger on purpose: notifyUntil stops at the
+        // first listener returning true, and this one does when it takes over the
+        // response - so it must not run before the exception has been recorded.
+        // logThrownException returns nothing, so it never stops the chain itself.
+        require_once __DIR__.'/../lib/Listeners/AdminErrorDetail.php';
+        $this->dispatcher->connect('application.throw_exception', ['\AhgCore\Listeners\AdminErrorDetail', 'handle']);
+
         // Supply the CSRF token wherever CSRF is enforced. See injectCsrfToken().
         $this->dispatcher->connect('response.filter_content', ['ahgCorePluginConfiguration', 'injectCsrfToken']);
 

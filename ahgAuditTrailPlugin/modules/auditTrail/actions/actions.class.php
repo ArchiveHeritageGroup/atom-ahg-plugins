@@ -77,13 +77,41 @@ class auditTrailActions extends AhgController
         $this->pager = $auditRepo->getFiltered($filters, 50, $page);
         $this->currentFilters = $filters;
 
-        $this->actionTypes = [
-            'create' => 'Created', 'update' => 'Updated', 'delete' => 'Deleted',
-            'view' => 'Viewed', 'download' => 'Downloaded', 'export' => 'Exported',
-            'import' => 'Imported', 'publish' => 'Published',
-        ];
+        // Every filter dropdown is built from what the log actually contains.
+        //
+        // These were hardcoded lists that did not describe this table. The action
+        // filter offered create/update/delete/download/export/import/publish -
+        // none of which are values this log ever stores. It records "edit", not
+        // "update"; "version_created", not "create". Only "view" overlapped, so
+        // choosing any other action returned 0 results on 3.2M rows of history
+        // and read as "there is no such activity" rather than "this filter cannot
+        // match anything".
+        //
+        // The entity filter had the mirror problem in both directions: it offered
+        // QubitRepository, QubitAccession and QubitDigitalObject, which do not
+        // appear in the data at all, while omitting HeritageAsset - 930,437 rows,
+        // the second most common type in the table - along with QubitStaticPage,
+        // Registry, Institution, requestToPublish and feedback. Whole categories
+        // of audit history were unreachable through the UI.
+        //
+        // Reading the values from the table is what the username filter below has
+        // always done. The maps here only supply nicer labels; anything not named
+        // falls back to a humanised form of the stored value, so a new action or
+        // entity type appears in the filter as soon as it is logged, without
+        // anyone having to remember to add it here.
+        $this->actionTypes = $this->distinctWithLabels('action', [
+            'view' => 'Viewed',
+            'edit' => 'Edited',
+            'login' => 'Logged in',
+            'logout' => 'Logged out',
+            'register' => 'Registered',
+            'version_created' => 'Version created',
+            'error404' => 'Not found (404)',
+            'errorLog' => 'Error logged',
+            'uploadChunk' => 'Upload (chunk)',
+        ]);
 
-        $this->entityTypes = [
+        $this->entityTypes = $this->distinctWithLabels('entity_type', [
             'QubitInformationObject' => 'Archival Description',
             'QubitActor' => 'Authority Record',
             'QubitRepository' => 'Repository',
@@ -91,12 +119,15 @@ class auditTrailActions extends AhgController
             'QubitUser' => 'User',
             'QubitAccession' => 'Accession',
             'QubitDigitalObject' => 'Digital Object',
-        ];
+            'QubitStaticPage' => 'Static Page',
+            'HeritageAsset' => 'Heritage Asset',
+            'requestToPublish' => 'Request to Publish',
+        ]);
 
-        $this->securityLevels = [
+        $this->securityLevels = $this->distinctWithLabels('security_classification', [
             'public' => 'Public', 'restricted' => 'Restricted',
             'confidential' => 'Confidential', 'secret' => 'Secret', 'top_secret' => 'Top Secret',
-        ];
+        ]);
 
         // Get distinct usernames from audit log for dropdown
         $this->usernames = DB::table('ahg_audit_log')
@@ -105,6 +136,34 @@ class auditTrailActions extends AhgController
             ->orderBy('username')
             ->pluck('username')
             ->toArray();
+    }
+
+    /**
+     * The values a column actually holds, as value => label.
+     *
+     * Each of these columns is indexed, so DISTINCT is an index scan rather than
+     * a pass over the 3.2M rows. Values without an entry in $labels are titled
+     * from the stored value, which keeps a newly logged action or entity type
+     * visible in the filter without a code change.
+     */
+    protected function distinctWithLabels(string $column, array $labels): array
+    {
+        $values = DB::table('ahg_audit_log')
+            ->whereNotNull($column)
+            ->where($column, '<>', '')
+            ->distinct()
+            ->orderBy($column)
+            ->pluck($column)
+            ->toArray();
+
+        $out = [];
+
+        foreach ($values as $value) {
+            $out[$value] = $labels[$value]
+                ?? ucfirst(trim(preg_replace('/(?<!^)[A-Z]/', ' $0', str_replace('_', ' ', (string) $value))));
+        }
+
+        return $out;
     }
 
     public function executeView($request)

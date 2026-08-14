@@ -162,8 +162,23 @@ class AuditLogRepository
                 $query->where($field, $filters[$field]);
             }
         }
+        // Exact match, not a contains-LIKE.
+        //
+        // The filter is a <select> built from the distinct usernames already in
+        // the log, so the value is always a whole username - there is nothing
+        // partial to match. The leading wildcard was therefore never needed, and
+        // it was actively wrong: filtering on "louise" also returned "louise2"
+        // and "mlouise", quietly mixing other people's activity into what reads
+        // as one person's audit trail.
+        //
+        // It was also unusable at scale. A leading wildcard cannot use an index,
+        // so on a 3.2M-row table this scanned every row - about 16 seconds for a
+        // single page of 50, and past the 90s worker timeout on a cold buffer
+        // pool, which killed the php-fpm process and rendered as "Oops! An Error
+        // Occurred" with nothing logged, because the worker died before it could
+        // log anything.
         if (!empty($filters['username'])) {
-            $query->where('username', 'like', "%{$filters['username']}%");
+            $query->where('username', $filters['username']);
         }
         if (!empty($filters['from_date'])) {
             $query->where('created_at', '>=', $filters['from_date']);

@@ -124,9 +124,21 @@ class HelpMarkdownParser
      */
     protected static function htmlToText(string $html): string
     {
-        // Remove code blocks first (they add noise to search)
+        // Fenced code blocks are genuinely noise - whole SQL and PHP listings
+        // whose keywords match everything and mean nothing.
         $text = preg_replace('/<pre[^>]*>.*?<\/pre>/si', ' ', $html);
-        $text = preg_replace('/<code[^>]*>.*?<\/code>/si', ' ', $text);
+
+        // Inline <code> spans are the opposite, and dropping them cost the search
+        // its most useful terms. They hold table names, class names, routes,
+        // settings and CLI tasks - `ahg_registration_request`, `RegistrationService`,
+        // `/admin/registrations` - which is exactly what somebody types when they
+        // come to the help looking for one. Searching for any of them returned
+        // nothing at all, across every article, because body_text is what
+        // MATCH(title, body_text) reads and none of it was there.
+        //
+        // Keep the text, drop the markup. Padded with spaces so an identifier
+        // against adjacent prose does not fuse into a word that matches neither.
+        $text = preg_replace('/<code[^>]*>(.*?)<\/code>/si', ' $1 ', $text);
 
         // Strip all remaining HTML
         $text = strip_tags($text);
