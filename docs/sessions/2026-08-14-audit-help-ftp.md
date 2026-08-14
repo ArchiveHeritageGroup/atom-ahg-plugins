@@ -144,3 +144,52 @@ migrations on PSIS (66 -> 70 rows, 0 pending).
 `migrate()` calls `pullUpdates()`. I had said it did not, having checked `run()` and
 not `migrate()`. On a box behind origin that deploys code as a side effect of
 recording a ledger.
+
+---
+
+# Addendum: deploying one plugin to a far-behind instance carries its security changes
+
+WDB (41.162.30.249, client production) runs plugins **v3.59.3**; PSIS is at v3.99.25.
+Only `ahgFtpPlugin` was synced, deliberately - the rest of the sync is scheduled for
+later.
+
+Syncing the whole plugin directory rather than the four changed files was the right
+call (WDB's older index action does not set every variable the new template reads),
+but it also carried **every other change made to that plugin in 9 commits**, including
+a security fix from v3.79.73 that gated the entire ftpUpload module to administrators
+because `clearAll` mass-deletes the upload folder.
+
+The hole it closed was real. The side effect was that the cataloguer doing the
+532-file upload - an editor/contributor, not an administrator - was locked out of the
+page entirely. Reported as "user does not have permission to access".
+
+**LESSON: a single-plugin sync to an instance N versions behind is not a single
+change.** Before syncing one plugin to a lagging instance, check what else moved in
+it: `git log v<their-version>..HEAD -- <plugin>` and read the security-flavoured
+commits. The failure mode is not a crash - it is a permission or behaviour change
+nobody was expecting.
+
+## Fix: gate on consequence, not on module
+
+    deleteFile, clearAll                        administrator
+    index, upload, uploadChunk, exists,
+    listFiles, importAsUpload                   editor / contributor / administrator
+
+The original hole stays shut - a plain authenticated account with no edit rights still
+gets nothing - but uploading no longer requires the same privilege as wiping the store.
+Implemented in `boot()` via `getActionName()`, the pattern already proven in
+`ahgUserRegistrationPlugin` and `ahgPrivacyPlugin`. Comparison is lowercased on both
+sides so `deleteFile` / `clearAll` match whatever case convention returns.
+
+## GOTCHA repeated: a 403 becoming a 200 is not a regression
+
+After the change, anonymous `/ftp-upload/` returned **200 instead of 403**, which
+looks like the guard failing open. It is not: `requireAdmin()` forwards to
+`admin/secure` (403) while `requireAuth()` redirects to the login page, and **AtoM
+serves its login page with HTTP 200**.
+
+Verified by reading the body, not the status: `body class="... user login"`, and no
+`drop-zone`, `Upload Files`, `pause-all-btn` or `path-prefix` anywhere in the 35KB
+response. Test access control on page content, never on status code.
+
+Confirmed working on WDB by the user.

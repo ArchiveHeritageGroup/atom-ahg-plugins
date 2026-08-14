@@ -85,6 +85,13 @@ class ahgCorePluginConfiguration extends sfPluginConfiguration
             sfConfig::set('sf_enabled_modules', $enabledModules);
         }
 
+        // Apply the instance's own timezone, if it has set one. AtoM ships
+        // America/Vancouver in locked base config and symfony applies it after
+        // plugin initialize(), so this is the first point it will stick.
+        // See TimezoneOverride.
+        require_once __DIR__.'/../lib/Listeners/TimezoneOverride.php';
+        $this->dispatcher->connect('context.load_factories', ['\AhgCore\Listeners\TimezoneOverride', 'apply']);
+
         // Capture exceptions symfony handles itself.
         //
         // ErrorNotificationService installs set_exception_handler, which only
