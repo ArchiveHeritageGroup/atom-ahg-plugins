@@ -586,6 +586,11 @@ APPLIER;
      */
     public static function refuseUnavailableFormat($event)
     {
+        // Refuse at most once per request. Throwing a second time would do it
+        // from inside the forward the first throw caused, which is the failure
+        // described below.
+        static $refused = false;
+
         $module = $event['module'] ?? null;
         if (empty($module)) {
             return;
@@ -603,6 +608,51 @@ APPLIER;
                 return;
             }
 
+            // Never refuse symfony's own internal pages.
+            //
+            // A 404 from anywhere - this guard or the action itself - forwards to
+            // error_404_module, which settings.yml sets to "admin". That forward
+            // fires controller.change_action again with sf_format still set, and
+            // the admin module ships no non-HTML template at all. So the guard
+            // refused the very page symfony was rendering to report the first
+            // 404, throwing from inside the ob_start() above
+            // sfPHPView::renderFile(). The buffer is discarded and the caller
+            // gets a 0-byte HTTP 200 instead of the 404 - which is exactly the
+            // blank 200 this guard exists to prevent, caused by the guard.
+            //
+            // Measured on PSIS 2026-08-15: every non-HTML format on a museum
+            // record returned 200 with an empty body.
+            //
+            // Force HTML for these instead, so the error template resolves and
+            // the status code is actually delivered. Matched on module AND
+            // action, because "admin" is a real module whose other actions must
+            // keep whatever formats they support.
+            $action = $event['action'] ?? null;
+            $internal = [
+                [sfConfig::get('sf_error_404_module'), sfConfig::get('sf_error_404_action', 'error404')],
+                [sfConfig::get('sf_secure_module'), sfConfig::get('sf_secure_action', 'secure')],
+                [sfConfig::get('sf_login_module'), sfConfig::get('sf_login_action', 'login')],
+                [sfConfig::get('sf_module_disabled_module'), sfConfig::get('sf_module_disabled_action', 'disabled')],
+            ];
+
+            foreach ($internal as $pair) {
+                if ($module === $pair[0] && $action === $pair[1]) {
+                    $request->setRequestFormat('html');
+                    $request->setParameter('sf_format', 'html');
+
+                    return;
+                }
+            }
+
+            if ($refused) {
+                // Already refused this request; this is a forward off the back of
+                // it. Let it render rather than throwing again.
+                $request->setRequestFormat('html');
+                $request->setParameter('sf_format', 'html');
+
+                return;
+            }
+
             if (self::moduleHasFormatTemplate($module, $format)) {
                 return;
             }
@@ -613,6 +663,7 @@ APPLIER;
             // gets a blank 200 instead of a 404.
             $request->setRequestFormat('html');
             $request->setParameter('sf_format', 'html');
+            $refused = true;
         } catch (\Throwable $e) {
             return; // never let the guard break the request
         }
