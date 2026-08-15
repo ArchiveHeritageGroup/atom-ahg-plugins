@@ -1049,6 +1049,23 @@ APPLIER;
                 return;
             }
 
+            // A 404 is not a server fault, and this listener sees a lot of them:
+            // symfony raises sfError404Exception for a missing record, for an
+            // unroutable URL, and - through refuseUnavailableFormat() - for a
+            // format a module does not ship. Search engine crawlers probe all
+            // three continuously (?sf_format=xml, ?template=eac, ;skos), and each
+            // was recorded at error level against a fabricated HTTP 500, which
+            // buries genuine faults under expected refusals.
+            //
+            // Skipped rather than downgraded, to match the policy the shutdown
+            // handler already applies to the same responses:
+            // ErrorNotificationService::logHttpErrorResponse() drops every 4xx as
+            // not actionable. Downgrading would still write a row per crawler
+            // probe and leave the two paths disagreeing about the same request.
+            if ($exception instanceof \sfError404Exception) {
+                return;
+            }
+
             \AhgCore\Services\ErrorNotificationService::logToDatabase(
                 'error',
                 $exception->getMessage(),
