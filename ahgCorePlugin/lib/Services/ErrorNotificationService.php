@@ -185,6 +185,19 @@ class ErrorNotificationService
      */
     public static function handleException(\Throwable $e): void
     {
+        // A 404 is not a server fault. Symfony raises sfError404Exception for a
+        // missing record, an unroutable URL, and - through
+        // ahgCorePluginConfiguration::refuseUnavailableFormat() - a format a
+        // module does not ship. Search engine crawlers probe all three
+        // continuously (?sf_format=xml, ?template=eac, ;skos), and every probe
+        // was recorded as an error and raised an alert email.
+        //
+        // Skipped, matching logHttpErrorResponse() below, which already drops
+        // every 4xx as not actionable.
+        if ($e instanceof \sfError404Exception) {
+            return;
+        }
+
         // Log it first (always)
         error_log('Uncaught exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
 
