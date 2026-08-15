@@ -32,7 +32,16 @@ class ahgResearchPluginConfiguration extends sfPluginConfiguration
                 'section' => 'Research',
                 'weight' => 10,
             ]);
-            AhgNav::register('user', 'research_researchers', [
+            // 'manage', not 'user': only the manage and browse groups are rendered
+            // without ahgThemeB5Plugin, so on a stock-theme instance this entry
+            // appeared nowhere and the registry was reachable only by typing
+            // /research/researchers. Found on the RARI dev instance, where there
+            // was no route to it from the interface at all.
+            //
+            // Stays administrator-only - this is the researcher registry, not a
+            // personal page. The personal "My Workspace" entry above keeps its
+            // 'user' group, where it belongs.
+            AhgNav::register('manage', 'research_researchers', [
                 'route' => '@research_researchers',
                 'label' => 'Researchers',
                 'icon' => 'fas fa-user-check',

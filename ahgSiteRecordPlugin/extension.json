@@ -1,0 +1,45 @@
+{
+    "name": "Site Record",
+    "machine_name": "ahgSiteRecordPlugin",
+    "version": "1.0.0",
+    "description": "Field recording for archaeological, heritage and rock art sites - site records attached to authority records, with role-gated locality",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "category": "heritage",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "optional": {
+        "extensions": [
+            "ahgConditionPlugin",
+            "ahgSecurityClearancePlugin"
+        ]
+    },
+    "tables": [
+        "ahg_site_record",
+        "ahg_site_attribute",
+        "ahg_site_recorder"
+    ],
+    "shared_tables": [],
+    "helpers": [],
+    "load_order": 60,
+    "display_panels": [
+        {
+            "id": "site_record_panel",
+            "label": "Site record",
+            "template": "ahgSiteRecordPlugin/templates/display/_site_record_panel.php",
+            "contexts": [
+                "actor"
+            ],
+            "position": "below-content",
+            "weight": 40
+        }
+    ],
+    "display_actions": [],
+    "display_badges": []
+}

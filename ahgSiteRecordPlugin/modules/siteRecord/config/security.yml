@@ -1,0 +1,30 @@
+# Site records carry locality data for heritage sites, which is the field that
+# enables looting. Nothing in this module is public.
+#
+# A missing security.yml inherits `default: is_secure: false` from
+# apps/qubit/config/security.yml - i.e. it fails OPEN. This file must exist.
+#
+# Double-bracket credentials are an OR. A single bracket is an AND, which would
+# lock out an administrator who does not also hold the other roles.
+
+browse:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
+
+view:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]
+
+edit:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
+
+# Deleting a site record destroys field observations that cannot be re-collected
+# without revisiting the site.
+delete:
+  is_secure:   true
+  credentials: [[ administrator ]]
+
+all:
+  is_secure:   true
+  credentials: [[ contributor, editor, administrator ]]

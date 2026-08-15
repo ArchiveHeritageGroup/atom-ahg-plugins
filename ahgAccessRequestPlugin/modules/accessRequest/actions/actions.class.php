@@ -5,8 +5,56 @@ class accessRequestActions extends AhgController
 {
     public function boot(): void
     {
-        require_once $this->config('sf_root_dir').'/atom-ahg-plugins/ahgAccessRequestPlugin/lib/Service/AccessRequestService.php';
-        require_once $this->config('sf_root_dir').'/atom-framework/src/Services/SecurityClearanceService.php';
+        // Relative to this file, never built from sf_root_dir.
+        //
+        // '<root>/atom-ahg-plugins/...' only resolves where the plugins directory
+        // is the symlink layout PSIS happens to use. Installed the ordinary way -
+        // a real directory under plugins/, which is what a standalone install and
+        // the RARI dev instance both have - the require fails AFTER headers are
+        // sent, so the caller gets HTTP 200 with a zero-byte body: a white screen
+        // with no error page and nothing in ahg_error_log.
+        require_once dirname(__FILE__, 4).'/lib/Service/AccessRequestService.php';
+
+        // The framework lives in different places depending on the install:
+        // atom-framework/ alongside the app, or bundled inside ahgRuntimePlugin.
+        // Resolve it rather than assuming, and never fatal when it is absent.
+        $this->requireSecurityClearanceService();
+    }
+
+    /**
+     * Load SecurityClearanceService from wherever this install keeps it.
+     *
+     * Does nothing when the class is already autoloaded, and fails quietly when
+     * no copy is found - a missing optional service must not white-screen the
+     * page, which is the failure this whole method exists to stop repeating.
+     */
+    private function requireSecurityClearanceService(): void
+    {
+        // AtomExtensions\, not AtomFramework\ - the file declares
+        // `namespace AtomExtensions\Services` in both the framework and the
+        // runtime-plugin copy, and this action calls it by that name. Checking
+        // the wrong namespace makes the guard always false: harmless here, since
+        // the search below still finds the file, but it defeats the early exit.
+        if (class_exists('\AtomExtensions\Services\SecurityClearanceService')) {
+            return;
+        }
+
+        $root = $this->config('sf_root_dir');
+
+        $candidates = [
+            $root.'/atom-framework/src/Services/SecurityClearanceService.php',
+            $root.'/plugins/ahgRuntimePlugin/src/Services/SecurityClearanceService.php',
+            $root.'/atom-ahg-plugins/ahgRuntimePlugin/src/Services/SecurityClearanceService.php',
+            dirname(__FILE__, 5).'/ahgRuntimePlugin/src/Services/SecurityClearanceService.php',
+        ];
+
+        foreach ($candidates as $file) {
+            if (file_exists($file)) {
+                require_once $file;
+
+                return;
+            }
+        }
     }
 
     /**

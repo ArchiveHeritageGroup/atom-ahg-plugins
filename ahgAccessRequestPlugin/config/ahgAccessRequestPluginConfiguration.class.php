@@ -19,7 +19,18 @@ class ahgAccessRequestPluginConfiguration extends sfPluginConfiguration
                 'section' => 'Security',
                 'weight' => 10,
             ]);
-            AhgNav::register('user', 'access_request_pending', [
+            // 'manage', not 'user': only the manage and browse groups are rendered
+            // without ahgThemeB5Plugin, so on a stock-theme instance the approval
+            // queue appeared nowhere - requests could sit unactioned with no way
+            // to reach them from the interface. Found on the RARI dev instance.
+            //
+            // Gating is unchanged and stays in the closure below rather than
+            // moving to a credentials list: 'credentials' => ['administrator']
+            // would be applied AND the closure, which would cut out a delegated
+            // approver who is not an administrator - exactly the person this
+            // queue exists for. The personal "My Access Requests" entry above
+            // keeps its 'user' group.
+            AhgNav::register('manage', 'access_request_pending', [
                 'route' => '@access_request_pending',
                 'label' => 'Pending Requests',
                 'icon' => 'fas fa-clock',
