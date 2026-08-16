@@ -48,14 +48,47 @@ class SiteRecordPanelInjector
     /**
      * Whether something else is already rendering display panels.
      *
-     * With an AHG theme or ahgDisplayPlugin present, the panel is collected from
+     * With an AHG theme or ahgDisplayPlugin ENABLED, the panel is collected from
      * extension.json and injecting here would render it twice.
+     *
+     * Enabled, not merely present on disk. This first checked is_dir(), which is
+     * wrong in a way that fails silently: PSIS has the ahgThemeB5Plugin directory
+     * but the plugin is disabled, so on an instance where the directory exists
+     * and neither renderer is enabled, this listener would stand down and nobody
+     * would draw the panel - invisible, with no error to explain it.
      */
     private function panelRenderedElsewhere(): bool
     {
+        $renderers = ['ahgThemeB5Plugin', 'ahgDisplayPlugin'];
+
+        // The active configuration lists enabled plugins only.
+        if (class_exists('\sfProjectConfiguration')) {
+            $active = \sfProjectConfiguration::getActive();
+
+            if ($active && method_exists($active, 'getPlugins')) {
+                $enabled = (array) $active->getPlugins();
+
+                foreach ($renderers as $renderer) {
+                    if (in_array($renderer, $enabled, true)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        // No configuration to ask - fall back to presence on disk, which at worst
+        // suppresses this listener rather than double-rendering the panel.
         $pluginsDir = (string) \sfConfig::get('sf_plugins_dir');
 
-        return is_dir($pluginsDir.'/ahgThemeB5Plugin') || is_dir($pluginsDir.'/ahgDisplayPlugin');
+        foreach ($renderers as $renderer) {
+            if (is_dir($pluginsDir.'/'.$renderer)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function inject(\sfEvent $event, $content)
