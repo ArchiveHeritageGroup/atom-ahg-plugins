@@ -27,9 +27,23 @@ class museumIndexAction extends AhgController
             $this->forward404();
         }
 
-        // Check user authorization using Qubit ACL
-        if (!($this->getUser()->isAuthenticated() || \AtomExtensions\Services\AclService::check($this->resource, 'read'))) {
-            $this->forward("admin", "secure");
+        // Read access. QubitAcl::check, which is what base AtoM's
+        // informationobject indexAction and the ISAD display path both use.
+        //
+        // This previously called AclService::check, which returns false for ANY
+        // anonymous visitor before it consults the ACL table at all. The
+        // condition could therefore never pass for the public, so every record
+        // on the Museum (CCO) display standard was refused regardless of
+        // publication status - 21 published records on PSIS - while the same
+        // records' metadata was still served by the ;ead and ;dc export routes,
+        // which perform no check of their own. Issue #300.
+        //
+        // The isAuthenticated() shortcut is gone with it: it granted read on any
+        // museum record to any logged-in account, including self-registered
+        // researchers, without consulting the ACL at all. QubitAcl grants the
+        // authenticated group read globally, so staff access is unchanged.
+        if (!QubitAcl::check($this->resource, 'read')) {
+            $this->forward('admin', 'secure');
         }
         
         // Check embargo access - blocks full embargo for public users
