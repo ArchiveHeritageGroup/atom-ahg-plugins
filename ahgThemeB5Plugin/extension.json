@@ -12,5 +12,5 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin", "ahgContactPlugin", "ahgUiOverridesPlugin"]
+    "dependencies": ["ahgCorePlugin", "ahgContactPlugin", "ahgUiOverridesPlugin", "ahgMetadataExtractionPlugin"]
 }

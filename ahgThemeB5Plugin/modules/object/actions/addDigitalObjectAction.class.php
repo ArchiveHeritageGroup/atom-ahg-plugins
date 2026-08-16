@@ -7,7 +7,15 @@ use Illuminate\Database\Capsule\Manager as DB;
  * Modified by The AHG to include Universal Metadata Extraction
  */
 
-// Include the metadata extraction trait from ahgMetadataExtractionPlugin
+// The metadata extraction trait, from ahgMetadataExtractionPlugin.
+//
+// This is a HARD dependency and is now declared as one in extension.json. It
+// cannot be made optional here: the require is at file scope and the class below
+// does `use arMetadataExtractionTrait`, so a file_exists guard would only move
+// the fatal from "failed opening required" to "trait not found". Declaring it is
+// what actually prevents the failure, because the installer then pulls the
+// plugin in rather than leaving digital object upload to white-screen at request
+// time.
 require_once dirname(__FILE__, 5).'/ahgMetadataExtractionPlugin/lib/Services/ahgMetadataExtractionTrait.php';
 
 use AtomFramework\Http\Controllers\AhgController;

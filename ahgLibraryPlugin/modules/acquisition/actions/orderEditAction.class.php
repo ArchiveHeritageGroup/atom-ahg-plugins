@@ -13,22 +13,34 @@ class acquisitionOrderEditAction extends AhgController
 
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
         require_once dirname(__FILE__, 4).'/lib/Service/AcquisitionService.php';
-        require_once dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
 
         $this->notice = $this->getUser()->getFlash('notice');
         $this->error = $this->getUser()->getFlash('error');
 
         $service = AcquisitionService::getInstance();
-        $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
 
-        // Load order types from taxonomy. getTerms() does not exist on the
-        // service - getTermsWithAttributes() returns [code => term-object]
-        // (with ->code and ->name); catch Throwable so a bad call degrades to
-        // the template's built-in default order types instead of a white screen.
-        try {
-            $this->orderTypes = $taxonomyService->getTermsWithAttributes('library_order_type');
-        } catch (\Throwable $e) {
-            $this->orderTypes = [];
+        // Order types from taxonomy. getTerms() does not exist on the service -
+        // getTermsWithAttributes() returns [code => term-object] (with ->code and
+        // ->name); catch Throwable so a bad call degrades to the template's
+        // built-in default order types instead of a white screen.
+        //
+        // The require is inside the guard for the same reason. ahgCorePlugin is a
+        // declared hard dependency and cannot be disabled, so it should always be
+        // there - but an unguarded require fails after headers are sent, and the
+        // caller gets HTTP 200 with an empty body and nothing in the log. The
+        // catch below only ever protected the call, never the include.
+        $this->orderTypes = [];
+        $taxonomyFile = dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+
+        if (file_exists($taxonomyFile)) {
+            require_once $taxonomyFile;
+
+            try {
+                $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+                $this->orderTypes = $taxonomyService->getTermsWithAttributes('library_order_type');
+            } catch (\Throwable $e) {
+                $this->orderTypes = [];
+            }
         }
 
         // Load budgets for dropdown

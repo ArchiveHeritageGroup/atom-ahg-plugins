@@ -12,10 +12,22 @@ class patronEditAction extends AhgController
         // Load PatronService
         require_once dirname(__FILE__, 4).'/lib/Service/PatronService.php';
 
-        // Load patron type options from ahg_dropdown
-        require_once dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
-        $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
-        $this->patronTypes = $taxonomyService->getTermsAsChoices('patron_type');
+        // Patron type options from ahg_dropdown.
+        //
+        // ahgCorePlugin is a declared hard dependency and is a core plugin that
+        // cannot be disabled, so this should always resolve. Guarded anyway
+        // because an unguarded require fails after headers are sent, and the
+        // caller then gets HTTP 200 with an empty body - a white screen with
+        // nothing in the log. An empty dropdown is recoverable; a blank page is
+        // not diagnosable.
+        $this->patronTypes = [];
+        $taxonomyFile = dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+
+        if (file_exists($taxonomyFile)) {
+            require_once $taxonomyFile;
+            $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+            $this->patronTypes = $taxonomyService->getTermsAsChoices('patron_type');
+        }
 
         $service = PatronService::getInstance();
         $id = (int) $request->getParameter('id');

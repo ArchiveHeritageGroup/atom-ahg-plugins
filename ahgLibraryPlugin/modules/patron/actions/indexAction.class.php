@@ -42,9 +42,16 @@ class patronIndexAction extends AhgController
                 ->count();
         }
 
-        // Load patron type options from ahg_dropdown
-        require_once dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
-        $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
-        $this->patronTypes = $taxonomyService->getTermsAsChoices('patron_type');
+        // Patron type options from ahg_dropdown. Guarded: see editAction - an
+        // unguarded require here fails after headers are sent and returns a
+        // zero-byte HTTP 200 with nothing logged.
+        $this->patronTypes = [];
+        $taxonomyFile = dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+
+        if (file_exists($taxonomyFile)) {
+            require_once $taxonomyFile;
+            $taxonomyService = new \ahgCorePlugin\Services\AhgTaxonomyService();
+            $this->patronTypes = $taxonomyService->getTermsAsChoices('patron_type');
+        }
     }
 }
