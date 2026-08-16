@@ -46,6 +46,16 @@ class ahgSiteRecordPluginConfiguration extends sfPluginConfiguration
             ['\AhgSiteRecordPlugin\Listeners\SiteRecordPanelInjector', 'filter']
         );
 
+        // Withhold the raw ISAAR field that carries locality from readers without
+        // clearance. Structuring locality into ahg_site_record gates the
+        // structured copy, but the original field keeps showing the same thing to
+        // everyone. OFF unless the instance sets site_record_gate_locality_field.
+        // See LocalityFieldRedactor.
+        $this->dispatcher->connect(
+            'response.filter_content',
+            ['\AhgSiteRecordPlugin\Listeners\LocalityFieldRedactor', 'filter']
+        );
+
         // Only 'manage' and 'browse' are rendered without ahgThemeB5Plugin, so a
         // staff-facing entry has to go in 'manage' - anything else silently
         // renders nowhere.

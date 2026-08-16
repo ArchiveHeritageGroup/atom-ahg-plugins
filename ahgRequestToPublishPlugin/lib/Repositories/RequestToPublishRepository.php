@@ -265,7 +265,14 @@ class RequestToPublishRepository
     /**
      * Get status label
      */
-    public function getStatusLabel(int $statusId): string
+    /**
+     * Status comes from request_to_publish_i18n through a LEFT JOIN, so it is
+     * null whenever the i18n row is missing - which is not hypothetical: RARI's
+     * data carries 79 request_to_publish rows with no i18n row at all, and a
+     * strict int hint turned that into a fatal on /requesttopublish/browse
+     * rather than a row that reads "Unknown".
+     */
+    public function getStatusLabel(?int $statusId): string
     {
         return match ($statusId) {
             219 => 'Approved',
@@ -278,7 +285,8 @@ class RequestToPublishRepository
     /**
      * Get status badge class
      */
-    public function getStatusBadgeClass(int $statusId): string
+    /** Null-tolerant for the same reason as getStatusLabel(). */
+    public function getStatusBadgeClass(?int $statusId): string
     {
         return match ($statusId) {
             219 => 'bg-success',

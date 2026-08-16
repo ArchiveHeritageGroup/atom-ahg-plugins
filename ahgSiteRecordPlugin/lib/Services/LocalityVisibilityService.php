@@ -59,6 +59,35 @@ class LocalityVisibilityService
     public const EXACT_CREDENTIALS = ['editor', 'administrator'];
 
     /**
+     * Whether this user may see locality at all, independent of any one record.
+     *
+     * For gating a raw field that has no site record behind it - the ISAAR
+     * "Internal structures/genealogy" field, where RARI keeps map sheet
+     * references as free text. Same credentials as canSeeExact(), so a reader
+     * cannot be refused the structured value and shown the unstructured one.
+     *
+     * @param mixed $user null to use the current session user
+     */
+    public static function userHasClearance($user = null): bool
+    {
+        if (null === $user) {
+            $user = self::currentUser();
+        }
+
+        if (!$user || !$user->isAuthenticated()) {
+            return false;
+        }
+
+        foreach (self::EXACT_CREDENTIALS as $credential) {
+            if ($user->hasCredential($credential)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Whether this record's locality is sensitive.
      *
      * Unset counts as sensitive - a record nobody has classified is protected,
