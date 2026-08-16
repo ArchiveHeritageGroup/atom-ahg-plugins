@@ -200,8 +200,7 @@ class SharePointPushService
 
     private function dispatchCommit(int $sessionId, array $userClaims): int
     {
-        $svcFile = sfConfig::get('sf_root_dir')
-            . '/atom-ahg-plugins/ahgIngestPlugin/lib/Services/IngestCommitService.php';
+        $svcFile = dirname(__FILE__, 4).'/ahgIngestPlugin/lib/Services/IngestCommitService.php';
         if (!file_exists($svcFile)) {
             throw new \RuntimeException('IngestCommitService not found at ' . $svcFile);
         }
