@@ -6,7 +6,7 @@
 $actorId = $actorId ?? 0;
 if (!$actorId) return;
 
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityCompletenessService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/AuthorityCompletenessService.php';
 $comp = (new \AhgAuthority\Services\AuthorityCompletenessService())->getCompleteness($actorId);
 if (!$comp) return;
 

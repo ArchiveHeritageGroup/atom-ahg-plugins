@@ -38,7 +38,7 @@ class libraryIsbnLookupAction extends AhgController
             $rootDir = $this->config('sf_root_dir');
 
             // Load DoiService (handles DOI, ISSN, and ISBN fallback)
-            require_once $rootDir . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/DoiService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/DoiService.php';
             $doiSvc = \ahgLibraryPlugin\Service\DoiService::getInstance();
 
             $idType = $doiSvc->detectType($identifier);
@@ -149,12 +149,12 @@ class libraryIsbnLookupAction extends AhgController
 
         // 1. Try WorldCatService (richer book data + Open Library covers)
         try {
-            require_once $rootDir . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Repository/IsbnLookupRepository.php';
+            require_once dirname(__FILE__, 4).'/lib/Repository/IsbnLookupRepository.php';
             $frameworkPath = $rootDir . '/atom-framework';
             require_once $frameworkPath . '/src/Services/LanguageService.php';
-            require_once $rootDir . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/WorldCatService.php';
-            require_once $rootDir . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/IsbnMetadataMapper.php';
-            require_once $rootDir . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/BookCoverService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/WorldCatService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/IsbnMetadataMapper.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/BookCoverService.php';
 
             $repository = new \ahgLibraryPlugin\Repository\IsbnLookupRepository();
             $service = new \ahgLibraryPlugin\Service\WorldCatService($repository);
@@ -283,8 +283,7 @@ class libraryIsbnLookupAction extends AhgController
     protected function getOpenLibraryCovers(string $isbn): array
     {
         try {
-            require_once $this->config('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/BookCoverService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/BookCoverService.php';
             return \ahgLibraryPlugin\Service\BookCoverService::getAllSizes($isbn);
         } catch (\Exception $e) {
             return [];

@@ -15,7 +15,7 @@ class acquisitionAddLineAction extends AhgController
         }
 
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/AcquisitionService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/AcquisitionService.php';
 
         $orderId = (int) $request->getParameter('order_id');
         if (!$orderId) {

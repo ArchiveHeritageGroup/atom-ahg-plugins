@@ -21,9 +21,9 @@ sfContext::createInstance($configuration);
 
 // Find ahgUniversalMetadataExtractor dynamically - check plugin paths
 $extractorPaths = [
-    SF_ROOT_DIR . '/atom-ahg-plugins/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php',
+    dirname(__FILE__, 3).'/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php',
     SF_ROOT_DIR . '/plugins/ahgMetadataExtractionPlugin/lib/Services/ahgUniversalMetadataExtractor.php',
-    SF_ROOT_DIR . '/atom-ahg-plugins/ahgThemeB5Plugin/lib/ahgUniversalMetadataExtractor.php',
+    dirname(__FILE__, 2).'/lib/ahgUniversalMetadataExtractor.php',
     SF_ROOT_DIR . '/plugins/ahgThemeB5Plugin/lib/ahgUniversalMetadataExtractor.php',
 ];
 $extractorLoaded = false;

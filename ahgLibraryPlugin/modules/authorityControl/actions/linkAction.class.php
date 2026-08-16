@@ -7,7 +7,7 @@ class authorityControlLinkAction extends AhgController
     public function execute($request)
     {
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/AuthorityControlService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/AuthorityControlService.php';
 
         $svc = new AuthorityControlService();
 

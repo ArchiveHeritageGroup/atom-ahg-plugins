@@ -31,7 +31,7 @@ class InstallCommand extends BaseCommand
 
     protected function handle(): int
     {
-        $pluginDir = $this->getAtomRoot() . '/atom-ahg-plugins/ahgHeritageAccountingPlugin';
+        $pluginDir = dirname(__FILE__, 3);
 
         $this->info('=== Heritage Accounting Plugin Installation ===');
         $this->newline();

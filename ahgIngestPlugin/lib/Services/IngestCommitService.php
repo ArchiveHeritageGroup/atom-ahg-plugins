@@ -409,7 +409,7 @@ class IngestCommitService
      */
     protected function processAccessionRow(object $row, array $enriched, object $session): array
     {
-        $ahgDir = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgIngestPlugin';
+        $ahgDir = dirname(__FILE__, 3);
         require_once $ahgDir . '/lib/Services/AccessionCommitHandler.php';
 
         $handler = new AccessionCommitHandler();

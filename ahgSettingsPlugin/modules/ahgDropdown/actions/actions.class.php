@@ -77,7 +77,7 @@ class ahgDropdownActions extends AhgController
         if (file_exists($bootstrap)) {
             require_once $bootstrap;
         }
-        $taxonomyService = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
+        $taxonomyService = dirname(__FILE__, 5).'/ahgCorePlugin/lib/Services/AhgTaxonomyService.php';
         if (file_exists($taxonomyService)) {
             require_once $taxonomyService;
         }

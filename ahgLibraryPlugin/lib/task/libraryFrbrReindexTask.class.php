@@ -41,8 +41,7 @@ EOT;
         $this->logSection('frbr-reindex', 'Starting full FRBR work-key re-index');
 
         require_once sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_root_dir')
-            . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/FrbrService.php';
+        require_once dirname(__FILE__, 3).'/lib/Service/FrbrService.php';
 
         $batchSize = (int) $this->configuration->getOption('batch');
         $svc = FrbrService::getInstance();

@@ -275,8 +275,7 @@ class OpacService
 
         // FRBR clustering
         if ($useFrbr) {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/FrbrService.php';
+            require_once dirname(__FILE__, 3).'/lib/Service/FrbrService.php';
 
             $frbrSvc = FrbrService::getInstance();
             $clusters = $frbrSvc->clusterSearchResults($rows);

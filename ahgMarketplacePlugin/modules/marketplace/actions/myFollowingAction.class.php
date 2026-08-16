@@ -2,8 +2,8 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Repositories/SettingsRepository.php';
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Repositories/SellerRepository.php';
+require_once dirname(__FILE__, 4).'/lib/Repositories/SettingsRepository.php';
+require_once dirname(__FILE__, 4).'/lib/Repositories/SellerRepository.php';
 
 use AtomAhgPlugins\ahgMarketplacePlugin\Repositories\SettingsRepository;
 use AtomAhgPlugins\ahgMarketplacePlugin\Repositories\SellerRepository;

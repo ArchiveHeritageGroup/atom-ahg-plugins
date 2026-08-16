@@ -21,7 +21,7 @@ class graphqlIndexAction extends AhgController
         }
 
         // Load API plugin dependencies
-        $apiPluginPath = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAPIPlugin/lib';
+        $apiPluginPath = dirname(__FILE__, 5).'/ahgAPIPlugin/lib';
         require_once $apiPluginPath . '/repository/ApiRepository.php';
         require_once $apiPluginPath . '/Services/ApiKeyService.php';
 
@@ -35,7 +35,7 @@ class graphqlIndexAction extends AhgController
     {
         spl_autoload_register(function ($class) {
             $prefix = 'AhgGraphQLPlugin\\';
-            $baseDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgGraphQLPlugin/lib/';
+            $baseDir = dirname(__FILE__, 4).'/lib/';
 
             $len = strlen($prefix);
             if (strncmp($prefix, $class, $len) !== 0) {

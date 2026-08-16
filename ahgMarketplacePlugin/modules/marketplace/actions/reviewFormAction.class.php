@@ -2,8 +2,8 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/TransactionService.php';
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/ReviewService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/TransactionService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/ReviewService.php';
 
 use AtomAhgPlugins\ahgMarketplacePlugin\Services\TransactionService;
 use AtomAhgPlugins\ahgMarketplacePlugin\Services\ReviewService;

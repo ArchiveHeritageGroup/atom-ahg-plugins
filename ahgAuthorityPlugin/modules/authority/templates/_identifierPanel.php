@@ -6,7 +6,7 @@
 $actorId = $actorId ?? 0;
 if (!$actorId) return;
 
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityIdentifierService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/AuthorityIdentifierService.php';
 $identifiers = (new \AhgAuthority\Services\AuthorityIdentifierService())->getIdentifiers($actorId);
 if (empty($identifiers)) return;
 ?>

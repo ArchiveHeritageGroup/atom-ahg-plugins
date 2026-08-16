@@ -103,7 +103,7 @@ class Z3950ServerCommand extends BaseCommand
         }
 
         // Load the server service (Symfony 1.x does not autoload namespaced plugin classes).
-        $serviceDir = $this->atomRoot . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service';
+        $serviceDir = dirname(__FILE__, 3).'/lib/Service';
         require_once $serviceDir . '/BerEncoder.class.php';
         require_once $serviceDir . '/Z3950ServerService.class.php';
 

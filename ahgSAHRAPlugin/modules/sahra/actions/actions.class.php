@@ -549,7 +549,7 @@ class sahraActions extends AhgController
             $this->redirect('@sahra_config');
         }
 
-        $svcFile = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgUserManagePlugin/lib/Services/UserCrudService.php';
+        $svcFile = dirname(__FILE__, 5).'/ahgUserManagePlugin/lib/Services/UserCrudService.php';
         if (!class_exists('\AhgUserManage\Services\UserCrudService') && file_exists($svcFile)) {
             require_once $svcFile;
         }

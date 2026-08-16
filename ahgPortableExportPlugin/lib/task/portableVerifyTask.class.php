@@ -90,7 +90,7 @@ EOF;
         }
 
         // Load ManifestBuilder for verification
-        $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
+        $ahgDir = dirname(__FILE__, 3);
         require_once $ahgDir . '/lib/Services/ManifestBuilder.php';
 
         $this->logSection('verify', 'Verifying package at: ' . $packageDir);

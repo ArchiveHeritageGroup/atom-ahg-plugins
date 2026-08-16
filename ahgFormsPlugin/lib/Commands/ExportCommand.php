@@ -33,7 +33,7 @@ class ExportCommand extends BaseCommand
             return 1;
         }
 
-        $pluginDir = $this->getAtomRoot() . '/atom-ahg-plugins/ahgFormsPlugin';
+        $pluginDir = dirname(__FILE__, 3);
         require_once $pluginDir . '/lib/Services/FormService.php';
 
         $service = new \ahgFormsPlugin\Services\FormService();

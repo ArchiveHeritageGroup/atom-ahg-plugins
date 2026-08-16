@@ -15,7 +15,7 @@ class patronSuspendAction extends AhgController
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
 
         // Load PatronService
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/PatronService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/PatronService.php';
 
         $id = (int) $request->getParameter('id');
         $reason = trim($request->getParameter('reason', ''));

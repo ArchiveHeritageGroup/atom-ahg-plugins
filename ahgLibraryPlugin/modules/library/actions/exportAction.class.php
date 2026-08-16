@@ -70,8 +70,7 @@ class libraryExportAction extends AhgController
 
         // Preview row count for the filter summary
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/ExportService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/ExportService.php';
 
             $svc = \ahgLibraryPlugin\Service\ExportService::getInstance();
             $items = $svc->fetchItems($this->filters);
@@ -93,8 +92,7 @@ class libraryExportAction extends AhgController
     protected function streamDownload(): string
     {
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/ExportService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/ExportService.php';
 
             $svc = \ahgLibraryPlugin\Service\ExportService::getInstance();
             $result = $svc->export($this->format, $this->filters);

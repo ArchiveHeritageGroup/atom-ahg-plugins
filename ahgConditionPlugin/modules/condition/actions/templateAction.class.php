@@ -22,7 +22,7 @@ class conditionTemplateAction extends AhgController
 
     protected function initService()
     {
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionTemplateService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionTemplateService.php';
         $this->templateService = new \ahgConditionPlugin\Service\ConditionTemplateService();
     }
 

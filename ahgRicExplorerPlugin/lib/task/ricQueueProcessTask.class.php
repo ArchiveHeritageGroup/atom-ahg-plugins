@@ -47,7 +47,7 @@ EOF;
     {
         parent::execute($arguments, $options);
 
-        $pluginDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgRicExplorerPlugin';
+        $pluginDir = dirname(__FILE__, 3);
         $syncScript = $pluginDir . '/bin/ric_sync.sh';
 
         if (!file_exists($syncScript)) {

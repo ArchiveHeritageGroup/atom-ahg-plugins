@@ -50,7 +50,7 @@ EOF;
         // Check 1: Symlink
         $this->log('[1] Checking plugin symlink...');
         $symlinkPath = sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin';
-        $targetPath = sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgThemeB5Plugin';
+        $targetPath = dirname(__FILE__, 3);
 
         if (!file_exists($symlinkPath)) {
             $issues[] = "Symlink missing: $symlinkPath";
@@ -365,7 +365,7 @@ EOF;
             if (strpos($issue, 'Symlink missing') !== false) {
                 $this->log('  Creating symlink...');
                 $symlinkPath = $pluginsDir.'/ahgThemeB5Plugin';
-                $targetPath = $rootDir.'/atom-ahg-plugins/ahgThemeB5Plugin';
+                $targetPath = dirname(__FILE__, 3);
 
                 if (file_exists($targetPath)) {
                     if (@symlink($targetPath, $symlinkPath)) {

@@ -94,7 +94,7 @@ class conditionActions extends AhgController
         }
 
         // Load service
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->conditionCheck = $service->getConditionCheckWithObject($this->checkId);
@@ -132,7 +132,7 @@ class conditionActions extends AhgController
             $this->forward404('Photo ID required');
         }
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->photo = $service->getPhoto($this->photoId);
@@ -169,7 +169,7 @@ class conditionActions extends AhgController
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $annotations = $service->getAnnotations($photoId);
@@ -200,7 +200,7 @@ class conditionActions extends AhgController
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $userId = (int) $this->getUser()->getAttribute('user_id');
@@ -233,7 +233,7 @@ class conditionActions extends AhgController
                 return $this->jsonResponse(['success' => false, 'error' => 'Upload error: ' . $uploadError]);
             }
 
-            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
             $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
             $photoType = $request->getParameter('photo_type', 'general');
@@ -280,7 +280,7 @@ class conditionActions extends AhgController
                 return $this->jsonResponse(['success' => false, 'error' => 'Missing photo_id']);
             }
 
-            require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
             $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
             $userId = (int) $this->getUser()->getAttribute('user_id');
@@ -306,7 +306,7 @@ class conditionActions extends AhgController
             $this->forward404('Photo ID required');
         }
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->photo = $service->getPhoto($this->photoId);
@@ -333,7 +333,7 @@ class conditionActions extends AhgController
 
         $format = $request->getParameter('format', 'pdf');
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $this->conditionCheck = $service->getConditionCheckWithObject($checkId);
@@ -363,7 +363,7 @@ class conditionActions extends AhgController
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing condition_check_id']));
         }
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $photos = $service->getPhotosForCheck($checkId);
@@ -409,7 +409,7 @@ class conditionActions extends AhgController
             return $this->renderText(json_encode(['success' => false, 'error' => 'Missing photo_id']));
         }
 
-        require_once $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgConditionPlugin/lib/Service/ConditionAnnotationService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/ConditionAnnotationService.php';
         $service = new \ahgConditionPlugin\Service\ConditionAnnotationService();
 
         $result = $service->updatePhotoMeta($photoId, $caption, $photoType);

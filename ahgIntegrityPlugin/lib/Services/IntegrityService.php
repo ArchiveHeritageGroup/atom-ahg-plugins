@@ -25,7 +25,7 @@ class IntegrityService
     protected function getPreservationService(): object
     {
         if ($this->preservationService === null) {
-            $path = \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPreservationPlugin/lib/PreservationService.php';
+            $path = dirname(__FILE__, 4).'/ahgPreservationPlugin/lib/PreservationService.php';
             if (!file_exists($path)) {
                 throw new \RuntimeException('ahgPreservationPlugin is required but PreservationService.php not found');
             }

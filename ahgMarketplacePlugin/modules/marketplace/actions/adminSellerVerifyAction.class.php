@@ -2,7 +2,7 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 
-$pluginPath = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin';
+$pluginPath = dirname(__FILE__, 4);
 require_once $pluginPath . '/lib/Services/SellerService.php';
 require_once $pluginPath . '/lib/Repositories/SellerRepository.php';
 

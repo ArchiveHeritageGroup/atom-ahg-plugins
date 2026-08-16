@@ -121,7 +121,7 @@ class dataMigrationBatchExportAction extends AhgController
     protected function directExport($query, $sector, $DB)
     {
         // Include required files
-        $pluginPath = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgDataMigrationPlugin';
+        $pluginPath = dirname(__FILE__, 4);
         require_once $pluginPath . '/lib/Exporters/BaseExporter.php';
         require_once $pluginPath . '/lib/Exporters/ArchivesExporter.php';
         require_once $pluginPath . '/lib/Exporters/MuseumExporter.php';

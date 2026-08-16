@@ -25,12 +25,9 @@ class opacAccountAction extends AhgController
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
 
         // Load services
-        require_once sfConfig::get('sf_root_dir')
-            . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OpacService.php';
-        require_once sfConfig::get('sf_root_dir')
-            . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/PatronService.php';
-        require_once sfConfig::get('sf_root_dir')
-            . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/FineService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/OpacService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/PatronService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/FineService.php';
 
         // Find patron record for current user
         $userId = (int) $this->getUser()->getAttribute('user_id');

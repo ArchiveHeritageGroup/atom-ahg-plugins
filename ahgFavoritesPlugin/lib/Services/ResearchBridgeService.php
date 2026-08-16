@@ -297,7 +297,7 @@ class ResearchBridgeService
 
         foreach ([
             $root.'/plugins/ahgResearchPlugin/lib/Services/'.$class.'.php',
-            $root.'/atom-ahg-plugins/ahgResearchPlugin/lib/Services/'.$class.'.php',
+            dirname(__FILE__, 4).'/ahgResearchPlugin/lib/Services/'.$class.'.php',
         ] as $path) {
             if (is_file($path)) {
                 require_once $path;

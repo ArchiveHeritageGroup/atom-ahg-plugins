@@ -11,7 +11,7 @@ class openurlActions extends AhgController
     public function executeIndex($request)
     {
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OpenUrlResolver.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/OpenUrlResolver.php';
 
         $this->results = (new OpenUrlResolver())->resolve($request->getParameterHolder()->getAll());
         $this->query = $request->getParameter('rft.title', $request->getParameter('rft.isbn', $request->getParameter('rft.issn', '')));

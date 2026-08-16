@@ -41,7 +41,7 @@ EOF;
             require_once $bootstrap;
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityDedupeService.php';
+        require_once dirname(__FILE__, 3).'/lib/Services/AuthorityDedupeService.php';
 
         $service = new \AhgAuthority\Services\AuthorityDedupeService();
         $limit = (int) $options['limit'];

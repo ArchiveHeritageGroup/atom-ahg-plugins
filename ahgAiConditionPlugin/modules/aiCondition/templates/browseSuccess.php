@@ -1,7 +1,7 @@
 <?php decorate_with('layout_2col.php') ?>
 
 <?php
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Helpers/AiConditionHelper.php';
+require_once dirname(__FILE__, 4).'/lib/Helpers/AiConditionHelper.php';
 ?>
 
 <?php slot('sidebar') ?>

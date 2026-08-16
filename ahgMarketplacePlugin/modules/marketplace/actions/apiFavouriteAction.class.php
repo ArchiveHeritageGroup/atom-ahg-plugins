@@ -2,7 +2,7 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Repositories/ListingRepository.php';
+require_once dirname(__FILE__, 4).'/lib/Repositories/ListingRepository.php';
 
 use AtomAhgPlugins\ahgMarketplacePlugin\Repositories\ListingRepository;
 use Illuminate\Database\Capsule\Manager as DB;

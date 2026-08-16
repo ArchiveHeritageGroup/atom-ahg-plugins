@@ -44,7 +44,7 @@ EOF;
         $DB = \Illuminate\Database\Capsule\Manager::class;
 
         // Load services
-        $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
+        $ahgDir = dirname(__FILE__, 3);
         require_once $ahgDir . '/lib/Services/ExportPipelineService.php';
 
         $dryRun = !empty($options['dry-run']);

@@ -23,7 +23,7 @@ class researchapiActions extends AhgController
         $this->startTime = (int) (microtime(true) * 1000);
 
         // Load API service
-        $servicePath = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgResearchPlugin/lib/Services/ResearchApiService.php';
+        $servicePath = dirname(__FILE__, 4).'/lib/Services/ResearchApiService.php';
         if (file_exists($servicePath)) {
             require_once $servicePath;
         }

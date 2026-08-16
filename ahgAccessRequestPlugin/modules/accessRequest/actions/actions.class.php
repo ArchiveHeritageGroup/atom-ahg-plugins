@@ -44,7 +44,9 @@ class accessRequestActions extends AhgController
         $candidates = [
             $root.'/atom-framework/src/Services/SecurityClearanceService.php',
             $root.'/plugins/ahgRuntimePlugin/src/Services/SecurityClearanceService.php',
-            $root.'/atom-ahg-plugins/ahgRuntimePlugin/src/Services/SecurityClearanceService.php',
+            // Relative to this file, so it resolves in both the symlink and the
+            // real-directory layout - PHP resolves symlinks in __FILE__, so this
+            // lands in whichever directory actually holds the plugins.
             dirname(__FILE__, 5).'/ahgRuntimePlugin/src/Services/SecurityClearanceService.php',
         ];
 

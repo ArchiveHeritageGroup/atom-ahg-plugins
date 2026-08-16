@@ -646,7 +646,7 @@ require_once SF_ROOT_DIR . '/config/ProjectConfiguration.class.php';
 \$configuration = ProjectConfiguration::getApplicationConfiguration('qubit', 'prod', false);
 sfContext::createInstance(\$configuration);
 
-require_once SF_ROOT_DIR . '/atom-ahg-plugins/ahgIiifPlugin/lib/Extensions/IiifViewer/Services/TranscriptionService.php';
+require_once dirname(__FILE__, 4).'/lib/Extensions/IiifViewer/Services/TranscriptionService.php';
 
 \$service = new \\AtomFramework\\Extensions\\IiifViewer\\Services\\TranscriptionService(['whisper_model' => '{$model}']);
 \$result = \$service->transcribe({$id}, ['language' => '{$lang}', 'force' => true]);

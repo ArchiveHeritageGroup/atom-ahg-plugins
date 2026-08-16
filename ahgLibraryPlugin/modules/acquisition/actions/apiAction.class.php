@@ -32,7 +32,7 @@ class acquisitionApiAction extends AhgController
         $this->getResponse()->setContentType('application/json');
 
         require_once \sfConfig::get('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/AcquisitionService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/AcquisitionService.php';
 
         // Authenticate via API key
         $apiKey = $request->getHttpHeader('X-API-Key');
@@ -672,7 +672,7 @@ class acquisitionApiAction extends AhgController
         // Cap at 100 items per batch
         $items = array_slice($items, 0, 100);
 
-        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/LibraryService.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/LibraryService.php';
         $libraryService = \LibraryService::getInstance();
 
         $created = [];

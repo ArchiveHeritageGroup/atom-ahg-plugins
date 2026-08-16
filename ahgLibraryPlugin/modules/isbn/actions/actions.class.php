@@ -53,8 +53,7 @@ class isbnActions extends AhgController
         $this->getResponse()->setContentType('application/json');
 
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/DoiService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/DoiService.php';
 
             $doiSvc = \ahgLibraryPlugin\Service\DoiService::getInstance();
             $result = $doiSvc->resolve($identifier);
@@ -162,8 +161,7 @@ class isbnActions extends AhgController
         $this->getResponse()->setContentType('application/json');
 
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/DoiService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/DoiService.php';
 
             $svc = \ahgLibraryPlugin\Service\DoiService::getInstance();
             $result = $svc->resolveDoi($doi);

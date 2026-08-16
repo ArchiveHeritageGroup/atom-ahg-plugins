@@ -29,8 +29,7 @@ class ricShaclActions extends AhgController
             if (file_exists($bootstrapFile)) {
                 require_once $bootstrapFile;
             }
-            $serviceFile = $this->config('sf_root_dir')
-                . '/atom-ahg-plugins/ahgRicExplorerPlugin/lib/Services/ShaclValidationService.class.php';
+            $serviceFile = dirname(__FILE__, 4).'/lib/Services/ShaclValidationService.class.php';
             if (file_exists($serviceFile)) {
                 require_once $serviceFile;
                 $this->shacl = new \AhgRicExplorer\Services\ShaclValidationService();

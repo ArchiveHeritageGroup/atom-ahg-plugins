@@ -30,8 +30,7 @@ class AuthorityDedupeService
      */
     protected function loadDedupeService(): ?object
     {
-        $path = \sfConfig::get('sf_root_dir') .
-            '/atom-ahg-plugins/ahgDedupePlugin/lib/Services/DedupeService.php';
+        $path = dirname(__FILE__, 4).'/ahgDedupePlugin/lib/Services/DedupeService.php';
 
         if (file_exists($path)) {
             require_once $path;

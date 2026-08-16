@@ -926,7 +926,7 @@ class ahgSpectrumWorkflowService
      */
     public static function getConditionCheckInterval(): int
     {
-        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgSpectrumPlugin/lib/ahgSpectrumEventService.class.php';
+        require_once dirname(__FILE__, 2).'/lib/ahgSpectrumEventService.class.php';
         return (int) \ahgSpectrumEventService::getSpectrumSetting('spectrum_condition_check_interval', '365');
     }
 
@@ -935,7 +935,7 @@ class ahgSpectrumWorkflowService
      */
     public static function getValuationReminderDays(): int
     {
-        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgSpectrumPlugin/lib/ahgSpectrumEventService.class.php';
+        require_once dirname(__FILE__, 2).'/lib/ahgSpectrumEventService.class.php';
         return (int) \ahgSpectrumEventService::getSpectrumSetting('spectrum_valuation_reminder_days', '30');
     }
 

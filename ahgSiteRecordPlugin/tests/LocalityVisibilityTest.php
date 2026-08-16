@@ -1,6 +1,8 @@
 <?php
 
-require '/usr/share/nginx/archive/atom-ahg-plugins/ahgSiteRecordPlugin/lib/Services/LocalityVisibilityService.php';
+// Relative, so the test runs wherever the plugin is installed - the same rule
+// the plugin code itself follows.
+require dirname(__DIR__).'/lib/Services/LocalityVisibilityService.php';
 
 use AhgSiteRecordPlugin\Services\LocalityVisibilityService as L;
 

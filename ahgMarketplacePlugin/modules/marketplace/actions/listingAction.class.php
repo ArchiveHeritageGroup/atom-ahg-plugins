@@ -2,11 +2,11 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/MarketplaceService.php';
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/SellerService.php';
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/CurrencyService.php';
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/AuctionService.php';
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Repositories/SettingsRepository.php';
+require_once dirname(__FILE__, 4).'/lib/Services/MarketplaceService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/SellerService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/CurrencyService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/AuctionService.php';
+require_once dirname(__FILE__, 4).'/lib/Repositories/SettingsRepository.php';
 
 use AtomAhgPlugins\ahgMarketplacePlugin\Services\MarketplaceService;
 use AtomAhgPlugins\ahgMarketplacePlugin\Services\SellerService;

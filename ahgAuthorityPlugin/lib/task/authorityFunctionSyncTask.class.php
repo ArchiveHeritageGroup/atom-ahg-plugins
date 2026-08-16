@@ -83,7 +83,7 @@ EOF;
             $this->logSection('authority', sprintf('Cleaned %d orphaned links', $orphanedActors + $orphanedFunctions));
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityFunctionService.php';
+        require_once dirname(__FILE__, 3).'/lib/Services/AuthorityFunctionService.php';
         $stats = (new \AhgAuthority\Services\AuthorityFunctionService())->getStats();
         $this->logSection('authority', sprintf('Stats: %d links, %d unique actors, %d unique functions',
             $stats['total_links'], $stats['unique_actors'], $stats['unique_functions']));

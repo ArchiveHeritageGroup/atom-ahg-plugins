@@ -32,7 +32,7 @@ class aiConditionInstallTask extends sfBaseTask
             require_once $bootstrap;
         }
 
-        $sqlFile = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/database/install.sql';
+        $sqlFile = dirname(__FILE__, 3).'/database/install.sql';
 
         if (!file_exists($sqlFile)) {
             $this->logSection('error', 'install.sql not found', null, 'ERROR');

@@ -452,7 +452,7 @@ class LoanService
         if (!$startDate) {
             return null;
         }
-        require_once \sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgSpectrumPlugin/lib/ahgSpectrumEventService.class.php';
+        require_once dirname(__FILE__, 5).'/lib/ahgSpectrumEventService.class.php';
         $days = (int) \ahgSpectrumEventService::getSpectrumSetting('spectrum_loan_default_period', '90');
         return date('Y-m-d', strtotime($startDate . " +{$days} days"));
     }

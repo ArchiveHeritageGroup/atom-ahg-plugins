@@ -503,8 +503,7 @@ class authorityActions extends sfActions
 
         // Delegate to ahgContactPlugin if available
         $this->contacts = [];
-        $contactServiceFile = \sfConfig::get('sf_root_dir') .
-            '/atom-ahg-plugins/ahgContactPlugin/lib/Extensions/Contact/Services/ContactInformationService.php';
+        $contactServiceFile = dirname(__FILE__, 5).'/ahgContactPlugin/lib/Extensions/Contact/Services/ContactInformationService.php';
 
         if (file_exists($contactServiceFile)) {
             require_once $contactServiceFile;

@@ -2,8 +2,8 @@
 
 use AtomFramework\Http\Controllers\AhgController;
 
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/TransactionService.php';
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/MarketplaceService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/TransactionService.php';
+require_once dirname(__FILE__, 4).'/lib/Services/MarketplaceService.php';
 
 use AtomAhgPlugins\ahgMarketplacePlugin\Services\TransactionService;
 use AtomAhgPlugins\ahgMarketplacePlugin\Services\MarketplaceService;
@@ -56,7 +56,7 @@ class marketplaceBuyAction extends AhgController
                 $this->redirect(['module' => 'marketplace', 'action' => 'listing', 'slug' => $slug]);
             }
 
-            require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMarketplacePlugin/lib/Services/AuctionService.php';
+            require_once dirname(__FILE__, 4).'/lib/Services/AuctionService.php';
             $auctionService = new \AtomAhgPlugins\ahgMarketplacePlugin\Services\AuctionService();
             $buyResult = $auctionService->buyNow($auction->id, $userId);
 

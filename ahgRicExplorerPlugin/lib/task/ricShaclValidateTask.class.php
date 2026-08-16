@@ -48,8 +48,7 @@ EOF;
         }
 
         // Namespaced plugin classes are loaded via require_once + new.
-        $serviceFile = sfConfig::get('sf_root_dir')
-            . '/atom-ahg-plugins/ahgRicExplorerPlugin/lib/Services/ShaclValidationService.class.php';
+        $serviceFile = dirname(__FILE__, 3).'/lib/Services/ShaclValidationService.class.php';
         if (!file_exists($serviceFile)) {
             $this->logSection('ric', 'ERROR: ShaclValidationService not found at ' . $serviceFile, null, 'ERROR');
 

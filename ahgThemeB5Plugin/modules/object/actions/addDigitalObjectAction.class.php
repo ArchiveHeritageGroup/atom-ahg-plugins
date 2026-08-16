@@ -8,7 +8,7 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 
 // Include the metadata extraction trait from ahgMetadataExtractionPlugin
-require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgMetadataExtractionPlugin/lib/Services/ahgMetadataExtractionTrait.php';
+require_once dirname(__FILE__, 5).'/ahgMetadataExtractionPlugin/lib/Services/ahgMetadataExtractionTrait.php';
 
 use AtomFramework\Http\Controllers\AhgController;
 

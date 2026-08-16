@@ -71,7 +71,7 @@ EOF;
         }
 
         // Load service
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahg3DModelPlugin/lib/Services/TripoSRService.php';
+        require_once dirname(__FILE__, 3).'/lib/Services/TripoSRService.php';
         $service = new \Ahg3DModel\Services\TripoSRService();
 
         // Handle options

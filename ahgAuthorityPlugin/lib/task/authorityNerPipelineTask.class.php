@@ -45,7 +45,7 @@ EOF;
             require_once $bootstrap;
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityNerPipelineService.php';
+        require_once dirname(__FILE__, 3).'/lib/Services/AuthorityNerPipelineService.php';
 
         $service = new \AhgAuthority\Services\AuthorityNerPipelineService();
         $dryRun = isset($options['dry-run']) && $options['dry-run'];

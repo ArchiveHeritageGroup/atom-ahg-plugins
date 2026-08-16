@@ -42,8 +42,8 @@ EOF;
             require_once $bootstrap;
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityCompletenessService.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAuthorityPlugin/lib/Services/AuthorityIdentifierService.php';
+        require_once dirname(__FILE__, 3).'/lib/Services/AuthorityCompletenessService.php';
+        require_once dirname(__FILE__, 3).'/lib/Services/AuthorityIdentifierService.php';
 
         // Check if auto-recalculation is enabled
         $autoRecalc = \Illuminate\Database\Capsule\Manager::table('ahg_authority_config')

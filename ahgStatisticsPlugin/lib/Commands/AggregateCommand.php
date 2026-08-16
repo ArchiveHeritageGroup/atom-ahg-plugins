@@ -40,7 +40,7 @@ class AggregateCommand extends BaseCommand
 
     protected function handle(): int
     {
-        $pluginDir = $this->getAtomRoot() . '/atom-ahg-plugins/ahgStatisticsPlugin';
+        $pluginDir = dirname(__FILE__, 3);
         require_once $pluginDir . '/lib/Services/StatisticsService.php';
 
         $service = new \StatisticsService();

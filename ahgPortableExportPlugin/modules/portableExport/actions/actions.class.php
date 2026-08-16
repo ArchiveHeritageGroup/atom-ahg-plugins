@@ -12,7 +12,7 @@ class portableExportActions extends sfActions
     {
         static $loaded = false;
         if (!$loaded) {
-            $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
+            $ahgDir = dirname(__FILE__, 4);
             require_once $ahgDir . '/lib/Services/ExportPipelineService.php';
             require_once $ahgDir . '/lib/Services/CatalogueExtractor.php';
             require_once $ahgDir . '/lib/Services/AssetCollector.php';
@@ -647,7 +647,7 @@ class portableExportActions extends sfActions
         $this->requireAdmin();
         $this->loadServices();
 
-        $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
+        $ahgDir = dirname(__FILE__, 4);
         require_once $ahgDir . '/lib/Services/ExportEstimator.php';
 
         $scopeType = $request->getParameter('scope_type', 'all');
@@ -771,7 +771,7 @@ class portableExportActions extends sfActions
         }
 
         // Load importer
-        $ahgDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgPortableExportPlugin';
+        $ahgDir = dirname(__FILE__, 4);
         require_once $ahgDir . '/lib/Services/ArchiveImporter.php';
 
         $importer = new \AhgPortableExportPlugin\Services\ArchiveImporter();

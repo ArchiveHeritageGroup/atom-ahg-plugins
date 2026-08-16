@@ -19,7 +19,7 @@ class aiConditionActions extends AhgController
             require_once $bootstrap;
         }
 
-        $pluginBase = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib';
+        $pluginBase = dirname(__FILE__, 4).'/lib';
         require_once $pluginBase . '/Repositories/AiConditionRepository.php';
         require_once $pluginBase . '/Services/AiConditionService.php';
         require_once $pluginBase . '/Helpers/AiConditionHelper.php';

@@ -56,8 +56,7 @@ class circulationOverdueAction extends AhgController
         $offset = ($this->page - 1) * $this->limit;
 
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OverdueNoticeService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/OverdueNoticeService.php';
 
             $svc = \ahgLibraryPlugin\Service\OverdueNoticeService::getInstance();
             $result = $svc->getOverdueItems($this->limit, $offset, 1);
@@ -87,8 +86,7 @@ class circulationOverdueAction extends AhgController
         $minDays = (int) $request->getParameter('min_days', 1);
 
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OverdueNoticeService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/OverdueNoticeService.php';
 
             $svc = \ahgLibraryPlugin\Service\OverdueNoticeService::getInstance();
             $result = $svc->sendBatchNotices([
@@ -119,8 +117,7 @@ class circulationOverdueAction extends AhgController
         $this->offset = 0;
 
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/OverdueNoticeService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/OverdueNoticeService.php';
 
             $svc = \ahgLibraryPlugin\Service\OverdueNoticeService::getInstance();
             $result = $svc->getOverdueItems($this->limit, 0, 1);

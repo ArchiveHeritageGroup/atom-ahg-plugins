@@ -9,8 +9,7 @@ class MappingLoader
     
     public static function init()
     {
-        self::$defaultMappingsPath = \sfConfig::get('sf_root_dir') 
-            . '/atom-ahg-plugins/ahgDataMigrationPlugin/data/mappings/defaults';
+        self::$defaultMappingsPath = dirname(__FILE__, 3).'/data/mappings/defaults';
     }
     
     /**

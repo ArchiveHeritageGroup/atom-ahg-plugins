@@ -76,8 +76,7 @@ class libraryAdvancedSearchAction extends AhgController
     protected function executeSearch(): void
     {
         try {
-            require_once sfConfig::get('sf_root_dir')
-                . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/SearchService.php';
+            require_once dirname(__FILE__, 4).'/lib/Service/SearchService.php';
 
             $svc = \ahgLibraryPlugin\Service\SearchService::getInstance();
 

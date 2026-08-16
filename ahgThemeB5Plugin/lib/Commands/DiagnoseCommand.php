@@ -47,7 +47,7 @@ class DiagnoseCommand extends BaseCommand
         // Check 1: Symlink
         $this->info('[1] Checking plugin symlink...');
         $symlinkPath = $pluginsDir . '/ahgThemeB5Plugin';
-        $targetPath = $rootDir . '/atom-ahg-plugins/ahgThemeB5Plugin';
+        $targetPath = dirname(__FILE__, 3);
 
         if (!file_exists($symlinkPath)) {
             $issues[] = "Symlink missing: {$symlinkPath}";
@@ -316,7 +316,7 @@ class DiagnoseCommand extends BaseCommand
             if (strpos($issue, 'Symlink missing') !== false) {
                 $this->line('  Creating symlink...');
                 $symlinkPath = $pluginsDir . '/ahgThemeB5Plugin';
-                $targetPath = $rootDir . '/atom-ahg-plugins/ahgThemeB5Plugin';
+                $targetPath = dirname(__FILE__, 3);
 
                 if (file_exists($targetPath)) {
                     if (@symlink($targetPath, $symlinkPath)) {

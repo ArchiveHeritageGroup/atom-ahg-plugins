@@ -99,8 +99,7 @@ class AuthorityNerPipelineService
     public function findMatchingActors(string $entityValue, string $entityType = 'PERSON', int $limit = 5): array
     {
         // Try to use ahgAIPlugin's NerRepository
-        $nerRepoFile = \sfConfig::get('sf_root_dir') .
-            '/atom-ahg-plugins/ahgAIPlugin/lib/repository/NerRepository.php';
+        $nerRepoFile = dirname(__FILE__, 4).'/ahgAIPlugin/lib/repository/NerRepository.php';
 
         if (file_exists($nerRepoFile)) {
             require_once $nerRepoFile;

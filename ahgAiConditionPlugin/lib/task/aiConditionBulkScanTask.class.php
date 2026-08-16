@@ -33,8 +33,8 @@ class aiConditionBulkScanTask extends sfBaseTask
             require_once $bootstrap;
         }
 
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Services/AiConditionService.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Repositories/AiConditionRepository.php';
+        require_once dirname(__FILE__, 3).'/lib/Services/AiConditionService.php';
+        require_once dirname(__FILE__, 3).'/lib/Repositories/AiConditionRepository.php';
 
         $service = new \ahgAiConditionPlugin\Services\AiConditionService();
         $repo = new \ahgAiConditionPlugin\Repositories\AiConditionRepository();

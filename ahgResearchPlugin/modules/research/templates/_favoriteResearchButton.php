@@ -23,7 +23,7 @@ if (!$favEnabled) return;
 $userId = sfContext::getInstance()->getUser()->getAttribute('user_id');
 if (!$userId) return;
 
-require_once sfConfig::get('sf_root_dir').'/atom-ahg-plugins/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
+require_once dirname(__FILE__, 5).'/ahgFavoritesPlugin/lib/Services/FavoritesService.php';
 $svc = new \AtomAhgPlugins\ahgFavoritesPlugin\Services\FavoritesService();
 $isFav = $svc->isFavoritedCustom((int) $userId, (int) $objectId, $objectType);
 $uid = 'rfav-' . uniqid();

@@ -87,7 +87,7 @@ class dataMigrationExecuteAhgImportAction extends AhgController
     protected function executeImport($request)
     {
         // Load required services
-        $pluginPath = $this->config('sf_root_dir') . '/atom-ahg-plugins/ahgDataMigrationPlugin';
+        $pluginPath = dirname(__FILE__, 4);
         if (file_exists($pluginPath . '/lib/Services/PreservicaImportService.php')) {
             require_once $pluginPath . '/lib/Services/PreservicaImportService.php';
         }

@@ -141,8 +141,7 @@ class AuthorityFunctionService
         }
 
         // Try ahgFunctionManagePlugin first
-        $funcServiceFile = \sfConfig::get('sf_root_dir') .
-            '/atom-ahg-plugins/ahgFunctionManagePlugin/lib/Services/FunctionBrowseService.php';
+        $funcServiceFile = dirname(__FILE__, 4).'/ahgFunctionManagePlugin/lib/Services/FunctionBrowseService.php';
 
         if (file_exists($funcServiceFile)) {
             require_once $funcServiceFile;

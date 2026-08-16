@@ -159,8 +159,7 @@ class AuthorityEacExportService
         }
 
         // Delegate to ahgExportPlugin's EAC builder if available
-        $exportServiceFile = \sfConfig::get('sf_root_dir') .
-            '/atom-ahg-plugins/ahgExportPlugin/lib/Services/EacCpfExportService.php';
+        $exportServiceFile = dirname(__FILE__, 4).'/ahgExportPlugin/lib/Services/EacCpfExportService.php';
 
         if (!file_exists($exportServiceFile)) {
             return null;

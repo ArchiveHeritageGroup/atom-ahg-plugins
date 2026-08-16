@@ -36,7 +36,7 @@ class RegionCommand extends BaseCommand
 
     protected function handle(): int
     {
-        $pluginDir = $this->getAtomRoot() . '/atom-ahg-plugins/ahgHeritageAccountingPlugin';
+        $pluginDir = dirname(__FILE__, 3);
         require_once $pluginDir . '/lib/Regions/RegionManager.php';
 
         $manager = \RegionManager::getInstance();

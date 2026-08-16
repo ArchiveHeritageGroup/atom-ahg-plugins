@@ -7,7 +7,7 @@ class tradingPartnerTestAction extends AhgController
     public function execute($request)
     {
         require_once $this->config('sf_root_dir') . '/atom-framework/bootstrap.php';
-        require_once sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgLibraryPlugin/lib/Service/EdiAdapter.php';
+        require_once dirname(__FILE__, 4).'/lib/Service/EdiAdapter.php';
 
         $db = \Illuminate\Database\Capsule\Manager::connection();
         $id = (int) $request->getParameter('id');

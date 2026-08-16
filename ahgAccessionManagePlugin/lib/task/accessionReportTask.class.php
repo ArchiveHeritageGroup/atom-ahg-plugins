@@ -36,7 +36,7 @@ EOF;
             require_once $frameworkBootstrap;
         }
 
-        $pluginDir = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAccessionManagePlugin';
+        $pluginDir = dirname(__FILE__, 3);
         require_once $pluginDir . '/lib/Services/AccessionIntakeService.php';
         require_once $pluginDir . '/lib/Services/AccessionAppraisalService.php';
         require_once $pluginDir . '/lib/Services/AccessionContainerService.php';

@@ -29,7 +29,7 @@ class aiConditionStatusTask extends sfBaseTask
             require_once $bootstrap;
         }
 
-        $serviceFile = sfConfig::get('sf_root_dir') . '/atom-ahg-plugins/ahgAiConditionPlugin/lib/Services/AiConditionService.php';
+        $serviceFile = dirname(__FILE__, 3).'/lib/Services/AiConditionService.php';
         require_once $serviceFile;
 
         $service = new \ahgAiConditionPlugin\Services\AiConditionService();
