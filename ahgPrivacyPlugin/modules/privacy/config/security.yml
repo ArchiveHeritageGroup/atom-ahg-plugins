@@ -1,0 +1,58 @@
+# Privacy - the data subject's side of the plugin. PUBLIC, and it has to be.
+#
+# A data subject exercising a right under POPIA, GDPR or any of the other
+# jurisdictions this plugin covers is by definition somebody who may not have
+# an account, and often somebody who wants to know why an organisation holds
+# their information at all. Putting an access request behind a login would
+# require them to hand over more personal information to ask what personal
+# information is held about them. The staff side lives in privacyAdmin, which
+# is a separate module and checks the user.
+#
+# What each public action actually discloses, checked 2026-08-17:
+#
+#   index, dashboard   the published privacy notice, the jurisdiction
+#                      configuration and the named Information Officer and
+#                      deputies. `dashboard` reads like a staff screen and is
+#                      not: POPIA requires an organisation to publish exactly
+#                      these contact details. No personal data of any data
+#                      subject appears.
+#   dsarRequest        the request form. Marked "(public form)" in the action.
+#   complaint          the complaint form.
+#   *Confirmation      the acknowledgement shown after submitting, with the
+#                      reference number just generated for that submission.
+#   dsarStatus         a status lookup that requires the reference number AND
+#                      the requestor's email together, matched as a pair in a
+#                      single query. Neither alone returns anything, so a
+#                      reference number on its own is not enough to read
+#                      somebody else's request. This is the reason the module
+#                      can be public at all - if it took a bare id or
+#                      reference it would be an enumeration of everyone who has
+#                      ever lodged a request, which is a personal data breach
+#                      inside the compliance plugin.
+#
+# Listed individually rather than left to the inherited default, so that this
+# is a decision on the record and a new action does not silently join them.
+
+index:
+  is_secure: false
+
+dashboard:
+  is_secure: false
+
+dsarRequest:
+  is_secure: false
+
+dsarConfirmation:
+  is_secure: false
+
+dsarStatus:
+  is_secure: false
+
+complaint:
+  is_secure: false
+
+complaintConfirmation:
+  is_secure: false
+
+all:
+  is_secure: true

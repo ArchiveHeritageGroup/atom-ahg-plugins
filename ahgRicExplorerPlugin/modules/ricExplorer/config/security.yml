@@ -1,0 +1,27 @@
+# RiC Explorer - graph data feed. Authenticated only.
+#
+# Both user-facing entry points already refuse anonymous callers in code
+# (knowledgeGraphAction and provenanceGraphAction each test isAuthenticated).
+# getData is the AJAX feed behind those two screens and had no check of any
+# kind, so it answered anyone: on 2026-08-17 an anonymous request for
+#
+#     /ricExplorer/getData?id=<any id>
+#
+# returned the title, slug and relationship graph of UNPUBLISHED DRAFT
+# descriptions on PSIS. The only caller is _ricPanel.php, which is not
+# registered on any public page, so closing the module breaks nothing.
+#
+# NOTE ON autocomplete
+#
+# Base AtoM's apps/qubit/config/security.yml secures the action NAME
+# `autocomplete` across every module, which is the only reason this module's
+# autocomplete action - which selects from information_object with no
+# publication filter at all - is not already public. It is restated here so
+# that fact is visible at the point of use rather than inherited invisibly.
+
+autocomplete:
+  credentials: [[ editor, administrator ]]
+  is_secure: true
+
+all:
+  is_secure: true

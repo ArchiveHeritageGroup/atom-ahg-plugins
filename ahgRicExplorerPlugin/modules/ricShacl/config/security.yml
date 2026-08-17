@@ -1,0 +1,14 @@
+# SHACL validation - administrators only.
+#
+# Routed under /admin/ric/shacl. Running a validation is work the server does
+# on request, and the reports name records that fail their shape constraints,
+# published or not.
+#
+# Note this module is absent from the plugin's config/settings.yml
+# enabled_modules list, so whether it loads at all depends on how the
+# application is configured. A posture that only holds while a module happens
+# to be switched off is not a posture, hence this file.
+
+all:
+  credentials: [[ administrator ]]
+  is_secure: true

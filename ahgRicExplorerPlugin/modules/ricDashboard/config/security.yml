@@ -1,0 +1,14 @@
+# RiC sync dashboard - administrators only.
+#
+# Routed under /admin/ric/*: sync status, orphan records, the job queue, logs,
+# configuration, and AJAX endpoints that resync, clean up orphans and clear
+# queue items. Those last ones change state, so this is not a reporting screen.
+#
+# The single action file already tests the user in code and anonymous callers
+# are redirected today. This file states the posture so it survives a new
+# action being added beside the existing ones, which is exactly how
+# ahgConditionPlugin's `template` action ended up public.
+
+all:
+  credentials: [[ administrator ]]
+  is_secure: true

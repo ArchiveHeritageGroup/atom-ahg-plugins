@@ -50,6 +50,21 @@ class AdminErrorDetail
                 return false;
             }
 
+            // A 404 is not a crash, so do not dress it up as one.
+            //
+            // symfony raises sfError404Exception for an ordinary missing record,
+            // an unroutable URL, and - through refuseUnavailableFormat() - a
+            // format a module does not ship. Crawlers probe the last constantly
+            // (?sf_format=xml, ?template=eac, ;skos). Rendering a stack trace and
+            // an exception class for those shows administrators what looks like a
+            // fault every time, and buries the traces that do matter.
+            //
+            // Same call as the logging side, which already skips 404s: let
+            // symfony serve its normal 404 page.
+            if ($exception instanceof \sfError404Exception) {
+                return false;
+            }
+
             self::render($exception);
 
             // Tells notifyUntil the event is handled, so symfony returns without

@@ -47,6 +47,29 @@ class ricExplorerGetDataAction extends AhgController
         if ($recordId === 'overview') {
             $graphData = $this->buildOverviewGraph();
         } else {
+            // Do not describe a record the caller may not read.
+            //
+            // buildGraphData() selects straight from information_object with no
+            // publication or ACL condition, so before this check the endpoint
+            // returned the title, slug and relationships of DRAFT descriptions
+            // to anyone who guessed an id. modules/ricExplorer/config/security.yml
+            // now closes the module to anonymous callers; this second check is
+            // what stops an ordinary authenticated account - a researcher, say -
+            // from enumerating unpublished titles through the same URL.
+            //
+            // QubitAcl::check() rather than AclService::check(): the latter
+            // returns false for every anonymous user, which would be the right
+            // answer here by accident and the wrong one everywhere else. Same
+            // call the museum module was corrected to use on 2026-08-15.
+            $resource = \QubitInformationObject::getById($recordId);
+
+            if (null === $resource || !\QubitAcl::check($resource, 'read')) {
+                return $this->renderText(json_encode([
+                    'success' => false,
+                    'error' => 'Not found',
+                ]));
+            }
+
             $graphData = $this->buildGraphData($recordId);
         }
 

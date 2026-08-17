@@ -1,0 +1,49 @@
+# Marketplace - a public shopfront, closed everywhere else.
+#
+# 47 of the module's 57 action files already test the user in code: everything
+# a seller does, every admin screen, checkout, orders, offers, bids. The ten
+# listed below are the shop front itself, and they are public on purpose - a
+# marketplace nobody can look at without an account is not a marketplace.
+#
+# They are named one at a time rather than left to `default: is_secure: false`,
+# because inheriting a public posture and choosing one are indistinguishable in
+# review, and only one of them survives somebody adding an eleventh action.
+#
+# The four api* actions are read-only lookups behind the browse UI - auction
+# status, categories, currencies and search. They disclose the same listings
+# the browse pages already show.
+
+browse:
+  is_secure: false
+
+search:
+  is_secure: false
+
+category:
+  is_secure: false
+
+featured:
+  is_secure: false
+
+sector:
+  is_secure: false
+
+auctionBrowse:
+  is_secure: false
+
+apiSearch:
+  is_secure: false
+
+apiCategories:
+  is_secure: false
+
+apiCurrencies:
+  is_secure: false
+
+apiAuctionStatus:
+  is_secure: false
+
+# Everything else - selling, bidding, offers, checkout, orders, admin - needs
+# an account. New actions land here by default rather than in the shopfront.
+all:
+  is_secure: true

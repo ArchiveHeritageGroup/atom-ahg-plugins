@@ -1,0 +1,34 @@
+# RiC semantic search - PUBLIC, deliberately.
+#
+# The live index action is eleven lines: it passes the configured search API
+# URL and the site base URL to a template, and the search itself happens in the
+# browser. Nothing is read from the database and nothing is disclosed, so this
+# is public for the same reason ordinary AtoM search is.
+#
+# proxy is listed even though it is currently unreachable.
+#
+# executeProxy lives in semanticSearchActions.class.php, which symfony never
+# loads for this module - actions.class.php wins - so /ricSemanticSearch/proxy
+# answers 404 today. It is named here anyway because of what it does if anyone
+# ever makes it live: it appends a caller-supplied `endpoint` parameter to the
+# configured API base and curls the result back. The host is fixed by
+# configuration so it is not open SSRF, but the PATH is the caller's, which
+# would let an anonymous visitor reach arbitrary paths on an internal service.
+# An entry costs nothing now and closes that door before it opens.
+
+proxy:
+  credentials: [[ editor, administrator ]]
+  is_secure: true
+
+index:
+  is_secure: false
+
+widget:
+  is_secure: false
+
+examples:
+  is_secure: false
+
+# Anything added later is closed until someone decides otherwise.
+all:
+  is_secure: true
