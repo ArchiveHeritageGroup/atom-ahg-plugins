@@ -16,6 +16,11 @@ class ahgSemanticSearchPluginConfiguration extends sfPluginConfiguration
     /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
     public static $summary = 'Semantic search with vector embeddings and thesaurus expansion';
 
+    // Required: sfPluginAdminPlugin renders $plugin::$version, and reading an
+    // undeclared static property is a fatal Error in PHP 8 - it kills the
+    // plugins page mid-render, taking the save button with it.
+    public static $version = "1.0.0";
+
     /** Plugin version */
     public const VERSION = '1.0.0';
 

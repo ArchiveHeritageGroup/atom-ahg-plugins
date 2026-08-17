@@ -4,6 +4,11 @@ class ahgSecurityClearancePluginConfiguration extends sfPluginConfiguration
     /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
     public static $summary = 'Security classification, user clearance and embargo enforcement';
 
+    // Without this, sfPluginAdminPlugin's `echo $plugin::$version` is a fatal
+    // Error in PHP 8 and the plugins page dies mid-render, taking the save
+    // button with it. See the fuller note in ahgContactPluginConfiguration.
+    public static $version = '1.0.0';
+
     /** Per-request guard: the MFA gate evaluates only the first dispatched action. */
     private $mfaGateChecked = false;
 

@@ -11,6 +11,11 @@ class ahgDiscoveryPluginConfiguration extends sfPluginConfiguration
     /** Shown by AtoM's stock plugin admin; omitted plugins are hidden there. */
     public static $summary = 'Natural-language discovery search with query expansion';
 
+    // Required: sfPluginAdminPlugin renders $plugin::$version, and reading an
+    // undeclared static property is a fatal Error in PHP 8 - it kills the
+    // plugins page mid-render, taking the save button with it.
+    public static $version = "1.0.0";
+
     const VERSION = '0.2.0';
 
     public function initialize()
