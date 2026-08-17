@@ -1,11 +1,34 @@
 <?php use_helper('Date') ?>
 
+<?php
+// Do NOT write `$resource->title ?? $resource->slug` here.
+//
+// ?? calls __isset(), and Propel's generated Base classes THROW
+// "Unknown record property" for a column the class does not have rather than
+// returning false. Whatever $resource is decorated as at render time, that made
+// this page fatal with HTTP 500 for every record, not just unusual ones. Ask for
+// the value through a method that exists and fall back to the slug.
+$resourceLabel = '';
+
+try {
+    if (method_exists($resource, 'getTitle')) {
+        $resourceLabel = (string) $resource->getTitle(['cultureFallback' => true]);
+    }
+} catch (Throwable $e) {
+    $resourceLabel = '';
+}
+
+if ('' === trim($resourceLabel)) {
+    $resourceLabel = (string) $resource->slug;
+}
+?>
+
 <div class="container-fluid py-3">
   <!-- Breadcrumb -->
   <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb mb-0">
       <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'action' => 'browse']) ?>">Browse</a></li>
-      <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>"><?php echo $resource->title ?? $resource->slug ?></a></li>
+      <li class="breadcrumb-item"><a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>"><?php echo $resourceLabel ?></a></li>
       <li class="breadcrumb-item active">Provenance</li>
     </ol>
   </nav>
@@ -14,7 +37,7 @@
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <h4 class="mb-1"><i class="fas fa-clock-rotate-left me-2"></i>Provenance & Chain of Custody</h4>
-      <p class="text-muted mb-0"><?php echo $resource->title ?? $resource->slug ?></p>
+      <p class="text-muted mb-0"><?php echo $resourceLabel ?></p>
     </div>
     <?php if ($sf_user->isAuthenticated()): ?>
     <a href="<?php echo url_for(['module' => 'informationobject', 'slug' => $resource->slug]) ?>" class="btn btn-outline-secondary me-2"><i class="fas fa-arrow-left me-1"></i>Back to Record</a>
