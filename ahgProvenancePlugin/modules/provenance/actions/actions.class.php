@@ -60,7 +60,15 @@ class provenanceActions extends AhgController
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
 
-        if (!$this->resource) {
+        // getBySlug does NOT filter by class: the slug table is shared, so an
+        // authority record or a term resolves here just as readily as a
+        // description. The pages then rendered against the wrong kind of object
+        // and the save died on the foreign key, because provenance_record's
+        // information_object_id has no matching row - a 500 at the end of a form
+        // the user had already filled in. It matters on an instance like RARI,
+        // where sites ARE authority records, so reaching provenance from one is
+        // the normal path rather than an odd one.
+        if (!$this->resource || !$this->resource instanceof QubitInformationObject) {
             $this->forward404('Record not found');
         }
 
@@ -114,7 +122,15 @@ class provenanceActions extends AhgController
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
 
-        if (!$this->resource) {
+        // getBySlug does NOT filter by class: the slug table is shared, so an
+        // authority record or a term resolves here just as readily as a
+        // description. The pages then rendered against the wrong kind of object
+        // and the save died on the foreign key, because provenance_record's
+        // information_object_id has no matching row - a 500 at the end of a form
+        // the user had already filled in. It matters on an instance like RARI,
+        // where sites ARE authority records, so reaching provenance from one is
+        // the normal path rather than an odd one.
+        if (!$this->resource || !$this->resource instanceof QubitInformationObject) {
             $this->forward404('Record not found');
         }
 
@@ -139,7 +155,15 @@ class provenanceActions extends AhgController
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
 
-        if (!$this->resource) {
+        // getBySlug does NOT filter by class: the slug table is shared, so an
+        // authority record or a term resolves here just as readily as a
+        // description. The pages then rendered against the wrong kind of object
+        // and the save died on the foreign key, because provenance_record's
+        // information_object_id has no matching row - a 500 at the end of a form
+        // the user had already filled in. It matters on an instance like RARI,
+        // where sites ARE authority records, so reaching provenance from one is
+        // the normal path rather than an odd one.
+        if (!$this->resource || !$this->resource instanceof QubitInformationObject) {
             $this->forward404('Record not found');
         }
 
@@ -162,7 +186,15 @@ class provenanceActions extends AhgController
         $slug = $request->getParameter('slug');
         $this->resource = QubitInformationObject::getBySlug($slug);
 
-        if (!$this->resource) {
+        // getBySlug does NOT filter by class: the slug table is shared, so an
+        // authority record or a term resolves here just as readily as a
+        // description. The pages then rendered against the wrong kind of object
+        // and the save died on the foreign key, because provenance_record's
+        // information_object_id has no matching row - a 500 at the end of a form
+        // the user had already filled in. It matters on an instance like RARI,
+        // where sites ARE authority records, so reaching provenance from one is
+        // the normal path rather than an odd one.
+        if (!$this->resource || !$this->resource instanceof QubitInformationObject) {
             $this->forward404('Record not found');
         }
 

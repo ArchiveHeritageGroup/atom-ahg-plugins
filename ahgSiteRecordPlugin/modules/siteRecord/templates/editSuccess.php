@@ -32,7 +32,17 @@ $groups = [
 ?>
 
 <form method="post" class="ahg-site-record-form">
-  <input type="hidden" name="_csrf_token" value="<?php echo esc_specialchars($csrf_token ?? ''); ?>">
+      <?php // No CSRF field here on purpose.
+       //
+       // AhgController declares `public string $csrf_token` as a real property, so
+       // assigning it never passes through sfComponent::__set() and never reaches
+       // the template variable holder. $csrf_token is undefined here, so a
+       // hand-written field renders EMPTY and fails validation.
+       //
+       // ahgCorePlugin injects the correct token into every same-origin POST form,
+       // and skips any form already carrying the field - so emitting an empty one
+       // suppressed the real one and every save answered
+       // {"error":"CSRF token validation failed"}. Leave it to the injector. ?>
 
   <?php if ($actor) { ?>
     <p class="text-muted">Authority record: <strong><?php echo esc_specialchars($actor->name ?? ''); ?></strong></p>

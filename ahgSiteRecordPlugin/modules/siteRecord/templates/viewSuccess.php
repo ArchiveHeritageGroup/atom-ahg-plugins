@@ -134,7 +134,17 @@ $taxonomyLabels = [
             // legacy application deletable by anything that followed a URL. ?>
       <form method="post" action="<?php echo url_for('@site_record_delete?id='.$record->id); ?>"
             onsubmit="return confirm('Delete this site record? Field observations cannot be recollected without revisiting the site.');">
-        <input type="hidden" name="_csrf_token" value="<?php echo esc_specialchars($csrf_token ?? ''); ?>">
+      <?php // No CSRF field here on purpose.
+       //
+       // AhgController declares `public string $csrf_token` as a real property, so
+       // assigning it never passes through sfComponent::__set() and never reaches
+       // the template variable holder. $csrf_token is undefined here, so a
+       // hand-written field renders EMPTY and fails validation.
+       //
+       // ahgCorePlugin injects the correct token into every same-origin POST form,
+       // and skips any form already carrying the field - so emitting an empty one
+       // suppressed the real one and every save answered
+       // {"error":"CSRF token validation failed"}. Leave it to the injector. ?>
         <button type="submit" class="btn btn-outline-danger">Delete</button>
       </form>
     <?php } ?>

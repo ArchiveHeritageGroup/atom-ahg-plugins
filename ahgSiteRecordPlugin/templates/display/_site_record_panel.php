@@ -138,6 +138,38 @@ $taxonomyLabels = [
     </tbody>
   </table>
 
+  <?php
+  // A way in to the record itself.
+  //
+  // Without these the panel is a dead end: it shows the site record but leaves a
+  // reader who wants to correct something with no route to the edit screen
+  // except knowing /site-record/<id>/edit and looking the id up by hand. Shown
+  // only to those who could actually use them.
+  $canEdit = false;
+
+  try {
+      $u = \sfContext::getInstance()->getUser();
+      $canEdit = $u && $u->isAuthenticated()
+          && ($u->hasCredential('editor') || $u->hasCredential('administrator'));
+  } catch (\Throwable $e) {
+      $canEdit = false;
+  }
+  ?>
+
+  <?php if ($canEdit) { ?>
+    <p class="mb-2">
+      <a class="btn btn-sm btn-outline-primary" href="/index.php/site-record/<?php echo (int) $record->id; ?>/edit">
+        <i class="fas fa-pen me-1"></i>Edit site record
+      </a>
+      <a class="btn btn-sm btn-outline-secondary" href="/index.php/site-record/<?php echo (int) $record->id; ?>">
+        View full record
+      </a>
+      <a class="btn btn-sm btn-outline-secondary" href="/index.php/site-record">
+        All site records
+      </a>
+    </p>
+  <?php } ?>
+
   <?php if ($locality['exact']) { ?>
     <p class="small text-muted">
       <i class="fas fa-lock me-1"></i>Locality shown in full because you hold clearance.
