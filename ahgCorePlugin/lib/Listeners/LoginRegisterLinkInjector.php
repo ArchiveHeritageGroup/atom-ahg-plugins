@@ -106,6 +106,32 @@ class LoginRegisterLinkInjector
                 }
             }
 
+            // Fall back to this plugin's own registration when no named route
+            // for an ordinary account exists.
+            //
+            // `user_register` is registered by ahgUserRegistrationPlugin, which
+            // is not on every instance. ahgCorePlugin ships
+            // modules/user/actions/registerAction.class.php regardless, served
+            // through the default /:module/:action route with no name of its
+            // own - so hasRouteName('user_register') is false while
+            // /user/register works perfectly well.
+            //
+            // Measured on RARI, 2026-08-17: /user/register returned a working
+            // registration form to an anonymous visitor, and the login page
+            // offered only "Register as a researcher". Somebody who just wanted
+            // an account was told the only way in was to apply as a researcher.
+            //
+            // Only used when the named route is absent, so an instance carrying
+            // ahgUserRegistrationPlugin still gets one link, not two.
+            if (!self::hasLabel($links, self::t('Create an account'))
+                && is_file(__DIR__.'/../../modules/user/actions/registerAction.class.php')) {
+                array_unshift($links, sprintf(
+                    '<a href="%s">%s</a>',
+                    htmlspecialchars(self::corePath('user/register'), ENT_QUOTES),
+                    htmlspecialchars(self::t('Create an account'), ENT_QUOTES)
+                ));
+            }
+
             if ([] === $links) {
                 return $content;
             }
@@ -133,6 +159,38 @@ class LoginRegisterLinkInjector
      * from a response filter would take down the page it is decorating - here,
      * the login page, which is the worst one to lose.
      */
+    /** Whether a link with this label was already offered. */
+    private static function hasLabel(array $links, string $label): bool
+    {
+        foreach ($links as $link) {
+            if (false !== strpos($link, '>'.htmlspecialchars($label, ENT_QUOTES).'<')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A path for a module/action that has no named route.
+     *
+     * Built from the request rather than assumed, because whether the front
+     * controller appears in the URL differs between deployments - RARI serves
+     * /index.php/user/login while other instances rewrite it away, and a
+     * hardcoded prefix is wrong on one of them.
+     */
+    private static function corePath(string $moduleAction): string
+    {
+        try {
+            $request = \sfContext::getInstance()->getRequest();
+            $prefix = rtrim((string) $request->getScriptName(), '/');
+
+            return ('' === $prefix ? '' : $prefix).'/'.$moduleAction;
+        } catch (\Throwable $e) {
+            return '/'.$moduleAction;
+        }
+    }
+
     private static function routeUrl(string $name): ?string
     {
         try {
