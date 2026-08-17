@@ -109,6 +109,60 @@ things worth knowing:
 - Records inherited without their translation rows cause staff pages to fail rather than
   degrade. Fixed, but it is the shape of problem to expect from legacy data.
 
+## Duplicate authority records
+
+An earlier import created authority records instead of matching the ones already there,
+and then attached that run's descriptions to the copies. This needs resolving at
+cutover, not after: every day it stays, more descriptions attach to the wrong record.
+
+What is in the development copy, measured 17 August 2026:
+
+| | |
+|---|---|
+| Authority records | 8,443 |
+| Surplus by exact name | 125, across 63 repeated names |
+| Surplus allowing for case, spacing and punctuation | 143 |
+| Loaded in the original pass, 30 April 2025 | 8,243 |
+| Created after it | 186 |
+| Of those, exact duplicates of an existing record | 58 |
+| **Duplicates carrying descriptions** | **52** |
+
+The clearest case is Chentcherere II. The real record holds 84 descriptions. Nineteen
+copies made in a single run on 21 August 2025 hold 43 more between them, slugged
+`chentcherere-ii-2` through `-20`. The copies have no entity type where the original has
+one, which is the fingerprint of the importer creating rather than matching.
+
+Two consequences shape the work:
+
+- **It is a merge, not a delete.** 52 of the duplicates are live creator links. Removing
+  them would take their descriptions with them. Each merge repoints `event.actor_id` to
+  the surviving record, then removes the empty shell.
+- **Name is the only key available.** `description_identifier` is empty for every actor,
+  so there is no site code to match on. Site codes exist only as parallel names, which
+  is the same field covered by the locality decision above. Exact and normalised name
+  matching finds 143; the 120 later records with no exact twin still need checking for
+  near-duplicates before anything is merged.
+
+Sequence:
+
+1. Produce a dry-run report - every proposed pairing, which record survives, how many
+   descriptions move, and anything ambiguous held back for a person to decide. No writes.
+2. RARI reviews it. Some pairs will be genuinely different people or sites with the same
+   name, and only they can say which. Nothing is assumed.
+3. Apply the approved merges on the development copy, verify description counts land on
+   the surviving records, then repeat on production during cutover.
+4. Re-run the detection afterwards, so anything the first pass missed is visible rather
+   than assumed absent.
+
+The importer itself must be corrected before any further load, or the next run recreates
+the problem. Matching on name alone is what caused this; the fix is to match against
+existing authority records and report near-misses instead of silently creating.
+
+The existing deduplication tooling does not cover this. It scans archival descriptions
+and digital objects, and has no handling for authority records at all, so the detection
+and merge described here is new work rather than a matter of pointing an existing tool at
+a different table.
+
 ## Not included
 
 The 30 TB image store is not part of this work. On the development copy every digital

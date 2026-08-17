@@ -127,6 +127,22 @@ $taxonomyLabels = [
 
   <div class="d-flex gap-2">
     <a class="btn btn-primary" href="<?php echo url_for('@site_record_edit?id='.$record->id); ?>">Edit</a>
+
+    <?php // Back to the authority record this site record belongs to.
+          //
+          // A site record is only ever reached from its authority record - the
+          // panel on that page is the way in - so landing here with no way back
+          // means retyping the site name into search to return to where you
+          // started. "Back to site records" goes to the browse list, which is
+          // not where the reader came from.
+          //
+          // Guarded on the slug because the actor is looked up by id and a
+          // record whose actor has been deleted would otherwise render
+          // href="/" and silently send the reader to the home page. ?>
+    <?php if (!empty($actor->slug)) { ?>
+      <a class="btn btn-outline-primary" href="<?php echo url_for('/'.$actor->slug); ?>">Back to record</a>
+    <?php } ?>
+
     <a class="btn btn-outline-secondary" href="<?php echo url_for('@site_record_browse'); ?>">Back to site records</a>
 
     <?php if ($sf_user->hasCredential('administrator')) { ?>

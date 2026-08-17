@@ -99,9 +99,20 @@ $groups = [
                value="<?php echo esc_specialchars(null !== $locality ? ($locality['longitude'] ?? '') : ''); ?>">
       </div>
       <div class="col-md-2">
-        <label class="form-label" for="coordinate_datum">Datum</label>
+        <?php // "Coordinate datum", not "Datum" on its own.
+              //
+              // This is the geodetic datum the latitude and longitude are
+              // measured against - WGS84, Cape Datum, Hartebeesthoek94 - and
+              // without it a coordinate pair is ambiguous by a few hundred
+              // metres. The bare word was read as a misspelling of "date" on
+              // 2026-08-17, which is a fair reading in South Africa where datum
+              // is Afrikaans for date, and it sits directly below a field
+              // labelled "Date visited". Naming it in full costs nothing. ?>
+        <label class="form-label" for="coordinate_datum">Coordinate datum</label>
         <input type="text" class="form-control" id="coordinate_datum" name="coordinate_datum"
+               aria-describedby="coordinate_datum_help"
                value="<?php echo esc_specialchars($val('coordinate_datum', 'WGS84')); ?>">
+        <div class="form-text" id="coordinate_datum_help">Reference frame for the coordinates, e.g. WGS84.</div>
       </div>
       <div class="col-md-2">
         <label class="form-label" for="altitude_m">Altitude (m)</label>
@@ -249,6 +260,16 @@ $groups = [
 
   <div class="d-flex gap-2">
     <button type="submit" class="btn btn-primary">Save</button>
+
+    <?php // Back to the authority record this site record belongs to.
+          //
+          // The way in is the panel on the authority record, so without this the
+          // only route back is the browser button or a fresh search. Guarded on
+          // the slug: an actor that has gone would otherwise produce href="/". ?>
+    <?php if (!empty($actor->slug)) { ?>
+      <a class="btn btn-outline-primary" href="<?php echo url_for('/'.$actor->slug); ?>">Back to record</a>
+    <?php } ?>
+
     <a class="btn btn-outline-secondary" href="<?php echo url_for('@site_record_browse'); ?>">Cancel</a>
   </div>
 </form>
