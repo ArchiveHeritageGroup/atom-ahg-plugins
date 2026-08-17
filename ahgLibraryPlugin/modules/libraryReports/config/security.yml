@@ -1,0 +1,5 @@
+# Library reporting. Already refused anonymous callers through an in-code check;
+# declared here so the posture survives an action being added without one.
+
+all:
+  is_secure: true

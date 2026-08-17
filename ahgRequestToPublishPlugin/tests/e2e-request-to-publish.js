@@ -15,11 +15,12 @@
 //
 // Run against a development instance, never production.
 //
-// Note on this module's security posture: security.yml declares `delete` and
-// `edit` only, with no `all:` catch, so every other action inherits
-// `default: is_secure: false`. The staff screens are guarded in code instead,
-// which is why they refuse anonymous callers - these checks assert that, so the
-// day someone adds an action without its own guard, this fails.
+// Requesting publication requires an account (2026-08-17, Johan).
+//
+// Note the module layout: routes are registered against 'requestToPublish'
+// (camelCase), and modules/requestToPublish/ holds all seven actions. The
+// lowercase modules/requesttopublish/ is an older partial copy. A security.yml
+// placed in the lowercase one protects nothing - these checks would catch that.
 
 const { chromium } = require('playwright');
 
@@ -63,11 +64,13 @@ async function login(page, user, password) {
     check(`anonymous refused: /${path}`, await refused(anon, r, path), true);
   }
 
-  // Deliberately public: a requester checks their own request by token without
-  // holding an account.
-  const rec = await anon.goto(`${BASE}/requesttopublish/receipt`, { waitUntil: 'domcontentloaded' });
-  check('receipt lookup is public by design', rec.status(), 200);
-  check('receipt page has no error', /Oops|error occurred/i.test(await anon.textContent('body')), false);
+  // The receipt lookup was public until 2026-08-17. It is now behind the login
+  // with everything else; if external requesters need it back it should get its
+  // own is_secure: false entry rather than the module being reopened.
+  for (const path of ['requesttopublish/receipt', `requesttopublish/${SLUG}`, `requestToPublish/submit/${SLUG}`]) {
+    const rec = await anon.goto(`${BASE}/${path}`, { waitUntil: 'domcontentloaded' });
+    check(`anonymous refused: /${path}`, await refused(anon, rec, path), true);
+  }
 
   console.log('\n--- 2. staff can reach the queues ---');
   const admin = await ctx();
@@ -89,18 +92,33 @@ async function login(page, user, password) {
   check('browse lists rows', rows > 0, true);
   check('no fatal on rows lacking a status', /Oops|error occurred/i.test(browseBody), false);
 
-  console.log('\n--- 4. the per-record request form ---');
+  console.log('\n--- 4. request slugs and description slugs are different things ---');
   //
-  // NOT asserted, because it is an open question rather than a known-good
-  // behaviour. config registers `requesttopublish_edit` at /requesttopublish/:slug
-  // pointing at action "edit", but the module ships browseAction,
-  // editRequestToPublishAction and receiptAction - there is no "edit" action, and
-  // the URL 404s. The record page links only to /requesttopublish/browse, so the
-  // route may simply be vestigial. Reported so a change here is visible, without
-  // failing the suite over something undiagnosed.
-  const r = await admin.goto(`${BASE}/requesttopublish/${SLUG}`, { waitUntil: 'domcontentloaded' });
-  console.log(`       /requesttopublish/<slug> -> HTTP ${r.status()}`
-    + (r.status() === 404 ? '  (route names an action the module does not define)' : ''));
+  // /requesttopublish/:slug takes a REQUEST slug and opens that request for
+  // editing - it is how browse links each row. Handing it a DESCRIPTION slug
+  // must 404, because a description is not a request. Raising a new request
+  // against a description is a separate URL.
+  //
+  // Both directions are asserted because confusing them cost real time: a 404
+  // from passing the wrong slug type looks exactly like a broken route, and
+  // "fixing" it by repointing this route at submit broke opening a request from
+  // the queue.
+  const newForm = await admin.goto(`${BASE}/requestToPublish/submit/${SLUG}`, { waitUntil: 'domcontentloaded' });
+  check('new request form on a description slug', newForm.status(), 200);
+  const fields = ((await admin.content()).match(/name="rtp_[a-z_]+"/g) || []).length;
+  check('it serves the request form', fields > 0, true);
+
+  const wrongType = await admin.goto(`${BASE}/requesttopublish/${SLUG}`, { waitUntil: 'domcontentloaded' });
+  check('a description slug is refused here', wrongType.status(), 404);
+
+  if (process.env.RS) {
+    const open = await admin.goto(`${BASE}/requesttopublish/${process.env.RS}`, { waitUntil: 'domcontentloaded' });
+    check('a request slug opens the request', open.status(), 200);
+    const del = await admin.goto(`${BASE}/requesttopublish/delete/${process.env.RS}`, { waitUntil: 'domcontentloaded' });
+    check('delete reachable for a real request', del.status(), 200);
+  } else {
+    console.log('       (set RS=<request slug> to also check opening and deleting a request)');
+  }
 
   await browser.close();
   console.log(`\n  ${pass} passed, ${fail} failed`);

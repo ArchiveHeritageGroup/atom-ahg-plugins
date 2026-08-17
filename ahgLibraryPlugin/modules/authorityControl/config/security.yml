@@ -1,0 +1,15 @@
+# Subject authority control is a cataloguing tool, not a public finding aid.
+#
+# Shipped no security.yml, so /authorityControl - "Subject Authority Control" -
+# was public. Verified anonymously against production on 2026-08-17.
+
+# Credentials, not just a login. `is_secure: true` alone admits ANY authenticated
+# account, including a self-registered researcher - which is exactly how the
+# researcher registry ended up readable by every logged-in user (fixed the same
+# week). Borrower records, EDI configuration and authority control are staff work.
+#
+# Double brackets are an OR; a single bracket is an AND and would lock out an
+# administrator who is not also an editor.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

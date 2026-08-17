@@ -1,0 +1,7 @@
+# OpenURL link resolver. Public ON PURPOSE - link resolvers are called by
+# discovery services and citation tools on a reader's behalf.
+#
+# Declared explicitly so the intent is visible.
+
+all:
+  is_secure: false

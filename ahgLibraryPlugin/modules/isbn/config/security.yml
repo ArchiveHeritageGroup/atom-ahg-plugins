@@ -1,0 +1,5 @@
+# ISBN lookup calls out to external providers using configured credentials.
+# Not currently routed, but declared so it cannot become public by being wired up.
+
+all:
+  is_secure: true

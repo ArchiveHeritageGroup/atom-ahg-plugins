@@ -31,6 +31,16 @@ class ahgRequestToPublishPluginConfiguration extends sfPluginConfiguration
         // (prepend adds to front, so last prepended = first matched)
 
         // Generic slug route (prepend first = matched last)
+        // :slug here is a REQUEST slug, not a description slug.
+        //
+        // browseSuccess.php links each row to action 'edit' with $item->slug -
+        // the request's own slug - so this is how staff open a request from the
+        // queue. Passing a description slug returns 404, which is correct: a
+        // description is not a request. (The form for raising a NEW request
+        // against a description is /requestToPublish/submit/:slug below.)
+        //
+        // Do not repoint this at 'submit' to make a description slug resolve -
+        // that was tried on 2026-08-17 and broke opening a request from browse.
         $router->any('requesttopublish_edit', '/requesttopublish/:slug', 'edit');
 
         // Delete route (more specific, prepend second)

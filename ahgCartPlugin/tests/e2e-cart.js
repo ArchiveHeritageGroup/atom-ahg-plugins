@@ -3,16 +3,15 @@
 // Usage:
 //
 //   BASE=http://192.168.0.133 SLUG=<description slug> \
-//   [RU=<admin email> RP=<admin password>] \
+//   RU=<account email> RP=<password> \
 //   NODE_PATH=<path to playwright> node e2e-cart.js
 //
-// The cart is deliberately public - modules/cart/config/security.yml says
-// `all: is_secure: false` - because a visitor requesting reproductions has no
-// account. So the anonymous path is the main path here, and the checks are that
-// it works AND that the staff screens behind it do not open up with it.
+// The cart requires an account (2026-08-17, Johan). It was public until then,
+// which was already inconsistent: the cart is stored and cleared by user_id, so
+// an anonymous visitor could fill one and then be sent to login to empty it.
 //
-// CREATES REAL DATA: cart contents for the browser session only, cleared at the
-// end of the run. Nothing persists once the session ends.
+// CREATES REAL DATA: cart contents for the signed-in account, emptied at the end
+// of the run.
 //
 // Run against a development instance, never production.
 
@@ -36,94 +35,70 @@ async function refused(page, res, path) {
     || !page.url().includes(path.split('?')[0]);
 }
 
+const isEmpty = async (page) =>
+  (await page.locator('table tbody tr').count()) === 0 || /empty/i.test(await page.textContent('body'));
+
 (async () => {
   const browser = await chromium.launch();
-  // One context throughout: the cart lives in the session.
-  const page = await (await browser.newContext({ ignoreHTTPSErrors: true })).newPage();
+  const ctx = () => browser.newContext({ ignoreHTTPSErrors: true }).then(c => c.newPage());
 
-  console.log('--- 1. an anonymous visitor can use the cart ---');
-  let r = await page.goto(`${BASE}/cart`, { waitUntil: 'domcontentloaded' });
-  check('cart reachable anonymously', r.status(), 200);
-  check('cart has no error', /Oops|error occurred/i.test(await page.textContent('body')), false);
+  console.log('--- 1. the cart is closed to anonymous visitors ---');
+  const anon = await ctx();
+  for (const path of ['cart', `cart/add/${SLUG}`, 'cart/checkout', 'cart/orders']) {
+    const res = await anon.goto(`${BASE}/${path}`, { waitUntil: 'domcontentloaded' });
+    check(`anonymous refused: /${path}`, await refused(anon, res, path), true);
+  }
 
-  console.log('\n--- 2. add a record to the cart ---');
-  r = await page.goto(`${BASE}/cart/add/${SLUG}`, { waitUntil: 'domcontentloaded' });
+  if (!process.env.RU) {
+    console.log('\n  (no RU/RP given - stopping after the anonymous checks)');
+    await browser.close();
+    console.log(`\n  ${pass} passed, ${fail} failed`);
+    process.exit(fail > 0 ? 1 : 0);
+  }
+
+  // One context from here on: the cart lives in the session.
+  const page = await ctx();
+  await page.goto(`${BASE}/user/login`, { waitUntil: 'domcontentloaded' });
+  await page.locator('#email:visible').first().fill(process.env.RU);
+  const pw = page.locator('#password:visible').first();
+  await pw.fill(process.env.RP);
+  await pw.press('Enter');
+  await page.waitForLoadState('domcontentloaded');
+  const cls = (await page.locator('body').getAttribute('class')) || '';
+  check('signed in', !/\buser login\b/.test(cls), true);
+
+  console.log('\n--- 2. add a record ---');
+  let r = await page.goto(`${BASE}/cart/add/${SLUG}`, { waitUntil: 'domcontentloaded' });
   check('add accepted', r.status() < 400, true);
   check('add produced no error', /Oops|error occurred/i.test(await page.textContent('body')), false);
 
   await page.goto(`${BASE}/cart`, { waitUntil: 'domcontentloaded' });
-  const withItem = await page.textContent('body');
-  const rows = await page.locator('table tbody tr').count();
-  check('cart is no longer empty', rows > 0 || !/empty/i.test(withItem), true);
+  check('cart is no longer empty', await isEmpty(page), false);
 
-  console.log('\n--- 3. the cart survives a page change ---');
+  console.log('\n--- 3. it survives navigating away ---');
   await page.goto(`${BASE}/${SLUG}`, { waitUntil: 'domcontentloaded' });
   await page.goto(`${BASE}/cart`, { waitUntil: 'domcontentloaded' });
-  check('still populated after navigating away', await page.locator('table tbody tr').count() > 0 ||
-        !/empty/i.test(await page.textContent('body')), true);
+  check('still populated', await isEmpty(page), false);
 
-  console.log('\n--- 4. staff screens stay closed to an anonymous visitor ---');
-  for (const path of ['cart/orders']) {
-    const res = await page.goto(`${BASE}/${path}`, { waitUntil: 'domcontentloaded' });
-    check(`anonymous refused: /${path}`, await refused(page, res, path), true);
-  }
-
-  console.log('\n--- 5. clearing the cart requires POST ---');
-  // A GET must not empty the cart. The same protection the site record delete
-  // has, and the one the legacy rock_forms application lacked, where following
-  // a link destroyed a record.
+  console.log('\n--- 4. clearing requires POST ---');
+  // A GET must not empty the cart: the same protection the site record delete
+  // has, and the one the legacy rock_forms application lacked, where following a
+  // link destroyed a record.
   await page.goto(`${BASE}/cart/clear`, { waitUntil: 'domcontentloaded' });
   await page.goto(`${BASE}/cart`, { waitUntil: 'domcontentloaded' });
-  const afterGet = await page.textContent('body');
-  check('GET does NOT clear the cart', await page.locator('table tbody tr').count() > 0 || !/empty/i.test(afterGet), true);
+  check('GET does NOT clear the cart', await isEmpty(page), false);
 
-  // Clearing also requires a login, because the cart is cleared by user_id.
-  // So an anonymous visitor can fill a cart and look at it but not empty it -
-  // worth asserting deliberately rather than discovering it as a puzzle.
-  const anonPost = await page.evaluate(async (base) => {
-    const res = await fetch(base + '/cart/clear', {
+  await page.evaluate(async (base) => {
+    await fetch(base + '/cart/clear', {
       method: 'POST',
       headers: { 'X-Requested-With': 'XMLHttpRequest' },
       credentials: 'same-origin',
-      redirect: 'follow',
     });
-    return res.url;
   }, BASE);
-  check('anonymous POST clear sent to login', /user\/login/.test(anonPost), true);
 
   await page.goto(`${BASE}/cart`, { waitUntil: 'domcontentloaded' });
-  check('anonymous cart survives the attempt',
-    await page.locator('table tbody tr').count() > 0 || !/empty/i.test(await page.textContent('body')), true);
-
-  console.log('\n--- 6. a signed-in user can clear their own cart ---');
-  if (!process.env.RU) {
-    console.log('       (skipped: no RU/RP given)');
-  } else {
-    await page.goto(`${BASE}/user/login`, { waitUntil: 'domcontentloaded' });
-    await page.locator('#email:visible').first().fill(process.env.RU);
-    const pw = page.locator('#password:visible').first();
-    await pw.fill(process.env.RP);
-    await pw.press('Enter');
-    await page.waitForLoadState('domcontentloaded');
-
-    await page.goto(`${BASE}/cart/add/${SLUG}`, { waitUntil: 'domcontentloaded' });
-    await page.goto(`${BASE}/cart`, { waitUntil: 'domcontentloaded' });
-    check('signed-in cart has the item',
-      await page.locator('table tbody tr').count() > 0 || !/empty/i.test(await page.textContent('body')), true);
-
-    await page.evaluate(async (base) => {
-      await fetch(base + '/cart/clear', {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        credentials: 'same-origin',
-      });
-    }, BASE);
-
-    await page.goto(`${BASE}/cart`, { waitUntil: 'domcontentloaded' });
-    const afterPost = await page.textContent('body');
-    check('cart empty after POST clear', await page.locator('table tbody tr').count() === 0 || /empty/i.test(afterPost), true);
-    check('clear produced no error', /Oops|error occurred/i.test(afterPost), false);
-  }
+  check('POST clears the cart', await isEmpty(page), true);
+  check('clear produced no error', /Oops|error occurred/i.test(await page.textContent('body')), false);
 
   await browser.close();
   console.log(`\n  ${pass} passed, ${fail} failed`);

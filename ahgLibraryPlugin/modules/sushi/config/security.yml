@@ -1,0 +1,6 @@
+# SUSHI harvesting of COUNTER usage statistics, using configured provider
+# credentials. Not currently routed, but declared so it cannot become public by
+# being wired up.
+
+all:
+  is_secure: true

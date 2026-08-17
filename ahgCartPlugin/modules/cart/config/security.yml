@@ -1,3 +1,17 @@
-# Allow all actions without authentication
+# The cart requires an account.
+#
+# Johan, 2026-08-17: "cart should only be available to authenticated user."
+#
+# This previously read `all: is_secure: false`, so an anonymous visitor could
+# fill a cart and browse it. That was already half-broken in practice: the cart
+# is stored and cleared by user_id, so an anonymous visitor could add items and
+# then be redirected to login when trying to empty it. Requiring an account
+# throughout makes the whole journey consistent, and on RARI it is no barrier -
+# non-Wits users become researchers with accounts, which is what the researcher
+# migration was for.
+#
+# No credentials list: any authenticated account may use its own cart. The staff
+# screens (orders, admin order detail) keep their own in-code checks on top.
+
 all:
-  is_secure: false
+  is_secure: true

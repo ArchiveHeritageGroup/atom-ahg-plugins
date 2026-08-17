@@ -1,0 +1,26 @@
+# The library module is mixed: a public catalogue face and staff cataloguing
+# tools in the same module.
+#
+# Public: browsing and searching holdings, and the cover proxy, which the browse
+# pages call for jacket images.
+#
+# Everything else - adding and editing records, renaming, MARC and ONIX export,
+# the ISBN provider configuration with its API credentials, and the subject
+# suggester - is staff work. `all` closes the module, and the public faces are
+# listed back individually, so an action added later is private by default rather
+# than public by default.
+
+index:
+  is_secure: false
+
+browse:
+  is_secure: false
+
+advancedSearch:
+  is_secure: false
+
+coverProxy:
+  is_secure: false
+
+all:
+  is_secure: true

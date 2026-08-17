@@ -1,0 +1,21 @@
+# Patron records are personal data: names, contact details, borrowing history,
+# suspensions.
+#
+# This module shipped no security.yml, so it inherited
+# `default: is_secure: false` and /patron - "Patron Management" - was served to
+# anyone. Verified anonymously against production on 2026-08-17. The table held
+# 0 rows at the time, so nothing was disclosed, but the screen is built to list
+# borrowers and would have.
+#
+# Every action here is staff work: index, view, edit, suspend, reactivate.
+
+# Credentials, not just a login. `is_secure: true` alone admits ANY authenticated
+# account, including a self-registered researcher - which is exactly how the
+# researcher registry ended up readable by every logged-in user (fixed the same
+# week). Borrower records, EDI configuration and authority control are staff work.
+#
+# Double brackets are an OR; a single bracket is an AND and would lock out an
+# administrator who is not also an editor.
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]

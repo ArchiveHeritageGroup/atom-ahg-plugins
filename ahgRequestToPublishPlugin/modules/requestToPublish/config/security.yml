@@ -3,7 +3,17 @@
 # Johan, 2026-08-17: request to publish "should only be available to
 # authenticated user", alongside the cart.
 #
-# This file previously declared `delete` and `edit` only, with no `all:` entry,
+# THIS is the module the routes use: RouteLoader is constructed with
+# 'requestToPublish' (camelCase), and this directory holds all seven actions -
+# browse, delete, edit, inbox, receipt, review, submit. The lowercase sibling
+# modules/requesttopublish/ is an older partial copy with three of them.
+#
+# This directory shipped config/module.yml and NO security.yml, so every action
+# the site actually serves inherited `default: is_secure: false`. The staff
+# queues refused anonymous callers only because they check in code. Putting the
+# declaration in the lowercase module, as was done first, protects nothing.
+#
+# The sibling file previously declared `delete` and `edit` only, with no `all:` entry,
 # so every other action inherited `default: is_secure: false` from
 # apps/qubit/config/security.yml. The staff queues were protected by in-code
 # checks rather than by declaration, which held - but it meant an action added
