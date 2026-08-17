@@ -1,0 +1,18 @@
+# Condition assessment is a staff function: checks, photographs of damage,
+# treatment history and the templates that define them.
+#
+# The module previously shipped NO security.yml at all. Most actions guard
+# themselves in code, so they refused anonymous callers, but `template` did not -
+# and a module with no security.yml inherits `default: is_secure: false` from
+# apps/qubit/config/security.yml, so /condition/templates was served to anyone.
+# Found by the end-to-end test on 2026-08-17.
+#
+# Declared here so the posture holds for every action, including any added later
+# that forgets its own check.
+#
+# Double-bracket credentials are an OR. A single bracket is an AND, which would
+# lock out an administrator who is not also an editor.
+
+all:
+  is_secure:   true
+  credentials: [[ editor, administrator ]]
