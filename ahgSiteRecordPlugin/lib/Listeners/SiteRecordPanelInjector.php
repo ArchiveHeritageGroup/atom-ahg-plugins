@@ -46,54 +46,29 @@ class SiteRecordPanelInjector
     }
 
     /**
-     * Whether something else is already rendering display panels.
+     * WHY THERE IS NO "is another plugin rendering this?" CHECK
      *
-     * With an AHG theme or ahgDisplayPlugin ENABLED, the panel is collected from
-     * extension.json and injecting here would render it twice.
+     * There was one. It asked whether ahgThemeB5Plugin or ahgDisplayPlugin was
+     * enabled and, if so, stood down on the assumption that one of them would
+     * draw the panel from its extension.json declaration.
      *
-     * Enabled, not merely present on disk. This first checked is_dir(), which is
-     * wrong in a way that fails silently: PSIS has the ahgThemeB5Plugin directory
-     * but the plugin is disabled, so on an instance where the directory exists
-     * and neither renderer is enabled, this listener would stand down and nobody
-     * would draw the panel - invisible, with no error to explain it.
+     * That assumption is false, and it cost a working install. Archaeology has
+     * both plugins enabled, so this listener suppressed itself on every actor
+     * page - but the theme only renders display panels in
+     * sfIsadPlugin/templates/indexSuccess.php, which is the information object
+     * view. Nothing renders panels on the ISAAR actor view. The result was a
+     * plugin that installed cleanly, registered its routes, served
+     * /site-record perfectly well, and showed no panel and no error on the one
+     * page users actually start from.
+     *
+     * The marker test below answers the same question exactly rather than by
+     * presumption: if the panel is already in the response, do not add it
+     * again. It is correct per page, needs no list of renderer plugin names,
+     * and cannot be wrong about what some other plugin might do.
      */
-    private function panelRenderedElsewhere(): bool
-    {
-        $renderers = ['ahgThemeB5Plugin', 'ahgDisplayPlugin'];
-
-        // The active configuration lists enabled plugins only.
-        if (class_exists('\sfProjectConfiguration')) {
-            $active = \sfProjectConfiguration::getActive();
-
-            if ($active && method_exists($active, 'getPlugins')) {
-                $enabled = (array) $active->getPlugins();
-
-                foreach ($renderers as $renderer) {
-                    if (in_array($renderer, $enabled, true)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        // No configuration to ask - fall back to presence on disk, which at worst
-        // suppresses this listener rather than double-rendering the panel.
-        $pluginsDir = (string) \sfConfig::get('sf_plugins_dir');
-
-        foreach ($renderers as $renderer) {
-            if (is_dir($pluginsDir.'/'.$renderer)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private function inject(\sfEvent $event, $content)
     {
-        if (self::$injected || $this->panelRenderedElsewhere()) {
+        if (self::$injected) {
             return $content;
         }
 

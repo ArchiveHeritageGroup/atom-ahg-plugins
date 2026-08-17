@@ -26,6 +26,46 @@ $service = new SiteRecordService();
 $record = $service->findByActorForDisplay((int) $resource->id);
 
 if (!$record) {
+    // No site record for this authority record.
+    //
+    // For the public, and for anyone who cannot create one, render nothing -
+    // most authority records are not sites and an empty panel on every one of
+    // them is noise.
+    //
+    // For an editor, render the way in. The add route has existed since the
+    // plugin shipped and nothing ever linked to it, so on an instance with no
+    // site records yet - a fresh install, or archaeology on 2026-08-17 - there
+    // was no path to the first one short of typing /site-record/add/<actor id>
+    // by hand. The panel is the only place this belongs: a site record is an
+    // extension of the authority record, so it is created from it.
+    // From the context, not $sf_user.
+    //
+    // $sf_user only exists when a template is rendered through the view layer.
+    // SiteRecordPanelInjector includes this partial from response.filter_content,
+    // where it is not defined - the same reason esc_specialchars has to be
+    // loaded by hand further up. Testing $sf_user there is always false, so the
+    // add button rendered nowhere and looked like the panel was simply not
+    // working.
+    $user = \sfContext::hasInstance() ? \sfContext::getInstance()->getUser() : null;
+
+    if (!$user
+        || !method_exists($user, 'hasCredential')
+        || (!$user->hasCredential('editor') && !$user->hasCredential('administrator'))) {
+        return;
+    }
+
+    ?>
+    <section class="ahg-site-record-panel border rounded p-3 mb-3">
+      <h2 class="h5 mb-2">Site record</h2>
+      <p class="text-muted mb-3">
+        This authority record has no site record. Add one to hold locality, site
+        attributes and field recorders.
+      </p>
+      <a class="btn btn-outline-primary"
+         href="<?php echo url_for('/site-record/add/'.(int) $resource->id); ?>">Add site record</a>
+    </section>
+    <?php
+
     return;
 }
 
