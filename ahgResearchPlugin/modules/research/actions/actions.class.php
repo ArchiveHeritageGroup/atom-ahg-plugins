@@ -261,7 +261,23 @@ class researchActions extends AhgController
 
     public function executeResearchers($request)
     {
-        if (!$this->getUser()->isAuthenticated()) { $this->redirect('user/login'); }
+        // Administrator, not merely authenticated.
+        //
+        // This is the staff registry: it lists every researcher with their name,
+        // email and institution, and carries the approve and reject controls. An
+        // authentication-only check meant any approved researcher could open it
+        // and read the contact details of all the others - found by the
+        // end-to-end test on 2026-08-16, which reached it as a freshly approved
+        // researcher and counted 24 rows. On RARI that is 22 real people.
+        //
+        // Matches the credentials on the AhgNav entry, which was already
+        // administrator-only; the menu simply hid a page that was not guarded.
+        if (!$this->getUser()->isAuthenticated() || !$this->getUser()->isAdministrator()) {
+            $this->getUser()->setFlash('error', 'Administrator access required');
+            $this->redirect('@homepage');
+
+            return;
+        }
         $this->researchers = $this->service->getResearchers([
             'status' => $request->getParameter('status'),
             'search' => $request->getParameter('q'),
