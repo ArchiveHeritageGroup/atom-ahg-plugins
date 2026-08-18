@@ -260,6 +260,12 @@ Install in this order. Anything in a later tier depends on something in an earli
 | Plugin | Tables | Requires |
 |---|---|---|
 | `ahgResearchPlugin` | 145 | ahgCorePlugin, **ahgAccessRequestPlugin** (which itself needs ahgSecurityClearancePlugin) |
+| `ahgHeritagePlugin` | 45 | **ahgThemeB5Plugin** (and so everything the theme requires) |
+
+`ahgHeritagePlugin` is the heritage discovery platform - the landing page, contributor
+system and region browsing served at `/heritage`. It is the one functional plugin that
+depends on a **theme** rather than the other way round, so installing it pulls in
+ahgThemeB5Plugin, ahgContactPlugin, ahgUiOverridesPlugin and ahgMetadataExtractionPlugin.
 
 A plugin with 0 tables owns no schema of its own - `ahgUiOverridesPlugin` is templates and
 helpers, `ahgThemeB5Plugin` is a theme. The installer reports `no schema - nothing to
@@ -287,6 +293,34 @@ Every plugin configuration class must declare both `$summary` and `$version`. At
 admin renders `$plugin::$version`, and in PHP 8 reading an undeclared static property is a
 fatal error - it kills that page part way down, taking the save button with it, with a 200
 response and nothing in any log.
+
+### Theme assets must be built after the theme is symlinked
+
+`ahgThemeB5Plugin` has no prebuilt CSS in the repository. Its stylesheet is compiled by
+AtoM's own webpack from the plugin's `webpack.entry.js` and `scss/`, and
+`_layout_start.php` then looks for the result with:
+
+```php
+glob($distPath.'/css/ahgThemeB5Plugin.bundle.*.css');
+```
+
+AtoM's documented install runs `npm run build` **before** any AHG plugin exists, so webpack
+never sees the theme and the bundle is never produced. The site then renders with no theme
+styling at all and nothing reports an error - the glob simply finds nothing.
+
+Symlink the theme first, then build:
+
+```bash
+cd /usr/share/nginx/atom
+ln -sfn /usr/share/nginx/atom/atom-ahg-plugins/ahgThemeB5Plugin plugins/ahgThemeB5Plugin
+npm run build
+chown -R www-data:www-data dist
+php symfony cc && systemctl reload php8.3-fpm
+```
+
+Confirm with `ls dist/css/ | grep ahgTheme` - you want a
+`ahgThemeB5Plugin.bundle.<hash>.css`. Re-run `npm run build` after any theme change or
+after adding a plugin that ships its own webpack entry.
 
 ### Post-install
 
@@ -325,11 +359,11 @@ all (`226/NAMESPACE`) and the web server stays down.
 
 ### Verified standalone set
 
-Nineteen plugins install onto an empty database, each with exactly one `install.sql` and a
+Twenty plugins install onto an empty database, each with exactly one `install.sql` and a
 manifest that matches it: ahgRuntime, ahgCore, ahgContact, ahgSecurityClearance, ahgDisplay,
 ahgSettings, ahgUiOverrides, ahgAuditTrail, ahgBackup, ahgThemeB5, ahgProvenance,
 ahgCondition, ahgCart, ahgRequestToPublish, ahgResearch, ahgUserRegistration,
-ahgAccessRequest, ahgMetadataExtraction, ahgSiteRecord.
+ahgAccessRequest, ahgMetadataExtraction, ahgSiteRecord, ahgHeritage.
 
 Proven by dropping all 253 tables and reinstalling from zero, then running the end-to-end
 suites: 74 checks passed, 4 failed, every failure traced to a plugin deliberately outside
