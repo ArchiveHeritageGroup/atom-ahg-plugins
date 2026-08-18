@@ -33,6 +33,7 @@ function isPluginActive($pluginName) {
 }
 
 $hasExport = isPluginActive('ahgExportPlugin');
+$hasSettings = isPluginActive('ahgSettingsPlugin');
 $hasLibrary = isPluginActive('ahgLibraryPlugin');
 $hasMuseum = isPluginActive('ahgMuseumPlugin');
 $hasGallery = isPluginActive('ahgGalleryPlugin');
@@ -91,7 +92,11 @@ $canManage = $isAdmin || $isEditor;
     <h4 class="mt-4"><?php echo __('Settings'); ?></h4>
     <ul class="list-unstyled">
         <li><a href="<?php echo url_for(['module' => 'settings', 'action' => 'index']); ?>"><i class="fas fa-cogs me-2"></i><?php echo __('AHG Settings'); ?></a></li>
+        <?php // Levels of Description is an ahgSettingsPlugin action; the settings link
+              // above is ahgCorePlugin's and always present. ?>
+        <?php if ($hasSettings): ?>
         <li><a href="<?php echo url_for(['module' => 'ahgSettings', 'action' => 'levels']); ?>"><i class="fas fa-layer-group me-2"></i><?php echo __('Levels of Description'); ?></a></li>
+        <?php endif; ?>
     </ul>
     <?php endif; ?>
 </div>
@@ -321,6 +326,12 @@ $canManage = $isAdmin || $isEditor;
     <?php endif; ?>
 
     <?php if ($hasResearch): ?>
+    <?php // Every link in this row is a 'research' module action, so the whole row
+          // belongs to ahgResearchPlugin. $hasResearch was defined but never used
+          // here, so on an instance without it these sixteen links rendered and led
+          // nowhere (2026-08-18). Access Requests below is a different plugin and
+          // keeps its own guard. ?>
+    <?php if ($hasResearch): ?>
     <!-- Research Knowledge Platform Row -->
     <div class="row mb-4">
         <div class="col-md-4">
@@ -376,6 +387,7 @@ $canManage = $isAdmin || $isEditor;
         </div>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
     <?php endif; ?>
 
     <?php if ($hasAccessRequest && $canManage): ?>
