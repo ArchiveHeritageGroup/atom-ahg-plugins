@@ -136,6 +136,48 @@ class AhgDb
     /**
      * Static table helper - shortcut for AhgDb::connection()->table()
      */
+    /**
+     * Is a table belonging to an OPTIONAL plugin present?
+     *
+     * Plugins query each other's tables - ahgCorePlugin reads ahgDAMPlugin's
+     * watermark tables, ahgResearchPlugin reads ahgFavoritesPlugin's - and when
+     * the other plugin is not installed the query throws and takes the whole page
+     * down. A missing optional plugin should make a feature absent, not make the
+     * catalogue unusable.
+     *
+     * Measured on the Wits archaeology install, 18 August 2026: three separate
+     * 500s on three unrelated pages (/informationobject/add, any description view,
+     * /research/mobile/) all from this one shape. See issue #302.
+     *
+     * Cached per request: these are consulted on form renders, and a schema lookup
+     * per call would be a query the page does not need.
+     *
+     * ⚠️ Choose the fallback deliberately at each call site. A feature list returns
+     * empty; an ACCESS or RIGHTS check must fail OPEN, or an absent optional plugin
+     * silently hides published material.
+     */
+    public static function hasOptionalTable(string $tableName): bool
+    {
+        static $known = [];
+
+        if (array_key_exists($tableName, $known)) {
+            return $known[$tableName];
+        }
+
+        try {
+            $connection = self::connection();
+            $known[$tableName] = $connection
+                ? $connection->getSchemaBuilder()->hasTable($tableName)
+                : false;
+        } catch (\Throwable $e) {
+            // Undecidable is not the same as absent, but the caller has to do
+            // something: report absent so the feature hides rather than throwing.
+            $known[$tableName] = false;
+        }
+
+        return $known[$tableName];
+    }
+
     public static function table(string $tableName): \Illuminate\Database\Query\Builder
     {
         $conn = self::connection();

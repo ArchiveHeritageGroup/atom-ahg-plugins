@@ -51,7 +51,12 @@ if (isset($resource)) {
   // Only show section if user is authenticated and at least one plugin is enabled
   if ($sf_user->isAuthenticated() && $resourceSlug && ($hasCco || $hasCondition || $hasSpectrum || $hasGrap || $hasOais || $hasResearch || $hasDisplay)) {
 ?>
-<section class="sidebar-widget">
+<?php // The marker class is what stops ahgProvenancePlugin's injector adding a
+      // SECOND Collections Management block. Its guard looks for
+      // 'ahg-collections-management' in the response; the theme rendered the same
+      // block without it, so the injector could not tell it was already there and
+      // Provenance appeared twice. ?>
+<section class="sidebar-widget ahg-collections-management">
   <h4><?php echo __('Collections Management'); ?></h4>
   <ul class="list-unstyled">
     <?php if ($hasCco): ?>

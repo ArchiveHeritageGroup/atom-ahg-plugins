@@ -209,6 +209,10 @@ class WatermarkRepository
      */
     public static function getCustomWatermarks(?int $objectId = null, bool $includeGlobal = true): Collection
     {
+        if (!self::watermarkTablesExist()) {
+            return new Collection();
+        }
+
         $query = DB::table('custom_watermark')->where('active', 1);
 
         if ($objectId !== null) {
@@ -388,11 +392,7 @@ class WatermarkRepository
             return self::$watermarkTablesPresent;
         }
 
-        try {
-            self::$watermarkTablesPresent = DB::schema()->hasTable('watermark_type');
-        } catch (\Throwable $e) {
-            self::$watermarkTablesPresent = false;
-        }
+        self::$watermarkTablesPresent = \AhgCore\Core\AhgDb::hasOptionalTable('watermark_type');
 
         return self::$watermarkTablesPresent;
     }

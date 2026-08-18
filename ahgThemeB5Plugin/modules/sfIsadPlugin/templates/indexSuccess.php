@@ -136,7 +136,12 @@ if (class_exists('\ahgExtendedRightsPlugin\Services\EmbargoService')) {
     <?php echo get_partial('object/subjectAccessPoints', ['resource' => $resource, 'sidebar' => true]); ?>
 
     <?php
+    // Related names belong beside the record, not beneath it. The creator events
+    // are shown here too - they used to appear only in the body copy below, which
+    // put "Related people and organizations" under the main block instead of in
+    // the right-hand column with the other access points.
     $sidebar = true;
+    $showActorEvents = true;
     include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php');
     ?>
 
@@ -495,13 +500,9 @@ $pdfDigitalObject = DB::table('digital_object')->where('object_id', $resource->i
     <?php echo get_partial('object/placeAccessPoints', ['resource' => $resource]); ?>
   </div>
 
-  <div class="nameAccessPoints">
-    <?php
-    $sidebar = false;
-    $showActorEvents = true;
-    include(sfConfig::get('sf_plugins_dir').'/ahgThemeB5Plugin/modules/informationobject/templates/_nameAccessPoints.php');
-    ?>
-  </div>
+  <?php // Related names render in the context menu (right column) instead - see
+        // the sidebar include above. Rendering both put the same block in two
+        // places on the page. ?>
 
   <div class="genreAccessPoints">
     <?php echo get_partial('informationobject/genreAccessPoints', ['resource' => $resource]); ?>

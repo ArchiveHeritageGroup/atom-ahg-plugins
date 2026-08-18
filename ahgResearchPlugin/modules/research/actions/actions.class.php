@@ -9121,6 +9121,11 @@ class researchActions extends AhgController
         }
         $this->projects = $projects->all();
 
+        // ahgFavoritesPlugin is optional. Without it this page 500s instead of
+        // simply showing no folders - issue #302.
+        if (!\AhgCore\Core\AhgDb::hasOptionalTable('favorites_folder')) {
+            $this->folders = [];
+        } else {
         $this->folders = DB::table('favorites_folder as f')
             ->leftJoin('favorites as fav', function ($j) {
                 $j->on('fav.folder_id', '=', 'f.id')->where('fav.object_type', '=', 'information_object');
@@ -9130,6 +9135,7 @@ class researchActions extends AhgController
             ->select('f.id', 'f.name', DB::raw('COUNT(fav.id) as item_count'))
             ->orderBy('f.name')
             ->get()->all();
+        }
     }
 
     /**
