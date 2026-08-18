@@ -467,6 +467,17 @@ class securityClearanceActions extends AhgController
             ->toArray();
 
         // Recent activity
+        // spectrum_audit_log belongs to ahgSpectrumPlugin, which this plugin does
+        // not depend on. Unguarded, the Clearance Report returned HTTP 500 on any
+        // instance without Spectrum - found by crawling the reports dashboard on a
+        // minimal install, 2026-08-18. No audit table means no recent activity to
+        // show; the rest of the report is unaffected.
+        $this->recentActivity = [];
+        
+        if (!$db::schema()->hasTable('spectrum_audit_log')) {
+            return;
+        }
+        
         $this->recentActivity = $db::table('spectrum_audit_log as sal')
             ->leftJoin('information_object_i18n as ioi', function($join) {
                 $join->on('sal.object_id', '=', 'ioi.id')->where('ioi.culture', '=', \AtomExtensions\Helpers\CultureHelper::getCulture());

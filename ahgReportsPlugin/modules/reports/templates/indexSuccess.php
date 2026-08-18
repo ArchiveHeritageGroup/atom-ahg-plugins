@@ -32,6 +32,7 @@ function isPluginActive($pluginName) {
     return isset($plugins[$pluginName]);
 }
 
+$hasExport = isPluginActive('ahgExportPlugin');
 $hasLibrary = isPluginActive('ahgLibraryPlugin');
 $hasMuseum = isPluginActive('ahgMuseumPlugin');
 $hasGallery = isPluginActive('ahgGalleryPlugin');
@@ -228,8 +229,12 @@ $canManage = $isAdmin || $isEditor;
                     <?php if ($hasSpectrum): ?>
                     <li class="list-group-item"><a href="/spectrum/export"><i class="fas fa-history me-2 text-muted"></i><?php echo __('Collections Procedures History Export'); ?></a></li>
                     <?php endif; ?>
+                    <?php // module 'export' lives in ahgExportPlugin; ungated these 404'd on any
+                          // instance without it - found by crawling this dashboard, 2026-08-18. ?>
+                    <?php if ($hasExport): ?>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'export', 'action' => 'csv']); ?>"><i class="fas fa-file-csv me-2 text-muted"></i><?php echo __('CSV Export'); ?></a></li>
                     <li class="list-group-item"><a href="<?php echo url_for(['module' => 'export', 'action' => 'ead']); ?>"><i class="fas fa-file-code me-2 text-muted"></i><?php echo __('EAD Export'); ?></a></li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>
@@ -461,9 +466,9 @@ $canManage = $isAdmin || $isEditor;
                     <li class="list-group-item">
                         <a href="/admin/condition"><i class="fas fa-clipboard-check me-2 text-muted"></i><?php echo __('Condition Dashboard'); ?></a>
                     </li>
-                    <li class="list-group-item">
-                        <a href="/admin/condition/risk"><i class="fas fa-exclamation-triangle me-2 text-muted"></i><?php echo __('Risk Assessment'); ?></a>
-                    </li>
+                    <?php // "Risk Assessment" removed 2026-08-18: it pointed at /admin/condition/risk,
+                          // which ahgConditionPlugin has never registered - no route, no action, no file.
+                          // It 404'd on every instance. Restore it when the feature exists. ?>
                     <li class="list-group-item">
                         <a href="/condition/templates"><i class="fas fa-clipboard me-2 text-muted"></i><?php echo __('Condition Templates'); ?></a>
                     </li>
