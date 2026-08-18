@@ -9,8 +9,21 @@
  * This file only contains UI-related viewer helpers for ahgUiOverridesPlugin.
  */
 
-// Load MediaHelper for enhanced media player
-sfContext::getInstance()->getConfiguration()->loadHelpers(['Media']);
+// Load MediaHelper for the enhanced media player, if it is available.
+//
+// MediaHelper.php ships in ahgIiifPlugin. This plugin does not depend on it, so on
+// an instance without IIIF the unconditional load threw
+//   InvalidArgumentException: Unable to load "MediaHelper.php" helper
+// and every archival description page returned HTTP 500. Seen on a clean install,
+// 2026-08-18, where ahgUiOverridesPlugin was enabled and ahgIiifPlugin was not.
+//
+// The media player is an enhancement; its absence must degrade the page, not take
+// it down. The helper functions below already guard on function_exists.
+try {
+    sfContext::getInstance()->getConfiguration()->loadHelpers(['Media']);
+} catch (Throwable $e) {
+    // ahgIiifPlugin not installed - enhanced media rendering is simply unavailable.
+}
 
 /**
  * Render digital object viewer

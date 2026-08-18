@@ -209,10 +209,23 @@ $sessionId = session_id();
 if (empty($sessionId) && !$userId) { @session_start(); $sessionId = session_id(); }
 $favoriteId = null;
 $cartId = null;
+
+// favorites belongs to ahgFavoritesPlugin and cart to ahgCartPlugin. The theme
+// depends on neither, so without them these queries logged
+// "Table 'favorites' doesn't exist" on every single record view. The page
+// survived, but an error on every page load buries the ones that matter - and
+// the buttons they drive should not be offered when the plugin is absent.
+$hasFavorites = DB::schema()->hasTable('favorites');
+$hasCart = DB::schema()->hasTable('cart');
+
 if ($userId) {
+    if ($hasFavorites) {
     $favoriteId = DB::table('favorites')->where('user_id', $userId)->where('archival_description_id', $resource->id)->value('id');
+    }
+    if ($hasCart) {
     $cartId = DB::table('cart')->where('user_id', $userId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
-} elseif ($sessionId) {
+    }
+} elseif ($sessionId && $hasCart) {
     $cartId = DB::table('cart')->where('session_id', $sessionId)->where('archival_description_id', $resource->id)->whereNull('completed_at')->value('id');
 }
 $hasDigitalObject = DB::table('digital_object')->where('object_id', $resource->id)->exists();
