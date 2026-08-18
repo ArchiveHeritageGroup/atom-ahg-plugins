@@ -1,5 +1,11 @@
 # RARI production migration
 
+> **Note on the install steps referenced here.** The AtoM and plugin installation
+> procedure has been verified from bare metal since this plan was written; see
+> [AtoM_2.10_Clean_Install_Log.md](AtoM_2.10_Clean_Install_Log.md) and the README.
+> In particular `php8.3-gd` is required and is missing from AtoM's own package list,
+> and base AtoM is not modified at any point.
+
 **Rock Art Research Institute, University of the Witwatersrand**
 **Target: within two weeks of 16 August 2026**
 **Prepared by:** Dr Johan Pieterse, The Archive and Heritage Group (Pty) Ltd

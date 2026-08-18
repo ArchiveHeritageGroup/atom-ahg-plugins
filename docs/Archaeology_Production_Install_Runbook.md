@@ -1,5 +1,27 @@
 # Archaeology production install - runbook
 
+> **SUPERSEDED IN PART - read this first.**
+>
+> This runbook was written from a rehearsal on an instance that already had composer,
+> the PHP extension set and a populated `vendor/` directory. It therefore documented the
+> AtoM-level steps and silently assumed the OS-level ones. A genuine bare-metal install on
+> 18 August 2026 disproved three things stated below:
+>
+> - **The `ProjectConfiguration` delta is not required.** Base AtoM is not modified at all;
+>   plugins load through AtoM's own `plugins` setting. The step below saying otherwise is
+>   wrong.
+> - **`ProtectSystem=full` is not universal.** Stock Ubuntu 24.04 ships `ProtectSystem=no`.
+>   It applies to how server 112 is configured, not to every installation.
+> - **`--prefer-dist` is not required.** Composer produced 53M with zero `.git` directories
+>   when not rate limited. The 548M seen on production came from GitHub HTTP 429 responses
+>   forcing source clones.
+>
+> It also omitted the step that actually blocks a clean install: **`apt install php8.3-gd`**.
+>
+> For the verified procedure see [AtoM_2.10_Clean_Install_Log.md](AtoM_2.10_Clean_Install_Log.md)
+> and the Installation section of the repository README, both written from an install that
+> ran on a machine with nothing on it.
+
 **Version:** atom-ahg-plugins v3.103.6, atom-framework v2.18.2
 **Rehearsed on:** the archaeology development instance (112, `/usr/share/nginx/archeology`), 17 August 2026
 **Status:** every step below was executed on the development instance and verified.

@@ -141,71 +141,151 @@ AtoM Extensions transforms AtoM into a **complete GLAM solution** (Galleries, Li
 
 ## Installation
 
+Verified on 18 August 2026 by installing from a **bare Ubuntu 24.04 server** to a working
+site, unattended. Every command below ran on that machine and produced the result stated.
+Nothing here is written from intention.
+
+### Base AtoM is not modified
+
+No file under `apps/`, `lib/`, `vendor/` or `config/` is touched, and
+`config/ProjectConfiguration.class.php` stays exactly as upstream ships it. The plugins
+load through AtoM's own `plugins` setting - the same list Admin > Plugins writes.
+
 ### Prerequisites
 
-- AtoM 2.10+ installed
-- PHP 8.3 (tested/supported version; the framework's dependencies require PHP >= 8.2)
-- MySQL 8.0+
-- Elasticsearch 7.10 (for AtoM 2.10)
-- Composer 2.x
-- ImageMagick + `php8.3-imagick` (base AtoM requirement for digital-object derivatives)
-- [atom-framework](https://github.com/ArchiveHeritageGroup/atom-framework)
+- AtoM 2.10 installed per the [official instructions](https://www.accesstomemory.org/en/docs/2.10/admin-manual/installation/ubuntu/)
+- MySQL 8.0+, Elasticsearch 7.10, Composer 2.x
+- **PHP 8.3 from Ubuntu's own repositories.** Do not add the `ondrej/php` PPA: it offers
+  8.4 and 8.5 and makes one of them the default. AtoM 2.10 does not run on 8.5.
+- **`php8.3-gd`** - required by the framework and **absent from AtoM's documented package
+  list**. Without it `composer install` fails with *"the requested PHP extension gd is
+  missing"* and the install stops dead. This is the single most common cause of a failed
+  AHG install.
 
-The plugins carry no Composer dependencies of their own - PHP libraries live in
-`atom-framework/composer.json` and are installed by `composer install` there.
+  ```bash
+  apt install php8.3-gd
+  ```
 
-JavaScript and CSS libraries used by the plugins (Bootstrap, OpenSeadragon,
-Mirador, Annotorious, PDF.js, three.js, Cytoscape, D3, Chart.js, Leaflet,
-FlexSearch, TipTap, html2canvas and others) are **vendored and committed** to this
-repository. There is no npm install at deploy time and nothing is fetched from a
-CDN at runtime, so the interface works without outbound internet and without
-widening the Content-Security-Policy.
+- `php8.3-imagick` is **optional**. It is needed for digital-object derivatives, not for
+  installation - the verified install ran without it.
 
-Optional per-feature external tools (Tesseract, ClamAV, Siegfried, Aspell, Argos
-Translate, Cantaloupe) are documented in the framework's
-[INSTALLATION.md](https://github.com/ArchiveHeritageGroup/atom-framework/blob/main/INSTALLATION.md#third-party-dependencies).
-Each degrades gracefully when absent - the feature is unavailable rather than broken.
+The plugins carry no Composer dependencies of their own; PHP libraries live in
+`atom-framework/composer.json`. JavaScript and CSS libraries are vendored and committed,
+so there is no npm install at deploy time and nothing is fetched from a CDN at runtime.
 
-### Quick Install
+### Install the framework
+
 ```bash
 cd /usr/share/nginx/atom
 git clone https://github.com/ArchiveHeritageGroup/atom-framework.git
 git clone https://github.com/ArchiveHeritageGroup/atom-ahg-plugins.git
 
 cd atom-framework
-composer install --no-dev
-bash bin/install
+composer install --no-dev --optimize-autoloader
+bin/build-runtime-plugin
+cd ..
 ```
 
-Run `bin/install` as the user that owns the AtoM tree (e.g. `sudo -u www-data bash bin/install`); it reads the database credentials from `<atom-root>/config/config.php`.
+`ahgRuntimePlugin` is **generated** by `bin/build-runtime-plugin`, not cloned. It is not in
+the plugins repository and a `git pull` will never produce it.
 
-### Enable Plugins
-The core plugins (theme, security, display, settings, audit, backup) are enabled
-automatically by `bin/install`. To add optional plugins, run these from the
-`atom-framework` directory (where `bin/atom` lives):
+If composer falls back to `Cloning ... from cache` because GitHub is rate limiting (HTTP
+429), the result carries a `.git` directory per package and is roughly ten times the size.
+Either re-run later, or strip them: `find vendor -type d -name .git -prune -exec rm -rf {} +`
+
+### Install a plugin
+
 ```bash
-php bin/atom extension:discover                    # list available extensions
-php bin/atom extension:install ahgLibraryPlugin    # install AND enable a plugin
-php bin/atom extension:disable ahgLibraryPlugin    # disable it again
+ln -sfn /usr/share/nginx/atom/atom-ahg-plugins/<Plugin> plugins/<Plugin>
+chown -h www-data:www-data plugins/<Plugin>
+
+php atom-framework/bin/install-plugin-schema.php --plugin=<Plugin> \
+    --database=<db> --user=<user> --password=<pw>
 ```
 
-### Post-install (required)
-Run these from the AtoM root after installing/enabling plugins:
+Read the line it prints. `verified all N declared tables exist` is success. A run that
+applies nothing exits 2 rather than claiming success, a plugin whose declared dependency
+is not installed is **refused** with the dependency named (`--force` overrides), and a
+plugin that legitimately owns no tables says `no schema - nothing to install`.
+
+On a server whose MySQL has no TCP listener, add
+`--socket=/var/run/mysqld/mysqld.sock`.
+
+**Never run `mysql < install.sql`.** The client stops at the first error and abandons every
+statement after it, leaving a half-built schema and saying nothing.
+
+### Enable
+
+In **Admin > Plugins**, in dependency order: `ahgRuntimePlugin`, then `ahgCorePlugin`, then
+the rest. Afterwards:
+
 ```bash
-sudo -u www-data php symfony cc                      # clear the Symfony cache
-sudo -u www-data php symfony display:auto-detect     # assign GLAM display types
-sudo -u www-data php symfony propel:build-nested-set # rebuild the term tree (plugins add taxonomy terms)
-sudo -u www-data php symfony propel:generate-slugs   # backfill slugs for plugin-added terms (search needs them)
-sudo -u www-data php symfony search:populate         # (re)build the search index
-sudo -u www-data php symfony ahg:refresh-facet-cache # build the GLAM browse facet cache
+php symfony cc
+systemctl reload php8.3-fpm
+```
+
+The theme is enabled under **Admin > Themes**, not Plugins. AtoM deliberately excludes any
+plugin whose `$summary` contains the word "theme" from the plugin list, so
+`ahgThemeB5Plugin` will never appear there.
+
+Every plugin configuration class must declare both `$summary` and `$version`. AtoM's plugin
+admin renders `$plugin::$version`, and in PHP 8 reading an undeclared static property is a
+fatal error - it kills that page part way down, taking the save button with it, with a 200
+response and nothing in any log.
+
+### Post-install
+
+> **AHG symfony tasks do not exist on a stock AtoM.** Stock `ProjectConfiguration` enables a
+> hardcoded plugin list and never reads the `plugins` setting, so symfony discovers no
+> plugin tasks. `php symfony display:auto-detect` and `php symfony ahg:refresh-facet-cache`
+> produce no output at all. Use `php atom-framework/bin/atom` for plugin management
+> (`discover`, `install`, `enable`, `disable`, `update`, `migrate`).
+
+Base AtoM's own tasks work normally and are worth running after enabling plugins:
+
+```bash
+sudo -u www-data php symfony propel:build-nested-set
+sudo -u www-data php symfony propel:generate-slugs
+sudo -u www-data php symfony search:populate
 sudo systemctl restart php8.3-fpm nginx
 ```
-Without `display:auto-detect` + `ahg:refresh-facet-cache` the GLAM Browse
-interface and its facets render empty even though the catalogue is indexed.
 
-> **Note:** `ahgMultiTenantPlugin` is disabled by default and should stay off
-> unless you configure tenant→domain mappings - it routes requests by hostname
-> and returns "Tenant Not Found" for any host it doesn't recognise.
+### If the AtoM root is under /usr/share/nginx
+
+Some php-fpm packaging sets `ProtectSystem=full`, which mounts `/usr` read-only for the
+worker; the site then cannot write its cache or logs and every page returns 500 with an
+empty body. Stock Ubuntu 24.04 ships `ProtectSystem=no` and is unaffected. Where it does
+apply, grant the paths and **prefix each with `-`**:
+
+```ini
+# /etc/systemd/system/php8.3-fpm.service.d/atom-storage.conf
+[Service]
+ReadWritePaths=-/usr/share/nginx/atom/log
+ReadWritePaths=-/usr/share/nginx/atom/cache
+ReadWritePaths=-/usr/share/nginx/atom/uploads
+```
+
+Without the `-`, a path that does not exist yet makes systemd refuse to start php-fpm at
+all (`226/NAMESPACE`) and the web server stays down.
+
+### Verified standalone set
+
+Eighteen plugins install onto an empty database, each with exactly one `install.sql` and a
+manifest that matches it: ahgRuntime, ahgCore, ahgContact, ahgSecurityClearance, ahgDisplay,
+ahgSettings, ahgUiOverrides, ahgAuditTrail, ahgBackup, ahgThemeB5, ahgProvenance,
+ahgCondition, ahgCart, ahgRequestToPublish, ahgResearch, ahgUserRegistration,
+ahgAccessRequest, ahgMetadataExtraction.
+
+Proven by dropping all 253 tables and reinstalling from zero, then running the end-to-end
+suites: 74 checks passed, 4 failed, every failure traced to a plugin deliberately outside
+this set.
+
+Plugins outside it may still carry schema that the installer does not create. They are not
+yet certified for standalone installation.
+
+> **Note:** `ahgMultiTenantPlugin` is disabled by default and should stay off unless you
+> configure tenant to domain mappings - it routes requests by hostname and returns
+> "Tenant Not Found" for any host it does not recognise.
 
 ---
 
