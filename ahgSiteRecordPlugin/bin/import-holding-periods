@@ -1,0 +1,167 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Turn the catalogue's Period column into subject access points.
+ *
+ * Period arrived as free text inside scope and content, which is searchable only
+ * as prose - it cannot be faceted, filtered or counted. Of the four candidate
+ * columns it is the one worth converting: 44 distinct terms with the top ten
+ * covering 97% of values, against site type's 560 terms covering 49%.
+ *
+ * Purely additive. Scope and content is left exactly as it is, so if the mapping
+ * turns out wrong the terms can be dropped without touching a description.
+ *
+ * NORMALISATION, and its limits
+ *
+ *   - Multi-value cells are split on , ; /
+ *   - A trailing '?' is stripped: "LIA?" indexes under LIA. The uncertainty is
+ *     not lost - the original string stays in scope and content - but a facet
+ *     with both LIA and LIA? in it is a worse facet.
+ *   - Case and obvious typo variants are merged (historic, Hist, Historis,
+ *     Historical -> Historic).
+ *   - Abbreviations are NOT expanded. LIA stays LIA rather than becoming Late
+ *     Iron Age: that is the cataloguers' own vocabulary, and renaming a term
+ *     later is cheap where re-mapping records is not.
+ *   - A bare '?' is not a period and is skipped.
+ *
+ * Dry run unless --apply is given.
+ */
+$root = getcwd();
+if (!is_file($root.'/config/ProjectConfiguration.class.php')) {
+    fwrite(STDERR, "Run from the AtoM root.\n");
+
+    exit(2);
+}
+require_once $root.'/config/ProjectConfiguration.class.php';
+
+$opts = ['file' => null, 'apply' => false, 'taxonomy' => 35];
+foreach (array_slice($argv, 1) as $a) {
+    if ('--apply' === $a) { $opts['apply'] = true; continue; }
+    if (0 === strpos($a, '--file=')) { $opts['file'] = substr($a, 7); continue; }
+    if (0 === strpos($a, '--taxonomy=')) { $opts['taxonomy'] = (int) substr($a, 11); continue; }
+}
+if (!$opts['file'] || !is_readable($opts['file'])) {
+    fwrite(STDERR, "--file must point at a readable CSV\n");
+
+    exit(2);
+}
+
+$configuration = ProjectConfiguration::getApplicationConfiguration('qubit', 'prod', false);
+sfContext::createInstance($configuration);
+if (class_exists('QubitSearch')) {
+    QubitSearch::disable();
+}
+\AhgCore\Core\AhgDb::init();
+$db = \Illuminate\Database\Capsule\Manager::connection();
+
+// Variants that are the same period written differently.
+$canonical = [
+    'historic' => 'Historic', 'hist' => 'Historic', 'historis' => 'Historic',
+    'historical' => 'Historic',
+    'recent' => 'Recent', 'modern' => 'Modern',
+    '19thc' => '19th Century', '19th century' => '19th Century',
+    'iron age' => 'Iron Age', 'rock art' => 'Rock Art',
+];
+
+$normalise = function (string $raw) use ($canonical): array {
+    $out = [];
+    foreach (preg_split('#[,;/]#', $raw) as $bit) {
+        $bit = trim($bit);
+        $bit = rtrim($bit, '? ');          // uncertainty marker
+        $bit = trim($bit);
+        if ('' === $bit || '?' === $bit) { continue; }
+        $key = mb_strtolower($bit);
+        $out[] = $canonical[$key] ?? $bit;
+    }
+
+    return array_values(array_unique($out));
+};
+
+$fh = fopen($opts['file'], 'r');
+$head = fgetcsv($fh);
+$col = array_flip($head);
+
+$terms = [];      // name => term id
+$linked = $rowsWithPeriod = $noDescription = $alreadyLinked = 0;
+$vocab = [];
+$errors = [];
+
+while (false !== ($r = fgetcsv($fh))) {
+    $get = function ($k) use ($r, $col) {
+        return isset($col[$k]) ? trim((string) ($r[$col[$k]] ?? '')) : '';
+    };
+
+    $period = $get('period');
+    if ('' === $period) { continue; }
+    ++$rowsWithPeriod;
+
+    $names = $normalise($period);
+    foreach ($names as $n) { $vocab[$n] = ($vocab[$n] ?? 0) + 1; }
+
+    $io = $db->table('information_object')->where('identifier', $get('site_number'))->first();
+    if (!$io) { ++$noDescription; continue; }
+
+    foreach ($names as $name) {
+        if (!$opts['apply']) { ++$linked; continue; }
+
+        try {
+            if (!isset($terms[$name])) {
+                $existing = $db->table('term as t')
+                    ->join('term_i18n as ti', function ($j) {
+                        $j->on('t.id', '=', 'ti.id')->where('ti.culture', '=', 'en');
+                    })
+                    ->where('t.taxonomy_id', $opts['taxonomy'])
+                    ->where('ti.name', $name)
+                    ->value('t.id');
+
+                if ($existing) {
+                    $terms[$name] = (int) $existing;
+                } else {
+                    $term = new QubitTerm();
+                    $term->taxonomyId = $opts['taxonomy'];
+                    $term->parentId = QubitTerm::ROOT_ID;
+                    $term->name = $name;
+                    $term->save();
+                    $terms[$name] = (int) $term->id;
+                }
+            }
+
+            // Re-runnable: never link the same term to the same record twice.
+            $has = $db->table('object_term_relation')
+                ->where('object_id', $io->id)
+                ->where('term_id', $terms[$name])
+                ->exists();
+            if ($has) { ++$alreadyLinked; continue; }
+
+            $rel = new QubitObjectTermRelation();
+            $rel->objectId = $io->id;
+            $rel->termId = $terms[$name];
+            $rel->save();
+            ++$linked;
+        } catch (\Throwable $e) {
+            $errors[] = $name.': '.substr($e->getMessage(), 0, 100);
+        }
+    }
+}
+fclose($fh);
+
+arsort($vocab);
+printf("\n    rows with a period          %6d\n", $rowsWithPeriod);
+printf("    distinct terms after tidy   %6d\n", count($vocab));
+printf("    %s %6d\n", $opts['apply'] ? 'access points created      ' : 'would create               ', $linked);
+printf("    already linked              %6d\n", $alreadyLinked);
+printf("    no matching description     %6d\n", $noDescription);
+if ($errors) {
+    printf("    ERRORS                      %6d\n", count($errors));
+    foreach (array_slice($errors, 0, 4) as $e) { echo "      {$e}\n"; }
+}
+echo "\n    vocabulary:\n";
+$i = 0;
+foreach ($vocab as $n => $c) {
+    printf("      %-24s %d\n", $n, $c);
+    if (++$i >= 15) { printf("      ... and %d more\n", count($vocab) - 15); break; }
+}
+echo $opts['apply']
+    ? "\n    APPLIED - indexing was disabled, run: php symfony search:populate\n"
+    : "\n    Dry run - nothing written. Add --apply.\n";
