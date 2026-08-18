@@ -165,8 +165,24 @@ if (class_exists('\ahgExtendedRightsPlugin\Services\EmbargoService')) {
 
 <?php ahg_render_display_panels($resource, 'before-media'); ?>
 
-<?php use_helper('informationobject', 'DigitalObjectViewer'); ?>
-<?php if (0 < count($resource->digitalObjectsRelatedByobjectId)) { // Multiple digital objects ?>
+<?php
+// Both helpers come from OPTIONAL plugins - informationobject from
+// ahgUiOverridesPlugin, DigitalObjectViewer from ahgIiifPlugin - and use_helper()
+// throws if the plugin is not loaded. Disabling ahgIiifPlugin therefore took every
+// description page down with an "Unable to load helper" 500, which reads as a theme
+// bug rather than an absent feature. Load what is there; skip the viewer if its
+// helper is not.
+$ahgHelpers = ['informationobject' => false, 'DigitalObjectViewer' => false];
+foreach (array_keys($ahgHelpers) as $ahgHelper) {
+    try {
+        use_helper($ahgHelper);
+        $ahgHelpers[$ahgHelper] = true;
+    } catch (\Throwable $e) {
+        // Optional plugin absent - the feature it provides simply does not render.
+    }
+}
+?>
+<?php if ($ahgHelpers['DigitalObjectViewer'] && 0 < count($resource->digitalObjectsRelatedByobjectId)) { // Multiple digital objects ?>
 	<?php foreach ($resource->digitalObjectsRelatedByobjectId as $obj) { ?>
 		<?php echo render_digital_object_viewer($resource, $obj); ?>
 	<?php } ?>
