@@ -3,7 +3,7 @@
 <?php slot('title'); ?>
   <h1><?php echo __('Browse Archival Description'); ?></h1>
   <div style="margin-bottom: 1rem;">
-    <a href="<?php echo url_for(['module' => 'reports', 'action' => 'reportSelect']); ?>" class="c-btn">
+    <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="c-btn">
       <i class="fa fa-arrow-left"></i> <?php echo __("Back to Reports"); ?>
     </a>
   </div>

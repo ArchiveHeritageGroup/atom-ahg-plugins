@@ -22,7 +22,7 @@ input[type="date"] {
 <section class="text-section">
 	<body>
 		<div>
-	        <button type="submit" class="btn"><?php echo link_to(__('Back to reports'), ['module' => 'reports', 'action' => 'reportSelect'], ['title' => __('Back to reports')]); ?></button>
+	        <button type="submit" class="btn"><?php echo link_to(__('Back to reports'), ['module' => 'reports', 'action' => 'index'], ['title' => __('Back to reports')]); ?></button>
 		</div>
 		<table class="table table-bordered" border="1" cellpadding="0" cellspacing="0" bordercolor="#999999">
 		<h4><?php echo __('Filter options'); ?></h4>

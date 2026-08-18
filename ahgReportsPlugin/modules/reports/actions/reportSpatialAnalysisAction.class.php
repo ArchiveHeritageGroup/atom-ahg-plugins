@@ -23,6 +23,10 @@ class reportsReportSpatialAnalysisAction extends AhgController
         // Coordinate source options
         $this->coordinateSources = [
             'property' => 'Property Table (custom fields)',
+            // Site records hold coordinates for RARI and archaeology. Gated: callers
+            // without clearance get a coarsened position and no map sheet, exactly as
+            // on the record view.
+            'site_record' => 'Site Records (ahgSiteRecordPlugin, locality gated)',
             'nmmz_site' => 'NMMZ Archaeological Site Table',
             'dam_metadata' => 'DAM IPTC Metadata (from images)',
             'contact_info' => 'Repository Contact Information',

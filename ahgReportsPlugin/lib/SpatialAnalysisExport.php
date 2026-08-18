@@ -49,7 +49,7 @@ class SpatialAnalysisExport
     /**
      * Coordinate source configuration
      */
-    protected string $coordinateSource = 'property'; // property, nmmz_site, dam_metadata, contact_info
+    protected string $coordinateSource = 'property'; // property, site_record, nmmz_site, dam_metadata, contact_info
 
     /**
      * Property names for coordinates (when using property source)
@@ -82,7 +82,7 @@ class SpatialAnalysisExport
 
     /**
      * Set coordinate source
-     * @param string $source One of: property, nmmz_site, dam_metadata, contact_info, scope_field
+     * @param string $source One of: property, site_record, nmmz_site, dam_metadata, contact_info, scope_field
      */
     public function setCoordinateSource(string $source): self
     {
@@ -237,6 +237,20 @@ class SpatialAnalysisExport
             $rowArray['is_painted'] = $this->matchesTerms($subjects, $this->paintedTerms) ? 'TRUE' : 'FALSE';
             $rowArray['is_engraved'] = $this->matchesTerms($subjects, $this->engravedTerms) ? 'TRUE' : 'FALSE';
 
+            // An export must not be a way around the locality rule.
+            //
+            // Site record coordinates are gated: LocalityVisibilityService decides who
+            // sees an exact position, and everyone else gets a coarsened one with the
+            // map sheet withheld. A CSV that joined ahg_site_record directly would hand
+            // out exact positions of archaeological sites to anyone who could reach the
+            // report - which is the single thing that gating exists to prevent.
+            //
+            // So the same service that governs the record view governs the export. If
+            // the plugin is absent there is nothing to gate and the row passes through.
+            if ('site_record' === $this->coordinateSource) {
+                $rowArray = $this->applyLocalityVisibility($rowArray);
+            }
+
             $rows[] = $rowArray;
         }
 
@@ -266,19 +280,55 @@ class SpatialAnalysisExport
     {
         switch ($this->coordinateSource) {
             case 'property':
-                // Join property table for latitude
+                // The value is in property_i18n, not property.
+                //
+                // AtoM's `property` table carries object_id, scope, name and culture
+                // only - the value is a translated column in `property_i18n`. Selecting
+                // prop_lat.value made the default coordinate source fail outright with
+                // "Unknown column 'prop_lat.value'", so this report could never run in
+                // its own default mode (found 2026-08-18).
                 $query->leftJoin('property as prop_lat', function ($join) {
                     $join->on('io.id', '=', 'prop_lat.object_id')
                         ->where('prop_lat.name', '=', $this->latitudePropertyName);
                 });
-                // Join property table for longitude
+                $query->leftJoin('property_i18n as prop_lat_i18n', function ($join) {
+                    $join->on('prop_lat.id', '=', 'prop_lat_i18n.id')
+                        ->where('prop_lat_i18n.culture', '=', $this->culture);
+                });
                 $query->leftJoin('property as prop_lng', function ($join) {
                     $join->on('io.id', '=', 'prop_lng.object_id')
                         ->where('prop_lng.name', '=', $this->longitudePropertyName);
                 });
+                $query->leftJoin('property_i18n as prop_lng_i18n', function ($join) {
+                    $join->on('prop_lng.id', '=', 'prop_lng_i18n.id')
+                        ->where('prop_lng_i18n.culture', '=', $this->culture);
+                });
                 $query->addSelect([
-                    'prop_lat.value as latitude',
-                    'prop_lng.value as longitude',
+                    'prop_lat_i18n.value as latitude',
+                    'prop_lng_i18n.value as longitude',
+                ]);
+                break;
+
+            case 'site_record':
+                // Coordinates held by ahgSiteRecordPlugin.
+                //
+                // A site record extends the AUTHORITY RECORD (ahg_site_record.actor_id),
+                // not the description, so the link runs through the description's
+                // creator event: information_object -> event.actor_id -> ahg_site_record.
+                //
+                // Added 2026-08-18: before this the report had no way to reach site
+                // record coordinates at all, which is where RARI and archaeology now
+                // keep them.
+                $query->leftJoin('event as sr_event', function ($join) {
+                    $join->on('io.id', '=', 'sr_event.object_id')
+                        ->whereNotNull('sr_event.actor_id');
+                });
+                $query->leftJoin('ahg_site_record as sr', 'sr_event.actor_id', '=', 'sr.actor_id');
+                $query->addSelect([
+                    'sr.latitude as latitude',
+                    'sr.longitude as longitude',
+                    'sr.map_sheet as map_sheet',
+                    'sr.locality_sensitive as locality_sensitive',
                 ]);
                 break;
 
@@ -332,9 +382,15 @@ class SpatialAnalysisExport
     {
         switch ($this->coordinateSource) {
             case 'property':
-                $query->whereNotNull('prop_lat.value')
-                    ->where('prop_lat.value', '!=', '')
-                    ->where('prop_lat.value', '!=', '0');
+                // Filter the i18n value, matching the join in addCoordinateColumns.
+                $query->whereNotNull('prop_lat_i18n.value')
+                    ->where('prop_lat_i18n.value', '!=', '')
+                    ->where('prop_lat_i18n.value', '!=', '0');
+                break;
+
+            case 'site_record':
+                $query->whereNotNull('sr.latitude')
+                    ->where('sr.latitude', '!=', 0);
                 break;
 
             case 'nmmz_site':
@@ -481,5 +537,58 @@ class SpatialAnalysisExport
             'painted' => $this->paintedTerms,
             'engraved' => $this->engravedTerms,
         ];
+    }
+
+    /**
+     * Coarsen or withhold coordinates unless the caller may see them exactly.
+     *
+     * Delegates to ahgSiteRecordPlugin's LocalityVisibilityService rather than
+     * re-implementing the rule - a second copy of a disclosure rule is a second place
+     * for it to drift, and the whole point of that service is that there is one path
+     * to a coordinate.
+     */
+    protected function applyLocalityVisibility(array $row): array
+    {
+        $service = 'AhgSiteRecordPlugin\\Services\\LocalityVisibilityService';
+
+        if (!class_exists($service)) {
+            return $row;   // plugin not installed: nothing gated, nothing to enforce
+        }
+
+        try {
+            $user = \sfContext::hasInstance() ? \sfContext::getInstance()->getUser() : null;
+            $sensitive = !isset($row['locality_sensitive']) || (bool) $row['locality_sensitive'];
+
+            if (!$sensitive) {
+                return $row;
+            }
+
+            if (method_exists($service, 'canSeeExact') && $service::canSeeExact($user, (object) $row)) {
+                return $row;
+            }
+
+            // Not cleared: coarsen the position and withhold the map sheet, exactly as
+            // the record view does.
+            if (method_exists($service, 'coarsen')) {
+                $coarse = $service::coarsen($row['latitude'] ?? null, $row['longitude'] ?? null);
+                $row['latitude'] = $coarse['latitude'] ?? null;
+                $row['longitude'] = $coarse['longitude'] ?? null;
+            } else {
+                $row['latitude'] = null;
+                $row['longitude'] = null;
+            }
+
+            $row['map_sheet'] = '';
+            $row['coordinate_precision'] = 'coarsened';
+        } catch (\Throwable $e) {
+            // Never fail open on a disclosure rule: if the decision cannot be made,
+            // withhold.
+            $row['latitude'] = null;
+            $row['longitude'] = null;
+            $row['map_sheet'] = '';
+            $row['coordinate_precision'] = 'withheld';
+        }
+
+        return $row;
     }
 }

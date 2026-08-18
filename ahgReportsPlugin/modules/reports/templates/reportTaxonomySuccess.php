@@ -15,7 +15,7 @@
 			  javascript:NewCal('dateEnd','ddmmyyyy',false,false,24,true);renderCalendar('dateEnd','div1');toggleOff('div3');">
   
 		<div>
-	        <button type="submit" class="btn"><?php echo link_to(__('Back to reports'), ['module' => 'reports', 'action' => 'reportSelect'], ['title' => __('Back to reports')]); ?></button>
+	        <button type="submit" class="btn"><?php echo link_to(__('Back to reports'), ['module' => 'reports', 'action' => 'index'], ['title' => __('Back to reports')]); ?></button>
 		</div>
 		<h4><?php echo __('Filter options'); ?></h4>
 		<div>

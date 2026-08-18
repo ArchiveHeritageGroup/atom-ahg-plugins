@@ -9,7 +9,7 @@
   <section class="sidebar-widget">
     
     <div style="margin-bottom: 1rem;">
-      <a href="<?php echo url_for(['module' => 'reports', 'action' => 'reportSelect']); ?>" class="c-btn" style="width:100%;">
+      <a href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>" class="c-btn" style="width:100%;">
         <i class="fa fa-arrow-left"></i> <?php echo __('Back to Reports'); ?>
       </a>
     </div>
