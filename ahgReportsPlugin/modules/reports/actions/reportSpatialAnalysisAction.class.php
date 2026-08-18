@@ -69,6 +69,37 @@ class reportsReportSpatialAnalysisAction extends AhgController
             return $this->renderText(json_encode($result, JSON_PRETTY_PRINT));
         }
 
+        // An empty export must explain itself.
+        //
+        // A CSV containing only a header row is indistinguishable from "this
+        // catalogue has no spatial data", when the usual cause is a filter that
+        // excluded everything. Say which filters were active and send the user back
+        // to the form rather than downloading nothing.
+        if (empty($result['rows'])) {
+            $active = [];
+            $places = $request->getParameter('places', []);
+            if (!empty($places)) {
+                $active[] = 'places (' . implode(', ', (array) $places) . ')';
+            }
+            if ('' !== trim((string) $request->getParameter('subject_filter_terms', ''))) {
+                $active[] = 'subject access points';
+            }
+            if ($request->getParameter('level_of_description')) {
+                $active[] = 'level of description';
+            }
+            if ((bool) $request->getParameter('top_level_only', true)) {
+                $active[] = 'top-level records only';
+            }
+
+            $this->getUser()->setFlash('error', $active
+                ? 'No records matched. These filters were applied: ' . implode('; ', $active) . '. Clear them and try again.'
+                : 'No records matched, and no filters were applied - the chosen coordinate source holds no data on this instance.');
+
+            $this->redirect(['module' => 'reports', 'action' => 'reportSpatialAnalysis']);
+
+            return;
+        }
+
         // Generate CSV
         require_once sfConfig::get('sf_plugins_dir') . '/ahgReportsPlugin/lib/SpatialAnalysisExport.php';
         $exporter = new \AhgReports\SpatialAnalysisExport();

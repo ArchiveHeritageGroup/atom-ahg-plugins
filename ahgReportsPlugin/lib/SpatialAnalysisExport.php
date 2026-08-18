@@ -251,6 +251,11 @@ class SpatialAnalysisExport
                 $rowArray = $this->applyLocalityVisibility($rowArray);
             }
 
+
+                if ('map_sheet' === $this->coordinateSource) {
+                    $rowArray = $this->applyMapSheetCell($rowArray);
+                }
+
             $rows[] = $rowArray;
         }
 
@@ -265,6 +270,22 @@ class SpatialAnalysisExport
             'is_engraved' => 'Is Engraved',
             'subjects_concatenated' => 'Subject Tags',
         ];
+
+            // A sheet-derived area is not a point, and the columns have to say so or
+            // the centroid gets read as a position.
+            if ('map_sheet' === $this->coordinateSource) {
+                $headers['map_sheet'] = 'Map Sheet';
+                $headers['coordinate_precision'] = 'Precision';
+                $headers['cell_size_km'] = 'Cell Size (km)';
+                $headers['cell_north'] = 'Cell North';
+                $headers['cell_south'] = 'Cell South';
+                $headers['cell_west'] = 'Cell West';
+                $headers['cell_east'] = 'Cell East';
+            } elseif ('site_record' === $this->coordinateSource) {
+                $headers['map_sheet'] = 'Map Sheet';
+                $headers['coordinate_precision'] = 'Precision';
+            }
+
 
         return [
             'headers' => $headers,
@@ -332,6 +353,25 @@ class SpatialAnalysisExport
                 ]);
                 break;
 
+            case 'map_sheet':
+                // Derive an area from the 1:50,000 map sheet reference.
+                //
+                // RARI holds no coordinates for most sites but does hold a sheet
+                // reference for 5,457 of them. A sheet is not a point: 3027AC names a
+                // 15-minute cell of roughly 25km. That is COARSER than the ~11km the
+                // locality rule already permits for a coarsened point, which is what
+                // makes this mode possible at all.
+                $query->leftJoin('event as ms_event', function ($join) {
+                    $join->on('io.id', '=', 'ms_event.object_id')
+                        ->whereNotNull('ms_event.actor_id');
+                });
+                $query->leftJoin('ahg_site_record as msr', 'ms_event.actor_id', '=', 'msr.actor_id');
+                $query->addSelect([
+                    'msr.map_sheet as map_sheet',
+                    'msr.locality_sensitive as locality_sensitive',
+                ]);
+                break;
+
             case 'nmmz_site':
                 $query->leftJoin('nmmz_archaeological_site as nmmz', 'io.id', '=', 'nmmz.information_object_id');
                 $query->addSelect([
@@ -391,6 +431,11 @@ class SpatialAnalysisExport
             case 'site_record':
                 $query->whereNotNull('sr.latitude')
                     ->where('sr.latitude', '!=', 0);
+                break;
+
+            case 'map_sheet':
+                $query->whereNotNull('msr.map_sheet')
+                    ->where('msr.map_sheet', '!=', '');
                 break;
 
             case 'nmmz_site':

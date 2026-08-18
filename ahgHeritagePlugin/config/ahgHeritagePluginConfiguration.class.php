@@ -13,9 +13,38 @@ class ahgHeritagePluginConfiguration extends sfPluginConfiguration
 
     /**
      * Redirect unauthenticated users from homepage to heritage landing page.
+     *
+     * Gated on the `heritage_homepage_redirect` setting, default on, so existing
+     * instances keep the behaviour they have.
+     *
+     * The gate exists because this redirect hands the public front door to a page
+     * whose cost scales with the catalogue. Measured 18 August 2026: the landing
+     * page renders in 1.2s against 133 descriptions and 112s against 292,278. An
+     * instance large enough for the page to be slow is exactly an instance where
+     * every anonymous visitor is sent to it, so the failure is invisible in
+     * development and total in production.
+     *
+     * Turning this off restores AtoM's own homepage and leaves the rest of the
+     * plugin working; it is a mitigation, not a fix for the page itself.
      */
     public function redirectHomepageToHeritage(sfEvent $event)
     {
+        // Fully-qualified, and guarded: this runs on controller.change_action for
+        // every request, so an unresolvable class here is a fatal on every page,
+        // not a broken menu entry. If the setting cannot be read, do not redirect -
+        // failing towards AtoM's own homepage keeps the site usable.
+        $settings = 'AtomExtensions\\Services\\AhgSettingsService';
+
+        if (class_exists($settings) && method_exists($settings, 'getBool')) {
+            try {
+                if (!$settings::getBool('heritage_homepage_redirect', true)) {
+                    return;
+                }
+            } catch (\Throwable $e) {
+                return;
+            }
+        }
+
         $context = sfContext::getInstance();
         $request = $context->getRequest();
         $user = $context->getUser();

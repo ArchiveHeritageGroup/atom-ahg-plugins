@@ -11,6 +11,26 @@ class ahgReportsPluginConfiguration extends sfPluginConfiguration
         $enabledModules[] = 'reports';
         sfConfig::set('sf_enabled_modules', $enabledModules);
 
+        // Navigation entry, contributed by the plugin rather than named by the theme.
+        //
+        // "Central Dashboard" was hardcoded in ahgThemeB5Plugin's own menu templates,
+        // so on an instance running the stock arDominion theme the plugin installed,
+        // routed and worked with nothing anywhere to click - observed on RARI, 18
+        // August 2026, where /reports answered 200 the whole time it looked absent.
+        // Registering here means the entry follows the plugin and disappears with it.
+        // Same shape as the ahgSecurityClearancePlugin fix, issue #292.
+        if (class_exists('AhgNav')) {
+            AhgNav::register('manage', 'reports_dashboard', [
+                // A route NAME, not a module/action array: AhgNav::knownRoute() is
+                // typed string and an array raises a TypeError from inside the layout,
+                // which empties every page rather than just this entry.
+                'route' => '@admin_dashboard',
+                'label' => 'Central Dashboard',
+                'credentials' => ['administrator', 'editor'],
+                'weight' => 900,
+            ]);
+        }
+
         $this->dispatcher->connect('routing.load_configuration', [$this, 'loadRoutes']);
     }
 

@@ -1,0 +1,70 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * Run the coordinate import on an instance whose ProjectConfiguration is stock.
+ *
+ * AtoM discovers CLI tasks from plugins enabled at PROJECT level, but stock
+ * ProjectConfiguration::setup() enables a fixed list of ten base plugins and
+ * never reads the `plugins` setting. AHG plugins are enabled by the APPLICATION
+ * configuration instead, so on such an instance `php symfony siterecord:*`
+ * simply does not exist - the task file is present, correct and unreachable.
+ *
+ * Measured on RARI, 18 August 2026: 34 plugins enabled at runtime, zero AHG task
+ * namespaces on the CLI.
+ *
+ * Base AtoM is not modified to fix this. This runner boots the application
+ * configuration - the same one index.php uses - and drives the task directly.
+ *
+ *   php plugins/ahgSiteRecordPlugin/bin/import-coordinates --file=/path/dump.xml
+ *   php plugins/ahgSiteRecordPlugin/bin/import-coordinates --file=... --apply
+ */
+$root = getcwd();
+if (!is_file($root . '/config/ProjectConfiguration.class.php')) {
+    fwrite(STDERR, "Run this from the AtoM root (where config/ProjectConfiguration.class.php lives).\n");
+
+    exit(2);
+}
+
+require_once $root . '/config/ProjectConfiguration.class.php';
+
+$env = getenv('ATOM_ENV') ?: 'prod';
+$configuration = ProjectConfiguration::getApplicationConfiguration('qubit', $env, false);
+
+$dispatcher = $configuration->getEventDispatcher();
+$formatter = new sfFormatter();
+
+$taskFile = __DIR__ . '/../lib/task/siteRecordImportCoordinatesTask.class.php';
+require_once $taskFile;
+
+// sfTask::log() publishes to command.log and sfCommandApplication normally
+// provides the listener. Driving the task directly there is none, so the task
+// runs to completion and prints nothing - which reads exactly like a task that
+// found no data. Attach one before the task can log anything.
+$dispatcher->connect('command.log', function (sfEvent $event) {
+    foreach ((array) $event->getParameters() as $line) {
+        echo rtrim((string) $line) . "\n";
+    }
+});
+
+$task = new siteRecordImportCoordinatesTask($dispatcher, $formatter);
+
+// sfBaseTask reads $this->configuration inside execute(); the constructor does
+// not set it, so without this the task dies on sfContext::createInstance(null).
+$task->setConfiguration($configuration);
+
+// Translate --flag / --key=value into the shapes sfTask::execute expects.
+$options = ['application' => 'qubit', 'env' => $env];
+foreach (array_slice($argv, 1) as $arg) {
+    if (0 !== strpos($arg, '--')) {
+        continue;
+    }
+    $arg = substr($arg, 2);
+    if (false !== ($eq = strpos($arg, '='))) {
+        $options[substr($arg, 0, $eq)] = substr($arg, $eq + 1);
+    } else {
+        $options[$arg] = true;
+    }
+}
+
+$task->execute([], $options);

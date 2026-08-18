@@ -65,7 +65,16 @@
                                     <select class="form-select" id="places" name="places[]" multiple size="6">
                                         <?php foreach ($availablePlaces as $id => $name): ?>
                                             <option value="<?php echo esc_specialchars($name) ?>"
-                                                <?php echo in_array($name, ['South Africa', 'Lesotho', 'Eswatini', 'Swaziland']) ? 'selected' : '' ?>>
+                                                <?php // No default place selection.
+                                                //
+                                                // Four countries were pre-selected here, contradicting this field's own
+                                                // help text ("Leave empty for all places") and silently emptying the
+                                                // report: on RARI the 126,973 descriptions carrying a site record have no
+                                                // country-level place access point, so the filter and the coordinate source
+                                                // could never both be satisfied. The export returned a header row and
+                                                // nothing else, which reads as "no data" rather than "your filter excluded
+                                                // everything". Default to all places; let the user narrow. ?>
+                                                >
                                                 <?php echo esc_specialchars($name) ?>
                                             </option>
                                         <?php endforeach ?>
@@ -104,6 +113,7 @@ Khoi</textarea>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-check">
+                                    <input type="hidden" name="top_level_only" value="0">
                                     <input class="form-check-input" type="checkbox" id="top_level_only" name="top_level_only" value="1" checked>
                                     <label class="form-check-label" for="top_level_only">
                                         Top-level records only (exclude child records like panels/images)
@@ -112,6 +122,7 @@ Khoi</textarea>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check">
+                                    <input type="hidden" name="require_coordinates" value="0">
                                     <input class="form-check-input" type="checkbox" id="require_coordinates" name="require_coordinates" value="1" checked>
                                     <label class="form-check-label" for="require_coordinates">
                                         Require coordinates (exclude records without lat/long)
