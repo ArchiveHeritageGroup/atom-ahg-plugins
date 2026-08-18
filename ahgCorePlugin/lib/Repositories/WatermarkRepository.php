@@ -186,6 +186,15 @@ class WatermarkRepository
      */
     public static function getTypes(bool $activeOnly = true): Collection
     {
+        // watermark_type is created by ahgDAMPlugin, which is optional. Without
+        // this guard the add/edit description form 500s on any instance that does
+        // not run DAM - "Base table or view not found: watermark_type" - which
+        // reads as a broken catalogue rather than an absent feature. Observed on
+        // the Wits archaeology install, 18 August 2026.
+        if (!self::watermarkTablesExist()) {
+            return new Collection();
+        }
+
         $query = DB::table('watermark_type')->orderBy('sort_order');
 
         if ($activeOnly) {
@@ -363,5 +372,28 @@ class WatermarkRepository
         return DB::table('object_watermark_setting')
             ->where('custom_watermark_id', $customId)
             ->pluck('object_id');
+    }
+
+    /**
+     * Is the optional watermark schema present?
+     *
+     * Cached per request: this is consulted on every form render and a schema
+     * lookup per call would be a query the page does not need.
+     */
+    protected static ?bool $watermarkTablesPresent = null;
+
+    protected static function watermarkTablesExist(): bool
+    {
+        if (null !== self::$watermarkTablesPresent) {
+            return self::$watermarkTablesPresent;
+        }
+
+        try {
+            self::$watermarkTablesPresent = DB::schema()->hasTable('watermark_type');
+        } catch (\Throwable $e) {
+            self::$watermarkTablesPresent = false;
+        }
+
+        return self::$watermarkTablesPresent;
     }
 }

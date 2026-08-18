@@ -80,19 +80,19 @@ class ahgHeritagePluginConfiguration extends sfPluginConfiguration
         // the plugin and disappears with it. Issue #292.
         if (class_exists('AhgNav')) {
             AhgNav::register('manage', 'heritage_adminDashboard', [
-                'route' => ['module' => 'heritage', 'action' => 'adminDashboard'],
+                'route' => '@heritage_admin_dashboard',
                 'label' => 'Heritage admin',
                 'credentials' => ['administrator'],
                 'weight' => 340,
             ]);
             AhgNav::register('manage', 'heritage_analyticsDashboard', [
-                'route' => ['module' => 'heritage', 'action' => 'analyticsDashboard'],
+                'route' => '@heritage_analytics_dashboard',
                 'label' => 'Heritage analytics',
                 'credentials' => ['administrator'],
                 'weight' => 341,
             ]);
             AhgNav::register('manage', 'heritage_custodianDashboard', [
-                'route' => ['module' => 'heritage', 'action' => 'custodianDashboard'],
+                'route' => '@heritage_custodian_dashboard',
                 'label' => 'Heritage custodian',
                 'credentials' => ['editor', 'administrator'],
                 'weight' => 342,
