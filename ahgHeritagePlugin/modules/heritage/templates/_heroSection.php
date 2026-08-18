@@ -26,10 +26,35 @@ $overlayOpacity = $firstImage['overlay_opacity'] ?? 0.5;
             ?>
             <div class="heritage-hero-bg <?php echo $index === 0 ? 'active' : ''; ?> <?php echo $effectClass; ?>"
                  data-index="<?php echo $index; ?>"
-                 data-duration="<?php echo $slideDuration; ?>"
-                 style="background-image: url('<?php echo esc_specialchars($image['image_path']); ?>');">
+                 data-duration="<?php echo $slideDuration; ?>">
             </div>
             <?php endforeach; ?>
+            <?php
+                // Backgrounds go in a nonce'd <style> block, not a style="" attribute.
+                //
+                // A CSP nonce authorises <style> ELEMENTS; it can never authorise a style
+                // ATTRIBUTE - there is nowhere to put the nonce. With
+                // style-src 'self' 'nonce-...' the browser silently dropped the background
+                // and the hero rendered empty. Nothing was wrong server-side - curl fetched
+                // the image fine - which made it look like a missing file rather than a
+                // blocked style. The instance this was compared against had 'unsafe-inline',
+                // which hid the problem entirely.
+                $heroCss = '';
+                foreach ($heroImages as $i => $img) {
+                    $path = $img['image_path'] ?? '';
+                    // url() is CSS, not HTML: refuse anything that could close the
+                    // declaration rather than trying to escape it.
+                    if ('' === $path || preg_match('/[\'"()\\\\]/', $path)) {
+                        continue;
+                    }
+                    $heroCss .= sprintf(
+                        ".heritage-hero-bg[data-index=\"%d\"]{background-image:url('%s');}\n",
+                        (int) $i,
+                        $path
+                    );
+                }
+                echo ahg_style_block($heroCss);
+            ?>
         <?php else: ?>
             <div class="heritage-hero-bg active" style="background: linear-gradient(135deg, var(--heritage-primary) 0%, #1a1a2e 100%);"></div>
         <?php endif; ?>
