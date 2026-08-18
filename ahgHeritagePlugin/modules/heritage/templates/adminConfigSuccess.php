@@ -262,7 +262,11 @@ $secondaryColor = $config->secondary_color ?? '';
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
-            <p class="small text-muted mt-3 mb-0">Stories are managed via the database. Contact your administrator to add or modify stories.</p>
+            <p class="small mt-3 mb-0">
+                    <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminStories']); ?>">
+                        <i class="fas fa-pencil-alt me-1"></i>Manage featured stories
+                    </a>
+                </p>
         </div>
     </div>
 

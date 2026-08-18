@@ -25,6 +25,10 @@ $active = $active ?? '';
        class="list-group-item list-group-item-action <?php echo $active === 'hero-slides' ? 'active' : ''; ?>">
         <i class="fas fa-images me-2"></i>Hero Slides
     </a>
+    <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminStories']); ?>"
+       class="list-group-item list-group-item-action <?php echo $active === 'stories' ? 'active' : ''; ?>">
+        <i class="fas fa-book-open me-2"></i>Featured stories
+    </a>
     <a href="<?php echo url_for(['module' => 'heritage', 'action' => 'adminFeaturedCollections']); ?>"
        class="list-group-item list-group-item-action <?php echo $active === 'featured' ? 'active' : ''; ?>">
         <i class="fas fa-star me-2"></i>Featured Collections

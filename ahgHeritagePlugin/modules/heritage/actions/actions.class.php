@@ -642,6 +642,111 @@ class heritageActions extends AhgController
     /**
      * Admin featured/curated collections management.
      */
+    /**
+     * Curated stories, administered through the interface.
+     *
+     * The config page used to say "Stories are managed via the database. Contact
+     * your administrator" - which is not a feature, it is a work order. Same shape
+     * as adminHeroSlides so the two behave alike.
+     */
+    public function executeAdminStories($request)
+    {
+        $this->requireHeritageEditor();
+
+        $institutionId = $request->getParameter('institution_id');
+        $action = $request->getParameter('story_action');
+        $storyId = $request->getParameter('story_id');
+
+        $service = new \AtomFramework\Heritage\Discovery\DiscoveryService($this->culture());
+
+        if ($request->isMethod('post')) {
+            try {
+                if ('create' === $action || 'update' === $action) {
+                    if ('' === trim((string) $request->getParameter('title'))) {
+                        throw new \Exception('A story needs a title.');
+                    }
+
+                    $data = [
+                        'institution_id' => $institutionId ? (int) $institutionId : null,
+                        'title' => $request->getParameter('title'),
+                        'subtitle' => $request->getParameter('subtitle'),
+                        'description' => $request->getParameter('description'),
+                        'cover_image' => $request->getParameter('cover_image'),
+                        'story_type' => $request->getParameter('story_type', 'collection'),
+                        'link_type' => $request->getParameter('link_type', 'search'),
+                        'link_reference' => $request->getParameter('link_reference'),
+                        'item_count' => $request->getParameter('item_count'),
+                        'is_featured' => $request->getParameter('is_featured'),
+                        'display_order' => $request->getParameter('display_order', 100),
+                        'is_enabled' => $request->getParameter('is_enabled'),
+                        'start_date' => $request->getParameter('start_date') ?: null,
+                        'end_date' => $request->getParameter('end_date') ?: null,
+                    ];
+
+                    if ('update' === $action && $storyId) {
+                        $service->updateStory((int) $storyId, $data);
+                        $this->getUser()->setFlash('notice', 'Story updated.');
+                    } else {
+                        $service->saveStory($data);
+                        $this->getUser()->setFlash('notice', 'Story created.');
+                    }
+                } elseif ('delete' === $action && $storyId) {
+                    $service->deleteStory((int) $storyId);
+                    $this->getUser()->setFlash('notice', 'Story deleted.');
+                } elseif ('toggle' === $action && $storyId) {
+                    $story = $service->getStory((int) $storyId);
+                    if ($story) {
+                        $story['is_enabled'] = empty($story['is_enabled']) ? 1 : 0;
+                        $service->updateStory((int) $storyId, $story);
+                        $this->getUser()->setFlash('notice', 'Story ' . ($story['is_enabled'] ? 'enabled' : 'disabled') . '.');
+                    }
+                }
+            } catch (\Throwable $e) {
+                $this->getUser()->setFlash('error', 'Could not save: ' . $e->getMessage());
+            }
+
+            $this->redirect(['module' => 'heritage', 'action' => 'adminStories']);
+
+            return;
+        }
+
+        // Administration lists everything, including disabled and expired stories -
+        // otherwise a disabled one cannot be found to re-enable.
+        $this->stories = $service->getAllStories($institutionId ? (int) $institutionId : null);
+        $this->institutionId = $institutionId;
+        $this->editStory = $storyId ? $service->getStory((int) $storyId) : null;
+
+        return sfView::SUCCESS;
+    }
+
+    /**
+     * Editor-or-administrator gate, shared by the heritage admin screens.
+     */
+    protected function requireHeritageEditor(): void
+    {
+        $user = $this->getUser();
+
+        if (!$user->isAuthenticated()) {
+            $this->forward('admin', 'secure');
+        }
+
+        if ($user->isAdministrator()) {
+            return;
+        }
+
+        foreach ($user->getAclGroups() as $group) {
+            if (in_array($group->id, [
+                \AtomExtensions\Constants\AclConstants::ADMINISTRATOR_ID,
+                \AtomExtensions\Constants\AclConstants::EDITOR_ID,
+            ], true)) {
+                return;
+            }
+        }
+
+        $this->forward('admin', 'secure');
+    }
+
+
     public function executeAdminFeaturedCollections($request)
     {
         if (!$this->getUser()->isAdministrator()) {

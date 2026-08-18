@@ -83,6 +83,11 @@ heritage_admin_hero_slides:
   param: { module: heritage, action: adminHeroSlides }
   requirements: { sf_method: [get, post] }
 
+heritage_admin_stories:
+  url: /heritage/admin/stories
+  param: { module: heritage, action: adminStories }
+  requirements: { sf_method: [get, post] }
+
 heritage_admin_featured_collections:
   url: /heritage/admin/featured-collections
   param: { module: heritage, action: adminFeaturedCollections }
