@@ -173,6 +173,19 @@ class AhgSettingsSectionAction extends AhgController
         'ftp' => 'ahgFtpPlugin',
         'sharepoint' => 'ahgSharePointPlugin',
         'share_link' => 'ahgTimeLimitedShareLinkPlugin',
+
+            // Added 2026-08-18. These sections were reachable on every instance,
+            // including ones where the plugin behind them was not installed, so the
+            // page either led nowhere or failed on a missing table.
+            'iiif' => 'ahgIiifPlugin',
+            'media' => 'ahgIiifPlugin',
+            'media_processing' => 'ahgIiifPlugin',
+            'semantic_search' => 'ahgSemanticSearchPlugin',
+
+            // The watermark page is served by ahgSecurityClearancePlugin but reads
+            // custom_watermark, watermark_type and object_watermark_setting, which
+            // ahgDAMPlugin owns. Gate on the plugin that owns the data.
+            'watermark' => 'ahgDAMPlugin',
     ];
 
     // Check if a plugin is enabled

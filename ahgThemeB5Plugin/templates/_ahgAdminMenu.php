@@ -51,7 +51,11 @@ $hasExhibitionSpace = false;
 try {
     $hasWorkflow = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_workflow');
     $hasSpectrumCompliance = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_spectrum_object_compliance');
-    $hasExhibitionSpace = \Illuminate\Database\Capsule\Manager::schema()->hasTable('ahg_exhibition_space');
+        // Enablement, not schema: tables outlive enablement, so asking whether
+        // ahg_exhibition_space exists kept the menu entry for good and offered a
+        // link into a module that is not loaded. Every other flag here asks
+        // ahgIsPluginEnabled(); this one now does too.
+        $hasExhibitionSpace = ahgIsPluginEnabled('ahgExhibitionPlugin');
 } catch (Exception $e) {}
 
 // Get pending counts for badges

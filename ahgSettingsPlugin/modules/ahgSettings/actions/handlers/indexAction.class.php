@@ -81,12 +81,16 @@ class AhgSettingsIndexAction extends AhgController
             'url' => 'admin/ahg-settings/section?section=media'
         ];
 
-        $this->sections['media_processing'] = [
-            'label' => 'Media Processing',
-            'icon' => 'fa-cogs',
-            'description' => 'Transcription, thumbnails, waveforms & media derivatives',
-            'url' => 'mediaSettings/index'
-        ];
+            // The mediaSettings module lives in ahgIiifPlugin; without it this tile
+            // links to a module that is not loaded.
+            if (in_array('ahgIiifPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+            $this->sections['media_processing'] = [
+                'label' => 'Media Processing',
+                'icon' => 'fa-cogs',
+                'description' => 'Transcription, thumbnails, waveforms & media derivatives',
+                'url' => 'mediaSettings/index'
+            ];
+            }
 
         $this->sections['tts'] = [
             'label' => 'Text-to-Speech',
@@ -95,12 +99,17 @@ class AhgSettingsIndexAction extends AhgController
             'url' => 'ahgSettings/tts'
         ];
 
-        $this->sections['watermark'] = [
-            'label' => 'Watermark Settings',
-            'icon' => 'fa-stamp',
-            'description' => 'Configure default watermarks for images and downloads',
-            'url' => 'securityClearance/watermarkSettings'
-        ];
+            // The watermark page is served by ahgSecurityClearancePlugin but reads
+            // custom_watermark, watermark_type and object_watermark_setting, which
+            // ahgDAMPlugin owns - without DAM it fails on a missing table.
+            if (in_array('ahgDAMPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+            $this->sections['watermark'] = [
+                'label' => 'Watermark Settings',
+                'icon' => 'fa-stamp',
+                'description' => 'Configure default watermarks for images and downloads',
+                'url' => 'securityClearance/watermarkSettings'
+            ];
+            }
         $this->sections['jobs'] = [
             'label' => 'Background Jobs',
             'icon' => 'fa-tasks',
@@ -356,12 +365,16 @@ class AhgSettingsIndexAction extends AhgController
         ];
 
         // Semantic Search - always available (core feature)
-        $this->sections['semantic_search'] = [
-            'label' => 'Semantic Search',
-            'icon' => 'fa-brain',
-            'description' => 'Thesaurus, synonyms, query expansion and search enhancement settings',
-            'url' => 'semanticSearchAdmin'
-        ];
+            // Semantic Search is not a core feature: semanticSearchAdmin lives in
+            // ahgSemanticSearchPlugin, so the tile led nowhere without it.
+            if (in_array('ahgSemanticSearchPlugin', sfProjectConfiguration::getActive()->getPlugins())) {
+            $this->sections['semantic_search'] = [
+                'label' => 'Semantic Search',
+                'icon' => 'fa-brain',
+                'description' => 'Thesaurus, synonyms, query expansion and search enhancement settings',
+                'url' => 'semanticSearchAdmin'
+            ];
+            }
 
         // E-Commerce / Cart Plugin
         $hasCart = in_array('ahgCartPlugin', sfProjectConfiguration::getActive()->getPlugins());
