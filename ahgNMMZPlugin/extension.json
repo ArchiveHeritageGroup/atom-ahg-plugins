@@ -2,18 +2,28 @@
     "name": "Zimbabwe NMMZ Compliance",
     "machine_name": "ahgNMMZPlugin",
     "version": "1.0.0",
-    "description": "Zimbabwe National Museums and Monuments Act [Chapter 25:11] compliance — monument register, antiquities, export permits, archaeological sites, heritage impact assessments",
+    "description": "Zimbabwe National Museums and Monuments Act [Chapter 25:11] compliance \u2014 monument register, antiquities, export permits, archaeological sites, heritage impact assessments",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "compliance",
-    "keywords": ["zimbabwe", "nmmz", "museums", "monuments", "antiquities", "archaeological", "compliance"],
+    "keywords": [
+        "zimbabwe",
+        "nmmz",
+        "museums",
+        "monuments",
+        "antiquities",
+        "archaeological",
+        "compliance"
+    ],
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
         "nmmz_config",
         "nmmz_monument_category",

@@ -29,10 +29,14 @@
         "elasticsearch": "For synonym export and semantic search"
     },
     "tables": [
-        "semantic_synonym",
-        "semantic_embedding",
+        "search_history",
+        "search_template",
+        "ahg_thesaurus_term",
+        "ahg_thesaurus_synonym",
+        "ahg_thesaurus_sync_log",
+        "ahg_thesaurus_embedding",
         "ahg_semantic_search_settings",
-        "semantic_query_log"
+        "ahg_semantic_search_log"
     ],
     "features": [
         "Thesaurus management with domain-specific synonyms",
@@ -78,7 +82,14 @@
             "name": "semantic-search-cron.php",
             "description": "Cron job handler for scheduled tasks",
             "usage": "php bin/semantic-search-cron.php [task] [options]",
-            "tasks": ["all", "sync-wordnet", "sync-wikidata", "update-embeddings", "export-es", "cleanup"]
+            "tasks": [
+                "all",
+                "sync-wordnet",
+                "sync-wikidata",
+                "update-embeddings",
+                "export-es",
+                "cleanup"
+            ]
         }
     ]
 }

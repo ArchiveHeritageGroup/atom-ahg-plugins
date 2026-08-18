@@ -16,18 +16,21 @@
         "ahgCorePlugin"
     ],
     "tables": [
+        "access_audit_log",
+        "gallery_exhibition",
+        "object_provenance",
         "custom_report",
         "report_schedule",
         "report_archive",
-        "dashboard_widget",
-        "report_section",
-        "report_template",
-        "report_link",
-        "report_version",
-        "report_comment",
         "report_attachment",
+        "report_comment",
+        "report_definition",
+        "report_link",
+        "report_query",
+        "report_section",
         "report_share",
-        "report_query"
+        "report_template",
+        "report_version"
     ],
     "features": [
         "Rich text editing with Quill.js",

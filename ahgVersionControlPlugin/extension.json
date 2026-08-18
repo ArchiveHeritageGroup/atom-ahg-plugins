@@ -41,7 +41,9 @@
             "id": "versions_io",
             "label": "Versions",
             "template": "ahgVersionControlPlugin/templates/display/_versions_panel.php",
-            "contexts": ["informationobject"],
+            "contexts": [
+                "informationobject"
+            ],
             "position": "below-content",
             "weight": 90
         },
@@ -49,7 +51,9 @@
             "id": "versions_actor",
             "label": "Versions",
             "template": "ahgVersionControlPlugin/templates/display/_versions_panel.php",
-            "contexts": ["actor"],
+            "contexts": [
+                "actor"
+            ],
             "position": "below-content",
             "weight": 90
         }

@@ -16,14 +16,19 @@
     ],
     "install_sql": "database/install.sql",
     "tables": [
+        "ahg_vendor_service_types",
         "ahg_vendors",
         "ahg_vendor_contacts",
-        "ahg_vendor_metrics",
-        "ahg_vendor_service_types",
         "ahg_vendor_services",
         "ahg_vendor_transactions",
         "ahg_vendor_transaction_items",
         "ahg_vendor_transaction_history",
-        "ahg_vendor_transaction_attachments"
+        "ahg_vendor_transaction_attachments",
+        "ahg_vendor_metrics",
+        "ahg_contract_type",
+        "ahg_contract",
+        "ahg_contract_document",
+        "ahg_contract_reminder",
+        "ahg_contract_history"
     ]
 }

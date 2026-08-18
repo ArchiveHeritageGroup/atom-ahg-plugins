@@ -20,7 +20,9 @@
     "display_panels": [],
     "display_badges": [],
     "tables": [
-        "tiff_pdf_merge_job"
+        "tiff_pdf_merge_job",
+        "tiff_pdf_merge_file",
+        "tiff_pdf_settings"
     ],
     "shared_tables": [],
     "helpers": [],

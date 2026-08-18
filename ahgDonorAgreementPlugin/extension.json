@@ -20,21 +20,16 @@
         ]
     },
     "tables": [
+        "agreement_rights_vocabulary",
         "agreement_type",
         "donor_agreement",
         "donor_agreement_i18n",
+        "donor_agreement_reminder",
         "donor_agreement_right",
         "donor_agreement_restriction",
         "donor_agreement_document",
-        "donor_agreement_reminder",
-        "donor_agreement_reminder_log",
-        "donor_agreement_history",
         "donor_agreement_accession",
         "donor_agreement_record",
-        "donor_agreement_classification",
-        "donor_agreement_rights",
-        "donor_provenance",
-        "donor_rights_application_log",
-        "agreement_rights_vocabulary"
+        "donor_agreement_history"
     ]
 }

@@ -22,10 +22,11 @@
         "watermark_setting",
         "custom_watermark",
         "object_watermark_setting",
-        "creative_commons_license",
-        "creative_commons_license_i18n",
         "rights_derivative_rule",
         "rights_derivative_log",
-        "security_watermark_log"
+        "security_watermark_log",
+        "dam_external_links",
+        "dam_format_holdings",
+        "dam_version_links"
     ]
 }

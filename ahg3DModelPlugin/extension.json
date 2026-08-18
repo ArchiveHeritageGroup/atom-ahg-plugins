@@ -16,14 +16,16 @@
     ],
     "install_sql": "database/install.sql",
     "tables": [
-        "object_3d_model",
-        "object_3d_model_i18n",
+        "iiif_3d_manifest",
+        "object_3d_audit_log",
         "object_3d_hotspot",
         "object_3d_hotspot_i18n",
-        "object_3d_texture",
+        "object_3d_model",
+        "object_3d_model_i18n",
         "object_3d_settings",
+        "object_3d_texture",
         "viewer_3d_settings",
-        "iiif_3d_manifest",
-        "object_3d_audit_log"
+        "object_3d_camera_bookmark",
+        "triposr_jobs"
     ]
 }

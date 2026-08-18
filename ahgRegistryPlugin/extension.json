@@ -10,7 +10,9 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
         "registry_institution",
         "registry_vendor",
@@ -31,6 +33,22 @@
         "registry_blog_post",
         "registry_settings",
         "registry_oauth_account",
-        "registry_instance_feature"
+        "registry_instance_feature",
+        "registry_software_component",
+        "registry_favorite",
+        "registry_newsletter",
+        "registry_newsletter_subscriber",
+        "registry_newsletter_send_log",
+        "registry_user_institution",
+        "registry_dropdown",
+        "registry_notification",
+        "registry_entity_url",
+        "registry_erd",
+        "registry_password_reset",
+        "registry_note",
+        "registry_standard",
+        "registry_standard_extension",
+        "registry_software_standard",
+        "registry_setup_guide"
     ]
 }

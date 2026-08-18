@@ -12,8 +12,10 @@
     },
     "tables": [
         "atom_data_mapping",
-        "atom_data_migration_job",
-        "atom_data_migration_log"
+        "atom_migration_job",
+        "atom_migration_log",
+        "atom_validation_rule",
+        "atom_validation_log"
     ],
     "category": "ahg",
     "features": [

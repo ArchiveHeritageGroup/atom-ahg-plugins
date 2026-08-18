@@ -7,15 +7,35 @@
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "preservation",
-    "keywords": ["integrity", "fixity", "verification", "checksum", "scheduling", "dead-letter", "ledger", "retention", "legal-hold", "disposition", "alerting"],
+    "keywords": [
+        "integrity",
+        "fixity",
+        "verification",
+        "checksum",
+        "scheduling",
+        "dead-letter",
+        "ledger",
+        "retention",
+        "legal-hold",
+        "disposition",
+        "alerting"
+    ],
     "requires": {
         "atom_framework": ">=2.8.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin", "ahgPreservationPlugin"],
+    "dependencies": [
+        "ahgCorePlugin",
+        "ahgPreservationPlugin"
+    ],
     "provides": {
-        "services": ["IntegrityService", "IntegrityScheduler", "IntegrityRetentionService", "IntegrityAlertService"]
+        "services": [
+            "IntegrityService",
+            "IntegrityScheduler",
+            "IntegrityRetentionService",
+            "IntegrityAlertService"
+        ]
     },
     "install_sql": "database/install.sql",
     "tables": [
@@ -26,7 +46,11 @@
         "integrity_retention_policy",
         "integrity_legal_hold",
         "integrity_disposition_queue",
-        "integrity_alert_config"
+        "integrity_alert_config",
+        "vital_record",
+        "record_declaration",
+        "destruction_certificate",
+        "retention_trigger_event"
     ],
     "settings": {
         "default_algorithm": "sha256",

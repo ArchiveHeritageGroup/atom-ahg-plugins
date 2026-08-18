@@ -1,21 +1,22 @@
 {
-  "name": "AHG Favorites Plugin",
-  "machine_name": "ahgFavoritesPlugin",
-  "version": "2.0.1",
-  "description": "Full-featured favorites/bookmarks management with folders, notes, bulk operations, and AJAX toggle",
-  "author": "The Archive and Heritage Group",
-  "license": "AGPL-3.0-or-later",
-  "category": "ahg",
-  "requires": {
-    "atom_framework": ">=1.0.0",
-    "atom": ">=2.8",
-    "php": ">=8.1"
-  },
-  "dependencies": [
-    "ahgCorePlugin"
-  ],
-  "tables": [
-    "favorites",
-    "favorites_folder"
-  ]
+    "name": "AHG Favorites Plugin",
+    "machine_name": "ahgFavoritesPlugin",
+    "version": "2.0.1",
+    "description": "Full-featured favorites/bookmarks management with folders, notes, bulk operations, and AJAX toggle",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "category": "ahg",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "favorites",
+        "favorites_folder",
+        "favorites_share"
+    ]
 }

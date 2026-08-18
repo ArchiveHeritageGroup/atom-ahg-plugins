@@ -752,3 +752,341 @@ CREATE TABLE IF NOT EXISTS ahg_research_message (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX idx_research_message_session (session_id, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/install_donut.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ============================================================================
+-- ahgAIPlugin - DONUT Document Understanding tables
+-- ============================================================================
+-- Stores structured document-parsing results returned by the DONUT model
+-- (served by the ahg-ai python service, default host .115:5008).
+-- No ENUM columns; no FOREIGN KEY to core AtoM tables; never touches
+-- atom_plugin. Provenance rows are written best-effort into ahg_ai_inference
+-- (owned by ahgProvenancePlugin) at runtime - that table is NOT created here.
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS ahg_donut_extraction (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    information_object_id BIGINT UNSIGNED DEFAULT NULL COMMENT 'Linked IO id once finalised; NULL while pending',
+    source_filename VARCHAR(255) DEFAULT NULL COMMENT 'Original document image filename',
+    input_hash CHAR(64) DEFAULT NULL COMMENT 'sha256 of the source image bytes',
+    doc_type VARCHAR(64) DEFAULT NULL COMMENT 'Classified document type as reported by DONUT',
+    confidence DECIMAL(6,5) DEFAULT NULL COMMENT 'Normalised 0.0-1.0 confidence; NULL when not exposed',
+    needs_review TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 when the model flags low confidence',
+    fields_json JSON DEFAULT NULL COMMENT 'Flattened name => value structured field map',
+    raw_json JSON DEFAULT NULL COMMENT 'Full raw gateway payload for audit/replay',
+    model_name VARCHAR(255) DEFAULT NULL COMMENT 'Model identifier reported by the gateway',
+    model_version VARCHAR(64) DEFAULT NULL COMMENT 'Model version string',
+    service_url VARCHAR(255) DEFAULT NULL COMMENT 'Gateway base URL the call was made against',
+    elapsed_ms INT DEFAULT NULL COMMENT 'Call latency in milliseconds',
+    status VARCHAR(20) NOT NULL DEFAULT 'extracted' COMMENT 'extracted, needs_review, finalised, rejected',
+    user_id INT DEFAULT NULL COMMENT 'Triggering user when known',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_donut_io (information_object_id),
+    INDEX idx_donut_status (status),
+    INDEX idx_donut_hash (input_hash),
+    INDEX idx_donut_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Default settings for the DONUT feature (idempotent).
+INSERT IGNORE INTO ahg_ai_settings (feature, setting_key, setting_value)
+VALUES
+    ('donut', 'enabled', '1'),
+    ('donut', 'donut_service_url', 'http://192.168.0.115:5008'),
+    ('donut', 'donut_timeout', '60')
+ON DUPLICATE KEY UPDATE setting_key = setting_key;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_ai_assistant_extras.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahgAIPlugin — AI assistant extras (DB-audit archive build-order #4)
+-- Two genuinely-missing tables ported from Heratio:
+--   1. ahg_ai_chatbot_message — persist #121 collection-chatbot conversation turns
+--   2. ahg_translation_memory  — translation-memory reuse for ai:translate
+-- Run-once, additive. No INSERT INTO atom_plugin (ahgAIPlugin is already enabled).
+-- NOTE: `role` is VARCHAR not ENUM per project rule #5 (no ENUM columns).
+
+CREATE TABLE IF NOT EXISTS `ahg_ai_chatbot_message` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `session_id` VARCHAR(64) NOT NULL,
+    `role` VARCHAR(20) NOT NULL DEFAULT 'user' COMMENT 'user, assistant, system',
+    `content` TEXT NOT NULL,
+    `sources` JSON DEFAULT NULL,
+    `grounding_score` FLOAT(5,4) DEFAULT NULL,
+    `model` VARCHAR(100) DEFAULT NULL,
+    `tokens_in` INT UNSIGNED DEFAULT NULL,
+    `tokens_out` INT UNSIGNED DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `ix_session` (`session_id`, `created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `ahg_translation_memory` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `source_text_hash` CHAR(64) NOT NULL COMMENT 'sha256 hex of the source text',
+    `source_lang` CHAR(8) NOT NULL DEFAULT '',
+    `target_lang` CHAR(8) NOT NULL,
+    `source_text` TEXT NOT NULL,
+    `target_text` TEXT NOT NULL,
+    `provenance` VARCHAR(32) NOT NULL DEFAULT 'machine' COMMENT 'machine, human, reviewed',
+    `confidence` FLOAT DEFAULT NULL,
+    `hit_count` INT UNSIGNED NOT NULL DEFAULT 0,
+    `last_used_at` TIMESTAMP NULL DEFAULT NULL,
+    `created_at` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tm_hash_target` (`source_text_hash`, `target_lang`),
+    KEY `idx_tm_target` (`target_lang`),
+    KEY `idx_tm_provenance` (`provenance`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_catalog_draft.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- AI Cataloguer (#149 strand) — full-record AI draft storage. Idempotent.
+
+CREATE TABLE IF NOT EXISTS ahg_catalog_draft (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    object_id INT NOT NULL,
+    draft_json LONGTEXT NOT NULL,
+    model VARCHAR(120) DEFAULT NULL,
+    tokens_used INT DEFAULT 0,
+    status VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'draft, applied, discarded',
+    applied_fields JSON DEFAULT NULL,
+    created_by INT DEFAULT NULL,
+    applied_by INT DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    applied_at DATETIME DEFAULT NULL,
+    INDEX idx_catalog_object (object_id),
+    INDEX idx_catalog_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_iiif_ai.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ============================================================================
+-- IIIF AI Extraction Migration
+-- Date: 2026-03-08
+-- Issue: #220 — AI-Powered IIIF Content Extraction
+--
+-- Creates ai_iiif_extraction table for tracking extraction pipeline results
+-- and seeds iiif_ai settings into ahg_ai_settings.
+-- ============================================================================
+
+-- Extraction tracking table
+CREATE TABLE IF NOT EXISTS `ai_iiif_extraction` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `information_object_id` INT NOT NULL COMMENT 'FK to information_object.id',
+    `iiif_canvas_id` BIGINT UNSIGNED DEFAULT NULL COMMENT 'FK to iiif_canvas.id (optional)',
+    `extraction_type` VARCHAR(50) NOT NULL COMMENT 'ocr, ner, translate, summarize, face',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'pending' COMMENT 'pending, processing, completed, failed',
+    `input_source` VARCHAR(500) DEFAULT NULL COMMENT 'Cantaloupe IIIF URL or local path',
+    `output_text` LONGTEXT DEFAULT NULL COMMENT 'Extracted/processed text',
+    `output_json` JSON DEFAULT NULL COMMENT 'Structured extraction results',
+    `error_message` TEXT DEFAULT NULL,
+    `processing_time_ms` INT UNSIGNED DEFAULT NULL,
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_aie_io` (`information_object_id`),
+    KEY `idx_aie_canvas` (`iiif_canvas_id`),
+    KEY `idx_aie_type` (`extraction_type`),
+    KEY `idx_aie_status` (`status`),
+    KEY `idx_aie_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ============================================================================
+-- Seed IIIF AI settings into ahg_ai_settings
+-- ============================================================================
+
+INSERT IGNORE INTO `ahg_ai_settings` (`feature`, `setting_key`, `setting_value`) VALUES
+    ('iiif_ai', 'enabled', '1'),
+    ('iiif_ai', 'auto_extract_on_manifest', '0'),
+    ('iiif_ai', 'extract_types', '["ocr","ner"]'),
+    ('iiif_ai', 'annotation_motivation', 'supplementing'),
+    ('iiif_ai', 'max_canvas_batch', '50'),
+    ('iiif_ai', 'ocr_language', 'eng'),
+    ('iiif_ai', 'ocr_confidence_threshold', '0.60'),
+    ('iiif_ai', 'api_timeout', '120');
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_ner_confidence_null.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ============================================================================
+-- NER Confidence NULL Migration
+-- Date: 2026-05-27
+-- Issue: PSIS #19 — DB migration clean existing confidence = 0.95 rows
+--
+-- PROBLEM:
+-- Before v3.35.0 (commit 7003d2a), the NER pipeline assigned confidence = 0.95
+-- as a hardcoded fallback whenever the /ai/v1/ner/extract API returned no
+-- per-entity score. This wrote FABRICATED confidence values to:
+--   - ahg_ner_entity.confidence
+--   - ahg_ner_entity_link.confidence
+--
+-- FIX:
+-- v3.35.0 changed all five PHP entry points to write confidence = NULL when
+-- no real model score is available (not 0.95). This migration cleans the
+-- pre-v3.35.0 fabricated values from existing rows.
+--
+-- SCOPE:
+--   - ahg_ner_entity     WHERE confidence = 0.9500  (fabricated fallback)
+--   - ahg_ner_entity_link WHERE confidence = 0.9500 (fabricated fallback)
+-- NOT changed (legitimate real scores):
+--   - confidence < 0.95  (real score below fallback threshold)
+--   - confidence > 0.95  (real score above fallback threshold)
+--   - confidence = 1.0000 (explicit default, not fabricated)
+-- ============================================================================
+
+-- Pre-check: show current fabricated row counts
+SELECT 'ahg_ner_entity'     AS tbl, COUNT(*) AS fabricated_confidence_095 FROM ahg_ner_entity     WHERE confidence = 0.9500
+UNION ALL
+SELECT 'ahg_ner_entity_link',                COUNT(*)                 FROM ahg_ner_entity_link WHERE confidence = 0.9500;
+
+-- ============================================================================
+-- CLEAN: ahg_ner_entity — reset fabricated 0.95 to NULL
+-- ============================================================================
+UPDATE ahg_ner_entity
+SET    confidence = NULL
+WHERE  confidence = 0.9500;
+
+-- ============================================================================
+-- CLEAN: ahg_ner_entity_link — reset fabricated 0.95 to NULL
+-- ============================================================================
+UPDATE ahg_ner_entity_link
+SET    confidence = NULL
+WHERE  confidence = 0.9500;
+
+-- Post-check: confirm zero fabricated rows remain
+SELECT 'ahg_ner_entity'     AS tbl, COUNT(*) AS remaining_095 FROM ahg_ner_entity     WHERE confidence = 0.9500
+UNION ALL
+SELECT 'ahg_ner_entity_link',                COUNT(*)                 FROM ahg_ner_entity_link WHERE confidence = 0.9500;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_research_copilot.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- Researcher Copilot (#149 strand) — persistent research sessions over the
+-- collection RAG assistant (#121). Idempotent.
+
+CREATE TABLE IF NOT EXISTS ahg_research_session (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(255) NOT NULL DEFAULT 'New research session',
+    culture VARCHAR(10) NOT NULL DEFAULT 'en',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_research_session_user (user_id),
+    INDEX idx_research_session_updated (updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ahg_research_message (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    session_id BIGINT UNSIGNED NOT NULL,
+    role VARCHAR(12) NOT NULL COMMENT 'user, assistant',
+    content MEDIUMTEXT NOT NULL,
+    sources_json TEXT DEFAULT NULL COMMENT 'JSON array of {slug,title}',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_research_message_session (session_id, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_settings_consolidation.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ============================================================================
+-- AI Settings Consolidation Migration
+-- Date: 2026-03-08
+--
+-- GOAL: Consolidate duplicate AI settings into single source of truth.
+--
+-- Current state (DUPLICATION):
+--   1. ahg_ai_settings (feature+setting_key) — ahgAIPlugin's own table
+--   2. ahg_ner_settings (setting_key) — legacy table used by ahgSettingsPlugin UI
+--
+-- Target state:
+--   ahg_ai_settings is the SINGLE source of truth.
+--   ahg_ner_settings retained read-only for backward compatibility.
+--   NerService reads from ahg_ai_settings first, ahg_ner_settings fallback.
+--
+-- API KEY REMOVAL:
+--   API keys and tokens are managed by a SEPARATE external token system.
+--   The api_key fields below are kept for internal service-to-service auth only
+--   (e.g., AtoM → AI server on same network). Client-facing API keys are
+--   NOT generated or managed by AtoM Heratio.
+-- ============================================================================
+
+-- Migrate any ahg_ner_settings values not yet in ahg_ai_settings
+INSERT IGNORE INTO ahg_ai_settings (feature, setting_key, setting_value)
+SELECT
+    CASE
+        WHEN setting_key LIKE 'summarizer_%' THEN 'summarize'
+        WHEN setting_key LIKE 'translation_%' THEN 'translate'
+        WHEN setting_key LIKE 'spellcheck_%' THEN 'spellcheck'
+        WHEN setting_key LIKE 'mt_%' THEN 'translate'
+        WHEN setting_key LIKE 'qdrant_%' THEN 'qdrant'
+        WHEN setting_key IN ('api_url', 'api_key', 'api_timeout', 'processing_mode') THEN 'general'
+        WHEN setting_key IN ('ner_enabled', 'ner_entity_types', 'auto_extract_on_upload', 'auto_extract', 'extract_from_pdf') THEN 'ner'
+        ELSE 'general'
+    END AS feature,
+    setting_key,
+    setting_value
+FROM ahg_ner_settings
+WHERE setting_key COLLATE utf8mb4_unicode_ci NOT IN (
+    SELECT setting_key FROM ahg_ai_settings WHERE feature = 'general'
+);

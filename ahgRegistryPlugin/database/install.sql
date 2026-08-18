@@ -821,3 +821,813 @@ CREATE TABLE IF NOT EXISTS `registry_notification` (
   KEY `idx_user_bar` (`user_id`, `is_dismissed`, `is_read`, `created_at`),
   KEY `idx_type_related` (`type`, `related_type`, `related_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_entity_urls.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- =============================================================================
+-- Registry — Repeatable URLs for Institution & Vendor
+-- Adds a single registry_entity_url table so institutions and vendors can
+-- attach multiple typed URLs (archives site, AtoM instance, digital repository,
+-- social profiles, source control, etc.) instead of a fixed handful of columns.
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS registry_entity_url (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    entity_type VARCHAR(20) NOT NULL COMMENT 'institution, vendor',
+    entity_id BIGINT UNSIGNED NOT NULL,
+    link_type VARCHAR(30) NOT NULL DEFAULT 'website' COMMENT 'website, atom_instance, repository, catalogue, blog, social, github, gitlab, linkedin, facebook, twitter, youtube, other',
+    url VARCHAR(500) NOT NULL,
+    label VARCHAR(150) DEFAULT NULL COMMENT 'optional custom label shown instead of link_type',
+    sort_order INT NOT NULL DEFAULT 100,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_entity (entity_type, entity_id),
+    INDEX idx_link_type (link_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Backfill: migrate existing single-column URLs into the new repeatable table
+-- so no data is lost when forms switch to the repeatable widget.
+INSERT IGNORE INTO registry_entity_url (entity_type, entity_id, link_type, url, sort_order)
+SELECT 'institution', id, 'website', website, 10
+FROM registry_institution
+WHERE website IS NOT NULL AND website <> ''
+  AND NOT EXISTS (
+      SELECT 1 FROM registry_entity_url u
+      WHERE u.entity_type = 'institution' AND u.entity_id = registry_institution.id
+        AND u.link_type = 'website' AND u.url = registry_institution.website
+  );
+
+INSERT IGNORE INTO registry_entity_url (entity_type, entity_id, link_type, url, sort_order)
+SELECT 'vendor', id, 'website', website, 10
+FROM registry_vendor
+WHERE website IS NOT NULL AND website <> ''
+  AND NOT EXISTS (
+      SELECT 1 FROM registry_entity_url u
+      WHERE u.entity_type = 'vendor' AND u.entity_id = registry_vendor.id
+        AND u.link_type = 'website' AND u.url = registry_vendor.website
+  );
+
+INSERT IGNORE INTO registry_entity_url (entity_type, entity_id, link_type, url, sort_order)
+SELECT 'vendor', id, 'github', github_url, 20
+FROM registry_vendor
+WHERE github_url IS NOT NULL AND github_url <> ''
+  AND NOT EXISTS (
+      SELECT 1 FROM registry_entity_url u
+      WHERE u.entity_type = 'vendor' AND u.entity_id = registry_vendor.id
+        AND u.link_type = 'github' AND u.url = registry_vendor.github_url
+  );
+
+INSERT IGNORE INTO registry_entity_url (entity_type, entity_id, link_type, url, sort_order)
+SELECT 'vendor', id, 'gitlab', gitlab_url, 30
+FROM registry_vendor
+WHERE gitlab_url IS NOT NULL AND gitlab_url <> ''
+  AND NOT EXISTS (
+      SELECT 1 FROM registry_entity_url u
+      WHERE u.entity_type = 'vendor' AND u.entity_id = registry_vendor.id
+        AND u.link_type = 'gitlab' AND u.url = registry_vendor.gitlab_url
+  );
+
+INSERT IGNORE INTO registry_entity_url (entity_type, entity_id, link_type, url, sort_order)
+SELECT 'vendor', id, 'linkedin', linkedin_url, 40
+FROM registry_vendor
+WHERE linkedin_url IS NOT NULL AND linkedin_url <> ''
+  AND NOT EXISTS (
+      SELECT 1 FROM registry_entity_url u
+      WHERE u.entity_type = 'vendor' AND u.entity_id = registry_vendor.id
+        AND u.link_type = 'linkedin' AND u.url = registry_vendor.linkedin_url
+  );
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_erd.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- =====================================================
+-- Registry ERD Documentation Migration
+-- Date: 2026-03-07
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS `registry_erd` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `plugin_name` varchar(255) NOT NULL COMMENT 'e.g. ahgPreservationPlugin',
+  `vendor_id` bigint unsigned DEFAULT NULL COMMENT 'FK to registry_vendor.id',
+  `display_name` varchar(255) NOT NULL COMMENT 'e.g. Digital Preservation',
+  `slug` varchar(255) NOT NULL,
+  `category` varchar(100) NOT NULL DEFAULT 'general' COMMENT 'core, sector, compliance, browse, ai, ingest, rights, research, collection, exhibition, integration, reporting',
+  `description` text COMMENT 'Short description of this ERD group',
+  `tables_json` json DEFAULT NULL COMMENT 'Array of table names to auto-render schema from information_schema',
+  `diagram` longtext COMMENT 'ASCII ERD diagram (rendered in <pre> block)',
+  `diagram_image` varchar(500) DEFAULT NULL COMMENT 'Uploaded ERD diagram image/document path',
+  `notes` text COMMENT 'Additional notes or markdown content',
+  `icon` varchar(100) DEFAULT 'fas fa-database' COMMENT 'Font Awesome icon class',
+  `color` varchar(50) DEFAULT 'primary' COMMENT 'Bootstrap color class',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `sort_order` int NOT NULL DEFAULT 100,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_erd_slug` (`slug`),
+  UNIQUE KEY `uq_erd_plugin` (`plugin_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- =====================================================
+-- Seed: Standards (already built)
+-- =====================================================
+INSERT IGNORE INTO `registry_erd` (`plugin_name`, `display_name`, `slug`, `category`, `description`, `tables_json`, `icon`, `color`, `sort_order`) VALUES
+('ahgRegistryPlugin', 'Standards & Conformance', 'standards-conformance', 'core',
+ 'Standards directory, Heratio extensions, vendor conformance declarations, and setup guides.',
+ '["registry_standard","registry_standard_extension","registry_software_standard","registry_setup_guide"]',
+ 'fas fa-balance-scale', 'danger', 10),
+
+('ahgAuditTrailPlugin', 'Audit Trail', 'audit-trail', 'compliance',
+ 'Audit logging for all entity changes with field-level detail tracking.',
+ '["audit_log","audit_log_detail"]',
+ 'fas fa-history', 'secondary', 20),
+
+('ahgSecurityClearancePlugin', 'Security Classification', 'security-classification', 'compliance',
+ 'NARSSA-aligned security classification, user clearance levels, and access control.',
+ '["security_classification","security_classification_record","security_user_clearance"]',
+ 'fas fa-shield-alt', 'warning', 30),
+
+('ahgPrivacyPlugin', 'Privacy & Compliance', 'privacy-compliance', 'compliance',
+ 'POPIA/GDPR/CCPA compliance: breach management, consent tracking, SAR requests, data retention.',
+ '["privacy_breach","privacy_breach_record","privacy_consent","privacy_sar_request","privacy_data_retention"]',
+ 'fas fa-user-shield', 'info', 40),
+
+('ahgPreservationPlugin', 'Digital Preservation', 'digital-preservation', 'core',
+ 'PREMIS events, checksums, fixity verification, format registry, PRONOM sync, replication.',
+ '["preservation_event","preservation_checksum","preservation_format","preservation_replication","preservation_package"]',
+ 'fas fa-archive', 'success', 50),
+
+('ahgConditionPlugin', 'Condition Assessment', 'condition-assessment', 'collection',
+ 'Spectrum 5.1-aligned condition assessment with treatment proposals and photo documentation.',
+ '["condition_assessment","condition_assessment_detail","condition_treatment_proposal","condition_photo"]',
+ 'fas fa-clipboard-check', 'primary', 60),
+
+('ahgLoanPlugin', 'Loan Management', 'loan-management', 'collection',
+ 'Incoming/outgoing loan tracking with item-level condition checks and insurance.',
+ '["loan","loan_item","loan_condition"]',
+ 'fas fa-exchange-alt', 'info', 70),
+
+('ahgHeritageAccountingPlugin', 'Heritage Accounting', 'heritage-accounting', 'compliance',
+ 'GRAP 103 / IPSAS 45 heritage asset accounting with valuation and movement tracking.',
+ '["heritage_asset","heritage_valuation","heritage_movement"]',
+ 'fas fa-calculator', 'success', 80),
+
+('ahgIiifPlugin', 'IIIF Integration', 'iiif-integration', 'core',
+ 'IIIF manifests, canvases, annotations, annotation bodies, and OCR text storage.',
+ '["iiif_manifest","iiif_canvas","iiif_annotation","iiif_annotation_body","iiif_ocr_text"]',
+ 'fas fa-images', 'primary', 90),
+
+('ahgResearchPlugin', 'Research Portal', 'research-portal', 'research',
+ 'Researcher registration, reading room booking, access requests, and usage logging.',
+ '["research_request","research_request_item","research_booking","research_access_log"]',
+ 'fas fa-microscope', 'warning', 100),
+
+('ahgDoiPlugin', 'DOI Integration', 'doi-integration', 'integration',
+ 'DataCite DOI minting, queue processing, verification, and sync.',
+ '["doi_record","doi_queue"]',
+ 'fas fa-fingerprint', 'dark', 110),
+
+('ahgExtendedRightsPlugin', 'Extended Rights', 'extended-rights', 'rights',
+ 'RightsStatements.org, embargo management, TK Labels, and batch rights operations.',
+ '["extended_rights","embargo_record"]',
+ 'fas fa-gavel', 'danger', 120),
+
+('ahgProvenancePlugin', 'Provenance Tracking', 'provenance-tracking', 'collection',
+ 'Chain of custody and provenance event tracking for archival records.',
+ '["provenance_event"]',
+ 'fas fa-route', 'secondary', 130),
+
+('ahgDonorAgreementPlugin', 'Donor Agreements', 'donor-agreements', 'collection',
+ 'Donor/institution agreement management with SA regulatory compliance.',
+ '["donor_agreement"]',
+ 'fas fa-file-contract', 'primary', 140),
+
+('ahgExhibitionPlugin', 'Exhibition Management', 'exhibition-management', 'exhibition',
+ 'Exhibition planning, object loans, venue management for GLAM/DAM institutions.',
+ '["exhibition","exhibition_item","exhibition_venue"]',
+ 'fas fa-palette', 'info', 150),
+
+('ahgCustomFieldsPlugin', 'Custom Fields (EAV)', 'custom-fields', 'core',
+ 'Admin-configurable custom metadata fields using Entity-Attribute-Value pattern.',
+ '["custom_field_definition","custom_field_value"]',
+ 'fas fa-th-list', 'success', 160),
+
+('ahgAIPlugin', 'AI & NER', 'ai-ner', 'ai',
+ 'Named Entity Recognition, translation, summarization, spellcheck, face detection, LLM suggestions.',
+ '["ai_entity","ai_entity_link","ai_translation","ai_suggestion"]',
+ 'fas fa-brain', 'purple', 170),
+
+('ahgIngestPlugin', 'Data Ingest', 'data-ingest', 'ingest',
+ 'OAIS-aligned 6-step batch ingestion pipeline with AI processing.',
+ '["ingest_session","ingest_file","ingest_mapping","ingest_row","ingest_validation","ingest_job"]',
+ 'fas fa-file-import', 'warning', 180),
+
+('ahgFeedbackPlugin', 'User Feedback', 'user-feedback', 'research',
+ 'User feedback and suggestions management.',
+ '["feedback"]',
+ 'fas fa-comment-dots', 'info', 190),
+
+('ahgWorkflowPlugin', 'Workflow Engine', 'workflow-engine', 'reporting',
+ 'Configurable approval workflow with steps, assignments, and history.',
+ '["workflow_definition","workflow_step","workflow_instance","workflow_history"]',
+ 'fas fa-project-diagram', 'primary', 200),
+
+('ahgReportBuilderPlugin', 'Report Builder', 'report-builder', 'reporting',
+ 'Enterprise report builder with templates, sections, SQL queries, scheduling.',
+ '["report_template","report_section","report_schedule","report_output"]',
+ 'fas fa-chart-bar', 'success', 210),
+
+('ahgLibraryPlugin', 'Library Cataloging', 'library-cataloging', 'sector',
+ 'Library cataloging with MARC-inspired fields, ISBN lookup, and cover images.',
+ '["library_item"]',
+ 'fas fa-book', 'primary', 220),
+
+('ahgMuseumPlugin', 'Museum Cataloging', 'museum-cataloging', 'sector',
+ 'Museum cataloging with CCO, CIDOC-CRM, Spectrum 5.1, Getty vocabulary linking.',
+ '["museum_object","museum_exhibition"]',
+ 'fas fa-landmark', 'warning', 230),
+
+('ahgGalleryPlugin', 'Gallery Management', 'gallery-management', 'sector',
+ 'Gallery/exhibition management, artist tracking, loans, and provenance.',
+ '["gallery_artwork","gallery_exhibition","gallery_artist"]',
+ 'fas fa-paint-brush', 'danger', 240),
+
+('ahgDAMPlugin', 'Digital Asset Management', 'dam', 'sector',
+ 'Digital Asset Management with IPTC metadata, watermarks, and asset workflows.',
+ '["dam_asset","dam_collection","dam_watermark"]',
+ 'fas fa-photo-video', 'info', 250),
+
+('ahgContactPlugin', 'Extended Contacts', 'extended-contacts', 'collection',
+ 'Extended contact information for actors (phone, email, address, social media).',
+ '["contact_information"]',
+ 'fas fa-address-book', 'secondary', 260),
+
+('ahgICIPPlugin', 'Indigenous Cultural IP', 'icip', 'rights',
+ 'Indigenous Cultural & Intellectual Property management and TK Labels.',
+ '["icip_record","icip_community"]',
+ 'fas fa-feather-alt', 'success', 270),
+
+('ahgCDPAPlugin', 'CDPA (Zimbabwe)', 'cdpa-zimbabwe', 'compliance',
+ 'Cyber & Data Protection Act [Chapter 12:07] — POTRAZ compliance.',
+ '["cdpa_license","cdpa_request"]',
+ 'fas fa-flag', 'danger', 280),
+
+('ahgNAZPlugin', 'NAZ (Zimbabwe)', 'naz-zimbabwe', 'compliance',
+ 'National Archives Act [Chapter 25:06] — 25-year rule, closure, permits.',
+ '["naz_closure","naz_transfer","naz_permit"]',
+ 'fas fa-landmark', 'warning', 290),
+
+('ahgRicExplorerPlugin', 'RiC / Fuseki', 'ric-fuseki', 'integration',
+ 'Records in Context (RiC-O) triplestore integration with Apache Jena Fuseki.',
+ '["ric_sync_config","ric_sync_log"]',
+ 'fas fa-project-diagram', 'dark', 300),
+
+('ahgSettingsPlugin', 'AHG Settings', 'ahg-settings', 'core',
+ 'Centralized AHG plugin settings management (section-based admin UI).',
+ '["ahg_settings"]',
+ 'fas fa-cog', 'secondary', 310)
+
+ON DUPLICATE KEY UPDATE display_name=VALUES(display_name);
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_feedback_v1.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- =====================================================
+-- ahgRegistryPlugin - Migration: Feedback v1
+-- Glenn & Richard feedback (2026-03-30)
+-- New instance fields + password reset tokens
+-- =====================================================
+
+-- ---------------------------------------------------
+-- 1. Instance: multi-repository, deployment architecture
+-- ---------------------------------------------------
+ALTER TABLE `registry_instance`
+  ADD COLUMN `multi_repository` tinyint(1) DEFAULT 0 AFTER `descriptive_standard`,
+  ADD COLUMN `repository_count` int DEFAULT NULL AFTER `multi_repository`,
+  ADD COLUMN `deployment_architecture` VARCHAR(50) DEFAULT NULL COMMENT 'single_site, split_edit_public, mirror, other' AFTER `repository_count`;
+
+-- ---------------------------------------------------
+-- 2. Vendor: add lat/lng for map display
+-- ---------------------------------------------------
+ALTER TABLE `registry_vendor`
+  ADD COLUMN `latitude` DECIMAL(10,7) DEFAULT NULL AFTER `country`,
+  ADD COLUMN `longitude` DECIMAL(10,7) DEFAULT NULL AFTER `latitude`;
+
+-- ---------------------------------------------------
+-- 3. Password reset tokens
+-- ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registry_password_reset` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `token` varchar(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_reset_token` (`token`),
+  KEY `idx_reset_email` (`email`),
+  KEY `idx_reset_expires` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_notes.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- =====================================================
+-- Registry Notes (universal comments/notes)
+-- Date: 2026-03-07
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS `registry_note` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `entity_type` varchar(50) NOT NULL COMMENT 'standard, vendor, erd, software, institution, group',
+  `entity_id` bigint unsigned NOT NULL,
+  `user_id` bigint unsigned DEFAULT NULL COMMENT 'FK to registry_user.id',
+  `user_name` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `is_pinned` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_note_entity` (`entity_type`, `entity_id`),
+  KEY `idx_note_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_notifications.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- Registry notifications: in-app notifications for admins and users
+-- Recipients: admins (all users in administrator group) + targeted single users
+
+CREATE TABLE IF NOT EXISTS `registry_notification` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL COMMENT 'recipient user.id',
+  `type` VARCHAR(64) NOT NULL COMMENT 'user_registered, institution_claimed, vendor_registered, software_added, review_submitted, etc.',
+  `title` VARCHAR(255) NOT NULL,
+  `message` TEXT NULL,
+  `link` VARCHAR(500) NULL COMMENT 'destination URL when notification is clicked',
+  `related_type` VARCHAR(64) NULL COMMENT 'user, institution, vendor, software, review, ...',
+  `related_id` BIGINT UNSIGNED NULL,
+  `actor_user_id` INT UNSIGNED NULL COMMENT 'user.id who triggered the event (null for anonymous)',
+  `actor_name` VARCHAR(255) NULL COMMENT 'display name of triggering actor (snapshot)',
+  `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+  `is_dismissed` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'hidden from top bar (still appears in dropdown until read)',
+  `created_at` DATETIME NOT NULL,
+  `read_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_unread` (`user_id`, `is_read`, `created_at`),
+  KEY `idx_user_bar` (`user_id`, `is_dismissed`, `is_read`, `created_at`),
+  KEY `idx_type_related` (`type`, `related_type`, `related_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_software_verification.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- Add verification audit columns to registry_software (parity with registry_vendor / registry_institution)
+-- Required by SoftwareService::verify() and adminSoftwareVerify action.
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'registry_software' AND COLUMN_NAME = 'verified_at');
+SET @sql := IF(@col = 0, 'ALTER TABLE registry_software ADD COLUMN verified_at DATETIME NULL AFTER is_verified', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'registry_software' AND COLUMN_NAME = 'verified_by');
+SET @sql := IF(@col = 0, 'ALTER TABLE registry_software ADD COLUMN verified_by INT NULL AFTER verified_at', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @col := (SELECT COUNT(*) FROM information_schema.COLUMNS
+             WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'registry_software' AND COLUMN_NAME = 'verification_notes');
+SET @sql := IF(@col = 0, 'ALTER TABLE registry_software ADD COLUMN verification_notes TEXT NULL AFTER verified_by', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_standards.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- =====================================================
+-- Registry Standards & Setup Guides Migration
+-- Date: 2026-03-07
+-- =====================================================
+
+-- ---------------------------------------------------
+-- 1. registry_standard — Reference to external standards
+-- ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registry_standard` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `acronym` varchar(50) DEFAULT NULL,
+  `slug` varchar(255) NOT NULL,
+  `category` varchar(50) NOT NULL DEFAULT 'descriptive' COMMENT 'descriptive, preservation, rights, accounting, compliance, metadata, interchange, sector',
+  `description` text,
+  `short_description` varchar(500) DEFAULT NULL,
+  `website_url` varchar(500) DEFAULT NULL,
+  `issuing_body` varchar(255) DEFAULT NULL,
+  `current_version` varchar(50) DEFAULT NULL,
+  `publication_year` int DEFAULT NULL,
+  `sector_applicability` json DEFAULT NULL COMMENT '["archive","library","museum","gallery","dam"]',
+  `is_featured` tinyint(1) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `sort_order` int DEFAULT 100,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_standard_slug` (`slug`),
+  KEY `idx_standard_category` (`category`),
+  KEY `idx_standard_active` (`is_active`),
+  FULLTEXT KEY `ft_standard_search` (`name`, `description`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------
+-- 2. registry_standard_extension — WHERE Heratio deviates/extends
+-- ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registry_standard_extension` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `standard_id` bigint unsigned NOT NULL,
+  `extension_type` varchar(30) NOT NULL DEFAULT 'addition' COMMENT 'addition, deviation, implementation_note, api_binding',
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `rationale` text COMMENT 'Why this extension exists',
+  `plugin_name` varchar(100) DEFAULT NULL COMMENT 'Which plugin implements this',
+  `api_endpoint` varchar(255) DEFAULT NULL COMMENT 'API route if applicable',
+  `db_tables` varchar(500) DEFAULT NULL COMMENT 'Comma-separated table names affected',
+  `is_active` tinyint(1) DEFAULT 1,
+  `sort_order` int DEFAULT 100,
+  `created_by` int DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_ext_standard` (`standard_id`),
+  KEY `idx_ext_type` (`extension_type`),
+  KEY `idx_ext_plugin` (`plugin_name`),
+  CONSTRAINT `fk_ext_standard` FOREIGN KEY (`standard_id`) REFERENCES `registry_standard` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------
+-- 3. registry_software_standard — Vendor conformance declarations
+-- ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registry_software_standard` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `software_id` bigint unsigned NOT NULL,
+  `standard_id` bigint unsigned NOT NULL,
+  `conformance_level` varchar(20) NOT NULL DEFAULT 'partial' COMMENT 'full, partial, extended, planned',
+  `notes` text,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_software_standard` (`software_id`, `standard_id`),
+  KEY `idx_ss_software` (`software_id`),
+  KEY `idx_ss_standard` (`standard_id`),
+  CONSTRAINT `fk_ss_software` FOREIGN KEY (`software_id`) REFERENCES `registry_software` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ss_standard` FOREIGN KEY (`standard_id`) REFERENCES `registry_standard` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------
+-- 4. registry_setup_guide — Deployment/config guides under Software
+-- ---------------------------------------------------
+CREATE TABLE IF NOT EXISTS `registry_setup_guide` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `software_id` bigint unsigned NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `slug` varchar(255) NOT NULL,
+  `category` varchar(50) NOT NULL DEFAULT 'deployment' COMMENT 'security, deployment, configuration, optimization, troubleshooting, integration',
+  `content` text NOT NULL COMMENT 'Markdown content',
+  `short_description` varchar(500) DEFAULT NULL,
+  `author_name` varchar(255) DEFAULT NULL,
+  `author_user_id` int DEFAULT NULL,
+  `is_featured` tinyint(1) DEFAULT 0,
+  `is_active` tinyint(1) DEFAULT 1,
+  `view_count` int DEFAULT 0,
+  `sort_order` int DEFAULT 100,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_guide_slug` (`software_id`, `slug`),
+  KEY `idx_guide_software` (`software_id`),
+  KEY `idx_guide_category` (`category`),
+  KEY `idx_guide_active` (`is_active`),
+  FULLTEXT KEY `ft_guide_search` (`title`, `content`),
+  CONSTRAINT `fk_guide_software` FOREIGN KEY (`software_id`) REFERENCES `registry_software` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------
+-- 5. Seed Data: Common GLAM/DAM Standards (links only)
+-- ---------------------------------------------------
+INSERT IGNORE INTO `registry_standard` (`name`, `acronym`, `slug`, `category`, `short_description`, `website_url`, `issuing_body`, `current_version`, `publication_year`, `sector_applicability`, `is_featured`, `sort_order`) VALUES
+-- Descriptive Standards
+('General International Standard Archival Description', 'ISAD(G)', 'isad-g', 'descriptive', 'Standard for describing archival materials at all levels.', 'https://www.ica.org/en/isadg-general-international-standard-archival-description-second-edition', 'International Council on Archives (ICA)', '2nd Edition', 2000, '["archive"]', 1, 10),
+('International Standard Archival Authority Record', 'ISAAR(CPF)', 'isaar-cpf', 'descriptive', 'Standard for creating authority records for corporate bodies, persons, and families.', 'https://www.ica.org/en/isaar-cpf-international-standard-archival-authority-record-corporate-bodies-persons-and-families-2nd', 'International Council on Archives (ICA)', '2nd Edition', 2004, '["archive"]', 1, 20),
+('Describing Archives: A Content Standard', 'DACS', 'dacs', 'descriptive', 'US standard for describing archives, personal papers, and manuscripts.', 'https://saa-ts-dacs.github.io/', 'Society of American Archivists (SAA)', '2nd Edition', 2013, '["archive"]', 0, 30),
+('Rules for Archival Description', 'RAD', 'rad', 'descriptive', 'Canadian standard for archival description.', 'https://archivescanada.ca/resources/rad/', 'Canadian Committee on Archival Description', '2nd Edition', 2008, '["archive"]', 0, 40),
+('Dublin Core Metadata Element Set', 'DC', 'dublin-core', 'metadata', 'General-purpose metadata standard for cross-domain resource description.', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/', 'Dublin Core Metadata Initiative (DCMI)', 'ISO 15836:2009', 2009, '["archive","library","museum","gallery","dam"]', 1, 50),
+('Metadata Object Description Schema', 'MODS', 'mods', 'metadata', 'XML schema for bibliographic metadata, subset of MARC.', 'https://www.loc.gov/standards/mods/', 'Library of Congress', '3.8', 2021, '["library","archive"]', 0, 60),
+('Encoded Archival Description', 'EAD', 'ead', 'interchange', 'XML standard for encoding finding aids.', 'https://www.loc.gov/ead/', 'Library of Congress / SAA', 'EAD3 1.1.1', 2019, '["archive"]', 0, 70),
+('International Standard for Describing Functions', 'ISDF', 'isdf', 'descriptive', 'Standard for describing functions of corporate bodies.', 'https://www.ica.org/en/isdf-international-standard-describing-functions', 'International Council on Archives (ICA)', '1st Edition', 2007, '["archive"]', 0, 80),
+('International Standard for Describing Institutions with Archival Holdings', 'ISDIAH', 'isdiah', 'descriptive', 'Standard for describing institutions that hold archival materials.', 'https://www.ica.org/en/isdiah-international-standard-describing-institutions-archival-holdings', 'International Council on Archives (ICA)', '1st Edition', 2008, '["archive"]', 0, 90),
+('Records in Contexts', 'RiC', 'ric', 'descriptive', 'Next-generation archival description standard based on linked data and ontologies.', 'https://www.ica.org/standards/RiC/RiC-O_v0-2.html', 'International Council on Archives (ICA)', '0.2', 2021, '["archive"]', 1, 100),
+
+-- Preservation Standards
+('PREMIS Data Dictionary for Preservation Metadata', 'PREMIS', 'premis', 'preservation', 'Standard for metadata supporting the preservation of digital objects.', 'https://www.loc.gov/standards/premis/', 'Library of Congress', '3.0', 2015, '["archive","library","museum","dam"]', 1, 110),
+('Open Archival Information System', 'OAIS', 'oais', 'preservation', 'Reference model for long-term preservation of digital information.', 'https://www.iso.org/standard/57284.html', 'Consultative Committee for Space Data Systems (CCSDS)', 'ISO 14721:2012', 2012, '["archive","library","museum","dam"]', 1, 120),
+('PRONOM Technical Registry', 'PRONOM', 'pronom', 'preservation', 'File format registry for identification and preservation planning.', 'https://www.nationalarchives.gov.uk/PRONOM/', 'The National Archives (UK)', 'Ongoing', 2002, '["archive","library","dam"]', 0, 130),
+
+-- Rights Standards
+('RightsStatements.org', NULL, 'rightsstatements', 'rights', 'Standardized rights statements for cultural heritage objects.', 'https://rightsstatements.org/', 'RightsStatements.org Consortium', '1.0', 2016, '["archive","library","museum","gallery","dam"]', 0, 140),
+('Creative Commons', 'CC', 'creative-commons', 'rights', 'Standardized licenses for sharing creative works.', 'https://creativecommons.org/licenses/', 'Creative Commons', '4.0', 2013, '["archive","library","museum","gallery","dam"]', 0, 150),
+('Traditional Knowledge Labels', 'TK Labels', 'tk-labels', 'rights', 'Labels for indigenous cultural heritage rights.', 'https://localcontexts.org/labels/traditional-knowledge-labels/', 'Local Contexts', '2.0', 2022, '["archive","library","museum","gallery"]', 0, 155),
+
+-- Museum/Gallery Standards
+('Cataloguing Cultural Objects', 'CCO', 'cco', 'descriptive', 'Content standard for cultural heritage object description.', 'https://vra.org/cco/', 'Visual Resources Association (VRA)', '1.0', 2006, '["museum","gallery"]', 0, 160),
+('Spectrum Collections Management Standard', 'Spectrum', 'spectrum', 'sector', 'Collections management procedures standard for museums.', 'https://collectionstrust.org.uk/spectrum/', 'Collections Trust (UK)', '5.1', 2017, '["museum","gallery"]', 1, 170),
+('CIDOC Conceptual Reference Model', 'CIDOC-CRM', 'cidoc-crm', 'metadata', 'Ontology for cultural heritage information integration.', 'https://www.cidoc-crm.org/', 'ICOM/CIDOC', 'ISO 21127:2023', 2023, '["museum","gallery","archive"]', 0, 175),
+
+-- DAM Standards
+('IPTC Photo Metadata Standard', 'IPTC', 'iptc', 'metadata', 'Standard for photo and media metadata.', 'https://iptc.org/standards/photo-metadata/', 'International Press Telecommunications Council', '2024.1', 2024, '["dam","library"]', 0, 180),
+('International Image Interoperability Framework', 'IIIF', 'iiif', 'interchange', 'APIs for interoperable image and AV delivery.', 'https://iiif.io/', 'IIIF Consortium', '3.0', 2020, '["archive","library","museum","gallery","dam"]', 1, 190),
+
+-- Accounting Standards
+('Generally Recognised Accounting Practice for Heritage Assets', 'GRAP 103', 'grap-103', 'accounting', 'South African standard for heritage asset accounting in public sector.', 'https://www.asb.co.za/', 'Accounting Standards Board (SA)', '2014', 2014, '["archive","library","museum","gallery"]', 0, 200),
+('International Public Sector Accounting Standard — Heritage', 'IPSAS 45', 'ipsas-45', 'accounting', 'International standard for heritage asset accounting in public sector.', 'https://www.ipsasb.org/', 'International Public Sector Accounting Standards Board', '2023', 2023, '["archive","library","museum","gallery"]', 0, 210),
+
+-- Compliance Standards
+('Protection of Personal Information Act', 'POPIA', 'popia', 'compliance', 'South African data protection legislation.', 'https://popia.co.za/', 'Information Regulator (SA)', '2013', 2013, '["archive","library","museum","gallery","dam"]', 0, 220),
+('General Data Protection Regulation', 'GDPR', 'gdpr', 'compliance', 'EU data protection regulation.', 'https://gdpr-info.eu/', 'European Union', '2016/679', 2016, '["archive","library","museum","gallery","dam"]', 0, 230),
+('National Archives Act (Zimbabwe)', 'NAZ Act', 'naz-act', 'compliance', 'Zimbabwe National Archives Act [Chapter 25:06] — 25-year closure rule.', 'http://www.parlzim.gov.zw/', 'Parliament of Zimbabwe', 'Chapter 25:06', 1986, '["archive"]', 0, 240),
+('Cyber and Data Protection Act (Zimbabwe)', 'CDPA', 'cdpa', 'compliance', 'Zimbabwe Cyber and Data Protection Act [Chapter 12:07].', 'https://www.potraz.gov.zw/', 'POTRAZ / Parliament of Zimbabwe', 'Chapter 12:07', 2021, '["archive","library","museum","gallery","dam"]', 0, 250)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
+
+-- ---------------------------------------------------
+-- 6. Seed Data: Heratio Standard Extensions
+-- ---------------------------------------------------
+INSERT IGNORE INTO `registry_standard_extension` (`standard_id`, `extension_type`, `title`, `description`, `rationale`, `plugin_name`, `db_tables`, `sort_order`) VALUES
+-- ISAAR(CPF) extensions
+((SELECT id FROM registry_standard WHERE slug = 'isaar-cpf'), 'addition', 'Structured Contact Records', 'Adds structured contact information (phone, email, address, role) to authority records via a dedicated contacts table, beyond ISAAR''s free-text address fields.', 'ISAAR(CPF) only provides free-text address area 5.2.1. Institutional users require structured, queryable contacts per authority record.', 'ahgContactPlugin', 'contact_information', 10),
+((SELECT id FROM registry_standard WHERE slug = 'isaar-cpf'), 'addition', 'Actor Autocomplete & Browse', 'High-performance Laravel Query Builder browse with autocomplete search for authority records, replacing Symfony/Propel browse.', 'Base AtoM''s actor browse is limited. GLAM institutions with 50k+ authority records need fast, filterable browse.', 'ahgActorManagePlugin', NULL, 20),
+
+-- ISAD(G) extensions
+((SELECT id FROM registry_standard WHERE slug = 'isad-g'), 'addition', 'Security Classification', 'Adds security clearance levels (Unclassified through Top Secret) and embargo dates to archival descriptions, with ACL enforcement per user clearance level.', 'NARSSA and government archives require classification-based access control not covered by ISAD(G).', 'ahgSecurityClearancePlugin', 'security_clearance,security_clearance_i18n', 10),
+((SELECT id FROM registry_standard WHERE slug = 'isad-g'), 'addition', 'Custom Metadata Fields (EAV)', 'Admin-configurable custom fields per entity type without code changes. Supports text, textarea, date, number, boolean, dropdown, url field types.', 'Institutions need institution-specific metadata fields beyond ISAD(G)''s fixed element set.', 'ahgCustomFieldsPlugin', 'custom_field_definition,custom_field_value', 20),
+((SELECT id FROM registry_standard WHERE slug = 'isad-g'), 'addition', 'GLAM Sector Display Modes', 'Automatic detection and sector-specific display of archival descriptions (Archive, Library, Museum, Gallery, DAM) with faceted browse.', 'AtoM only serves archives. Heratio extends to all GLAM/DAM sectors with appropriate display conventions.', 'ahgDisplayPlugin', 'display_object_config,display_facet_cache', 30),
+
+-- PREMIS extensions
+((SELECT id FROM registry_standard WHERE slug = 'premis'), 'implementation_note', 'PREMIS Events & Fixity via CLI', 'PREMIS preservation events and fixity checking implemented as CLI commands with scheduling support. Integrates with PRONOM via Siegfried for format identification.', 'Full PREMIS implementation requires automated fixity verification and format identification at scale.', 'ahgPreservationPlugin', 'preservation_event,preservation_fixity', 10),
+
+-- OAIS extensions
+((SELECT id FROM registry_standard WHERE slug = 'oais'), 'implementation_note', 'OAIS Package Generation in Ingest', 'The 6-step ingest wizard generates SIP, AIP, and DIP packages per OAIS reference model, with JSON manifests and checksums.', 'OAIS compliance requires structured information packages during ingest.', 'ahgIngestPlugin', 'ingest_session,ingest_job', 10),
+
+-- Spectrum extensions
+((SELECT id FROM registry_standard WHERE slug = 'spectrum'), 'addition', 'Spectrum Procedures Integration', 'Maps Spectrum 5.1 procedures to Heratio workflows: Object Entry, Acquisition, Loans In/Out, Condition Assessment, Deaccession.', 'Museum clients require Spectrum procedure compliance for accreditation.', 'ahgSpectrumPlugin', NULL, 10),
+((SELECT id FROM registry_standard WHERE slug = 'spectrum'), 'addition', 'Condition Assessment Module', 'Structured condition recording with photo evidence, damage types, conservation recommendations, and Spectrum 5.1 compliance fields.', 'Spectrum Condition Check procedure requires structured assessment records.', 'ahgConditionPlugin', 'condition_assessment,condition_photo', 20),
+
+-- IIIF extensions
+((SELECT id FROM registry_standard WHERE slug = 'iiif'), 'implementation_note', 'IIIF v2 & v3 Manifests with Annotations', 'Generates IIIF Presentation API v2 and v3 manifests for digital objects, with annotation support and Cantaloupe integration for Image API tiles.', 'GLAM institutions require interoperable image viewers and annotation capabilities.', 'ahgIiifPlugin', 'iiif_annotation', 10),
+
+-- RiC extensions
+((SELECT id FROM registry_standard WHERE slug = 'ric'), 'implementation_note', 'RiC-O Triplestore Sync', 'Syncs AtoM archival descriptions and authority records to an Apache Jena Fuseki triplestore as RiC-O linked data, with SPARQL query support.', 'RiC adoption requires linked data representation for archival entities.', 'ahgRicExplorerPlugin', NULL, 10),
+
+-- Dublin Core
+((SELECT id FROM registry_standard WHERE slug = 'dublin-core'), 'addition', 'GLAM Sector Metadata Enrichment', 'Extends Dublin Core records with sector-specific fields: Library (ISBN, call number), Museum (CCO fields), Gallery (exhibition history), DAM (IPTC, watermarks).', 'Dublin Core is intentionally minimal. Sector-specific use requires additional metadata.', 'ahgDisplayPlugin', NULL, 10),
+
+-- POPIA
+((SELECT id FROM registry_standard WHERE slug = 'popia'), 'implementation_note', 'Multi-Jurisdiction Privacy Compliance', 'Implements POPIA (SA), GDPR (EU), CCPA (US), PIPEDA (Canada), NDPA (Nigeria), DPA (Kenya), UK GDPR — with PII scanning and consent management.', 'International GLAM institutions operate across jurisdictions requiring parallel compliance.', 'ahgPrivacyPlugin', NULL, 10),
+
+-- GRAP 103
+((SELECT id FROM registry_standard WHERE slug = 'grap-103'), 'implementation_note', 'Heritage Asset Accounting with IPSAS Alignment', 'Implements GRAP 103 heritage asset valuation and reporting, aligned with IPSAS 45 for international applicability.', 'South African public sector archives require GRAP 103 compliance for heritage asset accounting.', 'ahgHeritageAccountingPlugin', NULL, 10)
+ON DUPLICATE KEY UPDATE `title` = VALUES(`title`);
+
+-- ---------------------------------------------------
+-- 7. Nav settings for Standards
+-- ---------------------------------------------------
+INSERT IGNORE INTO `registry_settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
+('nav_show_standards', '1', 'boolean', 'Show Standards link in the navigation bar')
+ON DUPLICATE KEY UPDATE `setting_key` = `setting_key`;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/seed_openric_software.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- =============================================================================
+-- OpenRiC software stack seed for registry_software
+-- Source: https://openric.org and the openric/* GitHub organisation
+-- Idempotent: keyed by slug; safe to re-run.
+-- =============================================================================
+
+-- Remove duplicate of the RiC standard. RiC-O is a standard, not software —
+-- it lives in registry_standard (slug 'ric').
+DELETE FROM registry_software WHERE slug = 'ric';
+
+-- -----------------------------------------------------------------------------
+-- 1. OpenRiC Reference API (openric/service) — Laravel server implementing
+--    the OpenRiC contract.
+-- -----------------------------------------------------------------------------
+UPDATE registry_software SET
+  name = 'OpenRiC Reference API',
+  short_description = 'Reference Laravel implementation of the OpenRiC HTTP contract — 46 endpoints, full RiC-O 1.1 8-entity CRUD, OAI-PMH v2.0, auto-generated OpenAPI 3.0.',
+  description = 'OpenRiC Reference API is the canonical implementation of the OpenRiC HTTP contract on top of RiC-O 1.1. It exposes Records, Agents, Places, Rules, Activities, Instantiations, Repositories and Functions through a uniform CRUD surface, plus OAI-PMH v2.0 for harvesting and content negotiation for JSON-LD/Turtle/HTML. Any OpenRiC-conformant client (viewer, capture, third-party) can drive this server, and any other server that implements the contract can replace it without client changes. Hosted reference deployment at ric.theahg.co.za.',
+  category = JSON_ARRAY('integration','discovery'),
+  website = 'https://ric.theahg.co.za',
+  documentation_url = 'https://openric.org',
+  git_provider = 'github',
+  git_url = 'https://github.com/openric/service',
+  git_default_branch = 'main',
+  git_is_public = 1,
+  license = 'AGPL-3.0',
+  license_url = 'https://www.gnu.org/licenses/agpl-3.0.html',
+  pricing_model = 'open_source',
+  glam_sectors = JSON_ARRAY('archive','library','museum','gallery','dam'),
+  is_verified = 1,
+  is_active = 1,
+  updated_at = NOW()
+WHERE slug = 'openric-api';
+
+-- -----------------------------------------------------------------------------
+-- 2. OpenRiC Viewer (openric/viewer, npm @openric/viewer)
+-- -----------------------------------------------------------------------------
+UPDATE registry_software SET
+  name = 'OpenRiC Viewer',
+  short_description = 'Standalone 2D/3D graph viewer for OpenRiC-conformant servers. Implementation-neutral — drives any server that implements the OpenRiC Viewing API.',
+  description = 'A pure-browser application that renders archival graphs visually in 2D and 3D. The viewer is published on npm as @openric/viewer and can be embedded in any host page. It speaks only the OpenRiC HTTP contract, so it works against the reference API or any other conformant server.',
+  category = JSON_ARRAY('discovery','utility'),
+  website = 'https://viewer.openric.org',
+  documentation_url = 'https://openric.org',
+  git_provider = 'github',
+  git_url = 'https://github.com/openric/viewer',
+  git_default_branch = 'main',
+  git_is_public = 1,
+  license = 'AGPL-3.0',
+  license_url = 'https://www.gnu.org/licenses/agpl-3.0.html',
+  latest_version = '0.3.0',
+  pricing_model = 'open_source',
+  glam_sectors = JSON_ARRAY('archive','library','museum','gallery','dam'),
+  is_verified = 1,
+  is_active = 1,
+  updated_at = NOW()
+WHERE slug = 'openric-viewer';
+
+-- -----------------------------------------------------------------------------
+-- 3. OpenRiC Capture (openric/capture)
+-- -----------------------------------------------------------------------------
+UPDATE registry_software SET
+  name = 'OpenRiC Capture',
+  short_description = 'Pure-browser data-entry client for OpenRiC servers. Create and edit Records, Agents, Places, Rules, Activities, Instantiations and relations against any conformant server.',
+  description = 'OpenRiC Capture is a browser-only data-entry client. It uses the OpenRiC write surface (POST/PATCH/DELETE) to create and edit archival entities — records, agents, places, rules, activities, instantiations, and the relations between them. Like the viewer, it is server-agnostic: point it at any conformant OpenRiC server and it works.',
+  category = JSON_ARRAY('utility','cms'),
+  website = 'https://capture.openric.org',
+  documentation_url = 'https://openric.org',
+  git_provider = 'github',
+  git_url = 'https://github.com/openric/capture',
+  git_default_branch = 'main',
+  git_is_public = 1,
+  license = 'AGPL-3.0',
+  license_url = 'https://www.gnu.org/licenses/agpl-3.0.html',
+  pricing_model = 'open_source',
+  glam_sectors = JSON_ARRAY('archive','library','museum','gallery','dam'),
+  is_verified = 1,
+  is_active = 1,
+  updated_at = NOW()
+WHERE slug = 'openric-capture';
+
+-- -----------------------------------------------------------------------------
+-- 4. OpenRiC Validator — Python CLI, lives in openric/spec/validator/
+-- -----------------------------------------------------------------------------
+INSERT IGNORE INTO registry_software
+  (name, slug, vendor_id, category, short_description, description,
+   website, documentation_url,
+   git_provider, git_url, git_default_branch, git_is_public,
+   license, license_url, latest_version,
+   pricing_model, glam_sectors, is_verified, is_active, created_at, updated_at)
+VALUES (
+  'OpenRiC Validator', 'openric-validator', 1,
+  JSON_ARRAY('utility'),
+  'Python CLI conformance validator for the OpenRiC specification — JSON Schemas, SHACL shapes, profile checks.',
+  'OpenRiC Validator (openric-validate) is the official Python CLI that validates artefacts against the OpenRiC specification. It runs the 19 JSON Schemas, the SHACL shapes for each named profile (Core Discovery through Export-Only), and the 27-case fixture pack. Used in CI to keep server implementations and content packages on-spec.',
+  'https://openric.org', 'https://openric.org',
+  'github', 'https://github.com/openric/spec', 'main', 1,
+  'AGPL-3.0', 'https://www.gnu.org/licenses/agpl-3.0.html', '0.1.0',
+  'open_source', JSON_ARRAY('archive','library','museum','gallery','dam'),
+  1, 1, NOW(), NOW()
+)
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  vendor_id = VALUES(vendor_id),
+  category = VALUES(category),
+  short_description = VALUES(short_description),
+  description = VALUES(description),
+  website = VALUES(website),
+  documentation_url = VALUES(documentation_url),
+  git_provider = VALUES(git_provider),
+  git_url = VALUES(git_url),
+  git_default_branch = VALUES(git_default_branch),
+  git_is_public = VALUES(git_is_public),
+  license = VALUES(license),
+  license_url = VALUES(license_url),
+  latest_version = VALUES(latest_version),
+  pricing_model = VALUES(pricing_model),
+  glam_sectors = VALUES(glam_sectors),
+  is_verified = VALUES(is_verified),
+  is_active = VALUES(is_active),
+  updated_at = NOW();
+
+-- -----------------------------------------------------------------------------
+-- 5. OpenRiC Conformance Suite — bash + jq probe in openric/spec/conformance/
+-- -----------------------------------------------------------------------------
+INSERT IGNORE INTO registry_software
+  (name, slug, vendor_id, category, short_description, description,
+   website, documentation_url,
+   git_provider, git_url, git_default_branch, git_is_public,
+   license, license_url,
+   pricing_model, glam_sectors, is_verified, is_active, created_at, updated_at)
+VALUES (
+  'OpenRiC Conformance Suite', 'openric-conformance', 1,
+  JSON_ARRAY('utility'),
+  'Black-box conformance probe for OpenRiC servers — point it at any server, get a pass/fail report across every documented endpoint.',
+  'A bash + jq script that exercises every required endpoint of an OpenRiC server and reports pass/fail per profile. Runs in CI for the reference implementation and is the same script third parties use to certify their own servers as conformant.',
+  'https://openric.org/conformance', 'https://openric.org/conformance',
+  'github', 'https://github.com/openric/spec', 'main', 1,
+  'AGPL-3.0', 'https://www.gnu.org/licenses/agpl-3.0.html',
+  'open_source', JSON_ARRAY('archive','library','museum','gallery','dam'),
+  1, 1, NOW(), NOW()
+)
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  vendor_id = VALUES(vendor_id),
+  category = VALUES(category),
+  short_description = VALUES(short_description),
+  description = VALUES(description),
+  website = VALUES(website),
+  documentation_url = VALUES(documentation_url),
+  git_provider = VALUES(git_provider),
+  git_url = VALUES(git_url),
+  git_default_branch = VALUES(git_default_branch),
+  git_is_public = VALUES(git_is_public),
+  license = VALUES(license),
+  license_url = VALUES(license_url),
+  pricing_model = VALUES(pricing_model),
+  glam_sectors = VALUES(glam_sectors),
+  is_verified = VALUES(is_verified),
+  is_active = VALUES(is_active),
+  updated_at = NOW();

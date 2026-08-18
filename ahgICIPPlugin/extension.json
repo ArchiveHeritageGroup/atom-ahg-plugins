@@ -1,68 +1,70 @@
 {
-  "name": "Indigenous Cultural IP",
-  "machine_name": "ahgICIPPlugin",
-  "version": "1.0.0",
-  "description": "Indigenous Cultural and Intellectual Property management \u2014 community registration, TK Labels, cultural notices, consent tracking, consultations, and access restrictions",
-  "author": "The Archive and Heritage Group",
-  "license": "AGPL-3.0-or-later",
-  "homepage": "https://theahg.co.za",
-  "category": "rights",
-  "keywords": [
-    "indigenous",
-    "icip",
-    "tk-labels",
-    "cultural-notices",
-    "consent",
-    "community",
-    "traditional-knowledge"
-  ],
-  "requires": {
-    "atom_framework": ">=1.0.0",
-    "atom": ">=2.8",
-    "php": ">=8.1"
-  },
-  "dependencies": [
-    "ahgCorePlugin"
-  ],
-  "tables": [
-    "icip_community",
-    "icip_consent",
-    "icip_cultural_notice_type",
-    "icip_cultural_notice",
-    "icip_notice_acknowledgement",
-    "icip_tk_label_type",
-    "icip_tk_label",
-    "icip_consultation",
-    "icip_access_restriction",
-    "icip_object_summary",
-    "icip_config"
-  ],
-  "display_panels": [
-    {
-      "id": "icip_badge_io",
-      "label": "",
-      "template": "ahgICIPPlugin/templates/display/_icip_record.php",
-      "contexts": [
-        "informationobject"
-      ],
-      "position": "before-media",
-      "weight": 5,
-      "vars": {
-        "mode": "badge"
-      }
+    "name": "Indigenous Cultural IP",
+    "machine_name": "ahgICIPPlugin",
+    "version": "1.0.0",
+    "description": "Indigenous Cultural and Intellectual Property management \u2014 community registration, TK Labels, cultural notices, consent tracking, consultations, and access restrictions",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "homepage": "https://theahg.co.za",
+    "category": "rights",
+    "keywords": [
+        "indigenous",
+        "icip",
+        "tk-labels",
+        "cultural-notices",
+        "consent",
+        "community",
+        "traditional-knowledge"
+    ],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
     },
-    {
-      "id": "icip_panel_io",
-      "label": "Indigenous cultural and intellectual property",
-      "template": "ahgICIPPlugin/templates/display/_icip_record.php",
-      "contexts": [
-        "informationobject"
-      ],
-      "position": "before-notes",
-      "weight": 40,
-      "vars": {
-        "mode": "panel"
-      }
-    }
-  ]
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "object_tk_label",
+        "icip_community",
+        "icip_consent",
+        "icip_cultural_notice_type",
+        "icip_cultural_notice",
+        "icip_notice_acknowledgement",
+        "icip_tk_label_type",
+        "icip_tk_label",
+        "icip_consultation",
+        "icip_access_restriction",
+        "icip_object_summary",
+        "icip_config",
+        "icip_access_log"
+    ],
+    "display_panels": [
+        {
+            "id": "icip_badge_io",
+            "label": "",
+            "template": "ahgICIPPlugin/templates/display/_icip_record.php",
+            "contexts": [
+                "informationobject"
+            ],
+            "position": "before-media",
+            "weight": 5,
+            "vars": {
+                "mode": "badge"
+            }
+        },
+        {
+            "id": "icip_panel_io",
+            "label": "Indigenous cultural and intellectual property",
+            "template": "ahgICIPPlugin/templates/display/_icip_record.php",
+            "contexts": [
+                "informationobject"
+            ],
+            "position": "before-notes",
+            "weight": 40,
+            "vars": {
+                "mode": "panel"
+            }
+        }
+    ]
 }

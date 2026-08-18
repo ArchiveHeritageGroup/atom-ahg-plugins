@@ -25,5 +25,22 @@
         "gallery",
         "library",
         "dam"
+    ],
+    "tables": [
+        "exhibition_venue",
+        "exhibition_gallery",
+        "exhibition",
+        "exhibition_status_history",
+        "exhibition_section",
+        "exhibition_object",
+        "exhibition_event",
+        "exhibition_checklist_template",
+        "exhibition_checklist",
+        "exhibition_checklist_item",
+        "exhibition_storyline",
+        "exhibition_storyline_stop",
+        "exhibition_media",
+        "ahg_exhibition_space",
+        "ahg_exhibition_placement"
     ]
 }

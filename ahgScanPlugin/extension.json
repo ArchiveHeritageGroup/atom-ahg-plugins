@@ -27,7 +27,7 @@
         "Configurable watched folders (path, layout, disposition, quiet period)",
         "Each folder bound 1:1 to an ahgIngestPlugin session for processing config",
         "scan:watch CLI detects new files and feeds the ingest commit pipeline",
-        "SHA-256 dedupe — files already ingested in the session are skipped",
+        "SHA-256 dedupe \u2014 files already ingested in the session are skipped",
         "Quiet-period guard (skip files still being written)",
         "Processed (archive) and failed (quarantine) disposition directories",
         "Per-pass scan_event audit log with counts and errors",

@@ -27,6 +27,9 @@
         ]
     },
     "tables": [
+        "marketplace_settings",
+        "marketplace_currency",
+        "marketplace_category",
         "marketplace_seller",
         "marketplace_listing",
         "marketplace_listing_image",
@@ -39,10 +42,7 @@
         "marketplace_enquiry",
         "marketplace_follow",
         "marketplace_collection",
-        "marketplace_collection_item",
-        "marketplace_settings",
-        "marketplace_currency",
-        "marketplace_category"
+        "marketplace_collection_item"
     ],
     "features": {
         "fixed_price": "Direct buy-now pricing with cart integration",

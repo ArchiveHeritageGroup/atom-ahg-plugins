@@ -8,5 +8,13 @@
     "category": "search",
     "requires": [],
     "is_core": false,
-    "is_locked": false
+    "is_locked": false,
+    "tables": [
+        "saved_search",
+        "saved_search_i18n",
+        "saved_search_log",
+        "saved_search_tag",
+        "search_popular",
+        "search_settings"
+    ]
 }

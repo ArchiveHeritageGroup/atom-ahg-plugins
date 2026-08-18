@@ -293,3 +293,133 @@ CREATE TABLE IF NOT EXISTS `viewer_3d_settings` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-30 16:53:54
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/camera_bookmarks.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahg3DModelPlugin - saved camera viewpoints ("bookmarks") for a 3D model.
+-- Lets curators capture named camera orbits the viewer can jump back to.
+
+CREATE TABLE IF NOT EXISTS `object_3d_camera_bookmark` (
+    `id`             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `model_id`       INT NOT NULL COMMENT 'object_3d_model.id (logical FK)',
+    `name`           VARCHAR(120) NOT NULL,
+    `camera_orbit`   VARCHAR(64) NOT NULL COMMENT 'model-viewer camera-orbit, e.g. "45deg 55deg 4m"',
+    `field_of_view`  VARCHAR(32) DEFAULT NULL COMMENT 'model-viewer field-of-view, e.g. "30deg"',
+    `display_order`  INT NOT NULL DEFAULT 0,
+    `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_model` (`model_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migration_3d_capture_metadata.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahg3DModelPlugin — 3D capture / provenance / PBR / LOD / licensing metadata.
+-- Parity with Heratio object_3d_model (DB audit 2026-06-15). All columns
+-- nullable + additive (safe on populated tables). Run once on existing installs.
+
+ALTER TABLE `object_3d_model`
+  ADD COLUMN `turntable_mp4_path`    VARCHAR(500) NULL,
+  ADD COLUMN `turntable_generated_at` DATETIME NULL,
+  ADD COLUMN `real_width`            DECIMAL(12,4) NULL,
+  ADD COLUMN `real_height`           DECIMAL(12,4) NULL,
+  ADD COLUMN `real_depth`            DECIMAL(12,4) NULL,
+  ADD COLUMN `dimension_unit`        VARCHAR(16) NULL COMMENT 'dropdown model_3d_units',
+  ADD COLUMN `scale_note`            VARCHAR(64) NULL,
+  ADD COLUMN `coordinate_system`     VARCHAR(16) NULL COMMENT 'dropdown model_3d_coordinate_system',
+  ADD COLUMN `bounding_box`          VARCHAR(96) NULL COMMENT 'auto: minX,minY,minZ maxX,maxY,maxZ (model units)',
+  ADD COLUMN `format_version`        VARCHAR(32) NULL COMMENT 'auto: e.g. glTF 2.0',
+  ADD COLUMN `compression`           VARCHAR(24) NULL COMMENT 'dropdown model_3d_compression',
+  ADD COLUMN `is_lossless_master`    TINYINT(1) NULL,
+  ADD COLUMN `pbr_maps`              VARCHAR(128) NULL COMMENT 'baseColor,normal,metalRough,occlusion,emissive',
+  ADD COLUMN `texture_colorspace`    VARCHAR(24) NULL,
+  ADD COLUMN `lod_levels`            INT NULL,
+  ADD COLUMN `is_watertight`         TINYINT(1) NULL,
+  ADD COLUMN `has_rig`               TINYINT(1) NULL,
+  ADD COLUMN `capture_method`        VARCHAR(40) NULL COMMENT 'dropdown model_3d_capture_method',
+  ADD COLUMN `capture_device`        VARCHAR(255) NULL,
+  ADD COLUMN `capture_date`          DATE NULL,
+  ADD COLUMN `capture_operator`      VARCHAR(255) NULL,
+  ADD COLUMN `source_count`          INT NULL COMMENT 'e.g. number of source photos',
+  ADD COLUMN `point_density`         VARCHAR(64) NULL,
+  ADD COLUMN `accuracy_mm`           DECIMAL(8,3) NULL,
+  ADD COLUMN `processing_software`   VARCHAR(255) NULL,
+  ADD COLUMN `processing_notes`      TEXT NULL,
+  ADD COLUMN `georeference`          VARCHAR(255) NULL,
+  ADD COLUMN `model_author`          VARCHAR(255) NULL,
+  ADD COLUMN `derivation_note`       TEXT NULL,
+  ADD COLUMN `model_license`         VARCHAR(100) NULL COMMENT 'dropdown model_3d_licence',
+  ADD COLUMN `model_license_holder`  VARCHAR(255) NULL,
+  ADD COLUMN `attribution`           VARCHAR(500) NULL,
+  ADD COLUMN `alt_text`              VARCHAR(500) NULL;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/triposr_schema.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ============================================================
+-- TripoSR - Image to 3D Model Generation
+-- Database Schema for ahg3DModelPlugin
+-- ============================================================
+
+-- Job tracking table
+CREATE TABLE IF NOT EXISTS `triposr_jobs` (
+    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    `object_id` INT NULL COMMENT 'Link to information_object.id',
+    `model_id` INT NULL COMMENT 'Link to object_3d_model.id after import',
+    `input_image` VARCHAR(500) NOT NULL COMMENT 'Path to input image',
+    `output_model` VARCHAR(500) NULL COMMENT 'Path to generated 3D model',
+    `output_format` VARCHAR(20) COMMENT 'glb, obj' DEFAULT 'glb',
+    `status` VARCHAR(50) COMMENT 'pending, processing, completed, failed' DEFAULT 'pending',
+    `processing_mode` VARCHAR(25) COMMENT 'local, remote' DEFAULT 'local',
+    `processing_time` DECIMAL(10,2) NULL COMMENT 'Time in seconds',
+    `error_message` TEXT NULL,
+    `options` JSON NULL COMMENT 'Generation options used',
+    `created_by` INT NULL COMMENT 'User who initiated',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `started_at` DATETIME NULL,
+    `completed_at` DATETIME NULL,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_object_id (`object_id`),
+    INDEX idx_model_id (`model_id`),
+    INDEX idx_status (`status`),
+    INDEX idx_created_at (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Default settings for TripoSR
+INSERT IGNORE INTO `viewer_3d_settings` (`setting_key`, `setting_value`, `setting_type`, `description`) VALUES
+('triposr_enabled', '1', 'boolean', 'Enable TripoSR image-to-3D conversion'),
+('triposr_api_url', 'http://127.0.0.1:5050', 'string', 'Local TripoSR API server URL'),
+('triposr_mode', 'local', 'string', 'Processing mode: local or remote'),
+('triposr_remote_url', '', 'string', 'Remote GPU server URL'),
+('triposr_remote_api_key', '', 'string', 'API key for remote GPU server'),
+('triposr_timeout', '300', 'integer', 'Request timeout in seconds'),
+('triposr_remove_bg', '1', 'boolean', 'Remove background from input image'),
+('triposr_foreground_ratio', '0.85', 'string', 'Foreground ratio after background removal'),
+('triposr_mc_resolution', '256', 'integer', 'Marching cubes resolution (higher = more detail)'),
+('triposr_bake_texture', '0', 'boolean', 'Bake texture into model (exports as OBJ)')
+ON DUPLICATE KEY UPDATE `description` = VALUES(`description`);

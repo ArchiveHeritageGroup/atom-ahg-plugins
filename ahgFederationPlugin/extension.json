@@ -6,10 +6,8 @@
     "author": "AHG Development Team",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://github.com/ahg/atom-ahg-plugins",
-
     "type": "atom-plugin",
     "category": "integration",
-
     "keywords": [
         "oai-pmh",
         "federation",
@@ -17,23 +15,19 @@
         "metadata",
         "interoperability"
     ],
-
     "require": {
         "atom": ">=2.7.0",
         "php": ">=8.0",
         "ahgCorePlugin": ">=1.0.0"
     },
-
     "suggest": {
         "ahgProvenancePlugin": "Enhanced provenance display for harvested records"
     },
-
     "autoload": {
         "psr-4": {
             "AhgFederation\\": "lib/"
         }
     },
-
     "config": {
         "enabled_modules": [
             "federation"
@@ -51,7 +45,6 @@
             }
         }
     },
-
     "database": {
         "install": "database/install.sql",
         "tables": [
@@ -60,7 +53,6 @@
             "federation_harvest_session"
         ]
     },
-
     "routes": {
         "federation_index": {
             "path": "/admin/federation",
@@ -83,18 +75,21 @@
             "action": "log"
         }
     },
-
     "permissions": {
         "federation_admin": {
             "description": "Administer federation settings and peers",
-            "default": ["administrator"]
+            "default": [
+                "administrator"
+            ]
         },
         "federation_harvest": {
             "description": "Run federation harvests",
-            "default": ["administrator", "editor"]
+            "default": [
+                "administrator",
+                "editor"
+            ]
         }
     },
-
     "oai": {
         "metadata_formats": [
             {
@@ -112,7 +107,6 @@
             }
         ]
     },
-
     "features": {
         "oai_heritage_format": {
             "name": "Heritage Metadata Format",
@@ -127,10 +121,21 @@
             "description": "Track source and history of harvested records"
         }
     },
-
     "extra": {
         "symfony1": {
             "plugin_name": "ahgFederationPlugin"
         }
-    }
+    },
+    "tables": [
+        "federation_peer",
+        "federation_harvest_log",
+        "federation_harvest_session",
+        "federation_peer_search",
+        "federation_search_cache",
+        "federation_search_log",
+        "federation_vocab_sync",
+        "federation_term_mapping",
+        "federation_vocab_change",
+        "federation_vocab_sync_log"
+    ]
 }

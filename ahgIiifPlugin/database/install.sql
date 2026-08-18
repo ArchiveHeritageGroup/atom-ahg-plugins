@@ -578,3 +578,132 @@ CREATE TABLE IF NOT EXISTS `iiif_saved_view` (
   KEY `idx_expires` (`expires_at`),
   KEY `idx_object` (`object_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/audio_description.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahgIiifPlugin - audio-description tracks (WebVTT kind="descriptions") for
+-- accessibility. One described track per digital object (video).
+
+CREATE TABLE IF NOT EXISTS `media_audio_description` (
+    `id`                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `digital_object_id` INT NOT NULL,
+    `object_id`         INT DEFAULT NULL,
+    `language`          VARCHAR(10) NOT NULL DEFAULT 'en',
+    `label`             VARCHAR(120) NOT NULL DEFAULT 'Audio description',
+    `vtt_content`       MEDIUMTEXT NULL,
+    `created_at`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_do` (`digital_object_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migration_iiif_ai_extract.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahgIiifPlugin — IIIF AI Extract (#220)
+-- Region-scoped, VLM-driven extractions over IIIF canvases.
+-- Run once on PSIS (archive) + archaeology. No ENUM (VARCHAR + COMMENT per house rule).
+
+CREATE TABLE IF NOT EXISTS iiif_ai_extract (
+  id                BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  object_id         INT NOT NULL,
+  digital_object_id INT NULL,
+  canvas_index      INT NOT NULL DEFAULT 0,
+  region            VARCHAR(64)  NOT NULL DEFAULT 'full' COMMENT 'full or x,y,w,h (IIIF Image API region)',
+  task              VARCHAR(20)  NOT NULL               COMMENT 'caption, describe, transcribe, entities, tags',
+  model             VARCHAR(120) NULL                   COMMENT 'gateway model id, e.g. llava:7b',
+  prompt            TEXT NULL,
+  output_text       LONGTEXT NULL,
+  output_json       JSON NULL,
+  confidence        DECIMAL(5,4) NULL,
+  status            VARCHAR(20)  NOT NULL DEFAULT 'draft' COMMENT 'draft, approved, rejected',
+  created_by        INT NULL,
+  created_at        DATETIME NULL,
+  updated_at        DATETIME NULL,
+  KEY idx_object (object_id),
+  KEY idx_status (status),
+  KEY idx_object_canvas (object_id, canvas_index)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migration_iiif_saved_view.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- Migration: Add iiif_saved_view table for Content State sharing
+-- Issue: #70 Content State API
+-- Description: Persists short tokens for IIIF Content State sharing.
+-- Short tokens (32-char alphanumeric) are stored in DB with TTL.
+-- Long-form tokens are direct base64url(JSON) — no DB needed.
+
+CREATE TABLE IF NOT EXISTS `iiif_saved_view` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `token` CHAR(32) NOT NULL COMMENT 'Short token lookup key',
+    `state_json` TEXT NOT NULL COMMENT 'Full Content State JSON',
+    `user_id` INT UNSIGNED DEFAULT NULL COMMENT 'User who created this saved view',
+    `object_id` INT UNSIGNED DEFAULT NULL COMMENT 'Associated information_object.id',
+    `expires_at` DATETIME NOT NULL COMMENT 'Auto-delete after TTL',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `click_count` INT UNSIGNED DEFAULT 0 COMMENT 'Analytics: how many times this link was used',
+    `created_ip` VARCHAR(45) DEFAULT NULL COMMENT 'IPv4 or IPv6 of creator',
+    UNIQUE KEY `uk_token` (`token`),
+    INDEX `idx_saved_view_object` (`object_id`),
+    INDEX `idx_saved_view_user` (`user_id`),
+    INDEX `idx_saved_view_expires` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migration_object_security_classification.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- Migration: Add object_security_classification table
+-- Issue: #70 Authorization Flow 2.0 clearance propagation
+-- Description: Stores clearance/classification level per information_object.
+-- Maps to EAD <accessrestrict> / <userestrict> / NDA rules.
+-- Clearance level drives which auth service protects the object.
+
+CREATE TABLE IF NOT EXISTS `object_security_classification` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `object_id` INT UNSIGNED NOT NULL COMMENT 'information_object.id',
+    `classification_level` VARCHAR(50) NOT NULL DEFAULT 'restricted'
+        COMMENT 'open | restricted | confidential | secret | top-secret',
+    `classification_authority` VARCHAR(255) DEFAULT NULL COMMENT 'Policy or legal basis',
+    `exemption_category` VARCHAR(100) DEFAULT NULL COMMENT 'FOIA / PA / other exemption',
+    `available_on` DATETIME DEFAULT NULL COMMENT 'Declassification date (NULL = never)',
+    `issued_at` DATETIME DEFAULT NULL COMMENT 'Date classification was applied',
+    `issued_by` INT UNSIGNED DEFAULT NULL COMMENT 'actor.id who classified',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY `uk_object_classification` (`object_id`),
+    INDEX `idx_classification_level` (`classification_level`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

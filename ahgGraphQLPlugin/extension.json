@@ -31,7 +31,26 @@
         "playground": "/api/graphql/playground"
     },
     "schema": {
-        "types": ["Item", "Actor", "Repository", "Term", "Taxonomy", "User", "DigitalObject", "Event"],
-        "queries": ["item", "items", "actor", "actors", "repositories", "taxonomies", "taxonomy", "search", "me"]
+        "types": [
+            "Item",
+            "Actor",
+            "Repository",
+            "Term",
+            "Taxonomy",
+            "User",
+            "DigitalObject",
+            "Event"
+        ],
+        "queries": [
+            "item",
+            "items",
+            "actor",
+            "actors",
+            "repositories",
+            "taxonomies",
+            "taxonomy",
+            "search",
+            "me"
+        ]
     }
 }

@@ -38,3 +38,30 @@ CREATE TABLE IF NOT EXISTS `feedback_i18n` (
   PRIMARY KEY (`id`, `culture`),
   INDEX `idx_status` (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migrate_feedback_status.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- =============================================================================
+-- ahgFeedbackPlugin: add `status` (varchar) column to feedback_i18n
+-- =============================================================================
+-- Older deployments only have `status_id` (int), but the application code
+-- (browseAction, viewAction, editAction) reads/writes `feedback_i18n.status`
+-- as a string ('pending' / 'completed').
+--
+-- install.sql uses CREATE TABLE IF NOT EXISTS, so existing tables never picked
+-- up the new column. This migration is idempotent.
+-- =============================================================================
+
+SET @c := (SELECT COUNT(*) FROM information_schema.COLUMNS
+           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'feedback_i18n' AND COLUMN_NAME = 'status');
+SET @s := IF(@c = 0, "ALTER TABLE `feedback_i18n` ADD COLUMN `status` VARCHAR(50) DEFAULT 'pending' COMMENT 'pending, completed'", 'SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;

@@ -21,5 +21,10 @@
     ],
     "is_core": false,
     "is_locked": false,
-    "load_order": 15
+    "load_order": 15,
+    "tables": [
+        "heritage_tenant",
+        "heritage_tenant_user",
+        "heritage_tenant_settings_override"
+    ]
 }

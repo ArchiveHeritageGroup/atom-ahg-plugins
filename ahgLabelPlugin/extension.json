@@ -19,7 +19,9 @@
     "display_actions": [],
     "display_panels": [],
     "display_badges": [],
-    "tables": [],
+    "tables": [
+        "label_template"
+    ],
     "shared_tables": [],
     "helpers": [],
     "category": "tools",

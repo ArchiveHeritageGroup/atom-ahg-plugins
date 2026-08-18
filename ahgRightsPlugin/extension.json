@@ -24,7 +24,10 @@
             "label": "Rights",
             "icon": "bi-shield-lock",
             "template": "ahgRightsPlugin/templates/display/_rights.php",
-            "contexts": ["informationobject", "actor"],
+            "contexts": [
+                "informationobject",
+                "actor"
+            ],
             "permission": "read",
             "weight": 30
         }
@@ -34,15 +37,16 @@
             "id": "rights_panel",
             "label": "Rights & Restrictions",
             "template": "ahgRightsPlugin/templates/display/_rights_section.php",
-            "contexts": ["informationobject"],
+            "contexts": [
+                "informationobject"
+            ],
             "position": "sidebar",
             "weight": 50
         }
     ],
     "display_badges": [],
     "tables": [
-        "rights",
-        "rights_i18n",
+        "object_creative_commons",
         "rights_cc_license",
         "rights_cc_license_i18n",
         "rights_derivative_log",

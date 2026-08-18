@@ -7,7 +7,6 @@
     "authorEmail": "johan@theahg.co.za",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://github.com/ArchiveHeritageGroup/atom-ahg-plugins",
-
     "category": "export",
     "tags": [
         "export",
@@ -27,42 +26,33 @@
         "PREMIS",
         "linked data"
     ],
-
     "requires": {
         "atom": ">=2.6.0",
         "php": ">=7.4",
         "atom-framework": ">=1.0.0"
     },
-
     "dependencies": [],
-
     "conflicts": [],
-
     "provides": [
         "metadata-export"
     ],
-
     "autoload": {
         "psr-4": {
             "AhgMetadataExport\\": "lib/"
         }
     },
-
     "modules": [
         "metadataExport",
         "linkedData"
     ],
-
     "tasks": [
         "metadataExportTask"
     ],
-
     "database": {
         "install": "database/install.sql",
         "uninstall": null,
         "migrations": []
     },
-
     "settings": {
         "defaultExportPath": {
             "type": "string",
@@ -71,7 +61,13 @@
         },
         "enabledFormats": {
             "type": "array",
-            "default": ["ead3", "rico", "lido", "premis", "marc21"],
+            "default": [
+                "ead3",
+                "rico",
+                "lido",
+                "premis",
+                "marc21"
+            ],
             "description": "List of enabled export formats"
         },
         "maxBulkExportRecords": {
@@ -80,7 +76,6 @@
             "description": "Maximum records for bulk export via web interface"
         }
     },
-
     "features": {
         "exportFormats": {
             "ead3": {
@@ -175,7 +170,6 @@
             }
         }
     },
-
     "cli": {
         "commands": [
             {
@@ -198,7 +192,6 @@
             }
         ]
     },
-
     "menu": {
         "admin": [
             {
@@ -208,10 +201,13 @@
             }
         ]
     },
-
     "documentation": {
         "readme": "README.md",
         "userGuide": "docs/user-guide.md",
         "technicalGuide": "docs/technical-guide.md"
-    }
+    },
+    "tables": [
+        "metadata_export_config",
+        "metadata_export_log"
+    ]
 }

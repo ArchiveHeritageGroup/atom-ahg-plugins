@@ -7,13 +7,26 @@
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "browse",
-    "keywords": ["accession", "browse", "manage", "intake", "appraisal", "valuation", "container", "rights", "GRAP103", "IPSAS45"],
+    "keywords": [
+        "accession",
+        "browse",
+        "manage",
+        "intake",
+        "appraisal",
+        "valuation",
+        "container",
+        "rights",
+        "GRAP103",
+        "IPSAS45"
+    ],
     "requires": {
         "atom_framework": ">=2.8.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
         "accession_v2",
         "accession_intake_checklist",

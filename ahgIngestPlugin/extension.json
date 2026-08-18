@@ -20,7 +20,8 @@
         "ingest_mapping",
         "ingest_validation",
         "ingest_row",
-        "ingest_job"
+        "ingest_job",
+        "ingest_watch_folder"
     ],
     "category": "ingestion",
     "features": [

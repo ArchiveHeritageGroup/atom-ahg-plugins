@@ -1,30 +1,33 @@
 {
-  "name": "AHG Feedback Plugin",
-  "machine_name": "ahgFeedbackPlugin",
-  "version": "1.0.6",
-  "description": "User feedback and suggestions management for archival records",
-  "author": "The Archive and Heritage Group",
-  "license": "AGPL-3.0-or-later",
-  "requires": {
-    "atom_framework": ">=1.0.0",
-    "atom": ">=2.8",
-    "php": ">=8.1"
-  },
-  "dependencies": [
-    "ahgCorePlugin"
-  ],
-  "tables": [],
-  "shared_tables": [
-    "feedback",
-    "feedback_i18n"
-  ],
-  "category": "user_engagement",
-  "menu": [
-    {
-      "name": "feedback",
-      "parent": "manage",
-      "path": "feedback/browse",
-      "label": "Feedback"
-    }
-  ]
+    "name": "AHG Feedback Plugin",
+    "machine_name": "ahgFeedbackPlugin",
+    "version": "1.0.6",
+    "description": "User feedback and suggestions management for archival records",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "feedback",
+        "feedback_i18n"
+    ],
+    "shared_tables": [
+        "feedback",
+        "feedback_i18n"
+    ],
+    "category": "user_engagement",
+    "menu": [
+        {
+            "name": "feedback",
+            "parent": "manage",
+            "path": "feedback/browse",
+            "label": "Feedback"
+        }
+    ]
 }

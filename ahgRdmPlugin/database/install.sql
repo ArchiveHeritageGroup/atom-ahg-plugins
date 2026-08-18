@@ -111,3 +111,35 @@ CREATE TABLE IF NOT EXISTS rdm_protected_object (
     UNIQUE KEY uq_rdm_protected_do (do_id),
     KEY idx_rdm_protected_dataset (dataset_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/seed_dropdowns.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahgRdmPlugin dropdown seed — reverse port of Heratio ahg-rdm (heratio#1338/#1340).
+-- INSERT IGNORE so re-runs never duplicate. Views read these from ahg_dropdown —
+-- no hardcoded <option> lists, no ENUM column.
+
+-- Dataset lifecycle statuses (taxonomy 'dataset_status').
+INSERT IGNORE INTO ahg_dropdown (taxonomy, taxonomy_label, taxonomy_section, code, label, color, icon, sort_order, is_active, created_at) VALUES
+ ('dataset_status', 'Dataset Status', 'rdm', 'draft',      'Draft',                  '#6c757d', NULL, 10, 1, NOW()),
+ ('dataset_status', 'Dataset Status', 'rdm', 'scanning',   'POPIA scanning',         '#0dcaf0', NULL, 20, 1, NOW()),
+ ('dataset_status', 'Dataset Status', 'rdm', 'review',     'Awaiting human review',  '#ffc107', NULL, 30, 1, NOW()),
+ ('dataset_status', 'Dataset Status', 'rdm', 'restricted', 'Restricted / embargoed', '#dc3545', NULL, 40, 1, NOW()),
+ ('dataset_status', 'Dataset Status', 'rdm', 'published',  'Published (open)',       '#198754', NULL, 50, 1, NOW());
+
+-- Human-gate disposition (taxonomy 'rdm_disposition'): the access decision a
+-- reviewer applies after confirming/dismissing findings. 'release' = open;
+-- blocked while PII is unresolved.
+INSERT IGNORE INTO ahg_dropdown (taxonomy, taxonomy_label, taxonomy_section, code, label, color, icon, sort_order, is_active, created_at) VALUES
+ ('rdm_disposition', 'Dataset Disposition', 'rdm', 'restrict',    'Restrict access',          '#dc3545', NULL, 10, 1, NOW()),
+ ('rdm_disposition', 'Dataset Disposition', 'rdm', 'embargo',     'Embargo (time-limited)',   '#fd7e14', NULL, 20, 1, NOW()),
+ ('rdm_disposition', 'Dataset Disposition', 'rdm', 'de-identify', 'De-identify then release', '#0dcaf0', NULL, 30, 1, NOW()),
+ ('rdm_disposition', 'Dataset Disposition', 'rdm', 'release',     'Release (open access)',    '#198754', NULL, 40, 1, NOW());

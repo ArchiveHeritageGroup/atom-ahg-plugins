@@ -38,6 +38,10 @@
     "install_sql": "database/install.sql",
     "tables": [
         "ai_inference_log",
-        "ai_inference_key"
+        "ai_inference_key",
+        "ai_act_system",
+        "ai_act_model",
+        "ai_act_risk",
+        "ai_act_attestation"
     ]
 }

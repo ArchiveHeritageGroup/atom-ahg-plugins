@@ -16,6 +16,10 @@
         "ahgCorePlugin"
     ],
     "tables": [
+        "loan",
+        "loan_document",
+        "loan_extension",
+        "loan_object",
         "ahg_loan",
         "ahg_loan_object",
         "ahg_loan_document",

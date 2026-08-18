@@ -10,22 +10,23 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgThemeB5Plugin"],
-    "theme_support": ["ahgThemeB5Plugin"],
+    "dependencies": [
+        "ahgThemeB5Plugin"
+    ],
+    "theme_support": [
+        "ahgThemeB5Plugin"
+    ],
     "install": {
         "database": "data/install.sql"
     },
     "tables": [
+        "heritage_era",
         "heritage_landing_config",
         "heritage_filter_type",
         "heritage_institution_filter",
         "heritage_filter_value",
         "heritage_curated_story",
         "heritage_hero_image",
-        "heritage_featured_collection",
-        "heritage_hero_slide",
-        "heritage_explore_category",
-        "heritage_timeline_period",
         "heritage_discovery_log",
         "heritage_discovery_click",
         "heritage_learned_term",
@@ -55,6 +56,14 @@
         "heritage_analytics_search",
         "heritage_analytics_content",
         "heritage_analytics_alert",
-        "heritage_content_quality"
+        "heritage_content_quality",
+        "heritage_featured_collection",
+        "heritage_hero_slide",
+        "heritage_explore_category",
+        "heritage_timeline_period",
+        "heritage_entity_graph_node",
+        "heritage_entity_graph_edge",
+        "heritage_entity_graph_object",
+        "heritage_graph_build_log"
     ]
 }

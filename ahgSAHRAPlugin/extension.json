@@ -7,20 +7,31 @@
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "compliance",
-    "keywords": ["south-africa", "sahra", "nhra", "heritage-permit", "archaeology", "palaeontology", "compliance", "act-25-of-1999"],
+    "keywords": [
+        "south-africa",
+        "sahra",
+        "nhra",
+        "heritage-permit",
+        "archaeology",
+        "palaeontology",
+        "compliance",
+        "act-25-of-1999"
+    ],
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
-        "sahra_config",
         "sahra_permit",
-        "sahra_permit_area",
-        "sahra_permit_document",
         "sahra_permit_log",
         "sahra_permit_report",
-        "sahra_reviewer"
+        "sahra_permit_area",
+        "sahra_permit_document",
+        "sahra_reviewer",
+        "sahra_config"
     ]
 }

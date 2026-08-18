@@ -20,19 +20,18 @@
         ]
     },
     "tables": [
+        "gallery_exhibition_checklist",
+        "gallery_exhibition_object",
+        "gallery_venue",
         "gallery_artist",
         "gallery_artist_bibliography",
         "gallery_artist_exhibition_history",
-        "gallery_exhibition",
-        "gallery_exhibition_checklist",
-        "gallery_exhibition_object",
-        "gallery_facility_report",
-        "gallery_insurance_policy",
         "gallery_loan",
         "gallery_loan_object",
-        "gallery_space",
+        "gallery_facility_report",
         "gallery_valuation",
-        "gallery_venue"
+        "gallery_insurance_policy",
+        "gallery_space"
     ],
     "shared_tables": [],
     "helpers": [],

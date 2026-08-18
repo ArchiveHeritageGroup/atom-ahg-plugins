@@ -1,75 +1,75 @@
 {
-  "name": "Custom Fields",
-  "machine_name": "ahgCustomFieldsPlugin",
-  "version": "1.0.0",
-  "description": "Admin-configurable custom metadata fields for any entity type. Define fields via UI \u2014 no code changes needed.",
-  "author": "The Archive and Heritage Group",
-  "license": "AGPL-3.0-or-later",
-  "requires": {
-    "atom_framework": ">=2.8.0",
-    "atom": ">=2.8",
-    "php": ">=8.1"
-  },
-  "dependencies": [
-    "ahgCorePlugin"
-  ],
-  "tables": [
-    "custom_field_definition",
-    "custom_field_value"
-  ],
-  "shared_tables": [],
-  "category": "metadata",
-  "load_order": 45,
-  "display_panels": [
-    {
-      "id": "site_location_map_io",
-      "label": "Site location",
-      "template": "ahgCustomFieldsPlugin/templates/display/_site_location_map.php",
-      "contexts": [
-        "informationobject"
-      ],
-      "position": "after-content",
-      "weight": 10
+    "name": "Custom Fields",
+    "machine_name": "ahgCustomFieldsPlugin",
+    "version": "1.0.0",
+    "description": "Admin-configurable custom metadata fields for any entity type. Define fields via UI \u2014 no code changes needed.",
+    "author": "The Archive and Heritage Group",
+    "license": "AGPL-3.0-or-later",
+    "requires": {
+        "atom_framework": ">=2.8.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
     },
-    {
-      "id": "custom_fields_io",
-      "label": "Additional Fields",
-      "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
-      "contexts": [
-        "informationobject"
-      ],
-      "position": "before-notes",
-      "weight": 30
-    },
-    {
-      "id": "custom_fields_actor",
-      "label": "Additional Fields",
-      "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
-      "contexts": [
-        "actor"
-      ],
-      "position": "below-content",
-      "weight": 70
-    },
-    {
-      "id": "custom_fields_accession",
-      "label": "Additional Fields",
-      "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
-      "contexts": [
-        "accession"
-      ],
-      "position": "below-content",
-      "weight": 70
-    },
-    {
-      "id": "custom_fields_repository",
-      "label": "Additional Fields",
-      "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
-      "contexts": [
-        "repository"
-      ],
-      "position": "below-content",
-      "weight": 70
-    }
-  ]
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "custom_field_definition",
+        "custom_field_value"
+    ],
+    "shared_tables": [],
+    "category": "metadata",
+    "load_order": 45,
+    "display_panels": [
+        {
+            "id": "site_location_map_io",
+            "label": "Site location",
+            "template": "ahgCustomFieldsPlugin/templates/display/_site_location_map.php",
+            "contexts": [
+                "informationobject"
+            ],
+            "position": "after-content",
+            "weight": 10
+        },
+        {
+            "id": "custom_fields_io",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": [
+                "informationobject"
+            ],
+            "position": "before-notes",
+            "weight": 30
+        },
+        {
+            "id": "custom_fields_actor",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": [
+                "actor"
+            ],
+            "position": "below-content",
+            "weight": 70
+        },
+        {
+            "id": "custom_fields_accession",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": [
+                "accession"
+            ],
+            "position": "below-content",
+            "weight": 70
+        },
+        {
+            "id": "custom_fields_repository",
+            "label": "Additional Fields",
+            "template": "ahgCustomFieldsPlugin/templates/display/_custom_fields_panel.php",
+            "contexts": [
+                "repository"
+            ],
+            "position": "below-content",
+            "weight": 70
+        }
+    ]
 }

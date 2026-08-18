@@ -480,3 +480,298 @@ INSERT IGNORE INTO `report_template` (`name`, `description`, `category`, `scope`
 
 INSERT IGNORE INTO `report_template` (`name`, `description`, `category`, `scope`, `structure`, `is_active`) VALUES
 ('Condition Assessment Report', 'Condition assessment template with rating scales, photographs, conservation recommendations', 'condition', 'system', '{}', 1);
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/migration_v2.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahgReportBuilderPlugin v2 Migration
+-- Issue 148: Report Builder Enhancements
+-- All new tables + ALTER statements for existing tables
+
+-- ============================================================
+-- NEW TABLES
+-- ============================================================
+
+-- 1. Report sections (drag-drop ordered content blocks)
+CREATE TABLE IF NOT EXISTS report_section (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT UNSIGNED NOT NULL,
+    section_type VARCHAR(82) COMMENT 'narrative, table, chart, summary_card, image_gallery, links, sql_query' NOT NULL,
+    title VARCHAR(255) DEFAULT NULL,
+    content LONGTEXT DEFAULT NULL,
+    position INT DEFAULT 0,
+    config JSON DEFAULT NULL,
+    clearance_level INT DEFAULT 0,
+    is_visible TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_report (report_id),
+    KEY idx_position (report_id, position)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2. Report templates (reusable report structures)
+CREATE TABLE IF NOT EXISTS report_template (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT DEFAULT NULL,
+    category VARCHAR(100) DEFAULT 'custom',
+    scope VARCHAR(37) COMMENT 'system, institution, user' DEFAULT 'user',
+    structure JSON NOT NULL,
+    created_by INT DEFAULT NULL,
+    repository_id INT DEFAULT NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_category (category),
+    KEY idx_scope (scope)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Report links (external URLs + internal cross-references)
+CREATE TABLE IF NOT EXISTS report_link (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT UNSIGNED NOT NULL,
+    section_id BIGINT UNSIGNED DEFAULT NULL,
+    link_type VARCHAR(86) COMMENT 'external, information_object, actor, repository, accession, digital_object' NOT NULL,
+    url VARCHAR(2048) DEFAULT NULL,
+    title VARCHAR(500) DEFAULT NULL,
+    description TEXT DEFAULT NULL,
+    target_id INT DEFAULT NULL,
+    target_slug VARCHAR(255) DEFAULT NULL,
+    link_category VARCHAR(100) DEFAULT 'reference',
+    og_image VARCHAR(2048) DEFAULT NULL,
+    position INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_report (report_id),
+    KEY idx_section (section_id),
+    KEY idx_type (link_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. Report versions (version history)
+CREATE TABLE IF NOT EXISTS report_version (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT UNSIGNED NOT NULL,
+    version_number INT NOT NULL,
+    snapshot JSON NOT NULL,
+    change_summary VARCHAR(500) DEFAULT NULL,
+    created_by INT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_report (report_id),
+    KEY idx_version (report_id, version_number)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Report comments (reviewer annotations)
+CREATE TABLE IF NOT EXISTS report_comment (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT UNSIGNED NOT NULL,
+    section_id BIGINT UNSIGNED DEFAULT NULL,
+    user_id INT NOT NULL,
+    content TEXT NOT NULL,
+    is_resolved TINYINT(1) DEFAULT 0,
+    resolved_by INT DEFAULT NULL,
+    resolved_at DATETIME DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_report (report_id),
+    KEY idx_section (section_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Report attachments (media and documents)
+CREATE TABLE IF NOT EXISTS report_attachment (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT UNSIGNED NOT NULL,
+    section_id BIGINT UNSIGNED DEFAULT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_path VARCHAR(1024) NOT NULL,
+    file_type VARCHAR(100) DEFAULT NULL,
+    file_size BIGINT UNSIGNED DEFAULT 0,
+    thumbnail_path VARCHAR(1024) DEFAULT NULL,
+    digital_object_id INT DEFAULT NULL,
+    caption TEXT DEFAULT NULL,
+    position INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_report (report_id),
+    KEY idx_section (section_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. Report shares (public sharing with expiry)
+CREATE TABLE IF NOT EXISTS report_share (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT UNSIGNED NOT NULL,
+    share_token VARCHAR(64) NOT NULL UNIQUE,
+    shared_by INT NOT NULL,
+    expires_at DATETIME DEFAULT NULL,
+    access_count INT DEFAULT 0,
+    is_active TINYINT(1) DEFAULT 1,
+    email_recipients TEXT DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_report (report_id),
+    KEY idx_token (share_token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. Saved SQL queries (for raw SQL mode)
+CREATE TABLE IF NOT EXISTS report_query (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    report_id BIGINT UNSIGNED DEFAULT NULL,
+    section_id BIGINT UNSIGNED DEFAULT NULL,
+    name VARCHAR(255) NOT NULL,
+    query_text TEXT NOT NULL,
+    query_type VARCHAR(27) COMMENT 'visual, raw_sql' DEFAULT 'visual',
+    visual_config JSON DEFAULT NULL,
+    parameters JSON DEFAULT NULL,
+    row_limit INT DEFAULT 1000,
+    timeout_seconds INT DEFAULT 30,
+    created_by INT NOT NULL,
+    is_shared TINYINT(1) DEFAULT 0,
+    last_executed_at DATETIME DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    KEY idx_report (report_id),
+    KEY idx_creator (created_by)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- ALTER EXISTING TABLES
+-- MySQL 8 does NOT support ADD COLUMN IF NOT EXISTS.
+-- Use a stored procedure to safely add columns.
+-- ============================================================
+
+DELIMITER //
+DROP PROCEDURE IF EXISTS _rb_add_column//
+CREATE PROCEDURE _rb_add_column(
+    IN p_table VARCHAR(64),
+    IN p_column VARCHAR(64),
+    IN p_definition VARCHAR(255)
+)
+BEGIN
+    SET @col_exists = (
+        SELECT COUNT(*) FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = p_table
+          AND COLUMN_NAME = p_column
+    );
+    IF @col_exists = 0 THEN
+        SET @sql = CONCAT('ALTER TABLE `', p_table, '` ADD COLUMN `', p_column, '` ', p_definition);
+        PREPARE stmt FROM @sql;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END IF;
+END//
+DELIMITER ;
+
+-- custom_report: Add workflow, template, and data binding fields
+CALL _rb_add_column('custom_report', 'status', "VARCHAR(59) COMMENT 'draft, in_review, approved, published, archived' DEFAULT 'draft'");
+CALL _rb_add_column('custom_report', 'template_id', 'BIGINT UNSIGNED DEFAULT NULL');
+CALL _rb_add_column('custom_report', 'data_mode', "VARCHAR(26) COMMENT 'live, snapshot' DEFAULT 'live'");
+CALL _rb_add_column('custom_report', 'snapshot_data', 'JSON DEFAULT NULL');
+CALL _rb_add_column('custom_report', 'snapshot_at', 'DATETIME DEFAULT NULL');
+CALL _rb_add_column('custom_report', 'cover_config', 'JSON DEFAULT NULL');
+CALL _rb_add_column('custom_report', 'version', 'INT DEFAULT 1');
+CALL _rb_add_column('custom_report', 'workflow_id', 'BIGINT UNSIGNED DEFAULT NULL');
+
+-- report_schedule: Add trigger-based scheduling
+CALL _rb_add_column('report_schedule', 'schedule_type', "VARCHAR(30) COMMENT 'recurring, trigger' DEFAULT 'recurring'");
+CALL _rb_add_column('report_schedule', 'trigger_config', 'JSON DEFAULT NULL');
+
+-- report_archive: Add share token for download links
+CALL _rb_add_column('report_archive', 'download_token', 'VARCHAR(64) DEFAULT NULL');
+CALL _rb_add_column('report_archive', 'download_count', 'INT DEFAULT 0');
+
+-- Cleanup helper procedure
+DROP PROCEDURE IF EXISTS _rb_add_column;
+
+-- ---------------------------------------------------------------------------
+-- Merged in from database/seed_templates.sql on 2026-08-18.
+--
+-- It sat beside install.sql and was never run by install-plugin-schema.php, so
+-- a clean install silently lacked whatever it defines. Our own instances had it
+-- because someone applied the file by hand. A plugin's schema is install.sql.
+--
+-- Unguarded INSERTs are rewritten to INSERT IGNORE so re-running stays safe;
+-- on a fresh database the result is identical.
+-- ---------------------------------------------------------------------------
+
+-- ahgReportBuilderPlugin - Pre-built Report Templates
+-- These are system-level templates for common GLAM reporting needs
+
+INSERT IGNORE INTO report_template (name, description, category, scope, structure, is_active, created_at) VALUES
+
+-- NARSSA Annual Report Template
+('NARSSA Annual Report', 'Standard annual report template for National Archives and Records Service compliance. Includes executive summary, statistical overview, accession summary, preservation status, and compliance checklist.', 'narssa', 'system', JSON_OBJECT(
+    'sections', JSON_ARRAY(
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Executive Summary', 'content', '<p>Provide an overview of the reporting period including key achievements, challenges, and strategic objectives.</p>', 'position', 0),
+        JSON_OBJECT('section_type', 'summary_card', 'title', 'Key Statistics', 'config', JSON_OBJECT('cards', JSON_ARRAY(
+            JSON_OBJECT('label', 'Total Holdings', 'source', 'count:information_object'),
+            JSON_OBJECT('label', 'New Accessions', 'source', 'count:accession'),
+            JSON_OBJECT('label', 'Digital Objects', 'source', 'count:digital_object'),
+            JSON_OBJECT('label', 'Repositories', 'source', 'count:repository')
+        )), 'position', 1),
+        JSON_OBJECT('section_type', 'chart', 'title', 'Accessions by Repository', 'config', JSON_OBJECT('chartType', 'bar', 'groupBy', 'repository_id', 'aggregate', 'count', 'dataSource', 'accession'), 'position', 2),
+        JSON_OBJECT('section_type', 'table', 'title', 'Accession Register', 'config', JSON_OBJECT('dataSource', 'accession', 'columns', JSON_ARRAY('identifier', 'title', 'date', 'scope_and_content')), 'position', 3),
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Preservation Report', 'content', '<p>Summarize preservation activities including digitization, conservation treatments, and environmental monitoring results.</p>', 'position', 4),
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Compliance Statement', 'content', '<p>Detail compliance with NARSSA regulations, National Archives Act requirements, and any audit findings.</p>', 'position', 5),
+        JSON_OBJECT('section_type', 'links', 'title', 'Reference Documents', 'position', 6)
+    ),
+    'data_source', 'accession',
+    'cover_config', JSON_OBJECT('showDate', true, 'showStats', true)
+), 1, NOW()),
+
+-- GRAP 103 Heritage Asset Report
+('GRAP 103 Heritage Asset Report', 'Heritage asset valuation and disclosure report template aligned with GRAP 103 / IPSAS 45 standards. Includes asset register, valuation summary, and disclosure notes.', 'grap103', 'system', JSON_OBJECT(
+    'sections', JSON_ARRAY(
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Introduction', 'content', '<p>This report presents the heritage asset register and valuation in accordance with GRAP 103: Heritage Assets / IPSAS 45.</p>', 'position', 0),
+        JSON_OBJECT('section_type', 'summary_card', 'title', 'Asset Overview', 'config', JSON_OBJECT('cards', JSON_ARRAY(
+            JSON_OBJECT('label', 'Total Heritage Assets', 'source', 'count:information_object'),
+            JSON_OBJECT('label', 'Valued Assets', 'source', 'custom'),
+            JSON_OBJECT('label', 'Unvalued Assets', 'source', 'custom')
+        )), 'position', 1),
+        JSON_OBJECT('section_type', 'table', 'title', 'Heritage Asset Register', 'config', JSON_OBJECT('dataSource', 'information_object', 'columns', JSON_ARRAY('identifier', 'title', 'level_of_description_id', 'repository_id')), 'position', 2),
+        JSON_OBJECT('section_type', 'chart', 'title', 'Assets by Level of Description', 'config', JSON_OBJECT('chartType', 'pie', 'groupBy', 'level_of_description_id', 'aggregate', 'count'), 'position', 3),
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Valuation Methodology', 'content', '<p>Describe the valuation methodology applied, including basis of measurement and any expert valuations obtained.</p>', 'position', 4),
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Disclosure Notes', 'content', '<p>Include required GRAP 103 disclosures: classes of heritage assets, measurement basis, carrying amounts, and impairment losses.</p>', 'position', 5)
+    ),
+    'data_source', 'information_object',
+    'cover_config', JSON_OBJECT('showDate', true, 'showStats', true)
+), 1, NOW()),
+
+-- Accession Summary Report
+('Accession Summary Report', 'Overview of accession activities with trends, statistics, and donor analysis.', 'accession', 'system', JSON_OBJECT(
+    'sections', JSON_ARRAY(
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Accession Overview', 'content', '<p>Summary of accession activities for the reporting period.</p>', 'position', 0),
+        JSON_OBJECT('section_type', 'summary_card', 'title', 'Statistics', 'config', JSON_OBJECT('cards', JSON_ARRAY(
+            JSON_OBJECT('label', 'Total Accessions', 'source', 'count:accession'),
+            JSON_OBJECT('label', 'This Year', 'source', 'custom'),
+            JSON_OBJECT('label', 'Pending Processing', 'source', 'custom')
+        )), 'position', 1),
+        JSON_OBJECT('section_type', 'chart', 'title', 'Accessions Over Time', 'config', JSON_OBJECT('chartType', 'line', 'groupBy', 'date', 'aggregate', 'count', 'dataSource', 'accession'), 'position', 2),
+        JSON_OBJECT('section_type', 'table', 'title', 'Recent Accessions', 'config', JSON_OBJECT('dataSource', 'accession', 'columns', JSON_ARRAY('identifier', 'title', 'date', 'source_of_acquisition')), 'position', 3)
+    ),
+    'data_source', 'accession',
+    'cover_config', JSON_OBJECT('showDate', true)
+), 1, NOW()),
+
+-- Condition Assessment Report
+('Condition Assessment Report', 'Template for documenting the physical condition of collection items. Suitable for archives, libraries, museums, and galleries.', 'condition', 'system', JSON_OBJECT(
+    'sections', JSON_ARRAY(
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Assessment Overview', 'content', '<p>Document the scope, methodology, and findings of the condition assessment survey.</p>', 'position', 0),
+        JSON_OBJECT('section_type', 'summary_card', 'title', 'Condition Summary', 'config', JSON_OBJECT('cards', JSON_ARRAY(
+            JSON_OBJECT('label', 'Items Assessed', 'source', 'custom'),
+            JSON_OBJECT('label', 'Good Condition', 'source', 'custom'),
+            JSON_OBJECT('label', 'Fair Condition', 'source', 'custom'),
+            JSON_OBJECT('label', 'Poor Condition', 'source', 'custom')
+        )), 'position', 1),
+        JSON_OBJECT('section_type', 'chart', 'title', 'Condition Distribution', 'config', JSON_OBJECT('chartType', 'doughnut', 'groupBy', 'condition_rating', 'aggregate', 'count'), 'position', 2),
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Methodology', 'content', '<p>Describe the assessment methodology, rating scale, and any standards applied (e.g., Spectrum 5.0 Condition Check procedure).</p>', 'position', 3),
+        JSON_OBJECT('section_type', 'image_gallery', 'title', 'Condition Photos', 'config', JSON_OBJECT(), 'position', 4),
+        JSON_OBJECT('section_type', 'narrative', 'title', 'Recommendations', 'content', '<p>List prioritized conservation treatment recommendations and preventive measures.</p>', 'position', 5)
+    ),
+    'data_source', 'information_object',
+    'cover_config', JSON_OBJECT('showDate', true)
+), 1, NOW());

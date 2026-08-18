@@ -2,7 +2,7 @@
     "name": "Discovery",
     "machine_name": "ahgDiscoveryPlugin",
     "version": "1.0.0",
-    "description": "Topic discovery and related content — natural language search with NER, synonym expansion, hierarchical context, and PageIndex LLM-driven retrieval over EAD, PDF, and RiC-O records",
+    "description": "Topic discovery and related content \u2014 natural language search with NER, synonym expansion, hierarchical context, and PageIndex LLM-driven retrieval over EAD, PDF, and RiC-O records",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "category": "search",
@@ -11,9 +11,15 @@
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "install_sql": "database/install.sql",
-    "optional_dependencies": ["ahgAIPlugin", "ahgSemanticSearchPlugin", "ahgSecurityClearancePlugin"],
+    "optional_dependencies": [
+        "ahgAIPlugin",
+        "ahgSemanticSearchPlugin",
+        "ahgSecurityClearancePlugin"
+    ],
     "tables": [
         "ahg_discovery_cache",
         "ahg_discovery_log",

@@ -7,13 +7,20 @@
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "browse",
-    "keywords": ["user", "browse", "manage", "authentication"],
+    "keywords": [
+        "user",
+        "browse",
+        "manage",
+        "authentication"
+    ],
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [],
     "features": [
         "User browse via Laravel Query Builder",

@@ -2,7 +2,7 @@
     "name": "Researcher Collection Upload",
     "machine_name": "ahgResearcherPlugin",
     "version": "1.0.0",
-    "description": "Researcher collection upload and approval workflow — online submissions and offline exchange import with two-step archivist review",
+    "description": "Researcher collection upload and approval workflow \u2014 online submissions and offline exchange import with two-step archivist review",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "requires": {

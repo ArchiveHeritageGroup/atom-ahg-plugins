@@ -25,7 +25,7 @@
         "Archive import: merge, replace, or dry-run modes with full ID remapping",
         "Self-documenting packages: README.md + schema documentation in manifest",
         "SHA-256 checksummed manifest for all exported files",
-        "FK-dependency-ordered import pipeline (taxonomies → repositories → descriptions → etc.)",
+        "FK-dependency-ordered import pipeline (taxonomies \u2192 repositories \u2192 descriptions \u2192 etc.)",
         "Dry-run estimate (record counts + estimated package size)",
         "Export and import verification CLI: portable:verify, portable:import --mode=dry_run",
         "Export full or partial catalogue (fonds, repository, custom scope)",

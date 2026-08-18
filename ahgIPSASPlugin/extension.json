@@ -2,18 +2,27 @@
     "name": "IPSAS Heritage Accounting",
     "machine_name": "ahgIPSASPlugin",
     "version": "1.0.0",
-    "description": "International Public Sector Accounting Standards (IPSAS 45) heritage asset accounting — asset register, valuations, impairments, insurance, depreciation, disposals, and financial year reporting",
+    "description": "International Public Sector Accounting Standards (IPSAS 45) heritage asset accounting \u2014 asset register, valuations, impairments, insurance, depreciation, disposals, and financial year reporting",
     "author": "The Archive and Heritage Group",
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "finance",
-    "keywords": ["ipsas", "ipsas-45", "heritage-accounting", "valuation", "depreciation", "public-sector"],
+    "keywords": [
+        "ipsas",
+        "ipsas-45",
+        "heritage-accounting",
+        "valuation",
+        "depreciation",
+        "public-sector"
+    ],
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
     "tables": [
         "ipsas_config",
         "ipsas_asset_category",

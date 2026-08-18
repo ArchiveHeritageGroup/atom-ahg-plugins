@@ -1,31 +1,63 @@
 {
-  "name": "Digital Preservation",
-  "machine_name": "ahgPreservationPlugin",
-  "version": "1.0.6",
-  "description": "Digital preservation: checksums, fixity verification, PREMIS events, format registry",
-  "author": "The Archive and Heritage Group (Pty) Ltd",
-  "license": "AGPL-3.0-or-later",
-  "homepage": "https://theahg.co.za",
-  "category": "preservation",
-  "keywords": [
-    "preservation",
-    "fixity",
-    "checksum",
-    "PREMIS",
-    "OAIS",
-    "format registry"
-  ],
-  "requires": {
-    "atom_framework": ">=1.0.0",
-    "atom": ">=2.8",
-    "php": ">=8.1"
-  },
-  "dependencies": [
-    "ahgCorePlugin"
-  ],
-  "settings": {
-    "default_algorithm": "sha256",
-    "auto_checksum_on_upload": true,
-    "fixity_check_interval_days": 7
-  }
+    "name": "Digital Preservation",
+    "machine_name": "ahgPreservationPlugin",
+    "version": "1.0.6",
+    "description": "Digital preservation: checksums, fixity verification, PREMIS events, format registry",
+    "author": "The Archive and Heritage Group (Pty) Ltd",
+    "license": "AGPL-3.0-or-later",
+    "homepage": "https://theahg.co.za",
+    "category": "preservation",
+    "keywords": [
+        "preservation",
+        "fixity",
+        "checksum",
+        "PREMIS",
+        "OAIS",
+        "format registry"
+    ],
+    "requires": {
+        "atom_framework": ">=1.0.0",
+        "atom": ">=2.8",
+        "php": ">=8.1"
+    },
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "settings": {
+        "default_algorithm": "sha256",
+        "auto_checksum_on_upload": true,
+        "fixity_check_interval_days": 7
+    },
+    "tables": [
+        "oais_information_package",
+        "oais_fixity_check",
+        "oais_package_content",
+        "oais_premis_event",
+        "oais_preservation_policy",
+        "oais_pronom_format",
+        "preservation_checksum",
+        "preservation_fixity_check",
+        "preservation_event",
+        "preservation_format",
+        "preservation_object_format",
+        "preservation_policy",
+        "preservation_stats",
+        "preservation_virus_scan",
+        "preservation_format_conversion",
+        "preservation_backup_verification",
+        "preservation_replication_target",
+        "preservation_replication_log",
+        "preservation_workflow_schedule",
+        "preservation_workflow_run",
+        "preservation_package",
+        "preservation_package_object",
+        "preservation_package_event",
+        "preservation_migration_pathway",
+        "preservation_format_obsolescence",
+        "preservation_migration_plan",
+        "preservation_migration_plan_object",
+        "tiff_pdf_merge_job",
+        "tiff_pdf_merge_file",
+        "tiff_pdf_settings"
+    ]
 }

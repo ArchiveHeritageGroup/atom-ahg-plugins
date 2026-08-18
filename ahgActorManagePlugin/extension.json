@@ -7,14 +7,23 @@
     "license": "AGPL-3.0-or-later",
     "homepage": "https://theahg.co.za",
     "category": "browse",
-    "keywords": ["actor", "browse", "performance", "elasticsearch"],
+    "keywords": [
+        "actor",
+        "browse",
+        "performance",
+        "elasticsearch"
+    ],
     "requires": {
         "atom_framework": ">=1.0.0",
         "atom": ">=2.8",
         "php": ">=8.1"
     },
-    "dependencies": ["ahgCorePlugin"],
-    "tables": [],
+    "dependencies": [
+        "ahgCorePlugin"
+    ],
+    "tables": [
+        "ahg_actor_visibility"
+    ],
     "features": [
         "Actor browse via direct ES HTTP queries (no Elastica)",
         "Batch facet population (2 queries instead of N+1)",
