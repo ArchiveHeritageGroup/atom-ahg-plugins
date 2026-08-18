@@ -98,8 +98,15 @@ $hasRic = checkPluginEnabled('ahgRicManagePlugin');
           <?php endif; ?>
         <?php endif; ?>
 
-        <?php // Inject Central Dashboards for Manage menu ?>
-        <?php if ('manage' == $menu->getName()): ?>
+        <?php // Inject Central Dashboards for Manage menu.
+              //
+              // Gated on ahgReportsPlugin: the link goes to reports/index, which only
+              // exists while that plugin is enabled. Ungated, the Manage menu offered
+              // "Central Dashboards" on every instance and answered 404 - seen on a
+              // minimal install, 2026-08-18. Same fault as the Exhibition spaces entry,
+              // in a different template. ?>
+        <?php if ('manage' == $menu->getName()
+                  && in_array('ahgReportsPlugin', sfProjectConfiguration::getActive()->getPlugins())): ?>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="<?php echo url_for(['module' => 'reports', 'action' => 'index']); ?>"><i class="fas fa-tachometer-alt fa-fw me-2"></i><?php echo __('Central Dashboards'); ?></a></li>
         <?php endif; ?>

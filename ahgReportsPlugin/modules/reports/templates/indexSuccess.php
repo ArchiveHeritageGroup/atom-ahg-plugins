@@ -4,15 +4,27 @@
 use Illuminate\Database\Capsule\Manager as DB;
 
 // Check which sector plugins are enabled
+/**
+ * Is a plugin actually loaded?
+ *
+ * Asks the running configuration, not the atom_plugin table.
+ *
+ * atom_plugin is the framework's own extension registry. On a stock AtoM it is not
+ * what loads plugins - AtoM reads its own `plugins` setting, which Admin > Plugins
+ * writes - so the table can say anything or nothing at all. Measured on a clean
+ * install (2026-08-18): atom_plugin reported ZERO plugins enabled while AtoM was
+ * running twenty-four of them, so every tile on this dashboard was hidden. On other
+ * instances the table carries rows for plugins that were never installed, which
+ * produces the opposite error: a tile linking to a module that is not loaded.
+ *
+ * sfProjectConfiguration::getActive()->getPlugins() is the list AtoM is actually
+ * running, which is the question each tile needs answered.
+ */
 function isPluginActive($pluginName) {
     static $plugins = null;
     if ($plugins === null) {
         try {
-            $pluginNames = DB::table('atom_plugin')
-                ->where('is_enabled', 1)
-                ->pluck('name')
-                ->toArray();
-            $plugins = array_flip($pluginNames);
+            $plugins = array_flip((array) sfProjectConfiguration::getActive()->getPlugins());
         } catch (Exception $e) {
             $plugins = [];
         }

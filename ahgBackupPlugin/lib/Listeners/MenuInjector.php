@@ -61,17 +61,30 @@ class MenuInjector
             return $content;
         }
 
-        // The dropdown's first child is its own title, <li><h6 class="dropdown-header">.
-        // Inserting straight after the <ul> put this entry above that heading, so the
-        // menu read "Backup & Restore" then "Manage". Skip past the header when one is
-        // present; themes without a header keep the original position.
-        $insertAt = $open + 1;
-        $headerEnd = stripos($content, '</li>', $insertAt);
-        if (false !== $headerEnd) {
-            $between = substr($content, $insertAt, $headerEnd - $insertAt);
-            if (false !== stripos($between, 'dropdown-header')) {
-                $insertAt = $headerEnd + strlen('</li>');
-            }
+        // Placed at the END of the Manage dropdown, not the start.
+        //
+        // This used to insert immediately after the dropdown header, which put a
+        // maintenance tool above Accessions, Donors and the rest of the cataloguing
+        // entries. Backup belongs at the bottom of that list, next to the other
+        // administrative items (2026-08-18).
+        //
+        // Anchor on the theme's "Central Dashboards" entry, which it appends inside
+        // this same <ul> after a divider. Backup goes immediately BEFORE that block,
+        // so the menu ends: ... Taxonomies, Backup & Restore, Central Dashboards.
+        //
+        // Anchoring on the closing </ul> instead put Backup after Dashboards, which
+        // is not the same thing.
+        $close = stripos($content, '</ul>', $open);
+        $insertAt = false === $close ? $open + 1 : $close;
+
+        $dash = stripos($content, 'Central Dashboards', $open);
+
+        if (false !== $dash && (false === $close || $dash < $close)) {
+            // Walk back to the start of the divider that precedes it, so Backup sits
+            // above the separator rather than between it and Dashboards.
+            $li = strripos(substr($content, 0, $dash), '<li>');
+            $hr = strripos(substr($content, 0, $li ?: $dash), '<li><hr');
+            $insertAt = false !== $hr ? $hr : ($li ?: $insertAt);
         }
 
         self::$injected = true;
