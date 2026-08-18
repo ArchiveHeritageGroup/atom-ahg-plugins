@@ -15,35 +15,53 @@ use Illuminate\Database\Capsule\Manager as DB;
  */
 class SpatialAnalysisExport
 {
+    /** Term ids of the row most recently passed to getSubjectTerms(). */
+    protected array $lastTermIds = [];
+
     /**
-     * Default painted tradition terms (case-insensitive partial match)
+     * Taxonomies searched for access points.
+     *
+     * 35 Subjects and 78 Genre both carry technique terms on RARI, and Genre
+     * carries most of them. Kept as a property so an instance that files
+     * technique elsewhere can add its taxonomy without editing the query.
+     */
+    protected array $accessPointTaxonomies = [35, 78];
+
+    /**
+     * Default painted tradition terms.
+     *
+     * FULL term names, not fragments: these are resolved against the vocabulary
+     * rather than matched as substrings, so 'paint' would resolve to nothing and
+     * - more to the point - can no longer catch a site called Paintshop Shelter.
+     * "Painted engraving" is deliberately in both lists; it is genuinely both.
      */
     protected array $paintedTerms = [
-        'brush painted',
-        'finger painted',
-        'painted',
-        'paint',
-        'pigment',
-        'ochre',
-        'San painting',
-        'rock painting',
+        'Rock Painting',
+        'Rock painting',
+        'Painting',
+        'Paintings',
+        'Brush painted',
+        'Finger painted',
+        'Painted engraving',
     ];
 
     /**
-     * Default engraved tradition terms (case-insensitive partial match)
+     * Default engraved tradition terms - FULL names, see $paintedTerms.
+     *
+     * 'Khoekhoen', 'Khoi' and 'geometric' were in this list and are not techniques:
+     * one is a people and one is a design description. Under substring matching
+     * they silently classified records as engraved on cultural attribution.
      */
     protected array $engravedTerms = [
-        'engraving',
-        'engraved',
-        'pecking',
-        'pecked',
-        'incising',
-        'incised',
-        'scratched',
-        'abraded',
-        'Khoekhoen',
-        'Khoi',
-        'geometric',
+        'Rock Engraving',
+        'Rock engraving',
+        'Engraving',
+        'Engravings',
+        'Pecking',
+        'Pecked',
+        'Incision',
+        'Incising',
+        'Painted engraving',
     ];
 
     /**
@@ -222,6 +240,10 @@ class SpatialAnalysisExport
 
         // Post-process results to add computed fields
         $rows = [];
+        // Resolved once, not per row.
+        $paintedIds = $this->resolveTermIds($this->paintedTerms);
+        $engravedIds = $this->resolveTermIds($this->engravedTerms);
+
         foreach ($results as $row) {
             $rowArray = (array) $row;
 
@@ -233,9 +255,10 @@ class SpatialAnalysisExport
             $places = $this->getPlaceTerms($row->id);
             $rowArray['place_country'] = $this->extractCountry($places, $placeTerms);
 
-            // Classify traditions
-            $rowArray['is_painted'] = $this->matchesTerms($subjects, $this->paintedTerms) ? 'TRUE' : 'FALSE';
-            $rowArray['is_engraved'] = $this->matchesTerms($subjects, $this->engravedTerms) ? 'TRUE' : 'FALSE';
+            // Classify by term id, not by spelling.
+            $termIds = $this->lastTermIds;
+            $rowArray['is_painted'] = array_intersect($termIds, $paintedIds) ? 'TRUE' : 'FALSE';
+            $rowArray['is_engraved'] = array_intersect($termIds, $engravedIds) ? 'TRUE' : 'FALSE';
 
             // An export must not be a way around the locality rule.
             //
@@ -268,7 +291,7 @@ class SpatialAnalysisExport
             'place_country' => 'Country',
             'is_painted' => 'Is Painted',
             'is_engraved' => 'Is Engraved',
-            'subjects_concatenated' => 'Subject Tags',
+            'subjects_concatenated' => 'Subject Access Points',
         ];
 
             // A sheet-derived area is not a point, and the columns have to say so or
@@ -456,22 +479,85 @@ class SpatialAnalysisExport
     }
 
     /**
+     * Resolve configured term NAMES to term ids, once per export.
+     *
+     * Substring matching is why this exists. Matching 'paint' against term names
+     * caught the PLACE names "Paintshop Shelter I" (48 uses) and "Scrapfield I"
+     * (245) and classified those sites as painted rock art on the strength of what
+     * they are called - the same failure as matching 'RiC' inside 'ameRICan'.
+     *
+     * Names rather than hardcoded ids, because ids are per-instance: RARI's Rock
+     * Painting is 111739 and no other installation will agree. Names are resolved
+     * here, scoped to the access-point taxonomies, matched in FULL rather than as
+     * fragments, and expanded to child terms so a narrower term still counts.
+     */
+    protected function resolveTermIds(array $names): array
+    {
+        $names = array_values(array_filter(array_map('trim', $names)));
+        if (!$names) {
+            return [];
+        }
+
+        $lower = array_map(function ($n) { return mb_strtolower($n); }, $names);
+
+        $rows = DB::table('term as t')
+            ->join('term_i18n as ti', function ($join) {
+                $join->on('t.id', '=', 'ti.id')
+                    ->where('ti.culture', '=', $this->culture);
+            })
+            ->whereIn('t.taxonomy_id', $this->accessPointTaxonomies)
+            ->whereIn(DB::raw('LOWER(ti.name)'), $lower)
+            ->select('t.id', 't.lft', 't.rgt', 't.taxonomy_id')
+            ->get();
+
+        $ids = [];
+        foreach ($rows as $r) {
+            $ids[] = (int) $r->id;
+
+            // A term filed under Rock Painting is still rock painting.
+            if (null !== $r->lft && null !== $r->rgt && $r->rgt > $r->lft + 1) {
+                foreach (DB::table('term')
+                    ->where('taxonomy_id', '=', $r->taxonomy_id)
+                    ->where('lft', '>', $r->lft)
+                    ->where('rgt', '<', $r->rgt)
+                    ->pluck('id')->toArray() as $k) {
+                    $ids[] = (int) $k;
+                }
+            }
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
      * Get all subject terms for an information object
      */
     protected function getSubjectTerms(int $objectId): array
     {
-        $terms = DB::table('object_term_relation as otr')
+        $rows = DB::table('object_term_relation as otr')
             ->join('term as t', 'otr.term_id', '=', 't.id')
             ->join('term_i18n as ti', function ($join) {
                 $join->on('t.id', '=', 'ti.id')
                     ->where('ti.culture', '=', $this->culture);
             })
             ->where('otr.object_id', '=', $objectId)
-            ->where('t.taxonomy_id', '=', 35) // Subjects taxonomy
-            ->pluck('ti.name')
-            ->toArray();
+            ->whereIn('t.taxonomy_id', $this->accessPointTaxonomies)
+            ->whereNotNull('ti.name')
+            ->where('ti.name', '!=', '')
+            ->distinct()
+            ->select('t.id', 'ti.name')
+            ->get();
 
-        return $terms;
+        // Ids travel with the names so classification can match on the term itself
+        // rather than on how it happens to be spelled.
+        $this->lastTermIds = [];
+        $names = [];
+        foreach ($rows as $r) {
+            $this->lastTermIds[] = (int) $r->id;
+            $names[] = $r->name;
+        }
+
+        return $names;
     }
 
     /**
@@ -505,8 +591,10 @@ class SpatialAnalysisExport
                 }
             }
         }
-        // Return first place if no match
-        return $places[0] ?? '';
+        // No match means no country. Returning the first place instead emitted site
+        // names - "Ha Baroana I", "Game Pass I 7240" - in a column labelled Country,
+        // which is worse than an empty cell because it looks like an answer.
+        return '';
     }
 
     /**
@@ -557,6 +645,14 @@ class SpatialAnalysisExport
     {
         $csv = $this->toCsv($exportResult);
         return file_put_contents($filePath, $csv);
+    }
+
+    /** Override which taxonomies count as access points. */
+    public function setAccessPointTaxonomies(array $ids): self
+    {
+        $this->accessPointTaxonomies = array_values(array_filter(array_map('intval', $ids)));
+
+        return $this;
     }
 
     /**
